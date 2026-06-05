@@ -123,11 +123,12 @@ export default function CheckinPage() {
       p_email:          walkin.email||null,
       p_cellulare:      walkin.cellulare||null,
       p_ragione_sociale:walkin.ragione_sociale||null,
+      p_partita_iva:    walkin.partita_iva||null,
     })
     setProcessing(false)
     if (!error && data?.ok) {
       setResult({ ok:true, nome:`${walkin.nome} ${walkin.cognome}` })
-      setWalkin({ nome:'', cognome:'', email:'', cellulare:'', ragione_sociale:'' })
+      setWalkin({ nome:'', cognome:'', email:'', cellulare:'', ragione_sociale:'', partita_iva:'' })
       setWalkinModal(false); loadPresenti()
     }
   }
@@ -293,6 +294,9 @@ export default function CheckinPage() {
               </div>
               <Field label="Cellulare"><Input value={walkin.cellulare} onChange={e=>setWalkin(p=>({...p,cellulare:e.target.value}))} placeholder="333 1234567"/></Field>
               <Field label="Azienda"><Input value={walkin.ragione_sociale} onChange={e=>setWalkin(p=>({...p,ragione_sociale:e.target.value}))} placeholder="Rossi Srl"/></Field>
+              <div style={{ gridColumn:'1/-1' }}>
+                <Field label="Partita IVA"><Input value={walkin.partita_iva} onChange={e=>setWalkin(p=>({...p,partita_iva:e.target.value}))} placeholder="12345670015"/></Field>
+              </div>
             </div>
             <div style={{ display:'flex', gap:'10px', justifyContent:'flex-end', marginTop:'4px' }}>
               <Btn variant="ghost" onClick={()=>setWalkinModal(false)}>Annulla</Btn>

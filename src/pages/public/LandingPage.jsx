@@ -1,4 +1,4 @@
-import { useEffect, useState } from 'react'
+import { useEffect, useState, useRef } from 'react'
 import { useParams } from 'react-router-dom'
 import { supabase } from '../../lib/supabase'
 import { MapPin, Calendar, Clock, Users, ChevronRight, AlertCircle, ExternalLink } from 'lucide-react'
@@ -16,6 +16,24 @@ function fmtOra(ts) {
 /* ── MODALE CONFERMA ─────────────────────────────────────────── */
 function ModalConferma({ reg, event, onClose }) {
   const [calAdded, setCalAdded] = useState(false)
+  const [qrDataUrl, setQrDataUrl] = useState(null)
+  const canvasRef = useRef(null)
+
+  // Genera QR code come immagine appena la modale si apre
+  useEffect(() => {
+    let cancelled = false
+    import('qrcode').then(QRCode => {
+      QRCode.toDataURL(reg.qr_code, {
+        width: 240,
+        margin: 2,
+        color: { dark: '#003DA5', light: '#FFFFFF' },
+        errorCorrectionLevel: 'H',
+      }).then(url => {
+        if (!cancelled) setQrDataUrl(url)
+      })
+    })
+    return () => { cancelled = true }
+  }, [reg.qr_code])
 
   function addToCalendar() {
     const fmt = ts => ts
@@ -40,12 +58,22 @@ function ModalConferma({ reg, event, onClose }) {
     setCalAdded(true)
   }
 
+  function downloadQR() {
+    if (!qrDataUrl) return
+    const a = Object.assign(document.createElement('a'), {
+      href: qrDataUrl,
+      download: `qr-${reg.qr_code}.png`
+    })
+    a.click()
+  }
+
   return (
     <div style={mc.overlay} onClick={e => e.target === e.currentTarget && onClose()}>
       <div style={mc.box}>
-        {/* check animato */}
+
+        {/* Check animato */}
         <div style={mc.iconWrap}>
-          <svg viewBox="0 0 56 56" style={{ width:'72px',height:'72px' }}>
+          <svg viewBox="0 0 56 56" style={{ width:'64px', height:'64px' }}>
             <circle cx="28" cy="28" r="27" fill="none" stroke="#16A34A" strokeWidth="2"
               strokeDasharray="170" strokeDashoffset="170"
               style={{ animation:'circ .6s ease forwards' }}/>
@@ -57,21 +85,48 @@ function ModalConferma({ reg, event, onClose }) {
         </div>
 
         <h2 style={mc.title}>Iscrizione confermata!</h2>
-        <p style={mc.sub}>Benvenuto/a, <strong>{reg.nome} {reg.cognome}</strong>. Riceverai a breve una email con il tuo QR Code personale da presentare all'ingresso.</p>
+        <p style={mc.sub}>
+          Benvenuto/a, <strong>{reg.nome} {reg.cognome}</strong>.
+          Salva il QR Code qui sotto — ti servirà per entrare all'evento.
+        </p>
 
-        <div style={mc.qrBox}>
-          <span style={mc.qrLabel}>Codice QR</span>
-          <code style={mc.qrCode}>{reg.qr_code}</code>
+        {/* QR CODE IMMAGINE */}
+        <div style={mc.qrImgBox}>
+          <p style={mc.qrImgLabel}>Il tuo QR Code personale</p>
+          {qrDataUrl ? (
+            <>
+              <img
+                src={qrDataUrl}
+                alt={`QR Code ${reg.qr_code}`}
+                style={mc.qrImg}
+              />
+              <p style={mc.qrImgHint}>📸 Fai uno screenshot oppure salva l'immagine</p>
+              <code style={mc.qrCodeText}>{reg.qr_code}</code>
+              <button onClick={downloadQR} style={mc.downloadBtn}>
+                ⬇ Scarica QR Code
+              </button>
+            </>
+          ) : (
+            <div style={mc.qrLoading}>
+              <div style={mc.qrSpinner}/>
+              <span style={{ fontSize:'13px', color:'#6B7280' }}>Generazione QR…</span>
+            </div>
+          )}
         </div>
 
+        {/* Info evento */}
         <div style={mc.infoBox}>
           {event.data_inizio && (
-            <div style={mc.infoRow}><Calendar size={14} style={{ color:'#003DA5',flexShrink:0 }}/><span>{fmtData(event.data_inizio)}</span></div>
+            <div style={mc.infoRow}>
+              <Calendar size={14} style={{ color:'#003DA5', flexShrink:0 }}/>
+              <span>{fmtData(event.data_inizio)}</span>
+            </div>
           )}
           {event.luogo && (
             <a href={`https://maps.google.com/?q=${encodeURIComponent(event.luogo)}`}
-              target="_blank" rel="noopener noreferrer" style={{ ...mc.infoRow, textDecoration:'none', color:'inherit' }}>
-              <MapPin size={14} style={{ color:'#003DA5',flexShrink:0 }}/>
+              target="_blank" rel="noopener noreferrer"
+              style={{ ...mc.infoRow, textDecoration:'none', color:'inherit' }}>
+              <MapPin size={14} style={{ color:'#003DA5', flexShrink:0 }}/>
               <span style={{ color:'#003DA5', textDecorationLine:'underline', textDecorationStyle:'dotted' }}>
                 {event.luogo}
               </span>
@@ -79,19 +134,31 @@ function ModalConferma({ reg, event, onClose }) {
           )}
         </div>
 
+        {/* Azioni */}
         <div style={mc.btnRow}>
-          <button onClick={addToCalendar} style={{ ...mc.calBtn, backgroundColor: calAdded ? '#16A34A' : '#003DA5' }}>
-            <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round">
-              <rect x="3" y="4" width="18" height="18" rx="2"/><line x1="16" y1="2" x2="16" y2="6"/>
-              <line x1="8" y1="2" x2="8" y2="6"/><line x1="3" y1="10" x2="21" y2="10"/>
+          <button onClick={addToCalendar}
+            style={{ ...mc.calBtn, backgroundColor: calAdded ? '#16A34A' : '#003DA5' }}>
+            <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor"
+              strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round">
+              <rect x="3" y="4" width="18" height="18" rx="2"/>
+              <line x1="16" y1="2" x2="16" y2="6"/>
+              <line x1="8"  y1="2" x2="8"  y2="6"/>
+              <line x1="3"  y1="10" x2="21" y2="10"/>
             </svg>
             {calAdded ? '✓ Aggiunto al calendario' : 'Aggiungi al calendario'}
           </button>
           <button onClick={onClose} style={mc.closeBtn}>Chiudi</button>
         </div>
-        <p style={mc.hint}>Il file .ics è compatibile con Google Calendar, Apple Calendar e Outlook.</p>
+
+        <p style={mc.hint}>
+          Riceverai anche una email di conferma con il QR Code allegato.
+        </p>
       </div>
-      <style>{`@keyframes circ{to{stroke-dashoffset:0}}@keyframes tick{to{stroke-dashoffset:0}}`}</style>
+      <style>{`
+        @keyframes circ { to { stroke-dashoffset: 0; } }
+        @keyframes tick { to { stroke-dashoffset: 0; } }
+        @keyframes qrspin { to { transform: rotate(360deg); } }
+      `}</style>
     </div>
   )
 }
@@ -343,18 +410,26 @@ const s = {
 }
 
 const mc = {
-  overlay: { position:'fixed', inset:0, backgroundColor:'rgba(0,0,0,.55)', display:'flex', alignItems:'center', justifyContent:'center', zIndex:1000, padding:'24px', overflowY:'auto' },
-  box:     { backgroundColor:'#FFFFFF', borderRadius:'20px', padding:'44px 36px', maxWidth:'460px', width:'100%', boxShadow:'0 32px 80px rgba(0,0,0,.2)', textAlign:'center' },
-  iconWrap:{ margin:'0 auto 20px', width:'72px', height:'72px' },
-  title:   { fontSize:'24px', fontWeight:'900', color:'#0A0A0A', letterSpacing:'-.03em', margin:'0 0 8px' },
-  sub:     { fontSize:'14px', color:'#6B7280', lineHeight:'1.6', margin:'0 0 20px' },
-  qrBox:   { backgroundColor:'#F4F5F7', borderRadius:'10px', padding:'14px', marginBottom:'16px', display:'flex', flexDirection:'column', gap:'4px' },
-  qrLabel: { fontSize:'11px', fontWeight:'600', color:'#6B7280', textTransform:'uppercase', letterSpacing:'.06em', margin:0 },
-  qrCode:  { fontSize:'16px', fontFamily:'monospace', color:'#003DA5', fontWeight:'700', letterSpacing:'.05em', margin:0 },
-  infoBox: { backgroundColor:'#EEF3FF', borderRadius:'10px', padding:'14px 16px', marginBottom:'24px', display:'flex', flexDirection:'column', gap:'8px', textAlign:'left' },
-  infoRow: { display:'flex', alignItems:'center', gap:'8px', fontSize:'13px', color:'#374151', fontWeight:'500' },
-  btnRow:  { display:'flex', gap:'10px', justifyContent:'center', marginBottom:'12px', flexWrap:'wrap' },
-  calBtn:  { display:'flex', alignItems:'center', gap:'8px', color:'#FFFFFF', border:'none', borderRadius:'8px', padding:'12px 20px', fontSize:'14px', fontWeight:'700', fontFamily:"'Inter',sans-serif", cursor:'pointer', transition:'background-color .2s', letterSpacing:'-.01em' },
-  closeBtn:{ padding:'12px 20px', backgroundColor:'transparent', border:'1px solid #E5E7EB', borderRadius:'8px', fontSize:'14px', fontWeight:'600', fontFamily:"'Inter',sans-serif", cursor:'pointer', color:'#6B7280' },
-  hint:    { fontSize:'11px', color:'#9CA3AF', lineHeight:'1.5', margin:0 },
+  overlay:      { position:'fixed', inset:0, backgroundColor:'rgba(0,0,0,.55)', display:'flex', alignItems:'center', justifyContent:'center', zIndex:1000, padding:'16px', overflowY:'auto' },
+  box:          { backgroundColor:'#FFFFFF', borderRadius:'20px', padding:'32px 28px', maxWidth:'420px', width:'100%', boxShadow:'0 32px 80px rgba(0,0,0,.2)', textAlign:'center' },
+  iconWrap:     { margin:'0 auto 16px', width:'64px', height:'64px' },
+  title:        { fontSize:'22px', fontWeight:'900', color:'#0A0A0A', letterSpacing:'-.03em', margin:'0 0 8px' },
+  sub:          { fontSize:'13px', color:'#6B7280', lineHeight:'1.6', margin:'0 0 20px' },
+  // QR IMAGE
+  qrImgBox:     { backgroundColor:'#F4F5F7', borderRadius:'12px', padding:'20px 16px', marginBottom:'16px', display:'flex', flexDirection:'column', alignItems:'center', gap:'10px' },
+  qrImgLabel:   { fontSize:'11px', fontWeight:'700', color:'#6B7280', textTransform:'uppercase', letterSpacing:'.07em', margin:0 },
+  qrImg:        { width:'200px', height:'200px', imageRendering:'pixelated', borderRadius:'8px', border:'4px solid #FFFFFF', boxShadow:'0 2px 12px rgba(0,61,165,.15)' },
+  qrImgHint:    { fontSize:'12px', color:'#6B7280', margin:0 },
+  qrCodeText:   { fontSize:'12px', fontFamily:'monospace', color:'#003DA5', fontWeight:'700', letterSpacing:'.04em', margin:0, backgroundColor:'#EEF3FF', padding:'4px 10px', borderRadius:'4px' },
+  downloadBtn:  { background:'none', border:'1px solid #003DA5', color:'#003DA5', borderRadius:'6px', padding:'7px 16px', fontSize:'13px', fontWeight:'700', fontFamily:"'Inter',sans-serif", cursor:'pointer' },
+  qrLoading:    { display:'flex', flexDirection:'column', alignItems:'center', gap:'10px', padding:'20px 0' },
+  qrSpinner:    { width:'32px', height:'32px', border:'3px solid #E5E7EB', borderTopColor:'#003DA5', borderRadius:'50%', animation:'qrspin .8s linear infinite' },
+  // Info
+  infoBox:      { backgroundColor:'#EEF3FF', borderRadius:'10px', padding:'12px 16px', marginBottom:'20px', display:'flex', flexDirection:'column', gap:'8px', textAlign:'left' },
+  infoRow:      { display:'flex', alignItems:'center', gap:'8px', fontSize:'13px', color:'#374151', fontWeight:'500' },
+  // Azioni
+  btnRow:       { display:'flex', gap:'10px', justifyContent:'center', marginBottom:'12px', flexWrap:'wrap' },
+  calBtn:       { display:'flex', alignItems:'center', gap:'8px', color:'#FFFFFF', border:'none', borderRadius:'8px', padding:'12px 18px', fontSize:'14px', fontWeight:'700', fontFamily:"'Inter',sans-serif", cursor:'pointer', transition:'background-color .2s', letterSpacing:'-.01em' },
+  closeBtn:     { padding:'12px 18px', backgroundColor:'transparent', border:'1px solid #E5E7EB', borderRadius:'8px', fontSize:'14px', fontWeight:'600', fontFamily:"'Inter',sans-serif", cursor:'pointer', color:'#6B7280' },
+  hint:         { fontSize:'11px', color:'#9CA3AF', lineHeight:'1.5', margin:0 },
 }
