@@ -2,6 +2,7 @@ import { useEffect, useState } from 'react'
 import { useParams, Link } from 'react-router-dom'
 import { supabase } from '../../lib/supabase'
 import { MapPin, Calendar, Clock, Users, ChevronRight, AlertCircle } from 'lucide-react'
+import FormIscrizione from './FormIscrizione'
 
 function formatDataCompleta(ts) {
   if (!ts) return null
@@ -173,12 +174,9 @@ export default function LandingPage() {
               )}
             </div>
 
-            {/* Form placeholder — verrà completato nella Fase 6 */}
             {formVisible && !esaurito && (
-              <div style={s.formPlaceholder}>
-                <p style={{ fontSize:'14px', color:'#6B7280', textAlign:'center', margin:0 }}>
-                  Il form di registrazione sarà disponibile nella prossima fase di sviluppo.
-                </p>
+              <div style={s.formSection}>
+                <FormIscrizione event={event} onSuccess={()=>setFormVisible(false)}/>
               </div>
             )}
           </section>
@@ -272,7 +270,7 @@ const s = {
   ctaTitle: { fontSize:'20px', fontWeight:'900', color:'#0A0A0A', letterSpacing:'-0.02em', margin:'0 0 6px' },
   ctaSub: { fontSize:'14px', color:'#6B7280', margin:0, lineHeight:'1.5', maxWidth:'480px' },
   ctaBtn: { display:'flex', alignItems:'center', gap:'8px', backgroundColor:'#003DA5', color:'#FFFFFF', border:'none', borderRadius:'4px', padding:'14px 28px', fontSize:'15px', fontWeight:'700', fontFamily:"'Inter',sans-serif", cursor:'pointer', whiteSpace:'nowrap', letterSpacing:'-0.01em' },
-  formPlaceholder: { backgroundColor:'#FFFFFF', border:'1px dashed #D1D5DB', borderRadius:'6px', padding:'32px' },
+  formSection: { backgroundColor:'#FFFFFF', border:'1px solid #E5E7EB', borderRadius:'8px', padding:'28px' },
 
   // Sidebar
   sidebar: { display:'flex', flexDirection:'column', gap:'16px', position:'sticky', top:'88px' },
