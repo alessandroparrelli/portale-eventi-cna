@@ -171,7 +171,7 @@ export default function DashboardPage() {
               <thead>
                 <tr>
                   {['#', 'Evento', 'Data', 'Luogo', 'Stato', 'Iscritti', 'Presenti', ''].map(h => (
-                    <th key={h} style={styles.th}>{h}</th>
+                    <th key={h} style={{ ...styles.th, display: ['Luogo','Presenti'].includes(h) ? 'none' : undefined }} data-hide-mobile={['Luogo','Presenti'].includes(h) ? 'true' : undefined}>{h}</th>
                   ))}
                 </tr>
               </thead>
@@ -275,9 +275,9 @@ const styles = {
   },
   statsGrid: {
     display: 'grid',
-    gridTemplateColumns: 'repeat(auto-fit, minmax(200px, 1fr))',
-    gap: '16px',
-    marginBottom: '32px',
+    gridTemplateColumns: 'repeat(2, 1fr)',
+    gap: '12px',
+    marginBottom: '28px',
   },
   statCard: {
     backgroundColor: '#FFFFFF',

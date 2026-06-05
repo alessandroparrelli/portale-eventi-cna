@@ -306,14 +306,14 @@ export default function LandingPage() {
 
 /* ── STILI ───────────────────────────────────────────────────── */
 const s = {
-  root:    { minHeight:'100vh', backgroundColor:'#FFFFFF', fontFamily:"'Inter',sans-serif" },
+  root:    { minHeight:'100vh', backgroundColor:'#FFFFFF', fontFamily:"'Inter',sans-serif", display:'flex', flexDirection:'column' },
   center:  { minHeight:'100vh', display:'flex', flexDirection:'column', alignItems:'center', justifyContent:'center', backgroundColor:'#F4F5F7', padding:'24px' },
   // header full-width
-  header:      { backgroundColor:'#FFFFFF', borderBottom:'3px solid #003DA5', position:'sticky', top:0, zIndex:50, width:'100%' },
-  headerInner: { maxWidth:'100%', padding:'0 40px', height:'80px', display:'flex', alignItems:'center' },
-  logo:        { height:'56px', objectFit:'contain' },
+  header:      { backgroundColor:'#FFFFFF', borderBottom:'3px solid #003DA5', position:'sticky', top:0, zIndex:50, width:'100%', margin:0, padding:0, lineHeight:0 },
+  headerInner: { maxWidth:'100%', padding:'0 20px', height:'72px', display:'flex', alignItems:'center', lineHeight:'normal' },
+  logo:        { height:'44px', maxHeight:'44px', objectFit:'contain', display:'block' },
   // hero
-  hero:        { display:'flex', alignItems:'flex-end', position:'relative' },
+  hero:        { display:'flex', alignItems:'flex-end', position:'relative', margin:0, padding:0, flexShrink:0 },
   heroOverlay: { width:'100%', padding:'56px 40px 44px', transition:'background-color .3s' },
   heroContent: { maxWidth:'820px' },
   heroTag:     { display:'inline-flex', alignItems:'center', gap:'6px', backgroundColor:'rgba(255,255,255,.16)', color:'#FFFFFF', padding:'4px 12px', borderRadius:'20px', fontSize:'12px', fontWeight:'600', marginBottom:'14px', backdropFilter:'blur(6px)' },

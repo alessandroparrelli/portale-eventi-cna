@@ -62,3 +62,23 @@ input, select, textarea, button { font-family: inherit; }
 /* ── QR Scanner fix ───────────────────────────────── */
 #qr-viewport video { width: 100% !important; }
 #qr-viewport canvas { display: none; }
+
+/* ── Gap fix landing ─────────────────────────────────── */
+.landing-root { display: flex; flex-direction: column; }
+.landing-root header { margin: 0; padding: 0; }
+.landing-root header + div { margin-top: 0; }
+
+/* Elimina line-height/spacing impliciti su img dentro header */
+header img { display: block; }
+
+/* ── Dashboard mobile stat grid ──────────────────────── */
+@media (max-width: 768px) {
+  /* Forza 2 colonne per le stat cards */
+  [data-stat-grid] { grid-template-columns: repeat(2,1fr) !important; }
+
+  /* Tabella dashboard: nascondi colonne non essenziali */
+  [data-hide-mobile] { display: none !important; }
+
+  /* Padding contenuto su mobile */
+  main { padding: 76px 14px 24px !important; }
+}
