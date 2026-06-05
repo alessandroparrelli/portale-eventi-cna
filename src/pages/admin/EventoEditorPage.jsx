@@ -216,7 +216,7 @@ const se = {
 export default function EventoEditorPage() {
   const { id } = useParams()
   const navigate = useNavigate()
-  const location = useLocation()
+
   const isNew = id === 'nuovo'
 
   const [event, setEvent] = useState({
