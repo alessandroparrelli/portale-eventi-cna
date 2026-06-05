@@ -3,7 +3,7 @@ import { useNavigate, useParams } from 'react-router-dom'
 import { supabase } from '../../lib/supabase'
 import { useRole } from '../../hooks/useRole'
 import RichEditor from '../../components/editor/RichEditor'
-import { ImageUploader } from './EventiPage'
+import ImageUploader from '../../components/editor/ImageUploader'
 import {
   Save, ArrowLeft, Eye, Plus, Trash2, GripVertical,
   Type, Image, Grid3x3,

@@ -3,6 +3,7 @@ import { useNavigate } from 'react-router-dom'
 import { supabase } from '../../lib/supabase'
 import { useRole } from '../../hooks/useRole'
 import { Modal, StatoBadge, Field, Input, Textarea, Select, Btn, EmptyState } from '../../components/ui'
+import ImageUploader from '../../components/editor/ImageUploader'
 import {
   Plus, CalendarDays, Pencil, Trash2, Copy, ExternalLink, Search,
   Link2, ClipboardCheck, Globe, Image, X, ChevronDown, ChevronUp,
@@ -23,108 +24,7 @@ const fmtDt = ts => ts
   ? new Date(ts).toLocaleDateString('it-IT',{day:'2-digit',month:'short',year:'numeric'})
   : '—'
 
-/* ─── Upload immagine ─────────────────────────────────────────── */
-export function ImageUploader({ value, onChange }) {
-  const ref = useRef()
-  const [uploading, setUploading] = useState(false)
-  const [dragOver,  setDragOver]  = useState(false)
-  const [genPrompt, setGenPrompt] = useState('')
-  const [generating,setGenerating]= useState(false)
-  const [genError,  setGenError]  = useState('')
-
-  async function handleFile(file) {
-    if (!file || !file.type.startsWith('image/')) return
-    setUploading(true)
-    const ext  = file.name.split('.').pop()
-    const path = `hero/${Date.now()}-${Math.random().toString(36).slice(2)}.${ext}`
-    const { error } = await supabase.storage.from('eventi-immagini').upload(path, file, { upsert:true })
-    if (!error) {
-      const { data } = supabase.storage.from('eventi-immagini').getPublicUrl(path)
-      onChange(data.publicUrl)
-    }
-    setUploading(false)
-  }
-
-  async function generateAI() {
-    if (!genPrompt.trim()) return
-    setGenerating(true); setGenError('')
-    try {
-      // Usa Claude per generare prompt ottimizzato, poi Unsplash come fallback gratuito
-      const query = encodeURIComponent(genPrompt.trim())
-      // Genera URL immagine da Picsum (placeholder professionale con seed)
-      const seed  = genPrompt.trim().replace(/\s+/g,'-').toLowerCase().slice(0,20)
-      const imgUrl = `https://picsum.photos/seed/${seed}/1200/480`
-      // Upload al bucket
-      const res  = await fetch(imgUrl)
-      const blob = await res.blob()
-      const file = new File([blob], `ai-${seed}.jpg`, { type:'image/jpeg' })
-      await handleFile(file)
-    } catch {
-      setGenError('Generazione fallita. Riprova.')
-    }
-    setGenerating(false)
-  }
-
-  return (
-    <div style={{ display:'flex', flexDirection:'column', gap:'12px' }}>
-      {/* Area upload */}
-      {value ? (
-        <div style={iu.preview}>
-          <img src={value} alt="hero" style={iu.previewImg}/>
-          <button onClick={() => onChange(null)} style={iu.removeBtn}><X size={15}/></button>
-        </div>
-      ) : (
-        <div onClick={() => ref.current?.click()}
-          onDragOver={e=>{e.preventDefault();setDragOver(true)}}
-          onDragLeave={()=>setDragOver(false)}
-          onDrop={e=>{e.preventDefault();setDragOver(false);handleFile(e.dataTransfer.files[0])}}
-          style={{ ...iu.drop, borderColor:dragOver?'#003DA5':'#D1D5DB', backgroundColor:dragOver?'#EEF3FF':'#FAFAFA' }}>
-          {uploading ? <p style={iu.dropTxt}>Caricamento…</p> : (
-            <>
-              <Image size={28} style={{ color:'#9CA3AF', marginBottom:'8px' }}/>
-              <p style={iu.dropTxt}>Trascina o <span style={{ color:'#003DA5', fontWeight:'600' }}>sfoglia</span></p>
-              <p style={{ fontSize:'11px', color:'#9CA3AF', margin:'3px 0 0' }}>JPG, PNG, WebP · consigliato 1200×480px</p>
-            </>
-          )}
-        </div>
-      )}
-      <input ref={ref} type="file" accept="image/*" style={{ display:'none' }}
-        onChange={e=>handleFile(e.target.files[0])}/>
-
-      {/* Generazione AI */}
-      <div style={iu.aiBox}>
-        <p style={iu.aiLabel}><Wand2 size={13}/> Genera con AI</p>
-        <div style={{ display:'flex', gap:'8px' }}>
-          <input value={genPrompt} onChange={e=>setGenPrompt(e.target.value)}
-            placeholder="es. sala congressi moderna, artigiani romani, networking aziendale"
-            style={iu.aiInput}
-            onKeyDown={e => e.key==='Enter' && generateAI()}/>
-          <button onClick={generateAI} disabled={generating||!genPrompt.trim()}
-            style={{ ...iu.aiBtn, opacity: generating||!genPrompt.trim() ? .6 : 1 }}>
-            {generating ? <Loader2 size={15} style={{ animation:'spin 1s linear infinite' }}/> : <Wand2 size={15}/>}
-          </button>
-        </div>
-        {genError && <p style={{ fontSize:'12px', color:'#DC2626', margin:'4px 0 0' }}>{genError}</p>}
-        <p style={{ fontSize:'11px', color:'#9CA3AF', margin:'4px 0 0' }}>
-          Digita parole chiave, premi Invio o il pulsante per generare un'immagine.
-        </p>
-      </div>
-      <style>{`@keyframes spin{from{transform:rotate(0)}to{transform:rotate(360deg)}}`}</style>
-    </div>
-  )
-}
-
-const iu = {
-  preview:    { position:'relative', borderRadius:'8px', overflow:'hidden', border:'1px solid #E5E7EB' },
-  previewImg: { width:'100%', height:'200px', objectFit:'cover', display:'block' },
-  removeBtn:  { position:'absolute', top:'8px', right:'8px', backgroundColor:'rgba(0,0,0,.6)', color:'#FFF', border:'none', borderRadius:'4px', padding:'5px 6px', cursor:'pointer', display:'flex', alignItems:'center' },
-  drop:       { border:'2px dashed', borderRadius:'8px', padding:'32px 24px', textAlign:'center', cursor:'pointer', transition:'all .15s', display:'flex', flexDirection:'column', alignItems:'center' },
-  dropTxt:    { fontSize:'13px', color:'#6B7280', margin:0 },
-  aiBox:      { backgroundColor:'#F8F4FF', border:'1px solid #E9D5FF', borderRadius:'8px', padding:'14px 16px' },
-  aiLabel:    { display:'flex', alignItems:'center', gap:'6px', fontSize:'12px', fontWeight:'700', color:'#7C3AED', margin:'0 0 8px', textTransform:'uppercase', letterSpacing:'.04em' },
-  aiInput:    { flex:1, padding:'8px 12px', border:'1px solid #D8B4FE', borderRadius:'6px', fontSize:'13px', fontFamily:"'Inter',sans-serif", outline:'none', backgroundColor:'#FFFFFF' },
-  aiBtn:      { padding:'8px 12px', backgroundColor:'#7C3AED', color:'#FFFFFF', border:'none', borderRadius:'6px', cursor:'pointer', display:'flex', alignItems:'center' },
-}
+/* ImageUploader → components/editor/ImageUploader.jsx */
 
 /* ─── Editor modale ───────────────────────────────────────────── */
 function EventEditor({ modal, cur, setCur, onSave, onClose, saving, errors }) {
@@ -512,7 +412,7 @@ export default function EventiPage() {
           <div style={s.center}>Caricamento…</div>
         ) : filtered.length===0 ? (
           <EmptyState icon={CalendarDays} title="Nessun evento" desc="Crea il primo evento"
-            action={canWrite ? <Btn onClick={openCreate}><Plus size={16}/>Crea evento</Btn> : null}/>
+            action={canWrite ? <Btn onClick={() => navigate('/admin/eventi/nuovo/editor')}><Plus size={16}/>Crea evento</Btn> : null}/>
         ) : (
           <div style={{ overflowX:'auto' }}>
             <table style={s.table}>
