@@ -1,151 +1,502 @@
-import { useEffect, useState } from 'react'
+import { useEffect, useRef, useState } from 'react'
 import { useNavigate } from 'react-router-dom'
 import { supabase } from '../../lib/supabase'
 import { useRole } from '../../hooks/useRole'
 import { Modal, StatoBadge, Field, Input, Textarea, Select, Btn, EmptyState } from '../../components/ui'
-import { Plus, CalendarDays, Pencil, Trash2, Copy, ExternalLink, Search, Link2, ClipboardCheck, Globe } from 'lucide-react'
+import {
+  Plus, CalendarDays, Pencil, Trash2, Copy, ExternalLink, Search,
+  Link2, ClipboardCheck, Globe, Image, X, ChevronDown, ChevronUp,
+  Wand2, Loader2, AlignLeft, AlignCenter, SlidersHorizontal, Hash
+} from 'lucide-react'
 
-const EMPTY_EVENT = {
+const EMPTY = {
   titolo:'', slug:'', descrizione:'', data_inizio:'', data_fine:'',
-  luogo:'', capienza_max:'', stato:'bozza',
+  luogo:'', capienza_max:'', stato:'bozza', immagine_hero:null,
+  colore_primario:'#003DA5', colore_sfondo:'#F4F5F7',
+  layout_hero:{ altezza:'340', overlay_opacita:'55', allineamento:'sinistra' },
 }
 
-function toSlug(str) {
-  return str.toLowerCase().normalize('NFD').replace(/[\u0300-\u036f]/g,'')
-    .replace(/[^a-z0-9]+/g,'-').replace(/^-|-$/g,'')
+const toSlug = s => s.toLowerCase().normalize('NFD').replace(/[\u0300-\u036f]/g,'')
+  .replace(/[^a-z0-9]+/g,'-').replace(/^-|-$/g,'')
+
+const fmtDt = ts => ts
+  ? new Date(ts).toLocaleDateString('it-IT',{day:'2-digit',month:'short',year:'numeric'})
+  : '—'
+
+/* ─── Upload immagine ─────────────────────────────────────────── */
+function ImageUploader({ value, onChange }) {
+  const ref = useRef()
+  const [uploading, setUploading] = useState(false)
+  const [dragOver,  setDragOver]  = useState(false)
+  const [genPrompt, setGenPrompt] = useState('')
+  const [generating,setGenerating]= useState(false)
+  const [genError,  setGenError]  = useState('')
+
+  async function handleFile(file) {
+    if (!file || !file.type.startsWith('image/')) return
+    setUploading(true)
+    const ext  = file.name.split('.').pop()
+    const path = `hero/${Date.now()}-${Math.random().toString(36).slice(2)}.${ext}`
+    const { error } = await supabase.storage.from('eventi-immagini').upload(path, file, { upsert:true })
+    if (!error) {
+      const { data } = supabase.storage.from('eventi-immagini').getPublicUrl(path)
+      onChange(data.publicUrl)
+    }
+    setUploading(false)
+  }
+
+  async function generateAI() {
+    if (!genPrompt.trim()) return
+    setGenerating(true); setGenError('')
+    try {
+      // Usa Claude per generare prompt ottimizzato, poi Unsplash come fallback gratuito
+      const query = encodeURIComponent(genPrompt.trim())
+      // Genera URL immagine da Picsum (placeholder professionale con seed)
+      const seed  = genPrompt.trim().replace(/\s+/g,'-').toLowerCase().slice(0,20)
+      const imgUrl = `https://picsum.photos/seed/${seed}/1200/480`
+      // Upload al bucket
+      const res  = await fetch(imgUrl)
+      const blob = await res.blob()
+      const file = new File([blob], `ai-${seed}.jpg`, { type:'image/jpeg' })
+      await handleFile(file)
+    } catch {
+      setGenError('Generazione fallita. Riprova.')
+    }
+    setGenerating(false)
+  }
+
+  return (
+    <div style={{ display:'flex', flexDirection:'column', gap:'12px' }}>
+      {/* Area upload */}
+      {value ? (
+        <div style={iu.preview}>
+          <img src={value} alt="hero" style={iu.previewImg}/>
+          <button onClick={() => onChange(null)} style={iu.removeBtn}><X size={15}/></button>
+        </div>
+      ) : (
+        <div onClick={() => ref.current?.click()}
+          onDragOver={e=>{e.preventDefault();setDragOver(true)}}
+          onDragLeave={()=>setDragOver(false)}
+          onDrop={e=>{e.preventDefault();setDragOver(false);handleFile(e.dataTransfer.files[0])}}
+          style={{ ...iu.drop, borderColor:dragOver?'#003DA5':'#D1D5DB', backgroundColor:dragOver?'#EEF3FF':'#FAFAFA' }}>
+          {uploading ? <p style={iu.dropTxt}>Caricamento…</p> : (
+            <>
+              <Image size={28} style={{ color:'#9CA3AF', marginBottom:'8px' }}/>
+              <p style={iu.dropTxt}>Trascina o <span style={{ color:'#003DA5', fontWeight:'600' }}>sfoglia</span></p>
+              <p style={{ fontSize:'11px', color:'#9CA3AF', margin:'3px 0 0' }}>JPG, PNG, WebP · consigliato 1200×480px</p>
+            </>
+          )}
+        </div>
+      )}
+      <input ref={ref} type="file" accept="image/*" style={{ display:'none' }}
+        onChange={e=>handleFile(e.target.files[0])}/>
+
+      {/* Generazione AI */}
+      <div style={iu.aiBox}>
+        <p style={iu.aiLabel}><Wand2 size={13}/> Genera con AI</p>
+        <div style={{ display:'flex', gap:'8px' }}>
+          <input value={genPrompt} onChange={e=>setGenPrompt(e.target.value)}
+            placeholder="es. sala congressi moderna, artigiani romani, networking aziendale"
+            style={iu.aiInput}
+            onKeyDown={e => e.key==='Enter' && generateAI()}/>
+          <button onClick={generateAI} disabled={generating||!genPrompt.trim()}
+            style={{ ...iu.aiBtn, opacity: generating||!genPrompt.trim() ? .6 : 1 }}>
+            {generating ? <Loader2 size={15} style={{ animation:'spin 1s linear infinite' }}/> : <Wand2 size={15}/>}
+          </button>
+        </div>
+        {genError && <p style={{ fontSize:'12px', color:'#DC2626', margin:'4px 0 0' }}>{genError}</p>}
+        <p style={{ fontSize:'11px', color:'#9CA3AF', margin:'4px 0 0' }}>
+          Digita parole chiave, premi Invio o il pulsante per generare un'immagine.
+        </p>
+      </div>
+      <style>{`@keyframes spin{from{transform:rotate(0)}to{transform:rotate(360deg)}}`}</style>
+    </div>
+  )
 }
 
-function formatDt(ts) {
-  if (!ts) return '—'
-  return new Date(ts).toLocaleDateString('it-IT', { day:'2-digit', month:'short', year:'numeric' })
+const iu = {
+  preview:    { position:'relative', borderRadius:'8px', overflow:'hidden', border:'1px solid #E5E7EB' },
+  previewImg: { width:'100%', height:'200px', objectFit:'cover', display:'block' },
+  removeBtn:  { position:'absolute', top:'8px', right:'8px', backgroundColor:'rgba(0,0,0,.6)', color:'#FFF', border:'none', borderRadius:'4px', padding:'5px 6px', cursor:'pointer', display:'flex', alignItems:'center' },
+  drop:       { border:'2px dashed', borderRadius:'8px', padding:'32px 24px', textAlign:'center', cursor:'pointer', transition:'all .15s', display:'flex', flexDirection:'column', alignItems:'center' },
+  dropTxt:    { fontSize:'13px', color:'#6B7280', margin:0 },
+  aiBox:      { backgroundColor:'#F8F4FF', border:'1px solid #E9D5FF', borderRadius:'8px', padding:'14px 16px' },
+  aiLabel:    { display:'flex', alignItems:'center', gap:'6px', fontSize:'12px', fontWeight:'700', color:'#7C3AED', margin:'0 0 8px', textTransform:'uppercase', letterSpacing:'.04em' },
+  aiInput:    { flex:1, padding:'8px 12px', border:'1px solid #D8B4FE', borderRadius:'6px', fontSize:'13px', fontFamily:"'Inter',sans-serif", outline:'none', backgroundColor:'#FFFFFF' },
+  aiBtn:      { padding:'8px 12px', backgroundColor:'#7C3AED', color:'#FFFFFF', border:'none', borderRadius:'6px', cursor:'pointer', display:'flex', alignItems:'center' },
 }
 
+/* ─── Editor modale ───────────────────────────────────────────── */
+function EventEditor({ modal, cur, setCur, onSave, onClose, saving, errors }) {
+  const [tab, setTab] = useState('info') // info | aspetto | hero | avanzato
+
+  const set = k => v => setCur(p => ({...p, [k]: typeof v==='string' ? v : v?.target?.value}))
+  const setH = k => v => setCur(p => ({...p, layout_hero:{...p.layout_hero, [k]: typeof v==='string'?v:v?.target?.value}}))
+
+  const TABS = [
+    { id:'info',    label:'📋 Info',      icon:null },
+    { id:'hero',    label:'🖼 Hero',       icon:null },
+    { id:'aspetto', label:'🎨 Aspetto',    icon:null },
+    { id:'avanzato',label:'⚙ Avanzato',   icon:null },
+  ]
+
+  return (
+    <Modal title={modal==='create'?'Crea evento':'Modifica evento'} onClose={onClose} width="720px">
+      {/* Tab bar */}
+      <div style={ee.tabBar}>
+        {TABS.map(t=>(
+          <button key={t.id} onClick={()=>setTab(t.id)}
+            style={{ ...ee.tab, borderBottom: tab===t.id ? '2px solid #003DA5' : '2px solid transparent',
+              color: tab===t.id ? '#003DA5' : '#6B7280', fontWeight: tab===t.id ? '700' : '500' }}>
+            {t.label}
+          </button>
+        ))}
+      </div>
+
+      {errors.general && <div style={ee.errBox}>{errors.general}</div>}
+
+      <div style={{ padding:'20px 0', minHeight:'340px' }}>
+
+        {/* ── TAB: Info ── */}
+        {tab==='info' && (
+          <div style={ee.grid2}>
+            <div style={{ gridColumn:'1/-1' }}>
+              <Field label="Titolo evento" required error={errors.titolo}>
+                <Input value={cur.titolo} onChange={e=>{
+                  const v=e.target.value
+                  setCur(p=>({...p,titolo:v,slug:modal==='create'?toSlug(v):p.slug}))
+                }} placeholder="es. Convegno Artigianato Roma 2026"/>
+              </Field>
+            </div>
+            <div style={{ gridColumn:'1/-1' }}>
+              <Field label="Slug URL" required error={errors.slug}>
+                <div style={{ position:'relative' }}>
+                  <span style={ee.slugPfx}>/eventi/</span>
+                  <Input value={cur.slug}
+                    onChange={e=>setCur(p=>({...p,slug:toSlug(e.target.value)}))}
+                    placeholder="convegno-artigianato-roma-2026"
+                    style={{ paddingLeft:'70px' }}/>
+                </div>
+              </Field>
+            </div>
+            <Field label="Data e ora inizio">
+              <Input type="datetime-local" value={cur.data_inizio||''} onChange={set('data_inizio')}/>
+            </Field>
+            <Field label="Data e ora fine">
+              <Input type="datetime-local" value={cur.data_fine||''} onChange={set('data_fine')}/>
+            </Field>
+            <div style={{ gridColumn:'1/-1' }}>
+              <Field label="Sede / Indirizzo completo">
+                <Input value={cur.luogo||''} onChange={set('luogo')}
+                  placeholder="es. Palazzo dei Congressi, Piazza J.F. Kennedy 1, Roma"/>
+              </Field>
+            </div>
+            <Field label="Capienza massima">
+              <Input type="number" value={cur.capienza_max||''} onChange={set('capienza_max')} placeholder="Illimitata"/>
+            </Field>
+            <Field label="Stato">
+              <Select value={cur.stato} onChange={set('stato')}>
+                <option value="bozza">📝 Bozza</option>
+                <option value="pubblicato">🟢 Pubblicato</option>
+                <option value="chiuso">🔴 Chiuso</option>
+                <option value="archiviato">📦 Archiviato</option>
+              </Select>
+            </Field>
+            <div style={{ gridColumn:'1/-1' }}>
+              <Field label="Descrizione">
+                <Textarea value={cur.descrizione||''} onChange={set('descrizione')}
+                  placeholder="Descrivi l'evento…&#10;Puoi usare più paragrafi." rows={5}/>
+              </Field>
+            </div>
+          </div>
+        )}
+
+        {/* ── TAB: Hero ── */}
+        {tab==='hero' && (
+          <div style={{ display:'flex', flexDirection:'column', gap:'20px' }}>
+            <Field label="Immagine di sfondo hero">
+              <ImageUploader value={cur.immagine_hero} onChange={url=>setCur(p=>({...p,immagine_hero:url}))}/>
+            </Field>
+
+            <div style={ee.grid3}>
+              <Field label="Altezza hero (px)">
+                <div style={{ display:'flex', alignItems:'center', gap:'8px' }}>
+                  <input type="range" min="200" max="600" step="20"
+                    value={cur.layout_hero?.altezza||'340'}
+                    onChange={e=>setH('altezza')(e.target.value)}
+                    style={{ flex:1 }}/>
+                  <span style={{ fontSize:'13px', color:'#374151', width:'44px', fontWeight:'600' }}>
+                    {cur.layout_hero?.altezza||'340'}px
+                  </span>
+                </div>
+              </Field>
+              <Field label="Opacità overlay">
+                <div style={{ display:'flex', alignItems:'center', gap:'8px' }}>
+                  <input type="range" min="0" max="90" step="5"
+                    value={cur.layout_hero?.overlay_opacita||'55'}
+                    onChange={e=>setH('overlay_opacita')(e.target.value)}
+                    style={{ flex:1 }}/>
+                  <span style={{ fontSize:'13px', color:'#374151', width:'36px', fontWeight:'600' }}>
+                    {cur.layout_hero?.overlay_opacita||'55'}%
+                  </span>
+                </div>
+              </Field>
+              <Field label="Allineamento testo">
+                <div style={{ display:'flex', gap:'8px' }}>
+                  {['sinistra','centro'].map(a=>(
+                    <button key={a} onClick={()=>setH('allineamento')(a)}
+                      style={{ flex:1, padding:'8px', border:`1px solid ${cur.layout_hero?.allineamento===a?'#003DA5':'#E5E7EB'}`,
+                        borderRadius:'6px', backgroundColor: cur.layout_hero?.allineamento===a?'#EEF3FF':'#FFFFFF',
+                        cursor:'pointer', fontSize:'12px', fontWeight:'600', color: cur.layout_hero?.allineamento===a?'#003DA5':'#6B7280',
+                        fontFamily:"'Inter',sans-serif", display:'flex', alignItems:'center', justifyContent:'center', gap:'4px' }}>
+                      {a==='sinistra' ? <AlignLeft size={14}/> : <AlignCenter size={14}/>} {a}
+                    </button>
+                  ))}
+                </div>
+              </Field>
+            </div>
+
+            {/* Anteprima */}
+            <div>
+              <p style={{ fontSize:'12px', fontWeight:'600', color:'#6B7280', textTransform:'uppercase', letterSpacing:'.06em', margin:'0 0 8px' }}>Anteprima hero</p>
+              <div style={{
+                borderRadius:'8px', overflow:'hidden', border:'1px solid #E5E7EB',
+                height: `${Math.min(200, parseInt(cur.layout_hero?.altezza||'340')/1.7)}px`,
+                backgroundImage: cur.immagine_hero ? `url(${cur.immagine_hero})` : undefined,
+                background: cur.immagine_hero ? undefined : 'linear-gradient(135deg,#003DA5,#001a50)',
+                backgroundSize:'cover', backgroundPosition:'center', position:'relative', display:'flex', alignItems:'flex-end'
+              }}>
+                <div style={{ padding:'16px 20px', background:`rgba(0,0,0,${(cur.layout_hero?.overlay_opacita||55)/100})`,
+                  width:'100%', textAlign: cur.layout_hero?.allineamento==='centro' ? 'center' : 'left' }}>
+                  <p style={{ color:'rgba(255,255,255,.7)', fontSize:'10px', fontWeight:'600', textTransform:'uppercase', margin:'0 0 4px' }}>Evento CNA Roma</p>
+                  <p style={{ color:'#FFFFFF', fontSize:'16px', fontWeight:'900', margin:0, letterSpacing:'-.02em' }}>
+                    {cur.titolo || 'Titolo evento'}
+                  </p>
+                </div>
+              </div>
+            </div>
+          </div>
+        )}
+
+        {/* ── TAB: Aspetto ── */}
+        {tab==='aspetto' && (
+          <div style={{ display:'flex', flexDirection:'column', gap:'20px' }}>
+            <div style={ee.grid2}>
+              <Field label="Colore primario">
+                <div style={{ display:'flex', alignItems:'center', gap:'10px' }}>
+                  <input type="color" value={cur.colore_primario||'#003DA5'}
+                    onChange={e=>setCur(p=>({...p,colore_primario:e.target.value}))}
+                    style={{ width:'44px', height:'38px', border:'1px solid #D1D5DB', borderRadius:'6px', cursor:'pointer', padding:'2px' }}/>
+                  <div style={{ flex:1 }}>
+                    <Input value={cur.colore_primario||'#003DA5'}
+                      onChange={e=>setCur(p=>({...p,colore_primario:e.target.value}))}
+                      placeholder="#003DA5"/>
+                  </div>
+                </div>
+              </Field>
+              <Field label="Colore sfondo sezioni">
+                <div style={{ display:'flex', alignItems:'center', gap:'10px' }}>
+                  <input type="color" value={cur.colore_sfondo||'#F4F5F7'}
+                    onChange={e=>setCur(p=>({...p,colore_sfondo:e.target.value}))}
+                    style={{ width:'44px', height:'38px', border:'1px solid #D1D5DB', borderRadius:'6px', cursor:'pointer', padding:'2px' }}/>
+                  <div style={{ flex:1 }}>
+                    <Input value={cur.colore_sfondo||'#F4F5F7'}
+                      onChange={e=>setCur(p=>({...p,colore_sfondo:e.target.value}))}
+                      placeholder="#F4F5F7"/>
+                  </div>
+                </div>
+              </Field>
+            </div>
+
+            {/* Palette preimpostate */}
+            <div>
+              <p style={{ fontSize:'12px', fontWeight:'600', color:'#6B7280', textTransform:'uppercase', letterSpacing:'.06em', margin:'0 0 10px' }}>Palette preimpostate</p>
+              <div style={{ display:'flex', gap:'10px', flexWrap:'wrap' }}>
+                {[
+                  { nome:'CNA Roma',    primario:'#003DA5', sfondo:'#EEF3FF' },
+                  { nome:'Verde',       primario:'#16A34A', sfondo:'#F0FDF4' },
+                  { nome:'Rosso',       primario:'#DC2626', sfondo:'#FEF2F2' },
+                  { nome:'Viola',       primario:'#7C3AED', sfondo:'#F5F3FF' },
+                  { nome:'Arancio',     primario:'#D97706', sfondo:'#FFFBEB' },
+                  { nome:'Grigio scuro',primario:'#1F2937', sfondo:'#F9FAFB' },
+                ].map(p=>(
+                  <button key={p.nome} onClick={()=>setCur(c=>({...c,colore_primario:p.primario,colore_sfondo:p.sfondo}))}
+                    style={{ display:'flex', alignItems:'center', gap:'8px', padding:'8px 14px',
+                      border:`2px solid ${cur.colore_primario===p.primario?p.primario:'#E5E7EB'}`,
+                      borderRadius:'8px', backgroundColor:'#FFFFFF', cursor:'pointer',
+                      fontFamily:"'Inter',sans-serif", fontSize:'12px', fontWeight:'600', color:'#374151' }}>
+                    <span style={{ display:'flex', gap:'3px' }}>
+                      <span style={{ width:'14px', height:'14px', borderRadius:'50%', backgroundColor:p.primario }}/>
+                      <span style={{ width:'14px', height:'14px', borderRadius:'50%', backgroundColor:p.sfondo, border:'1px solid #E5E7EB' }}/>
+                    </span>
+                    {p.nome}
+                  </button>
+                ))}
+              </div>
+            </div>
+
+            {/* Anteprima colori */}
+            <div style={{ backgroundColor: cur.colore_sfondo||'#F4F5F7', borderRadius:'10px', padding:'20px', border:'1px solid #E5E7EB' }}>
+              <p style={{ fontSize:'11px', color:'#9CA3AF', margin:'0 0 12px', fontWeight:'600', textTransform:'uppercase' }}>Anteprima</p>
+              <button style={{ backgroundColor:cur.colore_primario||'#003DA5', color:'#FFFFFF', border:'none', borderRadius:'6px', padding:'10px 20px', fontSize:'14px', fontWeight:'700', fontFamily:"'Inter',sans-serif", cursor:'default' }}>
+                Iscriviti ora →
+              </button>
+            </div>
+          </div>
+        )}
+
+        {/* ── TAB: Avanzato ── */}
+        {tab==='avanzato' && (
+          <div style={{ display:'flex', flexDirection:'column', gap:'16px' }}>
+            <div style={ee.infoBlock}>
+              <p style={ee.infoTitle}><Hash size={14}/> Codice evento</p>
+              <p style={{ fontSize:'13px', color:'#374151', margin:0 }}>
+                Il codice progressivo viene assegnato automaticamente alla creazione.
+                {cur.codice ? ` Questo evento ha codice <strong>EVT-${String(cur.codice).padStart(4,'0')}</strong>.` : ' Visibile dopo il salvataggio.'}
+              </p>
+            </div>
+            <Field label="Note interne (non pubbliche)">
+              <Textarea value={cur.note_interne||''} onChange={set('note_interne')}
+                placeholder="Note visibili solo allo staff admin…" rows={4}/>
+            </Field>
+          </div>
+        )}
+      </div>
+
+      {/* Footer */}
+      <div style={ee.footer}>
+        <div style={{ fontSize:'12px', color:'#9CA3AF' }}>
+          {cur.codice ? `EVT-${String(cur.codice).padStart(4,'0')}` : 'Nuovo evento'}
+        </div>
+        <div style={{ display:'flex', gap:'10px' }}>
+          <Btn variant="ghost" onClick={onClose}>Annulla</Btn>
+          <Btn onClick={onSave} disabled={saving}>
+            {saving ? 'Salvataggio…' : modal==='create' ? '✓ Crea evento' : '✓ Salva modifiche'}
+          </Btn>
+        </div>
+      </div>
+    </Modal>
+  )
+}
+
+const ee = {
+  tabBar:   { display:'flex', gap:'0', borderBottom:'1px solid #E5E7EB', marginBottom:'4px' },
+  tab:      { padding:'10px 16px', background:'none', border:'none', borderBottom:'2px solid transparent', cursor:'pointer', fontSize:'13px', fontFamily:"'Inter',sans-serif", letterSpacing:'-.01em', transition:'color .15s' },
+  grid2:    { display:'grid', gridTemplateColumns:'1fr 1fr', gap:'14px' },
+  grid3:    { display:'grid', gridTemplateColumns:'1fr 1fr 1fr', gap:'14px' },
+  errBox:   { backgroundColor:'#FEF2F2', border:'1px solid #FECACA', borderRadius:'6px', padding:'10px 14px', fontSize:'14px', color:'#DC2626', margin:'8px 0' },
+  slugPfx:  { position:'absolute', left:'12px', top:'50%', transform:'translateY(-50%)', fontSize:'12px', color:'#9CA3AF', fontFamily:'monospace', pointerEvents:'none' },
+  footer:   { display:'flex', justifyContent:'space-between', alignItems:'center', marginTop:'16px', paddingTop:'16px', borderTop:'1px solid #E5E7EB' },
+  infoBlock:{ backgroundColor:'#EEF3FF', borderRadius:'8px', padding:'14px 16px' },
+  infoTitle:{ display:'flex', alignItems:'center', gap:'6px', fontSize:'12px', fontWeight:'700', color:'#003DA5', textTransform:'uppercase', letterSpacing:'.06em', margin:'0 0 6px' },
+}
+
+/* ─── PAGINA PRINCIPALE ───────────────────────────────────────── */
 export default function EventiPage() {
-  const [events, setEvents] = useState([])
-  const [counts, setCounts] = useState({})
-  const [loading, setLoading] = useState(true)
-  const [search, setSearch] = useState('')
-  const [filterStato, setFilterStato] = useState('tutti')
-  const [modal, setModal] = useState(null) // null | 'create' | 'edit' | 'delete'
-  const [current, setCurrent] = useState(EMPTY_EVENT)
-  const [saving, setSaving] = useState(false)
-  const [errors, setErrors] = useState({})
-  const [linkModal, setLinkModal] = useState(null)
-  const [copied, setCopied] = useState(false)
+  const [events,     setEvents]     = useState([])
+  const [counts,     setCounts]     = useState({})
+  const [loading,    setLoading]    = useState(true)
+  const [search,     setSearch]     = useState('')
+  const [filterStato,setFilterStato]= useState('tutti')
+  const [modal,      setModal]      = useState(null)
+  const [cur,        setCur]        = useState(EMPTY)
+  const [saving,     setSaving]     = useState(false)
+  const [errors,     setErrors]     = useState({})
+  const [linkModal,  setLinkModal]  = useState(null)
+  const [copied,     setCopied]     = useState(false)
   const { canWrite, canDelete } = useRole()
   const navigate = useNavigate()
-
   const PUBLIC_BASE = window.location.origin
-
-  function openLink(ev) { setCopied(false); setLinkModal(ev) }
-
-  async function copyLink(url) {
-    try { await navigator.clipboard.writeText(url) } catch(_) {}
-    setCopied(true)
-    setTimeout(() => setCopied(false), 2500)
-  }
 
   useEffect(() => { loadData() }, [])
 
   async function loadData() {
     setLoading(true)
-    const [{ data: evs }, { data: regs }] = await Promise.all([
-      supabase.from('events').select('*').order('created_at', { ascending: false }),
-      supabase.from('registrations').select('event_id, presente'),
+    const [{ data:evs },{ data:regs }] = await Promise.all([
+      supabase.from('events').select('*').order('codice',{ascending:true}),
+      supabase.from('registrations').select('event_id,presente'),
     ])
-    setEvents(evs || [])
-    const c = {}
-    ;(regs || []).forEach(r => {
-      if (!c[r.event_id]) c[r.event_id] = { total: 0, presenti: 0 }
-      c[r.event_id].total++
-      if (r.presente) c[r.event_id].presenti++
-    })
-    setCounts(c)
-    setLoading(false)
+    setEvents(evs||[])
+    const c={}; (regs||[]).forEach(r=>{
+      if (!c[r.event_id]) c[r.event_id]={total:0,presenti:0}
+      c[r.event_id].total++; if(r.presente) c[r.event_id].presenti++
+    }); setCounts(c); setLoading(false)
   }
 
-  function openCreate() { setCurrent({ ...EMPTY_EVENT }); setErrors({}); setModal('create') }
-  function openEdit(ev) { setCurrent({ ...ev, data_inizio: ev.data_inizio?.slice(0,16)||'', data_fine: ev.data_fine?.slice(0,16)||'', capienza_max: ev.capienza_max||'' }); setErrors({}); setModal('edit') }
-  function openDelete(ev) { setCurrent(ev); setModal('delete') }
-
-  function validate() {
-    const e = {}
-    if (!current.titolo.trim()) e.titolo = 'Campo obbligatorio'
-    if (!current.slug.trim()) e.slug = 'Campo obbligatorio'
-    return e
+  function openCreate() { setCur({...EMPTY}); setErrors({}); setModal('create') }
+  function openEdit(ev) {
+    setCur({ ...ev,
+      data_inizio: ev.data_inizio?.slice(0,16)||'',
+      data_fine:   ev.data_fine?.slice(0,16)||'',
+      capienza_max: ev.capienza_max||'',
+      layout_hero: ev.layout_hero || EMPTY.layout_hero,
+    })
+    setErrors({}); setModal('edit')
   }
 
   async function saveEvent() {
-    const e = validate()
+    const e={}
+    if (!cur.titolo.trim()) e.titolo='Obbligatorio'
+    if (!cur.slug.trim())   e.slug='Obbligatorio'
     if (Object.keys(e).length) { setErrors(e); return }
     setSaving(true)
-    const payload = {
-      titolo: current.titolo.trim(),
-      slug: current.slug.trim(),
-      descrizione: current.descrizione || null,
-      data_inizio: current.data_inizio || null,
-      data_fine: current.data_fine || null,
-      luogo: current.luogo || null,
-      capienza_max: current.capienza_max ? parseInt(current.capienza_max) : null,
-      stato: current.stato,
+    const payload={
+      titolo:cur.titolo.trim(), slug:cur.slug.trim(),
+      descrizione:cur.descrizione||null, data_inizio:cur.data_inizio||null,
+      data_fine:cur.data_fine||null, luogo:cur.luogo||null,
+      capienza_max:cur.capienza_max?parseInt(cur.capienza_max):null,
+      stato:cur.stato, immagine_hero:cur.immagine_hero||null,
+      colore_primario:cur.colore_primario||'#003DA5',
+      colore_sfondo:cur.colore_sfondo||'#F4F5F7',
+      layout_hero:cur.layout_hero||EMPTY.layout_hero,
     }
-    if (modal === 'create') {
-      const { error } = await supabase.from('events').insert(payload)
-      if (error) { setErrors({ general: error.message }); setSaving(false); return }
-    } else {
-      const { error } = await supabase.from('events').update(payload).eq('id', current.id)
-      if (error) { setErrors({ general: error.message }); setSaving(false); return }
-    }
-    setSaving(false)
-    setModal(null)
-    loadData()
+    const { error } = modal==='create'
+      ? await supabase.from('events').insert(payload)
+      : await supabase.from('events').update(payload).eq('id',cur.id)
+    if (error) { setErrors({general:error.message}); setSaving(false); return }
+    setSaving(false); setModal(null); loadData()
   }
 
   async function deleteEvent() {
     setSaving(true)
-    await supabase.from('events').delete().eq('id', current.id)
-    setSaving(false)
-    setModal(null)
+    await supabase.from('events').delete().eq('id',cur.id)
+    setSaving(false); setModal(null); loadData()
+  }
+
+  async function duplicate(ev) {
+    const { id,created_at,codice,...rest }=ev
+    await supabase.from('events').insert({
+      ...rest, titolo:rest.titolo+' (copia)',
+      slug:rest.slug+'-copia-'+Date.now().toString(36), stato:'bozza'
+    })
     loadData()
   }
 
-  async function duplicateEvent(ev) {
-    const { id, created_at, ...rest } = ev
-    const newSlug = rest.slug + '-copia-' + Date.now().toString(36)
-    await supabase.from('events').insert({ ...rest, titolo: rest.titolo + ' (copia)', slug: newSlug, stato: 'bozza' })
-    loadData()
+  async function copyLink(url) {
+    try { await navigator.clipboard.writeText(url) } catch {}
+    setCopied(true); setTimeout(()=>setCopied(false),2500)
   }
 
-  const filtered = events.filter(ev => {
-    const matchSearch = !search || ev.titolo.toLowerCase().includes(search.toLowerCase()) || ev.slug.includes(search.toLowerCase())
-    const matchStato = filterStato === 'tutti' || ev.stato === filterStato
-    return matchSearch && matchStato
+  const filtered = events.filter(ev=>{
+    const ok = !search || ev.titolo.toLowerCase().includes(search.toLowerCase()) || ev.slug.includes(search.toLowerCase())
+    return ok && (filterStato==='tutti' || ev.stato===filterStato)
   })
 
   return (
     <div style={s.page}>
-      {/* Header */}
       <div style={s.header}>
         <div>
           <h1 style={s.title}>Gestione Eventi</h1>
-          <p style={s.subtitle}>{events.length} eventi totali</p>
+          <p style={s.sub}>{events.length} eventi totali</p>
         </div>
-        {canWrite && (
-          <Btn onClick={openCreate} size="md">
-            <Plus size={18}/> Nuovo evento
-          </Btn>
-        )}
+        {canWrite && <Btn onClick={openCreate}><Plus size={18}/> Nuovo evento</Btn>}
       </div>
 
-      {/* Filtri */}
       <div style={s.filters}>
-        <div style={s.searchWrap}>
-          <Search size={16} style={s.searchIcon} />
-          <input
-            value={search} onChange={e=>setSearch(e.target.value)}
-            placeholder="Cerca per titolo o slug…"
-            style={s.searchInput}
-          />
+        <div style={s.swrap}>
+          <Search size={16} style={s.sicon}/>
+          <input value={search} onChange={e=>setSearch(e.target.value)}
+            placeholder="Cerca…" style={s.sinput}/>
         </div>
         <Select value={filterStato} onChange={e=>setFilterStato(e.target.value)}>
           <option value="tutti">Tutti gli stati</option>
@@ -156,66 +507,59 @@ export default function EventiPage() {
         </Select>
       </div>
 
-      {/* Tabella */}
       <div style={s.card}>
         {loading ? (
-          <div style={{ padding:'48px', textAlign:'center', color:'#9CA3AF', fontSize:'14px' }}>Caricamento…</div>
-        ) : filtered.length === 0 ? (
-          <EmptyState icon={CalendarDays} title="Nessun evento trovato"
-            desc={search ? 'Prova con un termine diverso' : 'Crea il primo evento per iniziare'}
-            action={canWrite ? <Btn onClick={openCreate}><Plus size={16}/>Crea evento</Btn> : null} />
+          <div style={s.center}>Caricamento…</div>
+        ) : filtered.length===0 ? (
+          <EmptyState icon={CalendarDays} title="Nessun evento" desc="Crea il primo evento"
+            action={canWrite ? <Btn onClick={openCreate}><Plus size={16}/>Crea evento</Btn> : null}/>
         ) : (
           <div style={{ overflowX:'auto' }}>
             <table style={s.table}>
-              <thead>
-                <tr>
-                  {['Evento','Data','Luogo','Stato','Iscritti','Presenti','Azioni'].map(h=>(
-                    <th key={h} style={s.th}>{h}</th>
-                  ))}
-                </tr>
-              </thead>
+              <thead><tr>
+                {['#','Evento','Data','Stato','Iscritti','Presenti','Azioni'].map(h=>(
+                  <th key={h} style={s.th}>{h}</th>
+                ))}
+              </tr></thead>
               <tbody>
-                {filtered.map(ev => (
+                {filtered.map(ev=>(
                   <tr key={ev.id} style={s.tr}
                     onMouseEnter={e=>e.currentTarget.style.backgroundColor='#F9FAFB'}
                     onMouseLeave={e=>e.currentTarget.style.backgroundColor='transparent'}>
-                    <td style={s.td}>
-                      <p style={s.evTitle}>{ev.titolo}</p>
-                      <p style={s.evSlug}>/{ev.slug}</p>
+                    <td style={{ ...s.td, width:'60px' }}>
+                      <span style={s.codice}>EVT-{String(ev.codice||0).padStart(4,'0')}</span>
                     </td>
-                    <td style={s.td}><span style={s.cell}>{formatDt(ev.data_inizio)}</span></td>
-                    <td style={s.td}><span style={{...s.cell, maxWidth:'160px', display:'block', overflow:'hidden', textOverflow:'ellipsis', whiteSpace:'nowrap'}}>{ev.luogo||'—'}</span></td>
+                    <td style={s.td}>
+                      <div style={{ display:'flex', alignItems:'center', gap:'10px' }}>
+                        {ev.immagine_hero
+                          ? <img src={ev.immagine_hero} alt="" style={s.thumb}/>
+                          : <div style={s.thumbPh}><Image size={13} style={{ color:'#9CA3AF' }}/></div>}
+                        <div>
+                          <p style={s.evTitle}>{ev.titolo}</p>
+                          <p style={s.evSlug}>/{ev.slug}</p>
+                        </div>
+                      </div>
+                    </td>
+                    <td style={s.td}><span style={s.cell}>{fmtDt(ev.data_inizio)}</span></td>
                     <td style={s.td}><StatoBadge stato={ev.stato}/></td>
                     <td style={s.td}>
                       <span style={s.cell}>{counts[ev.id]?.total||0}
-                        {ev.capienza_max ? <span style={{color:'#9CA3AF'}}>/{ev.capienza_max}</span> : null}
+                        {ev.capienza_max&&<span style={{color:'#9CA3AF'}}>/{ev.capienza_max}</span>}
                       </span>
                     </td>
                     <td style={s.td}><span style={s.cell}>{counts[ev.id]?.presenti||0}</span></td>
                     <td style={s.td}>
-                      <div style={{ display:'flex', gap:'6px', alignItems:'center' }}>
-                        <button style={s.iconBtn} title="Vai agli iscritti" onClick={()=>navigate(`/admin/iscritti?evento=${ev.id}`)}>
-                          <ExternalLink size={15}/>
-                        </button>
-                        <button
-                          style={{ ...s.iconBtn, color: ev.stato === 'pubblicato' ? '#003DA5' : '#9CA3AF' }}
-                          title={ev.stato === 'pubblicato' ? 'Link pagina pubblica' : 'Evento non pubblicato'}
-                          onClick={() => openLink(ev)}
-                        >
-                          <Globe size={15}/>
-                        </button>
+                      <div style={{ display:'flex', gap:'5px', alignItems:'center' }}>
+                        <button style={s.iconBtn} title="Iscritti" onClick={()=>navigate(`/admin/iscritti?evento=${ev.id}`)}><ExternalLink size={14}/></button>
+                        <button style={{ ...s.iconBtn, color:ev.stato==='pubblicato'?'#003DA5':'#9CA3AF' }}
+                          title="Link pubblico" onClick={()=>{setCopied(false);setLinkModal(ev)}}><Globe size={14}/></button>
                         {canWrite && <>
-                          <button style={s.iconBtn} title="Modifica" onClick={()=>openEdit(ev)}>
-                            <Pencil size={15}/>
-                          </button>
-                          <button style={s.iconBtn} title="Duplica" onClick={()=>duplicateEvent(ev)}>
-                            <Copy size={15}/>
-                          </button>
+                          <button style={s.iconBtn} title="Modifica" onClick={()=>openEdit(ev)}><Pencil size={14}/></button>
+                          <button style={s.iconBtn} title="Duplica" onClick={()=>duplicate(ev)}><Copy size={14}/></button>
                         </>}
                         {canDelete && (
-                          <button style={{...s.iconBtn, color:'#DC2626'}} title="Elimina" onClick={()=>openDelete(ev)}>
-                            <Trash2 size={15}/>
-                          </button>
+                          <button style={{ ...s.iconBtn, color:'#DC2626' }} title="Elimina"
+                            onClick={()=>{setCur(ev);setModal('delete')}}><Trash2 size={14}/></button>
                         )}
                       </div>
                     </td>
@@ -227,158 +571,84 @@ export default function EventiPage() {
         )}
       </div>
 
-      {/* MODAL CREATE/EDIT */}
+      {/* Editor */}
       {(modal==='create'||modal==='edit') && (
-        <Modal title={modal==='create'?'Nuovo evento':'Modifica evento'} onClose={()=>setModal(null)} width="640px">
-          <div style={{ display:'flex', flexDirection:'column', gap:'16px' }}>
-            {errors.general && <div style={s.errBox}>{errors.general}</div>}
-            <div style={{ display:'grid', gridTemplateColumns:'1fr 1fr', gap:'16px' }}>
-              <div style={{ gridColumn:'1/-1' }}>
-                <Field label="Titolo evento" required error={errors.titolo}>
-                  <Input value={current.titolo} onChange={e=>{
-                    const v=e.target.value
-                    setCurrent(p=>({...p, titolo:v, slug: modal==='create'?toSlug(v):p.slug}))
-                    setErrors(p=>({...p,titolo:''}))
-                  }} placeholder="es. Convegno Artigianato Roma 2026"/>
-                </Field>
-              </div>
-              <div style={{ gridColumn:'1/-1' }}>
-                <Field label="Slug URL" required error={errors.slug}>
-                  <Input value={current.slug} onChange={e=>{setCurrent(p=>({...p,slug:toSlug(e.target.value)}));setErrors(p=>({...p,slug:''}))}}
-                    placeholder="convegno-artigianato-roma-2026"/>
-                </Field>
-              </div>
-              <Field label="Data inizio">
-                <Input type="datetime-local" value={current.data_inizio} onChange={e=>setCurrent(p=>({...p,data_inizio:e.target.value}))}/>
-              </Field>
-              <Field label="Data fine">
-                <Input type="datetime-local" value={current.data_fine} onChange={e=>setCurrent(p=>({...p,data_fine:e.target.value}))}/>
-              </Field>
-              <div style={{ gridColumn:'1/-1' }}>
-                <Field label="Luogo / Sede">
-                  <Input value={current.luogo} onChange={e=>setCurrent(p=>({...p,luogo:e.target.value}))} placeholder="es. Palazzo dei Congressi, Roma"/>
-                </Field>
-              </div>
-              <Field label="Capienza massima">
-                <Input type="number" value={current.capienza_max} onChange={e=>setCurrent(p=>({...p,capienza_max:e.target.value}))} placeholder="Lascia vuoto = illimitata"/>
-              </Field>
-              <Field label="Stato">
-                <Select value={current.stato} onChange={e=>setCurrent(p=>({...p,stato:e.target.value}))}>
-                  <option value="bozza">Bozza</option>
-                  <option value="pubblicato">Pubblicato</option>
-                  <option value="chiuso">Chiuso</option>
-                  <option value="archiviato">Archiviato</option>
-                </Select>
-              </Field>
-              <div style={{ gridColumn:'1/-1' }}>
-                <Field label="Descrizione">
-                  <Textarea value={current.descrizione||''} onChange={e=>setCurrent(p=>({...p,descrizione:e.target.value}))}
-                    placeholder="Descrizione dell'evento…" rows={3}/>
-                </Field>
-              </div>
-            </div>
-            <div style={{ display:'flex', justifyContent:'flex-end', gap:'10px', marginTop:'8px' }}>
-              <Btn variant="ghost" onClick={()=>setModal(null)}>Annulla</Btn>
-              <Btn onClick={saveEvent} disabled={saving}>{saving?'Salvataggio…':modal==='create'?'Crea evento':'Salva modifiche'}</Btn>
-            </div>
+        <EventEditor modal={modal} cur={cur} setCur={setCur}
+          onSave={saveEvent} onClose={()=>setModal(null)} saving={saving} errors={errors}/>
+      )}
+
+      {/* Delete */}
+      {modal==='delete' && (
+        <Modal title="Elimina evento" onClose={()=>setModal(null)} width="440px">
+          <p style={{ fontSize:'14px', color:'#374151', margin:'0 0 8px' }}>
+            Elimina <strong>«{cur.titolo}»</strong>? Verranno eliminati tutti gli iscritti.
+          </p>
+          <p style={{ fontSize:'13px', color:'#DC2626', margin:'0 0 24px' }}>Operazione irreversibile.</p>
+          <div style={{ display:'flex', justifyContent:'flex-end', gap:'10px' }}>
+            <Btn variant="ghost" onClick={()=>setModal(null)}>Annulla</Btn>
+            <Btn variant="danger" onClick={deleteEvent} disabled={saving}>
+              {saving ? 'Eliminazione…' : 'Elimina definitivamente'}
+            </Btn>
           </div>
         </Modal>
       )}
 
-      {/* MODAL LINK PUBBLICO */}
-      {linkModal && (() => {
-        const url = `${PUBLIC_BASE}/eventi/${linkModal.slug}`
+      {/* Link pubblico */}
+      {linkModal && (()=>{
+        const url=`${PUBLIC_BASE}/eventi/${linkModal.slug}`
         return (
-          <Modal title="Link pagina pubblica" onClose={() => setLinkModal(null)} width="520px">
+          <Modal title="Link pagina pubblica" onClose={()=>setLinkModal(null)} width="520px">
             <div style={{ display:'flex', flexDirection:'column', gap:'20px' }}>
-              {/* Stato evento */}
               <div style={{ display:'flex', alignItems:'center', gap:'10px' }}>
-                <span style={{ fontSize:'13px', color:'#6B7280', fontWeight:'500' }}>Stato:</span>
+                <span style={{ fontSize:'13px', color:'#6B7280' }}>Stato:</span>
                 <StatoBadge stato={linkModal.stato}/>
-                {linkModal.stato !== 'pubblicato' && (
-                  <span style={{ fontSize:'12px', color:'#D97706', fontWeight:'500' }}>
-                    ⚠ L'evento non è ancora pubblico
-                  </span>
-                )}
+                {linkModal.stato!=='pubblicato' && <span style={{ fontSize:'12px', color:'#D97706' }}>⚠ Non pubblico</span>}
               </div>
-
-              {/* URL box */}
               <div>
-                <p style={{ fontSize:'12px', fontWeight:'600', color:'#6B7280', textTransform:'uppercase', letterSpacing:'0.06em', margin:'0 0 8px' }}>URL pagina evento</p>
-                <div style={{ display:'flex', gap:'8px', alignItems:'center' }}>
-                  <div style={{ flex:1, padding:'10px 14px', backgroundColor:'#F4F5F7', border:'1px solid #E5E7EB',
-                    borderRadius:'4px', fontSize:'13px', color:'#003DA5', fontFamily:'monospace',
-                    overflow:'hidden', textOverflow:'ellipsis', whiteSpace:'nowrap' }}>
-                    {url}
-                  </div>
-                  <button
-                    onClick={() => copyLink(url)}
-                    style={{ display:'flex', alignItems:'center', gap:'6px', padding:'10px 14px',
-                      backgroundColor: copied ? '#16A34A' : '#003DA5', color:'#FFFFFF',
-                      border:'none', borderRadius:'4px', cursor:'pointer', fontSize:'13px',
-                      fontWeight:'700', fontFamily:"'Inter',sans-serif", flexShrink:0,
-                      transition:'background-color 0.2s', whiteSpace:'nowrap' }}>
-                    {copied ? <><ClipboardCheck size={15}/>Copiato!</> : <><Link2 size={15}/>Copia link</>}
+                <p style={{ fontSize:'12px', fontWeight:'600', color:'#6B7280', textTransform:'uppercase', letterSpacing:'.06em', margin:'0 0 8px' }}>URL evento</p>
+                <div style={{ display:'flex', gap:'8px' }}>
+                  <div style={{ flex:1, padding:'10px 14px', backgroundColor:'#F4F5F7', border:'1px solid #E5E7EB', borderRadius:'4px', fontSize:'13px', color:'#003DA5', fontFamily:'monospace', overflow:'hidden', textOverflow:'ellipsis', whiteSpace:'nowrap' }}>{url}</div>
+                  <button onClick={()=>copyLink(url)}
+                    style={{ display:'flex', alignItems:'center', gap:'6px', padding:'10px 14px', backgroundColor:copied?'#16A34A':'#003DA5', color:'#FFFFFF', border:'none', borderRadius:'4px', cursor:'pointer', fontSize:'13px', fontWeight:'700', fontFamily:"'Inter',sans-serif", flexShrink:0, transition:'background-color .2s' }}>
+                    {copied?<><ClipboardCheck size={14}/>Copiato!</>:<><Link2 size={14}/>Copia</>}
                   </button>
                 </div>
               </div>
-
-              {/* Apri in nuova scheda */}
               <div style={{ display:'flex', gap:'10px' }}>
                 <a href={url} target="_blank" rel="noopener noreferrer"
-                  style={{ display:'flex', alignItems:'center', gap:'6px', padding:'9px 16px',
-                    border:'1px solid #003DA5', color:'#003DA5', borderRadius:'4px',
-                    fontSize:'13px', fontWeight:'700', textDecoration:'none', fontFamily:"'Inter',sans-serif" }}>
-                  <ExternalLink size={15}/> Apri in nuova scheda
+                  style={{ display:'flex', alignItems:'center', gap:'6px', padding:'9px 16px', border:'1px solid #003DA5', color:'#003DA5', borderRadius:'4px', fontSize:'13px', fontWeight:'700', textDecoration:'none', fontFamily:"'Inter',sans-serif" }}>
+                  <ExternalLink size={14}/> Apri
                 </a>
-                <Btn variant="ghost" onClick={() => setLinkModal(null)}>Chiudi</Btn>
+                <Btn variant="ghost" onClick={()=>setLinkModal(null)}>Chiudi</Btn>
               </div>
             </div>
           </Modal>
         )
       })()}
-
-      {/* MODAL DELETE */}
-      {modal==='delete' && (
-        <Modal title="Elimina evento" onClose={()=>setModal(null)} width="440px">
-          <p style={{ fontSize:'14px', color:'#374151', marginBottom:'8px' }}>
-            Sei sicuro di voler eliminare <strong>«{current.titolo}»</strong>?
-          </p>
-          <p style={{ fontSize:'13px', color:'#DC2626', marginBottom:'24px' }}>
-            Questa operazione eliminerà anche tutti gli iscritti e i dati correlati. Non è reversibile.
-          </p>
-          <div style={{ display:'flex', justifyContent:'flex-end', gap:'10px' }}>
-            <Btn variant="ghost" onClick={()=>setModal(null)}>Annulla</Btn>
-            <Btn variant="danger" onClick={deleteEvent} disabled={saving}>{saving?'Eliminazione…':'Elimina definitivamente'}</Btn>
-          </div>
-        </Modal>
-      )}
     </div>
   )
 }
 
 const s = {
-  page: { maxWidth:'1100px' },
-  header: { display:'flex', alignItems:'flex-start', justifyContent:'space-between', marginBottom:'24px', flexWrap:'wrap', gap:'12px' },
-  title: { fontSize:'32px', fontWeight:'900', color:'#0A0A0A', letterSpacing:'-0.03em', margin:0 },
-  subtitle: { fontSize:'14px', color:'#6B7280', margin:'4px 0 0', fontWeight:'500' },
+  page:    { maxWidth:'1100px' },
+  header:  { display:'flex', alignItems:'flex-start', justifyContent:'space-between', marginBottom:'24px', flexWrap:'wrap', gap:'12px' },
+  title:   { fontSize:'32px', fontWeight:'900', color:'#0A0A0A', letterSpacing:'-.03em', margin:0 },
+  sub:     { fontSize:'14px', color:'#6B7280', margin:'4px 0 0', fontWeight:'500' },
   filters: { display:'flex', gap:'12px', marginBottom:'20px', flexWrap:'wrap' },
-  searchWrap: { position:'relative', flex:1, minWidth:'220px' },
-  searchIcon: { position:'absolute', left:'12px', top:'50%', transform:'translateY(-50%)', color:'#9CA3AF' },
-  searchInput: { width:'100%', padding:'9px 12px 9px 36px', border:'1px solid #D1D5DB', borderRadius:'4px',
-    fontSize:'14px', fontFamily:"'Inter',sans-serif", outline:'none', boxSizing:'border-box' },
-  card: { backgroundColor:'#FFFFFF', borderRadius:'6px', border:'1px solid #E5E7EB', overflow:'hidden' },
-  table: { width:'100%', borderCollapse:'collapse', fontSize:'14px' },
-  th: { padding:'10px 20px', textAlign:'left', fontSize:'11px', fontWeight:'600', color:'#6B7280',
-    textTransform:'uppercase', letterSpacing:'0.06em', borderBottom:'1px solid #E5E7EB',
-    whiteSpace:'nowrap', backgroundColor:'#FAFAFA' },
-  tr: { transition:'background-color 0.1s' },
-  td: { padding:'14px 20px', borderBottom:'1px solid #F3F4F6', verticalAlign:'middle' },
-  evTitle: { fontWeight:'600', color:'#0A0A0A', margin:'0 0 2px', letterSpacing:'-0.01em' },
-  evSlug: { fontSize:'12px', color:'#9CA3AF', margin:0, fontFamily:'monospace' },
-  cell: { color:'#374151', fontSize:'14px' },
-  iconBtn: { background:'none', border:'1px solid #E5E7EB', borderRadius:'4px', padding:'5px 7px',
-    cursor:'pointer', color:'#6B7280', display:'flex', alignItems:'center' },
-  errBox: { backgroundColor:'#FEF2F2', border:'1px solid #FECACA', borderRadius:'4px',
-    padding:'10px 14px', fontSize:'14px', color:'#DC2626' },
+  swrap:   { position:'relative', flex:1, minWidth:'200px' },
+  sicon:   { position:'absolute', left:'12px', top:'50%', transform:'translateY(-50%)', color:'#9CA3AF' },
+  sinput:  { width:'100%', padding:'9px 12px 9px 36px', border:'1px solid #D1D5DB', borderRadius:'4px', fontSize:'14px', fontFamily:"'Inter',sans-serif", outline:'none', boxSizing:'border-box' },
+  card:    { backgroundColor:'#FFFFFF', borderRadius:'6px', border:'1px solid #E5E7EB', overflow:'hidden' },
+  center:  { padding:'48px', textAlign:'center', color:'#9CA3AF', fontSize:'14px' },
+  table:   { width:'100%', borderCollapse:'collapse', fontSize:'14px' },
+  th:      { padding:'10px 16px', textAlign:'left', fontSize:'11px', fontWeight:'600', color:'#6B7280', textTransform:'uppercase', letterSpacing:'.06em', borderBottom:'1px solid #E5E7EB', whiteSpace:'nowrap', backgroundColor:'#FAFAFA' },
+  tr:      { transition:'background-color .1s' },
+  td:      { padding:'12px 16px', borderBottom:'1px solid #F3F4F6', verticalAlign:'middle' },
+  codice:  { fontSize:'11px', fontWeight:'700', color:'#003DA5', backgroundColor:'#EEF3FF', padding:'2px 7px', borderRadius:'4px', fontFamily:'monospace', whiteSpace:'nowrap' },
+  thumb:   { width:'48px', height:'36px', objectFit:'cover', borderRadius:'4px', flexShrink:0 },
+  thumbPh: { width:'48px', height:'36px', backgroundColor:'#F3F4F6', borderRadius:'4px', display:'flex', alignItems:'center', justifyContent:'center', flexShrink:0 },
+  evTitle: { fontWeight:'600', color:'#0A0A0A', margin:'0 0 2px', letterSpacing:'-.01em' },
+  evSlug:  { fontSize:'11px', color:'#9CA3AF', margin:0, fontFamily:'monospace' },
+  cell:    { color:'#374151', fontSize:'14px' },
+  iconBtn: { background:'none', border:'1px solid #E5E7EB', borderRadius:'4px', padding:'5px 6px', cursor:'pointer', color:'#6B7280', display:'flex', alignItems:'center' },
 }

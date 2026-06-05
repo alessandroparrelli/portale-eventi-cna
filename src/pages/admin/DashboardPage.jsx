@@ -66,7 +66,7 @@ export default function DashboardPage() {
       // Fetch events
       const { data: eventsData, error: eventsErr } = await supabase
         .from('events')
-        .select('id, titolo, slug, stato, data_inizio, data_fine, luogo, capienza_max, created_at')
+        .select('id, titolo, slug, stato, data_inizio, data_fine, luogo, capienza_max, created_at, codice')
         .order('created_at', { ascending: false })
         .limit(10)
 
@@ -170,7 +170,7 @@ export default function DashboardPage() {
             <table style={styles.table}>
               <thead>
                 <tr>
-                  {['Evento', 'Data', 'Luogo', 'Stato', 'Iscritti', 'Presenti', ''].map(h => (
+                  {['#', 'Evento', 'Data', 'Luogo', 'Stato', 'Iscritti', 'Presenti', ''].map(h => (
                     <th key={h} style={styles.th}>{h}</th>
                   ))}
                 </tr>
@@ -183,6 +183,11 @@ export default function DashboardPage() {
                     onMouseEnter={e => e.currentTarget.style.backgroundColor = '#F9FAFB'}
                     onMouseLeave={e => e.currentTarget.style.backgroundColor = 'transparent'}
                   >
+                    <td style={{ ...styles.td, width:'60px' }}>
+                      <span style={{ fontSize:'11px', fontWeight:'700', color:'#003DA5', backgroundColor:'#EEF3FF', padding:'2px 7px', borderRadius:'4px', fontFamily:'monospace', whiteSpace:'nowrap' }}>
+                        EVT-{String(ev.codice||0).padStart(4,'0')}
+                      </span>
+                    </td>
                     <td style={styles.td}>
                       <p style={styles.eventTitle}>{ev.titolo}</p>
                       <p style={styles.eventSlug}>/{ev.slug}</p>

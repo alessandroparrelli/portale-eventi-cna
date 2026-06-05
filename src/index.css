@@ -1,25 +1,64 @@
-@import url('https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;900&display=swap');
+@import url('https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800;900&display=swap');
 
-*, *::before, *::after {
-  box-sizing: border-box;
-}
-
+*, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
 html, body, #root {
-  margin: 0;
-  padding: 0;
   font-family: 'Inter', sans-serif;
   -webkit-font-smoothing: antialiased;
   background-color: #F4F5F7;
 }
-
 a { text-decoration: none; color: inherit; }
+input, select, textarea, button { font-family: inherit; }
 
-/* Landing page responsive */
+/* ── Responsive admin layout ──────────────────────── */
 @media (max-width: 768px) {
-  .landing-body {
+  /* Sidebar si nasconde, main occupa tutto */
+  aside { transform: translateX(-100%); transition: transform .25s ease; }
+  aside.open { transform: translateX(0); }
+  main { margin-left: 0 !important; padding: 16px !important; }
+
+  /* Grids a colonna singola */
+  .grid-2col, [style*="gridTemplateColumns: 1fr 1fr"] {
     grid-template-columns: 1fr !important;
   }
-  .landing-sidebar {
-    position: static !important;
+  .grid-3col { grid-template-columns: 1fr !important; }
+}
+
+/* ── Landing page responsive ──────────────────────── */
+@media (max-width: 640px) {
+  .landing-hero-title  { font-size: 28px !important; }
+  .landing-body        { padding: 24px 16px 0 !important; }
+  .landing-info-grid   { grid-template-columns: 1fr 1fr !important; }
+  .landing-cta-box     { flex-direction: column !important; align-items: flex-start !important; }
+  .landing-cta-btn     { width: 100% !important; justify-content: center !important; }
+}
+
+/* ── Form grid responsive ─────────────────────────── */
+@media (max-width: 520px) {
+  .form-grid-2col { grid-template-columns: 1fr !important; }
+  .form-grid-2col > [style*="gridColumn: 1/-1"] { grid-column: 1 !important; }
+}
+
+/* ── Check-in mobile ──────────────────────────────── */
+@media (max-width: 600px) {
+  .checkin-actions-row { grid-template-columns: 1fr !important; }
+}
+
+/* ── Modale conferma ──────────────────────────────── */
+@media (max-width: 500px) {
+  .modal-confirm-box {
+    padding: 28px 20px !important;
+    border-radius: 16px 16px 0 0 !important;
+    position: fixed !important;
+    bottom: 0 !important;
+    left: 0 !important;
+    right: 0 !important;
+    max-width: 100% !important;
+  }
+  .modal-confirm-overlay {
+    align-items: flex-end !important;
   }
 }
+
+/* ── QR Scanner fix ───────────────────────────────── */
+#qr-viewport video { width: 100% !important; }
+#qr-viewport canvas { display: none; }
