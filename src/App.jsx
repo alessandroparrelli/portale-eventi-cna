@@ -3,6 +3,7 @@ import { AuthProvider } from './hooks/useAuth'
 import ProtectedRoute from './components/ProtectedRoute'
 import AdminLayout from './components/AdminLayout'
 import LoginPage from './pages/LoginPage'
+import LandingPage from './pages/public/LandingPage'
 import DashboardPage from './pages/admin/DashboardPage'
 import EventiPage from './pages/admin/EventiPage'
 import IscrittiPage from './pages/admin/IscrittiPage'
@@ -14,7 +15,11 @@ export default function App() {
     <BrowserRouter>
       <AuthProvider>
         <Routes>
+          {/* Pubblica */}
           <Route path="/login" element={<LoginPage />} />
+          <Route path="/eventi/:slug" element={<LandingPage />} />
+
+          {/* Admin — protetta */}
           <Route path="/admin" element={<ProtectedRoute><AdminLayout /></ProtectedRoute>}>
             <Route index element={<DashboardPage />} />
             <Route path="eventi" element={<EventiPage />} />
@@ -24,6 +29,7 @@ export default function App() {
             <Route path="statistiche" element={<StatistichePage />} />
             <Route path="utenti" element={<UtentiPage />} />
           </Route>
+
           <Route path="*" element={<Navigate to="/admin" replace />} />
         </Routes>
       </AuthProvider>

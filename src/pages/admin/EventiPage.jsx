@@ -3,7 +3,7 @@ import { useNavigate } from 'react-router-dom'
 import { supabase } from '../../lib/supabase'
 import { useRole } from '../../hooks/useRole'
 import { Modal, StatoBadge, Field, Input, Textarea, Select, Btn, EmptyState } from '../../components/ui'
-import { Plus, CalendarDays, Pencil, Trash2, Copy, ExternalLink, Search } from 'lucide-react'
+import { Plus, CalendarDays, Pencil, Trash2, Copy, ExternalLink, Search, Link2, ClipboardCheck, Globe } from 'lucide-react'
 
 const EMPTY_EVENT = {
   titolo:'', slug:'', descrizione:'', data_inizio:'', data_fine:'',
@@ -30,8 +30,20 @@ export default function EventiPage() {
   const [current, setCurrent] = useState(EMPTY_EVENT)
   const [saving, setSaving] = useState(false)
   const [errors, setErrors] = useState({})
+  const [linkModal, setLinkModal] = useState(null)
+  const [copied, setCopied] = useState(false)
   const { canWrite, canDelete } = useRole()
   const navigate = useNavigate()
+
+  const PUBLIC_BASE = window.location.origin
+
+  function openLink(ev) { setCopied(false); setLinkModal(ev) }
+
+  async function copyLink(url) {
+    try { await navigator.clipboard.writeText(url) } catch(_) {}
+    setCopied(true)
+    setTimeout(() => setCopied(false), 2500)
+  }
 
   useEffect(() => { loadData() }, [])
 
@@ -182,8 +194,15 @@ export default function EventiPage() {
                     <td style={s.td}><span style={s.cell}>{counts[ev.id]?.presenti||0}</span></td>
                     <td style={s.td}>
                       <div style={{ display:'flex', gap:'6px', alignItems:'center' }}>
-                        <button style={s.iconBtn} title="Iscritti" onClick={()=>navigate(`/admin/iscritti?evento=${ev.id}`)}>
+                        <button style={s.iconBtn} title="Vai agli iscritti" onClick={()=>navigate(`/admin/iscritti?evento=${ev.id}`)}>
                           <ExternalLink size={15}/>
+                        </button>
+                        <button
+                          style={{ ...s.iconBtn, color: ev.stato === 'pubblicato' ? '#003DA5' : '#9CA3AF' }}
+                          title={ev.stato === 'pubblicato' ? 'Link pagina pubblica' : 'Evento non pubblicato'}
+                          onClick={() => openLink(ev)}
+                        >
+                          <Globe size={15}/>
                         </button>
                         {canWrite && <>
                           <button style={s.iconBtn} title="Modifica" onClick={()=>openEdit(ev)}>
@@ -265,6 +284,59 @@ export default function EventiPage() {
           </div>
         </Modal>
       )}
+
+      {/* MODAL LINK PUBBLICO */}
+      {linkModal && (() => {
+        const url = `${PUBLIC_BASE}/eventi/${linkModal.slug}`
+        return (
+          <Modal title="Link pagina pubblica" onClose={() => setLinkModal(null)} width="520px">
+            <div style={{ display:'flex', flexDirection:'column', gap:'20px' }}>
+              {/* Stato evento */}
+              <div style={{ display:'flex', alignItems:'center', gap:'10px' }}>
+                <span style={{ fontSize:'13px', color:'#6B7280', fontWeight:'500' }}>Stato:</span>
+                <StatoBadge stato={linkModal.stato}/>
+                {linkModal.stato !== 'pubblicato' && (
+                  <span style={{ fontSize:'12px', color:'#D97706', fontWeight:'500' }}>
+                    ⚠ L'evento non è ancora pubblico
+                  </span>
+                )}
+              </div>
+
+              {/* URL box */}
+              <div>
+                <p style={{ fontSize:'12px', fontWeight:'600', color:'#6B7280', textTransform:'uppercase', letterSpacing:'0.06em', margin:'0 0 8px' }}>URL pagina evento</p>
+                <div style={{ display:'flex', gap:'8px', alignItems:'center' }}>
+                  <div style={{ flex:1, padding:'10px 14px', backgroundColor:'#F4F5F7', border:'1px solid #E5E7EB',
+                    borderRadius:'4px', fontSize:'13px', color:'#003DA5', fontFamily:'monospace',
+                    overflow:'hidden', textOverflow:'ellipsis', whiteSpace:'nowrap' }}>
+                    {url}
+                  </div>
+                  <button
+                    onClick={() => copyLink(url)}
+                    style={{ display:'flex', alignItems:'center', gap:'6px', padding:'10px 14px',
+                      backgroundColor: copied ? '#16A34A' : '#003DA5', color:'#FFFFFF',
+                      border:'none', borderRadius:'4px', cursor:'pointer', fontSize:'13px',
+                      fontWeight:'700', fontFamily:"'Inter',sans-serif", flexShrink:0,
+                      transition:'background-color 0.2s', whiteSpace:'nowrap' }}>
+                    {copied ? <><ClipboardCheck size={15}/>Copiato!</> : <><Link2 size={15}/>Copia link</>}
+                  </button>
+                </div>
+              </div>
+
+              {/* Apri in nuova scheda */}
+              <div style={{ display:'flex', gap:'10px' }}>
+                <a href={url} target="_blank" rel="noopener noreferrer"
+                  style={{ display:'flex', alignItems:'center', gap:'6px', padding:'9px 16px',
+                    border:'1px solid #003DA5', color:'#003DA5', borderRadius:'4px',
+                    fontSize:'13px', fontWeight:'700', textDecoration:'none', fontFamily:"'Inter',sans-serif" }}>
+                  <ExternalLink size={15}/> Apri in nuova scheda
+                </a>
+                <Btn variant="ghost" onClick={() => setLinkModal(null)}>Chiudi</Btn>
+              </div>
+            </div>
+          </Modal>
+        )
+      })()}
 
       {/* MODAL DELETE */}
       {modal==='delete' && (

@@ -13,3 +13,13 @@ html, body, #root {
 }
 
 a { text-decoration: none; color: inherit; }
+
+/* Landing page responsive */
+@media (max-width: 768px) {
+  .landing-body {
+    grid-template-columns: 1fr !important;
+  }
+  .landing-sidebar {
+    position: static !important;
+  }
+}
