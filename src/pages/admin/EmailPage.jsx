@@ -1,4 +1,5 @@
 import { useEffect, useState } from 'react'
+import { useNavigate } from 'react-router-dom'
 import { supabase } from '../../lib/supabase'
 import { useRole } from '../../hooks/useRole'
 import { Modal, Btn, Field, Input, Textarea, Select, EmptyState } from '../../components/ui'
@@ -29,6 +30,7 @@ export default function EmailPage() {
   const [saving, setSaving] = useState(false)
   const [showVars, setShowVars] = useState(false)
   const { canWrite, canDelete } = useRole()
+  const navigate = useNavigate()
 
   useEffect(() => {
     supabase.from('events').select('id,titolo').order('data_inizio',{ascending:false})
@@ -97,7 +99,12 @@ export default function EmailPage() {
           <p style={s.subtitle}>Template email per conferma, reminder e questionari</p>
         </div>
         {selectedEvento && canWrite && (
-          <Btn onClick={openCreate}><Plus size={18}/> Nuovo template</Btn>
+          <div style={{ display:'flex', gap:'10px' }}>
+            <Btn variant="secondary" onClick={()=>navigate(`/admin/email/nuovo?evento=${selectedEvento}`)}>
+              <Plus size={18}/> Nuovo (editor completo)
+            </Btn>
+            <Btn onClick={openCreate}><Plus size={18}/> Nuovo rapido</Btn>
+          </div>
         )}
       </div>
 
@@ -177,7 +184,12 @@ export default function EmailPage() {
                       <td style={s.td}>
                         <div style={{ display:'flex', gap:'6px' }}>
                           {canWrite && (
-                            <button style={s.iconBtn} title="Modifica" onClick={()=>openEdit(t)}>
+                            <button style={{ ...s.iconBtn, color:'#003DA5', fontWeight:'800', fontSize:'14px' }} title="Apri editor completo" onClick={()=>navigate(`/admin/email/${t.id}/editor`)}>
+                              ✎
+                            </button>
+                          )}
+                          {canWrite && (
+                            <button style={s.iconBtn} title="Modifica rapida" onClick={()=>openEdit(t)}>
                               <Pencil size={15}/>
                             </button>
                           )}

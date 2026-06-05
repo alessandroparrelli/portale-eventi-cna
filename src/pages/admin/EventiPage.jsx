@@ -24,7 +24,7 @@ const fmtDt = ts => ts
   : '—'
 
 /* ─── Upload immagine ─────────────────────────────────────────── */
-function ImageUploader({ value, onChange }) {
+export function ImageUploader({ value, onChange }) {
   const ref = useRef()
   const [uploading, setUploading] = useState(false)
   const [dragOver,  setDragOver]  = useState(false)

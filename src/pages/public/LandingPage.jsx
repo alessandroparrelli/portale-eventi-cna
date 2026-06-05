@@ -163,6 +163,90 @@ function ModalConferma({ reg, event, onClose }) {
   )
 }
 
+/* ── SEZIONI RENDERER ────────────────────────────────────────── */
+function SectionRenderer({ sec, colore_primario }) {
+  const pad = `${sec.padding||40}px 0`
+  const bg  = sec.colore_sfondo || '#FFFFFF'
+
+  if (sec.tipo === 'testo') return (
+    <div style={{ backgroundColor:bg, padding:pad }}>
+      <div style={{ maxWidth:'820px', margin:'0 auto', padding:'0 24px' }}>
+        {sec.titolo && <h2 style={{ fontSize:'clamp(20px,3vw,32px)', fontWeight:'900', color:'#0A0A0A', letterSpacing:'-.03em', margin:'0 0 16px' }}>{sec.titolo}</h2>}
+        <div style={{ fontSize:'16px', lineHeight:'1.75', color:'#374151' }}
+          dangerouslySetInnerHTML={{ __html: sec.contenuto||'' }}/>
+      </div>
+    </div>
+  )
+
+  if (sec.tipo === 'immagine') {
+    const maxW = sec.larghezza==='large'?'80%':sec.larghezza==='medium'?'60%':sec.larghezza==='small'?'40%':'100%'
+    return (
+      <div style={{ backgroundColor:bg, padding:pad }}>
+        <div style={{ maxWidth:'820px', margin:'0 auto', padding:'0 24px', textAlign:'center' }}>
+          {sec.src && <img src={sec.src} alt={sec.didascalia||''} style={{ maxWidth:maxW, width:'100%', borderRadius:'10px', boxShadow:'0 4px 24px rgba(0,0,0,.1)' }}/>}
+          {sec.didascalia && <p style={{ fontSize:'13px', color:'#9CA3AF', marginTop:'8px', fontStyle:'italic' }}>{sec.didascalia}</p>}
+        </div>
+      </div>
+    )
+  }
+
+  if (sec.tipo === 'griglia') return (
+    <div style={{ backgroundColor:bg, padding:pad }}>
+      <div style={{ maxWidth:'820px', margin:'0 auto', padding:'0 24px' }}>
+        <div style={{ display:'grid', gridTemplateColumns:`repeat(${Math.min(sec.colonne?.length||2, 3)}, 1fr)`, gap:'20px' }}>
+          {(sec.colonne||[]).map((col,i) => (
+            <div key={i} style={{ backgroundColor:'#FFFFFF', borderRadius:'10px', padding:'24px', border:'1px solid #E5E7EB', boxShadow:'0 2px 8px rgba(0,0,0,.04)' }}>
+              {col.icona && <div style={{ fontSize:'28px', marginBottom:'12px' }}>{col.icona}</div>}
+              {col.titolo && <h3 style={{ fontSize:'17px', fontWeight:'800', color:'#0A0A0A', margin:'0 0 8px', letterSpacing:'-.02em' }}>{col.titolo}</h3>}
+              {col.testo && <p style={{ fontSize:'14px', color:'#6B7280', lineHeight:'1.6', margin:0 }}>{col.testo}</p>}
+            </div>
+          ))}
+        </div>
+      </div>
+    </div>
+  )
+
+  if (sec.tipo === 'stats') return (
+    <div style={{ backgroundColor:bg, padding:pad }}>
+      <div style={{ maxWidth:'820px', margin:'0 auto', padding:'0 24px' }}>
+        <div style={{ display:'flex', flexWrap:'wrap', gap:'24px', justifyContent:'center' }}>
+          {(sec.items||[]).map((item,i) => (
+            <div key={i} style={{ textAlign:'center', flex:'1 1 120px' }}>
+              <p style={{ fontSize:'clamp(36px,6vw,56px)', fontWeight:'900', color:sec.colore_numeri||colore_primario||'#003DA5', letterSpacing:'-.04em', margin:'0 0 4px', lineHeight:1 }}>{item.numero}</p>
+              <p style={{ fontSize:'14px', color:'#6B7280', fontWeight:'600', margin:0, textTransform:'uppercase', letterSpacing:'.04em' }}>{item.label}</p>
+            </div>
+          ))}
+        </div>
+      </div>
+    </div>
+  )
+
+  if (sec.tipo === 'separatore') {
+    if (sec.stile === 'spazio') return <div style={{ backgroundColor:bg, height:`${sec.padding||40}px` }}/>
+    if (sec.stile === 'wave')   return (
+      <div style={{ backgroundColor:bg, overflow:'hidden', lineHeight:0 }}>
+        <svg viewBox="0 0 1440 40" style={{ display:'block', width:'100%' }} preserveAspectRatio="none">
+          <path d="M0,20 C360,40 1080,0 1440,20 L1440,40 L0,40 Z" fill={sec.colore||'#E5E7EB'}/>
+        </svg>
+      </div>
+    )
+    return <div style={{ backgroundColor:bg, padding:pad }}><hr style={{ border:'none', borderTop:`2px solid ${sec.colore||'#E5E7EB'}`, maxWidth:'820px', margin:'0 auto' }}/></div>
+  }
+
+  if (sec.tipo === 'cta') return (
+    <div style={{ backgroundColor:bg, padding:pad }}>
+      <div style={{ maxWidth:'820px', margin:'0 auto', padding:'0 24px', textAlign:'center' }}>
+        {sec.titolo && <h2 style={{ fontSize:'clamp(20px,3vw,28px)', fontWeight:'900', color:'#0A0A0A', letterSpacing:'-.03em', margin:'0 0 20px' }}>{sec.titolo}</h2>}
+        <a href="#form" style={{ display:'inline-flex', alignItems:'center', gap:'8px', backgroundColor:sec.colore_btn||colore_primario||'#003DA5', color:sec.colore_testo||'#FFFFFF', borderRadius:'8px', padding:'14px 32px', fontSize:'16px', fontWeight:'800', textDecoration:'none', letterSpacing:'-.01em' }}>
+          {sec.testo||'Iscriviti ora'} →
+        </a>
+      </div>
+    </div>
+  )
+
+  return null
+}
+
 /* ── LANDING PAGE ────────────────────────────────────────────── */
 export default function LandingPage() {
   const { slug } = useParams()
@@ -328,6 +412,15 @@ export default function LandingPage() {
           </section>
         )}
 
+        {/* Sezioni dinamiche */}
+        {(event.sezioni||[]).length > 0 && (
+          <div style={{ margin:'0 -24px' }}>
+            {(event.sezioni).map((sec,i) => (
+              <SectionRenderer key={sec.id||i} sec={sec} colore_primario={event.colore_primario}/>
+            ))}
+          </div>
+        )}
+
         {/* CTA box */}
         {!conferma && (
           <section style={s.ctaBox}>
@@ -377,8 +470,8 @@ const s = {
   center:  { minHeight:'100vh', display:'flex', flexDirection:'column', alignItems:'center', justifyContent:'center', backgroundColor:'#F4F5F7', padding:'24px' },
   // header full-width
   header:      { backgroundColor:'#FFFFFF', borderBottom:'3px solid #003DA5', position:'sticky', top:0, zIndex:50, width:'100%', margin:0, padding:0, lineHeight:0 },
-  headerInner: { maxWidth:'100%', padding:'0 20px', height:'72px', display:'flex', alignItems:'center', lineHeight:'normal' },
-  logo:        { height:'44px', maxHeight:'44px', objectFit:'contain', display:'block' },
+  headerInner: { maxWidth:'100%', padding:'0 24px', height:'88px', display:'flex', alignItems:'center', justifyContent:'center', lineHeight:'normal' },
+  logo:        { height:'64px', maxHeight:'64px', objectFit:'contain', display:'block' },
   // hero
   hero:        { display:'flex', alignItems:'flex-end', position:'relative', margin:0, padding:0, flexShrink:0 },
   heroOverlay: { width:'100%', padding:'56px 40px 44px', transition:'background-color .3s' },
