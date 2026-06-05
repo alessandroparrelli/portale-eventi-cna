@@ -1,14 +1,13 @@
 import { useEffect, useRef, useState } from 'react'
-import { useNavigate, useParams, useLocation } from 'react-router-dom'
+import { useNavigate, useParams } from 'react-router-dom'
 import { supabase } from '../../lib/supabase'
 import { useRole } from '../../hooks/useRole'
 import RichEditor from '../../components/editor/RichEditor'
 import { ImageUploader } from './EventiPage'
 import {
   Save, ArrowLeft, Eye, Plus, Trash2, GripVertical,
-  ChevronDown, ChevronUp, Type, Image, Grid3x3,
-  Hash, Minus, MousePointerClick, AlignLeft, Wand2,
-  Loader2, Settings2, SlidersHorizontal, AlignCenter,
+  Type, Image, Grid3x3,
+  Hash, Minus, MousePointerClick, AlignLeft, AlignCenter, Wand2, Loader2,
 } from 'lucide-react'
 import { Field, Input, Select, Btn, StatoBadge } from '../../components/ui'
 

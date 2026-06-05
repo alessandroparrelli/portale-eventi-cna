@@ -489,7 +489,7 @@ export default function EventiPage() {
           <h1 style={s.title}>Gestione Eventi</h1>
           <p style={s.sub}>{events.length} eventi totali</p>
         </div>
-        {canWrite && <Btn onClick={openCreate}><Plus size={18}/> Nuovo evento</Btn>}
+        {canWrite && <Btn onClick={() => navigate('/admin/eventi/nuovo/editor')}><Plus size={18}/> Nuovo evento</Btn>}
       </div>
 
       <div style={s.filters}>
@@ -554,7 +554,12 @@ export default function EventiPage() {
                         <button style={{ ...s.iconBtn, color:ev.stato==='pubblicato'?'#003DA5':'#9CA3AF' }}
                           title="Link pubblico" onClick={()=>{setCopied(false);setLinkModal(ev)}}><Globe size={14}/></button>
                         {canWrite && <>
-                          <button style={s.iconBtn} title="Modifica" onClick={()=>openEdit(ev)}><Pencil size={14}/></button>
+                          <button
+                            style={{ ...s.iconBtn, color:'#003DA5', borderColor:'#003DA5', fontWeight:'700', fontSize:'15px', padding:'4px 10px', minWidth:'32px' }}
+                            title="Apri editor completo"
+                            onClick={() => navigate(`/admin/eventi/${ev.id}/editor`)}>
+                            ✎
+                          </button>
                           <button style={s.iconBtn} title="Duplica" onClick={()=>duplicate(ev)}><Copy size={14}/></button>
                         </>}
                         {canDelete && (

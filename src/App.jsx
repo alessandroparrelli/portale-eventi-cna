@@ -37,6 +37,8 @@ export default function App() {
           </Route>
 
           {/* Editor a schermo intero (fuori dal layout sidebar) */}
+          <Route path="/admin/eventi/nuovo/editor"
+            element={<ProtectedRoute><EventoEditorPage /></ProtectedRoute>} />
           <Route path="/admin/eventi/:id/editor"
             element={<ProtectedRoute><EventoEditorPage /></ProtectedRoute>} />
           <Route path="/admin/email/:id/editor"
