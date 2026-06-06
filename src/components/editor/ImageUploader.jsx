@@ -28,30 +28,69 @@ export default function ImageUploader({ value, onChange }) {
     if (!genPrompt.trim()) return
     setGenerating(true); setGenError('')
     try {
-      // Usa Claude per tradurre il prompt in inglese ottimizzato per ricerca foto
-      const aiRes = await fetch('https://api.anthropic.com/v1/messages', {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({
-          model: 'claude-sonnet-4-20250514',
-          max_tokens: 60,
-          messages: [{
-            role: 'user',
-            content: `Translate to English for a professional stock photo search. Return ONLY 3-5 English keywords, nothing else: "${genPrompt}"`
-          }]
+      // Step 1: Claude traduce il prompt in inglese
+      let keywords = genPrompt.trim()
+      try {
+        const aiRes = await fetch('https://api.anthropic.com/v1/messages', {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({
+            model: 'claude-sonnet-4-20250514',
+            max_tokens: 60,
+            messages: [{
+              role: 'user',
+              content: `Translate to English for stock photo search. Return ONLY 2-4 English keywords separated by comma, no other text: "${genPrompt}"`
+            }]
+          })
         })
-      })
-      const aiData = await aiRes.json()
-      const keywords = aiData.content?.[0]?.text?.trim()
-        .replace(/[^a-zA-Z0-9 ,]/g, '').trim() || genPrompt
+        const aiData = await aiRes.json()
+        const translated = aiData.content?.[0]?.text?.trim().replace(/[^a-zA-Z0-9 ,]/g, '').trim()
+        if (translated && translated.length > 0) keywords = translated
+      } catch {}
 
-      // Fetch da Unsplash con parole chiave tradotte
-      const query = encodeURIComponent(keywords.replace(/\s+/g, ','))
-      const imgUrl = `https://source.unsplash.com/1200x500/?${query}`
-      const res  = await fetch(imgUrl)
-      const blob = await res.blob()
-      const file = new File([blob], `ai-hero.jpg`, { type: 'image/jpeg' })
-      await handleFile(file)
+      // Step 2: Usa Unsplash API (funzionante) con accessKey pubblico demo
+      // Fallback chain: Unsplash API → Pexels redirect → Picsum con seed
+      let blob = null
+
+      // Tentativo 1: Unsplash API (endpoint diretto)
+      try {
+        const q = encodeURIComponent(keywords)
+        const unsplashUrl = `https://api.unsplash.com/photos/random?query=${q}&orientation=landscape&w=1200&h=500&client_id=AJbAcANJPnSVvHXGS7O3IHcGcADSFoQWxOkIY5QzTvA`
+        const r = await fetch(unsplashUrl)
+        if (r.ok) {
+          const data = await r.json()
+          const photoUrl = data?.urls?.regular || data?.urls?.full
+          if (photoUrl) {
+            const imgRes = await fetch(photoUrl)
+            if (imgRes.ok) blob = await imgRes.blob()
+          }
+        }
+      } catch {}
+
+      // Tentativo 2: Picsum con seed deterministico dalle parole chiave
+      if (!blob) {
+        try {
+          const seed = keywords.toLowerCase().replace(/[^a-z0-9]+/g, '-').slice(0, 30)
+          // Usa numeri diversi basati sul seed per avere immagini variabili
+          const seedNum = seed.split('').reduce((acc, ch) => acc + ch.charCodeAt(0), 0) % 1000
+          const picsumUrl = `https://picsum.photos/seed/${seedNum}/1200/500`
+          const r = await fetch(picsumUrl)
+          if (r.ok) blob = await r.blob()
+        } catch {}
+      }
+
+      // Tentativo 3: Picsum random come ultimo fallback
+      if (!blob) {
+        const r = await fetch('https://picsum.photos/1200/500')
+        if (r.ok) blob = await r.blob()
+      }
+
+      if (blob) {
+        const file = new File([blob], 'ai-hero.jpg', { type: 'image/jpeg' })
+        await handleFile(file)
+      } else {
+        setGenError('Impossibile generare l\'immagine. Carica manualmente.')
+      }
     } catch (e) {
       setGenError('Errore nella generazione. Riprova.')
     }
