@@ -229,8 +229,6 @@ export default function EventoEditorPage() {
   const [saving, setSaving] = useState(false)
   const [saved, setSaved] = useState(false)
   const [activeTab, setActiveTab] = useState('info') // info | hero | sezioni | aspetto
-  const [genPrompt, setGenPrompt] = useState('')
-  const [generating, setGenerating] = useState(false)
   const { canWrite } = useRole()
 
   useEffect(() => {
@@ -421,24 +419,6 @@ export default function EventoEditorPage() {
         {activeTab==='hero' && (
           <div style={p.panel}>
             <h2 style={p.panelTitle}>Immagine Hero</h2>
-
-            {/* AI generation */}
-            <div style={p.aiBox}>
-              <p style={p.aiLabel}><Wand2 size={14}/> Genera immagine con AI</p>
-              <p style={{ fontSize:'12px', color:'#7C3AED', margin:'0 0 10px' }}>
-                Descrivi l'immagine che vuoi — l'AI tradurrà la tua richiesta in inglese e cercherà la foto più adatta.
-              </p>
-              <div style={{ display:'flex', gap:'10px' }}>
-                <input value={genPrompt} onChange={e=>setGenPrompt(e.target.value)}
-                  placeholder="es. convegno aziendale, tavola rotonda, sala conferenze moderna, artigiani al lavoro"
-                  style={{ flex:1, padding:'10px 14px', border:'1px solid #D8B4FE', borderRadius:'8px', fontSize:'14px', fontFamily:"'Inter',sans-serif", outline:'none' }}
-                  onKeyDown={e=>e.key==='Enter'&&generateHeroImage()}/>
-                <button onClick={generateHeroImage} disabled={generating||!genPrompt.trim()}
-                  style={{ display:'flex', alignItems:'center', gap:'8px', padding:'10px 20px', backgroundColor:generating?'#6B7280':'#7C3AED', color:'#FFF', border:'none', borderRadius:'8px', cursor:generating?'not-allowed':'pointer', fontWeight:'700', fontFamily:"'Inter',sans-serif" }}>
-                  {generating ? <><Loader2 size={16} style={{animation:'spin 1s linear infinite'}}/>Generazione…</> : <><Wand2 size={16}/>Genera</>}
-                </button>
-              </div>
-            </div>
 
             <div style={{ marginBottom:'20px' }}>
               <ImageUploader value={event.immagine_hero} onChange={url=>setEvent(p=>({...p,immagine_hero:url}))}/>

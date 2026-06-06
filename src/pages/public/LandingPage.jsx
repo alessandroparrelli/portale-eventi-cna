@@ -2,6 +2,7 @@ import { useEffect, useState, useRef } from 'react'
 import { useParams } from 'react-router-dom'
 import { supabase } from '../../lib/supabase'
 import { MapPin, Calendar, Clock, Users, ChevronRight, AlertCircle, ExternalLink } from 'lucide-react'
+import { RICH_CSS } from '../../components/editor/RichEditor'
 import FormIscrizione from './FormIscrizione'
 
 function fmtData(ts) {
@@ -172,8 +173,9 @@ function SectionRenderer({ sec, colore_primario }) {
     <div style={{ backgroundColor:bg, padding:pad }}>
       <div style={{ maxWidth:'820px', margin:'0 auto', padding:'0 24px' }}>
         {sec.titolo && <h2 style={{ fontSize:'clamp(20px,3vw,32px)', fontWeight:'900', color:'#0A0A0A', letterSpacing:'-.03em', margin:'0 0 16px' }}>{sec.titolo}</h2>}
-        <div style={{ fontSize:'16px', lineHeight:'1.75', color:'#374151' }}
+        <div className="rich-content"
           dangerouslySetInnerHTML={{ __html: sec.contenuto||'' }}/>
+        <style>{RICH_CSS}</style>
       </div>
     </div>
   )
@@ -402,13 +404,23 @@ export default function LandingPage() {
           </div>
         )}
 
-        {/* Descrizione */}
-        {event.descrizione && (
+        {/* Descrizione — renderizza HTML ricco con stili completi */}
+        {(event.descrizione_html || event.descrizione) && (
           <section style={s.section}>
             <h2 style={s.secTitle}>Informazioni sull'evento</h2>
-            <div style={s.descText}>
-              {event.descrizione.split('\n').map((p,i) => <p key={i} style={{ margin:'0 0 12px' }}>{p}</p>)}
-            </div>
+            {event.descrizione_html ? (
+              <>
+                <div
+                  className="rich-content"
+                  dangerouslySetInnerHTML={{ __html: event.descrizione_html }}
+                />
+                <style>{RICH_CSS}</style>
+              </>
+            ) : (
+              <div style={s.descText}>
+                {(event.descrizione||'').split('\n').map((p,i) => <p key={i} style={{ margin:'0 0 12px' }}>{p}</p>)}
+              </div>
+            )}
           </section>
         )}
 
