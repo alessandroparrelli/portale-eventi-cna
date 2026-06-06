@@ -1,7 +1,7 @@
 import { useEffect, useState, useRef } from 'react'
 import { useParams } from 'react-router-dom'
 import { supabase } from '../../lib/supabase'
-import { MapPin, Calendar, Clock, Users, ChevronRight, AlertCircle, ExternalLink } from 'lucide-react'
+import { MapPin, Calendar, ChevronRight, AlertCircle } from 'lucide-react'
 import { RICH_CSS } from '../../components/editor/RichEditor'
 import FormIscrizione from './FormIscrizione'
 
@@ -14,32 +14,25 @@ function fmtOra(ts) {
   return new Date(ts).toLocaleTimeString('it-IT', { hour:'2-digit', minute:'2-digit' })
 }
 
-/* ── MODALE CONFERMA ─────────────────────────────────────────── */
+/* ── MODALE CONFERMA ─────────────────────────────────── */
 function ModalConferma({ reg, event, onClose }) {
   const [calAdded, setCalAdded] = useState(false)
   const [qrDataUrl, setQrDataUrl] = useState(null)
-  const canvasRef = useRef(null)
 
-  // Genera QR code come immagine appena la modale si apre
   useEffect(() => {
     let cancelled = false
     import('qrcode').then(QRCode => {
       QRCode.toDataURL(reg.qr_code, {
-        width: 240,
-        margin: 2,
-        color: { dark: '#003DA5', light: '#FFFFFF' },
-        errorCorrectionLevel: 'H',
-      }).then(url => {
-        if (!cancelled) setQrDataUrl(url)
-      })
+        width:240, margin:2,
+        color:{ dark:'#003DA5', light:'#FFFFFF' },
+        errorCorrectionLevel:'H',
+      }).then(url => { if (!cancelled) setQrDataUrl(url) })
     })
     return () => { cancelled = true }
   }, [reg.qr_code])
 
   function addToCalendar() {
-    const fmt = ts => ts
-      ? new Date(ts).toISOString().replace(/[-:]/g,'').replace(/\.\d{3}/,'')
-      : null
+    const fmt = ts => ts ? new Date(ts).toISOString().replace(/[-:]/g,'').replace(/\.\d{3}/,'') : null
     const dtStart = fmt(event.data_inizio)
     const dtEnd   = fmt(event.data_fine) || dtStart
     const now     = fmt(new Date().toISOString())
@@ -53,28 +46,23 @@ function ModalConferma({ reg, event, onClose }) {
       `DESCRIPTION:Iscrizione di ${reg.nome} ${reg.cognome}\\nQR: ${reg.qr_code}`,
       'END:VEVENT','END:VCALENDAR',
     ].join('\r\n')
-    const blob = new Blob([ics], { type:'text/calendar;charset=utf-8' })
-    const a = Object.assign(document.createElement('a'), { href: URL.createObjectURL(blob), download: `${event.slug}.ics` })
-    a.click(); URL.revokeObjectURL(a.href)
-    setCalAdded(true)
+    const a = Object.assign(document.createElement('a'), {
+      href: URL.createObjectURL(new Blob([ics],{type:'text/calendar;charset=utf-8'})),
+      download:`${event.slug}.ics`
+    })
+    a.click(); URL.revokeObjectURL(a.href); setCalAdded(true)
   }
 
   function downloadQR() {
     if (!qrDataUrl) return
-    const a = Object.assign(document.createElement('a'), {
-      href: qrDataUrl,
-      download: `qr-${reg.qr_code}.png`
-    })
-    a.click()
+    Object.assign(document.createElement('a'),{ href:qrDataUrl, download:`qr-${reg.qr_code}.png` }).click()
   }
 
   return (
-    <div style={mc.overlay} onClick={e => e.target === e.currentTarget && onClose()}>
+    <div style={mc.overlay} onClick={e => e.target===e.currentTarget && onClose()}>
       <div style={mc.box}>
-
-        {/* Check animato */}
         <div style={mc.iconWrap}>
-          <svg viewBox="0 0 56 56" style={{ width:'64px', height:'64px' }}>
+          <svg viewBox="0 0 56 56" style={{ width:'64px',height:'64px' }}>
             <circle cx="28" cy="28" r="27" fill="none" stroke="#16A34A" strokeWidth="2"
               strokeDasharray="170" strokeDashoffset="170"
               style={{ animation:'circ .6s ease forwards' }}/>
@@ -84,87 +72,51 @@ function ModalConferma({ reg, event, onClose }) {
               style={{ animation:'tick .4s ease .5s forwards' }}/>
           </svg>
         </div>
-
         <h2 style={mc.title}>Iscrizione confermata!</h2>
-        <p style={mc.sub}>
-          Benvenuto/a, <strong>{reg.nome} {reg.cognome}</strong>.
-          Salva il QR Code qui sotto — ti servirà per entrare all'evento.
-        </p>
-
-        {/* QR CODE IMMAGINE */}
-        <div style={mc.qrImgBox}>
-          <p style={mc.qrImgLabel}>Il tuo QR Code personale</p>
+        <p style={mc.sub}>Benvenuto/a <strong>{reg.nome} {reg.cognome}</strong>. Salva il QR Code — ti servirà all'ingresso.</p>
+        <div style={mc.qrBox}>
+          <p style={mc.qrLabel}>Il tuo QR Code personale</p>
           {qrDataUrl ? (
             <>
-              <img
-                src={qrDataUrl}
-                alt={`QR Code ${reg.qr_code}`}
-                style={mc.qrImg}
-              />
-              <p style={mc.qrImgHint}>📸 Fai uno screenshot oppure salva l'immagine</p>
-              <code style={mc.qrCodeText}>{reg.qr_code}</code>
-              <button onClick={downloadQR} style={mc.downloadBtn}>
-                ⬇ Scarica QR Code
-              </button>
+              <img src={qrDataUrl} alt="QR" style={mc.qrImg}/>
+              <p style={{ fontSize:'12px',color:'#6B7280',margin:0 }}>📸 Fai uno screenshot o scarica</p>
+              <code style={mc.qrCode}>{reg.qr_code}</code>
+              <button onClick={downloadQR} style={mc.dlBtn}>⬇ Scarica QR Code</button>
             </>
           ) : (
-            <div style={mc.qrLoading}>
-              <div style={mc.qrSpinner}/>
-              <span style={{ fontSize:'13px', color:'#6B7280' }}>Generazione QR…</span>
+            <div style={{ display:'flex',alignItems:'center',gap:'10px',padding:'20px 0' }}>
+              <div style={{ width:'28px',height:'28px',border:'3px solid #E5E7EB',borderTopColor:'#003DA5',borderRadius:'50%',animation:'qrspin .8s linear infinite' }}/>
+              <span style={{ fontSize:'13px',color:'#6B7280' }}>Generazione QR…</span>
             </div>
           )}
         </div>
-
-        {/* Info evento */}
-        <div style={mc.infoBox}>
-          {event.data_inizio && (
-            <div style={mc.infoRow}>
-              <Calendar size={14} style={{ color:'#003DA5', flexShrink:0 }}/>
-              <span>{fmtData(event.data_inizio)}</span>
-            </div>
-          )}
-          {event.luogo && (
-            <a href={`https://maps.google.com/?q=${encodeURIComponent(event.luogo)}`}
-              target="_blank" rel="noopener noreferrer"
-              style={{ ...mc.infoRow, textDecoration:'none', color:'inherit' }}>
-              <MapPin size={14} style={{ color:'#003DA5', flexShrink:0 }}/>
-              <span style={{ color:'#003DA5', textDecorationLine:'underline', textDecorationStyle:'dotted' }}>
-                {event.luogo}
-              </span>
-            </a>
-          )}
-        </div>
-
-        {/* Azioni */}
-        <div style={mc.btnRow}>
+        {event.data_inizio && (
+          <div style={mc.infoBox}>
+            <div style={mc.infoRow}><Calendar size={14} style={{ color:'#003DA5',flexShrink:0 }}/><span>{fmtData(event.data_inizio)}</span></div>
+            {event.luogo && (
+              <a href={`https://maps.google.com/?q=${encodeURIComponent(event.luogo)}`}
+                target="_blank" rel="noopener noreferrer" style={{ ...mc.infoRow,textDecoration:'none',color:'inherit' }}>
+                <MapPin size={14} style={{ color:'#003DA5',flexShrink:0 }}/>
+                <span style={{ color:'#003DA5',textDecorationLine:'underline',textDecorationStyle:'dotted' }}>{event.luogo}</span>
+              </a>
+            )}
+          </div>
+        )}
+        <div style={{ display:'flex',gap:'10px',justifyContent:'center',marginBottom:'12px',flexWrap:'wrap' }}>
           <button onClick={addToCalendar}
-            style={{ ...mc.calBtn, backgroundColor: calAdded ? '#16A34A' : '#003DA5' }}>
-            <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor"
-              strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round">
-              <rect x="3" y="4" width="18" height="18" rx="2"/>
-              <line x1="16" y1="2" x2="16" y2="6"/>
-              <line x1="8"  y1="2" x2="8"  y2="6"/>
-              <line x1="3"  y1="10" x2="21" y2="10"/>
-            </svg>
-            {calAdded ? '✓ Aggiunto al calendario' : 'Aggiungi al calendario'}
+            style={{ display:'flex',alignItems:'center',gap:'8px',color:'#FFFFFF',backgroundColor:calAdded?'#16A34A':'#003DA5',border:'none',borderRadius:'8px',padding:'12px 18px',fontSize:'14px',fontWeight:'700',fontFamily:"'Inter',sans-serif",cursor:'pointer' }}>
+            📅 {calAdded ? '✓ Aggiunto' : 'Aggiungi al calendario'}
           </button>
-          <button onClick={onClose} style={mc.closeBtn}>Chiudi</button>
+          <button onClick={onClose} style={{ padding:'12px 18px',backgroundColor:'transparent',border:'1px solid #E5E7EB',borderRadius:'8px',fontSize:'14px',fontWeight:'600',fontFamily:"'Inter',sans-serif",cursor:'pointer',color:'#6B7280' }}>Chiudi</button>
         </div>
-
-        <p style={mc.hint}>
-          Riceverai anche una email di conferma con il QR Code allegato.
-        </p>
+        <p style={{ fontSize:'11px',color:'#9CA3AF',lineHeight:'1.5',margin:0 }}>Riceverai anche una email di conferma con il QR Code.</p>
       </div>
-      <style>{`
-        @keyframes circ { to { stroke-dashoffset: 0; } }
-        @keyframes tick { to { stroke-dashoffset: 0; } }
-        @keyframes qrspin { to { transform: rotate(360deg); } }
-      `}</style>
+      <style>{`@keyframes circ{to{stroke-dashoffset:0}}@keyframes tick{to{stroke-dashoffset:0}}@keyframes qrspin{to{transform:rotate(360deg)}}`}</style>
     </div>
   )
 }
 
-/* ── SEZIONI RENDERER ────────────────────────────────────────── */
+/* ── SEZIONI RENDERER ────────────────────────────────── */
 function SectionRenderer({ sec, colore_primario }) {
   const pad = `${sec.padding||40}px 0`
   const bg  = sec.colore_sfondo || '#FFFFFF'
@@ -172,10 +124,8 @@ function SectionRenderer({ sec, colore_primario }) {
   if (sec.tipo === 'testo') return (
     <div style={{ backgroundColor:bg, padding:pad }}>
       <div style={{ maxWidth:'820px', margin:'0 auto', padding:'0 24px' }}>
-        {sec.titolo && <h2 style={{ fontSize:'clamp(20px,3vw,32px)', fontWeight:'900', color:'#0A0A0A', letterSpacing:'-.03em', margin:'0 0 16px' }}>{sec.titolo}</h2>}
-        <div className="rich-content"
-          dangerouslySetInnerHTML={{ __html: sec.contenuto||'' }}/>
-        <style>{RICH_CSS}</style>
+        {sec.titolo && <h2 style={{ fontSize:'clamp(20px,3vw,32px)',fontWeight:'900',color:'#0A0A0A',letterSpacing:'-.03em',margin:'0 0 16px' }}>{sec.titolo}</h2>}
+        <div className="rich-content" dangerouslySetInnerHTML={{ __html:sec.contenuto||'' }}/>
       </div>
     </div>
   )
@@ -184,9 +134,9 @@ function SectionRenderer({ sec, colore_primario }) {
     const maxW = sec.larghezza==='large'?'80%':sec.larghezza==='medium'?'60%':sec.larghezza==='small'?'40%':'100%'
     return (
       <div style={{ backgroundColor:bg, padding:pad }}>
-        <div style={{ maxWidth:'820px', margin:'0 auto', padding:'0 24px', textAlign:'center' }}>
-          {sec.src && <img src={sec.src} alt={sec.didascalia||''} style={{ maxWidth:maxW, width:'100%', borderRadius:'10px', boxShadow:'0 4px 24px rgba(0,0,0,.1)' }}/>}
-          {sec.didascalia && <p style={{ fontSize:'13px', color:'#9CA3AF', marginTop:'8px', fontStyle:'italic' }}>{sec.didascalia}</p>}
+        <div style={{ maxWidth:'820px',margin:'0 auto',padding:'0 24px',textAlign:'center' }}>
+          {sec.src && <img src={sec.src} alt={sec.didascalia||''} style={{ maxWidth:maxW,width:'100%',display:'block',margin:'0 auto' }}/>}
+          {sec.didascalia && <p style={{ fontSize:'13px',color:'#9CA3AF',marginTop:'8px',fontStyle:'italic' }}>{sec.didascalia}</p>}
         </div>
       </div>
     )
@@ -194,13 +144,13 @@ function SectionRenderer({ sec, colore_primario }) {
 
   if (sec.tipo === 'griglia') return (
     <div style={{ backgroundColor:bg, padding:pad }}>
-      <div style={{ maxWidth:'820px', margin:'0 auto', padding:'0 24px' }}>
-        <div style={{ display:'grid', gridTemplateColumns:`repeat(${Math.min(sec.colonne?.length||2, 3)}, 1fr)`, gap:'20px' }}>
+      <div style={{ maxWidth:'820px',margin:'0 auto',padding:'0 24px' }}>
+        <div style={{ display:'grid',gridTemplateColumns:`repeat(${Math.min(sec.colonne?.length||2,3)},1fr)`,gap:'20px' }}>
           {(sec.colonne||[]).map((col,i) => (
-            <div key={i} style={{ backgroundColor:'#FFFFFF', borderRadius:'10px', padding:'24px', border:'1px solid #E5E7EB', boxShadow:'0 2px 8px rgba(0,0,0,.04)' }}>
-              {col.icona && <div style={{ fontSize:'28px', marginBottom:'12px' }}>{col.icona}</div>}
-              {col.titolo && <h3 style={{ fontSize:'17px', fontWeight:'800', color:'#0A0A0A', margin:'0 0 8px', letterSpacing:'-.02em' }}>{col.titolo}</h3>}
-              {col.testo && <p style={{ fontSize:'14px', color:'#6B7280', lineHeight:'1.6', margin:0 }}>{col.testo}</p>}
+            <div key={i} style={{ backgroundColor:'#FFFFFF',borderRadius:'10px',padding:'24px',border:'1px solid #E5E7EB' }}>
+              {col.icona && <div style={{ fontSize:'28px',marginBottom:'12px' }}>{col.icona}</div>}
+              {col.titolo && <h3 style={{ fontSize:'17px',fontWeight:'800',color:'#0A0A0A',margin:'0 0 8px',letterSpacing:'-.02em' }}>{col.titolo}</h3>}
+              {col.testo && <p style={{ fontSize:'14px',color:'#6B7280',lineHeight:'1.6',margin:0 }}>{col.testo}</p>}
             </div>
           ))}
         </div>
@@ -210,12 +160,12 @@ function SectionRenderer({ sec, colore_primario }) {
 
   if (sec.tipo === 'stats') return (
     <div style={{ backgroundColor:bg, padding:pad }}>
-      <div style={{ maxWidth:'820px', margin:'0 auto', padding:'0 24px' }}>
-        <div style={{ display:'flex', flexWrap:'wrap', gap:'24px', justifyContent:'center' }}>
+      <div style={{ maxWidth:'820px',margin:'0 auto',padding:'0 24px' }}>
+        <div style={{ display:'flex',flexWrap:'wrap',gap:'24px',justifyContent:'center' }}>
           {(sec.items||[]).map((item,i) => (
-            <div key={i} style={{ textAlign:'center', flex:'1 1 120px' }}>
-              <p style={{ fontSize:'clamp(36px,6vw,56px)', fontWeight:'900', color:sec.colore_numeri||colore_primario||'#003DA5', letterSpacing:'-.04em', margin:'0 0 4px', lineHeight:1 }}>{item.numero}</p>
-              <p style={{ fontSize:'14px', color:'#6B7280', fontWeight:'600', margin:0, textTransform:'uppercase', letterSpacing:'.04em' }}>{item.label}</p>
+            <div key={i} style={{ textAlign:'center',flex:'1 1 120px' }}>
+              <p style={{ fontSize:'clamp(36px,6vw,56px)',fontWeight:'900',color:sec.colore_numeri||colore_primario||'#003DA5',letterSpacing:'-.04em',margin:'0 0 4px',lineHeight:1 }}>{item.numero}</p>
+              <p style={{ fontSize:'14px',color:'#6B7280',fontWeight:'600',margin:0,textTransform:'uppercase',letterSpacing:'.04em' }}>{item.label}</p>
             </div>
           ))}
         </div>
@@ -224,22 +174,22 @@ function SectionRenderer({ sec, colore_primario }) {
   )
 
   if (sec.tipo === 'separatore') {
-    if (sec.stile === 'spazio') return <div style={{ backgroundColor:bg, height:`${sec.padding||40}px` }}/>
-    if (sec.stile === 'wave')   return (
-      <div style={{ backgroundColor:bg, overflow:'hidden', lineHeight:0 }}>
-        <svg viewBox="0 0 1440 40" style={{ display:'block', width:'100%' }} preserveAspectRatio="none">
+    if (sec.stile==='spazio') return <div style={{ backgroundColor:bg,height:`${sec.padding||40}px` }}/>
+    if (sec.stile==='wave') return (
+      <div style={{ backgroundColor:bg,overflow:'hidden',lineHeight:0 }}>
+        <svg viewBox="0 0 1440 40" style={{ display:'block',width:'100%' }} preserveAspectRatio="none">
           <path d="M0,20 C360,40 1080,0 1440,20 L1440,40 L0,40 Z" fill={sec.colore||'#E5E7EB'}/>
         </svg>
       </div>
     )
-    return <div style={{ backgroundColor:bg, padding:pad }}><hr style={{ border:'none', borderTop:`2px solid ${sec.colore||'#E5E7EB'}`, maxWidth:'820px', margin:'0 auto' }}/></div>
+    return <div style={{ backgroundColor:bg,padding:pad }}><hr style={{ border:'none',borderTop:`2px solid ${sec.colore||'#E5E7EB'}`,maxWidth:'820px',margin:'0 auto' }}/></div>
   }
 
   if (sec.tipo === 'cta') return (
-    <div style={{ backgroundColor:bg, padding:pad }}>
-      <div style={{ maxWidth:'820px', margin:'0 auto', padding:'0 24px', textAlign:'center' }}>
-        {sec.titolo && <h2 style={{ fontSize:'clamp(20px,3vw,28px)', fontWeight:'900', color:'#0A0A0A', letterSpacing:'-.03em', margin:'0 0 20px' }}>{sec.titolo}</h2>}
-        <a href="#form" style={{ display:'inline-flex', alignItems:'center', gap:'8px', backgroundColor:sec.colore_btn||colore_primario||'#003DA5', color:sec.colore_testo||'#FFFFFF', borderRadius:'8px', padding:'14px 32px', fontSize:'16px', fontWeight:'800', textDecoration:'none', letterSpacing:'-.01em' }}>
+    <div style={{ backgroundColor:bg,padding:pad }}>
+      <div style={{ maxWidth:'820px',margin:'0 auto',padding:'0 24px',textAlign:'center' }}>
+        {sec.titolo && <h2 style={{ fontSize:'clamp(20px,3vw,28px)',fontWeight:'900',color:'#0A0A0A',letterSpacing:'-.03em',margin:'0 0 20px' }}>{sec.titolo}</h2>}
+        <a href="#form-iscrizione" style={{ display:'inline-flex',alignItems:'center',gap:'8px',backgroundColor:sec.colore_btn||colore_primario||'#003DA5',color:sec.colore_testo||'#FFFFFF',borderRadius:'8px',padding:'14px 32px',fontSize:'16px',fontWeight:'800',textDecoration:'none',letterSpacing:'-.01em' }}>
           {sec.testo||'Iscriviti ora'} →
         </a>
       </div>
@@ -249,7 +199,7 @@ function SectionRenderer({ sec, colore_primario }) {
   return null
 }
 
-/* ── LANDING PAGE ────────────────────────────────────────────── */
+/* ── LANDING PAGE ────────────────────────────────────── */
 export default function LandingPage() {
   const { slug } = useParams()
   const [event,       setEvent]       = useState(null)
@@ -257,13 +207,26 @@ export default function LandingPage() {
   const [notFound,    setNotFound]    = useState(false)
   const [iscrizioniN, setIscrizioniN] = useState(0)
   const [formVisible, setFormVisible] = useState(false)
-  const [conferma,    setConferma]    = useState(null) // dati iscritto per modale
+  const [conferma,    setConferma]    = useState(null)
 
-  // Blocca zoom e overflow su mobile
+  // ── Blocca zoom su mobile ──────────────────────────
   useEffect(() => {
-    const vp = document.querySelector('meta[name=viewport]')
-    if (vp) vp.content = 'width=device-width, initial-scale=1, maximum-scale=1, user-scalable=no'
-    return () => { if (vp) vp.content = 'width=device-width, initial-scale=1' }
+    // Imposta viewport che blocca zoom
+    let vp = document.querySelector('meta[name="viewport"]')
+    if (!vp) {
+      vp = document.createElement('meta')
+      vp.name = 'viewport'
+      document.head.appendChild(vp)
+    }
+    vp.content = 'width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no, shrink-to-fit=no'
+    // Blocca touch zoom via CSS
+    document.documentElement.style.touchAction = 'pan-x pan-y'
+    document.body.style.touchAction = 'pan-x pan-y'
+    return () => {
+      vp.content = 'width=device-width, initial-scale=1.0'
+      document.documentElement.style.touchAction = ''
+      document.body.style.touchAction = ''
+    }
   }, [])
 
   useEffect(() => {
@@ -271,7 +234,7 @@ export default function LandingPage() {
       .then(({ data, error }) => {
         if (error || !data) { setNotFound(true); setLoading(false); return }
         setEvent(data)
-        supabase.from('registrations').select('id',{count:'exact'}).eq('event_id', data.id)
+        supabase.from('registrations').select('id',{count:'exact'}).eq('event_id',data.id)
           .then(({ count }) => setIscrizioniN(count||0))
         setLoading(false)
       })
@@ -280,61 +243,69 @@ export default function LandingPage() {
   if (loading) return (
     <div style={s.center}>
       <img src="https://raw.githubusercontent.com/alessandroparrelli/fileappoggio/main/NUOVO-LOGO-CNA-ROMA-SOLO-ROMA.png"
-        alt="CNA Roma" style={{ height:'64px', opacity:.5, marginBottom:'16px' }}/>
-      <p style={{ color:'#9CA3AF', fontSize:'14px' }}>Caricamento…</p>
+        alt="CNA Roma" style={{ height:'56px',opacity:.4,marginBottom:'16px' }}/>
+      <p style={{ color:'#9CA3AF',fontSize:'14px' }}>Caricamento…</p>
     </div>
   )
   if (notFound) return (
     <div style={s.center}>
       <img src="https://raw.githubusercontent.com/alessandroparrelli/fileappoggio/main/NUOVO-LOGO-CNA-ROMA-SOLO-ROMA.png"
-        alt="CNA Roma" style={{ height:'64px', marginBottom:'24px' }}/>
-      <AlertCircle size={44} style={{ color:'#D1D5DB', marginBottom:'12px' }}/>
-      <p style={{ fontSize:'20px', fontWeight:'800', color:'#0A0A0A', margin:'0 0 8px' }}>Evento non trovato</p>
-      <p style={{ fontSize:'14px', color:'#6B7280' }}>L'evento non esiste o non è ancora pubblico.</p>
+        alt="CNA Roma" style={{ height:'56px',marginBottom:'24px' }}/>
+      <AlertCircle size={44} style={{ color:'#D1D5DB',marginBottom:'12px' }}/>
+      <p style={{ fontSize:'20px',fontWeight:'800',color:'#0A0A0A',margin:'0 0 8px' }}>Evento non trovato</p>
+      <p style={{ fontSize:'14px',color:'#6B7280' }}>L'evento non esiste o non è ancora pubblico.</p>
     </div>
   )
 
-  const cap     = event.capienza_max
-  const posti   = cap ? Math.max(0, cap - iscrizioniN) : null
-  const esaurito = cap && iscrizioniN >= cap
-
-  const heroH   = event.layout_hero?.altezza    || '340'
-  const overlayO = event.layout_hero?.overlay_opacita || '55'
-  const heroAlign = event.layout_hero?.allineamento   || 'sinistra'
+  const esaurito = false // capienza rimossa
+  const lh = event.layout_hero || {}
 
   const heroStyle = event.immagine_hero
-    ? { backgroundImage:`url(${event.immagine_hero})`, backgroundSize:'cover', backgroundPosition:'center' }
-    : { background:'linear-gradient(135deg, #003DA5 0%, #001a50 100%)' }
+    ? { backgroundImage:`url(${event.immagine_hero})`,backgroundSize:'cover',backgroundPosition:'center' }
+    : { background:'linear-gradient(135deg,#003DA5 0%,#001a50 100%)' }
 
   return (
     <div style={s.root}>
+      <style>{`
+        ${RICH_CSS}
+        /* Immagini nel corpo — nessun bordo, nessuna ombra, PNG trasparente */
+        .rich-content img {
+          max-width:100% !important;
+          border:none !important;
+          box-shadow:none !important;
+          border-radius:0 !important;
+          background:transparent !important;
+          outline:none !important;
+        }
+        /* Blocca overflow orizzontale */
+        html, body { overflow-x:hidden; max-width:100vw; }
+        * { box-sizing:border-box; }
+        /* Blocca zoom iOS */
+        input, select, textarea { font-size:16px !important; }
+      `}</style>
 
-      {/* ── HEADER full-width ── */}
+      {/* ── HEADER ── */}
       <header style={s.header}>
-        <div style={s.headerInner}>
-          <img
-            src="https://raw.githubusercontent.com/alessandroparrelli/fileappoggio/main/NUOVO-LOGO-CNA-ROMA-SOLO-ROMA.png"
-            alt="CNA Roma" style={s.logo}/>
-        </div>
+        <img src="https://raw.githubusercontent.com/alessandroparrelli/fileappoggio/main/NUOVO-LOGO-CNA-ROMA-SOLO-ROMA.png"
+          alt="CNA Roma" style={s.logo}/>
       </header>
 
       {/* ── HERO ── */}
-      <div style={{ ...s.hero, ...heroStyle, minHeight:`${heroH}px` }}>
-        <div style={{ ...s.heroOverlay, backgroundColor:`rgba(0,0,0,${overlayO/100})` }}>
-          <div style={{ ...s.heroContent, textAlign: heroAlign === 'centro' ? 'center' : 'left',
-            marginLeft: heroAlign === 'centro' ? 'auto' : undefined,
-            marginRight: heroAlign === 'centro' ? 'auto' : undefined }}>
+      <div style={{ ...s.hero, ...heroStyle, minHeight:`${lh.altezza||340}px` }}>
+        <div style={{ ...s.heroOverlay, backgroundColor:`rgba(0,0,0,${(lh.overlay_opacita||55)/100})` }}>
+          <div style={{ ...s.heroContent, textAlign:lh.allineamento==='centro'?'center':'left' }}>
             <span style={s.heroTag}><Calendar size={13}/> Evento CNA Roma</span>
             <h1 style={{
               ...s.heroTitle,
-              color: event.layout_hero?.titolo_colore || '#FFFFFF',
-              fontSize: event.layout_hero?.titolo_dimensione || 'clamp(26px,5vw,54px)',
-              fontWeight: event.layout_hero?.titolo_grassetto !== false ? '900' : '400',
-              textTransform: event.layout_hero?.titolo_maiuscolo ? 'uppercase' : 'none',
+              color:       lh.titolo_colore      || '#FFFFFF',
+              fontSize:    lh.titolo_dimensione  || 'clamp(26px,5vw,54px)',
+              fontWeight:  lh.titolo_grassetto !== false ? '900' : '400',
+              textTransform: lh.titolo_maiuscolo ? 'uppercase' : 'none',
             }}>{event.titolo}</h1>
             {event.data_inizio && (
               <p style={s.heroMeta}>
-                <Calendar size={14}/> {fmtData(event.data_inizio)}
+                <Calendar size={14}/>
+                {fmtData(event.data_inizio)}
                 {fmtOra(event.data_inizio) && ` · ${fmtOra(event.data_inizio)}`}
                 {event.data_fine && fmtOra(event.data_fine) && ` — ${fmtOra(event.data_fine)}`}
               </p>
@@ -343,113 +314,94 @@ export default function LandingPage() {
               <a href={`https://maps.google.com/?q=${encodeURIComponent(event.luogo)}`}
                 target="_blank" rel="noopener noreferrer" style={s.heroLoc}>
                 <MapPin size={14}/> {event.luogo}
-                <ExternalLink size={11} style={{ opacity:.7 }}/>
               </a>
             )}
           </div>
         </div>
       </div>
 
-      {/* ── BODY centrato ── */}
+      {/* ── BODY ── */}
       <div style={s.body}>
 
-
-
-        {/* ── 3 pulsanti azione ── */}
-        <div style={s.actionBtns}>
-          {/* Aggiungi al calendario */}
+        {/* 3 PULSANTI AZIONE */}
+        <div style={s.actionRow}>
           <button onClick={() => {
             const fmt = ts => ts ? new Date(ts).toISOString().replace(/[-:]/g,'').replace(/\.\d{3}/,'') : null
-            const dtStart = fmt(event.data_inizio)
-            const dtEnd   = fmt(event.data_fine) || dtStart
-            const now     = fmt(new Date().toISOString())
-            const ics = [
-              'BEGIN:VCALENDAR','VERSION:2.0','PRODID:-//CNA Roma//Portale Eventi//IT',
+            const dtStart = fmt(event.data_inizio), dtEnd = fmt(event.data_fine)||dtStart
+            const now = fmt(new Date().toISOString())
+            const ics = ['BEGIN:VCALENDAR','VERSION:2.0','PRODID:-//CNA Roma//IT',
               'CALSCALE:GREGORIAN','METHOD:PUBLISH','BEGIN:VEVENT',
-              `UID:${event.id}@cna-eventi`,
-              `DTSTAMP:${now}Z`,`DTSTART:${dtStart}`,`DTEND:${dtEnd}`,
-              `SUMMARY:${event.titolo}`,
-              `LOCATION:${(event.luogo||'').replace(/,/g,'\\,')}`,
-              'END:VEVENT','END:VCALENDAR',
-            ].join('\r\n')
-            const a = Object.assign(document.createElement('a'), {
-              href: URL.createObjectURL(new Blob([ics],{type:'text/calendar;charset=utf-8'})),
-              download: `${event.slug}.ics`
-            })
-            a.click(); URL.revokeObjectURL(a.href)
+              `UID:${event.id}@cna-eventi`,`DTSTAMP:${now}Z`,`DTSTART:${dtStart}`,`DTEND:${dtEnd}`,
+              `SUMMARY:${event.titolo}`,`LOCATION:${(event.luogo||'').replace(/,/g,'\\,')}`,
+              'END:VEVENT','END:VCALENDAR'].join('\r\n')
+            Object.assign(document.createElement('a'),{
+              href:URL.createObjectURL(new Blob([ics],{type:'text/calendar;charset=utf-8'})),
+              download:`${event.slug}.ics`
+            }).click()
           }} style={s.actionBtn}>
-            <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round">
-              <rect x="3" y="4" width="18" height="18" rx="2"/><line x1="16" y1="2" x2="16" y2="6"/>
-              <line x1="8" y1="2" x2="8" y2="6"/><line x1="3" y1="10" x2="21" y2="10"/>
+            <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round">
+              <rect x="3" y="4" width="18" height="18" rx="2"/><line x1="16" y1="2" x2="16" y2="6"/><line x1="8" y1="2" x2="8" y2="6"/><line x1="3" y1="10" x2="21" y2="10"/>
             </svg>
             Aggiungi al calendario
           </button>
 
-          {/* Mappa */}
           {event.luogo && (
             <a href={`https://maps.google.com/?q=${encodeURIComponent(event.luogo)}`}
               target="_blank" rel="noopener noreferrer" style={s.actionBtn}>
-              <MapPin size={16}/>
-              Mappa dell'evento
+              <MapPin size={14}/> Mappa dell'evento
             </a>
           )}
 
-          {/* Partecipa — scroll al form */}
           {!esaurito && !conferma && (
             <button onClick={() => {
-              document.getElementById('form-iscrizione')?.scrollIntoView({ behavior:'smooth', block:'start' })
-              if (!formVisible) setFormVisible(true)
+              setFormVisible(true)
+              setTimeout(() => {
+                document.getElementById('form-iscrizione')?.scrollIntoView({ behavior:'smooth', block:'start' })
+              }, 50)
             }} style={{ ...s.actionBtn, ...s.actionBtnPrimary }}>
-              <ChevronRight size={16}/>
-              Partecipa
+              <ChevronRight size={14}/> Partecipa
             </button>
           )}
         </div>
 
-        {/* Descrizione — renderizza HTML ricco con stili completi */}
+        {/* DESCRIZIONE */}
         {(event.descrizione_html || event.descrizione) && (
           <section style={s.section}>
-            {event.descrizione_html ? (
-              <>
-                <div
-                  className="rich-content"
-                  dangerouslySetInnerHTML={{ __html: event.descrizione_html }}
-                />
-                <style>{RICH_CSS}</style>
-              </>
-            ) : (
-              <div style={s.descText}>
-                {(event.descrizione||'').split('\n').map((p,i) => <p key={i} style={{ margin:'0 0 12px' }}>{p}</p>)}
-              </div>
-            )}
+            {event.descrizione_html
+              ? <div className="rich-content" dangerouslySetInnerHTML={{ __html:event.descrizione_html }}/>
+              : <div style={s.descText}>{(event.descrizione||'').split('\n').map((p,i)=><p key={i} style={{ margin:'0 0 12px' }}>{p}</p>)}</div>
+            }
           </section>
         )}
 
-        {/* Sezioni dinamiche */}
+        {/* SEZIONI DINAMICHE */}
         {(event.sezioni||[]).length > 0 && (
           <div style={{ margin:'0 -24px' }}>
-            {(event.sezioni).map((sec,i) => (
+            {event.sezioni.map((sec,i) => (
               <SectionRenderer key={sec.id||i} sec={sec} colore_primario={event.colore_primario}/>
             ))}
           </div>
         )}
 
-        {/* CTA box */}
+        {/* CTA / FORM */}
         {!conferma && (
-          <section style={s.ctaBox}>
-            <div style={s.ctaLeft}>
-              <h2 style={s.ctaTitle}>Partecipa all'evento</h2>
-              <p style={s.ctaSub}>
-                {esaurito
-                  ? 'I posti disponibili sono esauriti.'
-                  : 'Registrazione gratuita. Ricevi il tuo QR Code per l\'ingresso.'}
-              </p>
+          <section style={s.ctaSection}>
+            <div style={s.ctaRow}>
+              <div>
+                <h2 style={s.ctaTitle}>Partecipa all'evento</h2>
+                <p style={s.ctaSub}>
+                  {esaurito ? 'I posti sono esauriti.' : 'Registrazione gratuita. Ricevi il QR Code per l\'ingresso.'}
+                </p>
+              </div>
+              {!esaurito && !formVisible && (
+                <button onClick={() => {
+                  setFormVisible(true)
+                  setTimeout(()=>document.getElementById('form-iscrizione')?.scrollIntoView({behavior:'smooth',block:'start'}),50)
+                }} style={s.ctaBtn}>
+                  Iscriviti ora <ChevronRight size={18}/>
+                </button>
+              )}
             </div>
-            {!esaurito && !formVisible && (
-              <button onClick={() => setFormVisible(true)} style={s.ctaBtn}>
-                Iscriviti ora <ChevronRight size={18}/>
-              </button>
-            )}
           </section>
         )}
 
@@ -463,27 +415,23 @@ export default function LandingPage() {
           </div>
         )}
 
-        {/* Google Maps embed — mostrata sempre se l'evento ha un luogo */}
+        {/* MAPPA */}
         {event.luogo && (
           <div style={s.mapSection}>
             <h2 style={s.secTitle}>Come raggiungerci</h2>
             <div style={s.mapWrap}>
               <iframe
                 title="Mappa evento"
-                width="100%"
-                height="100%"
-                style={{ border:0, borderRadius:'12px', display:'block' }}
+                width="100%" height="100%"
+                style={{ border:0,display:'block' }}
                 loading="lazy"
                 allowFullScreen
                 referrerPolicy="no-referrer-when-downgrade"
-                src={`https://maps.google.com/maps?q=${encodeURIComponent(event.luogo)}&output=embed&z=15&hl=it`}
+                src={`https://maps.google.com/maps?q=${encodeURIComponent(event.luogo)}&output=embed&z=15&hl=it&t=m`}
               />
             </div>
-            <a
-              href={`https://maps.google.com/?q=${encodeURIComponent(event.luogo)}`}
-              target="_blank"
-              rel="noopener noreferrer"
-              style={s.mapLink}>
+            <a href={`https://maps.google.com/?q=${encodeURIComponent(event.luogo)}`}
+              target="_blank" rel="noopener noreferrer" style={s.mapLink}>
               <MapPin size={14}/> Apri in Google Maps
             </a>
           </div>
@@ -495,7 +443,6 @@ export default function LandingPage() {
         © {new Date().getFullYear()} CNA Roma — Confederazione Nazionale dell'Artigianato e della PMI
       </footer>
 
-      {/* Modale conferma */}
       {conferma && (
         <ModalConferma reg={conferma} event={event} onClose={() => setConferma(null)}/>
       )}
@@ -503,73 +450,57 @@ export default function LandingPage() {
   )
 }
 
-/* ── STILI ───────────────────────────────────────────────────── */
+/* ── STILI ─────────────────────────────────────────────── */
 const s = {
-  root:    { minHeight:'100vh', backgroundColor:'#FFFFFF', fontFamily:"'Inter',sans-serif", display:'flex', flexDirection:'column' },
+  root:    { minHeight:'100vh', backgroundColor:'#FFFFFF', fontFamily:"'Inter',sans-serif", overflowX:'hidden', width:'100%' },
   center:  { minHeight:'100vh', display:'flex', flexDirection:'column', alignItems:'center', justifyContent:'center', backgroundColor:'#F4F5F7', padding:'24px' },
-  // header full-width
-  header:      { backgroundColor:'#FFFFFF', borderBottom:'3px solid #003DA5', position:'sticky', top:0, zIndex:50, width:'100%', margin:0, padding:0, lineHeight:0 },
-  headerInner: { maxWidth:'100%', padding:'0 24px', height:'88px', display:'flex', alignItems:'center', justifyContent:'center', lineHeight:'normal' },
-  logo:        { height:'64px', maxHeight:'64px', objectFit:'contain', display:'block' },
-  // hero
-  hero:        { display:'flex', alignItems:'flex-end', position:'relative', margin:0, padding:0, flexShrink:0 },
-  heroOverlay: { width:'100%', padding:'56px 40px 44px', transition:'background-color .3s' },
-  heroContent: { maxWidth:'820px' },
-  heroTag:     { display:'inline-flex', alignItems:'center', gap:'6px', backgroundColor:'rgba(255,255,255,.16)', color:'#FFFFFF', padding:'4px 12px', borderRadius:'20px', fontSize:'12px', fontWeight:'600', marginBottom:'14px', backdropFilter:'blur(6px)' },
-  heroTitle:   { fontSize:'clamp(26px,5vw,54px)', fontWeight:'900', color:'#FFFFFF', letterSpacing:'-.04em', margin:'0 0 12px', lineHeight:'1.05' },
-  heroMeta:    { display:'flex', alignItems:'center', gap:'8px', fontSize:'15px', color:'rgba(255,255,255,.9)', margin:'0 0 8px', fontWeight:'500', textTransform:'capitalize', flexWrap:'wrap' },
-  heroLoc:     { display:'inline-flex', alignItems:'center', gap:'6px', color:'rgba(255,255,255,.8)', fontSize:'14px', textDecoration:'none', fontWeight:'500' },
-  // body
-  body:        { maxWidth:'820px', margin:'0 auto', padding:'40px 24px 0' },
-  infoGrid:    { display:'grid', gridTemplateColumns:'repeat(auto-fit,minmax(160px,1fr))', gap:'12px', marginBottom:'20px' },
-  infoCard:    { backgroundColor:'#F4F5F7', borderRadius:'10px', padding:'16px', display:'flex', gap:'12px', alignItems:'flex-start' },
-  infoLbl:     { fontSize:'11px', fontWeight:'600', color:'#6B7280', textTransform:'uppercase', letterSpacing:'.06em', margin:'0 0 3px' },
-  infoVal:     { fontSize:'14px', fontWeight:'600', color:'#0A0A0A', margin:0, lineHeight:'1.4' },
-  capBar:      { marginBottom:'28px' },
-  capTrack:    { height:'6px', backgroundColor:'#E5E7EB', borderRadius:'3px', overflow:'hidden' },
-  capFill:     { height:'100%', borderRadius:'3px', transition:'width .4s' },
-  section:     { borderTop:'1px solid #E5E7EB', paddingTop:'28px', marginBottom:'32px' },
-  secTitle:    { fontSize:'22px', fontWeight:'900', color:'#0A0A0A', letterSpacing:'-.03em', margin:'0 0 16px' },
+  // Header
+  header:      { backgroundColor:'#FFFFFF', borderBottom:'3px solid #003DA5', position:'sticky', top:0, zIndex:50, width:'100%', height:'80px', display:'flex', alignItems:'center', justifyContent:'center', padding:'0 24px' },
+  logo:        { height:'56px', maxHeight:'56px', objectFit:'contain', display:'block' },
+  // Hero
+  hero:        { display:'flex', alignItems:'flex-end', position:'relative', width:'100%' },
+  heroOverlay: { width:'100%', padding:'48px 24px 36px', transition:'background-color .3s' },
+  heroContent: { maxWidth:'820px', margin:'0 auto' },
+  heroTag:     { display:'inline-flex', alignItems:'center', gap:'6px', backgroundColor:'rgba(255,255,255,.18)', color:'#FFFFFF', padding:'4px 12px', borderRadius:'20px', fontSize:'12px', fontWeight:'600', marginBottom:'12px', backdropFilter:'blur(6px)' },
+  heroTitle:   { fontWeight:'900', color:'#FFFFFF', letterSpacing:'-.04em', margin:'0 0 10px', lineHeight:'1.05' },
+  heroMeta:    { display:'flex', alignItems:'center', gap:'8px', fontSize:'14px', color:'rgba(255,255,255,.9)', margin:'0 0 8px', fontWeight:'500', flexWrap:'wrap', textTransform:'capitalize' },
+  heroLoc:     { display:'inline-flex', alignItems:'center', gap:'6px', color:'rgba(255,255,255,.8)', fontSize:'13px', textDecoration:'none', fontWeight:'500' },
+  // Body
+  body:        { maxWidth:'820px', margin:'0 auto', padding:'32px 24px 0', width:'100%' },
+  section:     { marginBottom:'32px' },
+  secTitle:    { fontSize:'20px', fontWeight:'900', color:'#0A0A0A', letterSpacing:'-.03em', margin:'0 0 16px' },
   descText:    { fontSize:'15px', color:'#374151', lineHeight:'1.75' },
-  ctaBox:      { backgroundColor:'#EEF3FF', border:'1px solid #C7D9F8', borderRadius:'12px', padding:'28px', marginBottom:'24px', display:'flex', alignItems:'center', justifyContent:'space-between', gap:'20px', flexWrap:'wrap' },
-  ctaLeft:     {},
-  ctaTitle:    { fontSize:'20px', fontWeight:'900', color:'#0A0A0A', letterSpacing:'-.02em', margin:'0 0 6px' },
-  ctaSub:      { fontSize:'14px', color:'#4B5563', margin:0, lineHeight:'1.5' },
-  ctaBtn:      { display:'flex', alignItems:'center', gap:'8px', backgroundColor:'#003DA5', color:'#FFFFFF', border:'none', borderRadius:'8px', padding:'14px 28px', fontSize:'15px', fontWeight:'700', fontFamily:"'Inter',sans-serif", cursor:'pointer', whiteSpace:'nowrap', letterSpacing:'-.01em' },
-  formWrap:    { backgroundColor:'#FFFFFF', border:'1px solid #E5E7EB', borderRadius:'12px', padding:'28px', marginBottom:'40px' },
+  // 3 pulsanti
+  actionRow:       { display:'flex', gap:'8px', justifyContent:'center', marginBottom:'28px', overflowX:'auto', WebkitOverflowScrolling:'touch', scrollbarWidth:'none', padding:'4px 0' },
+  actionBtn:       { display:'flex', alignItems:'center', gap:'6px', padding:'10px 16px', backgroundColor:'#FFFFFF', border:'1.5px solid #003DA5', color:'#003DA5', borderRadius:'40px', fontSize:'13px', fontWeight:'700', fontFamily:"'Inter',sans-serif", cursor:'pointer', textDecoration:'none', whiteSpace:'nowrap', flexShrink:0 },
+  actionBtnPrimary:{ backgroundColor:'#003DA5', color:'#FFFFFF', border:'1.5px solid #003DA5' },
+  // CTA box
+  ctaSection:  { backgroundColor:'#EEF3FF', border:'1px solid #C7D9F8', borderRadius:'12px', padding:'24px', marginBottom:'24px' },
+  ctaRow:      { display:'flex', alignItems:'center', justifyContent:'space-between', gap:'16px', flexWrap:'wrap' },
+  ctaTitle:    { fontSize:'18px', fontWeight:'900', color:'#0A0A0A', letterSpacing:'-.02em', margin:'0 0 4px' },
+  ctaSub:      { fontSize:'13px', color:'#4B5563', margin:0, lineHeight:'1.5' },
+  ctaBtn:      { display:'flex', alignItems:'center', gap:'8px', backgroundColor:'#003DA5', color:'#FFFFFF', border:'none', borderRadius:'8px', padding:'12px 24px', fontSize:'14px', fontWeight:'700', fontFamily:"'Inter',sans-serif", cursor:'pointer', whiteSpace:'nowrap', flexShrink:0 },
+  formWrap:    { backgroundColor:'#FFFFFF', border:'1px solid #E5E7EB', borderRadius:'12px', padding:'24px', marginBottom:'32px' },
   formTitle:   { fontSize:'18px', fontWeight:'800', color:'#0A0A0A', letterSpacing:'-.02em', margin:'0 0 20px' },
-  // 3 pulsanti azione
-  actionBtns:       { display:'flex', gap:'8px', justifyContent:'center', flexWrap:'nowrap', marginBottom:'32px', padding:'0 8px', overflowX:'auto', scrollbarWidth:'none' },
-  actionBtn:        { display:'flex', alignItems:'center', gap:'6px', padding:'10px 16px', backgroundColor:'#FFFFFF', border:'1.5px solid #003DA5', color:'#003DA5', borderRadius:'40px', fontSize:'13px', fontWeight:'700', fontFamily:"'Inter',sans-serif", cursor:'pointer', textDecoration:'none', whiteSpace:'nowrap', transition:'all .15s', flexShrink:0 },
-  actionBtnPrimary: { backgroundColor:'#003DA5', color:'#FFFFFF', border:'1.5px solid #003DA5' },
-  footer:      { borderTop:'1px solid #E5E7EB', padding:'24px', textAlign:'center', fontSize:'13px', color:'#9CA3AF', marginTop:'40px' },
   // Mappa
-  mapSection:  { marginTop:'32px', marginBottom:'0' },
-  mapWrap:     { height:'380px', borderRadius:'12px', overflow:'hidden', border:'1px solid #E5E7EB', boxShadow:'0 2px 16px rgba(0,0,0,.08)', marginBottom:'12px' },
+  mapSection:  { marginTop:'32px', paddingBottom:'8px' },
+  mapWrap:     { height:'320px', borderRadius:'12px', overflow:'hidden', border:'1px solid #E5E7EB', marginBottom:'10px' },
   mapLink:     { display:'inline-flex', alignItems:'center', gap:'6px', fontSize:'13px', color:'#003DA5', fontWeight:'600', textDecoration:'none' },
+  // Footer
+  footer:      { borderTop:'1px solid #E5E7EB', padding:'20px 24px', textAlign:'center', fontSize:'12px', color:'#9CA3AF', marginTop:'40px' },
 }
 
 const mc = {
-  overlay:      { position:'fixed', inset:0, backgroundColor:'rgba(0,0,0,.55)', display:'flex', alignItems:'center', justifyContent:'center', zIndex:1000, padding:'16px', overflowY:'auto' },
-  box:          { backgroundColor:'#FFFFFF', borderRadius:'20px', padding:'32px 28px', maxWidth:'420px', width:'100%', boxShadow:'0 32px 80px rgba(0,0,0,.2)', textAlign:'center' },
-  iconWrap:     { margin:'0 auto 16px', width:'64px', height:'64px' },
-  title:        { fontSize:'22px', fontWeight:'900', color:'#0A0A0A', letterSpacing:'-.03em', margin:'0 0 8px' },
-  sub:          { fontSize:'13px', color:'#6B7280', lineHeight:'1.6', margin:'0 0 20px' },
-  // QR IMAGE
-  qrImgBox:     { backgroundColor:'#F4F5F7', borderRadius:'12px', padding:'20px 16px', marginBottom:'16px', display:'flex', flexDirection:'column', alignItems:'center', gap:'10px' },
-  qrImgLabel:   { fontSize:'11px', fontWeight:'700', color:'#6B7280', textTransform:'uppercase', letterSpacing:'.07em', margin:0 },
-  qrImg:        { width:'200px', height:'200px', imageRendering:'pixelated', borderRadius:'8px', border:'4px solid #FFFFFF', boxShadow:'0 2px 12px rgba(0,61,165,.15)' },
-  qrImgHint:    { fontSize:'12px', color:'#6B7280', margin:0 },
-  qrCodeText:   { fontSize:'12px', fontFamily:'monospace', color:'#003DA5', fontWeight:'700', letterSpacing:'.04em', margin:0, backgroundColor:'#EEF3FF', padding:'4px 10px', borderRadius:'4px' },
-  downloadBtn:  { background:'none', border:'1px solid #003DA5', color:'#003DA5', borderRadius:'6px', padding:'7px 16px', fontSize:'13px', fontWeight:'700', fontFamily:"'Inter',sans-serif", cursor:'pointer' },
-  qrLoading:    { display:'flex', flexDirection:'column', alignItems:'center', gap:'10px', padding:'20px 0' },
-  qrSpinner:    { width:'32px', height:'32px', border:'3px solid #E5E7EB', borderTopColor:'#003DA5', borderRadius:'50%', animation:'qrspin .8s linear infinite' },
-  // Info
-  infoBox:      { backgroundColor:'#EEF3FF', borderRadius:'10px', padding:'12px 16px', marginBottom:'20px', display:'flex', flexDirection:'column', gap:'8px', textAlign:'left' },
-  infoRow:      { display:'flex', alignItems:'center', gap:'8px', fontSize:'13px', color:'#374151', fontWeight:'500' },
-  // Azioni
-  btnRow:       { display:'flex', gap:'10px', justifyContent:'center', marginBottom:'12px', flexWrap:'wrap' },
-  calBtn:       { display:'flex', alignItems:'center', gap:'8px', color:'#FFFFFF', border:'none', borderRadius:'8px', padding:'12px 18px', fontSize:'14px', fontWeight:'700', fontFamily:"'Inter',sans-serif", cursor:'pointer', transition:'background-color .2s', letterSpacing:'-.01em' },
-  closeBtn:     { padding:'12px 18px', backgroundColor:'transparent', border:'1px solid #E5E7EB', borderRadius:'8px', fontSize:'14px', fontWeight:'600', fontFamily:"'Inter',sans-serif", cursor:'pointer', color:'#6B7280' },
-  hint:         { fontSize:'11px', color:'#9CA3AF', lineHeight:'1.5', margin:0 },
+  overlay:  { position:'fixed', inset:0, backgroundColor:'rgba(0,0,0,.55)', display:'flex', alignItems:'center', justifyContent:'center', zIndex:1000, padding:'16px', overflowY:'auto' },
+  box:      { backgroundColor:'#FFFFFF', borderRadius:'20px', padding:'28px 24px', maxWidth:'400px', width:'100%', boxShadow:'0 24px 80px rgba(0,0,0,.2)', textAlign:'center' },
+  iconWrap: { margin:'0 auto 14px', width:'64px', height:'64px' },
+  title:    { fontSize:'20px', fontWeight:'900', color:'#0A0A0A', letterSpacing:'-.03em', margin:'0 0 6px' },
+  sub:      { fontSize:'13px', color:'#6B7280', lineHeight:'1.6', margin:'0 0 16px' },
+  qrBox:    { backgroundColor:'#F4F5F7', borderRadius:'12px', padding:'16px', marginBottom:'14px', display:'flex', flexDirection:'column', alignItems:'center', gap:'8px' },
+  qrLabel:  { fontSize:'11px', fontWeight:'700', color:'#6B7280', textTransform:'uppercase', letterSpacing:'.07em', margin:0 },
+  qrImg:    { width:'180px', height:'180px', imageRendering:'pixelated', border:'none', background:'transparent' },
+  qrCode:   { fontSize:'11px', fontFamily:'monospace', color:'#003DA5', fontWeight:'700', letterSpacing:'.04em', backgroundColor:'#EEF3FF', padding:'3px 8px', borderRadius:'4px', margin:0 },
+  dlBtn:    { background:'none', border:'1px solid #003DA5', color:'#003DA5', borderRadius:'6px', padding:'6px 14px', fontSize:'12px', fontWeight:'700', fontFamily:"'Inter',sans-serif", cursor:'pointer' },
+  infoBox:  { backgroundColor:'#EEF3FF', borderRadius:'8px', padding:'10px 14px', marginBottom:'16px', display:'flex', flexDirection:'column', gap:'6px', textAlign:'left' },
+  infoRow:  { display:'flex', alignItems:'center', gap:'8px', fontSize:'12px', color:'#374151', fontWeight:'500' },
 }
