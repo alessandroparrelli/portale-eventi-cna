@@ -3,7 +3,7 @@ import { useAuth } from '../hooks/useAuth'
 import { useRole } from '../hooks/useRole'
 import {
   LayoutDashboard, CalendarDays, Users, Mail,
-  QrCode, BarChart2, LogOut, ChevronRight, UserCog, X,
+  QrCode, BarChart2, LogOut, ChevronRight, UserCog, X, User2,
 } from 'lucide-react'
 import { useState } from 'react'
 
@@ -21,7 +21,7 @@ export default function Sidebar({ mobileOpen, onMobileClose, isMobile: isMobileP
     { to: '/admin/checkin',     label: 'Check-in',    icon: QrCode },
     { to: '/admin/statistiche', label: 'Statistiche', icon: BarChart2 },
     ...(isAdmin ? [{ to: '/admin/utenti', label: 'Utenti', icon: UserCog }] : []),
-    { to: '/admin/profilo', label: '👤 Profilo', icon: UserCircle },
+    { to: '/admin/profilo', label: '👤 Profilo', icon: User2 },
   ]
 
   const RUOLO_COLORS = { admin:'#003DA5', supervisore:'#D97706', utente:'#6B7280' }
