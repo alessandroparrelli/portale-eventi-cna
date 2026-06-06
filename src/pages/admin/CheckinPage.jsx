@@ -44,6 +44,7 @@ export default function CheckinPage() {
   const [scanning,      setScanning]      = useState(false)
   const [manualModal,   setManualModal]   = useState(false)
   const [walkinModal,   setWalkinModal]   = useState(false)
+  const [listaModal,    setListaModal]    = useState(false)
   const [result,        setResult]        = useState(null)
   const [manualQr,      setManualQr]      = useState('')
   const [walkin,        setWalkin]        = useState({ nome:'', cognome:'', email:'', cellulare:'', ragione_sociale:'' })
@@ -51,6 +52,11 @@ export default function CheckinPage() {
   const [totali,        setTotali]        = useState(0)
   const [loadingP,      setLoadingP]      = useState(false)
   const [processing,    setProcessing]    = useState(false)
+  // Lista iscritti per spunta manuale
+  const [iscritti,      setIscritti]      = useState([])
+  const [searchLista,   setSearchLista]   = useState('')
+  const [loadingLista,  setLoadingLista]  = useState(false)
+  const [checkingId,    setCheckingId]    = useState(null)
   const html5QrRef = useRef(null)
   const { canWrite } = useRole()
 
@@ -74,6 +80,49 @@ export default function CheckinPage() {
       supabase.from('registrations').select('id',{count:'exact'}).eq('event_id',selectedEvento),
     ])
     setPresenti(data||[]); setTotali(count||0); setLoadingP(false)
+  }
+
+  async function loadIscritti() {
+    if (!selectedEvento) return
+    setLoadingLista(true)
+    const { data } = await supabase.from('registrations')
+      .select('id,nome,cognome,ragione_sociale,email,presente,checkin_at,stato')
+      .eq('event_id', selectedEvento)
+      .order('cognome', { ascending:true })
+    setIscritti(data || [])
+    setLoadingLista(false)
+  }
+
+  async function checkinManuale(reg) {
+    if (reg.presente) return // già presente
+    setCheckingId(reg.id)
+    const { error } = await supabase.from('registrations')
+      .update({ presente:true, stato:'presente', checkin_at: new Date().toISOString() })
+      .eq('id', reg.id)
+    if (!error) {
+      setIscritti(prev => prev.map(r => r.id === reg.id
+        ? { ...r, presente:true, stato:'presente', checkin_at:new Date().toISOString() }
+        : r
+      ))
+      setResult({ ok:true, nome:`${reg.nome} ${reg.cognome}` })
+      loadPresenti()
+    }
+    setCheckingId(null)
+  }
+
+  async function annullaCheckin(reg) {
+    setCheckingId(reg.id)
+    const { error } = await supabase.from('registrations')
+      .update({ presente:false, stato:'confermato', checkin_at:null })
+      .eq('id', reg.id)
+    if (!error) {
+      setIscritti(prev => prev.map(r => r.id === reg.id
+        ? { ...r, presente:false, stato:'confermato', checkin_at:null }
+        : r
+      ))
+      loadPresenti()
+    }
+    setCheckingId(null)
   }
 
   async function doCheckin(qr) {
@@ -222,6 +271,12 @@ export default function CheckinPage() {
               <Search size={18}/> Codice manuale
             </button>
             {canWrite && (
+              <button onClick={()=>{ loadIscritti(); setListaModal(true) }}
+                style={{ ...s.actionBtn, backgroundColor:'#F0FDF4', color:'#16A34A', borderColor:'#86EFAC' }}>
+                <Users size={18}/> Lista iscritti
+              </button>
+            )}
+            {canWrite && (
               <button onClick={()=>setWalkinModal(true)} style={{ ...s.actionBtn, backgroundColor:'#F3E8FF', color:'#7C3AED', borderColor:'#E9D5FF' }}>
                 <UserPlus size={18}/> Walk-in
               </button>
@@ -279,7 +334,121 @@ export default function CheckinPage() {
         </Modal>
       )}
 
-      {/* Modal walk-in */}
+      {/* Modal Lista iscritti — spunta manuale */}
+      {listaModal && (
+        <Modal title="Lista iscritti — spunta manuale" onClose={()=>setListaModal(false)} width="560px">
+          <div style={{ display:'flex', flexDirection:'column', gap:'12px' }}>
+            <p style={{ fontSize:'13px', color:'#6B7280', margin:0 }}>
+              Tocca il nome per effettuare il check-in. Tocca di nuovo per annullarlo.
+            </p>
+
+            {/* Barra ricerca */}
+            <div style={{ position:'relative' }}>
+              <Search size={16} style={{ position:'absolute', left:'12px', top:'50%', transform:'translateY(-50%)', color:'#9CA3AF' }}/>
+              <input
+                value={searchLista}
+                onChange={e => setSearchLista(e.target.value)}
+                placeholder="Cerca per nome o cognome…"
+                autoFocus
+                style={{ width:'100%', padding:'10px 12px 10px 36px', border:'1px solid #D1D5DB', borderRadius:'8px', fontSize:'14px', fontFamily:"'Inter',sans-serif", outline:'none', boxSizing:'border-box' }}
+              />
+            </div>
+
+            {/* Contatori */}
+            <div style={{ display:'flex', gap:'12px' }}>
+              {[
+                { label:'Totale', val:iscritti.length, col:'#6B7280', bg:'#F9FAFB' },
+                { label:'Presenti', val:iscritti.filter(r=>r.presente).length, col:'#16A34A', bg:'#F0FDF4' },
+                { label:'Assenti', val:iscritti.filter(r=>!r.presente).length, col:'#D97706', bg:'#FFFBEB' },
+              ].map(({ label, val, col, bg }) => (
+                <div key={label} style={{ flex:1, backgroundColor:bg, borderRadius:'8px', padding:'10px', textAlign:'center' }}>
+                  <p style={{ fontSize:'22px', fontWeight:'900', color:col, margin:0, letterSpacing:'-.03em' }}>{val}</p>
+                  <p style={{ fontSize:'11px', color:'#6B7280', margin:'2px 0 0', fontWeight:'600', textTransform:'uppercase', letterSpacing:'.04em' }}>{label}</p>
+                </div>
+              ))}
+            </div>
+
+            {/* Lista */}
+            {loadingLista ? (
+              <p style={{ textAlign:'center', color:'#9CA3AF', padding:'24px 0' }}>Caricamento…</p>
+            ) : (
+              <div style={{ maxHeight:'420px', overflowY:'auto', border:'1px solid #E5E7EB', borderRadius:'8px', overflow:'hidden' }}>
+                {iscritti
+                  .filter(r => {
+                    if (!searchLista.trim()) return true
+                    const q = searchLista.toLowerCase()
+                    return (r.nome||'').toLowerCase().includes(q) ||
+                           (r.cognome||'').toLowerCase().includes(q) ||
+                           (r.ragione_sociale||'').toLowerCase().includes(q)
+                  })
+                  .map((r, i, arr) => {
+                    const isLast = i === arr.length - 1
+                    const isChecking = checkingId === r.id
+                    return (
+                      <div key={r.id}
+                        onClick={() => !isChecking && (r.presente ? annullaCheckin(r) : checkinManuale(r))}
+                        style={{
+                          display:'flex', alignItems:'center', gap:'12px',
+                          padding:'13px 16px',
+                          borderBottom: isLast ? 'none' : '1px solid #F3F4F6',
+                          cursor: isChecking ? 'wait' : 'pointer',
+                          backgroundColor: r.presente ? '#F0FDF4' : '#FFFFFF',
+                          transition:'background-color .15s',
+                        }}
+                        onMouseEnter={e => { if (!r.presente) e.currentTarget.style.backgroundColor='#F9FAFB' }}
+                        onMouseLeave={e => e.currentTarget.style.backgroundColor = r.presente ? '#F0FDF4' : '#FFFFFF'}
+                      >
+                        {/* Checkbox visuale */}
+                        <div style={{
+                          width:'28px', height:'28px', borderRadius:'50%', flexShrink:0,
+                          border: r.presente ? 'none' : '2px solid #D1D5DB',
+                          backgroundColor: r.presente ? '#16A34A' : '#FFFFFF',
+                          display:'flex', alignItems:'center', justifyContent:'center',
+                          transition:'all .15s',
+                        }}>
+                          {isChecking
+                            ? <div style={{ width:'14px', height:'14px', border:'2px solid #FFF', borderTopColor:'transparent', borderRadius:'50%', animation:'spin .6s linear infinite' }}/>
+                            : r.presente && <CheckCircle2 size={18} style={{ color:'#FFFFFF' }}/>
+                          }
+                        </div>
+
+                        {/* Info iscritto */}
+                        <div style={{ flex:1, minWidth:0 }}>
+                          <p style={{ fontSize:'15px', fontWeight:'700', color:'#0A0A0A', margin:0, letterSpacing:'-.01em' }}>
+                            {r.cognome} {r.nome}
+                          </p>
+                          {r.ragione_sociale && (
+                            <p style={{ fontSize:'12px', color:'#6B7280', margin:'1px 0 0' }}>{r.ragione_sociale}</p>
+                          )}
+                        </div>
+
+                        {/* Stato / orario */}
+                        <div style={{ textAlign:'right', flexShrink:0 }}>
+                          {r.presente ? (
+                            <>
+                              <span style={{ fontSize:'11px', fontWeight:'700', color:'#16A34A', display:'block' }}>
+                                {r.stato === 'walk-in' ? 'Walk-in' : 'Presente'}
+                              </span>
+                              {r.checkin_at && (
+                                <span style={{ fontSize:'11px', color:'#9CA3AF' }}>
+                                  {new Date(r.checkin_at).toLocaleTimeString('it-IT',{hour:'2-digit',minute:'2-digit'})}
+                                </span>
+                              )}
+                            </>
+                          ) : (
+                            <span style={{ fontSize:'11px', color:'#9CA3AF', fontWeight:'500' }}>Tocca per ✓</span>
+                          )}
+                        </div>
+                      </div>
+                    )
+                  })}
+              </div>
+            )}
+          </div>
+        </Modal>
+      )}
+
+      <style>{`@keyframes spin{from{transform:rotate(0)}to{transform:rotate(360deg)}}`}</style>
       {walkinModal && (
         <Modal title="Aggiungi walk-in" onClose={()=>setWalkinModal(false)} width="460px">
           <form onSubmit={submitWalkin} style={{ display:'flex', flexDirection:'column', gap:'14px' }}>
@@ -333,7 +502,7 @@ const s = {
   scanPlaceholder:{ display:'flex', flexDirection:'column', alignItems:'center', justifyContent:'center', padding:'40px 24px', minHeight:'160px' },
   scanActions:    { padding:'16px' },
   bigBtn:         { width:'100%', display:'flex', alignItems:'center', justifyContent:'center', gap:'10px', backgroundColor:'#003DA5', color:'#FFFFFF', border:'none', borderRadius:'8px', padding:'16px', fontSize:'16px', fontWeight:'800', fontFamily:"'Inter',sans-serif", cursor:'pointer', letterSpacing:'-.01em' },
-  actionsRow:     { display:'grid', gridTemplateColumns:'1fr 1fr', gap:'12px', marginBottom:'20px' },
+  actionsRow:     { display:'grid', gridTemplateColumns:'1fr 1fr 1fr', gap:'10px', marginBottom:'20px' },
   actionBtn:      { display:'flex', alignItems:'center', justifyContent:'center', gap:'8px', backgroundColor:'#EEF3FF', color:'#003DA5', border:'1px solid #C7D9F8', borderRadius:'10px', padding:'14px', fontSize:'14px', fontWeight:'700', fontFamily:"'Inter',sans-serif", cursor:'pointer' },
   // Presenti
   presentiSection:{ backgroundColor:'#FFFFFF', border:'1px solid #E5E7EB', borderRadius:'12px', overflow:'hidden' },
