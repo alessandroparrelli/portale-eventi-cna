@@ -47,7 +47,7 @@ export const RICH_CSS = `
   }
   .rich-content pre code { background:none; color:inherit; padding:0; }
   .rich-content hr { border:none; border-top:2px solid #E5E7EB; margin:24px 0; }
-  .rich-content img { max-width:100%; border-radius:8px; margin:12px 0; display:block; box-shadow:0 2px 12px rgba(0,0,0,.1); cursor:pointer; }
+  .rich-content img { max-width:100%; border-radius:0; margin:12px 0; display:block; box-shadow:none; border:none; cursor:pointer; background:transparent; }
   .rich-content img[data-align=center] { margin-left:auto; margin-right:auto; }
   .rich-content img[data-align=right]  { margin-left:auto; margin-right:0; }
   .rich-content img[data-align=left]   { margin-left:0; margin-right:auto; }
