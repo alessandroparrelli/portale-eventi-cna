@@ -340,69 +340,7 @@ export default function LandingPage() {
       {/* ── BODY centrato ── */}
       <div style={s.body}>
 
-        {/* Info cards */}
-        <div style={s.infoGrid}>
-          {event.data_inizio && (
-            <div style={s.infoCard}>
-              <Calendar size={18} style={{ color:'#003DA5', flexShrink:0 }}/>
-              <div>
-                <p style={s.infoLbl}>Data</p>
-                <p style={s.infoVal}>{fmtData(event.data_inizio)}</p>
-              </div>
-            </div>
-          )}
-          {event.data_inizio && (
-            <div style={s.infoCard}>
-              <Clock size={18} style={{ color:'#003DA5', flexShrink:0 }}/>
-              <div>
-                <p style={s.infoLbl}>Orario</p>
-                <p style={s.infoVal}>
-                  {fmtOra(event.data_inizio) || '—'}
-                  {event.data_fine && fmtOra(event.data_fine) && ` — ${fmtOra(event.data_fine)}`}
-                </p>
-              </div>
-            </div>
-          )}
-          {event.luogo && (
-            <a href={`https://maps.google.com/?q=${encodeURIComponent(event.luogo)}`}
-              target="_blank" rel="noopener noreferrer"
-              style={{ ...s.infoCard, textDecoration:'none' }}>
-              <MapPin size={18} style={{ color:'#003DA5', flexShrink:0 }}/>
-              <div>
-                <p style={s.infoLbl}>Luogo <span style={{ color:'#003DA5' }}>↗</span></p>
-                <p style={{ ...s.infoVal, color:'#003DA5', textDecorationLine:'underline', textDecorationStyle:'dotted' }}>
-                  {event.luogo}
-                </p>
-              </div>
-            </a>
-          )}
-          {cap && (
-            <div style={s.infoCard}>
-              <Users size={18} style={{ color: esaurito?'#DC2626':'#003DA5', flexShrink:0 }}/>
-              <div>
-                <p style={s.infoLbl}>Disponibilità</p>
-                <p style={{ ...s.infoVal, color: esaurito?'#DC2626': posti&&posti<20?'#D97706':'#0A0A0A' }}>
-                  {esaurito ? 'Esaurito' : `${posti} posti rimasti`}
-                </p>
-              </div>
-            </div>
-          )}
-        </div>
 
-        {/* Barra progressione capienza */}
-        {cap && (
-          <div style={s.capBar}>
-            <div style={{ display:'flex', justifyContent:'space-between', marginBottom:'6px' }}>
-              <span style={{ fontSize:'12px', color:'#6B7280', fontWeight:'500' }}>Iscritti</span>
-              <span style={{ fontSize:'12px', color:'#6B7280', fontWeight:'600' }}>{iscrizioniN}/{cap}</span>
-            </div>
-            <div style={s.capTrack}>
-              <div style={{ ...s.capFill,
-                width:`${Math.min(100,(iscrizioniN/cap)*100)}%`,
-                backgroundColor: esaurito?'#DC2626': iscrizioniN/cap>.8?'#D97706':'#003DA5' }}/>
-            </div>
-          </div>
-        )}
 
         {/* Descrizione — renderizza HTML ricco con stili completi */}
         {(event.descrizione_html || event.descrizione) && (
@@ -462,6 +400,32 @@ export default function LandingPage() {
           </div>
         )}
 
+        {/* Google Maps embed — mostrata sempre se l'evento ha un luogo */}
+        {event.luogo && (
+          <div style={s.mapSection}>
+            <h2 style={s.secTitle}>Come raggiungerci</h2>
+            <div style={s.mapWrap}>
+              <iframe
+                title="Mappa evento"
+                width="100%"
+                height="100%"
+                style={{ border:0, borderRadius:'12px', display:'block' }}
+                loading="lazy"
+                allowFullScreen
+                referrerPolicy="no-referrer-when-downgrade"
+                src={`https://maps.google.com/maps?q=${encodeURIComponent(event.luogo)}&output=embed&z=15&hl=it`}
+              />
+            </div>
+            <a
+              href={`https://maps.google.com/?q=${encodeURIComponent(event.luogo)}`}
+              target="_blank"
+              rel="noopener noreferrer"
+              style={s.mapLink}>
+              <MapPin size={14}/> Apri in Google Maps
+            </a>
+          </div>
+        )}
+
       </div>
 
       <footer style={s.footer}>
@@ -512,6 +476,10 @@ const s = {
   formWrap:    { backgroundColor:'#FFFFFF', border:'1px solid #E5E7EB', borderRadius:'12px', padding:'28px', marginBottom:'40px' },
   formTitle:   { fontSize:'18px', fontWeight:'800', color:'#0A0A0A', letterSpacing:'-.02em', margin:'0 0 20px' },
   footer:      { borderTop:'1px solid #E5E7EB', padding:'24px', textAlign:'center', fontSize:'13px', color:'#9CA3AF', marginTop:'40px' },
+  // Mappa
+  mapSection:  { marginTop:'32px', marginBottom:'0' },
+  mapWrap:     { height:'380px', borderRadius:'12px', overflow:'hidden', border:'1px solid #E5E7EB', boxShadow:'0 2px 16px rgba(0,0,0,.08)', marginBottom:'12px' },
+  mapLink:     { display:'inline-flex', alignItems:'center', gap:'6px', fontSize:'13px', color:'#003DA5', fontWeight:'600', textDecoration:'none' },
 }
 
 const mc = {
