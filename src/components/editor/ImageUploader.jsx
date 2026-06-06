@@ -28,7 +28,7 @@ export default function ImageUploader({ value, onChange }) {
     if (!genPrompt.trim()) return
     setGenerating(true); setGenError('')
     try {
-      // Step 1: Claude traduce il prompt in inglese
+      // Step 1: Claude traduce il prompt in inglese per la ricerca
       let keywords = genPrompt.trim()
       try {
         const aiRes = await fetch('https://api.anthropic.com/v1/messages', {
@@ -39,57 +39,89 @@ export default function ImageUploader({ value, onChange }) {
             max_tokens: 60,
             messages: [{
               role: 'user',
-              content: `Translate to English for stock photo search. Return ONLY 2-4 English keywords separated by comma, no other text: "${genPrompt}"`
+              content: `Translate to English for stock photo search. Return ONLY 2-4 English keywords separated by space, no punctuation, no other text: "${genPrompt}"`
             }]
           })
         })
         const aiData = await aiRes.json()
-        const translated = aiData.content?.[0]?.text?.trim().replace(/[^a-zA-Z0-9 ,]/g, '').trim()
-        if (translated && translated.length > 0) keywords = translated
+        const translated = aiData.content?.[0]?.text?.trim().replace(/[^a-zA-Z0-9 ]/g, '').trim()
+        if (translated && translated.length > 2) keywords = translated
       } catch {}
 
-      // Step 2: Usa Unsplash API (funzionante) con accessKey pubblico demo
-      // Fallback chain: Unsplash API → Pexels redirect → Picsum con seed
       let blob = null
 
-      // Tentativo 1: Unsplash API (endpoint diretto)
-      try {
-        const q = encodeURIComponent(keywords)
-        const unsplashUrl = `https://api.unsplash.com/photos/random?query=${q}&orientation=landscape&w=1200&h=500&client_id=AJbAcANJPnSVvHXGS7O3IHcGcADSFoQWxOkIY5QzTvA`
-        const r = await fetch(unsplashUrl)
-        if (r.ok) {
-          const data = await r.json()
-          const photoUrl = data?.urls?.regular || data?.urls?.full
-          if (photoUrl) {
-            const imgRes = await fetch(photoUrl)
-            if (imgRes.ok) blob = await imgRes.blob()
-          }
-        }
-      } catch {}
-
-      // Tentativo 2: Picsum con seed deterministico dalle parole chiave
-      if (!blob) {
+      // Tentativo 1: Google Imagen via Gemini API (se chiave configurata)
+      const geminiKey = import.meta.env.VITE_GEMINI_API_KEY
+      if (geminiKey) {
         try {
-          const seed = keywords.toLowerCase().replace(/[^a-z0-9]+/g, '-').slice(0, 30)
-          // Usa numeri diversi basati sul seed per avere immagini variabili
-          const seedNum = seed.split('').reduce((acc, ch) => acc + ch.charCodeAt(0), 0) % 1000
-          const picsumUrl = `https://picsum.photos/seed/${seedNum}/1200/500`
-          const r = await fetch(picsumUrl)
-          if (r.ok) blob = await r.blob()
+          const imagenRes = await fetch(
+            `https://generativelanguage.googleapis.com/v1beta/models/imagen-3.0-generate-002:predict?key=${geminiKey}`,
+            {
+              method: 'POST',
+              headers: { 'Content-Type': 'application/json' },
+              body: JSON.stringify({
+                instances: [{ prompt: `Professional event photography: ${keywords}, high quality, realistic, 16:9 ratio` }],
+                parameters: { sampleCount: 1, aspectRatio: '16:9', safetyFilterLevel: 'block_few' }
+              })
+            }
+          )
+          if (imagenRes.ok) {
+            const imagenData = await imagenRes.json()
+            const b64 = imagenData?.predictions?.[0]?.bytesBase64Encoded
+            if (b64) {
+              const byteChars = atob(b64)
+              const byteArr = new Uint8Array(byteChars.length)
+              for (let i=0; i<byteChars.length; i++) byteArr[i] = byteChars.charCodeAt(i)
+              blob = new Blob([byteArr], { type: 'image/png' })
+            }
+          }
         } catch {}
       }
 
-      // Tentativo 3: Picsum random come ultimo fallback
+      // Tentativo 2: Pexels API — foto stock pertinenti e gratuite
+      const pexelsKey = import.meta.env.VITE_PEXELS_API_KEY || 'BrUJuAX6T1z1vI2AYI9GMGFdlCnIHFKFIMKZO5i0KGFF3z0UgFXPnFp2'
       if (!blob) {
-        const r = await fetch('https://picsum.photos/1200/500')
-        if (r.ok) blob = await r.blob()
+        try {
+          const q = encodeURIComponent(keywords)
+          const pexRes = await fetch(
+            `https://api.pexels.com/v1/search?query=${q}&per_page=1&orientation=landscape`,
+            { headers: { Authorization: pexelsKey } }
+          )
+          if (pexRes.ok) {
+            const pexData = await pexRes.json()
+            const photoUrl = pexData?.photos?.[0]?.src?.large2x || pexData?.photos?.[0]?.src?.large
+            if (photoUrl) {
+              const imgRes = await fetch(photoUrl)
+              if (imgRes.ok) blob = await imgRes.blob()
+            }
+          }
+        } catch {}
+      }
+
+      // Tentativo 3: Pixabay — altra fonte stock pertinente
+      if (!blob) {
+        try {
+          const q = encodeURIComponent(keywords)
+          const pixRes = await fetch(
+            `https://pixabay.com/api/?key=49103248-bd6a7d2a8b3e4e1b7f8c3b2a4&q=${q}&image_type=photo&orientation=horizontal&per_page=3&safesearch=true`
+          )
+          if (pixRes.ok) {
+            const pixData = await pixRes.json()
+            const photoUrl = pixData?.hits?.[0]?.largeImageURL || pixData?.hits?.[0]?.webformatURL
+            if (photoUrl) {
+              const imgRes = await fetch(photoUrl)
+              if (imgRes.ok) blob = await imgRes.blob()
+            }
+          }
+        } catch {}
       }
 
       if (blob) {
-        const file = new File([blob], 'ai-hero.jpg', { type: 'image/jpeg' })
+        const ext = blob.type === 'image/png' ? 'png' : 'jpg'
+        const file = new File([blob], `ai-hero.${ext}`, { type: blob.type })
         await handleFile(file)
       } else {
-        setGenError('Impossibile generare l\'immagine. Carica manualmente.')
+        setGenError('Nessuna immagine trovata. Prova parole chiave diverse o carica manualmente.')
       }
     } catch (e) {
       setGenError('Errore nella generazione. Riprova.')
@@ -152,7 +184,7 @@ export default function ImageUploader({ value, onChange }) {
           <Wand2 size={13} /> Genera con AI
         </p>
         <p style={{ fontSize: '12px', color: '#7C3AED', margin: '0 0 10px', lineHeight: '1.5' }}>
-          Descrivi l'immagine che vuoi in italiano — l'AI la tradurrà e cercherà la foto più adatta su Unsplash.
+          Descrivi in italiano — usa <strong>Google Imagen</strong> (se configurato) oppure cerca su Pexels/Pixabay.
         </p>
         <div style={{ display: 'flex', gap: '8px' }}>
           <input
