@@ -259,6 +259,13 @@ export default function LandingPage() {
   const [formVisible, setFormVisible] = useState(false)
   const [conferma,    setConferma]    = useState(null) // dati iscritto per modale
 
+  // Blocca zoom e overflow su mobile
+  useEffect(() => {
+    const vp = document.querySelector('meta[name=viewport]')
+    if (vp) vp.content = 'width=device-width, initial-scale=1, maximum-scale=1, user-scalable=no'
+    return () => { if (vp) vp.content = 'width=device-width, initial-scale=1' }
+  }, [])
+
   useEffect(() => {
     supabase.from('events').select('*').eq('slug', slug).eq('stato','pubblicato').single()
       .then(({ data, error }) => {
@@ -318,7 +325,13 @@ export default function LandingPage() {
             marginLeft: heroAlign === 'centro' ? 'auto' : undefined,
             marginRight: heroAlign === 'centro' ? 'auto' : undefined }}>
             <span style={s.heroTag}><Calendar size={13}/> Evento CNA Roma</span>
-            <h1 style={s.heroTitle}>{event.titolo}</h1>
+            <h1 style={{
+              ...s.heroTitle,
+              color: event.layout_hero?.titolo_colore || '#FFFFFF',
+              fontSize: event.layout_hero?.titolo_dimensione || 'clamp(26px,5vw,54px)',
+              fontWeight: event.layout_hero?.titolo_grassetto !== false ? '900' : '400',
+              textTransform: event.layout_hero?.titolo_maiuscolo ? 'uppercase' : 'none',
+            }}>{event.titolo}</h1>
             {event.data_inizio && (
               <p style={s.heroMeta}>
                 <Calendar size={14}/> {fmtData(event.data_inizio)}
@@ -396,7 +409,6 @@ export default function LandingPage() {
         {/* Descrizione — renderizza HTML ricco con stili completi */}
         {(event.descrizione_html || event.descrizione) && (
           <section style={s.section}>
-            <h2 style={s.secTitle}>Informazioni sull'evento</h2>
             {event.descrizione_html ? (
               <>
                 <div
@@ -527,8 +539,8 @@ const s = {
   formWrap:    { backgroundColor:'#FFFFFF', border:'1px solid #E5E7EB', borderRadius:'12px', padding:'28px', marginBottom:'40px' },
   formTitle:   { fontSize:'18px', fontWeight:'800', color:'#0A0A0A', letterSpacing:'-.02em', margin:'0 0 20px' },
   // 3 pulsanti azione
-  actionBtns:       { display:'flex', gap:'10px', justifyContent:'center', flexWrap:'nowrap', marginBottom:'32px' },
-  actionBtn:        { display:'flex', alignItems:'center', gap:'7px', padding:'11px 20px', backgroundColor:'#FFFFFF', border:'1.5px solid #003DA5', color:'#003DA5', borderRadius:'40px', fontSize:'14px', fontWeight:'700', fontFamily:"'Inter',sans-serif", cursor:'pointer', textDecoration:'none', whiteSpace:'nowrap', transition:'all .15s', flexShrink:1, minWidth:0 },
+  actionBtns:       { display:'flex', gap:'8px', justifyContent:'center', flexWrap:'nowrap', marginBottom:'32px', padding:'0 8px', overflowX:'auto', scrollbarWidth:'none' },
+  actionBtn:        { display:'flex', alignItems:'center', gap:'6px', padding:'10px 16px', backgroundColor:'#FFFFFF', border:'1.5px solid #003DA5', color:'#003DA5', borderRadius:'40px', fontSize:'13px', fontWeight:'700', fontFamily:"'Inter',sans-serif", cursor:'pointer', textDecoration:'none', whiteSpace:'nowrap', transition:'all .15s', flexShrink:0 },
   actionBtnPrimary: { backgroundColor:'#003DA5', color:'#FFFFFF', border:'1.5px solid #003DA5' },
   footer:      { borderTop:'1px solid #E5E7EB', padding:'24px', textAlign:'center', fontSize:'13px', color:'#9CA3AF', marginTop:'40px' },
   // Mappa

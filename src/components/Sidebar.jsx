@@ -7,7 +7,7 @@ import {
 } from 'lucide-react'
 import { useState } from 'react'
 
-export default function Sidebar({ mobileOpen, onMobileClose }) {
+export default function Sidebar({ mobileOpen, onMobileClose, isMobile: isMobileProp }) {
   const { user, signOut } = useAuth()
   const { ruolo, isAdmin } = useRole()
   const navigate = useNavigate()
@@ -27,8 +27,7 @@ export default function Sidebar({ mobileOpen, onMobileClose }) {
   const username = user?.user_metadata?.username || user?.email?.split('@')[0] || 'Admin'
   const handleSignOut = async () => { await signOut(); navigate('/login') }
 
-  // Su mobile la sidebar si comporta come drawer
-  const isMobile = typeof window !== 'undefined' && window.innerWidth < 768
+  const isMobile = isMobileProp ?? (typeof window !== 'undefined' && window.innerWidth < 768)
 
   function handleNavClick() {
     if (onMobileClose) onMobileClose()
@@ -56,27 +55,19 @@ export default function Sidebar({ mobileOpen, onMobileClose }) {
           : 'translateX(0)',
       }}>
 
-        {/* Header sidebar */}
-        <div style={st.logoArea}>
-          {!collapsed && (
+        {/* Header sidebar: logo solo su mobile drawer, pulsante collapse su desktop */}
+        <div style={{ ...st.logoArea, justifyContent: isMobile ? 'space-between' : 'flex-end' }}>
+          {isMobile && (
             <img
               src="https://raw.githubusercontent.com/alessandroparrelli/fileappoggio/main/NUOVO-LOGO-CNA-ROMA-SOLO-ROMA.png"
-              alt="CNA Roma" style={st.logo}
+              alt="CNA Roma" style={{ height:'36px', objectFit:'contain' }}
             />
           )}
-          {/* Desktop: collapse button */}
-          {!isMobile && (
+          {isMobile ? (
+            <button onClick={onMobileClose} style={st.collapseBtn}><X size={18}/></button>
+          ) : (
             <button onClick={() => setCollapsed(!collapsed)} style={st.collapseBtn}>
-              <ChevronRight size={16} style={{
-                transform: collapsed ? 'rotate(0deg)' : 'rotate(180deg)',
-                transition: 'transform 0.2s'
-              }}/>
-            </button>
-          )}
-          {/* Mobile: close button */}
-          {isMobile && (
-            <button onClick={onMobileClose} style={st.collapseBtn}>
-              <X size={18}/>
+              <ChevronRight size={16} style={{ transform: collapsed ? 'rotate(0deg)' : 'rotate(180deg)', transition:'transform 0.2s' }}/>
             </button>
           )}
         </div>

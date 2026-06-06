@@ -47,7 +47,18 @@ export const RICH_CSS = `
   }
   .rich-content pre code { background:none; color:inherit; padding:0; }
   .rich-content hr { border:none; border-top:2px solid #E5E7EB; margin:24px 0; }
-  .rich-content img { max-width:100%; border-radius:8px; margin:12px 0; display:block; box-shadow:0 2px 12px rgba(0,0,0,.1); }
+  .rich-content img { max-width:100%; border-radius:8px; margin:12px 0; display:block; box-shadow:0 2px 12px rgba(0,0,0,.1); cursor:pointer; }
+  .rich-content img[data-align=center] { margin-left:auto; margin-right:auto; }
+  .rich-content img[data-align=right]  { margin-left:auto; margin-right:0; }
+  .rich-content img[data-align=left]   { margin-left:0; margin-right:auto; }
+  .rich-content img[data-size=small]   { max-width:30%; }
+  .rich-content img[data-size=medium]  { max-width:60%; }
+  .rich-content img[data-size=large]   { max-width:100%; }
+  /* Spaziatura paragrafo */
+  .rich-content .p-tight    { margin-bottom:4px !important; }
+  .rich-content .p-normal   { margin-bottom:14px !important; }
+  .rich-content .p-relaxed  { margin-bottom:24px !important; }
+  .rich-content .p-loose    { margin-bottom:40px !important; }
   .rich-content a { color:#003DA5; text-decoration:underline; text-underline-offset:2px; font-weight:500; }
   .rich-content a:hover { color:#1d4ed8; }
   .rich-content table { border-collapse:collapse; width:100%; margin:16px 0; border-radius:8px; overflow:hidden; }
@@ -134,6 +145,7 @@ export default function RichEditor({ value, onChange, placeholder = 'Scrivi qui�
   const [showColorPicker, setShowColorPicker] = useState(false)
   const [showBgPicker, setShowBgPicker] = useState(false)
   const [showSpecial, setShowSpecial] = useState(false)
+  const [selectedImg, setSelectedImg] = useState(null) // {node, pos}
   const fileRef = useRef()
 
   const editor = useEditor({
@@ -157,6 +169,14 @@ export default function RichEditor({ value, onChange, placeholder = 'Scrivi qui�
       attributes: {
         class: 'rich-content',
         style: `min-height:${minHeight}; padding:20px 24px; outline:none;`,
+      },
+      handleClickOn: (view, pos, node) => {
+        if (node.type.name === 'image') {
+          setSelectedImg({ pos, attrs: node.attrs })
+          return true
+        }
+        setSelectedImg(null)
+        return false
       }
     }
   })
@@ -168,6 +188,16 @@ export default function RichEditor({ value, onChange, placeholder = 'Scrivi qui�
   }, [value])
 
   if (!editor) return null
+
+  function updateImageAttr(attr, value) {
+    if (!selectedImg || !editor) return
+    const { pos, attrs } = selectedImg
+    editor.chain().focus()
+      .setNodeSelection(pos)
+      .updateAttributes('image', { ...attrs, [attr]: value })
+      .run()
+    setSelectedImg(prev => prev ? { ...prev, attrs: { ...prev.attrs, [attr]: value } } : null)
+  }
 
   async function handleImageUpload(file) {
     if (!file) return
@@ -428,6 +458,33 @@ export default function RichEditor({ value, onChange, placeholder = 'Scrivi qui�
 
         <Sep/>
 
+        {/* Spaziatura paragrafo */}
+        <div style={{ position:'relative' }} onClick={e=>e.stopPropagation()}>
+          <Btn title="Spaziatura paragrafo">¶</Btn>
+          <div style={{ position:'absolute', top:'36px', left:0, backgroundColor:'#FFF', border:'1px solid #E5E7EB', borderRadius:'8px', padding:'8px', zIndex:200, boxShadow:'0 4px 16px rgba(0,0,0,.1)', minWidth:'160px', display:'none' }}>
+          </div>
+        </div>
+        {[['tight','Stretta'],['normal','Normale'],['relaxed','Ampia'],['loose','Larga']].map(([cls,label]) => (
+          <button key={cls} type="button"
+            title={`Spaziatura ${label}`}
+            onClick={() => {
+              const { from, to } = editor.state.selection
+              editor.chain().focus().command(({ tr }) => {
+                editor.state.doc.nodesBetween(from, to, (node, pos) => {
+                  if (node.type.name === 'paragraph') {
+                    tr.setNodeMarkup(pos, undefined, { ...node.attrs, class: `p-${cls}` })
+                  }
+                })
+                return true
+              }).run()
+            }}
+            style={{ height:'34px', padding:'0 8px', border:'1px solid #E5E7EB', background:'#FFF', borderRadius:'6px', cursor:'pointer', fontSize:'11px', fontWeight:'600', fontFamily:"'Inter',sans-serif", color:'#374151', display:'flex', alignItems:'center' }}>
+            {label}
+          </button>
+        ))}
+
+        <Sep/>
+
         {/* Box speciali + animazioni */}
         <div style={{ position:'relative' }} onClick={e=>e.stopPropagation()}>
           <Btn title="Inserisci blocco speciale o animazione" active={showSpecial}
@@ -481,6 +538,42 @@ export default function RichEditor({ value, onChange, placeholder = 'Scrivi qui�
           ✕
         </Btn>
       </div>
+
+      {/* ── TOOLBAR IMMAGINE SELEZIONATA ── */}
+      {selectedImg && (
+        <div style={{ display:'flex', flexWrap:'wrap', gap:'6px', padding:'8px 10px', backgroundColor:'#FFF7ED', borderBottom:'1px solid #FED7AA', alignItems:'center' }}>
+          <span style={{ fontSize:'11px', fontWeight:'700', color:'#D97706', alignSelf:'center' }}>🖼 IMMAGINE</span>
+          <Sep/>
+          {/* Allineamento */}
+          <span style={{ fontSize:'11px', color:'#6B7280', alignSelf:'center' }}>Allinea:</span>
+          {['left','center','right'].map(a => (
+            <button key={a} type="button" onClick={() => updateImageAttr('data-align', a)}
+              style={{ padding:'4px 10px', border:`1px solid ${selectedImg.attrs?.['data-align']===a?'#003DA5':'#E5E7EB'}`,
+                borderRadius:'4px', backgroundColor:selectedImg.attrs?.['data-align']===a?'#EEF3FF':'#FFF',
+                cursor:'pointer', fontSize:'12px', fontWeight:'600', fontFamily:"'Inter',sans-serif",
+                color:selectedImg.attrs?.['data-align']===a?'#003DA5':'#6B7280' }}>
+              {a==='left'?'◀ Sinistra':a==='center'?'■ Centro':'▶ Destra'}
+            </button>
+          ))}
+          <Sep/>
+          {/* Dimensione */}
+          <span style={{ fontSize:'11px', color:'#6B7280', alignSelf:'center' }}>Dimensione:</span>
+          {[['small','Piccola 30%'],['medium','Media 60%'],['large','Piena 100%']].map(([sz,label]) => (
+            <button key={sz} type="button" onClick={() => updateImageAttr('data-size', sz)}
+              style={{ padding:'4px 10px', border:`1px solid ${selectedImg.attrs?.['data-size']===sz?'#003DA5':'#E5E7EB'}`,
+                borderRadius:'4px', backgroundColor:selectedImg.attrs?.['data-size']===sz?'#EEF3FF':'#FFF',
+                cursor:'pointer', fontSize:'12px', fontWeight:'600', fontFamily:"'Inter',sans-serif",
+                color:selectedImg.attrs?.['data-size']===sz?'#003DA5':'#6B7280' }}>
+              {label}
+            </button>
+          ))}
+          <Sep/>
+          <button onClick={() => { editor.chain().focus().deleteSelection().run(); setSelectedImg(null) }}
+            style={{ padding:'4px 8px', border:'1px solid #FECACA', borderRadius:'4px', backgroundColor:'#FEF2F2', cursor:'pointer', fontSize:'12px', color:'#DC2626', fontFamily:"'Inter',sans-serif", fontWeight:'600' }}>
+            ✕ Elimina
+          </button>
+        </div>
+      )}
 
       {/* ── AREA EDITOR ── */}
       <EditorContent editor={editor}/>

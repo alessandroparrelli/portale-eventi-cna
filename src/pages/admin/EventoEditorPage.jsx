@@ -1,4 +1,4 @@
-import { useEffect, useRef, useState } from 'react'
+import React, { useEffect, useRef, useState } from 'react'
 import { useNavigate, useParams } from 'react-router-dom'
 import { supabase } from '../../lib/supabase'
 import { useRole } from '../../hooks/useRole'
@@ -223,7 +223,7 @@ export default function EventoEditorPage() {
     titolo:'', slug:'', stato:'bozza', data_inizio:'', data_fine:'',
     luogo:'', descrizione_html:'', immagine_hero:null,
     colore_primario:'#003DA5', colore_sfondo:'#F4F5F7',
-    layout_hero:{ altezza:'380', overlay_opacita:'55', allineamento:'sinistra' },
+    layout_hero:{ altezza:'380', overlay_opacita:'55', allineamento:'sinistra', titolo_colore:'#FFFFFF', titolo_dimensione:'clamp(26px,5vw,54px)', titolo_grassetto:true, titolo_maiuscolo:false },
     sezioni:[],
   })
   const [saving, setSaving] = useState(false)
@@ -312,8 +312,14 @@ export default function EventoEditorPage() {
     setGenerating(false)
   }
 
-  function addSection(tipo) {
-    setEvent(p=>({...p, sezioni:[...(p.sezioni||[]), newSection(tipo)]}))
+  function addSection(tipo, atIndex) {
+    const sec = newSection(tipo)
+    setEvent(p => {
+      const arr = [...(p.sezioni||[])]
+      if (atIndex !== undefined) arr.splice(atIndex + 1, 0, sec)
+      else arr.push(sec)
+      return { ...p, sezioni: arr }
+    })
     setActiveTab('sezioni')
   }
   function updateSection(idx, sec) { setEvent(p=>{ const s=[...p.sezioni]; s[idx]=sec; return {...p,sezioni:s} }) }
@@ -450,6 +456,45 @@ export default function EventoEditorPage() {
               </Field>
             </div>
 
+            {/* Stile titolo */}
+            <div style={{ marginTop:'16px', padding:'16px', backgroundColor:'#F9FAFB', borderRadius:'8px', border:'1px solid #E5E7EB' }}>
+              <p style={{ fontSize:'12px', fontWeight:'700', color:'#6B7280', textTransform:'uppercase', letterSpacing:'.06em', margin:'0 0 12px' }}>Stile titolo</p>
+              <div style={p.grid3}>
+                <Field label="Colore titolo">
+                  <div style={{ display:'flex', gap:'8px', alignItems:'center' }}>
+                    <input type="color" value={event.layout_hero?.titolo_colore||'#FFFFFF'}
+                      onChange={e=>setH('titolo_colore')(e.target.value)}
+                      style={{ width:'40px', height:'34px', border:'1px solid #D1D5DB', borderRadius:'6px', cursor:'pointer', padding:'2px' }}/>
+                    <Input value={event.layout_hero?.titolo_colore||'#FFFFFF'}
+                      onChange={e=>setH('titolo_colore')(e.target.value)} placeholder="#FFFFFF"/>
+                  </div>
+                </Field>
+                <Field label="Dimensione">
+                  <Select value={event.layout_hero?.titolo_dimensione||'clamp(26px,5vw,54px)'}
+                    onChange={e=>setH('titolo_dimensione')(e.target.value)}>
+                    <option value="clamp(20px,3vw,32px)">Piccolo</option>
+                    <option value="clamp(24px,4vw,42px)">Medio</option>
+                    <option value="clamp(26px,5vw,54px)">Grande</option>
+                    <option value="clamp(32px,6vw,68px)">Extra Grande</option>
+                  </Select>
+                </Field>
+                <Field label="Stile">
+                  <div style={{ display:'flex', gap:'8px' }}>
+                    <button onClick={()=>setH('titolo_grassetto')(!event.layout_hero?.titolo_grassetto)}
+                      style={{ flex:1, padding:'7px', border:`1px solid ${event.layout_hero?.titolo_grassetto?'#003DA5':'#E5E7EB'}`,
+                        borderRadius:'6px', backgroundColor:event.layout_hero?.titolo_grassetto?'#EEF3FF':'#FFF',
+                        cursor:'pointer', fontSize:'13px', fontWeight:'800', fontFamily:"'Inter',sans-serif",
+                        color:event.layout_hero?.titolo_grassetto?'#003DA5':'#6B7280' }}>B</button>
+                    <button onClick={()=>setH('titolo_maiuscolo')(!event.layout_hero?.titolo_maiuscolo)}
+                      style={{ flex:1, padding:'7px', border:`1px solid ${event.layout_hero?.titolo_maiuscolo?'#003DA5':'#E5E7EB'}`,
+                        borderRadius:'6px', backgroundColor:event.layout_hero?.titolo_maiuscolo?'#EEF3FF':'#FFF',
+                        cursor:'pointer', fontSize:'12px', fontWeight:'600', fontFamily:"'Inter',sans-serif",
+                        color:event.layout_hero?.titolo_maiuscolo?'#003DA5':'#6B7280' }}>AA</button>
+                  </div>
+                </Field>
+              </div>
+            </div>
+
             {/* Anteprima */}
             <div style={{ marginTop:'16px' }}>
               <p style={p.sectionLbl}>Anteprima hero</p>
@@ -463,7 +508,7 @@ export default function EventoEditorPage() {
                 <div style={{ padding:'20px 24px', background:`rgba(0,0,0,${(event.layout_hero?.overlay_opacita||55)/100})`,
                   width:'100%', textAlign:event.layout_hero?.allineamento==='centro'?'center':'left' }}>
                   <p style={{ color:'rgba(255,255,255,.7)', fontSize:'11px', margin:'0 0 4px', fontWeight:'600' }}>EVENTO CNA ROMA</p>
-                  <p style={{ color:'#FFF', fontSize:'22px', fontWeight:'900', margin:0 }}>{event.titolo||'Titolo evento'}</p>
+                  <p style={{ color:event.layout_hero?.titolo_colore||'#FFF', fontSize:'18px', fontWeight:event.layout_hero?.titolo_grassetto?'900':'400', margin:0, textTransform:event.layout_hero?.titolo_maiuscolo?'uppercase':'none' }}>{event.titolo||'Titolo evento'}</p>
                 </div>
               </div>
             </div>
@@ -516,7 +561,8 @@ export default function EventoEditorPage() {
                 <p style={{ margin:0, fontSize:'14px' }}>Nessuna sezione ancora. Aggiungi blocchi qui sopra.</p>
               </div>
             ) : (event.sezioni||[]).map((sec,i)=>(
-              <SectionEditor key={sec.id||i}
+              <React.Fragment key={sec.id||i}>
+                      <SectionEditor
                 sec={sec}
                 onChange={s=>updateSection(i,s)}
                 onDelete={()=>deleteSection(i)}
@@ -525,6 +571,24 @@ export default function EventoEditorPage() {
                 isFirst={i===0}
                 isLast={i===(event.sezioni.length-1)}
               />
+              <div style={{ display:'flex', justifyContent:'center', margin:'4px 0' }}>
+                <div style={{ position:'relative' }}>
+                  <button
+                    onClick={() => {
+                      const types = ['testo','immagine','griglia','stats','separatore','cta']
+                      const t = prompt('Tipo sezione:\n' + types.map((t,i)=>`${i+1}. ${t}`).join('\n') + '\n\nDigita il numero:')
+                      const idx = parseInt(t) - 1
+                      if (idx >= 0 && idx < types.length) addSection(types[idx], i)
+                    }}
+                    style={{ display:'flex', alignItems:'center', gap:'4px', padding:'3px 12px', border:'1px dashed #D1D5DB', borderRadius:'20px', backgroundColor:'#FFF', cursor:'pointer', fontSize:'11px', color:'#9CA3AF', fontFamily:"'Inter',sans-serif", fontWeight:'600', transition:'all .15s' }}
+                    onMouseEnter={e=>{e.currentTarget.style.borderColor='#003DA5';e.currentTarget.style.color='#003DA5'}}
+                    onMouseLeave={e=>{e.currentTarget.style.borderColor='#D1D5DB';e.currentTarget.style.color='#9CA3AF'}}
+                  >
+                    + inserisci sezione qui
+                  </button>
+                </div>
+              </div>
+              </React.Fragment>
             ))}
           </div>
         )}
