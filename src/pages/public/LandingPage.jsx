@@ -342,6 +342,57 @@ export default function LandingPage() {
 
 
 
+        {/* ── 3 pulsanti azione ── */}
+        <div style={s.actionBtns}>
+          {/* Aggiungi al calendario */}
+          <button onClick={() => {
+            const fmt = ts => ts ? new Date(ts).toISOString().replace(/[-:]/g,'').replace(/\.\d{3}/,'') : null
+            const dtStart = fmt(event.data_inizio)
+            const dtEnd   = fmt(event.data_fine) || dtStart
+            const now     = fmt(new Date().toISOString())
+            const ics = [
+              'BEGIN:VCALENDAR','VERSION:2.0','PRODID:-//CNA Roma//Portale Eventi//IT',
+              'CALSCALE:GREGORIAN','METHOD:PUBLISH','BEGIN:VEVENT',
+              `UID:${event.id}@cna-eventi`,
+              `DTSTAMP:${now}Z`,`DTSTART:${dtStart}`,`DTEND:${dtEnd}`,
+              `SUMMARY:${event.titolo}`,
+              `LOCATION:${(event.luogo||'').replace(/,/g,'\\,')}`,
+              'END:VEVENT','END:VCALENDAR',
+            ].join('\r\n')
+            const a = Object.assign(document.createElement('a'), {
+              href: URL.createObjectURL(new Blob([ics],{type:'text/calendar;charset=utf-8'})),
+              download: `${event.slug}.ics`
+            })
+            a.click(); URL.revokeObjectURL(a.href)
+          }} style={s.actionBtn}>
+            <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round">
+              <rect x="3" y="4" width="18" height="18" rx="2"/><line x1="16" y1="2" x2="16" y2="6"/>
+              <line x1="8" y1="2" x2="8" y2="6"/><line x1="3" y1="10" x2="21" y2="10"/>
+            </svg>
+            Aggiungi al calendario
+          </button>
+
+          {/* Mappa */}
+          {event.luogo && (
+            <a href={`https://maps.google.com/?q=${encodeURIComponent(event.luogo)}`}
+              target="_blank" rel="noopener noreferrer" style={s.actionBtn}>
+              <MapPin size={16}/>
+              Mappa dell'evento
+            </a>
+          )}
+
+          {/* Partecipa — scroll al form */}
+          {!esaurito && !conferma && (
+            <button onClick={() => {
+              document.getElementById('form-iscrizione')?.scrollIntoView({ behavior:'smooth', block:'start' })
+              if (!formVisible) setFormVisible(true)
+            }} style={{ ...s.actionBtn, ...s.actionBtnPrimary }}>
+              <ChevronRight size={16}/>
+              Partecipa
+            </button>
+          )}
+        </div>
+
         {/* Descrizione — renderizza HTML ricco con stili completi */}
         {(event.descrizione_html || event.descrizione) && (
           <section style={s.section}>
@@ -391,7 +442,7 @@ export default function LandingPage() {
         )}
 
         {formVisible && !esaurito && !conferma && (
-          <div style={s.formWrap}>
+          <div id="form-iscrizione" style={s.formWrap}>
             <h3 style={s.formTitle}>Modulo di iscrizione</h3>
             <FormIscrizione event={event} onSuccess={dati => {
               setFormVisible(false)
@@ -475,6 +526,10 @@ const s = {
   ctaBtn:      { display:'flex', alignItems:'center', gap:'8px', backgroundColor:'#003DA5', color:'#FFFFFF', border:'none', borderRadius:'8px', padding:'14px 28px', fontSize:'15px', fontWeight:'700', fontFamily:"'Inter',sans-serif", cursor:'pointer', whiteSpace:'nowrap', letterSpacing:'-.01em' },
   formWrap:    { backgroundColor:'#FFFFFF', border:'1px solid #E5E7EB', borderRadius:'12px', padding:'28px', marginBottom:'40px' },
   formTitle:   { fontSize:'18px', fontWeight:'800', color:'#0A0A0A', letterSpacing:'-.02em', margin:'0 0 20px' },
+  // 3 pulsanti azione
+  actionBtns:       { display:'flex', gap:'10px', justifyContent:'center', flexWrap:'nowrap', marginBottom:'32px' },
+  actionBtn:        { display:'flex', alignItems:'center', gap:'7px', padding:'11px 20px', backgroundColor:'#FFFFFF', border:'1.5px solid #003DA5', color:'#003DA5', borderRadius:'40px', fontSize:'14px', fontWeight:'700', fontFamily:"'Inter',sans-serif", cursor:'pointer', textDecoration:'none', whiteSpace:'nowrap', transition:'all .15s', flexShrink:1, minWidth:0 },
+  actionBtnPrimary: { backgroundColor:'#003DA5', color:'#FFFFFF', border:'1.5px solid #003DA5' },
   footer:      { borderTop:'1px solid #E5E7EB', padding:'24px', textAlign:'center', fontSize:'13px', color:'#9CA3AF', marginTop:'40px' },
   // Mappa
   mapSection:  { marginTop:'32px', marginBottom:'0' },
