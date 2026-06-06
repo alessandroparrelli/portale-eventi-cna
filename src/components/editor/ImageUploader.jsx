@@ -28,7 +28,7 @@ export default function ImageUploader({ value, onChange }) {
     if (!genPrompt.trim()) return
     setGenerating(true); setGenError('')
     try {
-      // Step 1: Claude traduce il prompt in inglese per la ricerca
+      // Step 1: Claude traduce il prompt in inglese
       let keywords = genPrompt.trim()
       try {
         const aiRes = await fetch('https://api.anthropic.com/v1/messages', {
@@ -48,83 +48,39 @@ export default function ImageUploader({ value, onChange }) {
         if (translated && translated.length > 2) keywords = translated
       } catch {}
 
-      let blob = null
+      // Step 2: chiama Supabase Edge Function come proxy (no CORS issues)
+      const edgeUrl = 'https://hnkhckcclgabunkqfmrz.supabase.co/functions/v1/image-search'
+      const res = await fetch(edgeUrl, {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ query: keywords })
+      })
 
-      // Tentativo 1: Google Imagen via Gemini API (se chiave configurata)
-      const geminiKey = import.meta.env.VITE_GEMINI_API_KEY
-      if (geminiKey) {
-        try {
-          const imagenRes = await fetch(
-            `https://generativelanguage.googleapis.com/v1beta/models/imagen-3.0-generate-002:predict?key=${geminiKey}`,
-            {
-              method: 'POST',
-              headers: { 'Content-Type': 'application/json' },
-              body: JSON.stringify({
-                instances: [{ prompt: `Professional event photography: ${keywords}, high quality, realistic, 16:9 ratio` }],
-                parameters: { sampleCount: 1, aspectRatio: '16:9', safetyFilterLevel: 'block_few' }
-              })
-            }
-          )
-          if (imagenRes.ok) {
-            const imagenData = await imagenRes.json()
-            const b64 = imagenData?.predictions?.[0]?.bytesBase64Encoded
-            if (b64) {
-              const byteChars = atob(b64)
-              const byteArr = new Uint8Array(byteChars.length)
-              for (let i=0; i<byteChars.length; i++) byteArr[i] = byteChars.charCodeAt(i)
-              blob = new Blob([byteArr], { type: 'image/png' })
-            }
-          }
-        } catch {}
+      if (!res.ok) {
+        const err = await res.json().catch(() => ({}))
+        if (err.error === 'no_results') {
+          setGenError('Nessuna foto trovata per "' + genPrompt + '". Prova con parole chiave diverse.')
+        } else {
+          setGenError('Errore nel servizio. Riprova.')
+        }
+        setGenerating(false)
+        return
       }
 
-      // Tentativo 2: Pexels API — foto stock pertinenti e gratuite
-      const pexelsKey = import.meta.env.VITE_PEXELS_API_KEY || 'BrUJuAX6T1z1vI2AYI9GMGFdlCnIHFKFIMKZO5i0KGFF3z0UgFXPnFp2'
-      if (!blob) {
-        try {
-          const q = encodeURIComponent(keywords)
-          const pexRes = await fetch(
-            `https://api.pexels.com/v1/search?query=${q}&per_page=1&orientation=landscape`,
-            { headers: { Authorization: pexelsKey } }
-          )
-          if (pexRes.ok) {
-            const pexData = await pexRes.json()
-            const photoUrl = pexData?.photos?.[0]?.src?.large2x || pexData?.photos?.[0]?.src?.large
-            if (photoUrl) {
-              const imgRes = await fetch(photoUrl)
-              if (imgRes.ok) blob = await imgRes.blob()
-            }
-          }
-        } catch {}
-      }
+      const { url } = await res.json()
+      if (!url) { setGenError('Nessuna immagine trovata. Prova parole chiave diverse.'); setGenerating(false); return }
 
-      // Tentativo 3: Pixabay — altra fonte stock pertinente
-      if (!blob) {
-        try {
-          const q = encodeURIComponent(keywords)
-          const pixRes = await fetch(
-            `https://pixabay.com/api/?key=49103248-bd6a7d2a8b3e4e1b7f8c3b2a4&q=${q}&image_type=photo&orientation=horizontal&per_page=3&safesearch=true`
-          )
-          if (pixRes.ok) {
-            const pixData = await pixRes.json()
-            const photoUrl = pixData?.hits?.[0]?.largeImageURL || pixData?.hits?.[0]?.webformatURL
-            if (photoUrl) {
-              const imgRes = await fetch(photoUrl)
-              if (imgRes.ok) blob = await imgRes.blob()
-            }
-          }
-        } catch {}
-      }
+      // Step 3: scarica l'immagine e carica su Supabase Storage
+      const imgRes = await fetch(url)
+      if (!imgRes.ok) throw new Error('fetch image failed')
+      const blob = await imgRes.blob()
+      const ext = blob.type.includes('png') ? 'png' : 'jpg'
+      const file = new File([blob], `ai-hero.${ext}`, { type: blob.type })
+      await handleFile(file)
 
-      if (blob) {
-        const ext = blob.type === 'image/png' ? 'png' : 'jpg'
-        const file = new File([blob], `ai-hero.${ext}`, { type: blob.type })
-        await handleFile(file)
-      } else {
-        setGenError('Nessuna immagine trovata. Prova parole chiave diverse o carica manualmente.')
-      }
     } catch (e) {
-      setGenError('Errore nella generazione. Riprova.')
+      console.error('generateAI error:', e)
+      setGenError('Errore nella generazione. Controlla la connessione e riprova.')
     }
     setGenerating(false)
   }
@@ -184,7 +140,7 @@ export default function ImageUploader({ value, onChange }) {
           <Wand2 size={13} /> Genera con AI
         </p>
         <p style={{ fontSize: '12px', color: '#7C3AED', margin: '0 0 10px', lineHeight: '1.5' }}>
-          Descrivi in italiano — usa <strong>Google Imagen</strong> (se configurato) oppure cerca su Pexels/Pixabay.
+          Descrivi in italiano — l'AI trova la foto più pertinente da librerie professionali.
         </p>
         <div style={{ display: 'flex', gap: '8px' }}>
           <input
