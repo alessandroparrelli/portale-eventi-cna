@@ -14,6 +14,7 @@ import EmailPage from './pages/admin/EmailPage'
 import EmailEditorPage from './pages/admin/EmailEditorPage'
 import StatistichePage from './pages/admin/StatistichePage'
 import UtentiPage from './pages/admin/UtentiPage'
+import ProfiloPage from './pages/admin/ProfiloPage'
 
 export default function App() {
   return (
@@ -34,6 +35,7 @@ export default function App() {
             <Route path="checkin" element={<CheckinPage />} />
             <Route path="statistiche" element={<StatistichePage />} />
             <Route path="utenti" element={<UtentiPage />} />
+            <Route path="profilo" element={<ProfiloPage />} />
           </Route>
 
           {/* Editor a schermo intero (fuori dal layout sidebar) */}

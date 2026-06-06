@@ -11,6 +11,7 @@ const PAGE_TITLES = {
   '/admin/checkin':    'Check-in',
   '/admin/statistiche':'Statistiche',
   '/admin/utenti':     'Utenti',
+  '/admin/profilo':    'Il mio account',
 }
 
 export default function AdminLayout() {

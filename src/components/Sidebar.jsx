@@ -21,6 +21,7 @@ export default function Sidebar({ mobileOpen, onMobileClose, isMobile: isMobileP
     { to: '/admin/checkin',     label: 'Check-in',    icon: QrCode },
     { to: '/admin/statistiche', label: 'Statistiche', icon: BarChart2 },
     ...(isAdmin ? [{ to: '/admin/utenti', label: 'Utenti', icon: UserCog }] : []),
+    { to: '/admin/profilo', label: '👤 Profilo', icon: UserCircle },
   ]
 
   const RUOLO_COLORS = { admin:'#003DA5', supervisore:'#D97706', utente:'#6B7280' }
