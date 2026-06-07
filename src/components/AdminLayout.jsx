@@ -31,7 +31,7 @@ export default function AdminLayout() {
   }, [isMobile])
 
   const closeMobile = useCallback(() => setMobileOpen(false), [])
-  const pageTitle = 'Events'
+  const pageTitle = 'Marketing'
 
   return (
     <div style={s.root}>
