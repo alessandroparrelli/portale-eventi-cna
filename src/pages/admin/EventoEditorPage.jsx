@@ -382,6 +382,22 @@ export default function EventoEditorPage() {
   const [activeTab, setActiveTab] = useState('info') // info | hero | sezioni | aspetto
   const { canWrite } = useRole()
 
+  const sensors = useSensors(
+    useSensor(PointerSensor, { activationConstraint:{ distance:6 } }),
+    useSensor(TouchSensor,   { activationConstraint:{ delay:150, tolerance:5 } })
+  )
+
+  function handleDragEnd(e) {
+    const { active, over } = e
+    if (!active || !over || active.id === over.id) return
+    const sezioni = event.sezioni || []
+    const oldIdx = sezioni.findIndex((s,i) => (s.id||String(i)) === active.id)
+    const newIdx = sezioni.findIndex((s,i) => (s.id||String(i)) === over.id)
+    if (oldIdx !== -1 && newIdx !== -1) {
+      setEvent(p => ({ ...p, sezioni: arrayMove(p.sezioni, oldIdx, newIdx) }))
+    }
+  }
+
   useEffect(() => {
     if (!isNew) loadEvent()
   }, [id])
@@ -668,25 +684,7 @@ export default function EventoEditorPage() {
         )}
 
         {/* ── CONTENUTO ── */}
-        {activeTab==='contenuto' && (() => {
-          const sensors = useSensors(
-            useSensor(PointerSensor, { activationConstraint:{ distance:6 } }),
-            useSensor(TouchSensor,   { activationConstraint:{ delay:150, tolerance:5 } })
-          )
-          const sezioniIds = (event.sezioni||[]).map((s,i) => s.id || String(i))
-
-          function handleDragEnd(e) {
-            const { active, over } = e
-            if (!active || !over || active.id === over.id) return
-            const sezioni = event.sezioni || []
-            const oldIdx = sezioni.findIndex((s,i) => (s.id||String(i)) === active.id)
-            const newIdx = sezioni.findIndex((s,i) => (s.id||String(i)) === over.id)
-            if (oldIdx !== -1 && newIdx !== -1) {
-              setEvent(p => ({ ...p, sezioni: arrayMove(p.sezioni, oldIdx, newIdx) }))
-            }
-          }
-
-          return (
+        {activeTab==='contenuto' && (
             <div style={p.panel}>
               <h2 style={p.panelTitle}>Contenuto della landing page</h2>
               <p style={{ fontSize:'13px', color:'#6B7280', margin:'0 0 16px' }}>
@@ -709,7 +707,7 @@ export default function EventoEditorPage() {
 
               {/* Sezioni riordinabili */}
               <DndContext sensors={sensors} collisionDetection={closestCenter} onDragEnd={handleDragEnd}>
-                <SortableContext items={sezioniIds} strategy={verticalListSortingStrategy}>
+                <SortableContext items={(event.sezioni||[]).map((s,i) => s.id || String(i))} strategy={verticalListSortingStrategy}>
                   <div style={{ display:'flex', flexDirection:'column', gap:'6px', paddingLeft:'32px' }}>
                     {(event.sezioni||[]).map((sec, i) => (
                       <SortableSectionItem
@@ -732,8 +730,7 @@ export default function EventoEditorPage() {
                 <InsertZone onAdd={(tipo) => addSection(tipo, (event.sezioni||[]).length)}/>
               </div>
             </div>
-          )
-        })()}
+        )}
 
         {/* ── ASPETTO ── */}
         {activeTab==='aspetto' && (
