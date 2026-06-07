@@ -147,8 +147,18 @@ export default function ProfiloPage() {
     setSaving(p => ({...p, pwd:true}))
     setErrors({})
 
-    // supabase.auth.updateUser non tocca auth.users direttamente dal client
-    const { error } = await supabase.auth.updateUser({ password: pwd.new })
+    // Cambio password via Edge Function (unico modo senza permission denied)
+    const { data: { session } } = await supabase.auth.getSession()
+    const res = await fetch('https://hnkhckcclgabunkqfmrz.supabase.co/functions/v1/admin-users', {
+      method: 'POST',
+      headers: {
+        'Content-Type': 'application/json',
+        'Authorization': `Bearer ${session?.access_token}`,
+      },
+      body: JSON.stringify({ action: 'update', user_id: user.id, password: pwd.new })
+    })
+    const result = await res.json()
+    const error = res.ok ? null : { message: result.error || 'Errore' }
     if (error) {
       console.error('savePassword:', error)
       err('Errore: ' + error.message)
