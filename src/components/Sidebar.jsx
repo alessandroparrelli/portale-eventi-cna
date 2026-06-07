@@ -105,9 +105,25 @@ export default function Sidebar({ mobileOpen, onMobileClose, isMobile: isMobileP
             </div>
           )}
           <button onClick={handleSignOut}
-            style={{ ...st.logoutBtn, justifyContent: collapsed && !isMobile ? 'center' : 'flex-start' }}>
+            style={{
+              display:'flex', alignItems:'center', gap:'8px',
+              padding:'11px 12px', width:'100%',
+              background:'none',
+              border:'1px solid #FECACA',
+              borderRadius:'6px',
+              cursor:'pointer',
+              fontSize:'14px',
+              fontFamily:"'Inter',sans-serif",
+              color:'#DC2626',
+              fontWeight:'700',
+              justifyContent: collapsed && !isMobile ? 'center' : 'flex-start',
+              transition:'background-color .15s',
+            }}
+            onMouseEnter={e=>e.currentTarget.style.backgroundColor='#FEF2F2'}
+            onMouseLeave={e=>e.currentTarget.style.backgroundColor='transparent'}
+          >
             <LogOut size={18} style={{ flexShrink:0 }}/>
-            {(!collapsed || isMobile) && <span>Esci</span>}
+            {(!collapsed || isMobile) && <span>Esci dall'app</span>}
           </button>
         </div>
       </aside>
