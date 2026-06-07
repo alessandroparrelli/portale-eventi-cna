@@ -56,8 +56,7 @@ export default function AdminLayout() {
       <main style={{
         ...s.main,
         marginLeft:  isMobile ? '0' : `${sidebarWidth}px`,
-        paddingTop:  isMobile ? '76px' : '88px',
-        padding:     isMobile ? '76px 14px 24px' : '88px 32px 32px',
+        padding:     isMobile ? '68px 14px 24px' : '72px 32px 32px',
       }}>
         <Outlet />
       </main>
@@ -70,21 +69,21 @@ const s = {
   header: {
     position:'fixed', top:0, right:0, zIndex:50,
     backgroundColor:'#FFFFFF', borderBottom:'2px solid #003DA5',
-    height:'72px', display:'flex', alignItems:'center',
-    padding:'0 28px', gap:'18px',
+    height:'60px', display:'flex', alignItems:'center',
+    padding:'0 20px', gap:'12px',
     boxShadow:'0 2px 8px rgba(0,61,165,.08)',
     transition:'left 0.2s ease',
   },
   hamburger: {
     background:'none', border:'none', cursor:'pointer',
     color:'#0A0A0A', display:'flex', alignItems:'center',
-    padding:'6px', borderRadius:'6px', marginRight:'4px', flexShrink:0,
+    padding:'6px', borderRadius:'6px', marginRight:'2px', flexShrink:0,
   },
-  logo:     { height:'48px', objectFit:'contain', flexShrink:0 },
-  divider:  { width:'1.5px', height:'32px', backgroundColor:'#E5E7EB', flexShrink:0 },
+  logo:     { height:'36px', objectFit:'contain', flexShrink:0 },
+  divider:  { width:'1px', height:'24px', backgroundColor:'#E5E7EB', flexShrink:0 },
   pageTitle:{
-    fontSize:'26px', fontWeight:'900', color:'#0A0A0A',
-    letterSpacing:'-0.04em', margin:0,
+    fontSize:'20px', fontWeight:'900', color:'#0A0A0A',
+    letterSpacing:'-0.03em', margin:0,
     fontFamily:"'Inter',sans-serif", lineHeight:1, whiteSpace:'nowrap',
   },
   main: { minHeight:'100vh', transition:'margin-left 0.2s ease' },
