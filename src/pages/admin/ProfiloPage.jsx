@@ -74,10 +74,14 @@ export default function ProfiloPage() {
     setSaving(p=>({...p,profile:true})); setErrors({})
     try {
       await adminApi.updateMyProfile(form.nome, form.cognome, form.username)
-      await supabase.rpc('log_activity', { p_azione:'profilo_aggiornato', p_dettagli:{} }).catch(()=>{})
       ok('Profilo salvato!')
-    } catch(e) { err(e.message) }
-    setSaving(p=>({...p,profile:false}))
+    } catch(e) {
+      err(e.message)
+    } finally {
+      setSaving(p=>({...p,profile:false}))
+    }
+    // Log in background — non blocca e non mostra errori
+    supabase.rpc('log_activity', { p_azione:'profilo_aggiornato', p_dettagli:{} }).catch(()=>{})
   }
 
   async function savePassword() {
@@ -89,11 +93,14 @@ export default function ProfiloPage() {
     setSaving(p=>({...p,pwd:true})); setErrors({})
     try {
       await adminApi.changeMyPassword(pwd.new)
-      await supabase.rpc('log_activity', { p_azione:'password_cambiata', p_dettagli:{} }).catch(()=>{})
       setPwd({ new:'', confirm:'' })
       ok('Password aggiornata!')
-    } catch(e) { err(e.message) }
-    setSaving(p=>({...p,pwd:false}))
+    } catch(e) {
+      err(e.message)
+    } finally {
+      setSaving(p=>({...p,pwd:false}))
+    }
+    supabase.rpc('log_activity', { p_azione:'password_cambiata', p_dettagli:{} }).catch(()=>{})
   }
 
   async function uploadAvatar(file) {
