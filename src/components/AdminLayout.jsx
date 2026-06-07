@@ -1,24 +1,13 @@
 import { useState, useEffect, useCallback } from 'react'
-import { Outlet, useLocation } from 'react-router-dom'
+import { Outlet } from 'react-router-dom'
 import Sidebar from './Sidebar'
 import { Menu } from 'lucide-react'
 
-const PAGE_TITLES = {
-  '/admin':            'Dashboard',
-  '/admin/eventi':     'Gestione eventi',
-  '/admin/iscritti':   'Iscritti',
-  '/admin/email':      'Email',
-  '/admin/checkin':    'Check-in',
-  '/admin/statistiche':'Statistiche',
-  '/admin/utenti':     'Utenti',
-  '/admin/profilo':    'Il mio account',
-}
 
 export default function AdminLayout() {
   const [sidebarWidth, setSidebarWidth] = useState(240)
   const [mobileOpen,   setMobileOpen]   = useState(false)
   const [isMobile,     setIsMobile]     = useState(false)
-  const location = useLocation()
 
   useEffect(() => {
     function check() {
@@ -42,7 +31,7 @@ export default function AdminLayout() {
   }, [isMobile])
 
   const closeMobile = useCallback(() => setMobileOpen(false), [])
-  const pageTitle = PAGE_TITLES[location.pathname] || 'Portale eventi'
+  const pageTitle = 'Events'
 
   return (
     <div style={s.root}>
