@@ -414,16 +414,17 @@ export default function EventoEditorPage() {
     setGenerating(false)
   }
 
-  function addSection(tipo, insertAt) {
+  // insertBefore = indice PRIMA del quale inserire (0 = all'inizio, sezioni.length = in fondo)
+  function addSection(tipo, insertBefore) {
     const sec = newSection(tipo)
-    setEvent(p => {
-      const arr = [...(p.sezioni||[])]
-      if (insertAt === undefined || insertAt === null) arr.push(sec)        // in fondo
-      else if (insertAt < 0) arr.unshift(sec)                               // all'inizio
-      else arr.splice(insertAt + 1, 0, sec)                                 // dopo insertAt
-      return { ...p, sezioni: arr }
+    setEvent(prev => {
+      const arr = [...(prev.sezioni||[])]
+      const pos = (insertBefore === undefined || insertBefore === null)
+        ? arr.length          // in fondo
+        : Math.max(0, Math.min(insertBefore, arr.length))
+      arr.splice(pos, 0, sec)
+      return { ...prev, sezioni: arr }
     })
-    setActiveTab('contenuto')
   }
   function updateSection(idx, sec) { setEvent(p=>{ const s=[...p.sezioni]; s[idx]=sec; return {...p,sezioni:s} }) }
   function deleteSection(idx)     { setEvent(p=>({...p,sezioni:p.sezioni.filter((_,i)=>i!==idx)})) }
@@ -625,15 +626,11 @@ export default function EventoEditorPage() {
               Clicca il <strong>+</strong> tra i blocchi per inserire una sezione nel punto desiderato.
             </p>
 
-            {/* InsertZone PRIMA della descrizione = inserisce all'inizio (indice -1 = unshift) */}
-            <InsertZone onAdd={(tipo) => addSection(tipo, -1)}/>
+            {/* Prima della descrizione → insertBefore=0 = in cima */}
+            <InsertZone onAdd={(tipo) => addSection(tipo, 0)}/>
 
             {/* Descrizione principale */}
-            <ContentBlock
-              label="📝 Descrizione principale"
-              badge="sempre visibile"
-              badgeColor="#003DA5"
-              noDrag>
+            <ContentBlock label="📝 Descrizione" badge="sempre visibile" badgeColor="#003DA5" noDrag>
               <RichEditor
                 value={event.descrizione_html||''}
                 onChange={v=>setEvent(p=>({...p,descrizione_html:v}))}
@@ -642,11 +639,8 @@ export default function EventoEditorPage() {
               />
             </ContentBlock>
 
-            {/* InsertZone DOPO la descrizione = inserisce in posizione 0 (prima sezione) */}
-            {(event.sezioni||[]).length === 0
-              ? <InsertZone onAdd={(tipo) => addSection(tipo, null)}/>
-              : <InsertZone onAdd={(tipo) => addSection(tipo, -1)}/>
-            }
+            {/* Dopo la descrizione → insertBefore=0 = prima di tutte le sezioni */}
+            <InsertZone onAdd={(tipo) => addSection(tipo, 0)} label="dopo descrizione"/>
 
             {(event.sezioni||[]).map((sec,i)=>(
               <React.Fragment key={sec.id||i}>
@@ -659,8 +653,8 @@ export default function EventoEditorPage() {
                   isFirst={i===0}
                   isLast={i===(event.sezioni.length-1)}
                 />
-                {/* InsertZone DOPO la sezione i = inserisce dopo indice i */}
-                <InsertZone onAdd={(tipo) => addSection(tipo, i)}/>
+                {/* Dopo sezione i → insertBefore = i+1 */}
+                <InsertZone key={`iz-${i}`} onAdd={(tipo) => addSection(tipo, i + 1)}/>
               </React.Fragment>
             ))}
           </div>
