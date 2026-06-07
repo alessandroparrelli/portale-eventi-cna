@@ -88,12 +88,21 @@ export default function UtentiPage() {
     if (Object.keys(e).length) { setErrors(e); return }
     setSaving(true)
     if (modal === 'create') {
-      const { error } = await supabase.rpc('create_admin_user', {
-        p_email: current.email.trim(), p_password: current.password,
-        p_username: current.username.trim(), p_ruolo: current.ruolo,
+      const { data, error } = await supabase.rpc('create_admin_user', {
+        p_email:    current.email.trim(),
+        p_password: current.password,
+        p_username: current.username.trim(),
+        p_ruolo:    current.ruolo,
       })
-      if (error) { setErrors({ general: error.message }); setSaving(false); return }
-      await supabase.rpc('log_activity', { p_azione:'utente_creato', p_dettagli:{ email:current.email } })
+      if (error) {
+        console.error('create_admin_user error:', error)
+        setErrors({ general: error.message || 'Errore nella creazione utente' })
+        setSaving(false); return
+      }
+      await supabase.rpc('log_activity', {
+        p_azione: 'utente_creato',
+        p_dettagli: { email: current.email }
+      }).catch(() => {})
     } else {
       const { error } = await supabase.from('admin_profiles').update({
         username: current.username.trim(),
@@ -101,12 +110,17 @@ export default function UtentiPage() {
         cognome:  current.cognome?.trim() || null,
         ruolo:    current.ruolo,
         attivo:   current.attivo !== false,
-        updated_at: new Date().toISOString(),
       }).eq('id', current.id)
-      if (error) { setErrors({ general: error.message }); setSaving(false); return }
+      if (error) {
+        console.error('update profile error:', error)
+        setErrors({ general: error.message || 'Errore nel salvataggio' })
+        setSaving(false); return
+      }
       await supabase.rpc('update_admin_user_meta', {
-        p_user_id: current.id, p_ruolo: current.ruolo, p_username: current.username.trim()
-      })
+        p_user_id:  current.id,
+        p_ruolo:    current.ruolo,
+        p_username: current.username.trim()
+      }).catch(() => {})
     }
     setSaving(false); setModal(null); loadUsers()
   }

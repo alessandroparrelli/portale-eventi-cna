@@ -106,15 +106,23 @@ export default function ProfiloPage() {
     if (!form.username.trim()) { setErrors({ username:'Campo obbligatorio' }); return }
     setSaving(p=>({...p,profile:true}))
     const { error } = await supabase.from('admin_profiles').update({
-      nome:     form.nome.trim()     || null,
-      cognome:  form.cognome.trim()  || null,
-      username: form.username.trim(),
-      avatar_url: form.avatar_url   || null,
-      updated_at: new Date().toISOString(),
+      nome:       form.nome.trim()    || null,
+      cognome:    form.cognome.trim() || null,
+      username:   form.username.trim(),
+      avatar_url: form.avatar_url    || null,
     }).eq('id', user.id)
-    if (error) { toast_err('Errore nel salvataggio'); }
-    else {
-      await supabase.rpc('log_activity', { p_azione:'profilo_aggiornato', p_dettagli:{ username:form.username } })
+    if (error) {
+      console.error('saveProfile error:', error)
+      toast_err('Errore: ' + (error.message || 'Riprova'))
+    } else {
+      // Aggiorna anche user_metadata di Supabase Auth
+      await supabase.auth.updateUser({
+        data: { username: form.username.trim() }
+      })
+      await supabase.rpc('log_activity', {
+        p_azione: 'profilo_aggiornato',
+        p_dettagli: { username: form.username }
+      }).catch(() => {})
       toast_ok('Profilo aggiornato!')
     }
     setSaving(p=>({...p,profile:false}))
