@@ -131,9 +131,6 @@ export default function ProfiloPage() {
       console.error('saveProfile:', error)
       err('Errore: ' + error.message)
     } else {
-      // Aggiorna metadata senza toccare auth.users direttamente
-      await supabase.auth.updateUser({ data: { username: form.username.trim() } })
-      // Log senza subquery su auth.users
       await supabase.rpc('log_activity', { p_azione:'profilo_aggiornato', p_dettagli:{ username:form.username } }).catch(()=>{})
       ok('Profilo salvato!')
       loadLog()
