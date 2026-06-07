@@ -62,7 +62,7 @@ export default function CheckinPage() {
 
   useEffect(() => {
     supabase.from('events').select('id,titolo,stato')
-      .in('stato',['pubblicato','chiuso']).order('data_inizio',{ascending:false})
+      .eq('stato','pubblicato').order('data_inizio',{ascending:false})
       .then(({data})=>setEventi(data||[]))
   }, [])
 

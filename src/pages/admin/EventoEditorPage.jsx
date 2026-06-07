@@ -43,6 +43,45 @@ function newSection(tipo) {
 }
 
 // ── Editor singola sezione ───────────────────────────────────
+
+function SectionInserter({ onAdd, label='+ Inserisci sezione qui' }) {
+  const [open, setOpen] = React.useState(false)
+  const TYPES = [
+    { tipo:'testo',      label:'📝 Testo',      desc:'Blocco testo formattato' },
+    { tipo:'immagine',   label:'🖼 Immagine',   desc:'Immagine con didascalia' },
+    { tipo:'griglia',    label:'⊞ Griglia',    desc:'Colonne affiancate' },
+    { tipo:'stats',      label:'📊 Statistiche', desc:'Numeri in evidenza' },
+    { tipo:'separatore', label:'— Separatore',  desc:'Linea o spazio' },
+    { tipo:'cta',        label:'🎯 CTA',         desc:'Pulsante call-to-action' },
+  ]
+  return (
+    <div style={{ position:'relative', display:'flex', justifyContent:'center', margin:'6px 0', zIndex:10 }}>
+      <button onClick={e=>{e.stopPropagation();setOpen(!open)}}
+        style={{ display:'flex', alignItems:'center', gap:'5px', padding:'5px 16px', border:'1.5px dashed #C7D9F8', borderRadius:'20px', backgroundColor:open?'#EEF3FF':'#FFF', cursor:'pointer', fontSize:'12px', color:open?'#003DA5':'#6B7280', fontFamily:"'Inter',sans-serif", fontWeight:'600', transition:'all .15s' }}
+        onMouseEnter={e=>{if(!open){e.currentTarget.style.borderColor='#003DA5';e.currentTarget.style.color='#003DA5'}}}
+        onMouseLeave={e=>{if(!open){e.currentTarget.style.borderColor='#C7D9F8';e.currentTarget.style.color='#6B7280'}}}>
+        ＋ {label.replace('+ ','')}
+      </button>
+      {open && (
+        <>
+          <div onClick={()=>setOpen(false)} style={{ position:'fixed', inset:0, zIndex:9 }}/>
+          <div style={{ position:'absolute', top:'100%', left:'50%', transform:'translateX(-50%)', marginTop:'6px', backgroundColor:'#FFF', border:'1px solid #E5E7EB', borderRadius:'10px', boxShadow:'0 8px 24px rgba(0,0,0,.12)', padding:'8px', zIndex:10, display:'grid', gridTemplateColumns:'1fr 1fr', gap:'4px', minWidth:'280px' }}>
+            {TYPES.map(({ tipo, label, desc }) => (
+              <button key={tipo} onClick={()=>{onAdd(tipo);setOpen(false)}}
+                style={{ display:'flex', flexDirection:'column', alignItems:'flex-start', padding:'10px 12px', border:'1px solid #E5E7EB', borderRadius:'8px', cursor:'pointer', backgroundColor:'#FFF', textAlign:'left', transition:'background-color .1s', fontFamily:"'Inter',sans-serif" }}
+                onMouseEnter={e=>e.currentTarget.style.backgroundColor='#EEF3FF'}
+                onMouseLeave={e=>e.currentTarget.style.backgroundColor='#FFF'}>
+                <span style={{ fontSize:'13px', fontWeight:'700', color:'#0A0A0A' }}>{label}</span>
+                <span style={{ fontSize:'11px', color:'#9CA3AF', marginTop:'2px' }}>{desc}</span>
+              </button>
+            ))}
+          </div>
+        </>
+      )}
+    </div>
+  )
+}
+
 function SectionEditor({ sec, onChange, onDelete, onMoveUp, onMoveDown, isFirst, isLast }) {
   const [open, setOpen] = useState(true)
   const TypeIcon = SECTION_TYPES.find(t=>t.tipo===sec.tipo)?.icon || Type
@@ -320,7 +359,7 @@ export default function EventoEditorPage() {
       else arr.push(sec)
       return { ...p, sezioni: arr }
     })
-    setActiveTab('sezioni')
+    setActiveTab('contenuto')
   }
   function updateSection(idx, sec) { setEvent(p=>{ const s=[...p.sezioni]; s[idx]=sec; return {...p,sezioni:s} }) }
   function deleteSection(idx)     { setEvent(p=>({...p,sezioni:p.sezioni.filter((_,i)=>i!==idx)})) }
@@ -334,8 +373,7 @@ export default function EventoEditorPage() {
   const TABS = [
     { id:'info',    label:'📋 Info & Date' },
     { id:'hero',    label:'🖼 Hero' },
-    { id:'descrizione', label:'📝 Descrizione' },
-    { id:'sezioni', label:`🧩 Sezioni (${event.sezioni?.length||0})` },
+    { id:'contenuto', label:`📝 Contenuto` },
     { id:'aspetto', label:'🎨 Aspetto' },
   ]
 
@@ -516,80 +554,48 @@ export default function EventoEditorPage() {
         )}
 
         {/* ── DESCRIZIONE RICH TEXT ── */}
-        {activeTab==='descrizione' && (
+        {activeTab==='contenuto' && (
           <div style={p.panel}>
-            <h2 style={p.panelTitle}>Descrizione evento</h2>
-            <p style={{ fontSize:'13px', color:'#6B7280', margin:'0 0 16px' }}>
-              Questa descrizione appare nella landing page pubblica. Usa la barra degli strumenti per formattare il testo con titoli, elenchi, tabelle, colori e immagini.
+            <h2 style={p.panelTitle}>Contenuto della landing page</h2>
+            <p style={{ fontSize:'13px', color:'#6B7280', margin:'0 0 4px' }}>
+              Il testo ricco è la descrizione principale. Le sezioni aggiuntive appaiono sotto, nell'ordine che preferisci.
             </p>
-            <RichEditor
-              value={event.descrizione_html||''}
-              onChange={v=>setEvent(p=>({...p,descrizione_html:v}))}
-              minHeight="500px"
-              placeholder="Inserisci la descrizione dell'evento. Puoi usare tutti gli strumenti di formattazione nella barra sopra…"
-            />
-          </div>
-        )}
 
-        {/* ── SEZIONI ── */}
-        {activeTab==='sezioni' && (
-          <div style={p.panel}>
-            <div style={{ display:'flex', alignItems:'center', justifyContent:'space-between', marginBottom:'20px' }}>
-              <div>
-                <h2 style={p.panelTitle}>Sezioni landing page</h2>
-                <p style={{ fontSize:'13px', color:'#6B7280', margin:0 }}>
-                  Aggiungi blocchi per costruire la pagina. Le sezioni appaiono sotto la descrizione nella landing pubblica.
-                </p>
-              </div>
-            </div>
+            {/* Pulsante aggiungi sezione ALL'INIZIO */}
+            <SectionInserter onAdd={(tipo) => addSection(tipo, -1)} label="+ Aggiungi sezione all'inizio"/>
 
-            {/* Aggiungi sezione */}
-            <div style={p.sectionAdder}>
-              <p style={p.sectionLbl}>Aggiungi sezione</p>
-              <div style={{ display:'flex', flexWrap:'wrap', gap:'8px' }}>
-                {SECTION_TYPES.map(({ tipo, label, icon:Icon })=>(
-                  <button key={tipo} onClick={()=>addSection(tipo)} style={p.addSecBtn}>
-                    <Icon size={14}/> {label}
-                  </button>
-                ))}
+            {/* Descrizione principale */}
+            <div style={{ border:'1px solid #E5E7EB', borderRadius:'10px', overflow:'hidden', marginBottom:'4px' }}>
+              <div style={{ padding:'10px 16px', backgroundColor:'#F8F9FF', borderBottom:'1px solid #E5E7EB', display:'flex', alignItems:'center', gap:'8px' }}>
+                <span style={{ fontSize:'13px', fontWeight:'700', color:'#003DA5' }}>📝 Descrizione principale</span>
+                <span style={{ fontSize:'11px', color:'#9CA3AF' }}>appare sempre per prima</span>
               </div>
-            </div>
-
-            {/* Lista sezioni */}
-            {(event.sezioni||[]).length === 0 ? (
-              <div style={{ padding:'40px', textAlign:'center', color:'#9CA3AF', border:'2px dashed #E5E7EB', borderRadius:'8px' }}>
-                <p style={{ margin:0, fontSize:'14px' }}>Nessuna sezione ancora. Aggiungi blocchi qui sopra.</p>
-              </div>
-            ) : (event.sezioni||[]).map((sec,i)=>(
-              <React.Fragment key={sec.id||i}>
-                      <SectionEditor
-                sec={sec}
-                onChange={s=>updateSection(i,s)}
-                onDelete={()=>deleteSection(i)}
-                onMoveUp={()=>moveSection(i,-1)}
-                onMoveDown={()=>moveSection(i,1)}
-                isFirst={i===0}
-                isLast={i===(event.sezioni.length-1)}
+              <RichEditor
+                value={event.descrizione_html||''}
+                onChange={v=>setEvent(p=>({...p,descrizione_html:v}))}
+                minHeight="300px"
+                placeholder="Inserisci la descrizione dell'evento…"
               />
-              <div style={{ display:'flex', justifyContent:'center', margin:'4px 0' }}>
-                <div style={{ position:'relative' }}>
-                  <button
-                    onClick={() => {
-                      const types = ['testo','immagine','griglia','stats','separatore','cta']
-                      const t = prompt('Tipo sezione:\n' + types.map((t,i)=>`${i+1}. ${t}`).join('\n') + '\n\nDigita il numero:')
-                      const idx = parseInt(t) - 1
-                      if (idx >= 0 && idx < types.length) addSection(types[idx], i)
-                    }}
-                    style={{ display:'flex', alignItems:'center', gap:'4px', padding:'3px 12px', border:'1px dashed #D1D5DB', borderRadius:'20px', backgroundColor:'#FFF', cursor:'pointer', fontSize:'11px', color:'#9CA3AF', fontFamily:"'Inter',sans-serif", fontWeight:'600', transition:'all .15s' }}
-                    onMouseEnter={e=>{e.currentTarget.style.borderColor='#003DA5';e.currentTarget.style.color='#003DA5'}}
-                    onMouseLeave={e=>{e.currentTarget.style.borderColor='#D1D5DB';e.currentTarget.style.color='#9CA3AF'}}
-                  >
-                    + inserisci sezione qui
-                  </button>
-                </div>
-              </div>
+            </div>
+
+            {/* Sezioni dopo la descrizione */}
+            {(event.sezioni||[]).map((sec,i)=>(
+              <React.Fragment key={sec.id||i}>
+                <SectionInserter onAdd={(tipo) => addSection(tipo, i-1)}/>
+                <SectionEditor
+                  sec={sec}
+                  onChange={s=>updateSection(i,s)}
+                  onDelete={()=>deleteSection(i)}
+                  onMoveUp={()=>moveSection(i,-1)}
+                  onMoveDown={()=>moveSection(i,1)}
+                  isFirst={i===0}
+                  isLast={i===(event.sezioni.length-1)}
+                />
               </React.Fragment>
             ))}
+
+            {/* Aggiungi sezione IN FONDO */}
+            <SectionInserter onAdd={(tipo) => addSection(tipo)} label="+ Aggiungi sezione in fondo"/>
           </div>
         )}
 
