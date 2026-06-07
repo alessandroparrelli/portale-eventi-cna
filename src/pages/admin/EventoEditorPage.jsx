@@ -1,4 +1,13 @@
 import React, { useEffect, useRef, useState } from 'react'
+import {
+  DndContext, closestCenter, PointerSensor, TouchSensor,
+  useSensor, useSensors, DragOverlay
+} from '@dnd-kit/core'
+import {
+  SortableContext, verticalListSortingStrategy,
+  useSortable, arrayMove
+} from '@dnd-kit/sortable'
+import { CSS } from '@dnd-kit/utilities'
 import { useNavigate, useParams } from 'react-router-dom'
 import { supabase } from '../../lib/supabase'
 import { useRole } from '../../hooks/useRole'
@@ -44,6 +53,46 @@ function newSection(tipo) {
 
 // ── Editor singola sezione ───────────────────────────────────
 
+
+
+// ── SORTABLE WRAPPER ────────────────────────────────────
+function SortableSectionItem({ sec, i, total, onChange, onDelete, onMoveUp, onMoveDown }) {
+  const { attributes, listeners, setNodeRef, transform, transition, isDragging } = useSortable({ id: sec.id || String(i) })
+  const style = {
+    transform: CSS.Transform.toString(transform),
+    transition,
+    opacity: isDragging ? 0.4 : 1,
+    position: 'relative',
+  }
+  return (
+    <div ref={setNodeRef} style={style}>
+      {/* Handle di trascinamento */}
+      <div {...attributes} {...listeners}
+        style={{
+          position:'absolute', left:'-28px', top:'50%', transform:'translateY(-50%)',
+          cursor:'grab', color:'#D1D5DB', display:'flex', alignItems:'center',
+          padding:'4px', borderRadius:'4px', zIndex:1,
+          touchAction:'none',
+        }}
+        title="Trascina per riordinare">
+        <svg width="16" height="24" viewBox="0 0 16 24" fill="currentColor">
+          <circle cx="5" cy="6"  r="2"/><circle cx="11" cy="6"  r="2"/>
+          <circle cx="5" cy="12" r="2"/><circle cx="11" cy="12" r="2"/>
+          <circle cx="5" cy="18" r="2"/><circle cx="11" cy="18" r="2"/>
+        </svg>
+      </div>
+      <SectionEditor
+        sec={sec}
+        onChange={onChange}
+        onDelete={onDelete}
+        onMoveUp={onMoveUp}
+        onMoveDown={onMoveDown}
+        isFirst={i === 0}
+        isLast={i === total - 1}
+      />
+    </div>
+  )
+}
 
 function InsertZone({ onAdd }) {
   const [hover, setHover] = React.useState(false)
@@ -618,47 +667,73 @@ export default function EventoEditorPage() {
           </div>
         )}
 
-        {/* ── DESCRIZIONE RICH TEXT ── */}
-        {activeTab==='contenuto' && (
-          <div style={p.panel}>
-            <h2 style={p.panelTitle}>Contenuto della landing page</h2>
-            <p style={{ fontSize:'13px', color:'#6B7280', margin:'0 0 16px' }}>
-              Clicca il <strong>+</strong> tra i blocchi per inserire una sezione nel punto desiderato.
-            </p>
+        {/* ── CONTENUTO ── */}
+        {activeTab==='contenuto' && (() => {
+          const sensors = useSensors(
+            useSensor(PointerSensor, { activationConstraint:{ distance:6 } }),
+            useSensor(TouchSensor,   { activationConstraint:{ delay:150, tolerance:5 } })
+          )
+          const sezioniIds = (event.sezioni||[]).map((s,i) => s.id || String(i))
 
-            {/* Prima della descrizione → insertBefore=0 = in cima */}
-            <InsertZone onAdd={(tipo) => addSection(tipo, 0)}/>
+          function handleDragEnd(e) {
+            const { active, over } = e
+            if (!active || !over || active.id === over.id) return
+            const sezioni = event.sezioni || []
+            const oldIdx = sezioni.findIndex((s,i) => (s.id||String(i)) === active.id)
+            const newIdx = sezioni.findIndex((s,i) => (s.id||String(i)) === over.id)
+            if (oldIdx !== -1 && newIdx !== -1) {
+              setEvent(p => ({ ...p, sezioni: arrayMove(p.sezioni, oldIdx, newIdx) }))
+            }
+          }
 
-            {/* Descrizione principale */}
-            <ContentBlock label="📝 Descrizione" badge="sempre visibile" badgeColor="#003DA5" noDrag>
-              <RichEditor
-                value={event.descrizione_html||''}
-                onChange={v=>setEvent(p=>({...p,descrizione_html:v}))}
-                minHeight="260px"
-                placeholder="Inserisci la descrizione dell'evento…"
-              />
-            </ContentBlock>
+          return (
+            <div style={p.panel}>
+              <h2 style={p.panelTitle}>Contenuto della landing page</h2>
+              <p style={{ fontSize:'13px', color:'#6B7280', margin:'0 0 16px' }}>
+                Usa il <strong>⠿</strong> a sinistra di ogni blocco per trascinarlo nel punto desiderato.
+              </p>
 
-            {/* Dopo la descrizione → insertBefore=0 = prima di tutte le sezioni */}
-            <InsertZone onAdd={(tipo) => addSection(tipo, 0)} label="dopo descrizione"/>
-
-            {(event.sezioni||[]).map((sec,i)=>(
-              <React.Fragment key={sec.id||i}>
-                <SectionEditor
-                  sec={sec}
-                  onChange={s=>updateSection(i,s)}
-                  onDelete={()=>deleteSection(i)}
-                  onMoveUp={()=>moveSection(i,-1)}
-                  onMoveDown={()=>moveSection(i,1)}
-                  isFirst={i===0}
-                  isLast={i===(event.sezioni.length-1)}
+              {/* Descrizione principale — non draggabile, sempre in cima */}
+              <div style={{ border:'1px solid #C7D9F8', borderRadius:'10px', overflow:'hidden', marginBottom:'8px', backgroundColor:'#F8FAFF' }}>
+                <div style={{ padding:'8px 16px', borderBottom:'1px solid #E5E7EB', display:'flex', alignItems:'center', gap:'8px' }}>
+                  <span style={{ fontSize:'13px', fontWeight:'700', color:'#003DA5' }}>📝 Descrizione principale</span>
+                  <span style={{ fontSize:'10px', color:'#9CA3AF', backgroundColor:'#EEF3FF', padding:'1px 8px', borderRadius:'10px' }}>sempre in cima</span>
+                </div>
+                <RichEditor
+                  value={event.descrizione_html||''}
+                  onChange={v=>setEvent(p=>({...p,descrizione_html:v}))}
+                  minHeight="260px"
+                  placeholder="Inserisci la descrizione dell'evento…"
                 />
-                {/* Dopo sezione i → insertBefore = i+1 */}
-                <InsertZone key={`iz-${i}`} onAdd={(tipo) => addSection(tipo, i + 1)}/>
-              </React.Fragment>
-            ))}
-          </div>
-        )}
+              </div>
+
+              {/* Sezioni riordinabili */}
+              <DndContext sensors={sensors} collisionDetection={closestCenter} onDragEnd={handleDragEnd}>
+                <SortableContext items={sezioniIds} strategy={verticalListSortingStrategy}>
+                  <div style={{ display:'flex', flexDirection:'column', gap:'6px', paddingLeft:'32px' }}>
+                    {(event.sezioni||[]).map((sec, i) => (
+                      <SortableSectionItem
+                        key={sec.id||String(i)}
+                        sec={sec}
+                        i={i}
+                        total={(event.sezioni||[]).length}
+                        onChange={s=>updateSection(i,s)}
+                        onDelete={()=>deleteSection(i)}
+                        onMoveUp={()=>moveSection(i,-1)}
+                        onMoveDown={()=>moveSection(i,1)}
+                      />
+                    ))}
+                  </div>
+                </SortableContext>
+              </DndContext>
+
+              {/* Aggiungi sezione */}
+              <div style={{ marginTop:'12px' }}>
+                <InsertZone onAdd={(tipo) => addSection(tipo, (event.sezioni||[]).length)}/>
+              </div>
+            </div>
+          )
+        })()}
 
         {/* ── ASPETTO ── */}
         {activeTab==='aspetto' && (
