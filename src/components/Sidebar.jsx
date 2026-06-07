@@ -141,8 +141,8 @@ export default function Sidebar({ mobileOpen, onMobileClose, isMobile: isMobileP
 }
 
 const st = {
-  sidebar:    { height:'100vh', backgroundColor:'#FFFFFF', borderRight:'1px solid #E5E7EB', display:'flex', flexDirection:'column', position:'fixed', top:0, left:0, zIndex:100, transition:'width .2s ease, transform .25s ease', overflow:'hidden' },
-  topBar:     { display:'flex', alignItems:'center', padding:'12px', borderBottom:'1px solid #F3F4F6', minHeight:'56px', gap:'8px' },
+  sidebar:    { height:'calc(100vh - 60px)', top:'60px', backgroundColor:'#FFFFFF', borderRight:'1px solid #E5E7EB', display:'flex', flexDirection:'column', position:'fixed', left:0, zIndex:100, transition:'width .2s ease, transform .25s ease', overflow:'hidden' },
+  topBar:     { display:'flex', alignItems:'center', padding:'10px 12px', borderBottom:'1px solid #F3F4F6', gap:'8px' },
   iconBtn:    { background:'none', border:'1px solid #E5E7EB', borderRadius:'6px', cursor:'pointer', padding:'5px', color:'#6B7280', display:'flex', alignItems:'center', flexShrink:0 },
   userCard:   { display:'flex', alignItems:'center', gap:'10px', margin:'10px 8px 4px', padding:'12px', borderRadius:'10px', border:'1px solid #E5E7EB', textDecoration:'none', transition:'background-color .15s, border-color .15s', flexShrink:0 },
   avatarWrap: { width:'38px', height:'38px', borderRadius:'50%', overflow:'hidden', flexShrink:0, display:'flex', alignItems:'center', justifyContent:'center' },

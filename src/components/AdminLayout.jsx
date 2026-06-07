@@ -38,11 +38,14 @@ export default function AdminLayout() {
       <Sidebar mobileOpen={mobileOpen} onMobileClose={closeMobile} isMobile={isMobile}/>
 
       {/* ── UNICO HEADER fisso a tutta larghezza ── */}
-      <header style={{ ...s.header, left: isMobile ? 0 : `${sidebarWidth}px` }}>
+      <header style={{ ...s.header, left: 0 }}>
         {isMobile && (
           <button onClick={() => setMobileOpen(true)} style={s.hamburger}>
             <Menu size={24}/>
           </button>
+        )}
+        {!isMobile && (
+          <div style={{ width: `${sidebarWidth}px`, flexShrink:0, transition:'width .2s ease' }}/>
         )}
         <img
           src="https://raw.githubusercontent.com/alessandroparrelli/fileappoggio/main/NUOVO-LOGO-CNA-ROMA-SOLO-ROMA.png"
@@ -67,12 +70,11 @@ export default function AdminLayout() {
 const s = {
   root: { minHeight:'100vh', backgroundColor:'#F4F5F7', fontFamily:"'Inter',sans-serif" },
   header: {
-    position:'fixed', top:0, right:0, zIndex:50,
+    position:'fixed', top:0, right:0, left:0, zIndex:200,
     backgroundColor:'#FFFFFF', borderBottom:'2px solid #003DA5',
     height:'60px', display:'flex', alignItems:'center',
     padding:'0 20px', gap:'12px',
     boxShadow:'0 2px 8px rgba(0,61,165,.08)',
-    transition:'left 0.2s ease',
   },
   hamburger: {
     background:'none', border:'none', cursor:'pointer',

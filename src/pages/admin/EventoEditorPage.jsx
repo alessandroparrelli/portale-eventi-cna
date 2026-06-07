@@ -44,6 +44,69 @@ function newSection(tipo) {
 
 // ── Editor singola sezione ───────────────────────────────────
 
+
+function InsertZone({ onAdd }) {
+  const [hover, setHover] = React.useState(false)
+  const [open,  setOpen]  = React.useState(false)
+  const TYPES = [
+    { tipo:'testo',      emoji:'📝', label:'Testo',       desc:'Blocco rich text' },
+    { tipo:'immagine',   emoji:'🖼', label:'Immagine',    desc:'Foto con didascalia' },
+    { tipo:'griglia',    emoji:'⊞',  label:'Griglia',     desc:'Colonne affiancate' },
+    { tipo:'stats',      emoji:'📊', label:'Statistiche', desc:'Numeri in evidenza' },
+    { tipo:'separatore', emoji:'—',  label:'Separatore',  desc:'Linea divisoria' },
+    { tipo:'cta',        emoji:'🎯', label:'CTA',          desc:'Pulsante azione' },
+  ]
+  return (
+    <div
+      style={{ position:'relative', display:'flex', alignItems:'center', justifyContent:'center', height: hover||open ? '44px' : '20px', transition:'height .2s', margin:'2px 0', cursor:'pointer' }}
+      onMouseEnter={() => setHover(true)}
+      onMouseLeave={() => { setHover(false) }}>
+      {/* Linea orizzontale */}
+      <div style={{ position:'absolute', left:0, right:0, height:'2px', backgroundColor: hover||open ? '#003DA5' : '#E5E7EB', transition:'background-color .15s, opacity .15s', borderRadius:'2px' }}/>
+      {/* Pulsante + */}
+      {(hover || open) && (
+        <button
+          onClick={e => { e.stopPropagation(); setOpen(!open) }}
+          style={{ position:'relative', zIndex:2, width:'32px', height:'32px', borderRadius:'50%', backgroundColor: open?'#003DA5':'#FFFFFF', border:'2px solid #003DA5', color: open?'#FFF':'#003DA5', fontSize:'20px', fontWeight:'300', lineHeight:'28px', cursor:'pointer', display:'flex', alignItems:'center', justifyContent:'center', boxShadow:'0 2px 8px rgba(0,61,165,.2)', transition:'all .15s', flexShrink:0 }}>
+          {open ? '×' : '+'}
+        </button>
+      )}
+      {/* Dropdown tipi sezione */}
+      {open && (
+        <>
+          <div onClick={()=>setOpen(false)} style={{ position:'fixed', inset:0, zIndex:10 }}/>
+          <div style={{ position:'absolute', top:'100%', left:'50%', transform:'translateX(-50%)', marginTop:'6px', backgroundColor:'#FFF', border:'1px solid #E5E7EB', borderRadius:'12px', boxShadow:'0 8px 32px rgba(0,0,0,.14)', padding:'8px', zIndex:20, display:'grid', gridTemplateColumns:'1fr 1fr 1fr', gap:'6px', minWidth:'360px' }}>
+            <div style={{ gridColumn:'1/-1', fontSize:'11px', fontWeight:'700', color:'#9CA3AF', textTransform:'uppercase', letterSpacing:'.06em', padding:'4px 6px 2px' }}>Scegli tipo di blocco</div>
+            {TYPES.map(({ tipo, emoji, label, desc }) => (
+              <button key={tipo}
+                onClick={() => { onAdd(tipo); setOpen(false); setHover(false) }}
+                style={{ display:'flex', flexDirection:'column', alignItems:'flex-start', padding:'10px', border:'1px solid #E5E7EB', borderRadius:'8px', cursor:'pointer', backgroundColor:'#FFF', fontFamily:"'Inter',sans-serif", transition:'all .1s' }}
+                onMouseEnter={e => { e.currentTarget.style.backgroundColor='#EEF3FF'; e.currentTarget.style.borderColor='#003DA5' }}
+                onMouseLeave={e => { e.currentTarget.style.backgroundColor='#FFF'; e.currentTarget.style.borderColor='#E5E7EB' }}>
+                <span style={{ fontSize:'18px', marginBottom:'4px' }}>{emoji}</span>
+                <span style={{ fontSize:'12px', fontWeight:'700', color:'#0A0A0A' }}>{label}</span>
+                <span style={{ fontSize:'10px', color:'#9CA3AF', marginTop:'1px' }}>{desc}</span>
+              </button>
+            ))}
+          </div>
+        </>
+      )}
+    </div>
+  )
+}
+
+function ContentBlock({ label, badge, badgeColor='#003DA5', children }) {
+  return (
+    <div style={{ border:'1px solid #E5E7EB', borderRadius:'10px', overflow:'hidden', marginBottom:'2px' }}>
+      <div style={{ padding:'8px 16px', backgroundColor:'#F8F9FF', borderBottom:'1px solid #E5E7EB', display:'flex', alignItems:'center', gap:'8px' }}>
+        <span style={{ fontSize:'13px', fontWeight:'700', color: badgeColor }}>{label}</span>
+        {badge && <span style={{ fontSize:'10px', color:'#9CA3AF', backgroundColor:'#F3F4F6', padding:'1px 8px', borderRadius:'10px' }}>{badge}</span>}
+      </div>
+      {children}
+    </div>
+  )
+}
+
 function SectionInserter({ onAdd, label='+ Inserisci sezione qui' }) {
   const [open, setOpen] = React.useState(false)
   const TYPES = [
@@ -557,31 +620,31 @@ export default function EventoEditorPage() {
         {activeTab==='contenuto' && (
           <div style={p.panel}>
             <h2 style={p.panelTitle}>Contenuto della landing page</h2>
-            <p style={{ fontSize:'13px', color:'#6B7280', margin:'0 0 4px' }}>
-              Il testo ricco è la descrizione principale. Le sezioni aggiuntive appaiono sotto, nell'ordine che preferisci.
+            <p style={{ fontSize:'13px', color:'#6B7280', margin:'0 0 16px' }}>
+              Clicca il <strong>+</strong> tra i blocchi per inserire una sezione nel punto desiderato.
             </p>
 
-            {/* Pulsante aggiungi sezione ALL'INIZIO */}
-            <SectionInserter onAdd={(tipo) => addSection(tipo, -1)} label="+ Aggiungi sezione all'inizio"/>
+            {/* Blocchi intercalati: inserter → descrizione → inserter → sezione → inserter → ... */}
+            <InsertZone onAdd={(tipo) => addSection(tipo, -1)}/>
 
             {/* Descrizione principale */}
-            <div style={{ border:'1px solid #E5E7EB', borderRadius:'10px', overflow:'hidden', marginBottom:'4px' }}>
-              <div style={{ padding:'10px 16px', backgroundColor:'#F8F9FF', borderBottom:'1px solid #E5E7EB', display:'flex', alignItems:'center', gap:'8px' }}>
-                <span style={{ fontSize:'13px', fontWeight:'700', color:'#003DA5' }}>📝 Descrizione principale</span>
-                <span style={{ fontSize:'11px', color:'#9CA3AF' }}>appare sempre per prima</span>
-              </div>
+            <ContentBlock
+              label="📝 Descrizione principale"
+              badge="sempre visibile"
+              badgeColor="#003DA5"
+              noDrag>
               <RichEditor
                 value={event.descrizione_html||''}
                 onChange={v=>setEvent(p=>({...p,descrizione_html:v}))}
-                minHeight="300px"
+                minHeight="260px"
                 placeholder="Inserisci la descrizione dell'evento…"
               />
-            </div>
+            </ContentBlock>
 
-            {/* Sezioni dopo la descrizione */}
+            <InsertZone onAdd={(tipo) => addSection(tipo, -1 + 1)}/>
+
             {(event.sezioni||[]).map((sec,i)=>(
               <React.Fragment key={sec.id||i}>
-                <SectionInserter onAdd={(tipo) => addSection(tipo, i-1)}/>
                 <SectionEditor
                   sec={sec}
                   onChange={s=>updateSection(i,s)}
@@ -591,11 +654,9 @@ export default function EventoEditorPage() {
                   isFirst={i===0}
                   isLast={i===(event.sezioni.length-1)}
                 />
+                <InsertZone onAdd={(tipo) => addSection(tipo, i)}/>
               </React.Fragment>
             ))}
-
-            {/* Aggiungi sezione IN FONDO */}
-            <SectionInserter onAdd={(tipo) => addSection(tipo)} label="+ Aggiungi sezione in fondo"/>
           </div>
         )}
 
