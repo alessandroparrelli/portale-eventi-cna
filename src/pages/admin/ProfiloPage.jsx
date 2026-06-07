@@ -130,16 +130,17 @@ export default function ProfiloPage() {
 
   async function savePassword() {
     const e = {}
-    if (!pwd.current)           e.current = 'Campo obbligatorio'
-    if (!pwd.new)               e.new     = 'Campo obbligatorio'
-    if (pwd.new.length < 8)     e.new     = 'Minimo 8 caratteri'
+    if (!pwd.new)                e.new     = 'Campo obbligatorio'
+    if (pwd.new.length < 8)      e.new     = 'Minimo 8 caratteri'
     if (pwd.new !== pwd.confirm) e.confirm = 'Le password non corrispondono'
-    if (Object.keys(e).length)  { setErrors(e); return }
+    if (Object.keys(e).length)   { setErrors(e); return }
     setSaving(p=>({...p,pwd:true}))
     const { error } = await supabase.auth.updateUser({ password: pwd.new })
-    if (error) toast_err('Errore cambio password: ' + error.message)
-    else {
-      await supabase.rpc('log_activity', { p_azione:'password_cambiata' })
+    if (error) {
+      console.error('updateUser error:', error)
+      toast_err('Errore cambio password: ' + error.message)
+    } else {
+      await supabase.rpc('log_activity', { p_azione:'password_cambiata' }).catch(()=>{})
       setPwd({ current:'', new:'', confirm:'' })
       toast_ok('Password aggiornata!')
     }

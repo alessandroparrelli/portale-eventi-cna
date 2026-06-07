@@ -5,6 +5,24 @@ import { useAuth } from '../../hooks/useAuth'
 import { Modal, RuoloBadge, Field, Input, Select, Btn, EmptyState } from '../../components/ui'
 import { Users, Plus, Pencil, Trash2, ShieldCheck, Eye, EyeOff, Clock, Activity, ToggleLeft, ToggleRight } from 'lucide-react'
 
+
+const ADMIN_USERS_URL = 'https://hnkhckcclgabunkqfmrz.supabase.co/functions/v1/admin-users'
+
+async function callAdminUsers(action, body = {}) {
+  const { data: { session } } = await supabase.auth.getSession()
+  const res = await fetch(ADMIN_USERS_URL, {
+    method: 'POST',
+    headers: {
+      'Content-Type': 'application/json',
+      'Authorization': `Bearer ${session?.access_token}`,
+    },
+    body: JSON.stringify({ action, ...body })
+  })
+  const data = await res.json()
+  if (!res.ok) throw new Error(data.error || 'Errore server')
+  return data
+}
+
 const EMPTY_USER = { username:'', email:'', password:'', ruolo:'utente', nome:'', cognome:'' }
 const RUOLO_DESC = {
   admin:       'Accesso completo: crea, modifica, elimina, esporta, gestisce utenti.',
@@ -88,15 +106,16 @@ export default function UtentiPage() {
     if (Object.keys(e).length) { setErrors(e); return }
     setSaving(true)
     if (modal === 'create') {
-      const { data, error } = await supabase.rpc('create_admin_user', {
-        p_email:    current.email.trim(),
-        p_password: current.password,
-        p_username: current.username.trim(),
-        p_ruolo:    current.ruolo,
-      })
-      if (error) {
-        console.error('create_admin_user error:', error)
-        setErrors({ general: error.message || 'Errore nella creazione utente' })
+      try {
+        await callAdminUsers('create', {
+          email:    current.email.trim(),
+          password: current.password,
+          username: current.username.trim(),
+          ruolo:    current.ruolo,
+        })
+      } catch(e) {
+        console.error('create user error:', e)
+        setErrors({ general: e.message || 'Errore nella creazione utente' })
         setSaving(false); return
       }
       await supabase.rpc('log_activity', {
@@ -104,23 +123,21 @@ export default function UtentiPage() {
         p_dettagli: { email: current.email }
       }).catch(() => {})
     } else {
-      const { error } = await supabase.from('admin_profiles').update({
-        username: current.username.trim(),
-        nome:     current.nome?.trim()    || null,
-        cognome:  current.cognome?.trim() || null,
-        ruolo:    current.ruolo,
-        attivo:   current.attivo !== false,
-      }).eq('id', current.id)
-      if (error) {
-        console.error('update profile error:', error)
-        setErrors({ general: error.message || 'Errore nel salvataggio' })
+      try {
+        await callAdminUsers('update', {
+          user_id:  current.id,
+          username: current.username.trim(),
+          nome:     current.nome?.trim()    || null,
+          cognome:  current.cognome?.trim() || null,
+          ruolo:    current.ruolo,
+          attivo:   current.attivo !== false,
+          ...(current.password?.trim() ? { password: current.password } : {}),
+        })
+      } catch(e) {
+        console.error('update user error:', e)
+        setErrors({ general: e.message || 'Errore nel salvataggio' })
         setSaving(false); return
       }
-      await supabase.rpc('update_admin_user_meta', {
-        p_user_id:  current.id,
-        p_ruolo:    current.ruolo,
-        p_username: current.username.trim()
-      }).catch(() => {})
     }
     setSaving(false); setModal(null); loadUsers()
   }
@@ -131,8 +148,10 @@ export default function UtentiPage() {
   }
 
   async function deleteUser() {
-    await supabase.rpc('delete_admin_user', { p_user_id: current.id })
-    await supabase.rpc('log_activity', { p_azione:'utente_eliminato', p_dettagli:{ username:current.username } })
+    try {
+      await callAdminUsers('delete', { user_id: current.id })
+    } catch(e) { console.error('delete error:', e) }
+    await supabase.rpc('log_activity', { p_azione:'utente_eliminato', p_dettagli:{ username:current.username } }).catch(()=>{})
     setModal(null); loadUsers()
   }
 
