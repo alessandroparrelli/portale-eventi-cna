@@ -414,12 +414,13 @@ export default function EventoEditorPage() {
     setGenerating(false)
   }
 
-  function addSection(tipo, atIndex) {
+  function addSection(tipo, insertAt) {
     const sec = newSection(tipo)
     setEvent(p => {
       const arr = [...(p.sezioni||[])]
-      if (atIndex !== undefined) arr.splice(atIndex + 1, 0, sec)
-      else arr.push(sec)
+      if (insertAt === undefined || insertAt === null) arr.push(sec)        // in fondo
+      else if (insertAt < 0) arr.unshift(sec)                               // all'inizio
+      else arr.splice(insertAt + 1, 0, sec)                                 // dopo insertAt
       return { ...p, sezioni: arr }
     })
     setActiveTab('contenuto')
@@ -624,7 +625,7 @@ export default function EventoEditorPage() {
               Clicca il <strong>+</strong> tra i blocchi per inserire una sezione nel punto desiderato.
             </p>
 
-            {/* Blocchi intercalati: inserter → descrizione → inserter → sezione → inserter → ... */}
+            {/* InsertZone PRIMA della descrizione = inserisce all'inizio (indice -1 = unshift) */}
             <InsertZone onAdd={(tipo) => addSection(tipo, -1)}/>
 
             {/* Descrizione principale */}
@@ -641,7 +642,11 @@ export default function EventoEditorPage() {
               />
             </ContentBlock>
 
-            <InsertZone onAdd={(tipo) => addSection(tipo, -1 + 1)}/>
+            {/* InsertZone DOPO la descrizione = inserisce in posizione 0 (prima sezione) */}
+            {(event.sezioni||[]).length === 0
+              ? <InsertZone onAdd={(tipo) => addSection(tipo, null)}/>
+              : <InsertZone onAdd={(tipo) => addSection(tipo, -1)}/>
+            }
 
             {(event.sezioni||[]).map((sec,i)=>(
               <React.Fragment key={sec.id||i}>
@@ -654,6 +659,7 @@ export default function EventoEditorPage() {
                   isFirst={i===0}
                   isLast={i===(event.sezioni.length-1)}
                 />
+                {/* InsertZone DOPO la sezione i = inserisce dopo indice i */}
                 <InsertZone onAdd={(tipo) => addSection(tipo, i)}/>
               </React.Fragment>
             ))}
