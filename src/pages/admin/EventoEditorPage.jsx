@@ -1,6 +1,6 @@
 import React, { useEffect, useRef, useState } from 'react'
 import {
-  DndContext, closestCenter, PointerSensor, TouchSensor,
+  DndContext, rectIntersection, PointerSensor, TouchSensor,
   useSensor, useSensors, DragOverlay
 } from '@dnd-kit/core'
 import {
@@ -57,12 +57,14 @@ function newSection(tipo) {
 
 // ── SORTABLE WRAPPER ────────────────────────────────────
 function SortableSectionItem({ sec, i, total, onChange, onDelete, onMoveUp, onMoveDown }) {
-  const { attributes, listeners, setNodeRef, transform, transition, isDragging } = useSortable({ id: sec.id || String(i) })
+  const id = sec.id || `sec-${i}`
+  const { attributes, listeners, setNodeRef, transform, transition, isDragging } = useSortable({ id })
   const style = {
     transform: CSS.Transform.toString(transform),
-    transition,
-    opacity: isDragging ? 0.4 : 1,
+    transition: transition || 'transform 200ms ease',
+    opacity: isDragging ? 0.35 : 1,
     position: 'relative',
+    zIndex: isDragging ? 10 : 'auto',
   }
   return (
     <div ref={setNodeRef} style={style}>
@@ -387,15 +389,26 @@ export default function EventoEditorPage() {
     useSensor(TouchSensor,   { activationConstraint:{ delay:150, tolerance:5 } })
   )
 
-  function handleDragEnd(e) {
+  const [activeId, setActiveId] = React.useState(null)
+
+  function getDndId(s, idx) { return s.id || `sec-${idx}` }
+
+  function handleDragStart(e) { setActiveId(e.active.id) }
+
+  function handleDragOver(e) {
     const { active, over } = e
     if (!active || !over || active.id === over.id) return
-    const sezioni = event.sezioni || []
-    const oldIdx = sezioni.findIndex((s,i) => (s.id||String(i)) === active.id)
-    const newIdx = sezioni.findIndex((s,i) => (s.id||String(i)) === over.id)
-    if (oldIdx !== -1 && newIdx !== -1) {
-      setEvent(p => ({ ...p, sezioni: arrayMove(p.sezioni, oldIdx, newIdx) }))
-    }
+    setEvent(p => {
+      const sezioni = p.sezioni || []
+      const oldIdx = sezioni.findIndex((s,i) => getDndId(s,i) === active.id)
+      const newIdx = sezioni.findIndex((s,i) => getDndId(s,i) === over.id)
+      if (oldIdx === -1 || newIdx === -1) return p
+      return { ...p, sezioni: arrayMove(sezioni, oldIdx, newIdx) }
+    })
+  }
+
+  function handleDragEnd(e) {
+    setActiveId(null)
   }
 
   useEffect(() => {
@@ -706,13 +719,19 @@ export default function EventoEditorPage() {
               </div>
 
               {/* Sezioni riordinabili */}
-              <DndContext sensors={sensors} collisionDetection={closestCenter} onDragEnd={handleDragEnd}>
-                <SortableContext items={(event.sezioni||[]).map((s,i) => s.id || String(i))} strategy={verticalListSortingStrategy}>
+              <DndContext
+                sensors={sensors}
+                collisionDetection={rectIntersection}
+                onDragStart={handleDragStart}
+                onDragOver={handleDragOver}
+                onDragEnd={handleDragEnd}
+              >
+                <SortableContext items={(event.sezioni||[]).map((s,i) => getDndId(s,i))} strategy={verticalListSortingStrategy}>
                   <div style={{ display:'flex', flexDirection:'column', gap:'6px', paddingLeft:'32px' }}>
                     {(event.sezioni||[]).map((sec, i) => (
                       <SortableSectionItem
-                        key={sec.id||String(i)}
-                        sec={sec}
+                        key={getDndId(sec,i)}
+                        sec={{ ...sec, id: getDndId(sec,i) }}
                         i={i}
                         total={(event.sezioni||[]).length}
                         onChange={s=>updateSection(i,s)}
