@@ -23,19 +23,15 @@ export function AuthProvider({ children }) {
   const signIn = async (emailOrUsername, password) => {
     let email = emailOrUsername.trim()
 
-    // Se non contiene @ è un username → risolvi la email da admin_profiles
+    // Se non contiene @ è un username → risolvi la email via RPC (SECURITY DEFINER, accessibile da anon)
     if (!email.includes('@')) {
-      const { data: profile, error: profileError } = await supabase
-        .from('admin_profiles')
-        .select('email')
-        .eq('username', email)
-        .eq('attivo', true)
-        .maybeSingle()
+      const { data: resolvedEmail, error: rpcError } = await supabase
+        .rpc('get_email_by_username', { p_username: email })
 
-      if (profileError || !profile) {
+      if (rpcError || !resolvedEmail) {
         return { data: null, error: { message: 'Username non trovato' } }
       }
-      email = profile.email
+      email = resolvedEmail
     }
 
     const { data, error } = await supabase.auth.signInWithPassword({ email, password })
