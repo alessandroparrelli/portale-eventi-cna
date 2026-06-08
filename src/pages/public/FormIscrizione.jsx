@@ -41,11 +41,15 @@ export default function FormIscrizione({ event, onSuccess }) {
 
   function validate() {
     const e = {}
-    if (!form.nome.trim())    e.nome    = 'Obbligatorio'
-    if (!form.cognome.trim()) e.cognome = 'Obbligatorio'
-    if (!form.email.trim())   e.email   = 'Obbligatorio'
-    else if (!/\S+@\S+\.\S+/.test(form.email)) e.email = 'Email non valida'
-    if (!form.mestiere_id) e.mestiere_id = 'Seleziona una categoria'
+    if (!form.nome.trim())             e.nome             = 'Obbligatorio'
+    if (!form.cognome.trim())          e.cognome          = 'Obbligatorio'
+    if (!form.email.trim())            e.email            = 'Obbligatorio'
+    else if (!/\S+@\S+\.\S+/.test(form.email)) e.email   = 'Email non valida'
+    if (!form.cellulare.trim())        e.cellulare        = 'Obbligatorio'
+    if (!form.cap.trim())              e.cap              = 'Obbligatorio'
+    if (!form.ragione_sociale.trim())  e.ragione_sociale  = 'Obbligatorio'
+    if (!form.partita_iva.trim())      e.partita_iva      = 'Obbligatorio'
+    if (!form.mestiere_id)             e.mestiere_id      = 'Seleziona una categoria'
     fields.filter(f => f.obbligatorio).forEach(f => {
       if (!extras[f.id]?.trim()) e[`extra_${f.id}`] = 'Obbligatorio'
     })
@@ -114,13 +118,13 @@ export default function FormIscrizione({ event, onSuccess }) {
           <Inp label="Email" required type="email" value={form.email} onChange={set('email')}
             placeholder="mario.rossi@example.it" error={errors.email}/>
         </div>
-        <Inp label="Cellulare" value={form.cellulare} onChange={set('cellulare')} placeholder="333 1234567"/>
-        <Inp label="CAP"       value={form.cap}       onChange={set('cap')}       placeholder="00100"/>
+        <Inp label="Cellulare" required value={form.cellulare} onChange={set('cellulare')} placeholder="333 1234567" error={errors.cellulare}/>
+        <Inp label="CAP"       required value={form.cap}       onChange={set('cap')}       placeholder="00100"       error={errors.cap}/>
         <div style={{ gridColumn:'1/-1' }}>
-          <Inp label="Ragione Sociale / Azienda" value={form.ragione_sociale}
-            onChange={set('ragione_sociale')} placeholder="es. Rossi Falegnameria Srl"/>
+          <Inp label="Ragione Sociale / Azienda" required value={form.ragione_sociale}
+            onChange={set('ragione_sociale')} placeholder="es. Rossi Falegnameria Srl" error={errors.ragione_sociale}/>
         </div>
-        <Inp label="Partita IVA" value={form.partita_iva} onChange={set('partita_iva')} placeholder="12345670015"/>
+        <Inp label="Partita IVA" required value={form.partita_iva} onChange={set('partita_iva')} placeholder="12345670015" error={errors.partita_iva}/>
 
         {/* Categoria professionale */}
         <div style={{ display:'flex', flexDirection:'column', gap:'4px' }}>
