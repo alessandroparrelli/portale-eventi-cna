@@ -4,7 +4,7 @@ import { useAuth } from '../hooks/useAuth'
 import { Eye, EyeOff, LogIn } from 'lucide-react'
 
 export default function LoginPage() {
-  const [email, setEmail] = useState('')
+  const [identifier, setIdentifier] = useState('')
   const [password, setPassword] = useState('')
   const [showPassword, setShowPassword] = useState(false)
   const [error, setError] = useState('')
@@ -17,7 +17,7 @@ export default function LoginPage() {
     setError('')
     setLoading(true)
 
-    const { error } = await signIn(email, password)
+    const { error } = await signIn(identifier, password)
     if (error) {
       setError('Credenziali non valide. Riprova.')
     } else {
@@ -45,13 +45,14 @@ export default function LoginPage() {
 
         <form onSubmit={handleSubmit} style={styles.form}>
           <div style={styles.field}>
-            <label style={styles.label}>Email</label>
+            <label style={styles.label}>Email o username</label>
             <input
-              type="email"
-              value={email}
-              onChange={e => setEmail(e.target.value)}
-              placeholder="email@portale.cna"
+              type="text"
+              value={identifier}
+              onChange={e => setIdentifier(e.target.value)}
+              placeholder="email@cnaroma.it oppure username"
               required
+              autoComplete="username"
               style={styles.input}
               onFocus={e => e.target.style.borderColor = '#003DA5'}
               onBlur={e => e.target.style.borderColor = '#D1D5DB'}

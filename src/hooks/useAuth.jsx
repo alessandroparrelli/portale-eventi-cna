@@ -20,7 +20,24 @@ export function AuthProvider({ children }) {
     return () => subscription.unsubscribe()
   }, [])
 
-  const signIn = async (email, password) => {
+  const signIn = async (emailOrUsername, password) => {
+    let email = emailOrUsername.trim()
+
+    // Se non contiene @ è un username → risolvi la email da admin_profiles
+    if (!email.includes('@')) {
+      const { data: profile, error: profileError } = await supabase
+        .from('admin_profiles')
+        .select('email')
+        .eq('username', email)
+        .eq('attivo', true)
+        .maybeSingle()
+
+      if (profileError || !profile) {
+        return { data: null, error: { message: 'Username non trovato' } }
+      }
+      email = profile.email
+    }
+
     const { data, error } = await supabase.auth.signInWithPassword({ email, password })
     return { data, error }
   }
