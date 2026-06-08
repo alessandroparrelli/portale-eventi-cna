@@ -343,13 +343,22 @@ export default function EventoEditorPage() {
 
   async function loadEvent() {
     const { data } = await supabase.from('events').select('*').eq('id', id).single()
-    if (data) setEvent({
-      ...data,
-      data_inizio: data.data_inizio?.slice(0,16)||'',
-      data_fine:   data.data_fine?.slice(0,16)||'',
-      layout_hero: data.layout_hero || { altezza:'380', overlay_opacita:'55', allineamento:'sinistra' },
-      sezioni:     data.sezioni || [],
-    })
+    if (data) {
+      let sezioni = data.sezioni || []
+      // Migrazione automatica: se c'è descrizione_html ma nessun blocco, crea il primo blocco testo
+      if (data.descrizione_html && sezioni.length === 0) {
+        sezioni = [{ id: 'migrated-' + Date.now().toString(36), tipo: 'testo', html: data.descrizione_html }]
+      }
+      setEvent({
+        ...data,
+        data_inizio: data.data_inizio?.slice(0,16)||'',
+        data_fine:   data.data_fine?.slice(0,16)||'',
+        layout_hero: data.layout_hero || { altezza:'380', overlay_opacita:'55', allineamento:'sinistra' },
+        sezioni,
+        // Azzera descrizione_html se è stata migrata nei blocchi
+        descrizione_html: sezioni.length > 0 ? null : data.descrizione_html,
+      })
+    }
   }
 
   function setH(k) { return v => setEvent(p=>({...p,layout_hero:{...p.layout_hero,[k]:typeof v==='string'?v:v?.target?.value}})) }

@@ -356,8 +356,8 @@ export default function LandingPage() {
           )}
         </div>
 
-        {/* DESCRIZIONE */}
-        {(event.descrizione_html || event.descrizione) && (
+        {/* DESCRIZIONE (solo se non ci sono blocchi) */}
+        {(event.descrizione_html || event.descrizione) && !(event.sezioni||[]).length && (
           <section style={s.section}>
             {event.descrizione_html
               ? <div className="rich-content" dangerouslySetInnerHTML={{ __html:event.descrizione_html }}/>
