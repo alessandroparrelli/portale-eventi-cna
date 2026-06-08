@@ -127,11 +127,59 @@ function CtaEditor({ block, onChange }) {
 
 // ── Blocco immagine editor ─────────────────────────────────
 function ImmagineEditor({ block, onChange }) {
+  const align = block.align || 'center'
+  const size  = block.size  || 'large'
+
   return (
-    <div style={{ padding: '16px', display: 'flex', flexDirection: 'column', gap: '10px' }}>
+    <div style={{ padding: '16px', display: 'flex', flexDirection: 'column', gap: '12px' }}>
       <ImageUploader value={block.src || null} onChange={url => onChange({ ...block, src: url || '' })} />
-      <input value={block.didascalia || ''} onChange={e => onChange({ ...block, didascalia: e.target.value })}
-        placeholder="Didascalia opzionale" style={inp} />
+
+      {/* Allineamento */}
+      <div>
+        <label style={lb}>Allineamento</label>
+        <div style={{ display: 'flex', gap: '6px' }}>
+          {[['left','◀ Sinistra'],['center','■ Centro'],['right','▶ Destra']].map(([val, label]) => (
+            <button key={val} type="button"
+              onClick={() => onChange({ ...block, align: val })}
+              style={{ flex: 1, padding: '7px', border: `1px solid ${align===val?'#003DA5':'#E5E7EB'}`, borderRadius: '6px', backgroundColor: align===val?'#EEF3FF':'#FFF', cursor: 'pointer', fontSize: '12px', fontWeight: '600', fontFamily:"'Inter',sans-serif", color: align===val?'#003DA5':'#6B7280', transition:'all .1s' }}>
+              {label}
+            </button>
+          ))}
+        </div>
+      </div>
+
+      {/* Dimensione */}
+      <div>
+        <label style={lb}>Dimensione</label>
+        <div style={{ display: 'flex', gap: '6px' }}>
+          {[['small','Piccola 33%'],['medium','Media 60%'],['large','Piena 100%']].map(([val, label]) => (
+            <button key={val} type="button"
+              onClick={() => onChange({ ...block, size: val })}
+              style={{ flex: 1, padding: '7px', border: `1px solid ${size===val?'#003DA5':'#E5E7EB'}`, borderRadius: '6px', backgroundColor: size===val?'#EEF3FF':'#FFF', cursor: 'pointer', fontSize: '12px', fontWeight: '600', fontFamily:"'Inter',sans-serif", color: size===val?'#003DA5':'#6B7280', transition:'all .1s' }}>
+              {label}
+            </button>
+          ))}
+        </div>
+      </div>
+
+      {/* Didascalia */}
+      <div>
+        <label style={lb}>Didascalia (opzionale)</label>
+        <input value={block.didascalia || ''} onChange={e => onChange({ ...block, didascalia: e.target.value })}
+          placeholder="Testo sotto l'immagine" style={inp} />
+      </div>
+
+      {/* Anteprima */}
+      {block.src && (
+        <div style={{ marginTop: '4px', padding: '12px', backgroundColor: '#F9FAFB', borderRadius: '8px', textAlign: align }}>
+          <img src={block.src} alt="" style={{
+            maxWidth: size==='small'?'33%':size==='medium'?'60%':'100%',
+            display: 'inline-block',
+            borderRadius: '4px',
+          }}/>
+          {block.didascalia && <p style={{ fontSize: '12px', color: '#9CA3AF', marginTop: '6px', fontStyle: 'italic' }}>{block.didascalia}</p>}
+        </div>
+      )}
     </div>
   )
 }

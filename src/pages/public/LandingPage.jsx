@@ -165,12 +165,18 @@ function BlockRenderer({ block, colore_primario }) {
     </div>
   )
 
-  if (block.tipo === 'immagine') return (
-    <div style={{ marginBottom:'16px', textAlign:'center' }}>
-      {block.src && <img src={block.src} alt={block.didascalia||''} style={{ maxWidth:'100%', display:'block', margin:'0 auto' }}/>}
-      {block.didascalia && <p style={{ fontSize:'13px', color:'#9CA3AF', marginTop:'8px', fontStyle:'italic' }}>{block.didascalia}</p>}
-    </div>
-  )
+  if (block.tipo === 'immagine') {
+    const maxW   = block.size==='small'?'33%':block.size==='medium'?'60%':'100%'
+    const align  = block.align || 'center'
+    const margin = align==='center'?'0 auto':align==='right'?'0 0 0 auto':'0 auto 0 0'
+    return (
+      <div style={{ marginBottom:'16px', textAlign: align }}>
+        {block.src && <img src={block.src} alt={block.didascalia||''}
+          style={{ maxWidth: maxW, width:'100%', display:'inline-block', margin: align==='center'?'0 auto':'0' }}/>}
+        {block.didascalia && <p style={{ fontSize:'13px', color:'#9CA3AF', marginTop:'8px', fontStyle:'italic' }}>{block.didascalia}</p>}
+      </div>
+    )
+  }
 
   if (block.tipo === 'separatore') return (
     <hr style={{ border:'none', borderTop:'2px solid #E5E7EB', margin:'24px 0' }}/>
