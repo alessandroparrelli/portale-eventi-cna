@@ -1,7 +1,7 @@
 import { useState, useEffect } from 'react'
 import { supabase } from '../../lib/supabase'
 import RichEditor from './RichEditor'
-import { Save, RotateCcw, CheckCircle, Code, Eye as EyeIcon } from 'lucide-react'
+import { Save, RotateCcw, CheckCircle, Code, Eye as EyeIcon, AlertTriangle } from 'lucide-react'
 
 const TIPI = [
   { key: 'conferma',      label: 'Conferma Iscrizione',      icon: '✅', desc: 'Inviata all\'iscritto appena si registra' },
@@ -35,8 +35,10 @@ export default function EventEmailTab({ eventoId }) {
   const [defaultTemplates, setDefaultTemplates] = useState({})
   const [saving, setSaving] = useState(false)
   const [saved, setSaved] = useState(false)
-  const [viewMode, setViewMode] = useState('visual') // 'visual' | 'html' | 'preview'
+  const [viewMode, setViewMode] = useState('visual')
   const [loading, setLoading] = useState(true)
+  const [showResetModal, setShowResetModal] = useState(false)
+  const [resetting, setResetting] = useState(false)
 
   useEffect(() => {
     if (eventoId) {
@@ -91,7 +93,7 @@ export default function EventEmailTab({ eventoId }) {
   async function ripristinaDefault() {
     const def = defaultTemplates[selected]
     if (!def) return
-    if (!confirm('Vuoi ripristinare il template di default? Le modifiche personalizzate andranno perse.')) return
+    setResetting(true)
     setTemplates(prev => ({
       ...prev,
       [selected]: { ...prev[selected], oggetto: def.oggetto, corpo_html: def.corpo_html, personalizzato: false }
@@ -100,6 +102,8 @@ export default function EventEmailTab({ eventoId }) {
       .update({ oggetto: def.oggetto, corpo_html: def.corpo_html, personalizzato: false, updated_at: new Date().toISOString() })
       .eq('event_id', eventoId)
       .eq('tipo', selected)
+    setResetting(false)
+    setShowResetModal(false)
   }
 
   function insertVarInOggetto(v) {
@@ -187,12 +191,11 @@ export default function EventEmailTab({ eventoId }) {
                 <EyeIcon size={12} /> Anteprima
               </button>
               <div style={{ flex: 1 }} />
-              {isPersonalizzato && (
-                <button type="button" onClick={ripristinaDefault}
-                  style={{ display: 'flex', alignItems: 'center', gap: '4px', padding: '5px 10px', borderRadius: '6px', border: '1px solid #E5E7EB', cursor: 'pointer', background: 'white', fontSize: '11px', color: '#6B7280', fontFamily: "'Inter',sans-serif" }}>
-                  <RotateCcw size={11} /> Ripristina default
-                </button>
-              )}
+              <button type="button" onClick={() => setShowResetModal(true)}
+                style={{ display:'flex', alignItems:'center', gap:'4px', padding:'5px 12px', borderRadius:'6px', border:'1px solid #E5E7EB', cursor:'pointer', background:'white', fontSize:'11px', color: isPersonalizzato ? '#DC2626' : '#6B7280', fontFamily:"'Inter',sans-serif", fontWeight: isPersonalizzato ? '700' : '500' }}>
+                <RotateCcw size={11} />
+                {isPersonalizzato ? 'Ripristina originale ●' : 'Ripristina originale'}
+              </button>
               <button type="button" onClick={save} disabled={saving}
                 style={{ display: 'flex', alignItems: 'center', gap: '4px', padding: '6px 14px', borderRadius: '6px', border: 'none', cursor: 'pointer', fontFamily: "'Inter',sans-serif", background: saved ? '#16A34A' : '#003DA5', color: 'white', fontWeight: '700', fontSize: '12px' }}>
                 {saved ? <><CheckCircle size={12} /> Salvato</> : saving ? 'Salvo…' : <><Save size={12} /> Salva</>}
@@ -268,6 +271,44 @@ export default function EventEmailTab({ eventoId }) {
           </div>
         </div>
       </div>
+
+      {/* ── MODAL RIPRISTINA ── */}
+      {showResetModal && (
+        <div style={{ position:'fixed', inset:0, background:'rgba(0,0,0,0.45)', zIndex:1000, display:'flex', alignItems:'center', justifyContent:'center', padding:'24px' }}
+          onClick={() => setShowResetModal(false)}>
+          <div style={{ background:'white', borderRadius:'16px', padding:'32px', maxWidth:'420px', width:'100%', boxShadow:'0 24px 64px rgba(0,0,0,0.2)' }}
+            onClick={e => e.stopPropagation()}>
+            <div style={{ display:'flex', alignItems:'center', gap:'12px', marginBottom:'16px' }}>
+              <div style={{ width:'44px', height:'44px', borderRadius:'12px', background:'#FEF2F2', display:'flex', alignItems:'center', justifyContent:'center', flexShrink:0 }}>
+                <AlertTriangle size={22} color="#DC2626" />
+              </div>
+              <div>
+                <h3 style={{ margin:0, fontSize:'17px', fontWeight:'800', color:'#0A0A0A', letterSpacing:'-0.02em' }}>Ripristina template originale</h3>
+                <p style={{ margin:'3px 0 0', fontSize:'13px', color:'#6B7280' }}>
+                  {TIPI.find(t => t.key === selected)?.label}
+                </p>
+              </div>
+            </div>
+
+            <p style={{ fontSize:'14px', color:'#374151', lineHeight:1.6, margin:'0 0 24px' }}>
+              Stai per eliminare tutte le personalizzazioni di questa email per questo evento e ripristinare il <strong>template standard</strong>.<br/><br/>
+              Questa operazione non può essere annullata.
+            </p>
+
+            <div style={{ display:'flex', gap:'10px', justifyContent:'flex-end' }}>
+              <button type="button" onClick={() => setShowResetModal(false)}
+                style={{ padding:'9px 20px', borderRadius:'8px', border:'1px solid #E5E7EB', background:'white', fontSize:'14px', fontWeight:'600', cursor:'pointer', fontFamily:"'Inter',sans-serif", color:'#374151' }}>
+                Annulla
+              </button>
+              <button type="button" onClick={ripristinaDefault} disabled={resetting}
+                style={{ display:'flex', alignItems:'center', gap:'6px', padding:'9px 20px', borderRadius:'8px', border:'none', background:'#DC2626', color:'white', fontSize:'14px', fontWeight:'700', cursor:'pointer', fontFamily:"'Inter',sans-serif", opacity: resetting ? 0.7 : 1 }}>
+                <RotateCcw size={15} />
+                {resetting ? 'Ripristino…' : 'Sì, ripristina'}
+              </button>
+            </div>
+          </div>
+        </div>
+      )}
     </div>
   )
 }
