@@ -1,13 +1,4 @@
 import React, { useEffect, useRef, useState } from 'react'
-import {
-  DndContext, rectIntersection, PointerSensor, TouchSensor,
-  useSensor, useSensors, DragOverlay
-} from '@dnd-kit/core'
-import {
-  SortableContext, verticalListSortingStrategy,
-  useSortable, arrayMove
-} from '@dnd-kit/sortable'
-import { CSS } from '@dnd-kit/utilities'
 import { useNavigate, useParams } from 'react-router-dom'
 import { supabase } from '../../lib/supabase'
 import { useRole } from '../../hooks/useRole'
@@ -51,112 +42,71 @@ function newSection(tipo) {
   }
 }
 
+// ── BARRA AGGIUNGI SEZIONE ───────────────────────────────
+const SECTION_TYPES_LIST = [
+  { tipo:'testo',      emoji:'📝', label:'Testo ricco' },
+  { tipo:'immagine',   emoji:'🖼',  label:'Immagine' },
+  { tipo:'griglia',    emoji:'⊞',   label:'Griglia colonne' },
+  { tipo:'stats',      emoji:'📊',  label:'Statistiche' },
+  { tipo:'separatore', emoji:'—',   label:'Separatore' },
+  { tipo:'cta',        emoji:'🎯',  label:'Call to action' },
+]
+
+function AddSectionBar({ onAdd }) {
+  const [open, setOpen] = useState(false)
+  return (
+    <div style={{ position:'relative', marginTop:'12px' }}>
+      <button
+        type="button"
+        onClick={() => setOpen(o => !o)}
+        style={{
+          display:'flex', alignItems:'center', gap:'8px',
+          width:'100%', padding:'12px 18px',
+          border:`2px dashed ${open ? '#003DA5' : '#D1D5DB'}`,
+          borderRadius:'8px', backgroundColor: open ? '#EEF3FF' : '#FAFAFA',
+          cursor:'pointer', fontSize:'14px', fontWeight:'700',
+          color: open ? '#003DA5' : '#6B7280',
+          fontFamily:"'Inter',sans-serif", justifyContent:'center',
+          transition:'all .15s',
+        }}>
+        <span style={{ fontSize:'18px', lineHeight:1 }}>{open ? '✕' : '+'}</span>
+        {open ? 'Chiudi' : 'Aggiungi sezione'}
+      </button>
+      {open && (
+        <div style={{
+          marginTop:'8px', border:'1px solid #E5E7EB', borderRadius:'10px',
+          backgroundColor:'#FFFFFF', overflow:'hidden',
+          boxShadow:'0 4px 16px rgba(0,0,0,.08)',
+        }}>
+          {SECTION_TYPES_LIST.map(({ tipo, emoji, label }) => (
+            <button key={tipo} type="button"
+              onClick={() => { onAdd(tipo); setOpen(false) }}
+              style={{
+                display:'flex', alignItems:'center', gap:'12px',
+                width:'100%', padding:'13px 18px',
+                border:'none', borderBottom:'1px solid #F3F4F6',
+                backgroundColor:'#FFF', cursor:'pointer',
+                fontFamily:"'Inter',sans-serif", textAlign:'left',
+                transition:'background-color .1s',
+              }}
+              onMouseEnter={e => e.currentTarget.style.backgroundColor='#EEF3FF'}
+              onMouseLeave={e => e.currentTarget.style.backgroundColor='#FFF'}>
+              <span style={{ fontSize:'20px', flexShrink:0 }}>{emoji}</span>
+              <span style={{ fontSize:'14px', fontWeight:'600', color:'#0A0A0A' }}>{label}</span>
+            </button>
+          ))}
+        </div>
+      )}
+    </div>
+  )
+}
+
 // ── Editor singola sezione ───────────────────────────────────
 
 
 
-// ── SORTABLE WRAPPER ────────────────────────────────────
-function SortableSectionItem({ sec, i, total, onChange, onDelete, onMoveUp, onMoveDown }) {
-  const id = sec.id || `sec-${i}`
-  const { attributes, listeners, setNodeRef, transform, transition, isDragging } = useSortable({ id })
-  const style = {
-    transform: CSS.Transform.toString(transform),
-    transition: transition || 'transform 200ms ease',
-    opacity: isDragging ? 0.35 : 1,
-    position: 'relative',
-    zIndex: isDragging ? 10 : 'auto',
-  }
-  return (
-    <div ref={setNodeRef} style={style}>
-      {/* Handle di trascinamento */}
-      <div {...attributes} {...listeners}
-        style={{
-          position:'absolute', left:'-28px', top:'50%', transform:'translateY(-50%)',
-          cursor:'grab', color:'#D1D5DB', display:'flex', alignItems:'center',
-          padding:'4px', borderRadius:'4px', zIndex:1,
-          touchAction:'none',
-        }}
-        title="Trascina per riordinare">
-        <svg width="16" height="24" viewBox="0 0 16 24" fill="currentColor">
-          <circle cx="5" cy="6"  r="2"/><circle cx="11" cy="6"  r="2"/>
-          <circle cx="5" cy="12" r="2"/><circle cx="11" cy="12" r="2"/>
-          <circle cx="5" cy="18" r="2"/><circle cx="11" cy="18" r="2"/>
-        </svg>
-      </div>
-      <SectionEditor
-        sec={sec}
-        onChange={onChange}
-        onDelete={onDelete}
-        onMoveUp={onMoveUp}
-        onMoveDown={onMoveDown}
-        isFirst={i === 0}
-        isLast={i === total - 1}
-      />
-    </div>
-  )
-}
 
-function InsertZone({ onAdd }) {
-  const [hover, setHover] = React.useState(false)
-  const [open,  setOpen]  = React.useState(false)
-  const TYPES = [
-    { tipo:'testo',      emoji:'📝', label:'Testo',       desc:'Blocco rich text' },
-    { tipo:'immagine',   emoji:'🖼', label:'Immagine',    desc:'Foto con didascalia' },
-    { tipo:'griglia',    emoji:'⊞',  label:'Griglia',     desc:'Colonne affiancate' },
-    { tipo:'stats',      emoji:'📊', label:'Statistiche', desc:'Numeri in evidenza' },
-    { tipo:'separatore', emoji:'—',  label:'Separatore',  desc:'Linea divisoria' },
-    { tipo:'cta',        emoji:'🎯', label:'CTA',          desc:'Pulsante azione' },
-  ]
-  return (
-    <div
-      style={{ position:'relative', display:'flex', alignItems:'center', justifyContent:'center', height: hover||open ? '44px' : '20px', transition:'height .2s', margin:'2px 0', cursor:'pointer' }}
-      onMouseEnter={() => setHover(true)}
-      onMouseLeave={() => { setHover(false) }}>
-      {/* Linea orizzontale */}
-      <div style={{ position:'absolute', left:0, right:0, height:'2px', backgroundColor: hover||open ? '#003DA5' : '#E5E7EB', transition:'background-color .15s, opacity .15s', borderRadius:'2px' }}/>
-      {/* Pulsante + */}
-      {(hover || open) && (
-        <button
-          onClick={e => { e.stopPropagation(); setOpen(!open) }}
-          style={{ position:'relative', zIndex:2, width:'32px', height:'32px', borderRadius:'50%', backgroundColor: open?'#003DA5':'#FFFFFF', border:'2px solid #003DA5', color: open?'#FFF':'#003DA5', fontSize:'20px', fontWeight:'300', lineHeight:'28px', cursor:'pointer', display:'flex', alignItems:'center', justifyContent:'center', boxShadow:'0 2px 8px rgba(0,61,165,.2)', transition:'all .15s', flexShrink:0 }}>
-          {open ? '×' : '+'}
-        </button>
-      )}
-      {/* Dropdown tipi sezione */}
-      {open && (
-        <>
-          <div onClick={()=>setOpen(false)} style={{ position:'fixed', inset:0, zIndex:10 }}/>
-          <div style={{ position:'absolute', top:'100%', left:'50%', transform:'translateX(-50%)', marginTop:'6px', backgroundColor:'#FFF', border:'1px solid #E5E7EB', borderRadius:'12px', boxShadow:'0 8px 32px rgba(0,0,0,.14)', padding:'8px', zIndex:20, display:'grid', gridTemplateColumns:'1fr 1fr 1fr', gap:'6px', minWidth:'360px' }}>
-            <div style={{ gridColumn:'1/-1', fontSize:'11px', fontWeight:'700', color:'#9CA3AF', textTransform:'uppercase', letterSpacing:'.06em', padding:'4px 6px 2px' }}>Scegli tipo di blocco</div>
-            {TYPES.map(({ tipo, emoji, label, desc }) => (
-              <button key={tipo}
-                onClick={() => { onAdd(tipo); setOpen(false); setHover(false) }}
-                style={{ display:'flex', flexDirection:'column', alignItems:'flex-start', padding:'10px', border:'1px solid #E5E7EB', borderRadius:'8px', cursor:'pointer', backgroundColor:'#FFF', fontFamily:"'Inter',sans-serif", transition:'all .1s' }}
-                onMouseEnter={e => { e.currentTarget.style.backgroundColor='#EEF3FF'; e.currentTarget.style.borderColor='#003DA5' }}
-                onMouseLeave={e => { e.currentTarget.style.backgroundColor='#FFF'; e.currentTarget.style.borderColor='#E5E7EB' }}>
-                <span style={{ fontSize:'18px', marginBottom:'4px' }}>{emoji}</span>
-                <span style={{ fontSize:'12px', fontWeight:'700', color:'#0A0A0A' }}>{label}</span>
-                <span style={{ fontSize:'10px', color:'#9CA3AF', marginTop:'1px' }}>{desc}</span>
-              </button>
-            ))}
-          </div>
-        </>
-      )}
-    </div>
-  )
-}
 
-function ContentBlock({ label, badge, badgeColor='#003DA5', children }) {
-  return (
-    <div style={{ border:'1px solid #E5E7EB', borderRadius:'10px', overflow:'hidden', marginBottom:'2px' }}>
-      <div style={{ padding:'8px 16px', backgroundColor:'#F8F9FF', borderBottom:'1px solid #E5E7EB', display:'flex', alignItems:'center', gap:'8px' }}>
-        <span style={{ fontSize:'13px', fontWeight:'700', color: badgeColor }}>{label}</span>
-        {badge && <span style={{ fontSize:'10px', color:'#9CA3AF', backgroundColor:'#F3F4F6', padding:'1px 8px', borderRadius:'10px' }}>{badge}</span>}
-      </div>
-      {children}
-    </div>
-  )
-}
 
 function SectionInserter({ onAdd, label='+ Inserisci sezione qui' }) {
   const [open, setOpen] = React.useState(false)
@@ -384,32 +334,7 @@ export default function EventoEditorPage() {
   const [activeTab, setActiveTab] = useState('info') // info | hero | sezioni | aspetto
   const { canWrite } = useRole()
 
-  const sensors = useSensors(
-    useSensor(PointerSensor, { activationConstraint:{ distance:6 } }),
-    useSensor(TouchSensor,   { activationConstraint:{ delay:150, tolerance:5 } })
-  )
 
-  const [activeId, setActiveId] = React.useState(null)
-
-  function getDndId(s, idx) { return s.id || `sec-${idx}` }
-
-  function handleDragStart(e) { setActiveId(e.active.id) }
-
-  function handleDragOver(e) {
-    const { active, over } = e
-    if (!active || !over || active.id === over.id) return
-    setEvent(p => {
-      const sezioni = p.sezioni || []
-      const oldIdx = sezioni.findIndex((s,i) => getDndId(s,i) === active.id)
-      const newIdx = sezioni.findIndex((s,i) => getDndId(s,i) === over.id)
-      if (oldIdx === -1 || newIdx === -1) return p
-      return { ...p, sezioni: arrayMove(sezioni, oldIdx, newIdx) }
-    })
-  }
-
-  function handleDragEnd(e) {
-    setActiveId(null)
-  }
 
   useEffect(() => {
     if (!isNew) loadEvent()
@@ -492,17 +417,9 @@ export default function EventoEditorPage() {
     setGenerating(false)
   }
 
-  // insertBefore = indice PRIMA del quale inserire (0 = all'inizio, sezioni.length = in fondo)
-  function addSection(tipo, insertBefore) {
+  function addSection(tipo) {
     const sec = newSection(tipo)
-    setEvent(prev => {
-      const arr = [...(prev.sezioni||[])]
-      const pos = (insertBefore === undefined || insertBefore === null)
-        ? arr.length          // in fondo
-        : Math.max(0, Math.min(insertBefore, arr.length))
-      arr.splice(pos, 0, sec)
-      return { ...prev, sezioni: arr }
-    })
+    setEvent(p => ({ ...p, sezioni: [...(p.sezioni||[]), sec] }))
   }
   function updateSection(idx, sec) { setEvent(p=>{ const s=[...p.sezioni]; s[idx]=sec; return {...p,sezioni:s} }) }
   function deleteSection(idx)     { setEvent(p=>({...p,sezioni:p.sezioni.filter((_,i)=>i!==idx)})) }
@@ -698,57 +615,39 @@ export default function EventoEditorPage() {
 
         {/* ── CONTENUTO ── */}
         {activeTab==='contenuto' && (
-            <div style={p.panel}>
-              <h2 style={p.panelTitle}>Contenuto della landing page</h2>
-              <p style={{ fontSize:'13px', color:'#6B7280', margin:'0 0 16px' }}>
-                Usa il <strong>⠿</strong> a sinistra di ogni blocco per trascinarlo nel punto desiderato.
-              </p>
+          <div style={p.panel}>
+            <h2 style={p.panelTitle}>Contenuto della landing page</h2>
 
-              {/* Descrizione principale — non draggabile, sempre in cima */}
-              <div style={{ border:'1px solid #C7D9F8', borderRadius:'10px', overflow:'hidden', marginBottom:'8px', backgroundColor:'#F8FAFF' }}>
-                <div style={{ padding:'8px 16px', borderBottom:'1px solid #E5E7EB', display:'flex', alignItems:'center', gap:'8px' }}>
-                  <span style={{ fontSize:'13px', fontWeight:'700', color:'#003DA5' }}>📝 Descrizione principale</span>
-                  <span style={{ fontSize:'10px', color:'#9CA3AF', backgroundColor:'#EEF3FF', padding:'1px 8px', borderRadius:'10px' }}>sempre in cima</span>
-                </div>
-                <RichEditor
-                  value={event.descrizione_html||''}
-                  onChange={v=>setEvent(p=>({...p,descrizione_html:v}))}
-                  minHeight="260px"
-                  placeholder="Inserisci la descrizione dell'evento…"
-                />
+            {/* Descrizione principale */}
+            <div style={{ border:'1px solid #C7D9F8', borderRadius:'10px', overflow:'hidden', marginBottom:'16px', backgroundColor:'#F8FAFF' }}>
+              <div style={{ padding:'8px 16px', borderBottom:'1px solid #E5E7EB', display:'flex', alignItems:'center', gap:'8px' }}>
+                <span style={{ fontSize:'13px', fontWeight:'700', color:'#003DA5' }}>📝 Descrizione principale</span>
+                <span style={{ fontSize:'10px', color:'#9CA3AF', backgroundColor:'#EEF3FF', padding:'1px 8px', borderRadius:'10px' }}>sempre in cima</span>
               </div>
-
-              {/* Sezioni riordinabili */}
-              <DndContext
-                sensors={sensors}
-                collisionDetection={rectIntersection}
-                onDragStart={handleDragStart}
-                onDragOver={handleDragOver}
-                onDragEnd={handleDragEnd}
-              >
-                <SortableContext items={(event.sezioni||[]).map((s,i) => getDndId(s,i))} strategy={verticalListSortingStrategy}>
-                  <div style={{ display:'flex', flexDirection:'column', gap:'6px', paddingLeft:'32px' }}>
-                    {(event.sezioni||[]).map((sec, i) => (
-                      <SortableSectionItem
-                        key={getDndId(sec,i)}
-                        sec={{ ...sec, id: getDndId(sec,i) }}
-                        i={i}
-                        total={(event.sezioni||[]).length}
-                        onChange={s=>updateSection(i,s)}
-                        onDelete={()=>deleteSection(i)}
-                        onMoveUp={()=>moveSection(i,-1)}
-                        onMoveDown={()=>moveSection(i,1)}
-                      />
-                    ))}
-                  </div>
-                </SortableContext>
-              </DndContext>
-
-              {/* Aggiungi sezione */}
-              <div style={{ marginTop:'12px' }}>
-                <InsertZone onAdd={(tipo) => addSection(tipo, (event.sezioni||[]).length)}/>
-              </div>
+              <RichEditor
+                value={event.descrizione_html||''}
+                onChange={v=>setEvent(p=>({...p,descrizione_html:v}))}
+                minHeight="260px"
+                placeholder="Inserisci la descrizione dell'evento…"
+              />
             </div>
+
+            {/* Sezioni */}
+            {(event.sezioni||[]).map((sec,i)=>(
+              <SectionEditor key={sec.id||i}
+                sec={sec}
+                onChange={s=>updateSection(i,s)}
+                onDelete={()=>deleteSection(i)}
+                onMoveUp={()=>moveSection(i,-1)}
+                onMoveDown={()=>moveSection(i,1)}
+                isFirst={i===0}
+                isLast={i===(event.sezioni.length-1)}
+              />
+            ))}
+
+            {/* Pulsante aggiungi sezione */}
+            <AddSectionBar onAdd={addSection}/>
+          </div>
         )}
 
         {/* ── ASPETTO ── */}
