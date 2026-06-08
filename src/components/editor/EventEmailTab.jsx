@@ -201,28 +201,26 @@ export default function EventEmailTab({ eventoId }) {
 
             {viewMode !== 'preview' && (
               <div style={{ padding: '12px 16px', borderBottom: '1px solid #E5E7EB' }}>
-                <div style={{ marginBottom: '10px' }}>
+                <div style={{ marginBottom: viewMode === 'html' ? '10px' : 0 }}>
                   <label style={lbl}>Oggetto email</label>
-                  <input
-                    id="event-email-oggetto"
-                    value={current.oggetto || ''}
+                  <input id="event-email-oggetto" value={current.oggetto || ''}
                     onChange={e => update('oggetto', e.target.value)}
-                    style={{ width: '100%', padding: '9px 12px', borderRadius: '7px', border: '1.5px solid #E5E7EB', fontSize: '13px', boxSizing: 'border-box', fontFamily: "'Inter',sans-serif", outline: 'none' }}
-                    placeholder="Oggetto dell'email..."
-                  />
+                    style={{ width:'100%', padding:'9px 12px', borderRadius:'7px', border:'1.5px solid #E5E7EB', fontSize:'13px', boxSizing:'border-box', fontFamily:"'Inter',sans-serif", outline:'none' }}
+                    placeholder="Oggetto dell'email..." />
                 </div>
-                <div>
-                  <label style={lbl}>Variabili — clicca per inserire {viewMode === 'visual' ? 'nel corpo' : 'nel campo selezionato'}</label>
-                  <div style={{ display: 'flex', flexWrap: 'wrap', gap: '5px' }}>
-                    {VARIABILI.map(v => (
-                      <button key={v} type="button"
-                        onClick={() => viewMode === 'html' ? insertVarInHtml(v) : insertVarInOggetto(v)}
-                        style={{ padding: '3px 8px', borderRadius: '20px', fontSize: '11px', background: '#EEF3FF', color: '#003DA5', border: '1px solid #C7D9F8', cursor: 'pointer', fontFamily: 'monospace', fontWeight: '600' }}>
-                        {v}
-                      </button>
-                    ))}
+                {viewMode === 'html' && (
+                  <div style={{ marginTop:'10px' }}>
+                    <label style={{ ...lbl, marginBottom:'5px' }}>Variabili — clicca per inserire nell'HTML</label>
+                    <div style={{ display:'flex', flexWrap:'wrap', gap:'5px' }}>
+                      {VARIABILI.map(v => (
+                        <button key={v} type="button" onClick={() => insertVarInHtml(v)}
+                          style={{ padding:'3px 8px', borderRadius:'20px', fontSize:'11px', background:'#EEF3FF', color:'#003DA5', border:'1px solid #C7D9F8', cursor:'pointer', fontFamily:'monospace', fontWeight:'600' }}>
+                          {v}
+                        </button>
+                      ))}
+                    </div>
                   </div>
-                </div>
+                )}
               </div>
             )}
 
@@ -234,6 +232,7 @@ export default function EventEmailTab({ eventoId }) {
                 onChange={html => update('corpo_html', html)}
                 placeholder="Scrivi il corpo dell'email…"
                 minHeight="340px"
+                variables={VARIABILI}
               />
             )}
 

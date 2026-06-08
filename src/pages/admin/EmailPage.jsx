@@ -175,32 +175,30 @@ export default function EmailPage() {
                 </button>
               </div>
 
+              {/* Oggetto sempre visibile tranne in preview */}
               {viewMode !== 'preview' && (
-                <div style={{ padding: '16px 20px', borderBottom: '1px solid #E5E7EB' }}>
-                  {/* Oggetto */}
-                  <div style={{ marginBottom: '12px' }}>
-                    <label style={s.label}>Oggetto email</label>
-                    <input
-                      id="email-oggetto-input"
-                      value={current.oggetto || ''}
-                      onChange={e => update('oggetto', e.target.value)}
-                      style={s.input}
-                      placeholder="Oggetto dell'email..."
-                    />
-                  </div>
-                  {/* Variabili */}
-                  <div>
-                    <label style={s.label}>Variabili — clicca per inserire {viewMode === 'visual' ? 'nel corpo' : 'nel campo selezionato'}</label>
-                    <div style={{ display: 'flex', flexWrap: 'wrap', gap: '5px' }}>
-                      {VARIABILI.map(v => (
-                        <button key={v} type="button"
-                          onClick={() => viewMode === 'html' ? insertVarInHtml(v) : insertVarInOggetto(v)}
-                          style={{ padding: '3px 10px', borderRadius: '20px', fontSize: '11px', background: '#EEF3FF', color: '#003DA5', border: '1px solid #C7D9F8', cursor: 'pointer', fontFamily: 'monospace', fontWeight: '600' }}>
-                          {v}
-                        </button>
-                      ))}
+                <div style={{ padding: '14px 20px', borderBottom: '1px solid #E5E7EB' }}>
+                  <label style={s.label}>Oggetto email</label>
+                  <input
+                    id="email-oggetto-input"
+                    value={current.oggetto || ''}
+                    onChange={e => update('oggetto', e.target.value)}
+                    style={s.input}
+                    placeholder="Oggetto dell'email..."
+                  />
+                  {viewMode === 'html' && (
+                    <div style={{ marginTop:'10px' }}>
+                      <label style={{ ...s.label, marginBottom:'6px' }}>Variabili — clicca per inserire nell'HTML</label>
+                      <div style={{ display:'flex', flexWrap:'wrap', gap:'5px' }}>
+                        {VARIABILI.map(v => (
+                          <button key={v} type="button" onClick={() => insertVarInHtml(v)}
+                            style={{ padding:'3px 10px', borderRadius:'20px', fontSize:'11px', background:'#EEF3FF', color:'#003DA5', border:'1px solid #C7D9F8', cursor:'pointer', fontFamily:'monospace', fontWeight:'600' }}>
+                            {v}
+                          </button>
+                        ))}
+                      </div>
                     </div>
-                  </div>
+                  )}
                 </div>
               )}
 
@@ -213,6 +211,7 @@ export default function EmailPage() {
                     onChange={html => update('corpo_html', html)}
                     placeholder="Scrivi il corpo dell'email…"
                     minHeight="380px"
+                    variables={VARIABILI}
                   />
                 </div>
               )}
