@@ -11,6 +11,7 @@ import {
   Hash, Minus, MousePointerClick, AlignLeft, AlignCenter, Wand2, Loader2,
 } from 'lucide-react'
 import { Field, Input, Select, Btn, StatoBadge } from '../../components/ui'
+import EventEmailTab from '../../components/editor/EventEmailTab'
 
 const toSlug = s => s.toLowerCase().normalize('NFD').replace(/[\u0300-\u036f]/g,'')
   .replace(/[^a-z0-9]+/g,'-').replace(/^-|-$/g,'')
@@ -441,10 +442,11 @@ export default function EventoEditorPage() {
   }
 
   const TABS = [
-    { id:'info',    label:'📋 Info & Date' },
-    { id:'hero',    label:'🖼 Hero' },
-    { id:'contenuto', label:`📝 Contenuto` },
-    { id:'aspetto', label:'🎨 Aspetto' },
+    { id:'info',      label:'📋 Info & Date' },
+    { id:'hero',      label:'🖼 Hero' },
+    { id:'contenuto', label:'📝 Contenuto' },
+    { id:'aspetto',   label:'🎨 Aspetto' },
+    { id:'email',     label:'✉️ Email' },
   ]
 
   return (
@@ -707,6 +709,14 @@ export default function EventoEditorPage() {
       <style>{`
         @keyframes spin { from{transform:rotate(0)} to{transform:rotate(360deg)} }
       `}</style>
+
+        {/* ── EMAIL ── */}
+        {activeTab==='email' && (
+          <div style={p.panel}>
+            <h2 style={p.panelTitle}>Email per questo evento</h2>
+            <EventEmailTab eventoId={id} />
+          </div>
+        )}
     </div>
   )
 }
