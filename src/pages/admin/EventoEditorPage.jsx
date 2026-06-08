@@ -617,36 +617,15 @@ export default function EventoEditorPage() {
         {activeTab==='contenuto' && (
           <div style={p.panel}>
             <h2 style={p.panelTitle}>Contenuto della landing page</h2>
-
-            {/* Descrizione principale */}
-            <div style={{ border:'1px solid #C7D9F8', borderRadius:'10px', overflow:'hidden', marginBottom:'16px', backgroundColor:'#F8FAFF' }}>
-              <div style={{ padding:'8px 16px', borderBottom:'1px solid #E5E7EB', display:'flex', alignItems:'center', gap:'8px' }}>
-                <span style={{ fontSize:'13px', fontWeight:'700', color:'#003DA5' }}>📝 Descrizione principale</span>
-                <span style={{ fontSize:'10px', color:'#9CA3AF', backgroundColor:'#EEF3FF', padding:'1px 8px', borderRadius:'10px' }}>sempre in cima</span>
-              </div>
-              <RichEditor
-                value={event.descrizione_html||''}
-                onChange={v=>setEvent(p=>({...p,descrizione_html:v}))}
-                minHeight="260px"
-                placeholder="Inserisci la descrizione dell'evento…"
-              />
-            </div>
-
-            {/* Sezioni */}
-            {(event.sezioni||[]).map((sec,i)=>(
-              <SectionEditor key={sec.id||i}
-                sec={sec}
-                onChange={s=>updateSection(i,s)}
-                onDelete={()=>deleteSection(i)}
-                onMoveUp={()=>moveSection(i,-1)}
-                onMoveDown={()=>moveSection(i,1)}
-                isFirst={i===0}
-                isLast={i===(event.sezioni.length-1)}
-              />
-            ))}
-
-            {/* Pulsante aggiungi sezione */}
-            <AddSectionBar onAdd={addSection}/>
+            <p style={{ fontSize:'13px', color:'#6B7280', margin:'0 0 12px', lineHeight:'1.5' }}>
+              Posiziona il cursore dove vuoi e usa il pulsante <strong>✨</strong> nella toolbar per inserire blocchi strutturati (statistiche, griglia, CTA, box colorati) direttamente nel punto desiderato.
+            </p>
+            <RichEditor
+              value={event.descrizione_html||''}
+              onChange={v=>setEvent(p=>({...p,descrizione_html:v}))}
+              minHeight="600px"
+              placeholder="Inizia a scrivere il contenuto dell'evento. Usa la toolbar per formattare il testo e il pulsante ✨ per inserire blocchi speciali nel punto del cursore…"
+            />
           </div>
         )}
 

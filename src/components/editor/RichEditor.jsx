@@ -229,33 +229,46 @@ export default function RichEditor({ value, onChange, placeholder = 'Scrivi qui�
   }
 
   const SPECIAL_BLOCKS = [
+    // Box callout
+    { label:'📘 Box Info',    html:'<div class="callout-info"><p><strong>ℹ️ Info:</strong> Inserisci il testo informativo qui.</p></div>' },
+    { label:'⚠️ Box Avviso', html:'<div class="callout-warning"><p><strong>⚠️ Attenzione:</strong> Inserisci l\'avviso qui.</p></div>' },
+    { label:'✅ Box Successo',html:'<div class="callout-success"><p><strong>✅ Nota:</strong> Inserisci il contenuto qui.</p></div>' },
+    { label:'❌ Box Errore',  html:'<div class="callout-error"><p><strong>❌ Importante:</strong> Inserisci il contenuto qui.</p></div>' },
+    // Animazioni
+    { label:'✨ Fade In',     html:'<p class="animate-fade">Testo con animazione fade-in.</p>' },
+    { label:'⬆️ Slide Up',   html:'<p class="animate-slide">Testo con animazione slide-up.</p>' },
+    { label:'💓 Pulsante',   html:'<p class="animate-pulse"><strong>Testo pulsante.</strong></p>' },
+    // Sezioni strutturate
     {
-      label:'📘 Box Info',
-      html:'<div class="callout-info"><p><strong>ℹ️ Info:</strong> Inserisci il testo informativo qui.</p></div>',
+      label:'📊 Statistiche',
+      html:`<div class="block-stats">
+  <div class="stat-item"><span class="stat-num">100+</span><span class="stat-label">PARTECIPANTI</span></div>
+  <div class="stat-item"><span class="stat-num">10</span><span class="stat-label">RELATORI</span></div>
+  <div class="stat-item"><span class="stat-num">3</span><span class="stat-label">ORE</span></div>
+</div><p></p>`,
     },
     {
-      label:'⚠️ Box Avviso',
-      html:'<div class="callout-warning"><p><strong>⚠️ Attenzione:</strong> Inserisci l\'avviso qui.</p></div>',
+      label:'⊞ Griglia 2 colonne',
+      html:`<div class="block-grid2">
+  <div class="grid-card"><p><strong>🎯 Titolo colonna 1</strong></p><p>Descrizione del contenuto di questa colonna.</p></div>
+  <div class="grid-card"><p><strong>🎯 Titolo colonna 2</strong></p><p>Descrizione del contenuto di questa colonna.</p></div>
+</div><p></p>`,
     },
     {
-      label:'✅ Box Successo',
-      html:'<div class="callout-success"><p><strong>✅ Nota:</strong> Inserisci il contenuto qui.</p></div>',
+      label:'⊞ Griglia 3 colonne',
+      html:`<div class="block-grid3">
+  <div class="grid-card"><p><strong>🎯 Col 1</strong></p><p>Testo.</p></div>
+  <div class="grid-card"><p><strong>🎯 Col 2</strong></p><p>Testo.</p></div>
+  <div class="grid-card"><p><strong>🎯 Col 3</strong></p><p>Testo.</p></div>
+</div><p></p>`,
     },
     {
-      label:'❌ Box Errore',
-      html:'<div class="callout-error"><p><strong>❌ Importante:</strong> Inserisci il contenuto qui.</p></div>',
+      label:'🎯 CTA Pulsante',
+      html:`<div class="block-cta"><p class="cta-title">Partecipa all\'evento</p><a href="#form-iscrizione" class="cta-btn">Iscriviti ora →</a></div><p></p>`,
     },
     {
-      label:'✨ Fade In',
-      html:'<p class="animate-fade">Testo con animazione fade-in.</p>',
-    },
-    {
-      label:'⬆️ Slide Up',
-      html:'<p class="animate-slide">Testo con animazione slide-up.</p>',
-    },
-    {
-      label:'💓 Pulsante',
-      html:'<p class="animate-pulse"><strong>Testo pulsante.</strong></p>',
+      label:'— Separatore',
+      html:'<hr/><p></p>',
     },
   ]
 
@@ -596,7 +609,22 @@ export default function RichEditor({ value, onChange, placeholder = 'Scrivi qui�
           pointer-events:none; top:0; width:4px;
         }
         .ProseMirror table { position:relative; }
-      `}</style>
+      /* Blocchi sezione strutturati */
+  .rich-content .block-stats { display:flex; flex-wrap:wrap; gap:24px; justify-content:center; padding:32px 0; }
+  .rich-content .stat-item { text-align:center; flex:1 1 100px; }
+  .rich-content .stat-num { display:block; font-size:clamp(36px,6vw,56px); font-weight:900; color:#003DA5; letter-spacing:-.04em; line-height:1; }
+  .rich-content .stat-label { display:block; font-size:13px; color:#6B7280; font-weight:700; text-transform:uppercase; letter-spacing:.06em; margin-top:4px; }
+  .rich-content .block-grid2 { display:grid; grid-template-columns:1fr 1fr; gap:16px; margin:16px 0; }
+  .rich-content .block-grid3 { display:grid; grid-template-columns:1fr 1fr 1fr; gap:16px; margin:16px 0; }
+  @media(max-width:600px) {
+    .rich-content .block-grid2,
+    .rich-content .block-grid3 { grid-template-columns:1fr; }
+  }
+  .rich-content .grid-card { background:#FFFFFF; border:1px solid #E5E7EB; border-radius:10px; padding:20px; }
+  .rich-content .block-cta { background:#EEF3FF; border:1px solid #C7D9F8; border-radius:12px; padding:28px 24px; text-align:center; margin:20px 0; }
+  .rich-content .cta-title { font-size:1.4em; font-weight:900; color:#0A0A0A; margin:0 0 16px; letter-spacing:-.02em; }
+  .rich-content .cta-btn { display:inline-block; background:#003DA5; color:#FFF; border-radius:8px; padding:12px 32px; font-weight:800; font-size:15px; text-decoration:none; }
+  `}</style>
     </div>
   )
 }
