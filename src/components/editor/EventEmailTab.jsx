@@ -4,10 +4,10 @@ import RichEditor from './RichEditor'
 import { Save, RotateCcw, CheckCircle, Code, Eye as EyeIcon } from 'lucide-react'
 
 const TIPI = [
-  { key: 'conferma_iscrizione',      label: 'Conferma Iscrizione',      icon: '✅', desc: 'Inviata all\'iscritto appena si registra' },
-  { key: 'notifica_admin',           label: 'Notifica Admin',           icon: '🔔', desc: 'Inviata agli admin ad ogni nuova iscrizione' },
-  { key: 'reminder_evento',          label: 'Reminder Evento',          icon: '⏰', desc: 'Inviata agli iscritti prima dell\'evento' },
-  { key: 'questionario_post_evento', label: 'Questionario Post Evento', icon: '⭐', desc: 'Inviata ai presenti dopo la chiusura' },
+  { key: 'conferma',      label: 'Conferma Iscrizione',      icon: '✅', desc: 'Inviata all\'iscritto appena si registra' },
+  { key: 'notifica_admin',label: 'Notifica Admin',           icon: '🔔', desc: 'Inviata agli admin ad ogni nuova iscrizione' },
+  { key: 'reminder',      label: 'Reminder Evento',          icon: '⏰', desc: 'Inviata agli iscritti prima dell\'evento' },
+  { key: 'questionario',  label: 'Questionario Post Evento', icon: '⭐', desc: 'Inviata ai presenti dopo la chiusura' },
 ]
 
 const VARIABILI = [
@@ -30,7 +30,7 @@ const PREVIEW_MAP = {
 }
 
 export default function EventEmailTab({ eventoId }) {
-  const [selected, setSelected] = useState('conferma_iscrizione')
+  const [selected, setSelected] = useState('conferma')
   const [templates, setTemplates] = useState({})
   const [defaultTemplates, setDefaultTemplates] = useState({})
   const [saving, setSaving] = useState(false)

@@ -4,10 +4,10 @@ import RichEditor from '../../components/editor/RichEditor'
 import { Mail, Save, CheckCircle, Code, Eye as EyeIcon } from 'lucide-react'
 
 const TIPI = [
-  { key: 'conferma_iscrizione',      label: 'Conferma Iscrizione',      icon: '✅', desc: 'Inviata automaticamente all\'iscritto alla registrazione' },
-  { key: 'notifica_admin',           label: 'Notifica Admin',           icon: '🔔', desc: 'Inviata agli amministratori ad ogni nuova iscrizione' },
-  { key: 'reminder_evento',          label: 'Reminder Evento',          icon: '⏰', desc: 'Inviata agli iscritti prima dell\'evento (configurabile)' },
-  { key: 'questionario_post_evento', label: 'Questionario Post Evento', icon: '⭐', desc: 'Inviata ai presenti dopo la chiusura dell\'evento' },
+  { key: 'conferma',      label: 'Conferma Iscrizione',      icon: '✅', desc: 'Inviata automaticamente all\'iscritto alla registrazione' },
+  { key: 'notifica_admin',label: 'Notifica Admin',           icon: '🔔', desc: 'Inviata agli amministratori ad ogni nuova iscrizione' },
+  { key: 'reminder',      label: 'Reminder Evento',          icon: '⏰', desc: 'Inviata agli iscritti prima dell\'evento (configurabile)' },
+  { key: 'questionario',  label: 'Questionario Post Evento', icon: '⭐', desc: 'Inviata ai presenti dopo la chiusura dell\'evento' },
 ]
 
 const VARIABILI = [
@@ -30,7 +30,7 @@ const PREVIEW_MAP = {
 }
 
 export default function EmailPage() {
-  const [selected, setSelected] = useState('conferma_iscrizione')
+  const [selected, setSelected] = useState('conferma')
   const [templates, setTemplates] = useState({})
   const [saving, setSaving] = useState(false)
   const [saved, setSaved] = useState(false)
