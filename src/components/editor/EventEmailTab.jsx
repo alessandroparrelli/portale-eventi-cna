@@ -1,6 +1,7 @@
 import { useState, useEffect } from 'react'
 import { supabase } from '../../lib/supabase'
-import { Save, RotateCcw, CheckCircle } from 'lucide-react'
+import RichEditor from './RichEditor'
+import { Save, RotateCcw, CheckCircle, Code, Eye as EyeIcon } from 'lucide-react'
 
 const TIPI = [
   { key: 'conferma_iscrizione',      label: 'Conferma Iscrizione',      icon: '✅', desc: 'Inviata all\'iscritto appena si registra' },
@@ -34,7 +35,7 @@ export default function EventEmailTab({ eventoId }) {
   const [defaultTemplates, setDefaultTemplates] = useState({})
   const [saving, setSaving] = useState(false)
   const [saved, setSaved] = useState(false)
-  const [preview, setPreview] = useState(false)
+  const [viewMode, setViewMode] = useState('visual') // 'visual' | 'html' | 'preview'
   const [loading, setLoading] = useState(true)
 
   useEffect(() => {
@@ -46,9 +47,9 @@ export default function EventEmailTab({ eventoId }) {
 
   async function fetchEventTemplates() {
     const { data } = await supabase
-      .from('event_email_templates')
+      .from('email_templates')
       .select('*')
-      .eq('evento_id', eventoId)
+      .eq('event_id', eventoId)
     if (data) {
       const map = {}
       data.forEach(t => { map[t.tipo] = t })
@@ -57,7 +58,7 @@ export default function EventEmailTab({ eventoId }) {
   }
 
   async function fetchDefaultTemplates() {
-    const { data } = await supabase.from('email_templates').select('*')
+    const { data } = await supabase.from('email_templates_default').select('*')
     if (data) {
       const map = {}
       data.forEach(t => { map[t.tipo] = t })
@@ -78,14 +79,9 @@ export default function EventEmailTab({ eventoId }) {
   async function save() {
     setSaving(true)
     const t = templates[selected]
-    await supabase.from('event_email_templates')
-      .update({
-        oggetto: t.oggetto,
-        corpo_html: t.corpo_html,
-        personalizzato: true,
-        updated_at: new Date().toISOString()
-      })
-      .eq('evento_id', eventoId)
+    await supabase.from('email_templates')
+      .update({ oggetto: t.oggetto, corpo_html: t.corpo_html, personalizzato: true, updated_at: new Date().toISOString() })
+      .eq('event_id', eventoId)
       .eq('tipo', selected)
     setSaving(false)
     setSaved(true)
@@ -100,33 +96,41 @@ export default function EventEmailTab({ eventoId }) {
       ...prev,
       [selected]: { ...prev[selected], oggetto: def.oggetto, corpo_html: def.corpo_html, personalizzato: false }
     }))
-    await supabase.from('event_email_templates')
+    await supabase.from('email_templates')
       .update({ oggetto: def.oggetto, corpo_html: def.corpo_html, personalizzato: false, updated_at: new Date().toISOString() })
-      .eq('evento_id', eventoId)
+      .eq('event_id', eventoId)
       .eq('tipo', selected)
   }
 
-  function insertVar(v) {
-    const id = `corpo-event-${selected}`
-    const el = document.getElementById(id)
-    if (!el) {
-      update('corpo_html', (current.corpo_html || '') + v)
-      return
-    }
-    const start = el.selectionStart
-    const end = el.selectionEnd
-    const val = el.value
-    const newVal = val.substring(0, start) + v + val.substring(end)
+  function insertVarInOggetto(v) {
+    const el = document.getElementById('event-email-oggetto')
+    if (!el) { update('oggetto', (current.oggetto || '') + v); return }
+    const start = el.selectionStart, end = el.selectionEnd
+    const newVal = current.oggetto.substring(0, start) + v + current.oggetto.substring(end)
+    update('oggetto', newVal)
+    setTimeout(() => { el.selectionStart = el.selectionEnd = start + v.length; el.focus() }, 0)
+  }
+
+  function insertVarInHtml(v) {
+    const el = document.getElementById('event-email-html-raw')
+    if (!el) { update('corpo_html', (current.corpo_html || '') + v); return }
+    const start = el.selectionStart, end = el.selectionEnd
+    const newVal = current.corpo_html.substring(0, start) + v + current.corpo_html.substring(end)
     update('corpo_html', newVal)
-    setTimeout(() => {
-      el.selectionStart = el.selectionEnd = start + v.length
-      el.focus()
-    }, 0)
+    setTimeout(() => { el.selectionStart = el.selectionEnd = start + v.length; el.focus() }, 0)
   }
 
   function getPreviewHtml() {
     let html = current.corpo_html || ''
     Object.entries(PREVIEW_MAP).forEach(([k, v]) => { html = html.replaceAll(k, v) })
+    if (!html.includes('<html')) {
+      html = `<!DOCTYPE html><html><head><meta charset="UTF-8"><style>
+        body{font-family:Inter,sans-serif;color:#0A0A0A;line-height:1.6;padding:24px;max-width:600px;margin:0 auto}
+        h1,h2,h3{letter-spacing:-0.03em} a{color:#003DA5}
+        table{border-collapse:collapse;width:100%} td,th{padding:8px 12px;border:1px solid #e5e7eb}
+        th{background:#003DA5;color:white}
+      </style></head><body>${html}</body></html>`
+    }
     return html
   }
 
@@ -147,33 +151,21 @@ export default function EventEmailTab({ eventoId }) {
         <div style={{ width: '210px', flexShrink: 0 }}>
           <div style={{ display: 'flex', flexDirection: 'column', gap: '6px' }}>
             {TIPI.map(t => (
-              <button
-                key={t.key}
-                type="button"
-                onClick={() => { setSelected(t.key); setPreview(false) }}
-                style={{
-                  textAlign: 'left', padding: '12px 14px', borderRadius: '8px',
-                  border: 'none', cursor: 'pointer', position: 'relative',
-                  background: selected === t.key ? '#003DA5' : '#F9FAFB',
-                  color: selected === t.key ? 'white' : '#0A0A0A',
-                  transition: 'all 0.15s', fontFamily: "'Inter',sans-serif"
-                }}
+              <button key={t.key} type="button"
+                onClick={() => { setSelected(t.key); setViewMode('visual') }}
+                style={{ textAlign: 'left', padding: '12px 14px', borderRadius: '8px', border: 'none', cursor: 'pointer', position: 'relative', background: selected === t.key ? '#003DA5' : '#F9FAFB', color: selected === t.key ? 'white' : '#0A0A0A', transition: 'all 0.15s', fontFamily: "'Inter',sans-serif" }}
               >
                 <div style={{ fontSize: '18px', marginBottom: '3px', lineHeight: 1 }}>{t.icon}</div>
                 <div style={{ fontWeight: '700', fontSize: '12px' }}>{t.label}</div>
                 <div style={{ fontSize: '11px', opacity: 0.7, marginTop: '2px', lineHeight: 1.4 }}>{t.desc}</div>
                 {templates[t.key]?.personalizzato && (
-                  <div style={{
-                    position: 'absolute', top: '8px', right: '8px',
-                    width: '8px', height: '8px', borderRadius: '50%',
-                    background: selected === t.key ? 'rgba(255,255,255,0.8)' : '#F59E0B'
-                  }} title="Personalizzato per questo evento" />
+                  <div style={{ position: 'absolute', top: '8px', right: '8px', width: '8px', height: '8px', borderRadius: '50%', background: selected === t.key ? 'rgba(255,255,255,0.8)' : '#F59E0B' }} title="Personalizzato per questo evento" />
                 )}
               </button>
             ))}
           </div>
           <div style={{ marginTop: '12px', padding: '10px 12px', background: '#FFFBEB', borderRadius: '8px', fontSize: '11px', color: '#92400E', lineHeight: 1.4 }}>
-            🟡 = template personalizzato per questo evento
+            🟡 = personalizzato per questo evento
           </div>
         </div>
 
@@ -181,88 +173,96 @@ export default function EventEmailTab({ eventoId }) {
         <div style={{ flex: 1 }}>
           <div style={{ background: '#FFFFFF', borderRadius: '10px', border: '1px solid #E5E7EB', overflow: 'hidden' }}>
             {/* Toolbar */}
-            <div style={{ padding: '12px 16px', borderBottom: '1px solid #E5E7EB', display: 'flex', gap: '8px', alignItems: 'center', flexWrap: 'wrap' }}>
-              <button type="button" onClick={() => setPreview(false)}
-                style={{ padding: '5px 12px', borderRadius: '6px', border: 'none', cursor: 'pointer', fontSize: '12px', fontFamily: "'Inter',sans-serif", background: !preview ? '#003DA5' : '#F5F5F5', color: !preview ? 'white' : '#555', fontWeight: '600' }}>
-                ✏️ Modifica
+            <div style={{ padding: '10px 14px', borderBottom: '1px solid #E5E7EB', display: 'flex', gap: '6px', alignItems: 'center', flexWrap: 'wrap' }}>
+              <button type="button" onClick={() => setViewMode('visual')}
+                style={{ ...tb, background: viewMode === 'visual' ? '#003DA5' : '#F5F5F5', color: viewMode === 'visual' ? 'white' : '#555' }}>
+                ✏️ Visuale
               </button>
-              <button type="button" onClick={() => setPreview(true)}
-                style={{ padding: '5px 12px', borderRadius: '6px', border: 'none', cursor: 'pointer', fontSize: '12px', fontFamily: "'Inter',sans-serif", background: preview ? '#003DA5' : '#F5F5F5', color: preview ? 'white' : '#555', fontWeight: '600' }}>
-                👁 Anteprima
+              <button type="button" onClick={() => setViewMode('html')}
+                style={{ ...tb, background: viewMode === 'html' ? '#003DA5' : '#F5F5F5', color: viewMode === 'html' ? 'white' : '#555', display: 'flex', alignItems: 'center', gap: '4px' }}>
+                <Code size={12} /> HTML
+              </button>
+              <button type="button" onClick={() => setViewMode('preview')}
+                style={{ ...tb, background: viewMode === 'preview' ? '#003DA5' : '#F5F5F5', color: viewMode === 'preview' ? 'white' : '#555', display: 'flex', alignItems: 'center', gap: '4px' }}>
+                <EyeIcon size={12} /> Anteprima
               </button>
               <div style={{ flex: 1 }} />
               {isPersonalizzato && (
                 <button type="button" onClick={ripristinaDefault}
-                  style={{ display: 'flex', alignItems: 'center', gap: '5px', padding: '5px 12px', borderRadius: '6px', border: '1px solid #E5E7EB', cursor: 'pointer', background: 'white', fontSize: '12px', color: '#6B7280', fontFamily: "'Inter',sans-serif" }}>
-                  <RotateCcw size={12} /> Ripristina default
+                  style={{ display: 'flex', alignItems: 'center', gap: '4px', padding: '5px 10px', borderRadius: '6px', border: '1px solid #E5E7EB', cursor: 'pointer', background: 'white', fontSize: '11px', color: '#6B7280', fontFamily: "'Inter',sans-serif" }}>
+                  <RotateCcw size={11} /> Ripristina default
                 </button>
               )}
               <button type="button" onClick={save} disabled={saving}
-                style={{ display: 'flex', alignItems: 'center', gap: '5px', padding: '6px 16px', borderRadius: '6px', border: 'none', cursor: 'pointer', fontFamily: "'Inter',sans-serif", background: saved ? '#16A34A' : '#003DA5', color: 'white', fontWeight: '700', fontSize: '12px' }}>
+                style={{ display: 'flex', alignItems: 'center', gap: '4px', padding: '6px 14px', borderRadius: '6px', border: 'none', cursor: 'pointer', fontFamily: "'Inter',sans-serif", background: saved ? '#16A34A' : '#003DA5', color: 'white', fontWeight: '700', fontSize: '12px' }}>
                 {saved ? <><CheckCircle size={12} /> Salvato</> : saving ? 'Salvo…' : <><Save size={12} /> Salva</>}
               </button>
             </div>
 
-            {!preview ? (
-              <div style={{ padding: '16px' }}>
-                {/* Oggetto */}
-                <div style={{ marginBottom: '14px' }}>
-                  <label style={{ fontSize: '11px', fontWeight: '700', color: '#6B7280', textTransform: 'uppercase', letterSpacing: '.06em', display: 'block', marginBottom: '6px' }}>
-                    Oggetto email
-                  </label>
+            {viewMode !== 'preview' && (
+              <div style={{ padding: '12px 16px', borderBottom: '1px solid #E5E7EB' }}>
+                <div style={{ marginBottom: '10px' }}>
+                  <label style={lbl}>Oggetto email</label>
                   <input
+                    id="event-email-oggetto"
                     value={current.oggetto || ''}
                     onChange={e => update('oggetto', e.target.value)}
                     style={{ width: '100%', padding: '9px 12px', borderRadius: '7px', border: '1.5px solid #E5E7EB', fontSize: '13px', boxSizing: 'border-box', fontFamily: "'Inter',sans-serif", outline: 'none' }}
                     placeholder="Oggetto dell'email..."
                   />
                 </div>
-
-                {/* Variabili */}
-                <div style={{ marginBottom: '14px' }}>
-                  <label style={{ fontSize: '11px', fontWeight: '700', color: '#6B7280', textTransform: 'uppercase', letterSpacing: '.06em', display: 'block', marginBottom: '6px' }}>
-                    Variabili — clicca per inserire nel corpo
-                  </label>
+                <div>
+                  <label style={lbl}>Variabili — clicca per inserire {viewMode === 'visual' ? 'nel corpo' : 'nel campo selezionato'}</label>
                   <div style={{ display: 'flex', flexWrap: 'wrap', gap: '5px' }}>
                     {VARIABILI.map(v => (
-                      <button key={v} type="button" onClick={() => insertVar(v)}
+                      <button key={v} type="button"
+                        onClick={() => viewMode === 'html' ? insertVarInHtml(v) : insertVarInOggetto(v)}
                         style={{ padding: '3px 8px', borderRadius: '20px', fontSize: '11px', background: '#EEF3FF', color: '#003DA5', border: '1px solid #C7D9F8', cursor: 'pointer', fontFamily: 'monospace', fontWeight: '600' }}>
                         {v}
                       </button>
                     ))}
                   </div>
                 </div>
-
-                {/* Corpo HTML */}
-                <div>
-                  <label style={{ fontSize: '11px', fontWeight: '700', color: '#6B7280', textTransform: 'uppercase', letterSpacing: '.06em', display: 'block', marginBottom: '6px' }}>
-                    Corpo email (HTML)
-                  </label>
-                  <textarea
-                    id={`corpo-event-${selected}`}
-                    value={current.corpo_html || ''}
-                    onChange={e => update('corpo_html', e.target.value)}
-                    rows={20}
-                    style={{ width: '100%', padding: '10px 12px', borderRadius: '7px', border: '1.5px solid #E5E7EB', fontSize: '11px', boxSizing: 'border-box', fontFamily: 'monospace', lineHeight: 1.6, resize: 'vertical', outline: 'none' }}
-                    placeholder="Inserisci il codice HTML dell'email..."
-                  />
-                </div>
               </div>
-            ) : (
+            )}
+
+            {/* Editor visuale */}
+            {viewMode === 'visual' && (
+              <RichEditor
+                key={selected}
+                value={current.corpo_html || ''}
+                onChange={html => update('corpo_html', html)}
+                placeholder="Scrivi il corpo dell'email…"
+                minHeight="340px"
+              />
+            )}
+
+            {/* HTML grezzo */}
+            {viewMode === 'html' && (
+              <div style={{ padding: '14px 16px' }}>
+                <label style={lbl}>Corpo email (HTML grezzo)</label>
+                <textarea
+                  id="event-email-html-raw"
+                  value={current.corpo_html || ''}
+                  onChange={e => update('corpo_html', e.target.value)}
+                  rows={22}
+                  style={{ width: '100%', padding: '10px 12px', borderRadius: '7px', border: '1.5px solid #E5E7EB', fontSize: '11px', boxSizing: 'border-box', fontFamily: 'monospace', lineHeight: 1.6, resize: 'vertical', outline: 'none' }}
+                  spellCheck={false}
+                />
+              </div>
+            )}
+
+            {/* Anteprima */}
+            {viewMode === 'preview' && (
               <div style={{ padding: '16px' }}>
                 <div style={{ marginBottom: '10px', padding: '8px 12px', background: '#F8F9FF', borderRadius: '7px', fontSize: '13px', fontFamily: "'Inter',sans-serif" }}>
                   <strong>Oggetto:</strong> {(current.oggetto || '—').replaceAll('{{nome_evento}}', 'Questo Evento')}
                 </div>
                 <div style={{ border: '1px solid #E5E7EB', borderRadius: '8px', overflow: 'hidden' }}>
-                  <iframe
-                    srcDoc={getPreviewHtml()}
-                    style={{ width: '100%', height: '520px', border: 'none', display: 'block' }}
-                    title="Anteprima email"
-                    sandbox="allow-same-origin"
-                  />
+                  <iframe srcDoc={getPreviewHtml()} style={{ width: '100%', height: '520px', border: 'none', display: 'block' }} title="Anteprima email" sandbox="allow-same-origin" />
                 </div>
                 <p style={{ fontSize: '11px', color: '#9CA3AF', marginTop: '8px', fontFamily: "'Inter',sans-serif" }}>
-                  Anteprima con dati di esempio. Le variabili vengono sostituite automaticamente all'invio reale.
+                  Anteprima con dati di esempio.
                 </p>
               </div>
             )}
@@ -272,3 +272,6 @@ export default function EventEmailTab({ eventoId }) {
     </div>
   )
 }
+
+const tb  = { padding: '5px 12px', borderRadius: '6px', border: 'none', cursor: 'pointer', fontSize: '12px', fontFamily: "'Inter',sans-serif", fontWeight: '600', transition: 'all 0.15s' }
+const lbl = { fontSize: '11px', fontWeight: '700', color: '#6B7280', textTransform: 'uppercase', letterSpacing: '.06em', display: 'block', marginBottom: '5px' }
