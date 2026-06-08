@@ -3,6 +3,7 @@ import { useNavigate, useParams } from 'react-router-dom'
 import { supabase } from '../../lib/supabase'
 import { useRole } from '../../hooks/useRole'
 import RichEditor from '../../components/editor/RichEditor'
+import BlockEditor, { newBlock } from '../../components/editor/BlockEditor'
 import ImageUploader from '../../components/editor/ImageUploader'
 import {
   Save, ArrowLeft, Eye, Plus, Trash2, GripVertical,
@@ -617,14 +618,12 @@ export default function EventoEditorPage() {
         {activeTab==='contenuto' && (
           <div style={p.panel}>
             <h2 style={p.panelTitle}>Contenuto della landing page</h2>
-            <p style={{ fontSize:'13px', color:'#6B7280', margin:'0 0 12px', lineHeight:'1.5' }}>
-              Posiziona il cursore dove vuoi e usa il pulsante <strong>✨</strong> nella toolbar per inserire blocchi strutturati (statistiche, griglia, CTA, box colorati) direttamente nel punto desiderato.
+            <p style={{ fontSize:'13px', color:'#6B7280', margin:'0 0 16px', lineHeight:'1.5' }}>
+              Aggiungi blocchi con il pulsante <strong>+</strong>. Usa <strong>↑ ↓</strong> per riordinare.
             </p>
-            <RichEditor
-              value={event.descrizione_html||''}
-              onChange={v=>setEvent(p=>({...p,descrizione_html:v}))}
-              minHeight="600px"
-              placeholder="Inizia a scrivere il contenuto dell'evento. Usa la toolbar per formattare il testo e il pulsante ✨ per inserire blocchi speciali nel punto del cursore…"
+            <BlockEditor
+              blocks={event.sezioni || []}
+              onChange={blocks => setEvent(p => ({ ...p, sezioni: blocks }))}
             />
           </div>
         )}

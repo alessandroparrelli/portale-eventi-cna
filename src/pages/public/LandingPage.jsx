@@ -117,82 +117,74 @@ function ModalConferma({ reg, event, onClose }) {
 }
 
 /* ── SEZIONI RENDERER ────────────────────────────────── */
-function SectionRenderer({ sec, colore_primario }) {
-  const pad = `${sec.padding||40}px 0`
-  const bg  = sec.colore_sfondo || '#FFFFFF'
+function BlockRenderer({ block, colore_primario }) {
+  if (!block) return null
 
-  if (sec.tipo === 'testo') return (
-    <div style={{ backgroundColor:bg, padding:pad }}>
-      <div style={{ maxWidth:'820px', margin:'0 auto', padding:'0 24px' }}>
-        {sec.titolo && <h2 style={{ fontSize:'clamp(20px,3vw,32px)',fontWeight:'900',color:'#0A0A0A',letterSpacing:'-.03em',margin:'0 0 16px' }}>{sec.titolo}</h2>}
-        <div className="rich-content" dangerouslySetInnerHTML={{ __html:sec.contenuto||'' }}/>
-      </div>
+  if (block.tipo === 'testo') return (
+    <div className="rich-content" style={{ marginBottom:'16px' }}
+      dangerouslySetInnerHTML={{ __html: block.html || '' }}/>
+  )
+
+  if (block.tipo === 'stats') return (
+    <div style={{ display:'flex', flexWrap:'wrap', gap:'32px', justifyContent:'center', padding:'32px 0', marginBottom:'16px' }}>
+      {(block.items || []).map((item, i) => (
+        <div key={i} style={{ textAlign:'center', flex:'1 1 100px' }}>
+          <p style={{ fontSize:'clamp(36px,6vw,52px)', fontWeight:'900', color:block.colore||colore_primario||'#003DA5', letterSpacing:'-.04em', margin:'0 0 4px', lineHeight:1 }}>
+            {item.num || item.numero}
+          </p>
+          <p style={{ fontSize:'13px', color:'#6B7280', fontWeight:'700', margin:0, textTransform:'uppercase', letterSpacing:'.05em' }}>
+            {item.label}
+          </p>
+        </div>
+      ))}
     </div>
   )
 
-  if (sec.tipo === 'immagine') {
-    const maxW = sec.larghezza==='large'?'80%':sec.larghezza==='medium'?'60%':sec.larghezza==='small'?'40%':'100%'
+  if (block.tipo === 'griglia') {
+    const cols = block.cols || block.colonne || []
     return (
-      <div style={{ backgroundColor:bg, padding:pad }}>
-        <div style={{ maxWidth:'820px',margin:'0 auto',padding:'0 24px',textAlign:'center' }}>
-          {sec.src && <img src={sec.src} alt={sec.didascalia||''} style={{ maxWidth:maxW,width:'100%',display:'block',margin:'0 auto' }}/>}
-          {sec.didascalia && <p style={{ fontSize:'13px',color:'#9CA3AF',marginTop:'8px',fontStyle:'italic' }}>{sec.didascalia}</p>}
-        </div>
+      <div style={{ display:'grid', gridTemplateColumns:`repeat(${Math.min(cols.length,3)},1fr)`, gap:'16px', marginBottom:'16px' }}>
+        {cols.map((col, i) => (
+          <div key={i} style={{ backgroundColor:'#FFFFFF', border:'1px solid #E5E7EB', borderRadius:'10px', padding:'20px' }}>
+            {col.icona && <div style={{ fontSize:'26px', marginBottom:'10px' }}>{col.icona}</div>}
+            {col.titolo && <h3 style={{ fontSize:'16px', fontWeight:'800', color:'#0A0A0A', margin:'0 0 8px', letterSpacing:'-.02em' }}>{col.titolo}</h3>}
+            {col.testo && <p style={{ fontSize:'14px', color:'#6B7280', lineHeight:'1.6', margin:0 }}>{col.testo}</p>}
+          </div>
+        ))}
       </div>
     )
   }
 
-  if (sec.tipo === 'griglia') return (
-    <div style={{ backgroundColor:bg, padding:pad }}>
-      <div style={{ maxWidth:'820px',margin:'0 auto',padding:'0 24px' }}>
-        <div style={{ display:'grid',gridTemplateColumns:`repeat(${Math.min(sec.colonne?.length||2,3)},1fr)`,gap:'20px' }}>
-          {(sec.colonne||[]).map((col,i) => (
-            <div key={i} style={{ backgroundColor:'#FFFFFF',borderRadius:'10px',padding:'24px',border:'1px solid #E5E7EB' }}>
-              {col.icona && <div style={{ fontSize:'28px',marginBottom:'12px' }}>{col.icona}</div>}
-              {col.titolo && <h3 style={{ fontSize:'17px',fontWeight:'800',color:'#0A0A0A',margin:'0 0 8px',letterSpacing:'-.02em' }}>{col.titolo}</h3>}
-              {col.testo && <p style={{ fontSize:'14px',color:'#6B7280',lineHeight:'1.6',margin:0 }}>{col.testo}</p>}
-            </div>
-          ))}
-        </div>
-      </div>
+  if (block.tipo === 'cta') return (
+    <div style={{ backgroundColor:'#EEF3FF', border:'1px solid #C7D9F8', borderRadius:'12px', padding:'28px 24px', textAlign:'center', marginBottom:'16px' }}>
+      {block.titolo && <h2 style={{ fontSize:'clamp(18px,3vw,26px)', fontWeight:'900', color:'#0A0A0A', letterSpacing:'-.03em', margin:'0 0 16px' }}>{block.titolo}</h2>}
+      <a href="#form-iscrizione"
+        style={{ display:'inline-block', backgroundColor:block.colore||'#003DA5', color:'#FFF', borderRadius:'8px', padding:'13px 32px', fontSize:'15px', fontWeight:'800', textDecoration:'none' }}>
+        {block.testo_btn || block.testo || 'Iscriviti ora →'}
+      </a>
     </div>
   )
 
-  if (sec.tipo === 'stats') return (
-    <div style={{ backgroundColor:bg, padding:pad }}>
-      <div style={{ maxWidth:'820px',margin:'0 auto',padding:'0 24px' }}>
-        <div style={{ display:'flex',flexWrap:'wrap',gap:'24px',justifyContent:'center' }}>
-          {(sec.items||[]).map((item,i) => (
-            <div key={i} style={{ textAlign:'center',flex:'1 1 120px' }}>
-              <p style={{ fontSize:'clamp(36px,6vw,56px)',fontWeight:'900',color:sec.colore_numeri||colore_primario||'#003DA5',letterSpacing:'-.04em',margin:'0 0 4px',lineHeight:1 }}>{item.numero}</p>
-              <p style={{ fontSize:'14px',color:'#6B7280',fontWeight:'600',margin:0,textTransform:'uppercase',letterSpacing:'.04em' }}>{item.label}</p>
-            </div>
-          ))}
-        </div>
-      </div>
+  if (block.tipo === 'immagine') return (
+    <div style={{ marginBottom:'16px', textAlign:'center' }}>
+      {block.src && <img src={block.src} alt={block.didascalia||''} style={{ maxWidth:'100%', display:'block', margin:'0 auto' }}/>}
+      {block.didascalia && <p style={{ fontSize:'13px', color:'#9CA3AF', marginTop:'8px', fontStyle:'italic' }}>{block.didascalia}</p>}
     </div>
   )
 
-  if (sec.tipo === 'separatore') {
-    if (sec.stile==='spazio') return <div style={{ backgroundColor:bg,height:`${sec.padding||40}px` }}/>
-    if (sec.stile==='wave') return (
-      <div style={{ backgroundColor:bg,overflow:'hidden',lineHeight:0 }}>
-        <svg viewBox="0 0 1440 40" style={{ display:'block',width:'100%' }} preserveAspectRatio="none">
-          <path d="M0,20 C360,40 1080,0 1440,20 L1440,40 L0,40 Z" fill={sec.colore||'#E5E7EB'}/>
-        </svg>
-      </div>
-    )
-    return <div style={{ backgroundColor:bg,padding:pad }}><hr style={{ border:'none',borderTop:`2px solid ${sec.colore||'#E5E7EB'}`,maxWidth:'820px',margin:'0 auto' }}/></div>
-  }
+  if (block.tipo === 'separatore') return (
+    <hr style={{ border:'none', borderTop:'2px solid #E5E7EB', margin:'24px 0' }}/>
+  )
 
-  if (sec.tipo === 'cta') return (
-    <div style={{ backgroundColor:bg,padding:pad }}>
-      <div style={{ maxWidth:'820px',margin:'0 auto',padding:'0 24px',textAlign:'center' }}>
-        {sec.titolo && <h2 style={{ fontSize:'clamp(20px,3vw,28px)',fontWeight:'900',color:'#0A0A0A',letterSpacing:'-.03em',margin:'0 0 20px' }}>{sec.titolo}</h2>}
-        <a href="#form-iscrizione" style={{ display:'inline-flex',alignItems:'center',gap:'8px',backgroundColor:sec.colore_btn||colore_primario||'#003DA5',color:sec.colore_testo||'#FFFFFF',borderRadius:'8px',padding:'14px 32px',fontSize:'16px',fontWeight:'800',textDecoration:'none',letterSpacing:'-.01em' }}>
-          {sec.testo||'Iscriviti ora'} →
-        </a>
-      </div>
+  // Retrocompatibilità vecchie sezioni
+  if (block.tipo === 'stats' || block.colore_numeri) return (
+    <div style={{ display:'flex', flexWrap:'wrap', gap:'24px', justifyContent:'center', padding:'24px 0' }}>
+      {(block.items||[]).map((item,i) => (
+        <div key={i} style={{ textAlign:'center' }}>
+          <p style={{ fontSize:'clamp(32px,5vw,48px)', fontWeight:'900', color:block.colore_numeri||'#003DA5', margin:'0 0 4px' }}>{item.numero}</p>
+          <p style={{ fontSize:'12px', color:'#6B7280', fontWeight:'700', margin:0, textTransform:'uppercase' }}>{item.label}</p>
+        </div>
+      ))}
     </div>
   )
 
@@ -374,11 +366,11 @@ export default function LandingPage() {
           </section>
         )}
 
-        {/* SEZIONI DINAMICHE */}
+        {/* BLOCCHI CONTENUTO */}
         {(event.sezioni||[]).length > 0 && (
-          <div style={{ margin:'0 -24px' }}>
-            {event.sezioni.map((sec,i) => (
-              <SectionRenderer key={sec.id||i} sec={sec} colore_primario={event.colore_primario}/>
+          <div style={{ marginBottom:'16px' }}>
+            {event.sezioni.map((block,i) => (
+              <BlockRenderer key={block.id||i} block={block} colore_primario={event.colore_primario}/>
             ))}
           </div>
         )}
