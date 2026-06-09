@@ -44,9 +44,6 @@ export default function AdminLayout() {
             <Menu size={24}/>
           </button>
         )}
-        {!isMobile && (
-          <div style={{ width: `${sidebarWidth}px`, flexShrink:0, transition:'width .2s ease' }}/>
-        )}
         <img
           src="https://raw.githubusercontent.com/alessandroparrelli/fileappoggio/main/NUOVO-LOGO-CNA-ROMA-SOLO-ROMA.png"
           alt="CNA Roma"
@@ -81,7 +78,7 @@ const s = {
     color:'#0A0A0A', display:'flex', alignItems:'center',
     padding:'6px', borderRadius:'6px', marginRight:'2px', flexShrink:0,
   },
-  logo:     { height:'36px', objectFit:'contain', flexShrink:0 },
+  logo:     { height:'48px', objectFit:'contain', flexShrink:0 },
   divider:  { width:'1px', height:'24px', backgroundColor:'#E5E7EB', flexShrink:0 },
   pageTitle:{
     fontSize:'20px', fontWeight:'900', color:'#0A0A0A',
