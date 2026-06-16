@@ -134,9 +134,10 @@ export default function FormIscrizione({ event, onSuccess }) {
           <select value={form.mestiere_id} onChange={set('mestiere_id')}
             style={{ padding:'10px 12px', border:`1px solid ${errors.mestiere_id?'#DC2626':'#D1D5DB'}`,
               borderRadius:'6px', fontSize:'14px', fontFamily:"'Inter',sans-serif",
-              outline:'none', backgroundColor:'#FFF' }}>
+              outline:'none', backgroundColor:'#FFF' }}
+            key={mestieri.length}>
             <option value="">— Seleziona —</option>
-            {mestieri.map(m => <option key={m.id} value={m.id}>{m.nome}</option>)}
+            {mestieri.map(m => <option key={m.id} value={String(m.id)}>{m.nome}</option>)}
           </select>
           {errors.mestiere_id && <span style={{ fontSize:'12px', color:'#DC2626' }}>{errors.mestiere_id}</span>}
         </div>
