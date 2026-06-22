@@ -74,6 +74,22 @@ function ModalConferma({ reg, event, onClose }) {
         </div>
         <h2 style={mc.title}>Iscrizione confermata!</h2>
         <p style={mc.sub}>Benvenuto/a <strong>{reg.nome} {reg.cognome}</strong>. Salva il QR Code — ti servirà all'ingresso.</p>
+
+        {/* Codice iscrizione */}
+        {reg.codice_iscrizione && (
+          <div style={{ background:'#EEF3FF', border:'1px solid #C7D9F8', borderRadius:'8px', padding:'10px 16px', marginBottom:'14px', textAlign:'center' }}>
+            <p style={{ fontSize:'11px', color:'#6B7280', margin:'0 0 3px', fontWeight:'700', textTransform:'uppercase', letterSpacing:'.06em' }}>Codice iscrizione</p>
+            <code style={{ fontSize:'18px', fontWeight:'900', color:'#003DA5', letterSpacing:'.05em', fontFamily:'monospace' }}>
+              {reg.codice_iscrizione}
+            </code>
+            {reg.accompagnatori > 0 && (
+              <p style={{ fontSize:'12px', color:'#6B7280', margin:'4px 0 0' }}>
+                + {reg.accompagnatori} accompagnator{reg.accompagnatori === 1 ? 'e' : 'i'} registrat{reg.accompagnatori === 1 ? 'o' : 'i'}
+              </p>
+            )}
+          </div>
+        )}
+
         <div style={mc.qrBox}>
           <p style={mc.qrLabel}>Il tuo QR Code personale</p>
           {qrDataUrl ? (

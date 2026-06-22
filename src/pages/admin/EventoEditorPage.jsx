@@ -377,6 +377,8 @@ export default function EventoEditorPage() {
       colore_sfondo:event.colore_sfondo,
       layout_hero:event.layout_hero,
       sezioni:event.sezioni,
+      capienza_max:event.capienza_max||null,
+      posti_per_utente:event.posti_per_utente||1,
     }
     if (isNew) {
       const { data } = await supabase.from('events').insert(payload).select().single()
@@ -442,11 +444,12 @@ export default function EventoEditorPage() {
   }
 
   const TABS = [
-    { id:'info',      label:'📋 Info & Date' },
-    { id:'hero',      label:'🖼 Hero' },
-    { id:'contenuto', label:'📝 Contenuto' },
-    { id:'aspetto',   label:'🎨 Aspetto' },
-    { id:'email',     label:'✉️ Email' },
+    { id:'info',       label:'📋 Info & Date' },
+    { id:'hero',       label:'🖼 Hero' },
+    { id:'contenuto',  label:'📝 Contenuto' },
+    { id:'aspetto',    label:'🎨 Aspetto' },
+    { id:'iscrizioni', label:'🎟 Iscrizioni' },
+    { id:'email',      label:'✉️ Email' },
   ]
 
   return (
@@ -711,6 +714,98 @@ export default function EventoEditorPage() {
       `}</style>
 
         {/* ── EMAIL ── */}
+        {/* ── ISCRIZIONI ── */}
+        {activeTab==='iscrizioni' && (
+          <div style={p.panel}>
+            <h2 style={p.panelTitle}>Gestione iscrizioni</h2>
+            <p style={{ fontSize:'14px', color:'#6B7280', margin:'0 0 24px' }}>
+              Configura capienza e quanti posti ogni utente può riservare per sé e per i propri accompagnatori.
+            </p>
+
+            <div style={p.grid2}>
+              {/* Capienza massima */}
+              <Field label="Capienza massima">
+                <Input
+                  type="number" min="0" step="1"
+                  value={event.capienza_max || ''}
+                  onChange={e => setEvent(p => ({ ...p, capienza_max: e.target.value ? parseInt(e.target.value) : null }))}
+                  placeholder="Lascia vuoto = illimitato"
+                />
+                <p style={{ fontSize:'12px', color:'#9CA3AF', margin:'4px 0 0' }}>
+                  Quando il limite è raggiunto le nuove iscrizioni vengono bloccate automaticamente.
+                </p>
+              </Field>
+
+              {/* Posti per utente */}
+              <Field label="Posti riservabili per utente">
+                <Select
+                  value={event.posti_per_utente || 1}
+                  onChange={e => setEvent(p => ({ ...p, posti_per_utente: parseInt(e.target.value) }))}
+                >
+                  <option value={1}>1 posto — solo l'intestatario</option>
+                  <option value={2}>2 posti — + 1 accompagnatore</option>
+                  <option value={3}>3 posti — + 2 accompagnatori</option>
+                  <option value={4}>4 posti — + 3 accompagnatori</option>
+                  <option value={5}>5 posti — + 4 accompagnatori</option>
+                  <option value={6}>6 posti — + 5 accompagnatori</option>
+                  <option value={10}>10 posti — + 9 accompagnatori</option>
+                </Select>
+                <p style={{ fontSize:'12px', color:'#9CA3AF', margin:'4px 0 0' }}>
+                  Nel form di iscrizione verranno mostrati tanti blocchi di dati quanti sono i posti selezionati.
+                </p>
+              </Field>
+            </div>
+
+            {/* Riepilogo visivo */}
+            <div style={{ marginTop:'24px', background:'#F9FAFB', border:'1px solid #E5E7EB', borderRadius:'10px', padding:'16px 20px' }}>
+              <p style={{ fontSize:'13px', fontWeight:'700', color:'#0A0A0A', margin:'0 0 10px', letterSpacing:'-.01em' }}>
+                Riepilogo configurazione iscrizioni
+              </p>
+              <div style={{ display:'flex', gap:'24px', flexWrap:'wrap' }}>
+                <div>
+                  <span style={{ fontSize:'12px', color:'#6B7280', fontWeight:'600', display:'block', textTransform:'uppercase', letterSpacing:'.05em' }}>Capienza</span>
+                  <span style={{ fontSize:'22px', fontWeight:'900', color:'#003DA5', letterSpacing:'-.02em' }}>
+                    {event.capienza_max ? event.capienza_max.toLocaleString('it-IT') : '∞'}
+                  </span>
+                  <span style={{ fontSize:'12px', color:'#9CA3AF', marginLeft:'4px' }}>posti totali</span>
+                </div>
+                <div>
+                  <span style={{ fontSize:'12px', color:'#6B7280', fontWeight:'600', display:'block', textTransform:'uppercase', letterSpacing:'.05em' }}>Per utente</span>
+                  <span style={{ fontSize:'22px', fontWeight:'900', color:'#003DA5', letterSpacing:'-.02em' }}>
+                    {event.posti_per_utente || 1}
+                  </span>
+                  <span style={{ fontSize:'12px', color:'#9CA3AF', marginLeft:'4px' }}>
+                    {(event.posti_per_utente || 1) === 1 ? 'posto' : 'posti'}
+                  </span>
+                </div>
+                {event.capienza_max && event.posti_per_utente > 1 && (
+                  <div>
+                    <span style={{ fontSize:'12px', color:'#6B7280', fontWeight:'600', display:'block', textTransform:'uppercase', letterSpacing:'.05em' }}>Iscrizioni attese</span>
+                    <span style={{ fontSize:'22px', fontWeight:'900', color:'#003DA5', letterSpacing:'-.02em' }}>
+                      ~{Math.ceil(event.capienza_max / (event.posti_per_utente || 1))}
+                    </span>
+                    <span style={{ fontSize:'12px', color:'#9CA3AF', marginLeft:'4px' }}>form compilati</span>
+                  </div>
+                )}
+              </div>
+            </div>
+
+            {/* Codice evento */}
+            <div style={{ marginTop:'20px', background:'#EEF3FF', border:'1px solid #C7D9F8', borderRadius:'10px', padding:'16px 20px' }}>
+              <p style={{ fontSize:'13px', fontWeight:'700', color:'#003DA5', margin:'0 0 6px' }}>
+                📌 Codice evento (assegnato automaticamente)
+              </p>
+              <p style={{ fontSize:'13px', color:'#374151', margin:0 }}>
+                Ogni iscritto riceve un codice univoco nel formato{' '}
+                <code style={{ background:'#fff', border:'1px solid #C7D9F8', borderRadius:'4px', padding:'1px 6px', fontFamily:'monospace', fontSize:'13px', color:'#003DA5' }}>
+                  EVT-{new Date().getFullYear().toString().slice(2)}{String(event.codice||0).padStart(4,'0')}-NNNN
+                </code>
+                {' '}dove NNNN è il numero progressivo dell'iscrizione. Gli accompagnatori hanno lo stesso codice dell'intestatario + suffisso ({'-B'}, {'-C'}…).
+              </p>
+            </div>
+          </div>
+        )}
+
         {activeTab==='email' && (
           <div style={p.panel}>
             <h2 style={p.panelTitle}>Email per questo evento</h2>
