@@ -322,7 +322,7 @@ export default function EventoEditorPage() {
   const { id } = useParams()
   const navigate = useNavigate()
 
-  const isNew = id === 'nuovo'
+  const isNew = !id || id === 'novo' || id === 'nuovo'
 
   const [event, setEvent] = useState({
     titolo:'', slug:'', stato:'bozza', data_inizio:'', data_fine:'',
@@ -382,7 +382,7 @@ export default function EventoEditorPage() {
     }
     if (isNew) {
       const { data } = await supabase.from('events').insert(payload).select().single()
-      if (data) navigate(`/admin/eventi/${data.id}`, { replace:true })
+      if (data) navigate(`/admin/eventi/${data.id}/editor`, { replace:true })
     } else {
       await supabase.from('events').update(payload).eq('id', id)
     }
