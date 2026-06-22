@@ -275,7 +275,7 @@ export default function LandingPage() {
   const lh = event.layout_hero || {}
 
   const heroStyle = event.immagine_hero
-    ? { backgroundImage:`url(${event.immagine_hero})`,backgroundSize:'cover',backgroundPosition:'center' }
+    ? { backgroundImage:`url(${event.immagine_hero})`,backgroundSize:'cover',backgroundPosition:'center top' }
     : { background:'linear-gradient(135deg,#003DA5 0%,#001a50 100%)' }
 
   return (
@@ -296,6 +296,10 @@ export default function LandingPage() {
         * { box-sizing:border-box; }
         /* Blocca zoom iOS */
         input, select, textarea { font-size:16px !important; }
+        @media (max-width: 600px) {
+          .hero-section { min-height: calc(100vw * 0.62) !important; }
+          .hero-section .grid-cols-2 { grid-template-columns: 1fr !important; }
+        }
       `}</style>
 
       {/* ── HEADER ── */}
@@ -305,7 +309,7 @@ export default function LandingPage() {
       </header>
 
       {/* ── HERO ── */}
-      <div style={{ ...s.hero, ...heroStyle, minHeight:`${lh.altezza||340}px`, maxHeight:'65vmax' }}>
+      <div className="hero-section" style={{ ...s.hero, ...heroStyle, minHeight:`min(${lh.altezza||340}px, 56vw)` }}>
         <div style={{ ...s.heroOverlay, backgroundColor:`rgba(0,0,0,${(lh.overlay_opacita||55)/100})` }}>
           <div style={{ ...s.heroContent, textAlign:lh.allineamento==='centro'?'center':'left' }}>
             <span style={s.heroTag}><Calendar size={13}/> Evento CNA Roma</span>

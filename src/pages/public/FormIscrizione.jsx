@@ -16,7 +16,7 @@ function Inp({ label, required, value, onChange, type = 'text', placeholder, err
           border: `1px solid ${error ? '#DC2626' : '#D1D5DB'}`,
           borderRadius: '6px', fontSize: '14px',
           fontFamily: "'Inter',sans-serif", outline: 'none',
-          boxSizing: 'border-box', width: '100%',
+          boxSizing: 'border-box', width: '100%', minWidth: 0,
         }}
         onFocus={e => (e.target.style.borderColor = '#003DA5')}
         onBlur={e => (e.target.style.borderColor = error ? '#DC2626' : '#D1D5DB')}
@@ -56,6 +56,7 @@ function PersonaForm({ idx, dati, onChange, errors, campi, mestieri, isAccompagn
       border: `1px solid ${isAccompagnatore ? '#E5E7EB' : '#003DA5'}`,
       borderRadius: '10px', padding: '16px', marginBottom: '16px',
       background: isAccompagnatore ? '#FAFAFA' : '#EEF3FF',
+      overflow: 'hidden',
     }}>
       {/* Header */}
       <div style={{ display: 'flex', alignItems: 'center', gap: '8px', marginBottom: '14px' }}>
@@ -330,7 +331,7 @@ const defaultCampi = [
 ]
 
 const s = {
-  grid: { display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '12px' },
+  grid: { display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(140px, 1fr))', gap: '12px' },
   errBox: { backgroundColor:'#FEF2F2', border:'1px solid #FECACA', borderRadius:'6px', padding:'10px 14px', fontSize:'14px', color:'#DC2626', marginBottom:'12px' },
   submitBtn: { marginTop:'8px', display:'flex', alignItems:'center', justifyContent:'center', gap:'8px', backgroundColor:'#003DA5', color:'#FFFFFF', border:'none', borderRadius:'6px', padding:'14px 24px', fontSize:'15px', fontWeight:'700', fontFamily:"'Inter',sans-serif", cursor:'pointer', letterSpacing:'-0.01em', transition:'opacity 0.15s' },
 }
