@@ -2,7 +2,7 @@ import { useState, useEffect } from 'react'
 import { supabase } from '../../lib/supabase'
 import { Loader2, User, Users } from 'lucide-react'
 
-/* ─── Campo input riutilizzabile ─── */
+/* ─── Input generico ─── */
 function Inp({ label, required, value, onChange, type = 'text', placeholder, error }) {
   return (
     <div style={{ display: 'flex', flexDirection: 'column', gap: '4px' }}>
@@ -26,128 +26,183 @@ function Inp({ label, required, value, onChange, type = 'text', placeholder, err
   )
 }
 
-/* ─── Blocco dati singola persona ─── */
-function PersonaForm({ idx, data, onChange, errors, mestieri, isAccompagnatore }) {
-  const set = k => e => onChange(idx, k, e.target.value)
-  const label = isAccompagnatore
-    ? `Accompagnatore ${idx}`
-    : 'Intestatario'
+/* ─── Valore persona vuoto in base ai campi ─── */
+function emptyPersona(campi) {
+  const obj = {}
+  campi.forEach(c => { obj[c.colonna_db] = '' })
+  return obj
+}
 
+/* ─── Valida una persona in base alla config dei campi ─── */
+function validatePersona(dati, campi) {
+  const errors = {}
+  campi.forEach(c => {
+    if (!c.visibile) return
+    const val = dati[c.colonna_db] || ''
+    if (c.obbligatorio && !val.trim()) {
+      errors[c.colonna_db] = 'Obbligatorio'
+    }
+    if (c.tipo === 'email' && val && !/\S+@\S+\.\S+/.test(val)) {
+      errors[c.colonna_db] = 'Email non valida'
+    }
+  })
+  return errors
+}
+
+/* ─── Blocco dati singola persona ─── */
+function PersonaForm({ idx, dati, onChange, errors, campi, mestieri, isAccompagnatore }) {
   return (
     <div style={{
       border: `1px solid ${isAccompagnatore ? '#E5E7EB' : '#003DA5'}`,
-      borderRadius: '10px',
-      padding: '16px',
-      marginBottom: '16px',
+      borderRadius: '10px', padding: '16px', marginBottom: '16px',
       background: isAccompagnatore ? '#FAFAFA' : '#EEF3FF',
     }}>
-      {/* Header persona */}
+      {/* Header */}
       <div style={{ display: 'flex', alignItems: 'center', gap: '8px', marginBottom: '14px' }}>
         <div style={{
           width: '28px', height: '28px', borderRadius: '50%',
           background: isAccompagnatore ? '#E5E7EB' : '#003DA5',
-          display: 'flex', alignItems: 'center', justifyContent: 'center',
-          flexShrink: 0,
+          display: 'flex', alignItems: 'center', justifyContent: 'center', flexShrink: 0,
         }}>
-          {isAccompagnatore
-            ? <User size={14} color="#6B7280" />
-            : <Users size={14} color="#fff" />}
+          {isAccompagnatore ? <User size={14} color="#6B7280" /> : <Users size={14} color="#fff" />}
         </div>
-        <span style={{
-          fontSize: '13px', fontWeight: '700',
-          color: isAccompagnatore ? '#374151' : '#003DA5',
-          letterSpacing: '-.01em',
-        }}>
-          {label}
+        <span style={{ fontSize: '13px', fontWeight: '700', color: isAccompagnatore ? '#374151' : '#003DA5' }}>
+          {isAccompagnatore ? `Accompagnatore ${idx}` : 'Intestatario'}
         </span>
       </div>
 
       <div style={s.grid}>
-        <Inp label="Nome"    required value={data.nome}    onChange={set('nome')}    placeholder="Mario"  error={errors.nome} />
-        <Inp label="Cognome" required value={data.cognome} onChange={set('cognome')} placeholder="Rossi"  error={errors.cognome} />
+        {campi.filter(c => c.visibile).map(c => {
+          const val = dati[c.colonna_db] || ''
+          const err = errors[c.colonna_db] || ''
+          const set = e => onChange(idx, c.colonna_db, e.target.value)
 
-        <div style={{ gridColumn: '1/-1' }}>
-          <Inp label="Email" required type="email" value={data.email} onChange={set('email')}
-            placeholder="mario.rossi@example.it" error={errors.email} />
-        </div>
+          // Categoria professionale
+          if (c.colonna_db === 'mestiere_id') {
+            return (
+              <div key={c.id} style={{ display: 'flex', flexDirection: 'column', gap: '4px' }}>
+                <label style={{ fontSize: '13px', fontWeight: '600', color: '#0A0A0A' }}>
+                  {c.label}{c.obbligatorio && <span style={{ color: '#DC2626' }}> *</span>}
+                </label>
+                <select
+                  value={val} onChange={set}
+                  key={mestieri.length}
+                  style={{
+                    padding: '10px 12px',
+                    border: `1px solid ${err ? '#DC2626' : '#D1D5DB'}`,
+                    borderRadius: '6px', fontSize: '14px',
+                    fontFamily: "'Inter',sans-serif", outline: 'none', backgroundColor: '#FFF',
+                  }}
+                >
+                  <option value="">— Seleziona —</option>
+                  {mestieri.map(m => <option key={m.id} value={String(m.id)}>{m.nome}</option>)}
+                </select>
+                {err && <span style={{ fontSize: '12px', color: '#DC2626' }}>{err}</span>}
+              </div>
+            )
+          }
 
-        <Inp label="Cellulare" required value={data.cellulare} onChange={set('cellulare')} placeholder="333 1234567" error={errors.cellulare} />
-        <Inp label="CAP"       required value={data.cap}       onChange={set('cap')}       placeholder="00100"       error={errors.cap} />
+          // Checkbox
+          if (c.tipo === 'checkbox') {
+            return (
+              <div key={c.id} style={{ display: 'flex', alignItems: 'center', gap: '8px', padding: '8px 0' }}>
+                <input
+                  type="checkbox" checked={val === 'true'}
+                  onChange={e => onChange(idx, c.colonna_db, e.target.checked ? 'true' : '')}
+                  style={{ width: '16px', height: '16px', cursor: 'pointer' }}
+                />
+                <label style={{ fontSize: '14px', color: '#0A0A0A', cursor: 'pointer' }}>
+                  {c.label}{c.obbligatorio && <span style={{ color: '#DC2626' }}> *</span>}
+                </label>
+                {err && <span style={{ fontSize: '12px', color: '#DC2626' }}>{err}</span>}
+              </div>
+            )
+          }
 
-        <div style={{ gridColumn: '1/-1' }}>
-          <Inp label="Ragione Sociale / Azienda" required value={data.ragione_sociale}
-            onChange={set('ragione_sociale')} placeholder="es. Rossi Falegnameria Srl" error={errors.ragione_sociale} />
-        </div>
+          // Select con opzioni personalizzate
+          if (c.tipo === 'select' && c.opzioni?.choices) {
+            return (
+              <div key={c.id} style={{ display: 'flex', flexDirection: 'column', gap: '4px' }}>
+                <label style={{ fontSize: '13px', fontWeight: '600', color: '#0A0A0A' }}>
+                  {c.label}{c.obbligatorio && <span style={{ color: '#DC2626' }}> *</span>}
+                </label>
+                <select value={val} onChange={set} style={{
+                  padding: '10px 12px', border: `1px solid ${err ? '#DC2626' : '#D1D5DB'}`,
+                  borderRadius: '6px', fontSize: '14px', fontFamily: "'Inter',sans-serif",
+                  outline: 'none', backgroundColor: '#FFF',
+                }}>
+                  <option value="">— Seleziona —</option>
+                  {c.opzioni.choices.map(o => <option key={o} value={o}>{o}</option>)}
+                </select>
+                {err && <span style={{ fontSize: '12px', color: '#DC2626' }}>{err}</span>}
+              </div>
+            )
+          }
 
-        <Inp label="Partita IVA" required value={data.partita_iva} onChange={set('partita_iva')} placeholder="12345670015" error={errors.partita_iva} />
+          // Data
+          if (c.tipo === 'data') {
+            return (
+              <div key={c.id} style={{ display: 'flex', flexDirection: 'column', gap: '4px' }}>
+                <label style={{ fontSize: '13px', fontWeight: '600', color: '#0A0A0A' }}>
+                  {c.label}{c.obbligatorio && <span style={{ color: '#DC2626' }}> *</span>}
+                </label>
+                <input type="date" value={val} onChange={set} style={{
+                  padding: '10px 12px', border: `1px solid ${err ? '#DC2626' : '#D1D5DB'}`,
+                  borderRadius: '6px', fontSize: '14px', fontFamily: "'Inter',sans-serif",
+                  outline: 'none', width: '100%', boxSizing: 'border-box',
+                }} />
+                {err && <span style={{ fontSize: '12px', color: '#DC2626' }}>{err}</span>}
+              </div>
+            )
+          }
 
-        {/* Categoria professionale */}
-        <div style={{ display: 'flex', flexDirection: 'column', gap: '4px' }}>
-          <label style={{ fontSize: '13px', fontWeight: '600', color: '#0A0A0A' }}>
-            Categoria professionale <span style={{ color: '#DC2626' }}>*</span>
-          </label>
-          <select
-            value={data.mestiere_id}
-            onChange={set('mestiere_id')}
-            key={mestieri.length}
-            style={{
-              padding: '10px 12px',
-              border: `1px solid ${errors.mestiere_id ? '#DC2626' : '#D1D5DB'}`,
-              borderRadius: '6px', fontSize: '14px',
-              fontFamily: "'Inter',sans-serif", outline: 'none',
-              backgroundColor: '#FFF',
-            }}
-          >
-            <option value="">— Seleziona —</option>
-            {mestieri.map(m => <option key={m.id} value={String(m.id)}>{m.nome}</option>)}
-          </select>
-          {errors.mestiere_id && <span style={{ fontSize: '12px', color: '#DC2626' }}>{errors.mestiere_id}</span>}
-        </div>
+          // Default: testo/email/telefono/numero
+          const inputType = c.tipo === 'email' ? 'email' : c.tipo === 'numero' ? 'number' : c.tipo === 'telefono' ? 'tel' : 'text'
+          // Occupa tutta la larghezza per email e campi singoli
+          const fullWidth = ['email','ragione_sociale','partita_iva'].includes(c.colonna_db)
+          return (
+            <div key={c.id} style={{ gridColumn: fullWidth ? '1/-1' : undefined }}>
+              <Inp
+                label={c.label} required={c.obbligatorio}
+                type={inputType} value={val} onChange={set} error={err}
+                placeholder={
+                  c.colonna_db === 'email' ? 'mario.rossi@example.it' :
+                  c.colonna_db === 'cap' ? '00100' :
+                  c.colonna_db === 'cellulare' ? '333 1234567' :
+                  c.colonna_db === 'partita_iva' ? '12345670015' : ''
+                }
+              />
+            </div>
+          )
+        })}
       </div>
     </div>
   )
 }
 
-/* ─── Valore persona vuoto ─── */
-function emptyPersona() {
-  return { nome: '', cognome: '', email: '', cellulare: '', cap: '', ragione_sociale: '', partita_iva: '', mestiere_id: '' }
-}
-
-/* ─── Validazione singola persona ─── */
-function validatePersona(p) {
-  const e = {}
-  if (!p.nome.trim())            e.nome            = 'Obbligatorio'
-  if (!p.cognome.trim())         e.cognome         = 'Obbligatorio'
-  if (!p.email.trim())           e.email           = 'Obbligatorio'
-  else if (!/\S+@\S+\.\S+/.test(p.email)) e.email = 'Email non valida'
-  if (!p.cellulare.trim())       e.cellulare       = 'Obbligatorio'
-  if (!p.cap.trim())             e.cap             = 'Obbligatorio'
-  if (!p.ragione_sociale.trim()) e.ragione_sociale = 'Obbligatorio'
-  if (!p.partita_iva.trim())     e.partita_iva     = 'Obbligatorio'
-  if (!p.mestiere_id)            e.mestiere_id     = 'Seleziona una categoria'
-  return e
-}
-
-/* ─── FORM ISCRIZIONE ─── */
+/* ─── FORM ISCRIZIONE PRINCIPALE ─── */
 export default function FormIscrizione({ event, onSuccess }) {
   const postiPerUtente = event.posti_per_utente || 1
 
   const [mestieri, setMestieri] = useState([])
-  const [fields,   setFields]   = useState([])
-
-  // Array di persone: [intestatario, accompagnatore1, ...]
-  const [persone, setPersone] = useState(
-    Array.from({ length: postiPerUtente }, () => emptyPersona())
-  )
-  const [errors,  setErrors]  = useState(Array.from({ length: postiPerUtente }, () => ({})))
-  const [loading, setLoading] = useState(false)
-  const [errGen,  setErrGen]  = useState('')
+  const [campi,    setCampi]    = useState([])
+  const [persone,  setPersone]  = useState([])
+  const [errors,   setErrors]   = useState([])
+  const [loading,  setLoading]  = useState(false)
+  const [errGen,   setErrGen]   = useState('')
 
   useEffect(() => {
-    supabase.from('mestieri').select('id,nome').eq('attivo', true).order('ordine')
-      .then(({ data }) => setMestieri(data || []))
-    supabase.from('form_fields').select('*').eq('event_id', event.id).order('ordine')
-      .then(({ data }) => setFields(data || []))
+    Promise.all([
+      supabase.from('mestieri').select('id,nome').eq('attivo', true).order('ordine'),
+      supabase.from('form_fields').select('*').eq('event_id', event.id).eq('visibile', true).order('ordine'),
+    ]).then(([{ data: m }, { data: f }]) => {
+      setMestieri(m || [])
+      const campiAttivi = f && f.length > 0 ? f : defaultCampi
+      setCampi(campiAttivi)
+      const empty = emptyPersona(campiAttivi)
+      setPersone(Array.from({ length: postiPerUtente }, () => ({ ...empty })))
+      setErrors(Array.from({ length: postiPerUtente }, () => ({})))
+    })
   }, [event.id])
 
   function handleChange(idx, key, value) {
@@ -156,7 +211,6 @@ export default function FormIscrizione({ event, onSuccess }) {
       next[idx] = { ...next[idx], [key]: value }
       return next
     })
-    // Azzera errore al cambiamento
     setErrors(prev => {
       const next = [...prev]
       next[idx] = { ...next[idx], [key]: '' }
@@ -168,119 +222,81 @@ export default function FormIscrizione({ event, onSuccess }) {
     e.preventDefault()
     setErrGen('')
 
-    // Valida tutte le persone
-    const newErrors = persone.map(p => validatePersona(p))
-    const hasErrors = newErrors.some(e => Object.keys(e).length > 0)
-    if (hasErrors) { setErrors(newErrors); return }
+    const newErrors = persone.map(p => validatePersona(p, campi))
+    if (newErrors.some(e => Object.keys(e).length > 0)) { setErrors(newErrors); return }
 
     setLoading(true)
-
     try {
-      // Genera codice iscrizione per l'intestatario
       const { data: codiceData } = await supabase.rpc('genera_codice_iscrizione', { p_event_id: event.id })
       const codiceBase = codiceData || ('EVT-' + Date.now().toString(36).toUpperCase())
+      const suffissi   = ['', '-B', '-C', '-D', '-E', '-F', '-G', '-H', '-I', '-J']
 
-      // Genera QR per ogni persona
-      const suffissi = ['', '-B', '-C', '-D', '-E', '-F', '-G', '-H', '-I', '-J']
+      // Costruisce payload da campi dinamici
+      function buildPayload(dati) {
+        const payload = { event_id: event.id, stato: 'confermato', presente: false }
+        campi.forEach(c => {
+          if (!c.visibile) return
+          if (c.colonna_db === 'mestiere_id') {
+            payload.mestiere_id = dati.mestiere_id || null
+          } else {
+            payload[c.colonna_db] = dati[c.colonna_db]?.trim() || null
+          }
+        })
+        return payload
+      }
 
-      // Inserisce l'intestatario per primo
-      const intestatario = persone[0]
       const { data: qrData0 } = await supabase.rpc('generate_qr_token')
-      const qr0 = qrData0 || ('QR-' + Math.random().toString(36).slice(2, 10).toUpperCase())
-
       const { data: reg0, error: err0 } = await supabase.from('registrations').insert({
-        event_id:        event.id,
-        qr_code:         qr0,
+        ...buildPayload(persone[0]),
+        qr_code: qrData0 || ('QR-' + Math.random().toString(36).slice(2,10).toUpperCase()),
         codice_iscrizione: codiceBase,
-        stato:           'confermato',
-        presente:        false,
-        nome:            intestatario.nome.trim(),
-        cognome:         intestatario.cognome.trim(),
-        ragione_sociale: intestatario.ragione_sociale || null,
-        partita_iva:     intestatario.partita_iva     || null,
-        email:           intestatario.email.trim(),
-        cellulare:       intestatario.cellulare       || null,
-        mestiere_id:     intestatario.mestiere_id     || null,
-        cap:             intestatario.cap             || null,
       }).select().single()
 
       if (err0) throw new Error(err0.message)
 
-      // Inserisce gli accompagnatori
       for (let i = 1; i < persone.length; i++) {
-        const acc = persone[i]
         const { data: qrAcc } = await supabase.rpc('generate_qr_token')
-        const qrA = qrAcc || ('QR-' + Math.random().toString(36).slice(2, 10).toUpperCase())
-
         await supabase.from('registrations').insert({
-          event_id:          event.id,
-          qr_code:           qrA,
+          ...buildPayload(persone[i]),
+          qr_code: qrAcc || ('QR-' + Math.random().toString(36).slice(2,10).toUpperCase()),
           codice_iscrizione: codiceBase + suffissi[i],
-          gruppo_id:         reg0.id,  // collega all'intestatario
-          stato:             'confermato',
-          presente:          false,
-          nome:              acc.nome.trim(),
-          cognome:           acc.cognome.trim(),
-          ragione_sociale:   acc.ragione_sociale || null,
-          partita_iva:       acc.partita_iva     || null,
-          email:             acc.email.trim(),
-          cellulare:         acc.cellulare       || null,
-          mestiere_id:       acc.mestiere_id     || null,
-          cap:               acc.cap             || null,
+          gruppo_id: reg0.id,
         })
       }
 
-      // Passa i dati alla modale di conferma
       onSuccess?.({
-        id:                reg0.id,
-        qr_code:           reg0.qr_code,
-        codice_iscrizione: codiceBase,
-        nome:              intestatario.nome.trim(),
-        cognome:           intestatario.cognome.trim(),
-        email:             intestatario.email.trim(),
-        accompagnatori:    persone.length - 1,
+        id: reg0.id, qr_code: reg0.qr_code, codice_iscrizione: codiceBase,
+        nome: persone[0].nome?.trim(), cognome: persone[0].cognome?.trim(),
+        email: persone[0].email?.trim(), accompagnatori: persone.length - 1,
       })
-
     } catch (err) {
-      if (err.message?.includes('capienza_esaurita')) {
-        setErrGen('Spiacenti, i posti disponibili sono esauriti.')
-      } else {
-        setErrGen('Errore durante la registrazione. Riprova.')
-      }
+      setErrGen(err.message?.includes('capienza_esaurita')
+        ? 'Spiacenti, i posti disponibili sono esauriti.'
+        : 'Errore durante la registrazione. Riprova.')
       setLoading(false)
     }
   }
 
+  if (campi.length === 0) return null
+
   return (
     <form onSubmit={submit} style={{ display: 'flex', flexDirection: 'column', gap: '0' }}>
-      {errGen && (
-        <div style={s.errBox}>{errGen}</div>
-      )}
+      {errGen && <div style={s.errBox}>{errGen}</div>}
 
-      {/* Header multi-posto */}
       {postiPerUtente > 1 && (
-        <div style={{
-          background: '#F0FDF4', border: '1px solid #86EFAC',
-          borderRadius: '8px', padding: '12px 16px', marginBottom: '16px',
-          display: 'flex', alignItems: 'center', gap: '10px',
-        }}>
+        <div style={{ background: '#F0FDF4', border: '1px solid #86EFAC', borderRadius: '8px', padding: '12px 16px', marginBottom: '16px', display: 'flex', alignItems: 'center', gap: '10px' }}>
           <Users size={18} style={{ color: '#16A34A', flexShrink: 0 }} />
           <p style={{ fontSize: '13px', color: '#166534', margin: 0, fontWeight: '600' }}>
             Puoi prenotare fino a <strong>{postiPerUtente} posti</strong>. Compila i dati di ogni partecipante.
-            {postiPerUtente > 1 && ' Gli accompagnatori condivideranno il tuo stesso codice iscrizione con un suffisso (-B, -C…).'}
           </p>
         </div>
       )}
 
-      {/* Blocchi persona */}
-      {persone.map((persona, idx) => (
+      {persone.map((dati, idx) => (
         <PersonaForm
-          key={idx}
-          idx={idx}
-          data={persona}
-          onChange={handleChange}
-          errors={errors[idx] || {}}
-          mestieri={mestieri}
+          key={idx} idx={idx} dati={dati}
+          onChange={handleChange} errors={errors[idx] || {}}
+          campi={campi} mestieri={mestieri}
           isAccompagnatore={idx > 0}
         />
       ))}
@@ -294,24 +310,27 @@ export default function FormIscrizione({ event, onSuccess }) {
       </button>
 
       <p style={{ fontSize: '12px', color: '#9CA3AF', margin: '8px 0 0', textAlign: 'center' }}>
-        I dati saranno trattati nel rispetto del GDPR. Riceverai una email di conferma.
+        I dati saranno trattati nel rispetto del GDPR.
       </p>
       <style>{`@keyframes spin{from{transform:rotate(0deg)}to{transform:rotate(360deg)}}`}</style>
     </form>
   )
 }
 
+/* Campi di fallback se non ci sono form_fields nel DB */
+const defaultCampi = [
+  { id:'d1', colonna_db:'nome',            label:'Nome',                   tipo:'testo',   obbligatorio:true,  visibile:true, ordine:1 },
+  { id:'d2', colonna_db:'cognome',         label:'Cognome',                tipo:'testo',   obbligatorio:true,  visibile:true, ordine:2 },
+  { id:'d3', colonna_db:'email',           label:'Email',                  tipo:'email',   obbligatorio:true,  visibile:true, ordine:3 },
+  { id:'d4', colonna_db:'cellulare',       label:'Cellulare',              tipo:'telefono',obbligatorio:true,  visibile:true, ordine:4 },
+  { id:'d5', colonna_db:'cap',             label:'CAP',                    tipo:'testo',   obbligatorio:true,  visibile:true, ordine:5 },
+  { id:'d6', colonna_db:'ragione_sociale', label:'Ragione Sociale',        tipo:'testo',   obbligatorio:true,  visibile:true, ordine:6 },
+  { id:'d7', colonna_db:'partita_iva',     label:'Partita IVA',            tipo:'testo',   obbligatorio:true,  visibile:true, ordine:7 },
+  { id:'d8', colonna_db:'mestiere_id',     label:'Categoria professionale',tipo:'select',  obbligatorio:true,  visibile:true, ordine:8 },
+]
+
 const s = {
-  grid: { display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '12px', marginBottom: '4px' },
-  errBox: {
-    backgroundColor: '#FEF2F2', border: '1px solid #FECACA', borderRadius: '6px',
-    padding: '10px 14px', fontSize: '14px', color: '#DC2626', marginBottom: '12px',
-  },
-  submitBtn: {
-    marginTop: '8px', display: 'flex', alignItems: 'center', justifyContent: 'center',
-    gap: '8px', backgroundColor: '#003DA5', color: '#FFFFFF', border: 'none', borderRadius: '6px',
-    padding: '14px 24px', fontSize: '15px', fontWeight: '700',
-    fontFamily: "'Inter',sans-serif", cursor: 'pointer',
-    letterSpacing: '-0.01em', transition: 'opacity 0.15s',
-  },
+  grid: { display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '12px' },
+  errBox: { backgroundColor:'#FEF2F2', border:'1px solid #FECACA', borderRadius:'6px', padding:'10px 14px', fontSize:'14px', color:'#DC2626', marginBottom:'12px' },
+  submitBtn: { marginTop:'8px', display:'flex', alignItems:'center', justifyContent:'center', gap:'8px', backgroundColor:'#003DA5', color:'#FFFFFF', border:'none', borderRadius:'6px', padding:'14px 24px', fontSize:'15px', fontWeight:'700', fontFamily:"'Inter',sans-serif", cursor:'pointer', letterSpacing:'-0.01em', transition:'opacity 0.15s' },
 }
