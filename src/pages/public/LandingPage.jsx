@@ -305,14 +305,14 @@ export default function LandingPage() {
       </header>
 
       {/* ── HERO ── */}
-      <div style={{ ...s.hero, ...heroStyle, minHeight:`${lh.altezza||340}px` }}>
+      <div style={{ ...s.hero, ...heroStyle, minHeight:`${lh.altezza||340}px`, maxHeight:'65vmax' }}>
         <div style={{ ...s.heroOverlay, backgroundColor:`rgba(0,0,0,${(lh.overlay_opacita||55)/100})` }}>
           <div style={{ ...s.heroContent, textAlign:lh.allineamento==='centro'?'center':'left' }}>
             <span style={s.heroTag}><Calendar size={13}/> Evento CNA Roma</span>
             <h1 style={{
               ...s.heroTitle,
               color:       lh.titolo_colore      || '#FFFFFF',
-              fontSize:    lh.titolo_dimensione  || 'clamp(26px,5vw,54px)',
+              fontSize:    lh.titolo_dimensione  || 'clamp(22px,5vw,48px)',
               fontWeight:  lh.titolo_grassetto !== false ? '900' : '400',
               textTransform: lh.titolo_maiuscolo ? 'uppercase' : 'none',
             }}>{event.titolo}</h1>
@@ -473,7 +473,7 @@ const s = {
   logo:        { height:'56px', maxHeight:'56px', objectFit:'contain', display:'block' },
   // Hero
   hero:        { display:'flex', alignItems:'flex-end', position:'relative', width:'100%' },
-  heroOverlay: { width:'100%', padding:'48px 24px 36px', transition:'background-color .3s' },
+  heroOverlay: { width:'100%', padding:'clamp(24px,5vw,48px) 20px clamp(20px,4vw,36px)', transition:'background-color .3s' },
   heroContent: { maxWidth:'820px', margin:'0 auto' },
   heroTag:     { display:'inline-flex', alignItems:'center', gap:'6px', backgroundColor:'rgba(255,255,255,.18)', color:'#FFFFFF', padding:'4px 12px', borderRadius:'20px', fontSize:'12px', fontWeight:'600', marginBottom:'12px', backdropFilter:'blur(6px)' },
   heroTitle:   { fontWeight:'900', color:'#FFFFFF', letterSpacing:'-.04em', margin:'0 0 10px', lineHeight:'1.05' },

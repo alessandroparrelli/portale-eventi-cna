@@ -38,9 +38,9 @@ function RigaCampo({ campo, onUpdate }) {
   const isNomeOrCognome = campo.colonna_db === 'nome' || campo.colonna_db === 'cognome'
 
   return (
-    <div style={{
+    <div className="iscrizioni-campo-row" style={{
       display: 'grid',
-      gridTemplateColumns: '28px 1fr 90px 90px',
+      gridTemplateColumns: '28px 1fr 72px 72px',
       alignItems: 'center', gap: '12px',
       padding: '10px 14px',
       borderBottom: '1px solid #F3F4F6',
@@ -124,7 +124,7 @@ function RigaCampoExtra({ campo, onUpdate, onDelete, extraIndex }) {
       border: '1px solid #E5E7EB', borderRadius: '10px',
       padding: '14px', marginBottom: '10px', background: '#FAFAFA',
     }}>
-      <div style={{ display: 'grid', gridTemplateColumns: '1fr 160px auto', gap: '10px', alignItems: 'start' }}>
+      <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(160px, 1fr)) 36px', gap: '10px', alignItems: 'start' }}>
         {/* Label */}
         <div>
           <label style={sLabel}>Nome del campo</label>
@@ -153,7 +153,7 @@ function RigaCampoExtra({ campo, onUpdate, onDelete, extraIndex }) {
           type="button"
           onClick={onDelete}
           style={{
-            marginTop: '22px', background: '#FEF2F2', border: '1px solid #FECACA',
+            marginTop: '0', alignSelf: 'flex-end', background: '#FEF2F2', border: '1px solid #FECACA',
             borderRadius: '6px', padding: '7px', cursor: 'pointer',
             display: 'flex', alignItems: 'center',
           }}
@@ -321,7 +321,7 @@ export default function IscrizioniTab({ event, setEvent, eventId }) {
     <div style={{ padding: '0', maxWidth: '720px' }}>
 
       {/* ── Header sezione ── */}
-      <div style={{ display: 'flex', alignItems: 'flex-start', justifyContent: 'space-between', marginBottom: '24px' }}>
+      <div style={{ display: 'flex', alignItems: 'flex-start', justifyContent: 'space-between', marginBottom: '24px', flexWrap: 'wrap', gap: '12px' }}>
         <div>
           <h2 style={{ fontSize: '20px', fontWeight: '900', color: '#0A0A0A', margin: '0 0 4px', letterSpacing: '-.02em' }}>
             Gestione iscrizioni
@@ -351,7 +351,7 @@ export default function IscrizioniTab({ event, setEvent, eventId }) {
       {/* ── Sezione 1: Capienza e posti ── */}
       <div style={sCard}>
         <p style={sCardTitle}>📦 Capienza e posti</p>
-        <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '16px' }}>
+        <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(220px, 1fr))', gap: '16px' }}>
           <div>
             <label style={sLabel}>Capienza massima</label>
             <input
@@ -383,7 +383,7 @@ export default function IscrizioniTab({ event, setEvent, eventId }) {
         </div>
 
         {/* Riepilogo */}
-        <div style={{ display: 'flex', gap: '20px', marginTop: '14px', padding: '12px 14px', background: '#F9FAFB', borderRadius: '8px' }}>
+        <div style={{ display: 'flex', gap: '16px', flexWrap: 'wrap', marginTop: '14px', padding: '12px 14px', background: '#F9FAFB', borderRadius: '8px' }}>
           {[
             { l: 'Capienza', v: event.capienza_max ? event.capienza_max.toLocaleString('it-IT') : '∞', u: 'posti' },
             { l: 'Per utente', v: event.posti_per_utente || 1, u: 'posti' },
@@ -411,8 +411,8 @@ export default function IscrizioniTab({ event, setEvent, eventId }) {
         <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', marginBottom: '4px' }}>
           <p style={sCardTitle}>📋 Campi del form</p>
           <div style={{ display: 'flex', gap: '20px', paddingRight: '14px' }}>
-            <span style={{ fontSize: '11px', color: '#6B7280', fontWeight: '700', width: '90px', textAlign: 'center' }}>VISIBILE</span>
-            <span style={{ fontSize: '11px', color: '#6B7280', fontWeight: '700', width: '90px', textAlign: 'center' }}>OBBLIGATORIO</span>
+            <span style={{ fontSize: '11px', color: '#6B7280', fontWeight: '700', width: '72px', textAlign: 'center' }}>VISIBILE</span>
+            <span style={{ fontSize: '11px', color: '#6B7280', fontWeight: '700', width: '72px', textAlign: 'center' }}>OBBLIG.</span>
           </div>
         </div>
         <p style={{ fontSize: '12px', color: '#9CA3AF', margin: '0 0 12px 14px' }}>
