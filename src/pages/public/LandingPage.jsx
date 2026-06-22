@@ -304,7 +304,7 @@ export default function LandingPage() {
 
       {/* ── HEADER ── */}
       <header style={s.header}>
-        <img src="https://raw.githubusercontent.com/alessandroparrelli/fileappoggio/main/NUOVO-LOGO-CNA-ROMA-SOLO-ROMA.png"
+        <img src={event?.logo_url || "https://raw.githubusercontent.com/alessandroparrelli/fileappoggio/main/NUOVO-LOGO-CNA-ROMA-SOLO-ROMA.png"}
           alt="CNA Roma" style={s.logo}/>
       </header>
 

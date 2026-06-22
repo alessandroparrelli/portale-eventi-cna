@@ -5,6 +5,7 @@ import { useRole } from '../../hooks/useRole'
 import RichEditor from '../../components/editor/RichEditor'
 import BlockEditor, { newBlock } from '../../components/editor/BlockEditor'
 import ImageUploader from '../../components/editor/ImageUploader'
+import LogoManager from '../../components/editor/LogoManager'
 import {
   Save, ArrowLeft, Eye, Plus, Trash2, GripVertical,
   Type, Image, Grid3x3,
@@ -327,7 +328,7 @@ export default function EventoEditorPage() {
 
   const [event, setEvent] = useState({
     titolo:'', slug:'', stato:'bozza', data_inizio:'', data_fine:'',
-    luogo:'', descrizione_html:'', immagine_hero:null,
+    luogo:'', descrizione_html:'', immagine_hero:null, logo_url:null,
     colore_primario:'#003DA5', colore_sfondo:'#F4F5F7',
     layout_hero:{ altezza:'380', overlay_opacita:'55', allineamento:'sinistra', titolo_colore:'#FFFFFF', titolo_dimensione:'clamp(26px,5vw,54px)', titolo_grassetto:true, titolo_maiuscolo:false },
     sezioni:[],
@@ -356,6 +357,7 @@ export default function EventoEditorPage() {
         data_inizio: data.data_inizio?.slice(0,16)||'',
         data_fine:   data.data_fine?.slice(0,16)||'',
         layout_hero: data.layout_hero || { altezza:'380', overlay_opacita:'55', allineamento:'sinistra' },
+        logo_url: data.logo_url || null,
         sezioni,
         // Azzera descrizione_html se è stata migrata nei blocchi
         descrizione_html: sezioni.length > 0 ? null : data.descrizione_html,
@@ -380,6 +382,7 @@ export default function EventoEditorPage() {
       sezioni:event.sezioni,
       capienza_max:event.capienza_max||null,
       posti_per_utente:event.posti_per_utente||1,
+      logo_url:event.logo_url||null,
     }
     if (isNew) {
       const { data } = await supabase.from('events').insert(payload).select().single()
@@ -544,6 +547,20 @@ export default function EventoEditorPage() {
           <div style={p.panel}>
             <h2 style={p.panelTitle}>Immagine Hero</h2>
 
+            {/* Logo header */}
+            <div style={{ marginBottom:'24px', padding:'16px', background:'#F9FAFB', border:'1px solid #E5E7EB', borderRadius:'10px' }}>
+              <p style={{ fontSize:'12px', fontWeight:'700', color:'#6B7280', textTransform:'uppercase', letterSpacing:'.06em', margin:'0 0 12px' }}>
+                🏷 Logo header della landing page
+              </p>
+              <p style={{ fontSize:'12px', color:'#9CA3AF', margin:'0 0 12px', lineHeight:'1.5' }}>
+                Scegli il logo che apparirà nell'header della pagina evento. Puoi caricare loghi personalizzati per eventi di altre sedi CNA.
+              </p>
+              <LogoManager
+                value={event.logo_url}
+                onChange={url => setEvent(p => ({ ...p, logo_url: url }))}
+              />
+            </div>
+
             <div style={{ marginBottom:'20px' }}>
               <ImageUploader value={event.immagine_hero} onChange={url=>setEvent(p=>({...p,immagine_hero:url}))}/>
             </div>
@@ -625,7 +642,13 @@ export default function EventoEditorPage() {
               }}>
                 <div style={{ padding:'20px 24px', background:`rgba(0,0,0,${(event.layout_hero?.overlay_opacita||55)/100})`,
                   width:'100%', textAlign:event.layout_hero?.allineamento==='centro'?'center':'left' }}>
-                  <p style={{ color:'rgba(255,255,255,.7)', fontSize:'11px', margin:'0 0 4px', fontWeight:'600' }}>EVENTO CNA ROMA</p>
+                  <div style={{ marginBottom:'6px' }}>
+                    <img
+                      src={event.logo_url || 'https://raw.githubusercontent.com/alessandroparrelli/fileappoggio/main/NUOVO-LOGO-CNA-ROMA-SOLO-ROMA.png'}
+                      alt="Logo"
+                      style={{ height:'28px', objectFit:'contain', opacity:.9 }}
+                    />
+                  </div>
                   <p style={{ color:event.layout_hero?.titolo_colore||'#FFF', fontSize:'18px', fontWeight:event.layout_hero?.titolo_grassetto?'900':'400', margin:0, textTransform:event.layout_hero?.titolo_maiuscolo?'uppercase':'none' }}>{event.titolo||'Titolo evento'}</p>
                 </div>
               </div>
