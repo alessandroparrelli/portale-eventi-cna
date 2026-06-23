@@ -14,6 +14,7 @@ import {
 import { Field, Input, Select, Btn, StatoBadge } from '../../components/ui'
 import EventEmailTab from '../../components/editor/EventEmailTab'
 import IscrizioniTab from '../../components/editor/IscrizioniTab'
+import AspettoTab from '../../components/editor/AspettoTab'
 
 const toSlug = s => s.toLowerCase().normalize('NFD').replace(/[\u0300-\u036f]/g,'')
   .replace(/[^a-z0-9]+/g,'-').replace(/^-|-$/g,'')
@@ -329,7 +330,7 @@ export default function EventoEditorPage() {
   const [event, setEvent] = useState({
     titolo:'', slug:'', stato:'bozza', data_inizio:'', data_fine:'',
     luogo:'', descrizione_html:'', immagine_hero:null, logo_url:null,
-    colore_primario:'#003DA5', colore_sfondo:'#F4F5F7',
+    colore_primario:'#003DA5', colore_sfondo:'#F4F5F7', tema:{},
     layout_hero:{ altezza:'380', overlay_opacita:'55', allineamento:'sinistra', titolo_colore:'#FFFFFF', titolo_dimensione:'clamp(26px,5vw,54px)', titolo_grassetto:true, titolo_maiuscolo:false },
     sezioni:[],
   })
@@ -358,6 +359,7 @@ export default function EventoEditorPage() {
         data_fine:   data.data_fine?.slice(0,16)||'',
         layout_hero: data.layout_hero || { altezza:'380', overlay_opacita:'55', allineamento:'sinistra' },
         logo_url: data.logo_url || null,
+        tema: data.tema || {},
         sezioni,
         // Azzera descrizione_html se è stata migrata nei blocchi
         descrizione_html: sezioni.length > 0 ? null : data.descrizione_html,
@@ -383,6 +385,7 @@ export default function EventoEditorPage() {
       capienza_max:event.capienza_max||null,
       posti_per_utente:event.posti_per_utente||1,
       logo_url:event.logo_url||null,
+      tema:event.tema||{},
     }
     if (isNew) {
       const { data } = await supabase.from('events').insert(payload).select().single()
@@ -673,66 +676,7 @@ export default function EventoEditorPage() {
         {/* ── ASPETTO ── */}
         {activeTab==='aspetto' && (
           <div style={p.panel}>
-            <h2 style={p.panelTitle}>Colori e aspetto</h2>
-            <div style={p.grid2}>
-              <Field label="Colore primario (pulsanti, link, accenti)">
-                <div style={{ display:'flex', gap:'10px', alignItems:'center' }}>
-                  <input type="color" value={event.colore_primario||'#003DA5'}
-                    onChange={e=>setEvent(p=>({...p,colore_primario:e.target.value}))}
-                    style={{ width:'48px', height:'40px', border:'1px solid #D1D5DB', borderRadius:'6px', cursor:'pointer', padding:'2px' }}/>
-                  <Input value={event.colore_primario||'#003DA5'}
-                    onChange={e=>setEvent(p=>({...p,colore_primario:e.target.value}))}/>
-                </div>
-              </Field>
-              <Field label="Colore sfondo sezioni">
-                <div style={{ display:'flex', gap:'10px', alignItems:'center' }}>
-                  <input type="color" value={event.colore_sfondo||'#F4F5F7'}
-                    onChange={e=>setEvent(p=>({...p,colore_sfondo:e.target.value}))}
-                    style={{ width:'48px', height:'40px', border:'1px solid #D1D5DB', borderRadius:'6px', cursor:'pointer', padding:'2px' }}/>
-                  <Input value={event.colore_sfondo||'#F4F5F7'}
-                    onChange={e=>setEvent(p=>({...p,colore_sfondo:e.target.value}))}/>
-                </div>
-              </Field>
-            </div>
-
-            {/* Palette */}
-            <div style={{ marginTop:'16px' }}>
-              <p style={p.sectionLbl}>Palette preimpostate</p>
-              <div style={{ display:'flex', flexWrap:'wrap', gap:'8px' }}>
-                {[
-                  { nome:'CNA Roma',    primario:'#003DA5', sfondo:'#EEF3FF' },
-                  { nome:'Verde',       primario:'#16A34A', sfondo:'#F0FDF4' },
-                  { nome:'Rosso CNA',   primario:'#DC2626', sfondo:'#FEF2F2' },
-                  { nome:'Viola',       primario:'#7C3AED', sfondo:'#F5F3FF' },
-                  { nome:'Oro',         primario:'#D97706', sfondo:'#FFFBEB' },
-                  { nome:'Grafite',     primario:'#1F2937', sfondo:'#F9FAFB' },
-                  { nome:'Teal',        primario:'#0D9488', sfondo:'#F0FDFA' },
-                  { nome:'Bianco puro', primario:'#003DA5', sfondo:'#FFFFFF' },
-                ].map(pl=>(
-                  <button key={pl.nome}
-                    onClick={()=>setEvent(p=>({...p,colore_primario:pl.primario,colore_sfondo:pl.sfondo}))}
-                    style={{ display:'flex', alignItems:'center', gap:'8px', padding:'8px 14px',
-                      border:`2px solid ${event.colore_primario===pl.primario?pl.primario:'#E5E7EB'}`,
-                      borderRadius:'8px', backgroundColor:'#FFFFFF', cursor:'pointer',
-                      fontFamily:"'Inter',sans-serif", fontSize:'12px', fontWeight:'600', color:'#374151' }}>
-                    <span style={{ display:'flex', gap:'3px' }}>
-                      <span style={{ width:'16px', height:'16px', borderRadius:'50%', backgroundColor:pl.primario }}/>
-                      <span style={{ width:'16px', height:'16px', borderRadius:'50%', backgroundColor:pl.sfondo, border:'1px solid #E5E7EB' }}/>
-                    </span>
-                    {pl.nome}
-                  </button>
-                ))}
-              </div>
-            </div>
-
-            {/* Anteprima */}
-            <div style={{ marginTop:'20px', backgroundColor:event.colore_sfondo||'#F4F5F7', borderRadius:'10px', padding:'24px', border:'1px solid #E5E7EB' }}>
-              <p style={{ fontSize:'11px', color:'#9CA3AF', margin:'0 0 12px', fontWeight:'600', textTransform:'uppercase' }}>Anteprima</p>
-              <button style={{ backgroundColor:event.colore_primario||'#003DA5', color:'#FFFFFF', border:'none', borderRadius:'8px', padding:'12px 24px', fontSize:'14px', fontWeight:'700', fontFamily:"'Inter',sans-serif", cursor:'default' }}>
-                Iscriviti ora →
-              </button>
-              <span style={{ marginLeft:'16px', fontSize:'14px', color:event.colore_primario||'#003DA5', fontWeight:'600', textDecoration:'underline', cursor:'default' }}>Scopri di più</span>
-            </div>
+            <AspettoTab event={event} setEvent={setEvent} />
           </div>
         )}
       </div>

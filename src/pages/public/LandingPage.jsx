@@ -1,6 +1,7 @@
 import { useEffect, useState, useRef } from 'react'
 import { useParams } from 'react-router-dom'
 import { supabase } from '../../lib/supabase'
+import { temaConDefault } from '../../components/editor/AspettoTab'
 import { MapPin, Calendar, ChevronRight, AlertCircle } from 'lucide-react'
 import { RICH_CSS } from '../../components/editor/RichEditor'
 import FormIscrizione from './FormIscrizione'
@@ -273,6 +274,7 @@ export default function LandingPage() {
 
   const esaurito = false // capienza rimossa
   const lh = event.layout_hero || {}
+  const tema = temaConDefault(event?.tema)
 
   const heroStyle = event.immagine_hero
     ? { backgroundImage:`url(${event.immagine_hero})`,backgroundSize:'cover',backgroundPosition:'center top' }
@@ -303,9 +305,26 @@ export default function LandingPage() {
       `}</style>
 
       {/* ── HEADER ── */}
-      <header style={s.header}>
-        <img src={event?.logo_url || "https://raw.githubusercontent.com/alessandroparrelli/fileappoggio/main/NUOVO-LOGO-CNA-ROMA-SOLO-ROMA.png"}
-          alt="CNA Roma" style={s.logo}/>
+      <header style={{
+        backgroundColor: tema.sfondo_header || '#FFFFFF',
+        borderBottom: `${tema.spessore_bordo || 3}px solid ${tema.bordo_header || '#003DA5'}`,
+        position:'sticky', top:0, zIndex:50, width:'100%',
+        height:'80px', display:'flex', alignItems:'center',
+        justifyContent:'center', padding:'0 24px',
+      }}>
+        {/* Logo con sfondo opzionale */}
+        <div style={{
+          background: tema.logo_bg === 'colore_primario' ? (tema.colore_primario || '#003DA5')
+                    : tema.logo_bg === 'bianco' ? '#FFFFFF'
+                    : 'transparent',
+          padding: tema.logo_bg && tema.logo_bg !== 'trasparente' ? '4px 10px' : 0,
+          borderRadius: '6px',
+          display: 'flex', alignItems: 'center',
+        }}>
+          <img src={event?.logo_url || "https://raw.githubusercontent.com/alessandroparrelli/fileappoggio/main/NUOVO-LOGO-CNA-ROMA-SOLO-ROMA.png"}
+            alt="CNA Roma"
+            style={{ height: `${tema.logo_altezza || 44}px`, maxWidth:'200px', objectFit:'contain', display:'block' }}/>
+        </div>
       </header>
 
       {/* ── HERO ── */}
@@ -339,9 +358,28 @@ export default function LandingPage() {
       </div>
 
       {/* ── BODY ── */}
-      <div style={s.body}>
+      <div style={{ ...s.body, backgroundColor: tema.sfondo_pagina || '#FFFFFF' }}>
 
         {/* 3 PULSANTI AZIONE */}
+        {(() => {
+          const btnRadius = tema.btn_stile === 'pill' ? '50px' : `${tema.btn_raggio || 8}px`
+          const aBtn = {
+            display:'flex', flexDirection:'column', alignItems:'center', justifyContent:'center',
+            gap:'5px', padding:'12px 8px', minHeight:'60px', cursor:'pointer',
+            textDecoration:'none', textAlign:'center', lineHeight:'1.3',
+            fontSize:'12px', fontWeight:'700', fontFamily:"'Inter',sans-serif",
+            backgroundColor: '#FFFFFF',
+            border: `1.5px solid ${tema.colore_primario || '#003DA5'}`,
+            color: tema.colore_primario || '#003DA5',
+            borderRadius: btnRadius,
+          }
+          const aBtnPrimary = {
+            ...aBtn,
+            backgroundColor: tema.btn_stile === 'contorno' ? 'transparent' : (tema.colore_pulsanti || tema.colore_primario || '#003DA5'),
+            color: tema.btn_stile === 'contorno' ? (tema.colore_pulsanti || '#003DA5') : (tema.colore_testo_btn || '#FFFFFF'),
+            border: `1.5px solid ${tema.colore_pulsanti || tema.colore_primario || '#003DA5'}`,
+          }
+          return (
         <div style={s.actionRow}>
           <button onClick={() => {
             const fmt = ts => ts ? new Date(ts).toISOString().replace(/[-:]/g,'').replace(/\.\d{3}/,'') : null
@@ -356,7 +394,7 @@ export default function LandingPage() {
               href:URL.createObjectURL(new Blob([ics],{type:'text/calendar;charset=utf-8'})),
               download:`${event.slug}.ics`
             }).click()
-          }} style={s.actionBtn}>
+          }} style={aBtn}>
             <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round">
               <rect x="3" y="4" width="18" height="18" rx="2"/><line x1="16" y1="2" x2="16" y2="6"/><line x1="8" y1="2" x2="8" y2="6"/><line x1="3" y1="10" x2="21" y2="10"/>
             </svg>
@@ -365,7 +403,7 @@ export default function LandingPage() {
 
           {event.luogo && (
             <a href={`https://maps.google.com/?q=${encodeURIComponent(event.luogo)}`}
-              target="_blank" rel="noopener noreferrer" style={s.actionBtn}>
+              target="_blank" rel="noopener noreferrer" style={aBtn}>
               <MapPin size={20}/>
               <span>Mappa<br/>dell'evento</span>
             </a>
@@ -377,12 +415,15 @@ export default function LandingPage() {
               setTimeout(() => {
                 document.getElementById('form-iscrizione')?.scrollIntoView({ behavior:'smooth', block:'start' })
               }, 50)
-            }} style={{ ...s.actionBtn, ...s.actionBtnPrimary }}>
+            }} style={aBtnPrimary}>
               <ChevronRight size={20}/>
               <span>Partecipa<br/>all'evento</span>
             </button>
           )}
         </div>
+          )
+        })()
+        }
 
         {/* DESCRIZIONE (solo se non ci sono blocchi) */}
         {(event.descrizione_html || event.descrizione) && !(event.sezioni||[]).length && (
@@ -405,7 +446,7 @@ export default function LandingPage() {
 
         {/* CTA / FORM */}
         {!conferma && (
-          <section style={s.ctaSection}>
+          <section style={{ ...s.ctaSection, backgroundColor: tema.cta_bg || '#EEF3FF' }}>
             <div style={s.ctaRow}>
               <div>
                 <h2 style={s.ctaTitle}>Partecipa all'evento</h2>
@@ -417,7 +458,15 @@ export default function LandingPage() {
                 <button onClick={() => {
                   setFormVisible(true)
                   setTimeout(()=>document.getElementById('form-iscrizione')?.scrollIntoView({behavior:'smooth',block:'start'}),50)
-                }} style={s.ctaBtn}>
+                }} style={{
+                  display:'flex', alignItems:'center', gap:'8px',
+                  backgroundColor: tema.btn_stile === 'contorno' ? 'transparent' : (tema.colore_pulsanti || tema.colore_primario || '#003DA5'),
+                  color: tema.btn_stile === 'contorno' ? (tema.colore_pulsanti || '#003DA5') : (tema.colore_testo_btn || '#FFFFFF'),
+                  border: tema.btn_stile === 'contorno' ? `2px solid ${tema.colore_pulsanti || '#003DA5'}` : 'none',
+                  borderRadius: tema.btn_stile === 'pill' ? '50px' : `${tema.btn_raggio || 8}px`,
+                  padding:'12px 24px', fontSize:'14px', fontWeight:'700',
+                  fontFamily:"'Inter',sans-serif", cursor:'pointer', whiteSpace:'nowrap', flexShrink:0,
+                }}>
                   Iscriviti ora <ChevronRight size={18}/>
                 </button>
               )}
@@ -475,7 +524,7 @@ const s = {
   root:    { minHeight:'100vh', backgroundColor:'#FFFFFF', fontFamily:"'Inter',sans-serif", overflowX:'hidden', width:'100%' },
   center:  { minHeight:'100vh', display:'flex', flexDirection:'column', alignItems:'center', justifyContent:'center', backgroundColor:'#F4F5F7', padding:'24px' },
   // Header
-  header:      { backgroundColor:'#FFFFFF', borderBottom:'3px solid #003DA5', position:'sticky', top:0, zIndex:50, width:'100%', height:'80px', display:'flex', alignItems:'center', justifyContent:'center', padding:'0 24px' },
+  // header: stile generato inline in base al tema dell'evento
   logo:        { height:'56px', maxHeight:'56px', objectFit:'contain', display:'block' },
   // Hero
   hero:        { display:'flex', alignItems:'flex-end', position:'relative', width:'100%' },
@@ -492,14 +541,13 @@ const s = {
   descText:    { fontSize:'15px', color:'#374151', lineHeight:'1.75' },
   // 3 pulsanti
   actionRow:       { display:'grid', gridTemplateColumns:'repeat(3, 1fr)', gap:'8px', marginBottom:'28px', padding:'4px 0' },
-  actionBtn:       { display:'flex', flexDirection:'column', alignItems:'center', justifyContent:'center', gap:'5px', padding:'12px 8px', backgroundColor:'#FFFFFF', border:'1.5px solid #003DA5', color:'#003DA5', borderRadius:'14px', fontSize:'12px', fontWeight:'700', fontFamily:"'Inter',sans-serif", cursor:'pointer', textDecoration:'none', textAlign:'center', lineHeight:'1.3', minHeight:'60px' },
-  actionBtnPrimary:{ backgroundColor:'#003DA5', color:'#FFFFFF', border:'1.5px solid #003DA5', borderRadius:'14px' },
+  // actionBtn / actionBtnPrimary: stili generati inline in base al tema
   // CTA box
   ctaSection:  { backgroundColor:'#EEF3FF', border:'1px solid #C7D9F8', borderRadius:'12px', padding:'24px', marginBottom:'24px' },
   ctaRow:      { display:'flex', alignItems:'center', justifyContent:'space-between', gap:'16px', flexWrap:'wrap' },
   ctaTitle:    { fontSize:'18px', fontWeight:'900', color:'#0A0A0A', letterSpacing:'-.02em', margin:'0 0 4px' },
   ctaSub:      { fontSize:'13px', color:'#4B5563', margin:0, lineHeight:'1.5' },
-  ctaBtn:      { display:'flex', alignItems:'center', gap:'8px', backgroundColor:'#003DA5', color:'#FFFFFF', border:'none', borderRadius:'8px', padding:'12px 24px', fontSize:'14px', fontWeight:'700', fontFamily:"'Inter',sans-serif", cursor:'pointer', whiteSpace:'nowrap', flexShrink:0 },
+  // ctaBtn: stile generato inline
   formWrap:    { backgroundColor:'#FFFFFF', border:'1px solid #E5E7EB', borderRadius:'12px', padding:'24px', marginBottom:'32px' },
   formTitle:   { fontSize:'18px', fontWeight:'800', color:'#0A0A0A', letterSpacing:'-.02em', margin:'0 0 20px' },
   // Mappa
