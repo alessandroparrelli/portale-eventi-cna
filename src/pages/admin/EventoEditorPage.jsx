@@ -679,24 +679,26 @@ export default function EventoEditorPage() {
             <AspettoTab event={event} setEvent={setEvent} />
           </div>
         )}
-      </div>
 
-      <style>{`
-        @keyframes spin { from{transform:rotate(0)} to{transform:rotate(360deg)} }
-      `}</style>
-
-        {/* ── EMAIL ── */}
         {/* ── ISCRIZIONI ── */}
         {activeTab==='iscrizioni' && (
-          <IscrizioniTab event={event} setEvent={setEvent} eventId={id} />
+          <div style={p.panel}>
+            <IscrizioniTab event={event} setEvent={setEvent} eventId={id} />
+          </div>
         )}
 
+        {/* ── EMAIL ── */}
         {activeTab==='email' && (
           <div style={p.panel}>
             <h2 style={p.panelTitle}>Email per questo evento</h2>
             <EventEmailTab eventoId={id} />
           </div>
         )}
+      </div>
+
+      <style>{`
+        @keyframes spin { from{transform:rotate(0)} to{transform:rotate(360deg)} }
+      `}</style>
     </div>
   )
 }
