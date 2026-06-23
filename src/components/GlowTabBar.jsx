@@ -36,8 +36,8 @@ function Tab({ t, isActive, color, onChange, mobile }) {
         onClick={() => onChange(t.id)}
         style={{
           display: 'inline-flex', alignItems: 'center',
-          padding: '6px 12px', borderRadius: '6px', border: 'none',
-          cursor: 'pointer', fontSize: '12px', fontWeight: isActive ? '700' : '500',
+          padding: '7px 13px', borderRadius: '6px', border: 'none',
+          cursor: 'pointer', fontSize: '14px', fontWeight: isActive ? '700' : '500',
           fontFamily: "'Inter', sans-serif", whiteSpace: 'nowrap', outline: 'none',
           flexShrink: 0,
           background: isActive ? `linear-gradient(135deg, ${p.from}, ${p.to})` : 'transparent',

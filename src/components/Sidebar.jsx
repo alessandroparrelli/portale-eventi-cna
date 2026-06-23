@@ -210,7 +210,7 @@ export default function Sidebar({ mobileOpen, onMobileClose, isMobile }) {
                       }}>
                         {icons[iconKey]?.(isActive ? '#fff' : '#9CA3AF')}
                       </div>
-                      <span style={{ fontSize:'13px', fontWeight: isActive ? '700' : '500', letterSpacing:'-0.01em', flex:1 }}>{label}</span>
+                      <span className="nav-label" style={{ fontSize:'13px', fontWeight: isActive ? '700' : '500', letterSpacing:'-0.01em', flex:1 }}>{label}</span>
                       {isActive && <div style={{ ...st.activeDot, backgroundColor: activeColor }}/>}
                     </>
                   )}
@@ -248,7 +248,7 @@ export default function Sidebar({ mobileOpen, onMobileClose, isMobile }) {
             onMouseEnter={e => e.currentTarget.style.backgroundColor='#FEF2F2'}
             onMouseLeave={e => e.currentTarget.style.backgroundColor='transparent'}>
             {icons.logout()}
-            <span>Esci dall'app</span>
+            <span className="logout-label">Esci dall'app</span>
           </button>
         </div>
 

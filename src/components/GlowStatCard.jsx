@@ -95,15 +95,15 @@ export default function GlowStatCard({ icon, label, value, sub, palette = 'blue'
         {/* Testo */}
         <div style={{ minWidth: 0, flex: 1 }}>
           <p style={{
-            fontSize: '22px', fontWeight: '900', color: p.num,
+            fontSize: '26px', fontWeight: '900', color: p.num,
             margin: 0, letterSpacing: '-0.03em', lineHeight: 1,
             fontFamily: "'Inter', sans-serif",
           }}>
             {value}
           </p>
           <p style={{
-            fontSize: '10px', fontWeight: '700', color: p.label,
-            margin: '2px 0 0', textTransform: 'uppercase',
+            fontSize: '11px', fontWeight: '700', color: p.label,
+            margin: '3px 0 0', textTransform: 'uppercase',
             letterSpacing: '0.04em', fontFamily: "'Inter', sans-serif",
             overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap',
           }}>

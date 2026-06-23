@@ -295,6 +295,97 @@ header img { display: block; }
   .hide-mobile { display: none !important; }
   .show-mobile { display: block !important; }
 
+  /* ══════════════════════════════════════════════════
+     SCALA TESTI — tutto più leggibile su mobile
+  ══════════════════════════════════════════════════ */
+
+  /* Sidebar: voci menu più grandi */
+  .nav-label { font-size: 15px !important; }
+
+  /* Sidebar: etichette gruppo */
+  aside nav p { font-size: 12px !important; letter-spacing: 0.06em !important; }
+
+  /* Sidebar: nome utente */
+  aside a p:first-child { font-size: 15px !important; }
+
+  /* Sidebar: badge ruolo */
+  aside a span:first-of-type { font-size: 12px !important; }
+
+  /* Sidebar: bottone logout */
+  .logout-label { font-size: 14px !important; }
+
+  /* Titoli pagina */
+  .page-header-row h1 { font-size: 20px !important; }
+  h1 { font-size: 20px !important; }
+  h2 { font-size: 16px !important; }
+  h3 { font-size: 15px !important; }
+
+  /* Sottotitoli e label */
+  p[style*="fontSize:'11px'"],
+  p[style*="fontSize: '11px'"],
+  span[style*="fontSize:'11px'"],
+  span[style*="fontSize: '11px'"] { font-size: 13px !important; }
+
+  p[style*="fontSize:'12px'"],
+  p[style*="fontSize: '12px'"],
+  span[style*="fontSize:'12px'"],
+  span[style*="fontSize: '12px'"] { font-size: 13px !important; }
+
+  p[style*="fontSize:'13px'"],
+  p[style*="fontSize: '13px'"],
+  span[style*="fontSize:'13px'"],
+  span[style*="fontSize: '13px'"],
+  div[style*="fontSize:'13px'"] { font-size: 14px !important; }
+
+  p[style*="fontSize:'14px'"],
+  p[style*="fontSize: '14px'"],
+  span[style*="fontSize:'14px'"],
+  span[style*="fontSize: '14px'"] { font-size: 15px !important; }
+
+  /* Celle tabella */
+  .table-wrap th,
+  .table-wrap td { font-size: 13px !important; padding: 10px 8px !important; }
+  .table-wrap thead th { font-size: 11px !important; }
+
+  /* Badge stato */
+  span[style*="fontSize:'11px'"],
+  span[style*="11px"] { font-size: 12px !important; }
+
+  /* GlowStatCard numero e label */
+  .stat-grid-4 p,
+  .stat-grid-3 p,
+  .stat-grid-auto p { font-size: 14px !important; }
+
+  /* GlowTabBar testo tab */
+  .glow-tab-wrap button { font-size: 13px !important; }
+
+  /* Filtri e input label */
+  label { font-size: 15px !important; }
+
+  /* Bottoni principali */
+  button[style*="fontSize:'14px'"],
+  button[style*="fontSize: '14px'"] { font-size: 15px !important; }
+  button[style*="fontSize:'13px'"],
+  button[style*="fontSize: '13px'"] { font-size: 14px !important; }
+  button[style*="fontSize:'12px'"],
+  button[style*="fontSize: '12px'"] { font-size: 13px !important; }
+
+  /* Codici e monospace */
+  span[style*="monospace"],
+  p[style*="monospace"] { font-size: 12px !important; }
+
+  /* Bottoni pill: mostra testo su mobile */
+  .btn-pill span { display: inline !important; font-size: 12px !important; }
+  .btn-pill { font-size: 12px !important; padding: 7px 10px !important; gap: 5px !important; }
+
+  /* Select e dropdown */
+  select { font-size: 16px !important; padding: 10px 12px !important; }
+
+  /* Testo generico nelle card */
+  .glow-card p,
+  div[style*="backgroundColor:'#FFFFFF'"] p,
+  div[style*="backgroundColor: '#FFFFFF'"] p { font-size: 14px !important; }
+
   /* ── Landing ── */
   .landing-hero-title  { font-size: 24px !important; }
   .landing-body        { padding: 16px 12px 0 !important; }
