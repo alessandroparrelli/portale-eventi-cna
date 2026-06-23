@@ -1,9 +1,10 @@
 import { useEffect, useState } from 'react'
 import { supabase } from '../../lib/supabase'
 import { Select, Field, EmptyState } from '../../components/ui'
-import { BarChart2, Star, TrendingUp, Users, CheckCircle2, UserX, UserCheck, Search, Calendar, Award, Clock, ArrowRight } from 'lucide-react'
+import { BarChart2, Star, TrendingUp, Users, CheckCircle2, UserX, UserCheck, Search, Calendar, Award, Clock, ArrowRight, Download } from 'lucide-react'
 import EventSelector from '../../components/EventSelector'
 import GlowTabBar from '../../components/GlowTabBar'
+import * as XLSX from 'xlsx'
 
 function StatCard({ icon: Icon, label, value, color='#003DA5', sub, iconClass }) {
   return (
@@ -78,6 +79,7 @@ export default function StatistichePage() {
   const [searchUtente, setSearchUtente] = useState('')
   const [selectedUtente, setSelectedUtente] = useState(null)
   const [cronologia, setCronologia] = useState([])
+  const [exportingXlsx, setExportingXlsx] = useState(false)
 
   useEffect(() => {
     supabase.from('events').select('id,titolo,capienza_max,data_inizio,stato').order('data_inizio',{ascending:false})
@@ -162,6 +164,79 @@ export default function StatistichePage() {
     const list = Object.values(map).sort((a,b) => b.eventi_totali - a.eventi_totali)
     setUtenti(list)
     setLoadingUtenti(false)
+  }
+
+  async function exportPartecipanti() {
+    setExportingXlsx(true)
+    try {
+      // Carica tutte le registrazioni con titoli eventi
+      const { data: regs } = await supabase
+        .from('registrations')
+        .select('id, nome, cognome, email, ragione_sociale, partita_iva, cellulare, cap, presente, stato, created_at, checkin_at, codice_iscrizione, event_id, mestiere_id')
+        .order('created_at', { ascending: false })
+
+      if (!regs || regs.length === 0) { setExportingXlsx(false); return }
+
+      // Carica tutti gli eventi e mestieri referenziati
+      const eventIds = [...new Set(regs.map(r => r.event_id).filter(Boolean))]
+      const mestiereIds = [...new Set(regs.map(r => r.mestiere_id).filter(Boolean))]
+
+      const [{ data: eventsData }, { data: mestieriData }] = await Promise.all([
+        supabase.from('events').select('id, titolo, data_inizio, luogo, stato').in('id', eventIds),
+        mestiereIds.length
+          ? supabase.from('mestieri').select('id, nome').in('id', mestiereIds)
+          : Promise.resolve({ data: [] }),
+      ])
+
+      const evMap = Object.fromEntries((eventsData || []).map(e => [e.id, e]))
+      const msMap = Object.fromEntries((mestieriData || []).map(m => [m.id, m.nome]))
+
+      const rows = regs.map(r => {
+        const ev = evMap[r.event_id] || {}
+        return {
+          'Evento':              ev.titolo            || '—',
+          'Data evento':         ev.data_inizio
+            ? new Date(ev.data_inizio).toLocaleDateString('it-IT', { day:'2-digit', month:'2-digit', year:'numeric' })
+            : '—',
+          'Luogo':               ev.luogo             || '—',
+          'Codice iscrizione':   r.codice_iscrizione  || '—',
+          'Data iscrizione':     r.created_at
+            ? new Date(r.created_at).toLocaleDateString('it-IT', { day:'2-digit', month:'2-digit', year:'numeric', hour:'2-digit', minute:'2-digit' })
+            : '—',
+          'Nome':                r.nome               || '—',
+          'Cognome':             r.cognome            || '—',
+          'Ragione Sociale':     r.ragione_sociale    || '—',
+          'P.IVA':               r.partita_iva        || '—',
+          'Email':               r.email              || '—',
+          'Cellulare':           r.cellulare          || '—',
+          'CAP':                 r.cap                || '—',
+          'Categoria':           msMap[r.mestiere_id] || '—',
+          'Stato':               r.stato              || '—',
+          'Presente':            r.presente ? 'Sì' : 'No',
+          'Check-in':            r.checkin_at
+            ? new Date(r.checkin_at).toLocaleDateString('it-IT', { day:'2-digit', month:'2-digit', year:'numeric', hour:'2-digit', minute:'2-digit' })
+            : '—',
+        }
+      })
+
+      const ws = XLSX.utils.json_to_sheet(rows)
+
+      // Larghezze colonne
+      ws['!cols'] = [
+        { wch: 30 }, { wch: 14 }, { wch: 20 }, { wch: 20 }, { wch: 18 },
+        { wch: 14 }, { wch: 14 }, { wch: 24 }, { wch: 14 }, { wch: 26 },
+        { wch: 14 }, { wch: 8  }, { wch: 20 }, { wch: 14 }, { wch: 8  }, { wch: 18 },
+      ]
+
+      const wb = XLSX.utils.book_new()
+      XLSX.utils.book_append_sheet(wb, ws, 'Partecipanti')
+      const date = new Date().toISOString().slice(0, 10)
+      XLSX.writeFile(wb, `partecipanti-${date}.xlsx`)
+    } catch (e) {
+      console.error(e)
+      alert('Errore durante l\'export.')
+    }
+    setExportingXlsx(false)
   }
 
   function selectUtente(u) {
@@ -347,6 +422,13 @@ export default function StatistichePage() {
                   style={{ width:'100%', boxSizing:'border-box', border:'1px solid #D1D5DB', borderRadius:'8px', padding:'9px 12px 9px 32px', fontSize:'13px', fontFamily:"'Inter',sans-serif", outline:'none' }}/>
               </div>
               <span style={{ fontSize:'12px', color:'#9CA3AF', whiteSpace:'nowrap' }}>{filteredUtenti.length} partecipanti</span>
+              <button
+                onClick={exportPartecipanti}
+                disabled={exportingXlsx || utenti.length === 0}
+                style={{ display:'flex', alignItems:'center', gap:'6px', backgroundColor: exportingXlsx ? '#9CA3AF' : '#16A34A', color:'#fff', border:'none', borderRadius:'8px', padding:'9px 14px', fontSize:'13px', fontWeight:'700', cursor: exportingXlsx ? 'default' : 'pointer', fontFamily:"'Inter',sans-serif", whiteSpace:'nowrap', flexShrink:0 }}>
+                <Download size={15}/>
+                {exportingXlsx ? 'Esportazione…' : 'Esporta Excel'}
+              </button>
             </div>
 
             {loadingUtenti ? (

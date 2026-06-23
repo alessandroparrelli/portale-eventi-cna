@@ -20,14 +20,12 @@ function QRActions({ qrValue, codice, eventoTitolo }) {
   async function saveQR() {
     setSaving(true)
     try {
-      const url = `https://chart.googleapis.com/chart?chs=400x400&cht=qr&chl=${encodeURIComponent(qrValue)}&choe=UTF-8`
-      const resp = await fetch(url)
-      const blob = await resp.blob()
+      const QRCode = await import('qrcode')
+      const dataUrl = await QRCode.toDataURL(qrValue, { width: 400, margin: 2, color: { dark: '#0A0A0A', light: '#FFFFFF' } })
       const a = document.createElement('a')
-      a.href = URL.createObjectURL(blob)
+      a.href = dataUrl
       a.download = `qr-${codice}.png`
       a.click()
-      URL.revokeObjectURL(a.href)
       setSaved(true); setTimeout(() => setSaved(false), 2500)
     } catch { alert('Errore nel salvataggio QR.') }
     setSaving(false)
@@ -57,12 +55,33 @@ QR Code: ${pageUrl}
 }
 
 function QRCodeDisplay({ value }) {
-  const size = 200
-  const url = `https://chart.googleapis.com/chart?chs=${size}x${size}&cht=qr&chl=${encodeURIComponent(value)}&choe=UTF-8`
+  const [dataUrl, setDataUrl] = useState(null)
+  const [err, setErr] = useState(false)
+
+  useEffect(() => {
+    if (!value) return
+    setDataUrl(null); setErr(false)
+    import('qrcode').then(QRCode => {
+      QRCode.toDataURL(value, {
+        width: 220,
+        margin: 2,
+        color: { dark: '#0A0A0A', light: '#FFFFFF' },
+      }).then(url => setDataUrl(url)).catch(() => setErr(true))
+    }).catch(() => setErr(true))
+  }, [value])
+
   return (
     <div style={{ display:'flex', flexDirection:'column', alignItems:'center', gap:'8px' }}>
-      <img src={url} alt="QR Code check-in" width={size} height={size} style={{ borderRadius:'8px', border:'1px solid #E5E7EB' }}/>
+      {dataUrl
+        ? <img src={dataUrl} alt="QR Code check-in" width={220} height={220} style={{ borderRadius:'8px', border:'1px solid #E5E7EB' }}/>
+        : err
+          ? <p style={{ fontSize:'13px', color:'#DC2626' }}>Errore generazione QR</p>
+          : <div style={{ width:220, height:220, borderRadius:'8px', border:'1px solid #E5E7EB', display:'flex', alignItems:'center', justifyContent:'center', backgroundColor:'#F9FAFB' }}>
+              <div style={{ width:28, height:28, border:'3px solid #E5E7EB', borderTopColor:'#003DA5', borderRadius:'50%', animation:'qrspin .8s linear infinite' }}/>
+            </div>
+      }
       <p style={{ fontSize:'11px', color:'#9CA3AF', margin:0, fontFamily:'monospace', letterSpacing:'0.05em' }}>{value}</p>
+      <style>{`@keyframes qrspin{to{transform:rotate(360deg)}}`}</style>
     </div>
   )
 }
