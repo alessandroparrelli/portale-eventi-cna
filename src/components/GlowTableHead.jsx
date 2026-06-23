@@ -36,6 +36,7 @@ export default function GlowTableHead({ columns = [] }) {
           return (
             <th
               key={i}
+              className={col.hideOnMobile ? 'col-hide-mobile' : undefined}
               style={{
                 padding: '10px 16px',
                 textAlign: col.align || 'left',

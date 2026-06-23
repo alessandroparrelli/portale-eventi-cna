@@ -504,7 +504,7 @@ export default function EventoEditorPage() {
       </div>
 
       {/* TAB BAR — glow pill */}
-      <div style={{ padding:'8px 16px 0', backgroundColor:'#FFFFFF', flexShrink:0 }}>
+      <div style={{ padding:'8px 16px 0', backgroundColor:'#FFFFFF', flexShrink:0, overflowX:'auto' }} className="editor-tabbar">
         <GlowTabBar active={activeTab} onChange={setActiveTab} tabs={TABS} />
       </div>
 

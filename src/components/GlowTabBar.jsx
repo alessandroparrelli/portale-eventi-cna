@@ -64,16 +64,18 @@ function Tab({ t, isActive, color, onChange }) {
 
 export default function GlowTabBar({ tabs = [], active, onChange }) {
   return (
-    <div style={{
-      display: 'flex',
-      gap: '5px',
-      padding: '6px',
-      background: 'linear-gradient(135deg, #F0F2F5, #E8EBF0)',
-      borderRadius: '12px',
-      marginBottom: '24px',
-      flexWrap: 'wrap',
-      boxShadow: 'inset 0 1px 3px rgba(0,0,0,.06)',
-    }}>
+    <div
+      className="glow-tab-wrap"
+      style={{
+        display: 'flex',
+        gap: '5px',
+        padding: '6px',
+        background: 'linear-gradient(135deg, #F0F2F5, #E8EBF0)',
+        borderRadius: '12px',
+        marginBottom: '24px',
+        flexWrap: 'wrap',
+        boxShadow: 'inset 0 1px 3px rgba(0,0,0,.06)',
+      }}>
       {tabs.map((t, i) => {
         const color = t.color || DEFAULT_COLORS[i % DEFAULT_COLORS.length]
         return (

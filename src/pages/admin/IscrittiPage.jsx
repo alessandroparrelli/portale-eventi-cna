@@ -88,7 +88,7 @@ export default function IscrittiPage() {
 
   return (
     <div style={s.page}>
-      <div style={s.header}>
+      <div style={s.header} className="page-header-row">
         <div>
           <h1 style={s.title}>Iscritti</h1>
           <p style={s.subtitle}>{selectedEvento ? `${registrations.length} iscritti · ${totPresenti} presenti · ${totConfermati} confermati` : 'Seleziona un evento'}</p>
@@ -103,7 +103,7 @@ export default function IscrittiPage() {
       </div>
 
       {/* Selettore evento + filtri */}
-      <div style={s.filters}>
+      <div style={s.filters} className="iscritti-filters">
         <EventSelector
           eventi={eventi}
           value={selectedEvento}
@@ -128,7 +128,7 @@ export default function IscrittiPage() {
 
       {/* Stats cards */}
       {selectedEvento && (
-        <div style={{ display:'grid', gridTemplateColumns:'repeat(auto-fit,minmax(140px,1fr))', gap:'10px', marginBottom:'16px' }}>
+        <div style={{ display:'grid', gridTemplateColumns:'repeat(auto-fit,minmax(140px,1fr))', gap:'10px', marginBottom:'16px' }} className="stat-grid-auto">
           <GlowStatCard icon="users"     label="Tot. iscritti" value={registrations.length}                                    palette="blue"/>
           <GlowStatCard icon="check"     label="Presenti"      value={totPresenti}                                              palette="green"/>
           <GlowStatCard icon="trending"  label="Confermati"    value={totConfermati}                                            palette="cyan"/>
@@ -146,13 +146,13 @@ export default function IscrittiPage() {
         ) : filtered.length === 0 ? (
           <EmptyState icon={Users} title="Nessun iscritto trovato" desc="Nessun risultato per i filtri selezionati"/>
         ) : (
-          <div style={{ overflowX:'auto' }}>
+          <div style={{ overflowX:'auto' }} className="table-wrap">
             <table style={s.table}>
               <GlowTableHead columns={[
                 { label:'Nominativo', color:'blue' },
-                { label:'Email',      color:'cyan' },
-                { label:'Mestiere',   color:'violet' },
-                { label:'Iscritto il',color:'amber' },
+                { label:'Email',      color:'cyan',   hideOnMobile:true },
+                { label:'Mestiere',   color:'violet', hideOnMobile:true },
+                { label:'Iscritto il',color:'amber',  hideOnMobile:true },
                 { label:'Stato',      color:'green' },
                 { label:'Azioni',     color:'neutral' },
               ]}/>
@@ -165,9 +165,9 @@ export default function IscrittiPage() {
                       <p style={s.name}>{r.nome} {r.cognome}</p>
                       {r.ragione_sociale && <p style={s.sub}>{r.ragione_sociale}</p>}
                     </td>
-                    <td style={s.td}><span style={s.cell}>{r.email||'—'}</span></td>
-                    <td style={s.td}><span style={s.cell}>{getMestiere(r.mestiere_id)}</span></td>
-                    <td style={s.td}><span style={s.cell}>{formatDt(r.created_at)}</span></td>
+                    <td style={s.td} className="col-hide-mobile"><span style={s.cell}>{r.email||'—'}</span></td>
+                    <td style={s.td} className="col-hide-mobile"><span style={s.cell}>{getMestiere(r.mestiere_id)}</span></td>
+                    <td style={s.td} className="col-hide-mobile"><span style={s.cell}>{formatDt(r.created_at)}</span></td>
                     <td style={s.td}><PresenzaBadge stato={r.stato}/></td>
                     <td style={s.td}>
                       <div style={{ display:'flex', gap:'6px' }}>

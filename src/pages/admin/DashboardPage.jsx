@@ -151,9 +151,9 @@ export default function DashboardPage() {
   return (
     <div style={styles.page} className="admin-page">
       {/* Header */}
-      <div style={styles.pageHeader}>
+      <div style={styles.pageHeader} className="page-header-row">
         <div>
-          <h1 style={styles.pageTitle}>Dashboard</h1>
+          <h1 style={styles.pageTitle} className="admin-page-title">Dashboard</h1>
           <p style={styles.pageSubtitle}>
             {new Date().toLocaleDateString('it-IT',{weekday:'long',day:'numeric',month:'long',year:'numeric'})}
           </p>
@@ -164,7 +164,7 @@ export default function DashboardPage() {
       </div>
 
       {/* KPI grid 4 colonne */}
-      <div style={styles.statsGrid}>
+      <div style={styles.statsGrid} className="stat-grid-4">
         <GlowStatCard icon="calendar"  label="Tot. eventi"     value={stats.totale}     palette="blue" />
         <GlowStatCard icon="check"     label="Pubblicati"      value={stats.pubblicati} palette="green" />
         <GlowStatCard icon="users"     label="Tot. iscritti"   value={stats.iscritti}   palette="cyan"  trend={stats.oggi} />
@@ -172,7 +172,7 @@ export default function DashboardPage() {
       </div>
 
       {/* Seconda riga KPI */}
-      <div style={{ ...styles.statsGrid, gridTemplateColumns:'repeat(3,1fr)', marginBottom:'20px' }}>
+      <div style={{ ...styles.statsGrid, gridTemplateColumns:'repeat(3,1fr)', marginBottom:'20px' }} className="stat-grid-3">
         <GlowStatCard icon="percent"  label="Tasso check-in"  value={`${checkInRate}%`}  palette="violet"
           sub={stats.iscritti > 0 ? `${stats.presenti} su ${stats.iscritti}` : 'Nessun iscritto'} />
         <GlowStatCard icon="clock"    label="Prossimi eventi" value={stats.prossimi}      palette="amber"
@@ -181,7 +181,7 @@ export default function DashboardPage() {
           sub={new Date().toLocaleDateString('it-IT',{day:'2-digit',month:'long'})} />
       </div>
 
-      <div style={{ display:'grid', gridTemplateColumns:'1fr 1fr', gap:'16px', marginBottom:'20px' }}>
+      <div style={{ display:'grid', gridTemplateColumns:'1fr 1fr', gap:'16px', marginBottom:'20px' }} className="dashboard-split">
 
         {/* Grafico iscrizioni settimanale */}
         <div style={styles.section}>
@@ -274,15 +274,15 @@ export default function DashboardPage() {
             </button>
           </div>
         ) : (
-          <div style={styles.tableWrap}>
+          <div style={styles.tableWrap} className="table-wrap">
             <table style={styles.table}>
               <GlowTableHead columns={[
-                { label:'#',        color:'neutral', width:'60px' },
+                { label:'#',        color:'neutral', width:'60px', hideOnMobile:true },
                 { label:'Evento',   color:'blue' },
-                { label:'Data',     color:'cyan' },
+                { label:'Data',     color:'cyan',    hideOnMobile:true },
                 { label:'Stato',    color:'green' },
                 { label:'Iscritti', color:'violet' },
-                { label:'Pres. %',  color:'amber' },
+                { label:'Pres. %',  color:'amber',   hideOnMobile:true },
                 { label:'',         color:'neutral' },
               ]}/>
               <tbody>
@@ -292,7 +292,7 @@ export default function DashboardPage() {
                     <tr key={ev.id} style={styles.tr}
                       onMouseEnter={e=>e.currentTarget.style.backgroundColor='#F9FAFB'}
                       onMouseLeave={e=>e.currentTarget.style.backgroundColor='transparent'}>
-                      <td style={{...styles.td,width:'60px'}}>
+                      <td style={{...styles.td,width:'60px'}} className="col-hide-mobile">
                         <span style={{fontSize:'11px',fontWeight:'700',color:'#003DA5',backgroundColor:'#EEF3FF',padding:'2px 7px',borderRadius:'4px',fontFamily:'monospace',whiteSpace:'nowrap'}}>
                           EVT-{String(ev.codice||0).padStart(4,'0')}
                         </span>
@@ -301,7 +301,7 @@ export default function DashboardPage() {
                         <p style={styles.eventTitle}>{ev.titolo}</p>
                         <p style={styles.eventSlug}>/{ev.slug}</p>
                       </td>
-                      <td style={styles.td}>
+                      <td style={styles.td} className="col-hide-mobile">
                         <p style={styles.cellText}>{formatDate(ev.data_inizio)}</p>
                       </td>
                       <td style={styles.td}><StatusBadge stato={ev.stato}/></td>
@@ -311,7 +311,7 @@ export default function DashboardPage() {
                           {ev.capienza_max&&<span style={styles.capTxt}>/{ev.capienza_max}</span>}
                         </p>
                       </td>
-                      <td style={styles.td}>
+                      <td style={styles.td} className="col-hide-mobile">
                         {rate != null ? (
                           <div style={{ display:'flex', alignItems:'center', gap:'8px' }}>
                             <div style={{ width:'50px', height:'6px', backgroundColor:'#F3F4F6', borderRadius:'3px', overflow:'hidden' }}>

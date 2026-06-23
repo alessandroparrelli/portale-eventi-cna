@@ -100,7 +100,7 @@ export default function ActivityLogPage() {
 
   return (
     <div style={s.page} className="admin-page">
-      <div style={s.header}>
+      <div style={s.header} className="page-header-row">
         <div>
           <h1 style={s.title}>Log Attività</h1>
           <p style={s.sub}>{total.toLocaleString('it-IT')} eventi registrati</p>
@@ -151,14 +151,14 @@ export default function ActivityLogPage() {
             <p style={{ color:'#9CA3AF', fontSize:'13px', margin:0 }}>Il log verrà popolato automaticamente con l'uso del portale.</p>
           </div>
         ) : (
-          <div style={{ overflowX:'auto' }}>
+          <div style={{ overflowX:'auto' }} className="table-wrap">
             <table style={s.table}>
               <GlowTableHead columns={[
                 { label:'Quando',           color:'blue' },
                 { label:'Azione',           color:'violet' },
-                { label:'Utente',           color:'green' },
+                { label:'Utente',           color:'green',  hideOnMobile:true },
                 { label:'Evento / Dettaglio', color:'amber' },
-                { label:'IP',               color:'neutral' },
+                { label:'IP',               color:'neutral', hideOnMobile:true },
               ]}/>
               <tbody>
                 {filtered.map(l => (
@@ -172,7 +172,7 @@ export default function ActivityLogPage() {
                     <td style={s.td}>
                       <AzioneBadge azione={l.azione} />
                     </td>
-                    <td style={s.td}>
+                    <td style={s.td} className="col-hide-mobile">
                       {l.utente_nome ? (
                         <div style={{ display:'flex', alignItems:'center', gap:'8px' }}>
                           <div style={{ width:'28px', height:'28px', borderRadius:'50%', backgroundColor:'#EEF3FF', display:'flex', alignItems:'center', justifyContent:'center', flexShrink:0 }}>
@@ -193,7 +193,7 @@ export default function ActivityLogPage() {
                       )}
                       {!l.evento_titolo && !l.dettaglio && <span style={{ color:'#D1D5DB' }}>—</span>}
                     </td>
-                    <td style={s.td}>
+                    <td style={s.td} className="col-hide-mobile">
                       <span style={{ fontSize:'11px', color:'#9CA3AF', fontFamily:'monospace' }}>{l.ip_address || '—'}</span>
                     </td>
                   </tr>

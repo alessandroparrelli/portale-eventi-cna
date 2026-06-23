@@ -52,7 +52,7 @@ export default function EventSelector({ eventi = [], value, onChange, label = 'E
 
       {/* Info evento selezionato */}
       {selected && (
-        <div style={{ display: 'flex', gap: '16px', flexShrink: 0, flexWrap: 'wrap' }}>
+        <div className="evt-selector-info" style={{ display: 'flex', gap: '16px', flexShrink: 0, flexWrap: 'wrap' }}>
           {selected.data_inizio && (
             <div style={{ textAlign: 'center' }}>
               <p style={{ fontSize: '11px', color: '#9CA3AF', margin: '0 0 2px', fontWeight: '600', textTransform: 'uppercase', letterSpacing: '0.04em' }}>Data</p>

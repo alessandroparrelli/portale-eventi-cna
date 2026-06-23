@@ -270,7 +270,7 @@ export default function StatistichePage() {
 
   return (
     <div style={s.page} className="admin-page">
-      <div style={s.header}>
+      <div style={s.header} className="page-header-row">
         <div>
           <h1 style={s.title}>Statistiche</h1>
           <p style={s.subtitle}>Analisi iscritti, presenze e cronologia partecipanti</p>
@@ -296,7 +296,7 @@ export default function StatistichePage() {
 
           {selectedEvento && !loading && stats && (
             <div style={{ display:'flex', flexDirection:'column', gap:'20px' }}>
-              <div style={s.statsGrid}>
+              <div style={s.statsGrid} className="stat-grid-auto">
                 <GlowStatCard icon="users"     label="Iscritti totali" value={stats.total}      palette="blue"
                   sub={stats.capienza ? `Capienza: ${stats.capienza}` : undefined}/>
                 <GlowStatCard icon="check"     label="Presenti"        value={stats.presenti}   palette="green"
@@ -347,7 +347,7 @@ export default function StatistichePage() {
                 ) : <p style={{ fontSize:'14px', color:'#9CA3AF' }}>Nessun dato disponibile</p>}
               </div>
 
-              <div style={{ display:'grid', gridTemplateColumns:'1fr 1fr', gap:'16px' }}>
+              <div style={{ display:'grid', gridTemplateColumns:'1fr 1fr', gap:'16px' }} className="grid-2col">
                 {/* Categorie */}
                 {topMestieri.length > 0 && (
                   <div style={s.section}>
@@ -412,7 +412,7 @@ export default function StatistichePage() {
 
       {/* ══ TAB UTENTI / CRONOLOGIA ══ */}
       {tab === 'utenti' && (
-        <div style={{ display:'grid', gridTemplateColumns: selectedUtente ? '1fr 1fr' : '1fr', gap:'20px' }}>
+        <div style={{ display:'grid', gridTemplateColumns: selectedUtente ? '1fr 1fr' : '1fr', gap:'20px' }} className="stats-user-split">
 
           {/* Lista partecipanti */}
           <div>
@@ -512,7 +512,7 @@ export default function StatistichePage() {
                   </div>
                   <button onClick={() => setSelectedUtente(null)} style={{ marginLeft:'auto', background:'none', border:'none', cursor:'pointer', color:'#9CA3AF', fontSize:'18px' }}>✕</button>
                 </div>
-                <div style={{ display:'grid', gridTemplateColumns:'1fr 1fr 1fr', gap:'10px' }}>
+                <div style={{ display:'grid', gridTemplateColumns:'1fr 1fr 1fr', gap:'10px' }} className="stat-grid-3">
                   <GlowStatCard icon="calendar" label="Iscrizioni" value={selectedUtente.eventi_totali} palette="blue"/>
                   <GlowStatCard icon="check"    label="Presenze"   value={selectedUtente.presenze}      palette="green"/>
                   <GlowStatCard icon="percent"  label="Tasso"

@@ -309,7 +309,7 @@ export default function CheckinPage() {
       {selectedEvento && (
         <>
           {/* ── Contatore presenze — GlowStatCard ── */}
-          <div style={{ display:'grid', gridTemplateColumns:'repeat(3,1fr)', gap:'10px', marginBottom:'14px' }}>
+          <div style={{ display:'grid', gridTemplateColumns:'repeat(3,1fr)', gap:'10px', marginBottom:'14px' }} className="stat-grid-3">
             <GlowStatCard icon="check"    label="Presenti"    value={presenti.length}                              palette="green"/>
             <GlowStatCard icon="clock"    label="In attesa"   value={nonPresenti}                                  palette="amber"/>
             <GlowStatCard icon="percent"  label="Tasso check-in" value={`${pct}%`}
@@ -367,7 +367,7 @@ export default function CheckinPage() {
           </div>
 
           {/* ── Azioni rapide ── */}
-          <div style={s.actionsRow}>
+          <div style={s.actionsRow} className="checkin-actions">
             <button onClick={() => setManualModal(true)} style={s.actionBtn}>
               <Search size={18} />
               <span>Codice manuale</span>

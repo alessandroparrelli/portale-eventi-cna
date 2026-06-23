@@ -377,7 +377,7 @@ export default function EventiPage() {
 
   return (
     <div style={s.page}>
-      <div style={s.header}>
+      <div style={s.header} className="page-header-row">
         <div>
           <h1 style={s.title}>Gestione Eventi</h1>
           <p style={s.sub}>{events.length} eventi totali</p>
@@ -407,15 +407,15 @@ export default function EventiPage() {
           <EmptyState icon={CalendarDays} title="Nessun evento" desc="Crea il primo evento"
             action={canWrite ? <Btn onClick={() => navigate('/admin/eventi/nuovo/editor')}><Plus size={16}/>Crea evento</Btn> : null}/>
         ) : (
-          <div style={{ overflowX:'auto' }}>
+          <div style={{ overflowX:'auto' }} className="table-wrap">
             <table style={s.table}>
               <GlowTableHead columns={[
-                { label:'#',        color:'neutral' },
+                { label:'#',        color:'neutral', hideOnMobile:true },
                 { label:'Evento',   color:'blue',   icon:<svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5"><rect x="3" y="4" width="18" height="18" rx="2"/><line x1="16" y1="2" x2="16" y2="6"/><line x1="8" y1="2" x2="8" y2="6"/><line x1="3" y1="10" x2="21" y2="10"/></svg> },
-                { label:'Data',     color:'cyan',   icon:<svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5"><circle cx="12" cy="12" r="10"/><polyline points="12 6 12 12 16 14"/></svg> },
+                { label:'Data',     color:'cyan',   icon:<svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5"><circle cx="12" cy="12" r="10"/><polyline points="12 6 12 12 16 14"/></svg>, hideOnMobile:true },
                 { label:'Stato',    color:'green',  icon:<svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5"><circle cx="12" cy="12" r="10"/><polyline points="9 12 11 14 15 10"/></svg> },
                 { label:'Iscritti', color:'violet', icon:<svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5"><circle cx="9" cy="7" r="4"/><path d="M3 21v-2a4 4 0 0 1 4-4h4a4 4 0 0 1 4 4v2"/></svg> },
-                { label:'Presenti', color:'amber',  icon:<svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5"><polyline points="20 6 9 17 4 12"/></svg> },
+                { label:'Presenti', color:'amber',  icon:<svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5"><polyline points="20 6 9 17 4 12"/></svg>, hideOnMobile:true },
                 { label:'Azioni',   color:'neutral' },
               ]}/>
               <tbody>
