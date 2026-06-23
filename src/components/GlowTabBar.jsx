@@ -1,10 +1,12 @@
 import { useState, useEffect } from 'react'
 
 function useMobile() {
-  const [m, setM] = useState(() => typeof window !== 'undefined' ? window.innerWidth < 769 : false)
+  const [m, setM] = useState(() =>
+    typeof window !== 'undefined' ? window.innerWidth < 769 : false
+  )
   useEffect(() => {
     const fn = () => setM(window.innerWidth < 769)
-    window.addEventListener('resize', fn, { passive:true })
+    window.addEventListener('resize', fn, { passive: true })
     return () => window.removeEventListener('resize', fn)
   }, [])
   return m
@@ -22,57 +24,58 @@ const PALETTES = {
 }
 const DEFAULT_COLORS = ['blue','green','violet','amber','cyan','coral','rose','teal']
 
-function Tab({ t, isActive, color, onChange }) {
-  const p = PALETTES[color] || PALETTES.blue
+// ── Singola Tab ──────────────────────────────────────────────────────
+function Tab({ t, isActive, color, onChange, mobile }) {
   const [hovered, setHovered] = useState(false)
+  const p = PALETTES[color] || PALETTES.blue
 
-  const style = mobile ? {
-    display: 'inline-flex', alignItems: 'center', gap: '4px',
-    padding: '6px 11px', borderRadius: '6px', border: 'none',
-    cursor: 'pointer', fontSize: '12px',
-    fontWeight: isActive ? '700' : '500',
-    fontFamily: "'Inter', sans-serif",
-    whiteSpace: 'nowrap', outline: 'none',
-    background: isActive ? `linear-gradient(135deg, ${p.from}, ${p.to})` : 'transparent',
-    color: isActive ? '#ffffff' : '#6B7280',
-    boxShadow: isActive ? `0 2px 8px rgba(${p.glow.replace('rgba(','').replace(')','').split(',').slice(0,3).join(',')}, .30)` : 'none',
-  } : {
-    display: 'inline-flex',
-    alignItems: 'center',
-    gap: '6px',
-    padding: '8px 16px',
-    borderRadius: '8px',
-    border: 'none',
-    cursor: 'pointer',
-    fontSize: '13px',
-    fontWeight: isActive ? '700' : '500',
-    fontFamily: "'Inter', sans-serif",
-    letterSpacing: '-0.01em',
-    whiteSpace: 'nowrap',
-    transition: 'all 0.18s cubic-bezier(.4,0,.2,1)',
-    position: 'relative',
-    outline: 'none',
-    background: isActive
-      ? `linear-gradient(135deg, ${p.from}, ${p.to})`
-      : hovered ? p.hint : 'transparent',
-    color: isActive ? '#ffffff' : hovered ? p.text : '#6B7280',
-    boxShadow: isActive
-      ? `0 4px 18px ${p.glow}, 0 1px 4px rgba(0,0,0,.12)`
-      : hovered
-        ? `0 2px 8px ${p.hint}`
-        : 'none',
-    transform: isActive ? 'translateY(-1px)' : hovered ? 'translateY(-1px)' : 'none',
+  // Mobile: pillola compatta senza icona, no hover effects
+  if (mobile) {
+    return (
+      <button
+        onClick={() => onChange(t.id)}
+        style={{
+          display: 'inline-flex', alignItems: 'center',
+          padding: '6px 12px', borderRadius: '6px', border: 'none',
+          cursor: 'pointer', fontSize: '12px', fontWeight: isActive ? '700' : '500',
+          fontFamily: "'Inter', sans-serif", whiteSpace: 'nowrap', outline: 'none',
+          flexShrink: 0,
+          background: isActive ? `linear-gradient(135deg, ${p.from}, ${p.to})` : 'transparent',
+          color: isActive ? '#ffffff' : '#6B7280',
+          boxShadow: isActive ? `0 2px 8px ${p.glow}` : 'none',
+        }}
+      >
+        {t.label}
+      </button>
+    )
   }
 
+  // Desktop: pillola con icona, hover glow, bounce via transform
   return (
     <button
-      style={style}
       onClick={() => onChange(t.id)}
       onMouseEnter={() => setHovered(true)}
       onMouseLeave={() => setHovered(false)}
+      style={{
+        display: 'inline-flex', alignItems: 'center', gap: '6px',
+        padding: '8px 16px', borderRadius: '8px', border: 'none',
+        cursor: 'pointer', fontSize: '13px',
+        fontWeight: isActive ? '700' : '500',
+        fontFamily: "'Inter', sans-serif",
+        letterSpacing: '-0.01em', whiteSpace: 'nowrap', outline: 'none',
+        transition: 'all 0.18s cubic-bezier(.4,0,.2,1)',
+        background: isActive
+          ? `linear-gradient(135deg, ${p.from}, ${p.to})`
+          : hovered ? p.hint : 'transparent',
+        color: isActive ? '#ffffff' : hovered ? p.text : '#6B7280',
+        boxShadow: isActive
+          ? `0 4px 18px ${p.glow}, 0 1px 4px rgba(0,0,0,.12)`
+          : hovered ? `0 2px 8px ${p.hint}` : 'none',
+        transform: isActive || hovered ? 'translateY(-1px)' : 'none',
+      }}
     >
-      {t.icon && !mobile && (
-        <span style={{ fontSize: 14, lineHeight: 1, filter: isActive ? 'brightness(10)' : 'none' }}>
+      {t.icon && (
+        <span style={{ fontSize: 14, lineHeight: 1 }}>
           {t.icon}
         </span>
       )}
@@ -81,8 +84,10 @@ function Tab({ t, isActive, color, onChange }) {
   )
 }
 
+// ── GlowTabBar ────────────────────────────────────────────────────────
 export default function GlowTabBar({ tabs = [], active, onChange }) {
   const mobile = useMobile()
+
   return (
     <div
       className="glow-tab-wrap"
@@ -98,7 +103,8 @@ export default function GlowTabBar({ tabs = [], active, onChange }) {
         WebkitOverflowScrolling: 'touch',
         scrollbarWidth: 'none',
         boxShadow: 'inset 0 1px 3px rgba(0,0,0,.06)',
-      }}>
+      }}
+    >
       {tabs.map((t, i) => {
         const color = t.color || DEFAULT_COLORS[i % DEFAULT_COLORS.length]
         return (
