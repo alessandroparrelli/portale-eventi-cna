@@ -277,7 +277,7 @@ export default function LandingPage() {
   const tema = temaConDefault(event?.tema)
 
   const heroStyle = event.immagine_hero
-    ? { backgroundImage:`url(${event.immagine_hero})`,backgroundSize:'cover',backgroundPosition:'center top' }
+    ? { backgroundImage:`url(${event.immagine_hero})`,backgroundSize:'cover',backgroundPosition: lh.bg_position || 'center top' }
     : { background:'linear-gradient(135deg,#003DA5 0%,#001a50 100%)' }
 
   return (

@@ -6,6 +6,8 @@ import RichEditor from '../../components/editor/RichEditor'
 import BlockEditor, { newBlock } from '../../components/editor/BlockEditor'
 import ImageUploader from '../../components/editor/ImageUploader'
 import LogoManager from '../../components/editor/LogoManager'
+import AddressSearch from '../../components/editor/AddressSearch'
+import HeroDragPreview from '../../components/editor/HeroDragPreview'
 import {
   Save, ArrowLeft, Eye, Plus, Trash2, GripVertical,
   Type, Image, Grid3x3,
@@ -529,8 +531,10 @@ export default function EventoEditorPage() {
               </Field>
               <div style={{ gridColumn:'1/-1' }}>
                 <Field label="Sede / Indirizzo completo">
-                  <Input value={event.luogo||''} onChange={e=>setEvent(p=>({...p,luogo:e.target.value}))}
-                    placeholder="es. Palazzo dei Congressi, Piazza J.F. Kennedy 1, Roma"/>
+                  <AddressSearch
+                    value={event.luogo||''}
+                    onChange={(addr) => setEvent(p => ({ ...p, luogo: addr }))}
+                  />
                 </Field>
               </div>
               <Field label="Stato">
@@ -633,28 +637,9 @@ export default function EventoEditorPage() {
               </div>
             </div>
 
-            {/* Anteprima */}
+            {/* Anteprima con drag */}
             <div style={{ marginTop:'16px' }}>
-              <p style={p.sectionLbl}>Anteprima hero</p>
-              <div style={{
-                borderRadius:'10px', overflow:'hidden', border:'1px solid #E5E7EB',
-                height:`${Math.min(220, parseInt(event.layout_hero?.altezza||'380')/1.7)}px`,
-                backgroundImage:event.immagine_hero?`url(${event.immagine_hero})`:undefined,
-                background:event.immagine_hero?undefined:'linear-gradient(135deg,#003DA5,#001a50)',
-                backgroundSize:'cover', backgroundPosition:'center', display:'flex', alignItems:'flex-end',
-              }}>
-                <div style={{ padding:'20px 24px', background:`rgba(0,0,0,${(event.layout_hero?.overlay_opacita||55)/100})`,
-                  width:'100%', textAlign:event.layout_hero?.allineamento==='centro'?'center':'left' }}>
-                  <div style={{ marginBottom:'6px' }}>
-                    <img
-                      src={event.logo_url || 'https://raw.githubusercontent.com/alessandroparrelli/fileappoggio/main/NUOVO-LOGO-CNA-ROMA-SOLO-ROMA.png'}
-                      alt="Logo"
-                      style={{ height:'28px', objectFit:'contain', opacity:.9 }}
-                    />
-                  </div>
-                  <p style={{ color:event.layout_hero?.titolo_colore||'#FFF', fontSize:'18px', fontWeight:event.layout_hero?.titolo_grassetto?'900':'400', margin:0, textTransform:event.layout_hero?.titolo_maiuscolo?'uppercase':'none' }}>{event.titolo||'Titolo evento'}</p>
-                </div>
-              </div>
+              <HeroDragPreview event={event} setH={setH} />
             </div>
           </div>
         )}
