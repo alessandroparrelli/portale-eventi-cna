@@ -308,28 +308,28 @@ export default function LandingPage() {
 
       {/* ── HERO ── */}
       <div className="hero-section" style={{ ...s.hero, ...heroStyle, minHeight:`min(${lh.altezza||340}px, 56vw)` }}>
-        <div style={{ ...s.heroOverlay, backgroundColor:`rgba(0,0,0,${(lh.overlay_opacita||55)/100})` }}>
-          {/* Logo sovrapposto in alto al centro */}
+        {/* Logo sovrapposto in alto al centro — fuori dall'overlay per non essere trascinato in basso */}
+        <div style={{
+          position: 'absolute', top: '20px', left: 0, right: 0,
+          display: 'flex', justifyContent: 'center', zIndex: 3,
+          pointerEvents: 'none',
+        }}>
           <div style={{
-            position: 'absolute', top: '20px', left: 0, right: 0,
-            display: 'flex', justifyContent: 'center', zIndex: 2,
-            pointerEvents: 'none',
+            background: tema.logo_bg === 'colore_primario' ? (tema.colore_primario || '#003DA5')
+                      : tema.logo_bg === 'bianco' ? '#FFFFFF'
+                      : 'transparent',
+            padding: tema.logo_bg && tema.logo_bg !== 'trasparente' ? '6px 14px' : 0,
+            borderRadius: '8px',
           }}>
-            <div style={{
-              background: tema.logo_bg === 'colore_primario' ? (tema.colore_primario || '#003DA5')
-                        : tema.logo_bg === 'bianco' ? '#FFFFFF'
-                        : 'transparent',
-              padding: tema.logo_bg && tema.logo_bg !== 'trasparente' ? '6px 14px' : 0,
-              borderRadius: '8px',
-            }}>
-              <img
-                src={event?.logo_url || "https://raw.githubusercontent.com/alessandroparrelli/fileappoggio/main/NUOVO-LOGO-CNA-ROMA-SOLO-ROMA.png"}
-                alt="CNA Roma"
-                style={{ height: `${tema.logo_altezza || 44}px`, maxWidth: '280px', objectFit: 'contain', display: 'block' }}
-              />
-            </div>
+            <img
+              src={event?.logo_url || "https://raw.githubusercontent.com/alessandroparrelli/fileappoggio/main/NUOVO-LOGO-CNA-ROMA-SOLO-ROMA.png"}
+              alt="CNA Roma"
+              style={{ height: `${tema.logo_altezza || 44}px`, maxWidth: '280px', objectFit: 'contain', display: 'block' }}
+            />
           </div>
+        </div>
 
+        <div style={{ ...s.heroOverlay, backgroundColor:`rgba(0,0,0,${(lh.overlay_opacita||55)/100})` }}>
           <div style={{ ...s.heroContent, textAlign:lh.allineamento==='centro'?'center':'left' }}>
             <h1 style={{
               ...s.heroTitle,
