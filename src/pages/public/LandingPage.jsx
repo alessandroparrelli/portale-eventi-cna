@@ -304,32 +304,32 @@ export default function LandingPage() {
         }
       `}</style>
 
-      {/* ── HEADER ── */}
-      <header style={{
-        backgroundColor: tema.sfondo_header || '#FFFFFF',
-        borderBottom: `${tema.spessore_bordo || 3}px solid ${tema.bordo_header || '#003DA5'}`,
-        position:'sticky', top:0, zIndex:50, width:'100%',
-        minHeight:'80px', height: `${Math.max(80, parseInt(tema.logo_altezza||44) + 24)}px`, display:'flex', alignItems:'center',
-        justifyContent:'center', padding:'0 24px',
-      }}>
-        {/* Logo con sfondo opzionale */}
-        <div style={{
-          background: tema.logo_bg === 'colore_primario' ? (tema.colore_primario || '#003DA5')
-                    : tema.logo_bg === 'bianco' ? '#FFFFFF'
-                    : 'transparent',
-          padding: tema.logo_bg && tema.logo_bg !== 'trasparente' ? '4px 10px' : 0,
-          borderRadius: '6px',
-          display: 'flex', alignItems: 'center',
-        }}>
-          <img src={event?.logo_url || "https://raw.githubusercontent.com/alessandroparrelli/fileappoggio/main/NUOVO-LOGO-CNA-ROMA-SOLO-ROMA.png"}
-            alt="CNA Roma"
-            style={{ height: `${tema.logo_altezza || 44}px`, maxWidth:'100%', objectFit:'contain', display:'block' }}/>
-        </div>
-      </header>
+{/* Header rimosso — logo sovrapposto all'hero */}
 
       {/* ── HERO ── */}
       <div className="hero-section" style={{ ...s.hero, ...heroStyle, minHeight:`min(${lh.altezza||340}px, 56vw)` }}>
         <div style={{ ...s.heroOverlay, backgroundColor:`rgba(0,0,0,${(lh.overlay_opacita||55)/100})` }}>
+          {/* Logo sovrapposto in alto al centro */}
+          <div style={{
+            position: 'absolute', top: '20px', left: 0, right: 0,
+            display: 'flex', justifyContent: 'center', zIndex: 2,
+            pointerEvents: 'none',
+          }}>
+            <div style={{
+              background: tema.logo_bg === 'colore_primario' ? (tema.colore_primario || '#003DA5')
+                        : tema.logo_bg === 'bianco' ? '#FFFFFF'
+                        : 'transparent',
+              padding: tema.logo_bg && tema.logo_bg !== 'trasparente' ? '6px 14px' : 0,
+              borderRadius: '8px',
+            }}>
+              <img
+                src={event?.logo_url || "https://raw.githubusercontent.com/alessandroparrelli/fileappoggio/main/NUOVO-LOGO-CNA-ROMA-SOLO-ROMA.png"}
+                alt="CNA Roma"
+                style={{ height: `${tema.logo_altezza || 44}px`, maxWidth: '280px', objectFit: 'contain', display: 'block' }}
+              />
+            </div>
+          </div>
+
           <div style={{ ...s.heroContent, textAlign:lh.allineamento==='centro'?'center':'left' }}>
             <h1 style={{
               ...s.heroTitle,
@@ -558,7 +558,7 @@ const s = {
   logo:        { height:'56px', maxHeight:'56px', objectFit:'contain', display:'block' },
   // Hero
   hero:        { display:'flex', alignItems:'flex-end', position:'relative', width:'100%' },
-  heroOverlay: { width:'100%', padding:'clamp(24px,5vw,48px) 20px clamp(20px,4vw,36px)', transition:'background-color .3s' },
+  heroOverlay: { width:'100%', padding:'clamp(24px,5vw,48px) 20px clamp(20px,4vw,36px)', transition:'background-color .3s', position:'relative' },
   heroContent: { maxWidth:'820px', margin:'0 auto' },
   heroTag:     { display:'inline-flex', alignItems:'center', gap:'6px', backgroundColor:'rgba(255,255,255,.18)', color:'#FFFFFF', padding:'4px 12px', borderRadius:'20px', fontSize:'12px', fontWeight:'600', marginBottom:'12px', backdropFilter:'blur(6px)' },
   heroTitle:   { fontWeight:'900', color:'#FFFFFF', letterSpacing:'-.04em', margin:'0 0 10px', lineHeight:'1.05' },
