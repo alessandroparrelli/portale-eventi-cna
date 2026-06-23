@@ -2,6 +2,7 @@ import { useEffect, useState } from 'react'
 import { supabase } from '../../lib/supabase'
 import { Activity, Search, RefreshCw, User, CalendarDays, Filter, ChevronDown } from 'lucide-react'
 import GlowTabBar from '../../components/GlowTabBar'
+import GlowTableHead from '../../components/GlowTableHead'
 
 const AZIONE_LABELS = {
   checkin_qr:      { label:'Check-in QR',       color:'#16A34A', bg:'#F0FDF4' },
@@ -152,13 +153,13 @@ export default function ActivityLogPage() {
         ) : (
           <div style={{ overflowX:'auto' }}>
             <table style={s.table}>
-              <thead>
-                <tr>
-                  {['Quando','Azione','Utente','Evento / Dettaglio','IP'].map(h => (
-                    <th key={h} style={s.th}>{h}</th>
-                  ))}
-                </tr>
-              </thead>
+              <GlowTableHead columns={[
+                { label:'Quando',           color:'blue' },
+                { label:'Azione',           color:'violet' },
+                { label:'Utente',           color:'green' },
+                { label:'Evento / Dettaglio', color:'amber' },
+                { label:'IP',               color:'neutral' },
+              ]}/>
               <tbody>
                 {filtered.map(l => (
                   <tr key={l.id} style={s.tr}

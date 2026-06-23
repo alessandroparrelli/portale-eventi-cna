@@ -56,12 +56,12 @@ export default function LoginPage() {
     e.preventDefault()
     setError('')
     setLoading(true)
-    const { error } = await signIn(identifier, password)
-    if (error) {
-      setError('Credenziali non valide. Riprova.')
+    const { error: authError } = await signIn(identifier, password)
+    if (authError) {
+      setError(authError.message || 'Credenziali non valide. Riprova.')
       setLoading(false)
     }
-    // Se ok, signIn fa window.location.replace('/admin') — non serve setLoading(false)
+    // Se ok, signIn naviga — loading rimane true mentre si carica /admin
   }
 
   return (

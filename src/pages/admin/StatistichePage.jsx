@@ -4,6 +4,7 @@ import { Select, Field, EmptyState } from '../../components/ui'
 import { BarChart2, Star, TrendingUp, Users, CheckCircle2, UserX, UserCheck, Search, Calendar, Award, Clock, ArrowRight, Download } from 'lucide-react'
 import EventSelector from '../../components/EventSelector'
 import GlowTabBar from '../../components/GlowTabBar'
+import GlowTableHead from '../../components/GlowTableHead'
 import * as XLSX from 'xlsx'
 
 function StatCard({ icon: Icon, label, value, color='#003DA5', sub, iconClass }) {
@@ -436,15 +437,13 @@ export default function StatistichePage() {
             ) : (
               <div style={{ backgroundColor:'#fff', borderRadius:'10px', border:'1px solid #E5E7EB', overflow:'hidden' }}>
                 <table style={{ width:'100%', borderCollapse:'collapse', fontSize:'13px' }}>
-                  <thead>
-                    <tr style={{ backgroundColor:'#FAFAFA', borderBottom:'1px solid #E5E7EB' }}>
-                      <th style={s.th}><ThIcon icon={Users} label="Partecipante" color="#003DA5" bg="#EEF3FF"/></th>
-                      <th style={s.th}><ThIcon icon={Calendar} label="Iscrizioni" color="#7C3AED" bg="#EDE9FE"/></th>
-                      <th style={s.th}><ThIcon icon={CheckCircle2} label="Presenze" color="#059669" bg="#D1FAE5"/></th>
-                      <th style={s.th}><ThIcon icon={Award} label="Tasso" color="#D97706" bg="#FEF3C7"/></th>
-                      <th style={s.th}></th>
-                    </tr>
-                  </thead>
+                  <GlowTableHead columns={[
+                    { label:'Partecipante', color:'blue' },
+                    { label:'Iscrizioni',   color:'violet' },
+                    { label:'Presenze',     color:'green' },
+                    { label:'Tasso %',      color:'amber' },
+                    { label:'',             color:'neutral' },
+                  ]}/>
                   <tbody>
                     {filteredUtenti.slice(0, 50).map((u, idx) => {
                       const tasso = u.eventi_totali > 0 ? Math.round((u.presenze/u.eventi_totali)*100) : 0

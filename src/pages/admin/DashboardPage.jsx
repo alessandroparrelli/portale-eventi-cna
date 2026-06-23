@@ -2,6 +2,7 @@ import { useEffect, useState } from 'react'
 import { useNavigate } from 'react-router-dom'
 import { supabase } from '../../lib/supabase'
 import GlowTabBar from '../../components/GlowTabBar'
+import GlowTableHead from '../../components/GlowTableHead'
 import {
   CalendarDays, Users, CheckCircle2, Clock, TrendingUp, Plus,
   ArrowRight, AlertCircle, Activity, Percent, Calendar
@@ -274,13 +275,15 @@ export default function DashboardPage() {
         ) : (
           <div style={styles.tableWrap}>
             <table style={styles.table}>
-              <thead>
-                <tr>
-                  {['#','Evento','Data','Stato','Iscritti','Pres. %',''].map(h=>(
-                    <th key={h} style={styles.th}>{h}</th>
-                  ))}
-                </tr>
-              </thead>
+              <GlowTableHead columns={[
+                { label:'#',        color:'neutral', width:'60px' },
+                { label:'Evento',   color:'blue' },
+                { label:'Data',     color:'cyan' },
+                { label:'Stato',    color:'green' },
+                { label:'Iscritti', color:'violet' },
+                { label:'Pres. %',  color:'amber' },
+                { label:'',         color:'neutral' },
+              ]}/>
               <tbody>
                 {events.filter(ev => tabFilter === 'tutti' || ev.stato === tabFilter).map(ev=>{
                   const rate = ev.iscritti > 0 ? Math.round((ev.presenti/ev.iscritti)*100) : null

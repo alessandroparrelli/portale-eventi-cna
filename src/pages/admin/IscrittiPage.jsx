@@ -2,6 +2,7 @@ import { useEffect, useState } from 'react'
 import { useSearchParams } from 'react-router-dom'
 import { supabase } from '../../lib/supabase'
 import { useRole } from '../../hooks/useRole'
+import GlowTableHead from '../../components/GlowTableHead'
 import { Modal, PresenzaBadge, Field, Input, Select, Btn, EmptyState } from '../../components/ui'
 import { Users, Search, Download, Eye, Trash2, UserCheck } from 'lucide-react'
 import * as XLSX from 'xlsx'
@@ -153,13 +154,14 @@ export default function IscrittiPage() {
         ) : (
           <div style={{ overflowX:'auto' }}>
             <table style={s.table}>
-              <thead>
-                <tr>
-                  {['Nominativo','Email','Mestiere','Iscritto il','Stato','Azioni'].map(h=>(
-                    <th key={h} style={s.th}>{h}</th>
-                  ))}
-                </tr>
-              </thead>
+              <GlowTableHead columns={[
+                { label:'Nominativo', color:'blue' },
+                { label:'Email',      color:'cyan' },
+                { label:'Mestiere',   color:'violet' },
+                { label:'Iscritto il',color:'amber' },
+                { label:'Stato',      color:'green' },
+                { label:'Azioni',     color:'neutral' },
+              ]}/>
               <tbody>
                 {filtered.map(r=>(
                   <tr key={r.id} style={s.tr}
