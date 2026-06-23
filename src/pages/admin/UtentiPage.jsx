@@ -119,7 +119,7 @@ export default function UtentiPage() {
   )
 
   return (
-    <div style={{ maxWidth:'1000px' }}>
+    <div style={{ width:'100%' }} className="admin-page">
       <div style={{ display:'flex', alignItems:'flex-start', justifyContent:'space-between', marginBottom:'20px', flexWrap:'wrap', gap:'12px' }}>
         <div>
           <h1 style={{ fontSize:'32px', fontWeight:'900', color:'#0A0A0A', letterSpacing:'-.03em', margin:0 }}>Gestione Utenti</h1>

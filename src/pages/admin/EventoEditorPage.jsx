@@ -18,6 +18,7 @@ import EventEmailTab from '../../components/editor/EventEmailTab'
 import IscrizioniTab from '../../components/editor/IscrizioniTab'
 import AspettoTab from '../../components/editor/AspettoTab'
 import SessioniTab from '../../components/editor/SessioniTab'
+import GlowTabBar from '../../components/GlowTabBar'
 
 const toSlug = s => s.toLowerCase().normalize('NFD').replace(/[\u0300-\u036f]/g,'')
   .replace(/[^a-z0-9]+/g,'-').replace(/^-|-$/g,'')
@@ -462,14 +463,14 @@ export default function EventoEditorPage() {
   }
 
   const TABS = [
-    { id:'info',       label:'📋 Info & Date' },
-    { id:'hero',       label:'🖼 Hero' },
-    { id:'contenuto',  label:'📝 Contenuto' },
-    { id:'aspetto',    label:'🎨 Aspetto' },
-    { id:'sessioni',   label:'🗓 Sessioni' },
-    { id:'iscrizioni', label:'🎟 Iscrizioni' },
-    { id:'email',      label:'✉️ Email' },
-    { id:'preview',    label:'👁 Preview' },
+    { id:'info',       label:'Info & Date',  icon:'📋', color:'blue'   },
+    { id:'hero',       label:'Hero',         icon:'🖼',  color:'cyan'   },
+    { id:'contenuto',  label:'Contenuto',    icon:'📝', color:'green'  },
+    { id:'aspetto',    label:'Aspetto',      icon:'🎨', color:'violet' },
+    { id:'sessioni',   label:'Sessioni',     icon:'🗓', color:'amber'  },
+    { id:'iscrizioni', label:'Iscrizioni',   icon:'🎟', color:'coral'  },
+    { id:'email',      label:'Email',        icon:'✉️', color:'rose'   },
+    { id:'preview',    label:'Preview',      icon:'👁',  color:'amber'  },
   ]
 
   return (
@@ -502,15 +503,9 @@ export default function EventoEditorPage() {
         </div>
       </div>
 
-      {/* TAB BAR */}
-      <div style={p.tabBar}>
-        {TABS.map(t=>(
-          <button key={t.id} onClick={()=>setActiveTab(t.id)}
-            style={{ ...p.tab, borderBottom:`2px solid ${activeTab===t.id?'#003DA5':'transparent'}`,
-              color:activeTab===t.id?'#003DA5':'#6B7280', fontWeight:activeTab===t.id?'700':'500' }}>
-            {t.label}
-          </button>
-        ))}
+      {/* TAB BAR — glow pill */}
+      <div style={{ padding:'8px 16px 0', backgroundColor:'#FFFFFF', flexShrink:0 }}>
+        <GlowTabBar active={activeTab} onChange={setActiveTab} tabs={TABS} />
       </div>
 
       {/* CONTENT */}

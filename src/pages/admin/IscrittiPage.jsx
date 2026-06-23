@@ -234,7 +234,7 @@ export default function IscrittiPage() {
 }
 
 const s = {
-  page: { maxWidth:'1200px' },
+  page: { width:'100%' },
   header: { display:'flex', alignItems:'flex-start', justifyContent:'space-between', marginBottom:'24px', flexWrap:'wrap', gap:'12px' },
   title: { fontSize:'32px', fontWeight:'900', color:'#0A0A0A', letterSpacing:'-0.03em', margin:0 },
   subtitle: { fontSize:'14px', color:'#6B7280', margin:'4px 0 0', fontWeight:'500' },

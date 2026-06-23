@@ -1,6 +1,7 @@
 import { useEffect, useState } from 'react'
 import { supabase } from '../../lib/supabase'
 import { Activity, Search, RefreshCw, User, CalendarDays, Filter, ChevronDown } from 'lucide-react'
+import GlowTabBar from '../../components/GlowTabBar'
 
 const AZIONE_LABELS = {
   checkin_qr:      { label:'Check-in QR',       color:'#16A34A', bg:'#F0FDF4' },
@@ -97,7 +98,7 @@ export default function ActivityLogPage() {
   })
 
   return (
-    <div style={s.page}>
+    <div style={s.page} className="admin-page">
       <div style={s.header}>
         <div>
           <h1 style={s.title}>Log Attività</h1>
@@ -109,25 +110,29 @@ export default function ActivityLogPage() {
         </button>
       </div>
 
-      {/* Filtri */}
-      <div style={{ display:'flex', gap:'10px', marginBottom:'20px', flexWrap:'wrap' }}>
-        <div style={{ position:'relative', flex:1, minWidth:'200px' }}>
+      {/* Tab filtro azione */}
+      <GlowTabBar
+        active={filterAzione}
+        onChange={setFilterAzione}
+        tabs={[
+          { id:'tutti',          label:'Tutto',        icon:'📋', color:'blue'   },
+          { id:'iscrizione',     label:'Iscrizioni',   icon:'✅', color:'green'  },
+          { id:'checkin_qr',     label:'Check-in QR',  icon:'📱', color:'cyan'   },
+          { id:'checkin_manuale',label:'Check-in man.', icon:'✋', color:'amber' },
+          { id:'evento_creato',  label:'Nuovi eventi', icon:'🗓', color:'violet' },
+          { id:'login',          label:'Accessi',      icon:'🔑', color:'coral'  },
+        ]}
+      />
+
+      {/* Search */}
+      <div style={{ display:'flex', gap:'10px', marginBottom:'16px', marginTop:'-8px' }}>
+        <div style={{ position:'relative', flex:1, maxWidth:'380px' }}>
           <Search size={15} style={{ position:'absolute', left:'12px', top:'50%', transform:'translateY(-50%)', color:'#9CA3AF' }} />
           <input
             value={search} onChange={e => setSearch(e.target.value)}
             placeholder="Cerca utente, azione, evento…"
             style={{ ...s.input, paddingLeft:'36px', width:'100%', boxSizing:'border-box' }}
           />
-        </div>
-        <div style={{ position:'relative' }}>
-          <Filter size={14} style={{ position:'absolute', left:'10px', top:'50%', transform:'translateY(-50%)', color:'#9CA3AF' }} />
-          <select value={filterAzione} onChange={e => setFilterAzione(e.target.value)} style={{ ...s.input, paddingLeft:'30px', paddingRight:'32px', appearance:'none', cursor:'pointer' }}>
-            <option value="tutti">Tutte le azioni</option>
-            {Object.entries(AZIONE_LABELS).map(([k,v]) => (
-              <option key={k} value={k}>{v.label}</option>
-            ))}
-          </select>
-          <ChevronDown size={14} style={{ position:'absolute', right:'10px', top:'50%', transform:'translateY(-50%)', color:'#9CA3AF', pointerEvents:'none' }} />
         </div>
       </div>
 
@@ -210,7 +215,7 @@ export default function ActivityLogPage() {
 }
 
 const s = {
-  page: { maxWidth:'1100px' },
+  page: { width:'100%' },
   header: { display:'flex', justifyContent:'space-between', alignItems:'flex-start', marginBottom:'24px', gap:'12px', flexWrap:'wrap' },
   title: { fontSize:'32px', fontWeight:'900', color:'#0A0A0A', letterSpacing:'-0.03em', margin:0 },
   sub: { fontSize:'14px', color:'#6B7280', margin:'4px 0 0', fontWeight:'500' },

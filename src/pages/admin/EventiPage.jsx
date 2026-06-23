@@ -4,6 +4,7 @@ import { supabase } from '../../lib/supabase'
 import { useRole } from '../../hooks/useRole'
 import { Modal, StatoBadge, Field, Input, Textarea, Select, Btn, EmptyState } from '../../components/ui'
 import ImageUploader from '../../components/editor/ImageUploader'
+import GlowTabBar from '../../components/GlowTabBar'
 import {
   Plus, CalendarDays, Pencil, Trash2, Copy, ExternalLink, Search,
   Link2, ClipboardCheck, Globe, Image, X, ChevronDown, ChevronUp,
@@ -34,24 +35,15 @@ function EventEditor({ modal, cur, setCur, onSave, onClose, saving, errors }) {
   const setH = k => v => setCur(p => ({...p, layout_hero:{...p.layout_hero, [k]: typeof v==='string'?v:v?.target?.value}}))
 
   const TABS = [
-    { id:'info',    label:'📋 Info',      icon:null },
-    { id:'hero',    label:'🖼 Hero',       icon:null },
-    { id:'aspetto', label:'🎨 Aspetto',    icon:null },
-    { id:'avanzato',label:'⚙ Avanzato',   icon:null },
+    { id:'info',    label:'Info',    icon:'📋', color:'blue'   },
+    { id:'hero',    label:'Hero',    icon:'🖼',  color:'cyan'   },
+    { id:'aspetto', label:'Aspetto', icon:'🎨', color:'violet' },
+    { id:'avanzato',label:'Avanzato',icon:'⚙',  color:'amber'  },
   ]
 
   return (
     <Modal title={modal==='create'?'Crea evento':'Modifica evento'} onClose={onClose} width="720px">
-      {/* Tab bar */}
-      <div style={ee.tabBar}>
-        {TABS.map(t=>(
-          <button key={t.id} onClick={()=>setTab(t.id)}
-            style={{ ...ee.tab, borderBottom: tab===t.id ? '2px solid #003DA5' : '2px solid transparent',
-              color: tab===t.id ? '#003DA5' : '#6B7280', fontWeight: tab===t.id ? '700' : '500' }}>
-            {t.label}
-          </button>
-        ))}
-      </div>
+      <GlowTabBar active={tab} onChange={setTab} tabs={TABS} />
 
       {errors.general && <div style={ee.errBox}>{errors.general}</div>}
 
@@ -551,7 +543,7 @@ export default function EventiPage() {
 }
 
 const s = {
-  page:    { maxWidth:'1100px' },
+  page:    { width:'100%' },
   header:  { display:'flex', alignItems:'flex-start', justifyContent:'space-between', marginBottom:'24px', flexWrap:'wrap', gap:'12px' },
   title:   { fontSize:'32px', fontWeight:'900', color:'#0A0A0A', letterSpacing:'-.03em', margin:0 },
   sub:     { fontSize:'14px', color:'#6B7280', margin:'4px 0 0', fontWeight:'500' },

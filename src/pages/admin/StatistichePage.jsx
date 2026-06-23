@@ -3,6 +3,7 @@ import { supabase } from '../../lib/supabase'
 import { Select, Field, EmptyState } from '../../components/ui'
 import { BarChart2, Star, TrendingUp, Users, CheckCircle2, UserX, UserCheck, Search, Calendar, Award, Clock, ArrowRight } from 'lucide-react'
 import EventSelector from '../../components/EventSelector'
+import GlowTabBar from '../../components/GlowTabBar'
 
 function StatCard({ icon: Icon, label, value, color='#003DA5', sub, iconClass }) {
   return (
@@ -191,7 +192,7 @@ export default function StatistichePage() {
   })
 
   return (
-    <div style={s.page}>
+    <div style={s.page} className="admin-page">
       <div style={s.header}>
         <div>
           <h1 style={s.title}>Statistiche</h1>
@@ -199,23 +200,14 @@ export default function StatistichePage() {
         </div>
       </div>
 
-      {/* TAB */}
-      <div style={{ display:'flex', gap:0, borderBottom:'1px solid #E5E7EB', marginBottom:'24px' }}>
-        {[
-          { id:'evento', label:'📊 Per evento' },
-          { id:'utenti', label:'👤 Per partecipante' },
-        ].map(t => (
-          <button key={t.id} onClick={() => setTab(t.id)} style={{
-            padding:'12px 20px', background:'none', border:'none',
-            borderBottom: tab===t.id ? '2px solid #003DA5' : '2px solid transparent',
-            color: tab===t.id ? '#003DA5' : '#6B7280',
-            fontWeight: tab===t.id ? '700' : '500',
-            fontSize:'14px', fontFamily:"'Inter',sans-serif", cursor:'pointer',
-          }}>
-            {t.label}
-          </button>
-        ))}
-      </div>
+      <GlowTabBar
+        active={tab}
+        onChange={setTab}
+        tabs={[
+          { id:'evento', label:'Per evento',       icon:'📊', color:'blue' },
+          { id:'utenti', label:'Per partecipante', icon:'👤', color:'violet' },
+        ]}
+      />
 
       {/* ══ TAB EVENTO ══ */}
       {tab === 'evento' && (
@@ -512,7 +504,7 @@ export default function StatistichePage() {
 }
 
 const s = {
-  page: { maxWidth:'1100px' },
+  page: { width:'100%' },
   header: { marginBottom:'20px' },
   title: { fontSize:'32px', fontWeight:'900', color:'#0A0A0A', letterSpacing:'-0.03em', margin:0 },
   subtitle: { fontSize:'14px', color:'#6B7280', margin:'4px 0 0', fontWeight:'500' },

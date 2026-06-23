@@ -96,9 +96,9 @@ const s = {
   main: {
     minHeight: '100vh',
     paddingTop: '80px',
-    paddingBottom: '32px',
-    paddingLeft: '28px',
-    paddingRight: '28px',
+    paddingBottom: '40px',
+    paddingLeft: '32px',
+    paddingRight: '32px',
     transition: 'margin-left 0.2s ease',
     boxSizing: 'border-box',
   },

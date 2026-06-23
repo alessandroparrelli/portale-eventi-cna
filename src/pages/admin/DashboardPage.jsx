@@ -1,6 +1,7 @@
 import { useEffect, useState } from 'react'
 import { useNavigate } from 'react-router-dom'
 import { supabase } from '../../lib/supabase'
+import GlowTabBar from '../../components/GlowTabBar'
 import {
   CalendarDays, Users, CheckCircle2, Clock, TrendingUp, Plus,
   ArrowRight, AlertCircle, Activity, Percent, Calendar
@@ -78,6 +79,7 @@ export default function DashboardPage() {
   const [weeklyData, setWeeklyData]   = useState([])
   const [nextEvents, setNextEvents]   = useState([])
   const [loading, setLoading]         = useState(true)
+  const [tabFilter, setTabFilter]     = useState('tutti')
   const navigate = useNavigate()
 
   useEffect(() => { loadData() }, [])
@@ -145,7 +147,7 @@ export default function DashboardPage() {
     : 0
 
   return (
-    <div style={styles.page}>
+    <div style={styles.page} className="admin-page">
       {/* Header */}
       <div style={styles.pageHeader}>
         <div>
@@ -240,6 +242,21 @@ export default function DashboardPage() {
             Vedi tutti <ArrowRight size={14}/>
           </button>
         </div>
+
+        {/* Filtro tab */}
+        <div style={{ padding:'12px 20px 0', borderBottom:'1px solid #F3F4F6' }}>
+          <GlowTabBar
+            active={tabFilter}
+            onChange={setTabFilter}
+            tabs={[
+              { id:'tutti',       label:'Tutti',      color:'blue'   },
+              { id:'pubblicato',  label:'Pubblicati', color:'green'  },
+              { id:'bozza',       label:'Bozze',      color:'amber'  },
+              { id:'chiuso',      label:'Chiusi',     color:'coral'  },
+              { id:'archiviato',  label:'Archiviati', color:'violet' },
+            ]}
+          />
+        </div>
         {loading ? (
           <div style={styles.loadingState}>
             <Clock size={24} style={{color:'#9CA3AF',marginBottom:'8px'}}/>
@@ -265,7 +282,7 @@ export default function DashboardPage() {
                 </tr>
               </thead>
               <tbody>
-                {events.map(ev=>{
+                {events.filter(ev => tabFilter === 'tutti' || ev.stato === tabFilter).map(ev=>{
                   const rate = ev.iscritti > 0 ? Math.round((ev.presenti/ev.iscritti)*100) : null
                   return (
                     <tr key={ev.id} style={styles.tr}
@@ -318,7 +335,7 @@ export default function DashboardPage() {
 }
 
 const styles = {
-  page: { maxWidth:'1100px' },
+  page: { width:'100%' },
   pageHeader: { display:'flex', alignItems:'flex-start', justifyContent:'space-between', marginBottom:'28px', flexWrap:'wrap', gap:'16px' },
   pageTitle: { fontSize:'32px', fontWeight:'900', color:'#0A0A0A', letterSpacing:'-0.03em', margin:0 },
   pageSubtitle: { fontSize:'14px', color:'#6B7280', margin:'4px 0 0', fontWeight:'500', textTransform:'capitalize' },

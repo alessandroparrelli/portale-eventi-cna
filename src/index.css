@@ -153,3 +153,116 @@ header img { display: block; }
 .btn-pill-green  { background:#16A34A; color:#fff; }
 .btn-pill-red    { background:#DC2626; color:#fff; }
 .btn-pill-violet { background:#7C3AED; color:#fff; }
+
+/* ═══════════════════════════════════════════════════════════
+   GLOW TAB BAR — tab colorate con sfumature e bagliore hover
+   ═══════════════════════════════════════════════════════════ */
+
+.glow-tab-bar {
+  display: flex;
+  gap: 6px;
+  padding: 6px;
+  background: #F1F2F5;
+  border-radius: 12px;
+  margin-bottom: 24px;
+  flex-wrap: wrap;
+}
+
+.glow-tab {
+  display: flex;
+  align-items: center;
+  gap: 7px;
+  padding: 8px 16px;
+  border-radius: 8px;
+  border: none;
+  cursor: pointer;
+  font-size: 13px;
+  font-weight: 600;
+  font-family: 'Inter', sans-serif;
+  letter-spacing: -0.01em;
+  transition: all 0.18s cubic-bezier(.4,0,.2,1);
+  position: relative;
+  white-space: nowrap;
+  color: #6B7280;
+  background: transparent;
+}
+
+.glow-tab:hover {
+  color: #374151;
+  background: rgba(255,255,255,0.7);
+}
+
+/* colori per tab attiva */
+.glow-tab.active-blue   { background: linear-gradient(135deg,#003DA5,#1a56db); color:#fff; box-shadow: 0 4px 14px rgba(0,61,165,.35), 0 1px 3px rgba(0,0,0,.1); }
+.glow-tab.active-green  { background: linear-gradient(135deg,#059669,#10b981); color:#fff; box-shadow: 0 4px 14px rgba(5,150,105,.35), 0 1px 3px rgba(0,0,0,.1); }
+.glow-tab.active-violet { background: linear-gradient(135deg,#7c3aed,#a78bfa); color:#fff; box-shadow: 0 4px 14px rgba(124,58,237,.35), 0 1px 3px rgba(0,0,0,.1); }
+.glow-tab.active-amber  { background: linear-gradient(135deg,#d97706,#f59e0b); color:#fff; box-shadow: 0 4px 14px rgba(217,119,6,.35),  0 1px 3px rgba(0,0,0,.1); }
+.glow-tab.active-cyan   { background: linear-gradient(135deg,#0891b2,#22d3ee); color:#fff; box-shadow: 0 4px 14px rgba(8,145,178,.35),  0 1px 3px rgba(0,0,0,.1); }
+.glow-tab.active-coral  { background: linear-gradient(135deg,#e85d24,#f97316); color:#fff; box-shadow: 0 4px 14px rgba(232,93,36,.35),  0 1px 3px rgba(0,0,0,.1); }
+.glow-tab.active-rose   { background: linear-gradient(135deg,#be185d,#ec4899); color:#fff; box-shadow: 0 4px 14px rgba(190,24,93,.35),  0 1px 3px rgba(0,0,0,.1); }
+
+/* hover glow per tab inattive */
+.glow-tab.hint-blue:hover   { color:#003DA5; background: rgba(0,61,165,.08); }
+.glow-tab.hint-green:hover  { color:#059669; background: rgba(5,150,105,.08); }
+.glow-tab.hint-violet:hover { color:#7c3aed; background: rgba(124,58,237,.08); }
+.glow-tab.hint-amber:hover  { color:#d97706; background: rgba(217,119,6,.08); }
+.glow-tab.hint-cyan:hover   { color:#0891b2; background: rgba(8,145,178,.08); }
+.glow-tab.hint-coral:hover  { color:#e85d24; background: rgba(232,93,36,.08); }
+.glow-tab.hint-rose:hover   { color:#be185d; background: rgba(190,24,93,.08); }
+
+/* Tab bar lineare (sottile, per editor) */
+.slim-tab-bar {
+  display: flex;
+  gap: 0;
+  border-bottom: 1px solid #E5E7EB;
+  padding: 0 24px;
+  flex-shrink: 0;
+  overflow-x: auto;
+  scrollbar-width: none;
+}
+.slim-tab-bar::-webkit-scrollbar { display: none; }
+
+.slim-tab {
+  padding: 12px 16px;
+  background: none;
+  border: none;
+  border-bottom: 2px solid transparent;
+  cursor: pointer;
+  font-size: 13px;
+  font-family: 'Inter', sans-serif;
+  white-space: nowrap;
+  transition: color .15s, border-color .15s;
+  color: #6B7280;
+  font-weight: 500;
+  position: relative;
+}
+.slim-tab::after {
+  content: '';
+  position: absolute;
+  bottom: -1px; left: 50%; right: 50%;
+  height: 2px;
+  background: linear-gradient(90deg,#003DA5,#1a56db);
+  border-radius: 2px 2px 0 0;
+  transition: left .2s cubic-bezier(.4,0,.2,1), right .2s cubic-bezier(.4,0,.2,1);
+}
+.slim-tab.active::after { left: 0; right: 0; }
+.slim-tab.active { color: #003DA5; font-weight: 700; }
+.slim-tab:hover:not(.active) { color: #374151; }
+
+/* ── Full-width layout su desktop ── */
+@media (min-width: 1024px) {
+  .admin-page { max-width: none !important; width: 100%; }
+}
+@media (min-width: 1280px) {
+  .admin-page-wide { max-width: none !important; }
+}
+
+/* ── Dashboard stats grid: 4 colonne su desktop wide ── */
+@media (min-width: 1400px) {
+  main { padding-left: 40px !important; padding-right: 40px !important; }
+}
+
+/* ── Mobile: padding corretto con header 56px ── */
+@media (max-width: 768px) {
+  main { padding-top: 72px !important; padding-left: 16px !important; padding-right: 16px !important; }
+}
