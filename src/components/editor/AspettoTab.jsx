@@ -124,7 +124,7 @@ function Anteprima({ tema, logoUrl, titolo }) {
         <div style={{ background: logoBg, padding: logoBg !== 'transparent' ? '4px 8px' : 0, borderRadius: '4px' }}>
           <img
             src={logoUrl || 'https://raw.githubusercontent.com/alessandroparrelli/fileappoggio/main/NUOVO-LOGO-CNA-ROMA-SOLO-ROMA.png'}
-            alt="logo" style={{ height: `${Math.min(logoHeight, 36)}px`, maxWidth: '140px', objectFit: 'contain', display: 'block' }}
+            alt="logo" style={{ height: `${Math.min(logoHeight, 56)}px`, maxWidth: '180px', objectFit: 'contain', display: 'block' }}
             onError={e => (e.target.style.display = 'none')}
           />
         </div>
@@ -261,13 +261,13 @@ export default function AspettoTab({ event, setEvent }) {
         <Sezione title="Logo" icon="🏷">
           <div>
             <label style={sLabel}>Altezza logo: {tema.logo_altezza || 44}px</label>
-            <input type="range" min="24" max="80" step="2"
+            <input type="range" min="24" max="160" step="4"
               value={tema.logo_altezza || 44}
               onChange={e => setT('logo_altezza', e.target.value)}
               style={{ width: '100%', marginTop: '6px' }}
             />
             <div style={{ display: 'flex', gap: '4px', marginTop: '6px' }}>
-              {[['24', 'XS'], ['36', 'S'], ['44', 'M'], ['56', 'L'], ['72', 'XL']].map(([v, l]) => (
+              {[['24', 'XS'], ['44', 'S'], ['64', 'M'], ['96', 'L'], ['128', 'XL'], ['160', 'XXL']].map(([v, l]) => (
                 <button key={v} type="button" onClick={() => setT('logo_altezza', v)}
                   style={{ flex: 1, padding: '4px', border: `1px solid ${tema.logo_altezza == v ? '#003DA5' : '#E5E7EB'}`, borderRadius: '5px', background: tema.logo_altezza == v ? '#EEF3FF' : '#fff', fontSize: '11px', fontWeight: '700', color: tema.logo_altezza == v ? '#003DA5' : '#6B7280', cursor: 'pointer', fontFamily: "'Inter',sans-serif" }}
                 >{l}</button>

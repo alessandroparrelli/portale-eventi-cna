@@ -309,7 +309,7 @@ export default function LandingPage() {
         backgroundColor: tema.sfondo_header || '#FFFFFF',
         borderBottom: `${tema.spessore_bordo || 3}px solid ${tema.bordo_header || '#003DA5'}`,
         position:'sticky', top:0, zIndex:50, width:'100%',
-        height:'80px', display:'flex', alignItems:'center',
+        minHeight:'80px', height: `${Math.max(80, parseInt(tema.logo_altezza||44) + 24)}px`, display:'flex', alignItems:'center',
         justifyContent:'center', padding:'0 24px',
       }}>
         {/* Logo con sfondo opzionale */}
@@ -323,7 +323,7 @@ export default function LandingPage() {
         }}>
           <img src={event?.logo_url || "https://raw.githubusercontent.com/alessandroparrelli/fileappoggio/main/NUOVO-LOGO-CNA-ROMA-SOLO-ROMA.png"}
             alt="CNA Roma"
-            style={{ height: `${tema.logo_altezza || 44}px`, maxWidth:'200px', objectFit:'contain', display:'block' }}/>
+            style={{ height: `${tema.logo_altezza || 44}px`, maxWidth:'100%', objectFit:'contain', display:'block' }}/>
         </div>
       </header>
 
