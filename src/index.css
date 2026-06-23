@@ -11,10 +11,9 @@ input, select, textarea, button { font-family: inherit; }
 
 /* ── Responsive admin layout ──────────────────────── */
 @media (max-width: 768px) {
-  /* Sidebar si nasconde, main occupa tutto */
   aside { transform: translateX(-100%); transition: transform .25s ease; }
   aside.open { transform: translateX(0); }
-  main { margin-left: 0 !important; padding: 16px !important; }
+  main { margin-left: 0 !important; padding: 72px 16px 24px !important; }
 
   /* Grids a colonna singola */
   .grid-2col, [style*="gridTemplateColumns: 1fr 1fr"] {

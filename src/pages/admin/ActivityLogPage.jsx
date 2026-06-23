@@ -66,13 +66,20 @@ export default function ActivityLogPage() {
 
     const { data, count } = await q
     // normalizza nomi colonne (compatibilità schema legacy)
-    const normalized = (data || []).map(l => ({
-      ...l,
-      utente_nome:   l.utente_nome   || l.username || null,
-      evento_titolo: l.evento_titolo || null,
-      ip_address:    l.ip_address    || l.ip || null,
-      dettaglio:     l.dettaglio     || l.dettagli || null,
-    }))
+    const normalized = (data || []).map(l => {
+      // dettagli è JSONB nel DB legacy — serializza se non è stringa
+      let dettaglio = l.dettaglio || l.dettagli || null
+      if (dettaglio && typeof dettaglio === 'object') {
+        dettaglio = JSON.stringify(dettaglio)
+      }
+      return {
+        ...l,
+        utente_nome:   l.utente_nome   || l.username || null,
+        evento_titolo: l.evento_titolo || null,
+        ip_address:    l.ip_address    || l.ip       || null,
+        dettaglio,
+      }
+    })
     setLogs(normalized)
     setTotal(count || 0)
     setLoading(false)

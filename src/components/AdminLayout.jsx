@@ -3,7 +3,6 @@ import { Outlet } from 'react-router-dom'
 import Sidebar from './Sidebar'
 import { Menu } from 'lucide-react'
 
-
 export default function AdminLayout() {
   const [sidebarWidth, setSidebarWidth] = useState(240)
   const [mobileOpen,   setMobileOpen]   = useState(false)
@@ -23,7 +22,7 @@ export default function AdminLayout() {
   useEffect(() => {
     if (isMobile) { setSidebarWidth(0); return }
     const observer = new ResizeObserver(entries => {
-      for (const e of entries) setSidebarWidth(e.contentRect.width)
+      for (const e of entries) setSidebarWidth(Math.round(e.contentRect.width))
     })
     const sidebar = document.querySelector('aside')
     if (sidebar) observer.observe(sidebar)
@@ -31,17 +30,16 @@ export default function AdminLayout() {
   }, [isMobile])
 
   const closeMobile = useCallback(() => setMobileOpen(false), [])
-  const pageTitle = 'Marketing'
 
   return (
     <div style={s.root}>
       <Sidebar mobileOpen={mobileOpen} onMobileClose={closeMobile} isMobile={isMobile}/>
 
-      {/* ── UNICO HEADER fisso a tutta larghezza ── */}
-      <header style={{ ...s.header, left: 0 }}>
+      {/* ── HEADER fisso full-width ── */}
+      <header style={s.header}>
         {isMobile && (
-          <button onClick={() => setMobileOpen(true)} style={s.hamburger}>
-            <Menu size={24}/>
+          <button onClick={() => setMobileOpen(true)} style={s.hamburger} aria-label="Apri menu">
+            <Menu size={22}/>
           </button>
         )}
         <img
@@ -50,13 +48,13 @@ export default function AdminLayout() {
           style={s.logo}
         />
         <div style={s.divider}/>
-        <h1 style={s.pageTitle}>{pageTitle}</h1>
+        <span style={s.pageTitle}>Eventi</span>
       </header>
 
+      {/* ── MAIN ── */}
       <main style={{
         ...s.main,
-        marginLeft:  isMobile ? '0' : `${sidebarWidth}px`,
-        padding:     isMobile ? '68px 14px 24px' : '72px 32px 32px',
+        marginLeft: isMobile ? '0' : `${sidebarWidth}px`,
       }}>
         <Outlet />
       </main>
@@ -65,25 +63,43 @@ export default function AdminLayout() {
 }
 
 const s = {
-  root: { minHeight:'100vh', backgroundColor:'#F4F5F7', fontFamily:"'Inter',sans-serif" },
+  root: {
+    minHeight: '100vh',
+    backgroundColor: '#F4F5F7',
+    fontFamily: "'Inter', sans-serif",
+  },
   header: {
-    position:'fixed', top:0, right:0, left:0, zIndex:200,
-    backgroundColor:'#FFFFFF', borderBottom:'2px solid #003DA5',
-    height:'60px', display:'flex', alignItems:'center',
-    padding:'0 20px', gap:'12px',
-    boxShadow:'0 2px 8px rgba(0,61,165,.08)',
+    position: 'fixed', top: 0, right: 0, left: 0, zIndex: 200,
+    backgroundColor: '#FFFFFF',
+    borderBottom: '1.5px solid #E5E7EB',
+    height: '56px',
+    display: 'flex', alignItems: 'center',
+    padding: '0 20px', gap: '14px',
+    boxShadow: '0 1px 4px rgba(0,0,0,0.06)',
   },
   hamburger: {
-    background:'none', border:'none', cursor:'pointer',
-    color:'#0A0A0A', display:'flex', alignItems:'center',
-    padding:'6px', borderRadius:'6px', marginRight:'2px', flexShrink:0,
+    background: 'none', border: 'none', cursor: 'pointer',
+    color: '#374151', display: 'flex', alignItems: 'center',
+    padding: '6px', borderRadius: '6px', flexShrink: 0,
   },
-  logo:     { height:'48px', objectFit:'contain', flexShrink:0 },
-  divider:  { width:'1px', height:'24px', backgroundColor:'#E5E7EB', flexShrink:0 },
-  pageTitle:{
-    fontSize:'20px', fontWeight:'900', color:'#0A0A0A',
-    letterSpacing:'-0.03em', margin:0,
-    fontFamily:"'Inter',sans-serif", lineHeight:1, whiteSpace:'nowrap',
+  logo: { height: '34px', objectFit: 'contain', flexShrink: 0 },
+  divider: { width: '1px', height: '20px', backgroundColor: '#E5E7EB', flexShrink: 0 },
+  pageTitle: {
+    fontSize: '18px',
+    fontWeight: '800',
+    color: '#0A0A0A',
+    letterSpacing: '-0.04em',
+    fontFamily: "'Inter', sans-serif",
+    lineHeight: 1,
+    whiteSpace: 'nowrap',
   },
-  main: { minHeight:'100vh', transition:'margin-left 0.2s ease' },
+  main: {
+    minHeight: '100vh',
+    paddingTop: '80px',
+    paddingBottom: '32px',
+    paddingLeft: '28px',
+    paddingRight: '28px',
+    transition: 'margin-left 0.2s ease',
+    boxSizing: 'border-box',
+  },
 }
