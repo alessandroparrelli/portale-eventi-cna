@@ -3,6 +3,7 @@ import { useSearchParams } from 'react-router-dom'
 import { supabase } from '../../lib/supabase'
 import { useRole } from '../../hooks/useRole'
 import GlowTableHead from '../../components/GlowTableHead'
+import GlowStatCard from '../../components/GlowStatCard'
 import { Modal, PresenzaBadge, Field, Input, Select, Btn, EmptyState } from '../../components/ui'
 import { Users, Search, Download, Eye, Trash2, UserCheck } from 'lucide-react'
 import * as XLSX from 'xlsx'
@@ -127,19 +128,12 @@ export default function IscrittiPage() {
 
       {/* Stats cards */}
       {selectedEvento && (
-        <div style={s.statsRow}>
-          {[
-            { label:'Totale iscritti', val: registrations.length, color:'#003DA5' },
-            { label:'Presenti', val: totPresenti, color:'#16A34A' },
-            { label:'Confermati', val: totConfermati, color:'#2563EB' },
-            { label:'Walk-in', val: registrations.filter(r=>r.stato==='walk-in').length, color:'#7C3AED' },
-            { label:'Assenti', val: registrations.filter(r=>r.stato==='assente').length, color:'#DC2626' },
-          ].map(stat=>(
-            <div key={stat.label} style={s.statCard}>
-              <p style={s.statVal(stat.color)}>{stat.val}</p>
-              <p style={s.statLabel}>{stat.label}</p>
-            </div>
-          ))}
+        <div style={{ display:'grid', gridTemplateColumns:'repeat(auto-fit,minmax(140px,1fr))', gap:'10px', marginBottom:'16px' }}>
+          <GlowStatCard icon="users"     label="Tot. iscritti" value={registrations.length}                                    palette="blue"/>
+          <GlowStatCard icon="check"     label="Presenti"      value={totPresenti}                                              palette="green"/>
+          <GlowStatCard icon="trending"  label="Confermati"    value={totConfermati}                                            palette="cyan"/>
+          <GlowStatCard icon="usercheck" label="Walk-in"       value={registrations.filter(r=>r.stato==='walk-in').length}     palette="violet"/>
+          <GlowStatCard icon="userx"     label="Assenti"       value={registrations.filter(r=>r.stato==='assente').length}     palette="red"/>
         </div>
       )}
 

@@ -4,6 +4,7 @@ import { Select, Field, EmptyState } from '../../components/ui'
 import { BarChart2, Star, TrendingUp, Users, CheckCircle2, UserX, UserCheck, Search, Calendar, Award, Clock, ArrowRight, Download } from 'lucide-react'
 import EventSelector from '../../components/EventSelector'
 import GlowTabBar from '../../components/GlowTabBar'
+import GlowStatCard from '../../components/GlowStatCard'
 import GlowTableHead from '../../components/GlowTableHead'
 import * as XLSX from 'xlsx'
 
@@ -296,16 +297,16 @@ export default function StatistichePage() {
           {selectedEvento && !loading && stats && (
             <div style={{ display:'flex', flexDirection:'column', gap:'20px' }}>
               <div style={s.statsGrid}>
-                <StatCard icon={Users}       label="Iscritti totali" value={stats.total}     color="#003DA5" iconClass="icon-badge-blue"
+                <GlowStatCard icon="users"     label="Iscritti totali" value={stats.total}      palette="blue"
                   sub={stats.capienza ? `Capienza: ${stats.capienza}` : undefined}/>
-                <StatCard icon={CheckCircle2} label="Presenti"        value={stats.presenti}  color="#059669" iconClass="icon-badge-green"
+                <GlowStatCard icon="check"     label="Presenti"        value={stats.presenti}   palette="green"
                   sub={stats.total ? `${Math.round((stats.presenti/stats.total)*100)}% di presenza` : undefined}/>
-                <StatCard icon={UserCheck}    label="Walk-in"         value={stats.walkin}    color="#7C3AED" iconClass="icon-badge-violet"/>
-                <StatCard icon={UserX}        label="Assenti"         value={stats.assenti}   color="#DC2626" iconClass="icon-badge-red"/>
-                <StatCard icon={TrendingUp}   label="Confermati"      value={stats.confermati}color="#2563EB" iconClass="icon-badge-blue"
+                <GlowStatCard icon="usercheck" label="Walk-in"         value={stats.walkin}     palette="violet"/>
+                <GlowStatCard icon="userx"     label="Assenti"         value={stats.assenti}    palette="red"/>
+                <GlowStatCard icon="trending"  label="Confermati"      value={stats.confermati} palette="cyan"
                   sub="in attesa di presenza"/>
                 {survey.length > 0 && (
-                  <StatCard icon={Star} label="Soddisfazione" value={surveyMedia+'/5'} color="#D97706" iconClass="icon-badge-amber"
+                  <GlowStatCard icon="star" label="Soddisfazione" value={surveyMedia+'/5'} palette="amber"
                     sub={`${survey.length} risposte`}/>
                 )}
               </div>
@@ -512,16 +513,11 @@ export default function StatistichePage() {
                   <button onClick={() => setSelectedUtente(null)} style={{ marginLeft:'auto', background:'none', border:'none', cursor:'pointer', color:'#9CA3AF', fontSize:'18px' }}>✕</button>
                 </div>
                 <div style={{ display:'grid', gridTemplateColumns:'1fr 1fr 1fr', gap:'10px' }}>
-                  {[
-                    { label:'Iscrizioni', val: selectedUtente.eventi_totali, color:'#003DA5' },
-                    { label:'Presenze',   val: selectedUtente.presenze,      color:'#059669' },
-                    { label:'Tasso',      val: selectedUtente.eventi_totali > 0 ? Math.round((selectedUtente.presenze/selectedUtente.eventi_totali)*100)+'%' : '—', color:'#D97706' },
-                  ].map(k => (
-                    <div key={k.label} style={{ textAlign:'center', backgroundColor:'#F9FAFB', borderRadius:'8px', padding:'12px' }}>
-                      <p style={{ fontSize:'22px', fontWeight:'900', color:k.color, margin:0, letterSpacing:'-0.03em' }}>{k.val}</p>
-                      <p style={{ fontSize:'11px', color:'#6B7280', margin:'3px 0 0', fontWeight:'600', textTransform:'uppercase', letterSpacing:'0.04em' }}>{k.label}</p>
-                    </div>
-                  ))}
+                  <GlowStatCard icon="calendar" label="Iscrizioni" value={selectedUtente.eventi_totali} palette="blue"/>
+                  <GlowStatCard icon="check"    label="Presenze"   value={selectedUtente.presenze}      palette="green"/>
+                  <GlowStatCard icon="percent"  label="Tasso"
+                    value={selectedUtente.eventi_totali > 0 ? Math.round((selectedUtente.presenze/selectedUtente.eventi_totali)*100)+'%' : '—'}
+                    palette="amber"/>
                 </div>
               </div>
 

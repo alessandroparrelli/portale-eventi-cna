@@ -2,6 +2,7 @@ import { useEffect, useState } from 'react'
 import { useNavigate } from 'react-router-dom'
 import { supabase } from '../../lib/supabase'
 import GlowTabBar from '../../components/GlowTabBar'
+import GlowStatCard from '../../components/GlowStatCard'
 import GlowTableHead from '../../components/GlowTableHead'
 import {
   CalendarDays, Users, CheckCircle2, Clock, TrendingUp, Plus,
@@ -164,19 +165,19 @@ export default function DashboardPage() {
 
       {/* KPI grid 4 colonne */}
       <div style={styles.statsGrid}>
-        <StatCard icon={CalendarDays} label="Tot. eventi"     value={stats.totale}     color="#003DA5" />
-        <StatCard icon={CheckCircle2} label="Pubblicati"      value={stats.pubblicati} color="#16A34A" />
-        <StatCard icon={Users}        label="Tot. iscritti"   value={stats.iscritti}   color="#003DA5" trend={stats.oggi} />
-        <StatCard icon={TrendingUp}   label="Tot. presenti"   value={stats.presenti}   color="#16A34A" />
+        <GlowStatCard icon="calendar"  label="Tot. eventi"     value={stats.totale}     palette="blue" />
+        <GlowStatCard icon="check"     label="Pubblicati"      value={stats.pubblicati} palette="green" />
+        <GlowStatCard icon="users"     label="Tot. iscritti"   value={stats.iscritti}   palette="cyan"  trend={stats.oggi} />
+        <GlowStatCard icon="trending"  label="Tot. presenti"   value={stats.presenti}   palette="teal" />
       </div>
 
       {/* Seconda riga KPI */}
       <div style={{ ...styles.statsGrid, gridTemplateColumns:'repeat(3,1fr)', marginBottom:'20px' }}>
-        <StatCard icon={Percent}  label="Tasso check-in"  value={`${checkInRate}%`}    color="#7C3AED"
+        <GlowStatCard icon="percent"  label="Tasso check-in"  value={`${checkInRate}%`}  palette="violet"
           sub={stats.iscritti > 0 ? `${stats.presenti} su ${stats.iscritti}` : 'Nessun iscritto'} />
-        <StatCard icon={Calendar} label="Prossimi eventi" value={stats.prossimi}        color="#0891B2"
+        <GlowStatCard icon="clock"    label="Prossimi eventi" value={stats.prossimi}      palette="amber"
           sub={stats.prossimi > 0 ? 'in programma' : 'Nessuno programmato'} />
-        <StatCard icon={Activity} label="Iscrizioni oggi" value={stats.oggi}            color="#D97706"
+        <GlowStatCard icon="activity" label="Iscrizioni oggi" value={stats.oggi}          palette="coral"
           sub={new Date().toLocaleDateString('it-IT',{day:'2-digit',month:'long'})} />
       </div>
 

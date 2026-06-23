@@ -2,6 +2,7 @@ import { useEffect, useRef, useState } from 'react'
 import { supabase } from '../../lib/supabase'
 import { useRole } from '../../hooks/useRole'
 import { Modal, Btn, Select, Field, Input } from '../../components/ui'
+import GlowStatCard from '../../components/GlowStatCard'
 import { QrCode, UserPlus, CheckCircle2, XCircle, AlertTriangle, RefreshCw, Search, Camera, CameraOff, Users, WifiOff } from 'lucide-react'
 import EventSelector from '../../components/EventSelector'
 
@@ -307,49 +308,20 @@ export default function CheckinPage() {
 
       {selectedEvento && (
         <>
-          {/* ── Contatore presenze ── */}
-          <div style={s.counterCard}>
-            {/* Numero grande */}
-            <div style={s.counterMain}>
-              <span style={s.counterNum}>{presenti.length}</span>
-              <span style={s.counterLabel}>presenti</span>
-            </div>
-
-            {/* Separatore */}
-            <div style={{ width: '1px', height: '56px', background: 'rgba(255,255,255,.2)', flexShrink: 0 }} />
-
-            {/* Attesa */}
-            <div style={s.counterMain}>
-              <span style={{ ...s.counterNum, color: 'rgba(255,255,255,.6)' }}>{nonPresenti}</span>
-              <span style={s.counterLabel}>in attesa</span>
-            </div>
-
-            {/* Separatore */}
-            <div style={{ width: '1px', height: '56px', background: 'rgba(255,255,255,.2)', flexShrink: 0 }} />
-
-            {/* Barra % + totale */}
-            <div style={{ flex: 1, display: 'flex', flexDirection: 'column', gap: '6px' }}>
-              <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'baseline' }}>
-                <span style={{ fontSize: '13px', color: 'rgba(255,255,255,.7)', fontWeight: '500' }}>
-                  {totali} iscritti totali
-                </span>
-                <span style={{ fontSize: '18px', fontWeight: '900', color: '#fff', letterSpacing: '-.02em' }}>
-                  {pct}%
-                </span>
-              </div>
-              <div style={s.pctBar}>
-                <div style={{ ...s.pctFill, width: `${pct}%` }} />
-              </div>
-            </div>
-
-            {/* Refresh */}
-            <button
-              onClick={loadPresenti}
-              style={s.refreshBtn}
-              title="Aggiorna"
-              disabled={loadingP}
-            >
-              <RefreshCw size={17} style={{ animation: loadingP ? 'spin .8s linear infinite' : 'none' }} />
+          {/* ── Contatore presenze — GlowStatCard ── */}
+          <div style={{ display:'grid', gridTemplateColumns:'repeat(3,1fr)', gap:'10px', marginBottom:'14px' }}>
+            <GlowStatCard icon="check"    label="Presenti"    value={presenti.length}                              palette="green"/>
+            <GlowStatCard icon="clock"    label="In attesa"   value={nonPresenti}                                  palette="amber"/>
+            <GlowStatCard icon="percent"  label="Tasso check-in" value={`${pct}%`}
+              sub={`${totali} iscritti totali`} palette="blue"/>
+          </div>
+          {/* Barra percentuale */}
+          <div style={{ ...s.pctBar, marginBottom:'14px', position:'relative' }}>
+            <div style={{ ...s.pctFill, width:`${pct}%` }}/>
+            <button onClick={loadPresenti} disabled={loadingP}
+              style={{ position:'absolute', right:8, top:'50%', transform:'translateY(-50%)', background:'rgba(255,255,255,.9)', border:'none', borderRadius:'6px', cursor:'pointer', padding:'4px 8px', display:'flex', alignItems:'center', gap:'4px', fontSize:'12px', color:'#003DA5', fontWeight:'700' }}>
+              <RefreshCw size={13} style={{ animation: loadingP ? 'spin .8s linear infinite' : 'none' }}/>
+              Aggiorna
             </button>
           </div>
 
@@ -684,8 +656,8 @@ const s = {
   counterMain:    { display: 'flex', flexDirection: 'column', alignItems: 'center', minWidth: '56px' },
   counterNum:     { fontSize: '44px', fontWeight: '900', color: '#FFFFFF', letterSpacing: '-.04em', lineHeight: 1 },
   counterLabel:   { fontSize: '11px', color: 'rgba(255,255,255,.6)', fontWeight: '600', textTransform: 'uppercase', letterSpacing: '.05em', marginTop: '3px' },
-  pctBar:         { height: '6px', backgroundColor: 'rgba(255,255,255,.2)', borderRadius: '3px', overflow: 'hidden' },
-  pctFill:        { height: '100%', backgroundColor: '#FFFFFF', borderRadius: '3px', transition: 'width .5s ease' },
+  pctBar:         { height: '8px', backgroundColor: '#E5E7EB', borderRadius: '4px', overflow: 'visible' },
+  pctFill:        { height: '100%', background: 'linear-gradient(90deg,#003DA5,#1a56db)', borderRadius: '4px', transition: 'width .5s ease' },
   refreshBtn:     { background: 'rgba(255,255,255,.15)', border: 'none', borderRadius: '8px', padding: '9px', cursor: 'pointer', color: '#FFFFFF', display: 'flex', alignItems: 'center', flexShrink: 0 },
   // Scanner
   scanCard:       { backgroundColor: '#FFFFFF', border: '1px solid #E5E7EB', borderRadius: '12px', overflow: 'hidden', marginBottom: '12px' },
