@@ -1,4 +1,5 @@
 import { useEffect, useRef, useState } from 'react'
+import { supabase } from '../../lib/supabase'
 import { Upload, Check, X, Loader2, ImageOff } from 'lucide-react'
 
 const GITHUB_OWNER = 'alessandroparrelli'
@@ -68,16 +69,6 @@ export default function LogoManager({ value, onChange }) {
     setUploadOk('')
 
     try {
-      // Token letto dalle env Vercel (VITE_GITHUB_TOKEN)
-      const token = import.meta.env.VITE_GITHUB_TOKEN ||
-                    localStorage.getItem('github_token_cna')
-
-      if (!token) {
-        setUploadErr('Variabile VITE_GITHUB_TOKEN non configurata su Vercel.')
-        setUploading(false)
-        return
-      }
-
       // Converti file in base64
       const base64 = await new Promise((resolve, reject) => {
         const reader = new FileReader()
@@ -86,54 +77,30 @@ export default function LogoManager({ value, onChange }) {
         reader.readAsDataURL(file)
       })
 
-      // Sanitizza il nome
-      const safeName = file.name
-        .normalize('NFD').replace(/[\u0300-\u036f]/g, '')
-        .replace(/[^a-zA-Z0-9._-]/g, '-')
-        .replace(/-+/g, '-')
-        .toLowerCase()
+      // Recupera il JWT dell'utente autenticato
+      const { data: { session } } = await supabase.auth.getSession()
+      const jwt = session?.access_token
+      if (!jwt) throw new Error('Non autenticato')
 
-      const path = `${GITHUB_FOLDER}/${safeName}`
-
-      // Controlla se esiste già (per aggiornare)
-      let sha = undefined
-      try {
-        const check = await fetch(
-          `https://api.github.com/repos/${GITHUB_OWNER}/${GITHUB_REPO}/contents/${path}`,
-          { headers: { 'Authorization': `token ${token}` } }
-        )
-        if (check.ok) {
-          const existing = await check.json()
-          sha = existing.sha
-        }
-      } catch {}
-
-      const body = { message: `Upload logo: ${safeName}`, content: base64, branch: 'main' }
-      if (sha) body.sha = sha
-
+      // Chiama la Edge Function proxy (il token GitHub è lato server)
       const res = await fetch(
-        `https://api.github.com/repos/${GITHUB_OWNER}/${GITHUB_REPO}/contents/${path}`,
+        `${import.meta.env.VITE_SUPABASE_URL}/functions/v1/github-upload-logo`,
         {
-          method: 'PUT',
+          method: 'POST',
           headers: {
-            'Authorization': `token ${token}`,
+            'Authorization': `Bearer ${jwt}`,
             'Content-Type': 'application/json',
           },
-          body: JSON.stringify(body),
+          body: JSON.stringify({ filename: file.name, base64 }),
         }
       )
 
-      if (!res.ok) {
-        const err = await res.json()
-        throw new Error(err.message || 'Errore upload GitHub')
-      }
+      const result = await res.json()
+      if (!res.ok || result.error) throw new Error(result.error || 'Errore upload')
 
-      const publicUrl = `${RAW_BASE}${safeName}`
-      setUploadOk(`Logo caricato: ${safeName}`)
-      
-      // Aggiorna la lista e seleziona il nuovo logo
+      setUploadOk(`Logo caricato: ${result.filename}`)
       await fetchLoghi()
-      onChange(publicUrl)
+      onChange(result.url)
 
     } catch (e) {
       setUploadErr(e.message || 'Errore durante il caricamento')
