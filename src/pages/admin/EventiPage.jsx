@@ -451,7 +451,11 @@ export default function EventiPage() {
                         {canWrite && (
                           <button className="btn-pill btn-pill-blue"
                             title="Apri editor completo"
-                            onClick={() => navigate(`/admin/eventi/${ev.id}/editor`)}>
+                            onClick={() => {
+                              if (window.confirm(`Stai per aprire l'editor dell'evento "${ev.titolo}".\n\nContinuare?`)) {
+                                navigate(`/admin/eventi/${ev.id}/editor`)
+                              }
+                            }}>
                             <Pencil size={12}/> Gestisci
                           </button>
                         )}

@@ -322,7 +322,7 @@ export default function DashboardPage() {
                         ) : <span style={{color:'#D1D5DB',fontSize:'13px'}}>—</span>}
                       </td>
                       <td style={styles.td}>
-                        <button onClick={()=>navigate(`/admin/eventi/${ev.id}/editor`)} style={styles.rowBtn}>
+                        <button onClick={()=>navigate(`/admin/eventi`)} style={styles.rowBtn}>
                           Gestisci
                         </button>
                       </td>
