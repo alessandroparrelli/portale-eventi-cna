@@ -63,6 +63,14 @@ export default function AddressSearch({ value, onChange }) {
   const timerRef = useRef(null)
   const wrapRef  = useRef(null)
 
+  // Sincronizza se il valore esterno cambia (es. caricamento asincrono evento)
+  useEffect(() => {
+    if (value && value !== query) {
+      setQuery(value)
+      setSelected(true)
+    }
+  }, [value])
+
   // Chiudi dropdown cliccando fuori
   useEffect(() => {
     function handler(e) {

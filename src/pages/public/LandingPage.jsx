@@ -356,10 +356,10 @@ export default function LandingPage() {
       {/* ── DATA E LUOGO sotto hero ── */}
       {(event.data_inizio || event.luogo) && (
         <div style={{
-          backgroundColor: tema.sfondo_pagina || '#FFFFFF',
-          borderBottom: '1px solid #F3F4F6',
+          backgroundColor: 'transparent',
           padding: '14px 24px',
-          display: 'flex', flexWrap: 'wrap', gap: '16px', alignItems: 'center',
+          display: 'flex', flexWrap: 'wrap', gap: '16px',
+          alignItems: 'center', justifyContent: 'center',
         }}>
           {event.data_inizio && (
             <div style={{ display:'flex', alignItems:'center', gap:'7px' }}>
