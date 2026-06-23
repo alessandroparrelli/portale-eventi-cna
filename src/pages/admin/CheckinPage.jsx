@@ -3,6 +3,7 @@ import { supabase } from '../../lib/supabase'
 import { useRole } from '../../hooks/useRole'
 import { Modal, Btn, Select, Field, Input } from '../../components/ui'
 import { QrCode, UserPlus, CheckCircle2, XCircle, AlertTriangle, RefreshCw, Search, Camera, CameraOff, Users, WifiOff } from 'lucide-react'
+import EventSelector from '../../components/EventSelector'
 
 function OfflineBanner() {
   const [offline, setOffline] = useState(!navigator.onLine)
@@ -284,17 +285,12 @@ export default function CheckinPage() {
       <OfflineBanner />
 
       {/* ── Selettore evento ── */}
-      <div style={s.eventSelector}>
-        <label style={s.eventLabel}>Evento in corso</label>
-        <Select
-          value={selectedEvento}
-          onChange={e => { setSelectedEvento(e.target.value); setResult(null); stopScanner() }}
-          style={s.eventSelect}
-        >
-          <option value="">— Seleziona l'evento —</option>
-          {eventi.map(ev => <option key={ev.id} value={ev.id}>{ev.titolo}</option>)}
-        </Select>
-      </div>
+      <EventSelector
+        eventi={eventi}
+        value={selectedEvento}
+        onChange={e => { setSelectedEvento(e.target.value); setResult(null); stopScanner() }}
+        label="Evento in corso"
+      />
 
       {/* ── Empty state ── */}
       {!selectedEvento && (

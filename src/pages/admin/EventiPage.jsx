@@ -7,7 +7,7 @@ import ImageUploader from '../../components/editor/ImageUploader'
 import {
   Plus, CalendarDays, Pencil, Trash2, Copy, ExternalLink, Search,
   Link2, ClipboardCheck, Globe, Image, X, ChevronDown, ChevronUp,
-  Wand2, Loader2, AlignLeft, AlignCenter, SlidersHorizontal, Hash
+  Wand2, Loader2, AlignLeft, AlignCenter, SlidersHorizontal, Hash, Users
 } from 'lucide-react'
 
 const EMPTY = {
@@ -449,22 +449,38 @@ export default function EventiPage() {
                     </td>
                     <td style={s.td}><span style={s.cell}>{counts[ev.id]?.presenti||0}</span></td>
                     <td style={s.td}>
-                      <div style={{ display:'flex', gap:'5px', alignItems:'center' }}>
-                        <button style={s.iconBtn} title="Iscritti" onClick={()=>navigate(`/admin/iscritti?evento=${ev.id}`)}><ExternalLink size={14}/></button>
-                        <button style={{ ...s.iconBtn, color:ev.stato==='pubblicato'?'#003DA5':'#9CA3AF' }}
-                          title="Link pubblico" onClick={()=>{setCopied(false);setLinkModal(ev)}}><Globe size={14}/></button>
-                        {canWrite && <>
-                          <button
-                            style={{ ...s.iconBtn, color:'#003DA5', borderColor:'#003DA5', fontWeight:'700', fontSize:'15px', padding:'4px 10px', minWidth:'32px' }}
+                      <div style={{ display:'flex', gap:'5px', alignItems:'center', flexWrap:'nowrap' }}>
+                        {/* Gestisci — pill blu primario */}
+                        {canWrite && (
+                          <button className="btn-pill btn-pill-blue"
                             title="Apri editor completo"
                             onClick={() => navigate(`/admin/eventi/${ev.id}/editor`)}>
-                            ✎
+                            <Pencil size={12}/> Gestisci
                           </button>
-                          <button style={s.iconBtn} title="Duplica" onClick={()=>duplicate(ev)}><Copy size={14}/></button>
-                        </>}
+                        )}
+                        {/* Iscritti */}
+                        <button className="btn-pill btn-pill-ghost"
+                          title="Vedi iscritti" onClick={()=>navigate(`/admin/iscritti?evento=${ev.id}`)}>
+                          <Users size={12}/> Iscritti
+                        </button>
+                        {/* Link pubblico */}
+                        <button className="btn-pill btn-pill-ghost"
+                          style={{ color: ev.stato==='pubblicato'?'#003DA5':'#9CA3AF', borderColor: ev.stato==='pubblicato'?'#003DA5':'#D1D5DB' }}
+                          title="Link pubblico" onClick={()=>{setCopied(false);setLinkModal(ev)}}>
+                          <Globe size={12}/>
+                        </button>
+                        {/* Duplica */}
+                        {canWrite && (
+                          <button className="btn-pill btn-pill-ghost" title="Duplica" onClick={()=>duplicate(ev)}>
+                            <Copy size={12}/>
+                          </button>
+                        )}
+                        {/* Elimina */}
                         {canDelete && (
-                          <button style={{ ...s.iconBtn, color:'#DC2626' }} title="Elimina"
-                            onClick={()=>{setCur(ev);setModal('delete')}}><Trash2 size={14}/></button>
+                          <button className="btn-pill" style={{ background:'transparent', border:'1px solid #FCA5A5', color:'#DC2626' }}
+                            title="Elimina" onClick={()=>{setCur(ev);setModal('delete')}}>
+                            <Trash2 size={12}/>
+                          </button>
                         )}
                       </div>
                     </td>

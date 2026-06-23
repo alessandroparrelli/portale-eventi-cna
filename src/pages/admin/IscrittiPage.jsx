@@ -5,6 +5,7 @@ import { useRole } from '../../hooks/useRole'
 import { Modal, PresenzaBadge, Field, Input, Select, Btn, EmptyState } from '../../components/ui'
 import { Users, Search, Download, Eye, Trash2, UserCheck } from 'lucide-react'
 import * as XLSX from 'xlsx'
+import EventSelector from '../../components/EventSelector'
 
 function formatDt(ts) {
   if (!ts) return '—'
@@ -101,11 +102,13 @@ export default function IscrittiPage() {
 
       {/* Selettore evento + filtri */}
       <div style={s.filters}>
-        <Select value={selectedEvento} onChange={e=>setSelectedEvento(e.target.value)} style={{ minWidth:'280px' }}>
-          <option value="">— Seleziona evento —</option>
-          {eventi.map(ev=><option key={ev.id} value={ev.id}>{ev.titolo}</option>)}
-        </Select>
-        {selectedEvento && <>
+        <EventSelector
+          eventi={eventi}
+          value={selectedEvento}
+          onChange={e => setSelectedEvento(e.target.value)}
+          label="Evento"
+        />
+        {selectedEvento && <div style={{ display:'flex', gap:'10px', flexWrap:'wrap', marginTop:'-8px', marginBottom:'12px' }}>
           <div style={s.searchWrap}>
             <Search size={16} style={s.searchIcon}/>
             <input value={search} onChange={e=>setSearch(e.target.value)}
@@ -118,7 +121,7 @@ export default function IscrittiPage() {
             <option value="assente">Assente</option>
             <option value="walk-in">Walk-in</option>
           </Select>
-        </>}
+        </div>}
       </div>
 
       {/* Stats cards */}

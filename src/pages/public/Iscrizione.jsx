@@ -1,7 +1,7 @@
 import { useEffect, useState } from 'react'
 import { useParams, useNavigate } from 'react-router-dom'
 import { supabase } from '../../lib/supabase'
-import { CalendarDays, MapPin, User, Mail, Phone, CheckCircle2, XCircle, Clock, ArrowLeft, Download } from 'lucide-react'
+import { CalendarDays, MapPin, User, Mail, Phone, CheckCircle2, XCircle, Clock, ArrowLeft, Download, Share2 } from 'lucide-react'
 
 const CNA_LOGO = 'https://raw.githubusercontent.com/alessandroparrelli/fileappoggio/main/NUOVO-LOGO-CNA-ROMA-SOLO-ROMA.png'
 
@@ -14,9 +14,50 @@ function fmtDt(ts, full = false) {
   })
 }
 
+function QRActions({ qrValue, codice, eventoTitolo }) {
+  const [saving, setSaving] = useState(false)
+  const [saved, setSaved] = useState(false)
+  async function saveQR() {
+    setSaving(true)
+    try {
+      const url = `https://chart.googleapis.com/chart?chs=400x400&cht=qr&chl=${encodeURIComponent(qrValue)}&choe=UTF-8`
+      const resp = await fetch(url)
+      const blob = await resp.blob()
+      const a = document.createElement('a')
+      a.href = URL.createObjectURL(blob)
+      a.download = `qr-${codice}.png`
+      a.click()
+      URL.revokeObjectURL(a.href)
+      setSaved(true); setTimeout(() => setSaved(false), 2500)
+    } catch { alert('Errore nel salvataggio QR.') }
+    setSaving(false)
+  }
+  function shareWhatsApp() {
+    const pageUrl = window.location.origin + '/iscrizione/' + codice
+    const msg = `🎟 La mia iscrizione a "${eventoTitolo || 'evento CNA'}"
+
+Codice: ${codice}
+QR Code: ${pageUrl}
+
+📱 Mostra questa pagina all'ingresso.`
+    window.open(`https://wa.me/?text=${encodeURIComponent(msg)}`, '_blank')
+  }
+  return (
+    <div style={{ display:'flex', gap:'8px', justifyContent:'center', flexWrap:'wrap', marginTop:'12px' }}>
+      <button onClick={saveQR} disabled={saving}
+        style={{ display:'flex', alignItems:'center', gap:'6px', backgroundColor:'#003DA5', color:'#fff', border:'none', borderRadius:'8px', padding:'10px 16px', fontSize:'13px', fontWeight:'700', cursor:'pointer', fontFamily:"'Inter',sans-serif", opacity:saving?0.7:1 }}>
+        <Download size={15}/> {saved ? '✓ Salvato!' : saving ? '…' : 'Salva QR'}
+      </button>
+      <button onClick={shareWhatsApp}
+        style={{ display:'flex', alignItems:'center', gap:'6px', backgroundColor:'#25D366', color:'#fff', border:'none', borderRadius:'8px', padding:'10px 16px', fontSize:'13px', fontWeight:'700', cursor:'pointer', fontFamily:"'Inter',sans-serif" }}>
+        <Share2 size={15}/> Invia su WhatsApp
+      </button>
+    </div>
+  )
+}
+
 function QRCodeDisplay({ value }) {
   const size = 200
-  // Usa Google Charts API per generare QR (public, no auth)
   const url = `https://chart.googleapis.com/chart?chs=${size}x${size}&cht=qr&chl=${encodeURIComponent(value)}&choe=UTF-8`
   return (
     <div style={{ display:'flex', flexDirection:'column', alignItems:'center', gap:'8px' }}>
@@ -253,7 +294,10 @@ export default function Iscrizione() {
               <div style={{ backgroundColor:'#ffffff', borderRadius:'10px', border:'1px solid #E5E7EB', padding:'20px', display:'flex', flexDirection:'column', alignItems:'center', justifyContent:'center' }}>
                 <p style={{ fontSize:'11px', fontWeight:'700', color:'#9CA3AF', textTransform:'uppercase', letterSpacing:'0.06em', margin:'0 0 14px' }}>QR Code check-in</p>
                 {reg.qr_code
-                  ? <QRCodeDisplay value={reg.qr_code} />
+                  ? <>
+                      <QRCodeDisplay value={reg.qr_code} />
+                      <QRActions qrValue={reg.qr_code} codice={reg.codice_iscrizione} eventoTitolo={event?.titolo} />
+                    </>
                   : <p style={{ fontSize:'13px', color:'#9CA3AF', textAlign:'center' }}>QR code non disponibile</p>
                 }
               </div>

@@ -2,7 +2,7 @@ import { useEffect, useState, useRef } from 'react'
 import { useParams } from 'react-router-dom'
 import { supabase } from '../../lib/supabase'
 import { temaConDefault } from '../../components/editor/AspettoTab'
-import { MapPin, Calendar, ChevronRight, AlertCircle } from 'lucide-react'
+import { MapPin, Calendar, ChevronRight, AlertCircle, Download, Share2 } from 'lucide-react'
 import { RICH_CSS } from '../../components/editor/RichEditor'
 import FormIscrizione from './FormIscrizione'
 
@@ -19,6 +19,22 @@ function fmtOra(ts) {
 function ModalConferma({ reg, event, onClose }) {
   const [calAdded, setCalAdded] = useState(false)
   const [qrDataUrl, setQrDataUrl] = useState(null)
+  const [qrSaved, setQrSaved] = useState(false)
+
+  function saveQR() {
+    if (!qrDataUrl) return
+    const a = document.createElement('a')
+    a.href = qrDataUrl
+    a.download = `qr-${reg.codice_iscrizione || reg.qr_code}.png`
+    a.click()
+    setQrSaved(true); setTimeout(() => setQrSaved(false), 2500)
+  }
+
+  function shareWhatsApp() {
+    const pageUrl = window.location.origin + '/iscrizione/' + reg.codice_iscrizione
+    const msg = `🎟 La mia iscrizione a "${event?.titolo || 'evento CNA'}"\n\nCodice: ${reg.codice_iscrizione}\nQR Code: ${pageUrl}\n\n📱 Mostra questa pagina all'ingresso.`
+    window.open(`https://wa.me/?text=${encodeURIComponent(msg)}`, '_blank')
+  }
 
   useEffect(() => {
     let cancelled = false
@@ -98,7 +114,12 @@ function ModalConferma({ reg, event, onClose }) {
               <img src={qrDataUrl} alt="QR" style={mc.qrImg}/>
               <p style={{ fontSize:'12px',color:'#6B7280',margin:0 }}>📸 Fai uno screenshot o scarica</p>
               <code style={mc.qrCode}>{reg.qr_code}</code>
-              <button onClick={downloadQR} style={mc.dlBtn}>⬇ Scarica QR Code</button>
+              <button onClick={saveQR} style={{ ...mc.dlBtn, backgroundColor:'#003DA5', color:'#fff', border:'none' }}>
+                <Download size={13} style={{ display:'inline', marginRight:4, verticalAlign:'middle' }}/> {qrSaved ? '✓ Salvato!' : 'Salva QR Code'}
+              </button>
+              <button onClick={shareWhatsApp} style={{ ...mc.dlBtn, backgroundColor:'#25D366', color:'#fff', border:'none', marginLeft:6 }}>
+                <Share2 size={13} style={{ display:'inline', marginRight:4, verticalAlign:'middle' }}/> WhatsApp
+              </button>
             </>
           ) : (
             <div style={{ display:'flex',alignItems:'center',gap:'10px',padding:'20px 0' }}>

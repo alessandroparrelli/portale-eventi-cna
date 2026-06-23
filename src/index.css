@@ -82,3 +82,75 @@ header img { display: block; }
   /* Padding contenuto su mobile */
   main { padding: 76px 14px 24px !important; }
 }
+
+/* ═══════════════════════════════════════════════════════════════
+   TEMA LUMINOUS GLOW — header tabelle, badge, glow effects
+   ═══════════════════════════════════════════════════════════════ */
+
+/* Table header glow */
+.tbl-head-blue  { background: linear-gradient(135deg,#003DA5 0%,#1a56db 100%); color:#fff; }
+.tbl-head-green { background: linear-gradient(135deg,#059669 0%,#10b981 100%); color:#fff; }
+.tbl-head-violet{ background: linear-gradient(135deg,#7c3aed 0%,#a78bfa 100%); color:#fff; }
+
+/* Glow card hover */
+.glow-card {
+  transition: box-shadow .2s ease, transform .15s ease;
+}
+.glow-card:hover {
+  box-shadow: 0 0 0 1px #003DA520, 0 8px 24px #003DA528;
+  transform: translateY(-1px);
+}
+
+/* Icon badge luminous */
+.icon-badge-blue   { background: linear-gradient(135deg,#dbeafe,#bfdbfe); color:#1d4ed8; border-radius:8px; }
+.icon-badge-green  { background: linear-gradient(135deg,#d1fae5,#a7f3d0); color:#065f46; border-radius:8px; }
+.icon-badge-violet { background: linear-gradient(135deg,#ede9fe,#ddd6fe); color:#5b21b6; border-radius:8px; }
+.icon-badge-amber  { background: linear-gradient(135deg,#fef3c7,#fde68a); color:#92400e; border-radius:8px; }
+.icon-badge-red    { background: linear-gradient(135deg,#fee2e2,#fecaca); color:#991b1b; border-radius:8px; }
+.icon-badge-cyan   { background: linear-gradient(135deg,#cffafe,#a5f3fc); color:#155e75; border-radius:8px; }
+
+/* Table header con icona SVG colorata */
+.th-icon {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  white-space: nowrap;
+  font-size: 11px;
+  font-weight: 700;
+  text-transform: uppercase;
+  letter-spacing: 0.05em;
+}
+
+/* EventSelector card style */
+.evt-selector-card {
+  background: #fff;
+  border: 1px solid #E5E7EB;
+  border-radius: 10px;
+  padding: 16px 20px;
+  margin-bottom: 20px;
+  display: flex;
+  align-items: center;
+  gap: 14px;
+}
+
+/* Btn action pill */
+.btn-pill {
+  display: inline-flex;
+  align-items: center;
+  gap: 5px;
+  padding: 5px 12px;
+  border-radius: 20px;
+  font-size: 12px;
+  font-weight: 700;
+  border: none;
+  cursor: pointer;
+  font-family: 'Inter', sans-serif;
+  transition: opacity .15s;
+  white-space: nowrap;
+}
+.btn-pill:hover { opacity: .85; }
+.btn-pill-blue   { background:#003DA5; color:#fff; }
+.btn-pill-ghost  { background:transparent; border:1px solid #D1D5DB !important; color:#374151; }
+.btn-pill-green  { background:#16A34A; color:#fff; }
+.btn-pill-red    { background:#DC2626; color:#fff; }
+.btn-pill-violet { background:#7C3AED; color:#fff; }
