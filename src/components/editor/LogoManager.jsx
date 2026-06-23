@@ -30,9 +30,10 @@ export default function LogoManager({ value, onChange }) {
   async function fetchLoghi() {
     setLoading(true)
     try {
+      const cb = Date.now()
       const res = await fetch(
-        `https://api.github.com/repos/${GITHUB_OWNER}/${GITHUB_REPO}/contents/${GITHUB_FOLDER}`,
-        { headers: { 'Accept': 'application/vnd.github.v3+json' } }
+        `https://api.github.com/repos/${GITHUB_OWNER}/${GITHUB_REPO}/contents/${GITHUB_FOLDER}?ref=main&_=${cb}`,
+        { headers: { 'Accept': 'application/vnd.github.v3+json', 'Cache-Control': 'no-cache' } }
       )
       if (!res.ok) throw new Error()
       const files = await res.json()
@@ -40,9 +41,10 @@ export default function LogoManager({ value, onChange }) {
         .filter(f => /\.(png|jpg|jpeg|svg|webp)$/i.test(f.name))
         .map(f => ({
           name: f.name.replace(/\.[^.]+$/, '').replace(/[-_]/g, ' '),
-          url:  f.download_url,
+          url:  f.download_url + `?v=${Date.now()}`,
           sha:  f.sha,
           path: f.path,
+          filename: f.name,
           isDefault: false,
         }))
       setLoghi([LOGO_DEFAULT, ...imgs])
@@ -81,6 +83,8 @@ export default function LogoManager({ value, onChange }) {
       const result = await res.json()
       if (!res.ok || result.error) throw new Error(result.error || 'Errore upload')
       setUploadOk(`Logo caricato: ${result.filename}`)
+      // Attende che GitHub indicizzi il file prima di ricaricare la lista
+      await new Promise(r => setTimeout(r, 1500))
       await fetchLoghi()
       onChange(result.url)
     } catch (e) {
@@ -128,13 +132,13 @@ export default function LogoManager({ value, onChange }) {
       if (!res.ok || result.error) throw new Error(result.error || 'Errore eliminazione')
 
       // Se il logo eliminato era quello selezionato, ripristina default
-      const urlEliminate = loghi
-        .filter(l => selezionati.has(l.path))
-        .map(l => l.url)
-      if (urlEliminate.includes(value)) onChange(null)
+      const pathEliminate = Array.from(selezionati)
+      const logoEliminato = loghi.find(l => pathEliminate.includes(l.path) && sameUrl(l.url, value))
+      if (logoEliminato) onChange(null)
 
       setSelezionati(new Set())
       setDeleteMode(false)
+      await new Promise(r => setTimeout(r, 1500))
       await fetchLoghi()
     } catch (e) {
       setDeleteErr(e.message || 'Errore durante l\'eliminazione')
@@ -143,6 +147,10 @@ export default function LogoManager({ value, onChange }) {
   }
 
   const selected      = value || LOGO_DEFAULT.url
+  // Confronto URL: ignora il cache-buster ?v=...
+  function sameUrl(a, b) {
+    return (a || '').split('?')[0] === (b || '').split('?')[0]
+  }
   const eliminabili   = loghi.filter(l => !l.isDefault)
   const tuttiSelezionati = eliminabili.length > 0 && eliminabili.every(l => selezionati.has(l.path))
 
@@ -226,7 +234,7 @@ export default function LogoManager({ value, onChange }) {
       ) : (
         <div style={{ display:'grid', gridTemplateColumns:'repeat(auto-fill, minmax(120px, 1fr))', gap:'8px', marginBottom:'16px' }}>
           {loghi.map(logo => {
-            const isSelected  = selected === logo.url
+            const isSelected  = sameUrl(selected, logo.url)
             const isChecked   = selezionati.has(logo.path)
             const showCheck   = deleteMode && !logo.isDefault
 
