@@ -1,7 +1,6 @@
 import { useState, useEffect, useCallback } from 'react'
 import { Outlet } from 'react-router-dom'
 import Sidebar from './Sidebar'
-import { Menu } from 'lucide-react'
 
 export default function AdminLayout() {
   const [sidebarWidth, setSidebarWidth] = useState(240)
@@ -39,13 +38,17 @@ export default function AdminLayout() {
       <header style={s.header}>
         {isMobile && (
           <button onClick={() => setMobileOpen(true)} style={s.hamburger} aria-label="Apri menu">
-            <Menu size={22}/>
+            <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round">
+              <line x1="3" y1="6" x2="21" y2="6"/><line x1="3" y1="12" x2="21" y2="12"/><line x1="3" y1="18" x2="21" y2="18"/>
+            </svg>
           </button>
         )}
         <img
           src="https://raw.githubusercontent.com/alessandroparrelli/fileappoggio/main/NUOVO-LOGO-CNA-ROMA-SOLO-ROMA.png"
           alt="CNA Roma"
-          style={s.logo}
+          style={{ ...s.logo, cursor: 'pointer' }}
+          onClick={() => window.location.reload()}
+          title="Ricarica pagina"
         />
         <div style={s.divider}/>
         <span style={s.pageTitle}>Eventi</span>

@@ -23,11 +23,9 @@ export function AuthProvider({ children }) {
   const signIn = async (emailOrUsername, password) => {
     let email = emailOrUsername.trim()
 
-    // Se non contiene @ è un username → risolvi la email via RPC (SECURITY DEFINER, accessibile da anon)
     if (!email.includes('@')) {
       const { data: resolvedEmail, error: rpcError } = await supabase
         .rpc('get_email_by_username', { p_username: email })
-
       if (rpcError || !resolvedEmail) {
         return { data: null, error: { message: 'Username non trovato' } }
       }
@@ -35,11 +33,17 @@ export function AuthProvider({ children }) {
     }
 
     const { data, error } = await supabase.auth.signInWithPassword({ email, password })
+    if (!error) {
+      // Forza reload completo — garantisce che tutto lo stato venga reinizializzato
+      window.location.replace('/admin')
+    }
     return { data, error }
   }
 
   const signOut = async () => {
     await supabase.auth.signOut()
+    // Forza reload completo — evita race condition con ProtectedRoute
+    window.location.replace('/login')
   }
 
   return (
