@@ -539,7 +539,12 @@ export default function LandingPage() {
       </div>
 
       <footer style={s.footer}>
-        © {new Date().getFullYear()} CNA Roma — Confederazione Nazionale dell'Artigianato e della PMI
+        <img
+          src={event?.logo_url || "https://raw.githubusercontent.com/alessandroparrelli/fileappoggio/main/NUOVO-LOGO-CNA-ROMA-SOLO-ROMA.png"}
+          alt="CNA Roma"
+          style={{ height: `clamp(32px, ${Math.round((tema.logo_altezza || 44) * 0.08)}vw, ${Math.round((tema.logo_altezza || 44) * 0.7)}px)`, maxWidth: '200px', objectFit: 'contain', display: 'block', margin: '0 auto 10px' }}
+        />
+        <span>© {new Date().getFullYear()} CNA Roma — Confederazione Nazionale dell'Artigianato e della PMI</span>
       </footer>
 
       {conferma && (
