@@ -30,25 +30,30 @@ export default function LogoManager({ value, onChange }) {
   async function fetchLoghi() {
     setLoading(true)
     try {
-      const cb = Date.now()
+      const { data: { session } } = await supabase.auth.getSession()
+      const jwt = session?.access_token
+      if (!jwt) throw new Error('Non autenticato')
+
       const res = await fetch(
-        `https://api.github.com/repos/${GITHUB_OWNER}/${GITHUB_REPO}/contents/${GITHUB_FOLDER}?ref=main&_=${cb}`,
-        { headers: { 'Accept': 'application/vnd.github.v3+json', 'Cache-Control': 'no-cache' } }
+        `${import.meta.env.VITE_SUPABASE_URL}/functions/v1/github-list-loghi`,
+        { headers: { 'Authorization': `Bearer ${jwt}` } }
       )
-      if (!res.ok) throw new Error()
-      const files = await res.json()
-      const imgs = files
-        .filter(f => /\.(png|jpg|jpeg|svg|webp)$/i.test(f.name))
-        .map(f => ({
-          name: f.name.replace(/\.[^.]+$/, '').replace(/[-_]/g, ' '),
-          url:  f.download_url + `?v=${Date.now()}`,
-          sha:  f.sha,
-          path: f.path,
-          filename: f.name,
-          isDefault: false,
-        }))
+      if (!res.ok) throw new Error(`HTTP ${res.status}`)
+      const data = await res.json()
+      if (!data.ok || !data.files) throw new Error(data.error || 'Errore lista')
+
+      const ts = Date.now()
+      const imgs = data.files.map(f => ({
+        name:      f.name.replace(/\.[^.]+$/, '').replace(/[-_]/g, ' '),
+        url:       f.url + `?v=${ts}`,
+        sha:       f.sha,
+        path:      f.path,
+        filename:  f.name,
+        isDefault: false,
+      }))
       setLoghi([LOGO_DEFAULT, ...imgs])
-    } catch {
+    } catch (e) {
+      console.error('fetchLoghi:', e)
       setLoghi([LOGO_DEFAULT])
     }
     setLoading(false)
