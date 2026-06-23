@@ -174,7 +174,7 @@ export default function Iscrizione() {
               placeholder="EVT-AACCCC-NNNN"
               style={{
                 flex:1, border:'1px solid #D1D5DB', borderRadius:'6px', padding:'10px 14px',
-                fontSize:'14px', fontFamily:"'Inter',sans-serif", fontWeight:'600',
+                fontSize:'16px', fontFamily:"'Inter',sans-serif", fontWeight:'600',
                 letterSpacing:'0.05em', outline:'none', color:'#0A0A0A'
               }}
             />

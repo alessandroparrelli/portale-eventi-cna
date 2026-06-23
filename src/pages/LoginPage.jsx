@@ -189,7 +189,7 @@ const s = {
     padding: '10px 14px 10px 40px',
     border: '1.5px solid #D1D5DB',
     borderRadius: '8px',
-    fontSize: '14px',
+    fontSize: '16px',
     fontFamily: "'Inter', sans-serif",
     color: '#0A0A0A',
     outline: 'none',

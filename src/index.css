@@ -9,6 +9,26 @@ html, body, #root {
 a { text-decoration: none; color: inherit; }
 input, select, textarea, button { font-family: inherit; }
 
+/* ── Fix iOS Safari: previene zoom automatico su input/select/textarea ── */
+/* iOS fa zoom se fontSize < 16px — questo sovrascrive globalmente su mobile */
+@media (max-width: 768px) {
+  input[type="text"],
+  input[type="email"],
+  input[type="password"],
+  input[type="tel"],
+  input[type="number"],
+  input[type="search"],
+  input[type="date"],
+  input[type="time"],
+  select,
+  textarea {
+    font-size: 16px !important;
+    -webkit-text-size-adjust: 100%;
+  }
+}
+
+
+
 /* ── QR Scanner ─────────────────────────────────── */
 #qr-viewport video { width: 100% !important; }
 #qr-viewport canvas { display: none; }
