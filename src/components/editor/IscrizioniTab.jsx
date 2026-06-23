@@ -1,191 +1,151 @@
 import { useEffect, useState } from 'react'
 import { supabase } from '../../lib/supabase'
-import { Eye, EyeOff, Plus, Trash2, GripVertical, AlertCircle } from 'lucide-react'
-import { Field, Input, Select, Btn } from '../ui'
+import { Plus, Trash2, GripVertical, AlertCircle, Save, Check } from 'lucide-react'
 
-/* ─── Campi standard (non eliminabili) ─────────────────────────── */
-const CAMPI_FISSI = ['nome', 'cognome', 'email'] // sempre visibili e obbligatori
+/* ─── Campi fissi — sempre visibili e obbligatori ─────────────── */
+const CAMPI_FISSI = ['nome', 'cognome', 'email']
 
-/* ─── Toggle visibile/obbligatorio ─────────────────────────────── */
-function ToggleSwitch({ checked, onChange, disabled }) {
+/* ─── Toggle switch ─────────────────────────────────────────────── */
+function Toggle({ on, onChange, disabled }) {
   return (
     <button
       type="button"
-      onClick={() => !disabled && onChange(!checked)}
+      onClick={() => !disabled && onChange(!on)}
       disabled={disabled}
+      aria-checked={on}
       style={{
-        width: '40px', height: '22px', borderRadius: '11px', border: 'none',
-        background: checked ? '#003DA5' : '#D1D5DB',
+        width: '38px', height: '20px', borderRadius: '10px',
+        border: 'none', flexShrink: 0,
+        background: on ? '#003DA5' : '#D1D5DB',
         cursor: disabled ? 'not-allowed' : 'pointer',
-        position: 'relative', transition: 'background .2s', flexShrink: 0,
-        opacity: disabled ? 0.5 : 1,
+        position: 'relative', transition: 'background .2s',
+        opacity: disabled ? 0.4 : 1,
       }}
     >
       <span style={{
-        position: 'absolute', top: '3px',
-        left: checked ? '21px' : '3px',
+        position: 'absolute', top: '2px',
+        left: on ? '20px' : '2px', transition: 'left .15s',
         width: '16px', height: '16px', borderRadius: '50%',
-        background: '#fff', transition: 'left .2s',
-        boxShadow: '0 1px 3px rgba(0,0,0,.2)',
+        background: '#fff', boxShadow: '0 1px 3px rgba(0,0,0,.25)',
       }} />
     </button>
   )
 }
 
-/* ─── Riga campo standard ───────────────────────────────────────── */
-function RigaCampo({ campo, onUpdate }) {
-  const isFisso = CAMPI_FISSI.includes(campo.colonna_db)
-  const isNomeOrCognome = campo.colonna_db === 'nome' || campo.colonna_db === 'cognome'
-
+/* ─── Riga campo standard ─────────────────────────────────────── */
+function RigaCampo({ campo, onChange }) {
+  const fisso = CAMPI_FISSI.includes(campo.colonna_db)
   return (
-    <div className="iscrizioni-campo-row" style={{
+    <div style={{
       display: 'grid',
-      gridTemplateColumns: '28px 1fr 72px 72px',
-      alignItems: 'center', gap: '12px',
-      padding: '10px 14px',
+      gridTemplateColumns: '24px 1fr 88px 88px',
+      alignItems: 'center',
+      gap: '8px',
+      padding: '11px 12px',
       borderBottom: '1px solid #F3F4F6',
       background: campo.visibile ? '#fff' : '#F9FAFB',
-      opacity: campo.visibile ? 1 : 0.6,
     }}>
-      {/* Drag handle (visivo) */}
-      <GripVertical size={16} style={{ color: '#D1D5DB', cursor: 'grab' }} />
+      <GripVertical size={14} style={{ color: '#D1D5DB' }} />
 
-      {/* Label editabile (solo extra, non fissi) */}
-      <div style={{ display: 'flex', alignItems: 'center', gap: '8px' }}>
-        {isFisso ? (
-          <span style={{ fontSize: '14px', fontWeight: '600', color: '#0A0A0A' }}>
-            {campo.label}
+      <div style={{ display: 'flex', alignItems: 'center', gap: '6px', minWidth: 0 }}>
+        <span style={{
+          fontSize: '14px', fontWeight: '600', color: '#0A0A0A',
+          whiteSpace: 'nowrap', overflow: 'hidden', textOverflow: 'ellipsis',
+        }}>
+          {campo.label}
+        </span>
+        <code style={{
+          fontSize: '10px', color: '#9CA3AF', background: '#F3F4F6',
+          borderRadius: '3px', padding: '1px 4px', flexShrink: 0,
+        }}>
+          {campo.colonna_db}
+        </code>
+        {fisso && (
+          <span style={{ fontSize: '10px', color: '#003DA5', background: '#EEF3FF', borderRadius: '3px', padding: '1px 5px', flexShrink: 0, fontWeight: '700' }}>
+            fisso
           </span>
-        ) : (
-          <input
-            value={campo.label}
-            onChange={e => onUpdate({ ...campo, label: e.target.value })}
-            style={{
-              fontSize: '14px', fontWeight: '600', color: '#0A0A0A',
-              border: '1px solid transparent', borderRadius: '4px',
-              padding: '2px 6px', background: 'transparent',
-              fontFamily: "'Inter',sans-serif", width: '100%',
-            }}
-            onFocus={e => (e.target.style.borderColor = '#003DA5')}
-            onBlur={e => (e.target.style.borderColor = 'transparent')}
-          />
-        )}
-        {campo.colonna_db && (
-          <code style={{
-            fontSize: '11px', color: '#9CA3AF', background: '#F3F4F6',
-            borderRadius: '4px', padding: '1px 5px', flexShrink: 0,
-          }}>
-            {campo.colonna_db}
-          </code>
         )}
       </div>
 
-      {/* Toggle visibile */}
-      <div style={{ display: 'flex', flexDirection: 'column', alignItems: 'center', gap: '3px' }}>
-        <ToggleSwitch
-          checked={campo.visibile}
-          disabled={isFisso}
-          onChange={v => onUpdate({ ...campo, visibile: v, obbligatorio: v ? campo.obbligatorio : false })}
+      {/* Visibile */}
+      <div style={{ display: 'flex', flexDirection: 'column', alignItems: 'center', gap: '2px' }}>
+        <Toggle
+          on={campo.visibile}
+          disabled={fisso}
+          onChange={v => onChange({ ...campo, visibile: v, obbligatorio: v ? campo.obbligatorio : false })}
         />
-        <span style={{ fontSize: '10px', color: '#9CA3AF', fontWeight: '600' }}>
-          {campo.visibile ? 'Visibile' : 'Nascosto'}
+        <span style={{ fontSize: '10px', color: campo.visibile ? '#003DA5' : '#9CA3AF', fontWeight: '600' }}>
+          {campo.visibile ? 'Sì' : 'No'}
         </span>
       </div>
 
-      {/* Toggle obbligatorio */}
-      <div style={{ display: 'flex', flexDirection: 'column', alignItems: 'center', gap: '3px' }}>
-        <ToggleSwitch
-          checked={campo.obbligatorio}
-          disabled={isFisso || !campo.visibile}
-          onChange={v => onUpdate({ ...campo, obbligatorio: v })}
+      {/* Obbligatorio */}
+      <div style={{ display: 'flex', flexDirection: 'column', alignItems: 'center', gap: '2px' }}>
+        <Toggle
+          on={campo.obbligatorio}
+          disabled={fisso || !campo.visibile}
+          onChange={v => onChange({ ...campo, obbligatorio: v })}
         />
-        <span style={{ fontSize: '10px', color: '#9CA3AF', fontWeight: '600' }}>
-          {campo.obbligatorio ? 'Obblig.' : 'Facolt.'}
+        <span style={{ fontSize: '10px', color: campo.obbligatorio ? '#003DA5' : '#9CA3AF', fontWeight: '600' }}>
+          {campo.obbligatorio ? 'Sì' : 'No'}
         </span>
       </div>
     </div>
   )
 }
 
-/* ─── Riga campo extra ──────────────────────────────────────────── */
-function RigaCampoExtra({ campo, onUpdate, onDelete, extraIndex }) {
-  const TIPI = [
-    { v: 'testo', l: 'Testo breve' },
-    { v: 'email', l: 'Email' },
-    { v: 'telefono', l: 'Telefono' },
-    { v: 'numero', l: 'Numero' },
-    { v: 'select', l: 'Selezione' },
-    { v: 'checkbox', l: 'Checkbox (sì/no)' },
-    { v: 'data', l: 'Data' },
-  ]
+/* ─── Riga campo extra ─────────────────────────────────────────── */
+function RigaCampoExtra({ campo, onChange, onDelete }) {
+  const TIPI = ['testo','email','telefono','numero','select','checkbox','data']
+  const TIPI_LABEL = { testo:'Testo', email:'Email', telefono:'Telefono', numero:'Numero', select:'Selezione', checkbox:'Checkbox', data:'Data' }
 
   return (
     <div style={{
-      border: '1px solid #E5E7EB', borderRadius: '10px',
-      padding: '14px', marginBottom: '10px', background: '#FAFAFA',
+      border: '1px solid #E5E7EB', borderRadius: '8px',
+      padding: '12px', marginBottom: '8px', background: '#FAFAFA',
     }}>
-      <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(160px, 1fr)) 36px', gap: '10px', alignItems: 'start' }}>
-        {/* Label */}
+      <div style={{ display: 'grid', gridTemplateColumns: '1fr 130px 32px', gap: '8px', alignItems: 'end', marginBottom: '8px' }}>
         <div>
           <label style={sLabel}>Nome del campo</label>
           <input
             value={campo.label}
-            onChange={e => onUpdate({ ...campo, label: e.target.value })}
-            placeholder="es. Codice fiscale, Settore, Note…"
+            onChange={e => onChange({ ...campo, label: e.target.value })}
+            placeholder="es. Codice fiscale, Note…"
             style={sInput}
           />
         </div>
-
-        {/* Tipo */}
         <div>
           <label style={sLabel}>Tipo</label>
-          <select
-            value={campo.tipo}
-            onChange={e => onUpdate({ ...campo, tipo: e.target.value })}
-            style={sInput}
-          >
-            {TIPI.map(t => <option key={t.v} value={t.v}>{t.l}</option>)}
+          <select value={campo.tipo} onChange={e => onChange({ ...campo, tipo: e.target.value })} style={sInput}>
+            {TIPI.map(t => <option key={t} value={t}>{TIPI_LABEL[t]}</option>)}
           </select>
         </div>
-
-        {/* Elimina */}
         <button
-          type="button"
-          onClick={onDelete}
-          style={{
-            marginTop: '0', alignSelf: 'flex-end', background: '#FEF2F2', border: '1px solid #FECACA',
-            borderRadius: '6px', padding: '7px', cursor: 'pointer',
-            display: 'flex', alignItems: 'center',
-          }}
+          type="button" onClick={onDelete}
+          style={{ background: '#FEF2F2', border: '1px solid #FECACA', borderRadius: '6px', padding: '6px', cursor: 'pointer', display: 'flex', alignItems: 'center' }}
         >
-          <Trash2 size={15} style={{ color: '#DC2626' }} />
+          <Trash2 size={14} style={{ color: '#DC2626' }} />
         </button>
       </div>
 
-      {/* Opzioni se tipo = select */}
       {campo.tipo === 'select' && (
-        <div style={{ marginTop: '10px' }}>
+        <div style={{ marginBottom: '8px' }}>
           <label style={sLabel}>Opzioni (una per riga)</label>
           <textarea
             value={(campo.opzioni?.choices || []).join('\n')}
-            onChange={e => onUpdate({ ...campo, opzioni: { choices: e.target.value.split('\n').filter(Boolean) } })}
-            placeholder="Opzione 1&#10;Opzione 2&#10;Opzione 3"
+            onChange={e => onChange({ ...campo, opzioni: { choices: e.target.value.split('\n').filter(Boolean) } })}
+            placeholder={"Opzione 1\nOpzione 2\nOpzione 3"}
             rows={3}
-            style={{ ...sInput, resize: 'vertical', fontFamily: "'Inter',sans-serif" }}
+            style={{ ...sInput, resize: 'vertical', fontFamily: "'Inter',sans-serif", fontSize: '13px' }}
           />
         </div>
       )}
 
-      <div style={{ display: 'flex', gap: '16px', marginTop: '10px', alignItems: 'center' }}>
-        <label style={{ display: 'flex', alignItems: 'center', gap: '6px', cursor: 'pointer', fontSize: '13px', color: '#374151' }}>
-          <ToggleSwitch
-            checked={campo.obbligatorio}
-            onChange={v => onUpdate({ ...campo, obbligatorio: v })}
-          />
-          Obbligatorio
-        </label>
-        <span style={{ fontSize: '12px', color: '#9CA3AF' }}>
-          Salvato in: <code style={{ background: '#F3F4F6', padding: '1px 5px', borderRadius: '3px' }}>{campo.colonna_db || `extra_${extraIndex}`}</code>
+      <div style={{ display: 'flex', alignItems: 'center', gap: '8px' }}>
+        <Toggle on={campo.obbligatorio} onChange={v => onChange({ ...campo, obbligatorio: v })} />
+        <span style={{ fontSize: '12px', color: '#374151' }}>Obbligatorio</span>
+        <span style={{ fontSize: '11px', color: '#9CA3AF', marginLeft: 'auto' }}>
+          colonna: <code style={{ background: '#F3F4F6', padding: '1px 4px', borderRadius: '3px' }}>{campo.colonna_db}</code>
         </span>
       </div>
     </div>
@@ -198,160 +158,176 @@ export default function IscrizioniTab({ event, setEvent, eventId }) {
   const [loading, setLoading] = useState(true)
   const [saving,  setSaving]  = useState(false)
   const [saved,   setSaved]   = useState(false)
-  const isNew = !eventId || eventId === 'nuovo'
+  const [errore,  setErrore]  = useState('')
 
-  // Campi standard (con colonna_db su registrations)
+  // Un evento è "nuovo" se non ha ancora un UUID nel DB
+  const isNew = !eventId || eventId === 'nuovo' || eventId === 'undefined'
+
   const campiStandard = campi.filter(c => c.colonna_db && !c.colonna_db.startsWith('extra_'))
-  // Campi extra
-  const campiExtra    = campi.filter(c => c.colonna_db?.startsWith('extra_') || (!c.colonna_db && c.tipo !== undefined))
+  const campiExtra    = campi.filter(c => c.colonna_db?.startsWith('extra_'))
 
+  /* ── Carica campi dal DB ── */
   useEffect(() => {
-    if (isNew || !eventId) { setLoading(false); return }
-    supabase.from('form_fields').select('*').eq('event_id', eventId).order('ordine')
-      .then(({ data }) => {
-        if (data && data.length > 0) setCampi(data)
-        setLoading(false)
+    if (isNew) { setLoading(false); return }
+
+    setLoading(true)
+    setErrore('')
+
+    supabase
+      .from('form_fields')
+      .select('*')
+      .eq('event_id', eventId)
+      .order('ordine', { ascending: true })
+      .then(({ data, error }) => {
+        if (error) {
+          setErrore('Errore caricamento campi: ' + error.message)
+          setLoading(false)
+          return
+        }
+
+        if (!data || data.length === 0) {
+          // Se non ci sono campi, inizializzali via RPC poi ricarica
+          supabase.rpc('init_form_fields', { p_event_id: eventId })
+            .then(() => {
+              supabase.from('form_fields').select('*')
+                .eq('event_id', eventId).order('ordine')
+                .then(({ data: d2 }) => {
+                  setCampi(d2 || [])
+                  setLoading(false)
+                })
+            })
+        } else {
+          setCampi(data)
+          setLoading(false)
+        }
       })
   }, [eventId])
 
-  function updateCampo(id, nuovoCampo) {
-    setCampi(prev => prev.map(c => c.id === id ? nuovoCampo : c))
+  /* ── Aggiorna un campo localmente ── */
+  function aggiornaCampo(id, nuovoCampo) {
+    setCampi(prev => prev.map(c => c.id === id ? { ...c, ...nuovoCampo } : c))
   }
 
-  function aggiungiCampoExtra() {
-    // Trova il prossimo extra_N disponibile
-    const usati = campiExtra.map(c => c.colonna_db).filter(Boolean)
-    const extraNums = [1,2,3,4,5]
-    const libero = extraNums.find(n => !usati.includes(`extra_${n}`))
-    if (!libero) return // max 5 extra
-
-    const nuovoCampo = {
-      id:          `new_${Date.now()}`,
-      event_id:    eventId,
-      label:       '',
-      tipo:        'testo',
-      colonna_db:  `extra_${libero}`,
+  /* ── Aggiunge campo extra ── */
+  function aggiungiExtra() {
+    const usati = campiExtra.map(c => c.colonna_db)
+    const libero = [1,2,3,4,5].find(n => !usati.includes(`extra_${n}`))
+    if (!libero) return
+    setCampi(prev => [...prev, {
+      id:           `__new__${Date.now()}`,
+      event_id:     eventId,
+      label:        '',
+      tipo:         'testo',
+      colonna_db:   `extra_${libero}`,
       obbligatorio: false,
-      visibile:    true,
-      ordine:      100 + libero,
-      opzioni:     null,
-      _nuovo:      true,
-    }
-    setCampi(prev => [...prev, nuovoCampo])
+      visibile:     true,
+      ordine:       100 + libero,
+      opzioni:      null,
+      _nuovo:       true,
+    }])
   }
 
-  function eliminaCampoExtra(id) {
-    setCampi(prev => prev.filter(c => c.id !== id))
-  }
-
+  /* ── Salva tutto ── */
   async function salva() {
     if (isNew) return
-    setSaving(true)
-    setSaved(false)
+    setSaving(true); setSaved(false); setErrore('')
 
-    // Upsert dei campi standard
-    const aggiornamenti = campiStandard.map(c => ({
-      id:          c.id,
-      event_id:    c.event_id,
-      label:       c.label,
-      tipo:        c.tipo,
-      colonna_db:  c.colonna_db,
-      obbligatorio:c.obbligatorio,
-      visibile:    c.visibile,
-      ordine:      c.ordine,
-      opzioni:     c.opzioni,
-    }))
-
-    await supabase.from('form_fields').upsert(aggiornamenti)
-
-    // Gestione campi extra: elimina rimossi, upsert nuovi/modificati
-    // Prima recupera gli id esistenti sul DB
-    const { data: esistenti } = await supabase.from('form_fields')
-      .select('id, colonna_db')
-      .eq('event_id', eventId)
-      .like('colonna_db', 'extra_%')
-
-    const idEsistenti = (esistenti || []).map(c => c.id)
-    const idLocali    = campiExtra.filter(c => !c._nuovo).map(c => c.id)
-    const daEliminare = idEsistenti.filter(id => !idLocali.includes(id))
-
-    if (daEliminare.length) {
-      await supabase.from('form_fields').delete().in('id', daEliminare)
-    }
-
-    for (const c of campiExtra) {
-      if (c._nuovo) {
-        const { data: inserted } = await supabase.from('form_fields').insert({
-          event_id:    eventId,
-          label:       c.label || 'Campo personalizzato',
-          tipo:        c.tipo,
-          colonna_db:  c.colonna_db,
-          obbligatorio:c.obbligatorio,
-          visibile:    true,
-          ordine:      c.ordine,
-          opzioni:     c.opzioni,
-        }).select().single()
-        if (inserted) {
-          setCampi(prev => prev.map(x => x.id === c.id ? { ...inserted } : x))
-        }
-      } else {
-        await supabase.from('form_fields').upsert({
-          id:          c.id,
-          event_id:    c.event_id,
-          label:       c.label || 'Campo personalizzato',
-          tipo:        c.tipo,
-          colonna_db:  c.colonna_db,
-          obbligatorio:c.obbligatorio,
-          visibile:    true,
-          ordine:      c.ordine,
-          opzioni:     c.opzioni,
-        })
+    try {
+      // 1. Aggiorna campi standard esistenti
+      for (const c of campiStandard) {
+        const { error } = await supabase.from('form_fields')
+          .update({ obbligatorio: c.obbligatorio, visibile: c.visibile, label: c.label })
+          .eq('id', c.id)
+        if (error) throw error
       }
+
+      // 2. Gestisci campi extra
+      // Recupera gli ID extra esistenti nel DB
+      const { data: dbExtra } = await supabase.from('form_fields')
+        .select('id').eq('event_id', eventId).like('colonna_db', 'extra_%')
+
+      const dbIds    = (dbExtra || []).map(r => r.id)
+      const localiIds = campiExtra.filter(c => !c._nuovo).map(c => c.id)
+
+      // Elimina quelli rimossi localmente
+      const daEliminare = dbIds.filter(id => !localiIds.includes(id))
+      if (daEliminare.length) {
+        await supabase.from('form_fields').delete().in('id', daEliminare)
+      }
+
+      // Inserisci nuovi / aggiorna esistenti
+      for (const c of campiExtra) {
+        if (c._nuovo) {
+          const { data: ins, error } = await supabase.from('form_fields').insert({
+            event_id:    eventId,
+            label:       c.label || 'Campo extra',
+            tipo:        c.tipo,
+            colonna_db:  c.colonna_db,
+            obbligatorio: c.obbligatorio,
+            visibile:    true,
+            ordine:      c.ordine,
+            opzioni:     c.opzioni,
+          }).select().single()
+          if (error) throw error
+          // Sostituisce il record temporaneo con quello reale
+          setCampi(prev => prev.map(x => x.id === c.id ? ins : x))
+        } else {
+          const { error } = await supabase.from('form_fields')
+            .update({ label: c.label, tipo: c.tipo, obbligatorio: c.obbligatorio, ordine: c.ordine, opzioni: c.opzioni })
+            .eq('id', c.id)
+          if (error) throw error
+        }
+      }
+
+      setSaved(true)
+      setTimeout(() => setSaved(false), 2500)
+    } catch (e) {
+      setErrore('Errore salvataggio: ' + e.message)
     }
 
     setSaving(false)
-    setSaved(true)
-    setTimeout(() => setSaved(false), 2500)
   }
 
-  const extraUsati = campiExtra.length
-  const maxExtra = 5
-
+  /* ── Render ── */
   return (
-    <div style={{ padding: '0', maxWidth: '720px' }}>
-
-      {/* ── Header sezione ── */}
-      <div style={{ display: 'flex', alignItems: 'flex-start', justifyContent: 'space-between', marginBottom: '24px', flexWrap: 'wrap', gap: '12px' }}>
+    <div>
+      {/* ── Header ── */}
+      <div style={{ display: 'flex', alignItems: 'flex-start', justifyContent: 'space-between', flexWrap: 'wrap', gap: '12px', marginBottom: '20px' }}>
         <div>
-          <h2 style={{ fontSize: '20px', fontWeight: '900', color: '#0A0A0A', margin: '0 0 4px', letterSpacing: '-.02em' }}>
+          <h2 style={{ fontSize: '18px', fontWeight: '900', color: '#0A0A0A', margin: '0 0 3px', letterSpacing: '-.02em' }}>
             Gestione iscrizioni
           </h2>
           <p style={{ fontSize: '13px', color: '#6B7280', margin: 0 }}>
-            Configura capienza, posti per utente e i campi del form di iscrizione.
+            Configura capienza, posti per utente e campi del form.
           </p>
         </div>
         {!isNew && (
           <button
-            type="button"
-            onClick={salva}
-            disabled={saving}
+            type="button" onClick={salva} disabled={saving}
             style={{
+              display: 'flex', alignItems: 'center', gap: '6px',
               background: saved ? '#16A34A' : '#003DA5',
               color: '#fff', border: 'none', borderRadius: '8px',
-              padding: '9px 18px', fontSize: '14px', fontWeight: '700',
+              padding: '9px 16px', fontSize: '13px', fontWeight: '700',
               fontFamily: "'Inter',sans-serif", cursor: saving ? 'not-allowed' : 'pointer',
               transition: 'background .2s', flexShrink: 0,
             }}
           >
-            {saving ? 'Salvataggio…' : saved ? '✓ Salvato' : 'Salva configurazione'}
+            {saving ? <><span style={spinStyle} />Salvataggio…</> : saved ? <><Check size={14} /> Salvato</> : <><Save size={14} /> Salva configurazione</>}
           </button>
         )}
       </div>
 
-      {/* ── Sezione 1: Capienza e posti ── */}
+      {errore && (
+        <div style={{ background: '#FEF2F2', border: '1px solid #FECACA', borderRadius: '8px', padding: '10px 14px', fontSize: '13px', color: '#DC2626', marginBottom: '16px' }}>
+          ⚠ {errore}
+        </div>
+      )}
+
+      {/* ── Capienza e posti ── */}
       <div style={sCard}>
         <p style={sCardTitle}>📦 Capienza e posti</p>
-        <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(220px, 1fr))', gap: '16px' }}>
+        <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(200px, 1fr))', gap: '14px' }}>
           <div>
             <label style={sLabel}>Capienza massima</label>
             <input
@@ -361,7 +337,7 @@ export default function IscrizioniTab({ event, setEvent, eventId }) {
               placeholder="Illimitata"
               style={sInput}
             />
-            <p style={sHint}>Lascia vuoto per nessun limite. Raggiunto il limite, le iscrizioni vengono bloccate.</p>
+            <p style={sHint}>Lascia vuoto = nessun limite</p>
           </div>
           <div>
             <label style={sLabel}>Posti per utente</label>
@@ -370,150 +346,134 @@ export default function IscrizioniTab({ event, setEvent, eventId }) {
               onChange={e => setEvent(p => ({ ...p, posti_per_utente: parseInt(e.target.value) }))}
               style={sInput}
             >
-              <option value={1}>1 — solo l'intestatario</option>
-              <option value={2}>2 — + 1 accompagnatore</option>
-              <option value={3}>3 — + 2 accompagnatori</option>
-              <option value={4}>4 — + 3 accompagnatori</option>
-              <option value={5}>5 — + 4 accompagnatori</option>
-              <option value={6}>6 — + 5 accompagnatori</option>
-              <option value={10}>10 — + 9 accompagnatori</option>
+              {[1,2,3,4,5,6,10].map(n => (
+                <option key={n} value={n}>{n === 1 ? '1 — solo intestatario' : `${n} — + ${n-1} accompagnator${n===2?'e':'i'}`}</option>
+              ))}
             </select>
-            <p style={sHint}>Nel form verranno mostrati tanti blocchi dati quanti i posti.</p>
+            <p style={sHint}>Blocchi del form mostrati all'utente</p>
           </div>
         </div>
 
-        {/* Riepilogo */}
-        <div style={{ display: 'flex', gap: '16px', flexWrap: 'wrap', marginTop: '14px', padding: '12px 14px', background: '#F9FAFB', borderRadius: '8px' }}>
-          {[
-            { l: 'Capienza', v: event.capienza_max ? event.capienza_max.toLocaleString('it-IT') : '∞', u: 'posti' },
-            { l: 'Per utente', v: event.posti_per_utente || 1, u: 'posti' },
-            event.capienza_max && (event.posti_per_utente || 1) > 1
-              ? { l: 'Form attesi', v: '~' + Math.ceil(event.capienza_max / (event.posti_per_utente || 1)), u: 'iscrizioni' }
-              : null,
-          ].filter(Boolean).map(stat => (
-            <div key={stat.l}>
-              <span style={{ fontSize: '11px', color: '#6B7280', fontWeight: '700', textTransform: 'uppercase', letterSpacing: '.05em', display: 'block' }}>{stat.l}</span>
-              <span style={{ fontSize: '22px', fontWeight: '900', color: '#003DA5', letterSpacing: '-.02em' }}>{stat.v}</span>
-              <span style={{ fontSize: '12px', color: '#9CA3AF', marginLeft: '3px' }}>{stat.u}</span>
-            </div>
-          ))}
-          <div style={{ marginLeft: 'auto', textAlign: 'right' }}>
-            <span style={{ fontSize: '11px', color: '#6B7280', fontWeight: '700', textTransform: 'uppercase', letterSpacing: '.05em', display: 'block' }}>Codice evento</span>
-            <code style={{ fontSize: '14px', fontWeight: '900', color: '#003DA5', letterSpacing: '.04em', fontFamily: 'monospace' }}>
+        <div style={{ display: 'flex', gap: '20px', flexWrap: 'wrap', marginTop: '12px', padding: '10px 12px', background: '#F9FAFB', borderRadius: '8px' }}>
+          <div>
+            <span style={sStat}>CAPIENZA</span>
+            <span style={sVal}>{event.capienza_max ? event.capienza_max.toLocaleString('it-IT') : '∞'}</span>
+            <span style={sUnit}> posti</span>
+          </div>
+          <div>
+            <span style={sStat}>PER UTENTE</span>
+            <span style={sVal}>{event.posti_per_utente || 1}</span>
+            <span style={sUnit}> posti</span>
+          </div>
+          <div style={{ marginLeft: 'auto' }}>
+            <span style={sStat}>CODICE EVENTO</span>
+            <code style={{ fontSize: '13px', fontWeight: '900', color: '#003DA5', letterSpacing: '.04em', fontFamily: 'monospace' }}>
               EVT-{new Date().getFullYear().toString().slice(2)}{String(event.codice || 0).padStart(4, '0')}-NNNN
             </code>
           </div>
         </div>
       </div>
 
-      {/* ── Sezione 2: Campi del form ── */}
+      {/* ── Campi del form ── */}
       <div style={sCard}>
-        <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', marginBottom: '4px' }}>
-          <p style={sCardTitle}>📋 Campi del form</p>
-          <div style={{ display: 'flex', gap: '20px', paddingRight: '14px' }}>
-            <span style={{ fontSize: '11px', color: '#6B7280', fontWeight: '700', width: '72px', textAlign: 'center' }}>VISIBILE</span>
-            <span style={{ fontSize: '11px', color: '#6B7280', fontWeight: '700', width: '72px', textAlign: 'center' }}>OBBLIG.</span>
-          </div>
+        {/* Intestazione con colonne allineate */}
+        <div style={{ display: 'grid', gridTemplateColumns: '24px 1fr 88px 88px', gap: '8px', padding: '0 12px 8px', borderBottom: '1px solid #E5E7EB', marginBottom: '0' }}>
+          <div />
+          <p style={{ ...sCardTitle, margin: 0 }}>📋 Campi del form</p>
+          <span style={{ fontSize: '11px', fontWeight: '700', color: '#6B7280', textAlign: 'center', textTransform: 'uppercase', letterSpacing: '.04em' }}>Visibile</span>
+          <span style={{ fontSize: '11px', fontWeight: '700', color: '#6B7280', textAlign: 'center', textTransform: 'uppercase', letterSpacing: '.04em' }}>Obblig.</span>
         </div>
-        <p style={{ fontSize: '12px', color: '#9CA3AF', margin: '0 0 12px 14px' }}>
-          Nome, Cognome ed Email sono sempre visibili e obbligatori. Gli altri campi possono essere nascosti o resi facoltativi.
-        </p>
 
         {isNew ? (
-          <div style={{ padding: '20px 14px', textAlign: 'center' }}>
-            <AlertCircle size={20} style={{ color: '#D97706', marginBottom: '8px' }} />
-            <p style={{ fontSize: '13px', color: '#6B7280', margin: 0 }}>
-              Salva prima l'evento per configurare i campi del form.
-            </p>
+          <div style={{ padding: '24px', textAlign: 'center' }}>
+            <AlertCircle size={20} style={{ color: '#D97706', display: 'block', margin: '0 auto 8px' }} />
+            <p style={{ fontSize: '13px', color: '#6B7280', margin: 0 }}>Salva prima l'evento per configurare i campi.</p>
           </div>
         ) : loading ? (
-          <p style={{ padding: '20px 14px', fontSize: '13px', color: '#9CA3AF' }}>Caricamento…</p>
+          <div style={{ padding: '24px', textAlign: 'center', color: '#9CA3AF', fontSize: '13px', display: 'flex', alignItems: 'center', justifyContent: 'center', gap: '8px' }}>
+            <span style={spinStyle} /> Caricamento campi…
+          </div>
+        ) : campiStandard.length === 0 ? (
+          <div style={{ padding: '24px', textAlign: 'center' }}>
+            <p style={{ fontSize: '13px', color: '#DC2626', margin: 0 }}>Nessun campo trovato. Clicca Salva per inizializzarli.</p>
+          </div>
         ) : (
-          <div style={{ border: '1px solid #E5E7EB', borderRadius: '8px', overflow: 'hidden' }}>
+          <div>
             {campiStandard.map(c => (
-              <RigaCampo key={c.id} campo={c} onUpdate={nc => updateCampo(c.id, nc)} />
+              <RigaCampo key={c.id} campo={c} onChange={nc => aggiornaCampo(c.id, nc)} />
             ))}
+            <p style={{ fontSize: '11px', color: '#9CA3AF', padding: '8px 12px 0', margin: 0 }}>
+              I campi contrassegnati come <strong>fisso</strong> (nome, cognome, email) sono sempre visibili e obbligatori.
+            </p>
           </div>
         )}
       </div>
 
-      {/* ── Sezione 3: Campi extra ── */}
+      {/* ── Campi extra ── */}
       {!isNew && (
         <div style={sCard}>
-          <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', marginBottom: '8px' }}>
+          <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', marginBottom: '10px' }}>
             <div>
-              <p style={sCardTitle}>➕ Campi personalizzati</p>
-              <p style={{ fontSize: '12px', color: '#9CA3AF', margin: '2px 0 0' }}>
-                Aggiungi fino a 5 campi extra. I dati vengono salvati nelle colonne extra_1…extra_5.
-              </p>
+              <p style={{ ...sCardTitle, margin: '0 0 2px' }}>➕ Campi personalizzati</p>
+              <p style={{ fontSize: '11px', color: '#9CA3AF', margin: 0 }}>Fino a 5 campi extra, salvati in extra_1…extra_5</p>
             </div>
-            {extraUsati < maxExtra && (
+            {campiExtra.length < 5 && (
               <button
-                type="button"
-                onClick={aggiungiCampoExtra}
-                style={{
-                  display: 'flex', alignItems: 'center', gap: '6px',
-                  background: '#EEF3FF', color: '#003DA5',
-                  border: '1px solid #C7D9F8', borderRadius: '8px',
-                  padding: '8px 14px', fontSize: '13px', fontWeight: '700',
-                  fontFamily: "'Inter',sans-serif", cursor: 'pointer', flexShrink: 0,
-                }}
+                type="button" onClick={aggiungiExtra}
+                style={{ display: 'flex', alignItems: 'center', gap: '5px', background: '#EEF3FF', color: '#003DA5', border: '1px solid #C7D9F8', borderRadius: '7px', padding: '7px 12px', fontSize: '12px', fontWeight: '700', fontFamily: "'Inter',sans-serif", cursor: 'pointer', flexShrink: 0 }}
               >
-                <Plus size={15} /> Aggiungi campo
+                <Plus size={13} /> Aggiungi
               </button>
             )}
           </div>
 
           {campiExtra.length === 0 ? (
-            <div style={{ padding: '24px', textAlign: 'center', border: '1px dashed #D1D5DB', borderRadius: '8px' }}>
-              <p style={{ fontSize: '13px', color: '#9CA3AF', margin: 0 }}>
-                Nessun campo extra — clicca "Aggiungi campo" per crearne uno.
-              </p>
+            <div style={{ padding: '18px', textAlign: 'center', border: '1px dashed #D1D5DB', borderRadius: '7px' }}>
+              <p style={{ fontSize: '12px', color: '#9CA3AF', margin: 0 }}>Nessun campo personalizzato — clicca Aggiungi per crearne uno.</p>
             </div>
-          ) : (
-            campiExtra.map((c, i) => (
-              <RigaCampoExtra
-                key={c.id}
-                campo={c}
-                extraIndex={i + 1}
-                onUpdate={nc => updateCampo(c.id, nc)}
-                onDelete={() => eliminaCampoExtra(c.id)}
-              />
-            ))
-          )}
-
-          {extraUsati >= maxExtra && (
-            <p style={{ fontSize: '12px', color: '#D97706', marginTop: '8px', fontWeight: '600' }}>
-              ⚠ Limite di 5 campi extra raggiunto.
-            </p>
-          )}
+          ) : campiExtra.map((c, i) => (
+            <RigaCampoExtra
+              key={c.id}
+              campo={c}
+              onChange={nc => aggiornaCampo(c.id, nc)}
+              onDelete={() => setCampi(prev => prev.filter(x => x.id !== c.id))}
+            />
+          ))}
         </div>
       )}
+
+      <style>{`
+        @keyframes spin-iscr { from{transform:rotate(0)} to{transform:rotate(360deg)} }
+        @media(max-width:480px) {
+          .iscrizioni-campo-row { grid-template-columns: 20px 1fr 64px 64px !important; gap: 4px !important; }
+        }
+      `}</style>
     </div>
   )
 }
 
-/* ─── Stili locali ─────────────────────────────────────────────── */
+const spinStyle = {
+  display: 'inline-block', width: '12px', height: '12px',
+  border: '2px solid rgba(255,255,255,.4)', borderTopColor: '#fff',
+  borderRadius: '50%', animation: 'spin-iscr .7s linear infinite',
+}
+
 const sCard = {
-  background: '#fff', border: '1px solid #E5E7EB', borderRadius: '12px',
-  overflow: 'hidden', marginBottom: '16px',
-  padding: '16px',
+  background: '#fff', border: '1px solid #E5E7EB', borderRadius: '10px',
+  overflow: 'hidden', marginBottom: '14px', padding: '14px',
 }
 const sCardTitle = {
-  fontSize: '14px', fontWeight: '800', color: '#0A0A0A',
-  margin: '0 0 12px', letterSpacing: '-.01em',
+  fontSize: '13px', fontWeight: '800', color: '#0A0A0A',
+  margin: '0 0 10px', letterSpacing: '-.01em',
 }
-const sLabel = {
-  display: 'block', fontSize: '12px', fontWeight: '700',
-  color: '#374151', marginBottom: '5px',
-}
+const sLabel = { display: 'block', fontSize: '12px', fontWeight: '700', color: '#374151', marginBottom: '4px' }
 const sInput = {
-  width: '100%', padding: '9px 11px',
+  width: '100%', padding: '8px 10px',
   border: '1px solid #D1D5DB', borderRadius: '6px',
-  fontSize: '14px', fontFamily: "'Inter',sans-serif",
-  outline: 'none', boxSizing: 'border-box',
-  backgroundColor: '#fff',
+  fontSize: '13px', fontFamily: "'Inter',sans-serif",
+  outline: 'none', boxSizing: 'border-box', backgroundColor: '#fff',
 }
-const sHint = {
-  fontSize: '11px', color: '#9CA3AF', margin: '4px 0 0', lineHeight: '1.4',
-}
+const sHint = { fontSize: '11px', color: '#9CA3AF', margin: '3px 0 0' }
+const sStat = { fontSize: '10px', color: '#6B7280', fontWeight: '700', textTransform: 'uppercase', letterSpacing: '.05em', display: 'block' }
+const sVal  = { fontSize: '20px', fontWeight: '900', color: '#003DA5', letterSpacing: '-.02em' }
+const sUnit = { fontSize: '11px', color: '#9CA3AF' }
