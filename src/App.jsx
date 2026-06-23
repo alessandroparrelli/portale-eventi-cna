@@ -5,6 +5,7 @@ import AdminLayout from './components/AdminLayout'
 import LoginPage from './pages/LoginPage'
 import LandingPage from './pages/public/LandingPage'
 import QuestionarioPage from './pages/public/QuestionarioPage'
+import Iscrizione from './pages/public/Iscrizione'
 import DashboardPage from './pages/admin/DashboardPage'
 import EventiPage from './pages/admin/EventiPage'
 import EventoEditorPage from './pages/admin/EventoEditorPage'
@@ -15,6 +16,7 @@ import EmailEditorPage from './pages/admin/EmailEditorPage'
 import StatistichePage from './pages/admin/StatistichePage'
 import UtentiPage from './pages/admin/UtentiPage'
 import ProfiloPage from './pages/admin/ProfiloPage'
+import ActivityLogPage from './pages/admin/ActivityLogPage'
 
 export default function App() {
   return (
@@ -25,6 +27,8 @@ export default function App() {
           <Route path="/login" element={<LoginPage />} />
           <Route path="/eventi/:slug" element={<LandingPage />} />
           <Route path="/questionario" element={<QuestionarioPage />} />
+          <Route path="/iscrizione/:codice" element={<Iscrizione />} />
+          <Route path="/iscrizione" element={<Iscrizione />} />
 
           {/* Admin — layout sidebar */}
           <Route path="/admin" element={<ProtectedRoute><AdminLayout /></ProtectedRoute>}>
@@ -36,6 +40,7 @@ export default function App() {
             <Route path="statistiche" element={<StatistichePage />} />
             <Route path="utenti" element={<UtentiPage />} />
             <Route path="profilo" element={<ProfiloPage />} />
+            <Route path="log" element={<ActivityLogPage />} />
           </Route>
 
           {/* Editor a schermo intero (fuori dal layout sidebar) */}

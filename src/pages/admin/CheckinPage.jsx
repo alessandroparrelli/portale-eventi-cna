@@ -2,7 +2,27 @@ import { useEffect, useRef, useState } from 'react'
 import { supabase } from '../../lib/supabase'
 import { useRole } from '../../hooks/useRole'
 import { Modal, Btn, Select, Field, Input } from '../../components/ui'
-import { QrCode, UserPlus, CheckCircle2, XCircle, AlertTriangle, RefreshCw, Search, Camera, CameraOff, Users } from 'lucide-react'
+import { QrCode, UserPlus, CheckCircle2, XCircle, AlertTriangle, RefreshCw, Search, Camera, CameraOff, Users, WifiOff } from 'lucide-react'
+
+function OfflineBanner() {
+  const [offline, setOffline] = useState(!navigator.onLine)
+  useEffect(() => {
+    const on  = () => setOffline(false)
+    const off = () => setOffline(true)
+    window.addEventListener('online', on)
+    window.addEventListener('offline', off)
+    return () => { window.removeEventListener('online', on); window.removeEventListener('offline', off) }
+  }, [])
+  if (!offline) return null
+  return (
+    <div style={{ backgroundColor:'#FEF3C7', border:'1px solid #FCD34D', borderRadius:'8px', padding:'10px 14px', marginBottom:'14px', display:'flex', alignItems:'center', gap:'10px' }}>
+      <WifiOff size={16} style={{ color:'#D97706', flexShrink:0 }} />
+      <p style={{ fontSize:'13px', fontWeight:'600', color:'#92400E', margin:0 }}>
+        Modalità offline — i check-in verranno sincronizzati quando torni online.
+      </p>
+    </div>
+  )
+}
 
 /* ─── Banner risultato ─────────────────────────────────────────── */
 function ResultBanner({ result, onClose }) {
@@ -260,6 +280,8 @@ export default function CheckinPage() {
 
   return (
     <div style={s.page}>
+
+      <OfflineBanner />
 
       {/* ── Selettore evento ── */}
       <div style={s.eventSelector}>

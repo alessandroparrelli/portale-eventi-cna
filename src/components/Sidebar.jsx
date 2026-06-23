@@ -5,6 +5,7 @@ import { supabase } from '../lib/supabase'
 import {
   LayoutDashboard, CalendarDays, Users, Mail,
   QrCode, BarChart2, LogOut, ChevronRight, UserCog, X, User2,
+  Activity,
 } from 'lucide-react'
 import { useState, useEffect } from 'react'
 
@@ -38,6 +39,7 @@ export default function Sidebar({ mobileOpen, onMobileClose, isMobile: isMobileP
     { to: '/admin/checkin',     label: 'Check-in',     icon: QrCode },
     { to: '/admin/statistiche', label: 'Statistiche',  icon: BarChart2 },
     ...(isAdmin ? [{ to: '/admin/utenti',  label: 'Utenti',  icon: UserCog }] : []),
+    { to: '/admin/log',         label: 'Log Attività', icon: Activity },
     { to: '/admin/profilo',     label: 'Il mio profilo', icon: User2 },
   ]
 

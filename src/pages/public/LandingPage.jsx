@@ -124,6 +124,12 @@ function ModalConferma({ reg, event, onClose }) {
             style={{ display:'flex',alignItems:'center',gap:'8px',color:'#FFFFFF',backgroundColor:calAdded?'#16A34A':'#003DA5',border:'none',borderRadius:'8px',padding:'12px 18px',fontSize:'14px',fontWeight:'700',fontFamily:"'Inter',sans-serif",cursor:'pointer' }}>
             📅 {calAdded ? '✓ Aggiunto' : 'Aggiungi al calendario'}
           </button>
+          {reg.codice_iscrizione && (
+            <a href={`/iscrizione/${reg.codice_iscrizione}`} target="_blank" rel="noopener noreferrer"
+              style={{ display:'flex',alignItems:'center',gap:'8px',color:'#003DA5',backgroundColor:'transparent',border:'1px solid #003DA5',borderRadius:'8px',padding:'12px 18px',fontSize:'14px',fontWeight:'700',fontFamily:"'Inter',sans-serif",cursor:'pointer',textDecoration:'none' }}>
+              🔍 Verifica iscrizione
+            </a>
+          )}
           <button onClick={onClose} style={{ padding:'12px 18px',backgroundColor:'transparent',border:'1px solid #E5E7EB',borderRadius:'8px',fontSize:'14px',fontWeight:'600',fontFamily:"'Inter',sans-serif",cursor:'pointer',color:'#6B7280' }}>Chiudi</button>
         </div>
         <p style={{ fontSize:'11px',color:'#9CA3AF',lineHeight:'1.5',margin:0 }}>Riceverai anche una email di conferma con il QR Code.</p>
@@ -473,6 +479,58 @@ export default function LandingPage() {
             ))}
           </div>
         )}
+
+        {/* PROGRAMMA / SESSIONI */}
+        {(event.sessioni||[]).length > 0 && (() => {
+          const primaryColor = tema.colore_primario || '#003DA5'
+          return (
+            <section style={{ ...s.section, marginBottom:'8px' }}>
+              <h2 style={{ fontSize:'24px', fontWeight:'900', color:'#0A0A0A', letterSpacing:'-0.03em', margin:'0 0 24px' }}>
+                Programma
+              </h2>
+              <div style={{ display:'flex', flexDirection:'column', gap:'0' }}>
+                {event.sessioni.map((sess, idx) => (
+                  <div key={sess.id||idx} style={{ display:'flex', gap:'20px', paddingBottom:'24px', position:'relative' }}>
+                    {/* Timeline line */}
+                    {idx < event.sessioni.length - 1 && (
+                      <div style={{ position:'absolute', left:'19px', top:'40px', bottom:'0', width:'2px', backgroundColor:'#E5E7EB' }} />
+                    )}
+                    {/* Bullet */}
+                    <div style={{ width:'40px', height:'40px', borderRadius:'50%', backgroundColor: primaryColor + '14', border:`2px solid ${primaryColor}`, display:'flex', alignItems:'center', justifyContent:'center', flexShrink:0, zIndex:1 }}>
+                      <span style={{ fontSize:'13px', fontWeight:'800', color: primaryColor }}>{idx+1}</span>
+                    </div>
+                    {/* Content */}
+                    <div style={{ flex:1, paddingTop:'8px' }}>
+                      <div style={{ display:'flex', flexWrap:'wrap', gap:'8px', alignItems:'baseline', marginBottom:'4px' }}>
+                        <h3 style={{ fontSize:'16px', fontWeight:'800', color:'#0A0A0A', letterSpacing:'-0.02em', margin:0 }}>
+                          {sess.titolo || `Sessione ${idx+1}`}
+                        </h3>
+                        {(sess.ora_inizio || sess.data) && (
+                          <span style={{ fontSize:'12px', fontWeight:'600', color: primaryColor, backgroundColor: primaryColor+'12', padding:'2px 8px', borderRadius:'20px' }}>
+                            {sess.data && new Date(sess.data+'T00:00').toLocaleDateString('it-IT',{weekday:'short',day:'2-digit',month:'short'})}
+                            {sess.ora_inizio && (sess.data ? ' · ' : '') + sess.ora_inizio}
+                            {sess.ora_fine && `–${sess.ora_fine}`}
+                          </span>
+                        )}
+                      </div>
+                      {sess.relatore && (
+                        <p style={{ fontSize:'13px', color:'#6B7280', margin:'0 0 6px', fontWeight:'500' }}>
+                          🎤 {sess.relatore}
+                        </p>
+                      )}
+                      {sess.luogo && (
+                        <p style={{ fontSize:'13px', color:'#9CA3AF', margin:'0 0 6px' }}>📍 {sess.luogo}</p>
+                      )}
+                      {sess.descrizione && (
+                        <p style={{ fontSize:'14px', color:'#374151', margin:'6px 0 0', lineHeight:'1.6' }}>{sess.descrizione}</p>
+                      )}
+                    </div>
+                  </div>
+                ))}
+              </div>
+            </section>
+          )
+        })()}
 
         {/* CTA / FORM */}
         {!conferma && (

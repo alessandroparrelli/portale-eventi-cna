@@ -17,6 +17,7 @@ import { Field, Input, Select, Btn, StatoBadge } from '../../components/ui'
 import EventEmailTab from '../../components/editor/EventEmailTab'
 import IscrizioniTab from '../../components/editor/IscrizioniTab'
 import AspettoTab from '../../components/editor/AspettoTab'
+import SessioniTab from '../../components/editor/SessioniTab'
 
 const toSlug = s => s.toLowerCase().normalize('NFD').replace(/[\u0300-\u036f]/g,'')
   .replace(/[^a-z0-9]+/g,'-').replace(/^-|-$/g,'')
@@ -465,8 +466,10 @@ export default function EventoEditorPage() {
     { id:'hero',       label:'🖼 Hero' },
     { id:'contenuto',  label:'📝 Contenuto' },
     { id:'aspetto',    label:'🎨 Aspetto' },
+    { id:'sessioni',   label:'🗓 Sessioni' },
     { id:'iscrizioni', label:'🎟 Iscrizioni' },
     { id:'email',      label:'✉️ Email' },
+    { id:'preview',    label:'👁 Preview' },
   ]
 
   return (
@@ -685,11 +688,51 @@ export default function EventoEditorPage() {
           </div>
         )}
 
+        {/* ── SESSIONI ── */}
+        {activeTab==='sessioni' && (
+          <div style={p.panel}>
+            <h2 style={p.panelTitle}>Programma / Sessioni</h2>
+            <SessioniTab event={event} setEvent={setEvent} />
+          </div>
+        )}
+
         {/* ── EMAIL ── */}
         {activeTab==='email' && (
           <div style={p.panel}>
             <h2 style={p.panelTitle}>Email per questo evento</h2>
             <EventEmailTab eventoId={id} />
+          </div>
+        )}
+
+        {/* ── PREVIEW ── */}
+        {activeTab==='preview' && (
+          <div style={{ display:'flex', flexDirection:'column', height:'100%' }}>
+            {!event.slug ? (
+              <div style={{ padding:'48px', textAlign:'center', color:'#9CA3AF' }}>
+                <p style={{ fontSize:'15px', fontWeight:'600', color:'#374151' }}>Nessuna anteprima disponibile</p>
+                <p style={{ fontSize:'13px' }}>Salva l'evento prima di visualizzare l'anteprima.</p>
+              </div>
+            ) : (
+              <>
+                <div style={{ backgroundColor:'#F4F5F7', border:'1px solid #E5E7EB', borderRadius:'8px', padding:'10px 16px', marginBottom:'12px', display:'flex', alignItems:'center', justifyContent:'space-between', gap:'10px', flexShrink:0 }}>
+                  <div style={{ display:'flex', alignItems:'center', gap:'8px', flex:1, minWidth:0 }}>
+                    <span style={{ fontSize:'12px', color:'#9CA3AF', backgroundColor:'#fff', border:'1px solid #E5E7EB', borderRadius:'4px', padding:'4px 10px', fontFamily:'monospace', overflow:'hidden', textOverflow:'ellipsis', whiteSpace:'nowrap', flex:1 }}>
+                      {window.location.origin}/eventi/{event.slug}
+                    </span>
+                  </div>
+                  <a href={`/eventi/${event.slug}`} target="_blank" rel="noopener noreferrer"
+                    style={{ display:'flex', alignItems:'center', gap:'6px', border:'1px solid #003DA5', color:'#003DA5', borderRadius:'6px', padding:'6px 14px', fontSize:'12px', fontWeight:'700', textDecoration:'none', fontFamily:"'Inter',sans-serif", whiteSpace:'nowrap', flexShrink:0 }}>
+                    Apri in nuova tab ↗
+                  </a>
+                </div>
+                <iframe
+                  key={event.slug}
+                  src={`/eventi/${event.slug}`}
+                  style={{ flex:1, border:'none', borderRadius:'10px', minHeight:'600px', boxShadow:'0 1px 8px rgba(0,0,0,0.08)' }}
+                  title="Anteprima landing page"
+                />
+              </>
+            )}
           </div>
         )}
       </div>

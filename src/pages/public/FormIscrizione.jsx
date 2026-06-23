@@ -34,16 +34,41 @@ function emptyPersona(campi) {
 }
 
 /* ─── Valida una persona in base alla config dei campi ─── */
+function validateEmail(v) {
+  return /^[^\s@]+@[^\s@]+\.[^\s@]{2,}$/.test(v)
+}
+function validatePhone(v) {
+  return /^[\d\s\-\+\(\)]{7,15}$/.test(v)
+}
+function validatePIVA(v) {
+  const p = v.replace(/\s/g,'')
+  return /^\d{11}$/.test(p)
+}
+function validateCAP(v) {
+  return /^\d{5}$/.test(v.trim())
+}
+
 function validatePersona(dati, campi) {
   const errors = {}
   campi.forEach(c => {
     if (!c.visibile) return
-    const val = dati[c.colonna_db] || ''
+    const val = (dati[c.colonna_db] || '').toString()
     if (c.obbligatorio && !val.trim()) {
-      errors[c.colonna_db] = 'Obbligatorio'
+      errors[c.colonna_db] = 'Campo obbligatorio'
+      return
     }
-    if (c.tipo === 'email' && val && !/\S+@\S+\.\S+/.test(val)) {
-      errors[c.colonna_db] = 'Email non valida'
+    if (!val.trim()) return
+    if (c.tipo === 'email' || c.colonna_db === 'email') {
+      if (!validateEmail(val)) errors[c.colonna_db] = 'Indirizzo email non valido'
+    }
+    if (c.tipo === 'telefono' || c.colonna_db === 'cellulare') {
+      if (!validatePhone(val)) errors[c.colonna_db] = 'Numero di telefono non valido'
+    }
+    if (c.colonna_db === 'partita_iva') {
+      if (!validatePIVA(val)) errors[c.colonna_db] = 'Partita IVA non valida (11 cifre)'
+    }
+    if (c.colonna_db === 'cap') {
+      if (!validateCAP(val)) errors[c.colonna_db] = 'CAP non valido (5 cifre)'
     }
   })
   return errors
