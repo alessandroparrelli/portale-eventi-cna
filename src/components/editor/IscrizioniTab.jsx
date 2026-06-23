@@ -38,7 +38,7 @@ function RigaCampo({ campo, onChange }) {
   return (
     <div style={{
       display: 'grid',
-      gridTemplateColumns: '24px 1fr 88px 88px',
+      gridTemplateColumns: '20px 1fr 70px 70px',
       alignItems: 'center',
       gap: '8px',
       padding: '11px 12px',
@@ -47,24 +47,23 @@ function RigaCampo({ campo, onChange }) {
     }}>
       <GripVertical size={14} style={{ color: '#D1D5DB' }} />
 
-      <div style={{ display: 'flex', alignItems: 'center', gap: '6px', minWidth: 0 }}>
-        <span style={{
-          fontSize: '14px', fontWeight: '600', color: '#0A0A0A',
-          whiteSpace: 'nowrap', overflow: 'hidden', textOverflow: 'ellipsis',
-        }}>
+      <div style={{ display: 'flex', flexDirection: 'column', gap: '2px', minWidth: 0 }}>
+        <span style={{ fontSize: '13px', fontWeight: '700', color: '#0A0A0A' }}>
           {campo.label}
         </span>
-        <code style={{
-          fontSize: '10px', color: '#9CA3AF', background: '#F3F4F6',
-          borderRadius: '3px', padding: '1px 4px', flexShrink: 0,
-        }}>
-          {campo.colonna_db}
-        </code>
-        {fisso && (
-          <span style={{ fontSize: '10px', color: '#003DA5', background: '#EEF3FF', borderRadius: '3px', padding: '1px 5px', flexShrink: 0, fontWeight: '700' }}>
-            fisso
-          </span>
-        )}
+        <div style={{ display: 'flex', gap: '4px', flexWrap: 'wrap' }}>
+          <code style={{
+            fontSize: '10px', color: '#9CA3AF', background: '#F3F4F6',
+            borderRadius: '3px', padding: '1px 4px',
+          }}>
+            {campo.colonna_db}
+          </code>
+          {fisso && (
+            <span style={{ fontSize: '10px', color: '#003DA5', background: '#EEF3FF', borderRadius: '3px', padding: '1px 5px', fontWeight: '700' }}>
+              fisso
+            </span>
+          )}
+        </div>
       </div>
 
       {/* Visibile */}
@@ -377,7 +376,7 @@ export default function IscrizioniTab({ event, setEvent, eventId }) {
       {/* ── Campi del form ── */}
       <div style={sCard}>
         {/* Intestazione con colonne allineate */}
-        <div style={{ display: 'grid', gridTemplateColumns: '24px 1fr 88px 88px', gap: '8px', padding: '0 12px 8px', borderBottom: '1px solid #E5E7EB', marginBottom: '0' }}>
+        <div style={{ display: 'grid', gridTemplateColumns: '20px 1fr 70px 70px', gap: '8px', padding: '0 12px 10px', borderBottom: '1px solid #E5E7EB', marginBottom: '0' }}>
           <div />
           <p style={{ ...sCardTitle, margin: 0 }}>📋 Campi del form</p>
           <span style={{ fontSize: '11px', fontWeight: '700', color: '#6B7280', textAlign: 'center', textTransform: 'uppercase', letterSpacing: '.04em' }}>Visibile</span>
@@ -460,7 +459,7 @@ const spinStyle = {
 
 const sCard = {
   background: '#fff', border: '1px solid #E5E7EB', borderRadius: '10px',
-  overflow: 'hidden', marginBottom: '14px', padding: '14px',
+  marginBottom: '14px', padding: '14px',
 }
 const sCardTitle = {
   fontSize: '13px', fontWeight: '800', color: '#0A0A0A',
