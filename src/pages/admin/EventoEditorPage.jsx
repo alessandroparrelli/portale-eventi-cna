@@ -331,7 +331,7 @@ export default function EventoEditorPage() {
 
   const [event, setEvent] = useState({
     titolo:'', slug:'', stato:'bozza', data_inizio:'', data_fine:'',
-    luogo:'', descrizione_html:'', immagine_hero:null, logo_url:null,
+    luogo:'', sottotitolo:'', descrizione_html:'', immagine_hero:null, logo_url:null,
     colore_primario:'#003DA5', colore_sfondo:'#F4F5F7', tema:{},
     layout_hero:{ altezza:'380', overlay_opacita:'55', allineamento:'sinistra', titolo_colore:'#FFFFFF', titolo_dimensione:'clamp(26px,5vw,54px)', titolo_grassetto:true, titolo_maiuscolo:false },
     sezioni:[],
@@ -361,6 +361,7 @@ export default function EventoEditorPage() {
         data_fine:   data.data_fine?.slice(0,16)||'',
         layout_hero: data.layout_hero || { altezza:'380', overlay_opacita:'55', allineamento:'sinistra' },
         logo_url: data.logo_url || null,
+        sottotitolo: data.sottotitolo || '',
         tema: data.tema || {},
         sezioni,
         // Azzera descrizione_html se è stata migrata nei blocchi
@@ -387,6 +388,7 @@ export default function EventoEditorPage() {
       capienza_max:event.capienza_max||null,
       posti_per_utente:event.posti_per_utente||1,
       logo_url:event.logo_url||null,
+      sottotitolo:event.sottotitolo||null,
       tema:event.tema||{},
     }
     if (isNew) {
@@ -529,6 +531,15 @@ export default function EventoEditorPage() {
               <Field label="Data e ora fine">
                 <Input type="datetime-local" value={event.data_fine||''} onChange={e=>setEvent(p=>({...p,data_fine:e.target.value}))}/>
               </Field>
+              <div style={{ gridColumn:'1/-1' }}>
+                <Field label="Sottotitolo evento">
+                  <Input
+                    value={event.sottotitolo||''}
+                    onChange={e=>setEvent(p=>({...p,sottotitolo:e.target.value}))}
+                    placeholder="es. Insieme da 80 anni, il futuro ha radici nelle persone"
+                  />
+                </Field>
+              </div>
               <div style={{ gridColumn:'1/-1' }}>
                 <Field label="Sede / Indirizzo completo">
                   <AddressSearch

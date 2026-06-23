@@ -331,31 +331,61 @@ export default function LandingPage() {
       <div className="hero-section" style={{ ...s.hero, ...heroStyle, minHeight:`min(${lh.altezza||340}px, 56vw)` }}>
         <div style={{ ...s.heroOverlay, backgroundColor:`rgba(0,0,0,${(lh.overlay_opacita||55)/100})` }}>
           <div style={{ ...s.heroContent, textAlign:lh.allineamento==='centro'?'center':'left' }}>
-            <span style={s.heroTag}><Calendar size={13}/> Evento CNA Roma</span>
             <h1 style={{
               ...s.heroTitle,
               color:       lh.titolo_colore      || '#FFFFFF',
               fontSize:    lh.titolo_dimensione  || 'clamp(22px,5vw,48px)',
               fontWeight:  lh.titolo_grassetto !== false ? '900' : '400',
               textTransform: lh.titolo_maiuscolo ? 'uppercase' : 'none',
+              marginBottom: event.sottotitolo ? '8px' : '0',
             }}>{event.titolo}</h1>
-            {event.data_inizio && (
-              <p style={s.heroMeta}>
-                <Calendar size={14}/>
-                {fmtData(event.data_inizio)}
-                {fmtOra(event.data_inizio) && ` · ${fmtOra(event.data_inizio)}`}
-                {event.data_fine && fmtOra(event.data_fine) && ` — ${fmtOra(event.data_fine)}`}
-              </p>
-            )}
-            {event.luogo && (
-              <a href={`https://maps.google.com/?q=${encodeURIComponent(event.luogo)}`}
-                target="_blank" rel="noopener noreferrer" style={s.heroLoc}>
-                <MapPin size={14}/> {event.luogo}
-              </a>
+            {event.sottotitolo && (
+              <p style={{
+                color: lh.titolo_colore ? `${lh.titolo_colore}CC` : 'rgba(255,255,255,.85)',
+                fontSize: 'clamp(14px,2.5vw,20px)',
+                fontWeight: '500',
+                margin: 0,
+                letterSpacing: '-.01em',
+                lineHeight: 1.3,
+              }}>{event.sottotitolo}</p>
             )}
           </div>
         </div>
       </div>
+
+      {/* ── DATA E LUOGO sotto hero ── */}
+      {(event.data_inizio || event.luogo) && (
+        <div style={{
+          backgroundColor: tema.sfondo_pagina || '#FFFFFF',
+          borderBottom: '1px solid #F3F4F6',
+          padding: '14px 24px',
+          display: 'flex', flexWrap: 'wrap', gap: '16px', alignItems: 'center',
+        }}>
+          {event.data_inizio && (
+            <div style={{ display:'flex', alignItems:'center', gap:'7px' }}>
+              <Calendar size={15} style={{ color: tema.colore_primario || '#003DA5', flexShrink:0 }}/>
+              <span style={{ fontSize:'14px', fontWeight:'700', color:'#0A0A0A', fontFamily:"'Inter',sans-serif", letterSpacing:'-.01em' }}>
+                {fmtData(event.data_inizio)}
+                {fmtOra(event.data_inizio) && ` · ${fmtOra(event.data_inizio)}`}
+                {event.data_fine && fmtOra(event.data_fine) && ` — ${fmtOra(event.data_fine)}`}
+              </span>
+            </div>
+          )}
+          {event.luogo && (
+            <a
+              href={`https://maps.google.com/?q=${encodeURIComponent(event.luogo)}`}
+              target="_blank" rel="noopener noreferrer"
+              style={{ display:'flex', alignItems:'center', gap:'7px', textDecoration:'none' }}
+            >
+              <MapPin size={15} style={{ color: tema.colore_primario || '#003DA5', flexShrink:0 }}/>
+              <span style={{ fontSize:'14px', fontWeight:'700', color:'#0A0A0A', fontFamily:"'Inter',sans-serif", letterSpacing:'-.01em',
+                textDecorationLine:'underline', textDecorationStyle:'dotted', textDecorationColor:'#9CA3AF' }}>
+                {event.luogo}
+              </span>
+            </a>
+          )}
+        </div>
+      )}
 
       {/* ── BODY ── */}
       <div style={{ ...s.body, backgroundColor: tema.sfondo_pagina || '#FFFFFF' }}>
