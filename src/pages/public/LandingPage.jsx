@@ -538,7 +538,7 @@ export default function LandingPage() {
 
       </div>
 
-      <footer style={s.footer}>
+      <footer style={{ ...s.footer, backgroundColor: tema.sfondo_footer || '#F4F5F7', borderTop: `1px solid ${tema.sfondo_footer || '#F4F5F7'}`, color: tema.testo_footer || '#9CA3AF' }}>
         <img
           src={event?.logo_url || "https://raw.githubusercontent.com/alessandroparrelli/fileappoggio/main/NUOVO-LOGO-CNA-ROMA-SOLO-ROMA.png"}
           alt="CNA Roma"

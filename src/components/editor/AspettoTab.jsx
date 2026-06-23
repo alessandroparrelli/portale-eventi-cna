@@ -26,6 +26,9 @@ export const TEMA_DEFAULT = {
   sfondo_sezioni:      '#F4F5F7',
   // Footer/CTA
   cta_bg:              '#EEF3FF',
+  // Footer
+  sfondo_footer:       '#F4F5F7',
+  testo_footer:        '#9CA3AF',
 }
 
 export function temaConDefault(t) {
@@ -317,6 +320,10 @@ export default function AspettoTab({ event, setEvent }) {
             <ColorPicker label="Sfondo sezioni" value={tema.sfondo_sezioni} onChange={v => setT('sfondo_sezioni', v)} hint="Sfondo delle sezioni di contenuto" />
           </div>
           <ColorPicker label="Sfondo area CTA / registrazione" value={tema.cta_bg} onChange={v => setT('cta_bg', v)} />
+          <div style={sGrid}>
+            <ColorPicker label="Sfondo footer" value={tema.sfondo_footer} onChange={v => setT('sfondo_footer', v)} />
+            <ColorPicker label="Testo footer" value={tema.testo_footer} onChange={v => setT('testo_footer', v)} />
+          </div>
         </Sezione>
 
         {/* ── Sezione: Pulsanti ── */}
