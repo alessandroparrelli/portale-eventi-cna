@@ -5,26 +5,52 @@ import { MapPin, Search, Loader2, X } from 'lucide-react'
 function formatAddress(r) {
   const a = r.address || {}
 
-  const via = a.road || a.pedestrian || a.path || a.footway || ''
-  const civico = a.house_number || ''
-  const cap = a.postcode || ''
-  const comune = a.city || a.town || a.village || a.municipality || ''
-  const provincia = a.county || a.state_district || ''
-  const sigla = PROVINCE_SIGLA[provincia] || ''
+  // Nome del luogo (palazzo, edificio, POI)
+  const nome_luogo = a.amenity || a.building || a.tourism || a.leisure ||
+                     a.office || a.shop || a.historic || ''
 
-  // Stringa indirizzo
+  // Via — preferisce road, poi altre tipologie stradali
+  const via = a.road || a.pedestrian || a.path || a.footway ||
+              a.cycleway || a.street || ''
+
+  // Numero civico — Nominatim lo mette in house_number separato
+  const civico = a.house_number || ''
+
+  const cap    = a.postcode || ''
+  const comune = a.city || a.town || a.village || a.hamlet ||
+                 a.municipality || a.suburb || ''
+  const provincia = a.county || a.state_district || a.state || ''
+  const sigla  = PROVINCE_SIGLA[provincia] || siglaFromDisplay(r.display_name) || ''
+
+  // Costruisce la stringa strutturata
   const parti = []
-  if (via) parti.push(civico ? `${via}, ${civico}` : via)
+
+  // Prima parte: nome luogo + via + civico
+  if (nome_luogo && via) {
+    parti.push(`${nome_luogo}, ${via}${civico ? ', ' + civico : ''}`)
+  } else if (via) {
+    parti.push(civico ? `${via}, ${civico}` : via)
+  } else if (nome_luogo) {
+    parti.push(nome_luogo)
+  }
+
   if (cap)    parti.push(cap)
   if (comune) parti.push(sigla ? `${comune} (${sigla})` : comune)
 
   return {
     indirizzo: parti.join(', '),
-    via, civico, cap, comune, provincia, sigla,
+    nome_luogo, via, civico, cap, comune, provincia, sigla,
     lat: parseFloat(r.lat),
     lon: parseFloat(r.lon),
     display: r.display_name,
   }
+}
+
+// Estrae sigla provincia dal display_name di Nominatim (es. "..., Roma RM, ...")
+function siglaFromDisplay(display) {
+  const match = display.match(/\b([A-Z]{2})\b/)
+  if (match) return match[1]
+  return ''
 }
 
 /* ─── COMPONENTE ─────────────────────────────────────────────────── */
@@ -60,8 +86,8 @@ export default function AddressSearch({ value, onChange }) {
     setLoading(true)
     try {
       const url = `https://nominatim.openstreetmap.org/search?` +
-        `q=${encodeURIComponent(q)}&format=json&addressdetails=1&limit=6` +
-        `&countrycodes=it&accept-language=it`
+        `q=${encodeURIComponent(q)}&format=json&addressdetails=1&limit=8` +
+        `&countrycodes=it&accept-language=it&namedetails=1`
 
       const res = await fetch(url, {
         headers: { 'Accept-Language': 'it', 'User-Agent': 'portale-cna-roma/1.0' }
@@ -150,13 +176,13 @@ export default function AddressSearch({ value, onChange }) {
                 onMouseLeave={e => e.currentTarget.style.background = 'none'}
               >
                 <MapPin size={14} style={{ color: '#003DA5', marginTop: '2px', flexShrink: 0 }} />
-                <div>
+                <div style={{ flex: 1, minWidth: 0 }}>
                   <p style={{ fontSize: '13px', fontWeight: '600', color: '#0A0A0A', margin: '0 0 2px' }}>
-                    {fmt.indirizzo || fmt.display.split(',')[0]}
+                    {fmt.indirizzo || r.display_name.split(',')[0]}
                   </p>
-                  <p style={{ fontSize: '11px', color: '#9CA3AF', margin: 0, lineHeight: '1.4' }}>
-                    {/* Mostra solo le prime 3 parti del display_name per chiarezza */}
-                    {r.display_name.split(',').slice(0, 4).join(', ')}
+                  <p style={{ fontSize: '11px', color: '#9CA3AF', margin: 0, lineHeight: '1.4',
+                    overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap' }}>
+                    {r.display_name.split(',').slice(0, 5).join(', ')}
                   </p>
                 </div>
               </button>
