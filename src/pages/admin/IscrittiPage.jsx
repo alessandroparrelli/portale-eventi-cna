@@ -192,7 +192,7 @@ export default function IscrittiPage() {
       {/* MODAL DETTAGLIO */}
       {detail && (
         <Modal title="Dettaglio iscritto" onClose={()=>setDetail(null)} width="520px">
-          <div style={{ display:'grid', gridTemplateColumns:'1fr 1fr', gap:'16px' }}>
+          <div style={{ display:'grid', gridTemplateColumns:'1fr 1fr', gap:'16px' }} className="grid-2col">
             {[
               ['Nome', detail.nome],['Cognome', detail.cognome],
               ['Ragione Sociale', detail.ragione_sociale],['P.IVA', detail.partita_iva],

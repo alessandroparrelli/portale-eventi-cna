@@ -163,7 +163,7 @@ export default function ProfiloPage() {
   }
 
   return (
-    <div style={{ maxWidth:'520px', margin:'0 auto', fontFamily:"'Inter',sans-serif" }}>
+    <div style={{ maxWidth:'520px', margin:'0 auto', fontFamily:"'Inter',sans-serif", width:'100%', boxSizing:'border-box' }}>
 
       {/* ── HEADER PROFILO ── */}
       <div style={{ backgroundColor:'#FFFFFF', border:'1px solid #E5E7EB', borderRadius:'12px', padding:'20px', marginBottom:'16px', display:'flex', alignItems:'center', gap:'16px' }}>
@@ -200,7 +200,7 @@ export default function ProfiloPage() {
 
       {/* ── DATI PERSONALI ── */}
       <Card title="Dati personali" icon="👤">
-        <div style={{ display:'grid', gridTemplateColumns:'1fr 1fr', gap:'12px', marginBottom:'12px' }}>
+        <div style={{ display:'grid', gridTemplateColumns:'1fr 1fr', gap:'12px', marginBottom:'12px' }} className="grid-2col">
           <Field label="Nome">
             <Input value={nome} onChange={e => setNome(e.target.value)} placeholder="Mario"/>
           </Field>

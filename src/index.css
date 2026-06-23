@@ -1,48 +1,58 @@
 @import url('https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800;900&display=swap');
 
-*, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+*, *::before, *::after {
+  box-sizing: border-box;
+  margin: 0;
+  padding: 0;
+  /* Blocca zoom su doppio tap su iOS */
+  touch-action: manipulation;
+}
+
+html {
+  /* Previene ridimensionamento font su rotazione iOS */
+  -webkit-text-size-adjust: 100%;
+  text-size-adjust: 100%;
+}
+
 html, body, #root {
   font-family: 'Inter', sans-serif;
   -webkit-font-smoothing: antialiased;
   background-color: #F4F5F7;
+  /* Blocca overflow orizzontale a livello root */
+  overflow-x: hidden;
+  max-width: 100vw;
 }
+
 a { text-decoration: none; color: inherit; }
 input, select, textarea, button { font-family: inherit; }
 
-/* ── Fix iOS Safari: previene zoom automatico su input/select/textarea ── */
-/* iOS fa zoom se fontSize < 16px — questo sovrascrive globalmente su mobile */
-@media (max-width: 768px) {
-  input[type="text"],
-  input[type="email"],
-  input[type="password"],
-  input[type="tel"],
-  input[type="number"],
-  input[type="search"],
-  input[type="date"],
-  input[type="time"],
-  select,
-  textarea {
-    font-size: 16px !important;
-    -webkit-text-size-adjust: 100%;
-  }
+/* ── Fix iOS Safari: previene zoom automatico su input focus ── */
+/* iOS fa zoom se fontSize < 16px — regola globale di sicurezza */
+input[type="text"],
+input[type="email"],
+input[type="password"],
+input[type="tel"],
+input[type="number"],
+input[type="search"],
+input[type="date"],
+input[type="time"],
+select,
+textarea {
+  font-size: 16px;
+  -webkit-text-size-adjust: 100%;
 }
-
-
 
 /* ── QR Scanner ─────────────────────────────────── */
 #qr-viewport video { width: 100% !important; }
 #qr-viewport canvas { display: none; }
 
 /* ── Landing gap fix ─────────────────────────────── */
-.landing-root { display: flex; flex-direction: column; }
-.landing-root header { margin: 0; padding: 0; }
 header img { display: block; }
 
 /* ══════════════════════════════════════════════════════
    COMPONENTI GLOBALI
 ══════════════════════════════════════════════════════ */
 
-/* Btn pill */
 .btn-pill {
   display: inline-flex; align-items: center; gap: 5px;
   padding: 5px 12px; border-radius: 20px;
@@ -57,7 +67,6 @@ header img { display: block; }
 .btn-pill-red    { background:#DC2626; color:#fff; }
 .btn-pill-violet { background:#7C3AED; color:#fff; }
 
-/* Icon badge */
 .icon-badge-blue   { background:linear-gradient(135deg,#dbeafe,#bfdbfe); color:#1d4ed8; border-radius:8px; }
 .icon-badge-green  { background:linear-gradient(135deg,#d1fae5,#a7f3d0); color:#065f46; border-radius:8px; }
 .icon-badge-violet { background:linear-gradient(135deg,#ede9fe,#ddd6fe); color:#5b21b6; border-radius:8px; }
@@ -65,27 +74,29 @@ header img { display: block; }
 .icon-badge-red    { background:linear-gradient(135deg,#fee2e2,#fecaca); color:#991b1b; border-radius:8px; }
 .icon-badge-cyan   { background:linear-gradient(135deg,#cffafe,#a5f3fc); color:#155e75; border-radius:8px; }
 
-/* Glow card */
 .glow-card { transition: box-shadow .2s ease, transform .15s ease; }
 .glow-card:hover { box-shadow: 0 0 0 1px #003DA520, 0 8px 24px #003DA528; transform: translateY(-1px); }
 
-/* EventSelector */
 .evt-selector-card {
   background: #fff; border: 1px solid #E5E7EB; border-radius: 10px;
   padding: 14px 16px; margin-bottom: 16px;
   display: flex; align-items: center; gap: 12px; flex-wrap: wrap;
 }
 
-/* th-icon */
 .th-icon {
   display: flex; align-items: center; gap: 6px;
   white-space: nowrap; font-size: 11px; font-weight: 700;
   text-transform: uppercase; letter-spacing: 0.05em;
 }
 
-/* ══════════════════════════════════════════════════════
-   GLOW TAB BAR
-══════════════════════════════════════════════════════ */
+/* GlowTabBar scroll */
+.glow-tab-wrap {
+  scrollbar-width: none;
+  -webkit-overflow-scrolling: touch;
+}
+.glow-tab-wrap::-webkit-scrollbar { display: none; }
+
+/* Slim tab */
 .slim-tab-bar {
   display: flex; gap: 0; border-bottom: 1px solid #E5E7EB;
   padding: 0 16px; flex-shrink: 0;
@@ -108,7 +119,6 @@ header img { display: block; }
 }
 .slim-tab.active::after { left: 0; right: 0; }
 .slim-tab.active { color: #003DA5; font-weight: 700; }
-.slim-tab:hover:not(.active) { color: #374151; }
 
 /* ══════════════════════════════════════════════════════
    DESKTOP (≥ 769px)
@@ -129,111 +139,110 @@ header img { display: block; }
 }
 
 /* ══════════════════════════════════════════════════════
-   MOBILE (≤ 768px)  — tutto qui, niente altrove
+   MOBILE ≤ 768px  — iPhone 17 Pro = 393px
 ══════════════════════════════════════════════════════ */
 @media (max-width: 768px) {
+
+  /* Blocca qualsiasi overflow */
+  body, #root, main, aside { max-width: 100vw; }
 
   /* Layout base */
   main {
     margin-left: 0 !important;
-    padding: 68px 12px 32px !important;
+    padding: 64px 10px 24px !important;
+    overflow-x: hidden !important;
   }
 
-  /* Sidebar nascosta di default */
+  /* Sidebar */
   aside {
     transform: translateX(-100%);
     transition: transform .25s cubic-bezier(.4,0,.2,1);
-    width: 240px !important;
+    width: 280px !important;
+    max-width: 85vw !important;
   }
   aside.open { transform: translateX(0); }
 
-  /* ── Header ── */
-  .admin-page-title { font-size: 22px !important; letter-spacing: -0.03em !important; }
-
-  /* ── GlowTabBar: scroll orizzontale ── */
-  .glow-tab-wrap {
-    overflow-x: auto !important;
-    flex-wrap: nowrap !important;
-    -webkit-overflow-scrolling: touch;
-    scrollbar-width: none;
-    padding-bottom: 2px;
-    margin-bottom: 16px !important;
+  /* ── Input: font 16px per prevenire zoom iOS ── */
+  input, select, textarea {
+    font-size: 16px !important;
   }
-  .glow-tab-wrap::-webkit-scrollbar { display: none; }
 
-  /* ── Stat card grid: 2 colonne compatte su mobile ── */
+  /* ── Page header: riga singola compatta ── */
+  .page-header-row {
+    display: flex !important;
+    flex-direction: row !important;
+    align-items: center !important;
+    gap: 8px !important;
+    margin-bottom: 12px !important;
+    flex-wrap: nowrap !important;
+  }
+  .page-header-row h1 {
+    font-size: 18px !important;
+    letter-spacing: -0.03em !important;
+    flex: 1 !important;
+    min-width: 0 !important;
+    white-space: nowrap !important;
+    overflow: hidden !important;
+    text-overflow: ellipsis !important;
+  }
+  .page-header-row p { display: none !important; }
+  .page-header-row > button {
+    font-size: 12px !important;
+    padding: 7px 10px !important;
+    gap: 4px !important;
+    flex-shrink: 0 !important;
+  }
+
+  /* ── Stat card grid: 2 colonne, card compatta ── */
   .stat-grid-4,
   .stat-grid-3,
   .stat-grid-auto {
     grid-template-columns: 1fr 1fr !important;
     gap: 6px !important;
+    margin-bottom: 10px !important;
+  }
+
+  /* ── GlowTabBar: scroll orizzontale ── */
+  .glow-tab-wrap {
+    flex-wrap: nowrap !important;
+    overflow-x: auto !important;
     margin-bottom: 12px !important;
   }
 
-  /* ── Stat card: nascondi sottotitolo su mobile ── */
-  .stat-grid-4 .stat-sub,
-  .stat-grid-3 .stat-sub,
-  .stat-grid-auto .stat-sub { display: none !important; }
+  /* ── Tabelle: niente min-width fisso, scroll fluido ── */
+  .table-wrap {
+    overflow-x: auto !important;
+    -webkit-overflow-scrolling: touch !important;
+    margin: 0 -10px !important;
+    padding: 0 10px !important;
+    width: calc(100% + 20px) !important;
+  }
+  /* NO min-width fisso — la tabella si adatta al contenuto */
+  .table-wrap table {
+    min-width: unset !important;
+    width: 100% !important;
+    font-size: 12px !important;
+  }
+  .table-wrap th,
+  .table-wrap td {
+    padding: 8px 8px !important;
+    font-size: 11px !important;
+  }
 
-  /* ── Grids generiche → 1 colonna ── */
-  .grid-2col  { grid-template-columns: 1fr !important; }
-  .grid-3col  { grid-template-columns: 1fr !important; }
+  /* Nascondi colonne opzionali */
+  .col-hide-mobile { display: none !important; }
 
-  /* ── Sezione grafico+prossimi eventi → colonna ── */
-  .dashboard-split { grid-template-columns: 1fr !important; }
-
-  /* ── EventSelector: compatto su mobile ── */
+  /* ── EventSelector: compatto ── */
   .evt-selector-info { display: none !important; }
+  .evt-selector-icon { display: none !important; }
   .evt-selector-card {
-    padding: 10px 12px !important;
+    padding: 10px !important;
     gap: 8px !important;
     margin-bottom: 10px !important;
     border-radius: 8px !important;
   }
-  .evt-selector-icon { display: none !important; }
 
-  /* ── Tabelle: scroll orizzontale ── */
-  .table-wrap {
-    overflow-x: auto !important;
-    -webkit-overflow-scrolling: touch;
-    margin: 0 -12px;
-    padding: 0 12px;
-  }
-  .table-wrap table { min-width: 480px; }
-
-  /* ── Colonne opzionali nascoste su mobile ── */
-  .col-hide-mobile { display: none !important; }
-
-  /* ── Page header: compatto su mobile ── */
-  .page-header-row {
-    flex-direction: row !important;
-    align-items: center !important;
-    gap: 8px !important;
-    margin-bottom: 14px !important;
-    flex-wrap: nowrap !important;
-  }
-  .page-header-row h1 {
-    font-size: 20px !important;
-    letter-spacing: -0.03em !important;
-    flex: 1 !important;
-    min-width: 0 !important;
-    overflow: hidden !important;
-    text-overflow: ellipsis !important;
-    white-space: nowrap !important;
-  }
-  .page-header-row p { display: none !important; }
-  .page-header-row button {
-    font-size: 12px !important;
-    padding: 8px 12px !important;
-    flex-shrink: 0 !important;
-    white-space: nowrap !important;
-  }
-
-  /* ── Bottoni azione riga tabella: solo icone ── */
-  .btn-pill span { display: none; }
-  .btn-pill { padding: 6px 8px !important; }
-
-  /* ── Sezione iscritti filtri: colonna, compatta ── */
+  /* ── Filtri: colonna, full-width ── */
   .iscritti-filters {
     flex-direction: column !important;
     gap: 6px !important;
@@ -243,14 +252,11 @@ header img { display: block; }
     min-width: unset !important;
   }
 
-  /* ── Editor evento: tab scrollabile ── */
-  .editor-tabbar {
-    overflow-x: auto !important;
-    flex-wrap: nowrap !important;
-    scrollbar-width: none;
-    -webkit-overflow-scrolling: touch;
-  }
-  .editor-tabbar::-webkit-scrollbar { display: none; }
+  /* ── Grids generiche → 1 colonna ── */
+  .grid-2col  { grid-template-columns: 1fr !important; }
+  .grid-3col  { grid-template-columns: 1fr !important; }
+  .dashboard-split { grid-template-columns: 1fr !important; }
+  .stats-user-split { grid-template-columns: 1fr !important; }
 
   /* ── Checkin actions ── */
   .checkin-actions {
@@ -259,40 +265,52 @@ header img { display: block; }
   }
   .checkin-actions button {
     font-size: 12px !important;
-    padding: 10px 8px !important;
+    padding: 10px 6px !important;
   }
 
-  /* ── Modal: bottom sheet su mobile ── */
+  /* ── Editor tab bar scrollabile ── */
+  .editor-tabbar {
+    overflow-x: auto !important;
+    flex-wrap: nowrap !important;
+    scrollbar-width: none !important;
+    -webkit-overflow-scrolling: touch !important;
+  }
+  .editor-tabbar::-webkit-scrollbar { display: none !important; }
+
+  /* ── Bottoni pill: solo icona ── */
+  .btn-pill span { display: none !important; }
+  .btn-pill { padding: 6px 7px !important; border-radius: 6px !important; }
+
+  /* ── Modal: bottom sheet ── */
   .modal-overlay { align-items: flex-end !important; }
   .modal-box {
-    border-radius: 16px 16px 0 0 !important;
-    max-height: 90vh !important;
+    border-radius: 14px 14px 0 0 !important;
+    max-height: 88vh !important;
     overflow-y: auto !important;
     width: 100% !important;
     max-width: 100% !important;
   }
 
-  /* ── Landing page ── */
-  .landing-hero-title  { font-size: 26px !important; }
-  .landing-body        { padding: 20px 14px 0 !important; }
-  .landing-info-grid   { grid-template-columns: 1fr 1fr !important; }
-  .landing-cta-box     { flex-direction: column !important; align-items: stretch !important; }
-  .landing-cta-btn     { width: 100% !important; justify-content: center !important; }
-
-  /* ── Form grid ── */
-  .form-grid-2col { grid-template-columns: 1fr !important; }
-
-  /* ── Statistiche: cronologia full-width ── */
-  .stats-user-split { grid-template-columns: 1fr !important; }
-
   /* ── Nascondi elementi non essenziali ── */
   .hide-mobile { display: none !important; }
   .show-mobile { display: block !important; }
+
+  /* ── Landing ── */
+  .landing-hero-title  { font-size: 24px !important; }
+  .landing-body        { padding: 16px 12px 0 !important; }
+  .landing-cta-btn     { width: 100% !important; justify-content: center !important; }
+  .form-grid-2col      { grid-template-columns: 1fr !important; }
 }
 
-/* ── Landing responsive (extra small) ── */
-@media (max-width: 400px) {
-  .stat-grid-4, .stat-grid-3, .stat-grid-auto {
-    grid-template-columns: 1fr !important;
+/* Extra small: iPhone SE, 375px */
+@media (max-width: 390px) {
+  main { padding: 64px 8px 20px !important; }
+  .stat-grid-4,
+  .stat-grid-3,
+  .stat-grid-auto {
+    grid-template-columns: 1fr 1fr !important;
+    gap: 5px !important;
   }
+  .table-wrap th,
+  .table-wrap td { padding: 6px 6px !important; font-size: 10px !important; }
 }

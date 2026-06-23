@@ -190,7 +190,7 @@ export default function UtentiPage() {
         <Modal title={modal==='create'?'Nuovo utente':'Modifica utente'} onClose={()=>setModal(null)} width="500px">
           <div style={{ display:'flex', flexDirection:'column', gap:'13px' }}>
             {errors.general && <div style={{ backgroundColor:'#FEF2F2', border:'1px solid #FECACA', borderRadius:'6px', padding:'10px 14px', fontSize:'13px', color:'#DC2626' }}>{errors.general}</div>}
-            <div style={{ display:'grid', gridTemplateColumns:'1fr 1fr', gap:'12px' }}>
+            <div style={{ display:'grid', gridTemplateColumns:'1fr 1fr', gap:'12px' }} className="grid-2col">
               <Field label="Nome"><Input value={cur.nome||''} onChange={e=>setCur(p=>({...p,nome:e.target.value}))} placeholder="Mario"/></Field>
               <Field label="Cognome"><Input value={cur.cognome||''} onChange={e=>setCur(p=>({...p,cognome:e.target.value}))} placeholder="Rossi"/></Field>
             </div>
