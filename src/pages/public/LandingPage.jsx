@@ -310,7 +310,7 @@ export default function LandingPage() {
       <div className="hero-section" style={{ ...s.hero, ...heroStyle, minHeight:`min(${lh.altezza||340}px, 56vw)` }}>
         {/* Logo sovrapposto in alto al centro — fuori dall'overlay per non essere trascinato in basso */}
         <div style={{
-          position: 'absolute', top: '20px', left: 0, right: 0,
+          position: 'absolute', top: '10px', left: 0, right: 0,
           display: 'flex', justifyContent: 'center', zIndex: 3,
           pointerEvents: 'none',
         }}>
