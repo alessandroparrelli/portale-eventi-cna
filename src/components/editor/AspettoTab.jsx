@@ -322,7 +322,17 @@ export default function AspettoTab({ event, setEvent }) {
           <ColorPicker label="Sfondo area CTA / registrazione" value={tema.cta_bg} onChange={v => setT('cta_bg', v)} />
           <div style={sGrid}>
             <ColorPicker label="Sfondo footer" value={tema.sfondo_footer} onChange={v => setT('sfondo_footer', v)} />
-            <ColorPicker label="Testo footer" value={tema.testo_footer} onChange={v => setT('testo_footer', v)} />
+            <ColorPicker label="Colore testo footer" value={tema.testo_footer} onChange={v => setT('testo_footer', v)} />
+          </div>
+          <div>
+            <label style={sLabel}>Testo footer</label>
+            <input
+              value={event.footer_testo || ''}
+              onChange={e => setEvent(p => ({ ...p, footer_testo: e.target.value }))}
+              placeholder={`© ${new Date().getFullYear()} CNA di Roma — Artigiani Imprenditori d'Italia`}
+              style={{ ...sInput, marginTop: '4px' }}
+            />
+            <p style={sHint}>Lascia vuoto per usare il testo di default.</p>
           </div>
         </Sezione>
 

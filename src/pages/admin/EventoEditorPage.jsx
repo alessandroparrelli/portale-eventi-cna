@@ -331,7 +331,7 @@ export default function EventoEditorPage() {
 
   const [event, setEvent] = useState({
     titolo:'', slug:'', stato:'bozza', data_inizio:'', data_fine:'',
-    luogo:'', sottotitolo:'', descrizione_html:'', immagine_hero:null, logo_url:null,
+    luogo:'', sottotitolo:'', footer_testo:'', descrizione_html:'', immagine_hero:null, logo_url:null,
     colore_primario:'#003DA5', colore_sfondo:'#F4F5F7', tema:{},
     layout_hero:{ altezza:'380', overlay_opacita:'55', allineamento:'sinistra', titolo_colore:'#FFFFFF', titolo_dimensione:'clamp(26px,5vw,54px)', titolo_grassetto:true, titolo_maiuscolo:false },
     sezioni:[],
@@ -362,6 +362,7 @@ export default function EventoEditorPage() {
         layout_hero: data.layout_hero || { altezza:'380', overlay_opacita:'55', allineamento:'sinistra' },
         logo_url: data.logo_url || null,
         sottotitolo: data.sottotitolo || '',
+        footer_testo: data.footer_testo || '',
         tema: data.tema || {},
         sezioni,
         // Azzera descrizione_html se è stata migrata nei blocchi
@@ -389,6 +390,7 @@ export default function EventoEditorPage() {
       posti_per_utente:event.posti_per_utente||1,
       logo_url:event.logo_url||null,
       sottotitolo:event.sottotitolo||null,
+      footer_testo:event.footer_testo||null,
       tema:event.tema||{},
     }
     if (isNew) {

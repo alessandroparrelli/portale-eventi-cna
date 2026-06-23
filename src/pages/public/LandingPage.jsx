@@ -544,7 +544,7 @@ export default function LandingPage() {
           alt="CNA Roma"
           style={{ height: `clamp(32px, ${Math.round((tema.logo_altezza || 44) * 0.08)}vw, ${Math.round((tema.logo_altezza || 44) * 0.7)}px)`, maxWidth: '200px', objectFit: 'contain', display: 'block', margin: '0 auto 10px' }}
         />
-        <span>© {new Date().getFullYear()} CNA Roma — Confederazione Nazionale dell'Artigianato e della PMI</span>
+        <span>{event.footer_testo || `© ${new Date().getFullYear()} CNA di Roma — Artigiani Imprenditori d'Italia`}</span>
       </footer>
 
       {conferma && (
