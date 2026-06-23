@@ -324,7 +324,7 @@ export default function LandingPage() {
             <img
               src={event?.logo_url || "https://raw.githubusercontent.com/alessandroparrelli/fileappoggio/main/NUOVO-LOGO-CNA-ROMA-SOLO-ROMA.png"}
               alt="CNA Roma"
-              style={{ height: `clamp(28px, ${Math.round((tema.logo_altezza || 44) * 0.065)}vw, ${tema.logo_altezza || 44}px)`, maxWidth: 'min(280px, 60vw)', objectFit: 'contain', display: 'block' }}
+              style={{ height: `clamp(40px, ${Math.round((tema.logo_altezza || 44) * 0.1)}vw, ${tema.logo_altezza || 44}px)`, maxWidth: 'min(280px, 70vw)', objectFit: 'contain', display: 'block' }}
             />
           </div>
         </div>
