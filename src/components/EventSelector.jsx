@@ -10,7 +10,7 @@ export default function EventSelector({ eventi = [], value, onChange, label = 'E
   return (
     <div className="evt-selector-card" style={{ flexWrap: 'wrap', gap: '12px' }}>
       {/* Icona */}
-      <div className="icon-badge-blue" style={{ width: 42, height: 42, display: 'flex', alignItems: 'center', justifyContent: 'center', flexShrink: 0 }}>
+      <div className="icon-badge-blue evt-selector-icon" style={{ width: 42, height: 42, display: 'flex', alignItems: 'center', justifyContent: 'center', flexShrink: 0 }}>
         <CalendarDays size={20} />
       </div>
 

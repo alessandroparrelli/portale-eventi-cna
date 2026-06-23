@@ -141,23 +141,19 @@ header img { display: block; }
   }
   .glow-tab-wrap::-webkit-scrollbar { display: none; }
 
-  /* ── Stat card grid: sempre 2 colonne su mobile ── */
+  /* ── Stat card grid: 2 colonne compatte su mobile ── */
   .stat-grid-4,
   .stat-grid-3,
   .stat-grid-auto {
     grid-template-columns: 1fr 1fr !important;
-    gap: 8px !important;
+    gap: 6px !important;
+    margin-bottom: 12px !important;
   }
-  /* Card più compatte */
-  .stat-grid-4 > div,
-  .stat-grid-3 > div,
-  .stat-grid-auto > div {
-    padding: 14px !important;
-  }
-  .stat-grid-4 > div p:first-of-type,
-  .stat-grid-3 > div p:first-of-type {
-    font-size: 28px !important;
-  }
+
+  /* ── Stat card: nascondi sottotitolo su mobile ── */
+  .stat-grid-4 .stat-sub,
+  .stat-grid-3 .stat-sub,
+  .stat-grid-auto .stat-sub { display: none !important; }
 
   /* ── Grids generiche → 1 colonna ── */
   .grid-2col  { grid-template-columns: 1fr !important; }
@@ -166,9 +162,15 @@ header img { display: block; }
   /* ── Sezione grafico+prossimi eventi → colonna ── */
   .dashboard-split { grid-template-columns: 1fr !important; }
 
-  /* ── EventSelector: senza info data/stato su mobile ── */
+  /* ── EventSelector: compatto su mobile ── */
   .evt-selector-info { display: none !important; }
-  .evt-selector-card { padding: 12px !important; }
+  .evt-selector-card {
+    padding: 10px 12px !important;
+    gap: 8px !important;
+    margin-bottom: 10px !important;
+    border-radius: 8px !important;
+  }
+  .evt-selector-icon { display: none !important; }
 
   /* ── Tabelle: scroll orizzontale ── */
   .table-wrap {
@@ -182,22 +184,43 @@ header img { display: block; }
   /* ── Colonne opzionali nascoste su mobile ── */
   .col-hide-mobile { display: none !important; }
 
-  /* ── Page header ── */
+  /* ── Page header: compatto su mobile ── */
   .page-header-row {
-    flex-direction: column !important;
-    gap: 10px !important;
-    margin-bottom: 16px !important;
+    flex-direction: row !important;
+    align-items: center !important;
+    gap: 8px !important;
+    margin-bottom: 14px !important;
+    flex-wrap: nowrap !important;
   }
-  .page-header-row h1 { font-size: 24px !important; }
+  .page-header-row h1 {
+    font-size: 20px !important;
+    letter-spacing: -0.03em !important;
+    flex: 1 !important;
+    min-width: 0 !important;
+    overflow: hidden !important;
+    text-overflow: ellipsis !important;
+    white-space: nowrap !important;
+  }
+  .page-header-row p { display: none !important; }
+  .page-header-row button {
+    font-size: 12px !important;
+    padding: 8px 12px !important;
+    flex-shrink: 0 !important;
+    white-space: nowrap !important;
+  }
 
   /* ── Bottoni azione riga tabella: solo icone ── */
   .btn-pill span { display: none; }
   .btn-pill { padding: 6px 8px !important; }
 
-  /* ── Sezione iscritti filtri: colonna ── */
+  /* ── Sezione iscritti filtri: colonna, compatta ── */
   .iscritti-filters {
     flex-direction: column !important;
-    gap: 8px !important;
+    gap: 6px !important;
+  }
+  .iscritti-filters > * {
+    width: 100% !important;
+    min-width: unset !important;
   }
 
   /* ── Editor evento: tab scrollabile ── */
@@ -209,8 +232,15 @@ header img { display: block; }
   }
   .editor-tabbar::-webkit-scrollbar { display: none; }
 
-  /* ── Checkin actions: griglia 2 col ── */
-  .checkin-actions { grid-template-columns: 1fr 1fr !important; gap: 8px !important; }
+  /* ── Checkin actions ── */
+  .checkin-actions {
+    grid-template-columns: 1fr 1fr !important;
+    gap: 6px !important;
+  }
+  .checkin-actions button {
+    font-size: 12px !important;
+    padding: 10px 8px !important;
+  }
 
   /* ── Modal: bottom sheet su mobile ── */
   .modal-overlay { align-items: flex-end !important; }

@@ -1,4 +1,14 @@
-import { useState } from 'react'
+import { useState, useEffect } from 'react'
+
+function useMobile() {
+  const [m, setM] = useState(() => typeof window !== 'undefined' ? window.innerWidth < 769 : false)
+  useEffect(() => {
+    const fn = () => setM(window.innerWidth < 769)
+    window.addEventListener('resize', fn, { passive:true })
+    return () => window.removeEventListener('resize', fn)
+  }, [])
+  return m
+}
 
 const PALETTES = {
   blue:   { from:'#003DA5', to:'#1a56db', glow:'rgba(0,61,165,.40)',   hint:'rgba(0,61,165,.09)',   text:'#003DA5' },
@@ -16,7 +26,17 @@ function Tab({ t, isActive, color, onChange }) {
   const p = PALETTES[color] || PALETTES.blue
   const [hovered, setHovered] = useState(false)
 
-  const style = {
+  const style = mobile ? {
+    display: 'inline-flex', alignItems: 'center', gap: '4px',
+    padding: '6px 11px', borderRadius: '6px', border: 'none',
+    cursor: 'pointer', fontSize: '12px',
+    fontWeight: isActive ? '700' : '500',
+    fontFamily: "'Inter', sans-serif",
+    whiteSpace: 'nowrap', outline: 'none',
+    background: isActive ? `linear-gradient(135deg, ${p.from}, ${p.to})` : 'transparent',
+    color: isActive ? '#ffffff' : '#6B7280',
+    boxShadow: isActive ? `0 2px 8px rgba(${p.glow.replace('rgba(','').replace(')','').split(',').slice(0,3).join(',')}, .30)` : 'none',
+  } : {
     display: 'inline-flex',
     alignItems: 'center',
     gap: '6px',
@@ -32,7 +52,6 @@ function Tab({ t, isActive, color, onChange }) {
     transition: 'all 0.18s cubic-bezier(.4,0,.2,1)',
     position: 'relative',
     outline: 'none',
-    // stato
     background: isActive
       ? `linear-gradient(135deg, ${p.from}, ${p.to})`
       : hovered ? p.hint : 'transparent',
@@ -52,7 +71,7 @@ function Tab({ t, isActive, color, onChange }) {
       onMouseEnter={() => setHovered(true)}
       onMouseLeave={() => setHovered(false)}
     >
-      {t.icon && (
+      {t.icon && !mobile && (
         <span style={{ fontSize: 14, lineHeight: 1, filter: isActive ? 'brightness(10)' : 'none' }}>
           {t.icon}
         </span>
@@ -63,17 +82,21 @@ function Tab({ t, isActive, color, onChange }) {
 }
 
 export default function GlowTabBar({ tabs = [], active, onChange }) {
+  const mobile = useMobile()
   return (
     <div
       className="glow-tab-wrap"
       style={{
         display: 'flex',
-        gap: '5px',
-        padding: '6px',
+        gap: mobile ? '3px' : '5px',
+        padding: mobile ? '4px' : '6px',
         background: 'linear-gradient(135deg, #F0F2F5, #E8EBF0)',
-        borderRadius: '12px',
-        marginBottom: '24px',
-        flexWrap: 'wrap',
+        borderRadius: mobile ? '8px' : '12px',
+        marginBottom: mobile ? '14px' : '24px',
+        flexWrap: 'nowrap',
+        overflowX: mobile ? 'auto' : 'visible',
+        WebkitOverflowScrolling: 'touch',
+        scrollbarWidth: 'none',
         boxShadow: 'inset 0 1px 3px rgba(0,0,0,.06)',
       }}>
       {tabs.map((t, i) => {
@@ -85,6 +108,7 @@ export default function GlowTabBar({ tabs = [], active, onChange }) {
             isActive={active === t.id}
             color={color}
             onChange={onChange}
+            mobile={mobile}
           />
         )
       })}
