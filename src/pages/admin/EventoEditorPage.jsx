@@ -376,7 +376,7 @@ export default function EventoEditorPage() {
     }
   }
 
-  function setH(k) { return v => setEvent(p=>({...p,layout_hero:{...p.layout_hero,[k]:typeof v==='string'?v:v?.target?.value}})) }
+  function setH(k) { return v => setEvent(p=>({...p,layout_hero:{...p.layout_hero,[k]:typeof v==='boolean'?v:typeof v==='string'?v:v?.target?.value}})) }
 
   async function save() {
     if (!event.titolo.trim()) return alert('Il titolo è obbligatorio')
@@ -570,22 +570,63 @@ export default function EventoEditorPage() {
 
             {/* Logo header */}
             <div style={{ marginBottom:'24px', padding:'16px', background:'#F9FAFB', border:'1px solid #E5E7EB', borderRadius:'10px' }}>
-              <p style={{ fontSize:'12px', fontWeight:'700', color:'#6B7280', textTransform:'uppercase', letterSpacing:'.06em', margin:'0 0 12px' }}>
-                🏷 Logo header della landing page
+              <p style={{ fontSize:'12px', fontWeight:'700', color:'#6B7280', textTransform:'uppercase', letterSpacing:'.06em', margin:'0 0 6px' }}>
+                🏷 Logo header
               </p>
               <p style={{ fontSize:'12px', color:'#9CA3AF', margin:'0 0 12px', lineHeight:'1.5' }}>
-                Scegli il logo che apparirà nell'header della pagina evento. Puoi caricare loghi personalizzati per eventi di altre sedi CNA.
+                Scegli il logo che apparirà nell'header della pagina evento.
               </p>
               <LogoManager
                 value={event.logo_url}
                 onChange={url => setEvent(p => ({ ...p, logo_url: url }))}
               />
+              {/* Slider dimensione + sfondo logo */}
+              <div style={{ marginTop:'14px', display:'grid', gridTemplateColumns:'1fr 1fr', gap:'16px' }}>
+                <Field label={`Dimensione logo: ${event.layout_hero?.logo_altezza||'48'}px`}>
+                  <input type="range" min="28" max="160" step="4"
+                    value={event.layout_hero?.logo_altezza||'48'}
+                    onChange={e=>setH('logo_altezza')(e.target.value)}
+                    style={{ width:'100%' }}/>
+                </Field>
+                <Field label="Sfondo logo" hint="Per logo leggibile su hero scuro">
+                  <div style={{ display:'flex', gap:'6px' }}>
+                    {[['trasparente','⬜ Nessuno'],['bianco','🤍 Bianco'],['colore_primario','🎨 Tema']].map(([v,l]) => (
+                      <button key={v} onClick={()=>setH('logo_sfondo')(v)} style={{
+                        flex:1, padding:'6px 4px', border:`1px solid ${(event.layout_hero?.logo_sfondo||'trasparente')===v?'#003DA5':'#E5E7EB'}`,
+                        borderRadius:'6px', background:(event.layout_hero?.logo_sfondo||'trasparente')===v?'#EEF3FF':'#fff',
+                        cursor:'pointer', fontSize:'11px', fontWeight:'600',
+                        color:(event.layout_hero?.logo_sfondo||'trasparente')===v?'#003DA5':'#6B7280',
+                        fontFamily:"'Inter',sans-serif"
+                      }}>{l}</button>
+                    ))}
+                  </div>
+                </Field>
+              </div>
+              {/* Anteprima logo live */}
+              <div style={{ marginTop:'10px', padding:'10px', background:'#1a1a2e', borderRadius:'8px', textAlign:'center' }}>
+                <div style={{
+                  background: (event.layout_hero?.logo_sfondo||'trasparente')==='bianco' ? '#fff'
+                            : (event.layout_hero?.logo_sfondo||'trasparente')==='colore_primario' ? (event.colore_primario||'#003DA5')
+                            : 'transparent',
+                  padding: (event.layout_hero?.logo_sfondo && event.layout_hero?.logo_sfondo!=='trasparente') ? '5px 12px' : 0,
+                  borderRadius:'6px', display:'inline-flex', alignItems:'center'
+                }}>
+                  <img
+                    src={event.logo_url || 'https://raw.githubusercontent.com/alessandroparrelli/fileappoggio/main/NUOVO-LOGO-CNA-ROMA-SOLO-ROMA.png'}
+                    alt="Logo preview"
+                    style={{ height:(event.layout_hero?.logo_altezza||'48')+'px', objectFit:'contain', display:'block' }}
+                  />
+                </div>
+                <p style={{ fontSize:'10px', color:'rgba(255,255,255,0.4)', margin:'5px 0 0' }}>Anteprima su sfondo scuro</p>
+              </div>
             </div>
 
+            {/* Immagine hero */}
             <div style={{ marginBottom:'20px' }}>
               <ImageUploader value={event.immagine_hero} onChange={url=>setEvent(p=>({...p,immagine_hero:url}))}/>
             </div>
 
+            {/* Controlli layout */}
             <div style={p.grid3}>
               <Field label={`Altezza hero: ${event.layout_hero?.altezza||'380'}px`}>
                 <input type="range" min="200" max="700" step="20"
@@ -612,15 +653,32 @@ export default function EventoEditorPage() {
               </Field>
             </div>
 
-            {/* Stile titolo */}
+            {/* Testi hero */}
+            <div style={{ marginTop:'16px', display:'grid', gridTemplateColumns:'1fr', gap:'12px' }}>
+              <Field label="Titolo principale (H1)" hint="Uguale al titolo evento — modificalo dalla tab Info">
+                <div style={{ padding:'10px 14px', background:'#F9FAFB', border:'1px solid #E5E7EB', borderRadius:'8px', fontSize:'14px', color:'#9CA3AF', fontStyle:'italic' }}>
+                  {event.titolo || 'Titolo evento…'}
+                </div>
+              </Field>
+              <Field label="Secondo titolo (H2 — opzionale)" hint="Appare sotto il titolo principale, più piccolo">
+                <Input
+                  value={event.layout_hero?.titolo2||''}
+                  onChange={e=>setH('titolo2')(e.target.value)}
+                  placeholder="Es. slogan, data, luogo in evidenza..."
+                />
+              </Field>
+            </div>
+
+            {/* Stile titolo H1 */}
             <div style={{ marginTop:'16px', padding:'16px', backgroundColor:'#F9FAFB', borderRadius:'8px', border:'1px solid #E5E7EB' }}>
-              <p style={{ fontSize:'12px', fontWeight:'700', color:'#6B7280', textTransform:'uppercase', letterSpacing:'.06em', margin:'0 0 12px' }}>Stile titolo</p>
+              <p style={{ fontSize:'12px', fontWeight:'700', color:'#6B7280', textTransform:'uppercase', letterSpacing:'.06em', margin:'0 0 12px' }}>Stile titolo principale (H1)</p>
               <div style={p.grid3}>
-                <Field label="Colore titolo">
+                <Field label="Colore">
                   <div style={{ display:'flex', gap:'8px', alignItems:'center' }}>
-                    <input type="color" value={event.layout_hero?.titolo_colore||'#FFFFFF'}
+                    <input type="color"
+                      value={/^#[0-9A-Fa-f]{6}$/.test(event.layout_hero?.titolo_colore||'') ? event.layout_hero?.titolo_colore : '#ffffff'}
                       onChange={e=>setH('titolo_colore')(e.target.value)}
-                      style={{ width:'40px', height:'34px', border:'1px solid #D1D5DB', borderRadius:'6px', cursor:'pointer', padding:'2px' }}/>
+                      style={{ width:'40px', height:'34px', border:'1px solid #D1D5DB', borderRadius:'6px', cursor:'pointer', padding:'2px', flexShrink:0 }}/>
                     <Input value={event.layout_hero?.titolo_colore||'#FFFFFF'}
                       onChange={e=>setH('titolo_colore')(e.target.value)} placeholder="#FFFFFF"/>
                   </div>
@@ -636,18 +694,51 @@ export default function EventoEditorPage() {
                 </Field>
                 <Field label="Stile">
                   <div style={{ display:'flex', gap:'8px' }}>
-                    <button onClick={()=>setH('titolo_grassetto')(!event.layout_hero?.titolo_grassetto)}
-                      style={{ flex:1, padding:'7px', border:`1px solid ${event.layout_hero?.titolo_grassetto?'#003DA5':'#E5E7EB'}`,
-                        borderRadius:'6px', backgroundColor:event.layout_hero?.titolo_grassetto?'#EEF3FF':'#FFF',
+                    <button onClick={()=>setH('titolo_grassetto')(event.layout_hero?.titolo_grassetto===false?true:false)}
+                      style={{ flex:1, padding:'7px', border:`1px solid ${event.layout_hero?.titolo_grassetto!==false?'#003DA5':'#E5E7EB'}`,
+                        borderRadius:'6px', backgroundColor:event.layout_hero?.titolo_grassetto!==false?'#EEF3FF':'#FFF',
                         cursor:'pointer', fontSize:'13px', fontWeight:'800', fontFamily:"'Inter',sans-serif",
-                        color:event.layout_hero?.titolo_grassetto?'#003DA5':'#6B7280' }}>B</button>
-                    <button onClick={()=>setH('titolo_maiuscolo')(!event.layout_hero?.titolo_maiuscolo)}
+                        color:event.layout_hero?.titolo_grassetto!==false?'#003DA5':'#6B7280' }}>B</button>
+                    <button onClick={()=>setH('titolo_maiuscolo')(event.layout_hero?.titolo_maiuscolo?false:true)}
                       style={{ flex:1, padding:'7px', border:`1px solid ${event.layout_hero?.titolo_maiuscolo?'#003DA5':'#E5E7EB'}`,
                         borderRadius:'6px', backgroundColor:event.layout_hero?.titolo_maiuscolo?'#EEF3FF':'#FFF',
                         cursor:'pointer', fontSize:'12px', fontWeight:'600', fontFamily:"'Inter',sans-serif",
                         color:event.layout_hero?.titolo_maiuscolo?'#003DA5':'#6B7280' }}>AA</button>
                   </div>
                 </Field>
+              </div>
+
+              {/* Stile H2 */}
+              <div style={{ borderTop:'1px solid #E5E7EB', marginTop:'14px', paddingTop:'14px' }}>
+                <p style={{ fontSize:'12px', fontWeight:'700', color:'#6B7280', textTransform:'uppercase', letterSpacing:'.06em', margin:'0 0 12px' }}>Stile secondo titolo (H2)</p>
+                <div style={p.grid3}>
+                  <Field label="Colore">
+                    <div style={{ display:'flex', gap:'8px', alignItems:'center' }}>
+                      <input type="color"
+                        value={/^#[0-9A-Fa-f]{6}$/.test(event.layout_hero?.titolo2_colore||'') ? event.layout_hero?.titolo2_colore : '#ffffff'}
+                        onChange={e=>setH('titolo2_colore')(e.target.value)}
+                        style={{ width:'40px', height:'34px', border:'1px solid #D1D5DB', borderRadius:'6px', cursor:'pointer', padding:'2px', flexShrink:0 }}/>
+                      <Input value={event.layout_hero?.titolo2_colore||''}
+                        onChange={e=>setH('titolo2_colore')(e.target.value)} placeholder="#ffffff"/>
+                    </div>
+                  </Field>
+                  <Field label="Dimensione">
+                    <Select value={event.layout_hero?.titolo2_dimensione||'clamp(15px,2vw,20px)'}
+                      onChange={e=>setH('titolo2_dimensione')(e.target.value)}>
+                      <option value="clamp(13px,1.5vw,16px)">Piccolo</option>
+                      <option value="clamp(15px,2vw,20px)">Medio</option>
+                      <option value="clamp(18px,2.5vw,26px)">Grande</option>
+                      <option value="clamp(22px,3vw,34px)">Extra Grande</option>
+                    </Select>
+                  </Field>
+                  <Field label="Stile">
+                    <button onClick={()=>setH('titolo2_grassetto')(event.layout_hero?.titolo2_grassetto?false:true)}
+                      style={{ width:'100%', padding:'7px', border:`1px solid ${event.layout_hero?.titolo2_grassetto?'#003DA5':'#E5E7EB'}`,
+                        borderRadius:'6px', backgroundColor:event.layout_hero?.titolo2_grassetto?'#EEF3FF':'#FFF',
+                        cursor:'pointer', fontSize:'13px', fontWeight:'800', fontFamily:"'Inter',sans-serif",
+                        color:event.layout_hero?.titolo2_grassetto?'#003DA5':'#6B7280' }}>B</button>
+                  </Field>
+                </div>
               </div>
             </div>
 

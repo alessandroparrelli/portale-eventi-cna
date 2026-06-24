@@ -314,6 +314,16 @@ export default function LandingPage() {
     <div style={s.root}>
       <style>{`
         ${RICH_CSS}
+        @keyframes heroIn{from{opacity:0;transform:translateY(20px)}to{opacity:1;transform:translateY(0)}}
+        .ev-hero-logo{animation:heroIn .6s ease both}
+        .ev-hero-content{animation:heroIn .8s ease .2s both}
+        .ev-hero-content h1{animation:heroIn .7s ease .15s both}
+        .ev-hero-content h2{animation:heroIn .7s ease .3s both}
+        .ev-hero-content p{animation:heroIn .7s ease .4s both}
+        @media(max-width:768px){
+          .ev-hero-content h1{font-size:clamp(22px,7vw,42px)!important;word-break:break-word}
+          .ev-hero-content h2{font-size:clamp(14px,4vw,22px)!important}
+        }
         /* Immagini nel corpo — nessun bordo, nessuna ombra, PNG trasparente */
         .rich-content img {
           max-width:100% !important;
@@ -339,36 +349,46 @@ export default function LandingPage() {
       {/* ── HERO ── */}
       <div className="hero-section" style={{ ...s.hero, ...heroStyle, minHeight:`min(${lh.altezza||340}px, 56vw)` }}>
         {/* Logo sovrapposto in alto al centro — fuori dall'overlay per non essere trascinato in basso */}
-        <div style={{
+        <div className="ev-hero-logo" style={{
           position: 'absolute', top: '10px', left: 0, right: 0,
           display: 'flex', justifyContent: 'center', zIndex: 3,
           pointerEvents: 'none',
         }}>
           <div style={{
-            background: tema.logo_bg === 'colore_primario' ? (tema.colore_primario || '#003DA5')
-                      : tema.logo_bg === 'bianco' ? '#FFFFFF'
+            background: (lh.logo_sfondo || tema.logo_bg) === 'colore_primario' ? (tema.colore_primario || '#003DA5')
+                      : (lh.logo_sfondo || tema.logo_bg) === 'bianco' ? '#FFFFFF'
                       : 'transparent',
-            padding: tema.logo_bg && tema.logo_bg !== 'trasparente' ? '6px 14px' : 0,
+            padding: (lh.logo_sfondo || tema.logo_bg) && (lh.logo_sfondo || tema.logo_bg) !== 'trasparente' ? '6px 14px' : 0,
             borderRadius: '8px',
           }}>
             <img
               src={event?.logo_url || "https://raw.githubusercontent.com/alessandroparrelli/fileappoggio/main/NUOVO-LOGO-CNA-ROMA-SOLO-ROMA.png"}
               alt="CNA Roma"
-              style={{ height: `clamp(40px, ${Math.round((tema.logo_altezza || 44) * 0.1)}vw, ${tema.logo_altezza || 44}px)`, maxWidth: 'min(280px, 70vw)', objectFit: 'contain', display: 'block' }}
+              style={{ height: `clamp(36px, ${Math.round((lh.logo_altezza || tema.logo_altezza || 44) * 0.1)}vw, ${lh.logo_altezza || tema.logo_altezza || 44}px)`, maxWidth: 'min(280px, 70vw)', objectFit: 'contain', display: 'block' }}
             />
           </div>
         </div>
 
         <div style={{ ...s.heroOverlay, backgroundColor:`rgba(0,0,0,${(lh.overlay_opacita||55)/100})` }}>
-          <div style={{ ...s.heroContent, textAlign:lh.allineamento==='centro'?'center':'left' }}>
+          <div style={{ ...s.heroContent, textAlign:lh.allineamento==='centro'?'center':'left' }} className="ev-hero-content">
             <h1 style={{
               ...s.heroTitle,
               color:       lh.titolo_colore      || '#FFFFFF',
               fontSize:    lh.titolo_dimensione  || 'clamp(22px,5vw,48px)',
               fontWeight:  lh.titolo_grassetto !== false ? '900' : '400',
               textTransform: lh.titolo_maiuscolo ? 'uppercase' : 'none',
-              marginBottom: event.sottotitolo ? '8px' : '0',
+              marginBottom: (lh.titolo2 || event.sottotitolo) ? '10px' : '0',
             }}>{event.titolo}</h1>
+            {lh.titolo2 && (
+              <h2 style={{
+                fontSize:   lh.titolo2_dimensione || 'clamp(15px,2vw,20px)',
+                fontWeight: lh.titolo2_grassetto  ? '700' : '400',
+                color:      lh.titolo2_colore     || 'rgba(255,255,255,0.88)',
+                margin:     '0 0 10px',
+                letterSpacing: '-.02em',
+                lineHeight: 1.3,
+              }}>{lh.titolo2}</h2>
+            )}
             {event.sottotitolo && (
               <p style={{
                 color: lh.titolo_colore ? `${lh.titolo_colore}CC` : 'rgba(255,255,255,.85)',
@@ -382,7 +402,6 @@ export default function LandingPage() {
           </div>
         </div>
       </div>
-
       {/* ── DATA E LUOGO sotto hero ── */}
       {(event.data_inizio || event.luogo) && (
         <div style={{
