@@ -220,6 +220,23 @@ export default function LandingEditorPage() {
                       style={{ width:'100%' }} />
                   </Field>
                 </div>
+                <div style={{ marginTop:'10px' }}>
+                  <Field label="Colore logo sull'hero">
+                    <div style={{ display:'flex', gap:'8px' }}>
+                      {[['bianco','⬜ Bianco'],['nessuno','🎨 Originale'],['nero','⬛ Nero']].map(([v,l]) => (
+                        <button key={v} onClick={() => setH('logo_filtro')(v)} style={{
+                          flex:1, padding:'8px 6px', border:`1px solid ${(lh.logo_filtro||'bianco')===v?'#003DA5':'#E5E7EB'}`,
+                          borderRadius:'6px', background:(lh.logo_filtro||'bianco')===v?'#EEF3FF':'#fff',
+                          cursor:'pointer', fontSize:'12px', fontWeight:'600',
+                          fontFamily:'Inter,sans-serif', color:(lh.logo_filtro||'bianco')===v?'#003DA5':'#6B7280'
+                        }}>{l}</button>
+                      ))}
+                    </div>
+                    <p style={{ fontSize:'11px', color:'#9CA3AF', margin:'4px 0 0' }}>
+                      "Bianco" per sfondi scuri · "Originale" mantiene i colori del logo
+                    </p>
+                  </Field>
+                </div>
               </div>
 
               {/* Immagine hero */}
@@ -275,13 +292,18 @@ export default function LandingEditorPage() {
                 <div style={{ display:'grid', gridTemplateColumns:'1fr 1fr 1fr', gap:'12px' }}>
                   <Field label="Colore">
                     <div style={{ display:'flex', gap:'8px', alignItems:'center' }}>
-                      <input type="color" value={lh.titolo_colore||'#FFFFFF'} onChange={setH('titolo_colore')}
+                      <input type="color"
+                        value={/^#[0-9A-Fa-f]{6}$/.test(lh.titolo_colore||'') ? lh.titolo_colore : '#ffffff'}
+                        onChange={e => setH('titolo_colore')(e.target.value)}
                         style={{ width:'40px', height:'34px', border:'1px solid #D1D5DB', borderRadius:'6px', cursor:'pointer', padding:'2px', flexShrink:0 }} />
-                      <input value={lh.titolo_colore||'#FFFFFF'} onChange={setH('titolo_colore')} style={{ ...iSt, flex:1, fontSize:'12px' }} />
+                      <input value={lh.titolo_colore||'#ffffff'}
+                        onChange={e => setH('titolo_colore')(e.target.value)}
+                        style={{ ...iSt, flex:1, fontSize:'12px' }} />
                     </div>
                   </Field>
                   <Field label="Dimensione">
-                    <select value={lh.titolo_dimensione||'clamp(26px,5vw,54px)'} onChange={setH('titolo_dimensione')} style={iSt}>
+                    <select value={lh.titolo_dimensione||'clamp(26px,5vw,54px)'}
+                      onChange={e => setH('titolo_dimensione')(e.target.value)} style={iSt}>
                       <option value="clamp(20px,3vw,32px)">Piccolo</option>
                       <option value="clamp(24px,4vw,42px)">Medio</option>
                       <option value="clamp(26px,5vw,54px)">Grande</option>
@@ -290,13 +312,13 @@ export default function LandingEditorPage() {
                   </Field>
                   <Field label="Stile">
                     <div style={{ display:'flex', gap:'6px' }}>
-                      <button onClick={() => setH('titolo_grassetto')(!lh.titolo_grassetto)} style={{
+                      <button onClick={() => setH('titolo_grassetto')(lh.titolo_grassetto === false ? true : false)} style={{
                         flex:1, padding:'7px', border:`1px solid ${lh.titolo_grassetto!==false?'#003DA5':'#E5E7EB'}`,
                         borderRadius:'6px', background:lh.titolo_grassetto!==false?'#EEF3FF':'#fff',
                         cursor:'pointer', fontSize:'14px', fontWeight:'800', fontFamily:'Inter,sans-serif',
                         color:lh.titolo_grassetto!==false?'#003DA5':'#6B7280'
                       }}>B</button>
-                      <button onClick={() => setH('titolo_maiuscolo')(!lh.titolo_maiuscolo)} style={{
+                      <button onClick={() => setH('titolo_maiuscolo')(lh.titolo_maiuscolo ? false : true)} style={{
                         flex:1, padding:'7px', border:`1px solid ${lh.titolo_maiuscolo?'#003DA5':'#E5E7EB'}`,
                         borderRadius:'6px', background:lh.titolo_maiuscolo?'#EEF3FF':'#fff',
                         cursor:'pointer', fontSize:'12px', fontWeight:'600', fontFamily:'Inter,sans-serif',
@@ -311,13 +333,18 @@ export default function LandingEditorPage() {
                   <div style={{ display:'grid', gridTemplateColumns:'1fr 1fr 1fr', gap:'12px' }}>
                     <Field label="Colore">
                       <div style={{ display:'flex', gap:'8px', alignItems:'center' }}>
-                        <input type="color" value={lh.titolo2_colore||'#FFFFFFDD'} onChange={setH('titolo2_colore')}
+                        <input type="color"
+                          value={/^#[0-9A-Fa-f]{6}$/.test(lh.titolo2_colore||'') ? lh.titolo2_colore : '#ffffff'}
+                          onChange={e => setH('titolo2_colore')(e.target.value)}
                           style={{ width:'40px', height:'34px', border:'1px solid #D1D5DB', borderRadius:'6px', cursor:'pointer', padding:'2px', flexShrink:0 }} />
-                        <input value={lh.titolo2_colore||''} onChange={setH('titolo2_colore')} placeholder="#FFFFFF" style={{ ...iSt, flex:1, fontSize:'12px' }} />
+                        <input value={lh.titolo2_colore||''}
+                          onChange={e => setH('titolo2_colore')(e.target.value)}
+                          placeholder="#ffffff" style={{ ...iSt, flex:1, fontSize:'12px' }} />
                       </div>
                     </Field>
                     <Field label="Dimensione">
-                      <select value={lh.titolo2_dimensione||'clamp(15px,2vw,20px)'} onChange={setH('titolo2_dimensione')} style={iSt}>
+                      <select value={lh.titolo2_dimensione||'clamp(15px,2vw,20px)'}
+                        onChange={e => setH('titolo2_dimensione')(e.target.value)} style={iSt}>
                         <option value="clamp(13px,1.5vw,16px)">Piccolo</option>
                         <option value="clamp(15px,2vw,20px)">Medio</option>
                         <option value="clamp(18px,2.5vw,26px)">Grande</option>
@@ -326,7 +353,7 @@ export default function LandingEditorPage() {
                     </Field>
                     <Field label="Stile">
                       <div style={{ display:'flex', gap:'6px' }}>
-                        <button onClick={() => setH('titolo2_grassetto')(!lh.titolo2_grassetto)} style={{
+                        <button onClick={() => setH('titolo2_grassetto')(lh.titolo2_grassetto ? false : true)} style={{
                           flex:1, padding:'7px', border:`1px solid ${lh.titolo2_grassetto?'#003DA5':'#E5E7EB'}`,
                           borderRadius:'6px', background:lh.titolo2_grassetto?'#EEF3FF':'#fff',
                           cursor:'pointer', fontSize:'14px', fontWeight:'800', fontFamily:'Inter,sans-serif',
