@@ -166,7 +166,7 @@ function BlockRenderer({ block, cp }) {
   if (block.tipo === 'griglia') {
     const cols = block.cols||block.colonne||[]
     return (
-      <div style={{ display:'grid', gridTemplateColumns:`repeat(auto-fit, minmax(min(100%, 240px), 1fr))`, gap:'16px', marginBottom:'24px' }}>
+      <div style={{ display:'grid', gridTemplateColumns:`repeat(auto-fit, minmax(min(100%, 280px), 1fr))`, gap:'16px', marginBottom:'24px' }}>
         {cols.map((col,i)=>(
           <Animate key={i} animation="fadeup" delay={i*80}>
             <div style={{ background:'#fff', border:'1px solid #E5E7EB', borderRadius:'12px', padding:'24px', height:'100%', boxSizing:'border-box', transition:'box-shadow .2s, transform .2s' }}
@@ -549,7 +549,7 @@ export default function LandingPagePublic() {
         .lp-blocco-titolo h2 { font-size: clamp(20px,5vw,38px) !important; }
         .lp-blocco-titolo p  { font-size: clamp(13px,2.5vw,18px) !important; }
 
-        @media (max-width: 600px) {
+        @media (max-width: 768px) {
           /* Hero: titoli proporzionali */
           .lp-hero-content h1 {
             font-size: clamp(22px, 7vw, 42px) !important;
