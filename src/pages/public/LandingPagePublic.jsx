@@ -138,9 +138,9 @@ function BlockRenderer({ block, cp }) {
 
   if (block.tipo === 'titolo') return (
     <Animate animation={block.animazione||'fadeup'}>
-      <div style={{ textAlign:block.allineamento||'center', marginBottom:'32px', marginTop:'8px' }}>
-        <h2 style={{ fontSize:'clamp(24px,4vw,38px)', fontWeight:'900', color:'#0A0A0A', letterSpacing:'-.03em', margin:'0 0 10px' }}>{block.testo}</h2>
-        {block.sottotitolo && <p style={{ fontSize:'clamp(14px,2vw,18px)', color:'#6B7280', margin:0, lineHeight:1.6 }}>{block.sottotitolo}</p>}
+      <div className="lp-blocco-titolo" style={{ textAlign:block.allineamento||'center', marginBottom:'32px', marginTop:'8px' }}>
+        <h2 className="lp-section-title" style={{ fontSize:'clamp(24px,4vw,38px)', fontWeight:'900', color:'#0A0A0A', letterSpacing:'-.03em', margin:'0 0 10px' }}>{block.testo}</h2>
+        {block.sottotitolo && <p className="lp-section-sub" style={{ fontSize:'clamp(14px,2vw,18px)', color:'#6B7280', margin:0, lineHeight:1.6 }}>{block.sottotitolo}</p>}
         <div style={{ width:'48px', height:'4px', background:cp, borderRadius:'2px', margin: block.allineamento==='center'?'16px auto 0':block.allineamento==='right'?'16px 0 0 auto':'16px auto 0 0' }} />
       </div>
     </Animate>
@@ -148,7 +148,7 @@ function BlockRenderer({ block, cp }) {
 
   if (block.tipo === 'stats') return (
     <Animate animation="fadein">
-      <div style={{ display:'flex', flexWrap:'wrap', gap:'32px', justifyContent:'center', padding:'32px 0', marginBottom:'16px' }}>
+      <div className="lp-stats" style={{ display:'flex', flexWrap:'wrap', gap:'32px', justifyContent:'center', padding:'32px 0', marginBottom:'16px' }}>
         {(block.items||[]).map((item,i)=>(
           <Animate key={i} animation="fadeup" delay={i*100}>
             <div style={{ textAlign:'center', flex:'1 1 100px' }}>
@@ -166,7 +166,7 @@ function BlockRenderer({ block, cp }) {
   if (block.tipo === 'griglia') {
     const cols = block.cols||block.colonne||[]
     return (
-      <div style={{ display:'grid', gridTemplateColumns:`repeat(${Math.min(cols.length,3)},1fr)`, gap:'16px', marginBottom:'24px' }}>
+      <div style={{ display:'grid', gridTemplateColumns:`repeat(auto-fit, minmax(min(100%, 240px), 1fr))`, gap:'16px', marginBottom:'24px' }}>
         {cols.map((col,i)=>(
           <Animate key={i} animation="fadeup" delay={i*80}>
             <div style={{ background:'#fff', border:'1px solid #E5E7EB', borderRadius:'12px', padding:'24px', height:'100%', boxSizing:'border-box', transition:'box-shadow .2s, transform .2s' }}
@@ -186,7 +186,7 @@ function BlockRenderer({ block, cp }) {
     const colonne = block.colonne || 2
     return (
       <Animate animation="fadeup">
-        <div style={{ display:'grid', gridTemplateColumns:`repeat(${colonne},1fr)`, gap:'10px', marginBottom:'24px' }}>
+        <div style={{ display:'grid', gridTemplateColumns:`repeat(auto-fit, minmax(min(100%, ${colonne===1?'100%':colonne===3?'160px':'220px'}), 1fr))`, gap:'10px', marginBottom:'24px' }}>
           {(block.items||[]).map((item,i)=>(
             <div key={i} style={{ display:'flex', alignItems:'center', gap:'10px', padding:'12px 16px', background:'#fff', border:'1px solid #E5E7EB', borderRadius:'8px' }}>
               <span style={{ color:block.colore||cp, fontWeight:'800', fontSize:'16px', flexShrink:0 }}>{item.icona||'✓'}</span>
@@ -242,7 +242,7 @@ function BlockRenderer({ block, cp }) {
               </div>
               <div style={{ paddingTop:'4px' }}>
                 <h4 style={{ fontSize:'16px', fontWeight:'800', color:'#0A0A0A', margin:'0 0 6px', letterSpacing:'-.02em' }}>{item.titolo}</h4>
-                <p style={{ fontSize:'14px', color:'#6B7280', lineHeight:'1.65', margin:0 }}>{item.testo}</p>
+                <p className="lp-timeline-text" style={{ fontSize:'14px', color:'#6B7280', lineHeight:'1.65', margin:0 }}>{item.testo}</p>
               </div>
             </div>
           </Animate>
@@ -278,7 +278,7 @@ function BlockRenderer({ block, cp }) {
 
   if (block.tipo === 'testimonial') return (
     <Animate animation="fadeup">
-      <div style={{ display:'grid', gridTemplateColumns:`repeat(${Math.min((block.items||[]).length,2)},1fr)`, gap:'16px', marginBottom:'24px' }}>
+      <div style={{ display:'grid', gridTemplateColumns:`repeat(auto-fit, minmax(min(100%, 280px), 1fr))`, gap:'16px', marginBottom:'24px' }}>
         {(block.items||[]).map((item,i)=>(
           <Animate key={i} animation="fadeup" delay={i*100}>
             <div style={{ background:'#fff', border:'1px solid #E5E7EB', borderRadius:'12px', padding:'24px', position:'relative' }}>
@@ -447,7 +447,7 @@ function FormContatti({ lp, tema }) {
   return (
     <form onSubmit={submit} style={{display:'flex',flexDirection:'column',gap:'14px'}}>
       {(nomeF||cognomeF)&&(
-        <div style={{display:'grid',gridTemplateColumns:`${nomeF?'1fr':''}${nomeF&&cognomeF?' ':''}${cognomeF?'1fr':''}`,gap:'12px'}}>
+        <div className="lp-form-name-row" style={{display:'grid',gridTemplateColumns:`${nomeF?'1fr':''}${nomeF&&cognomeF?' ':''}${cognomeF?'1fr':''}`,gap:'12px'}}>
           {nomeF&&<div><label style={lbSt}>{nomeF.label}</label><input type="text" value={values.nome||''} onChange={e=>setVal('nome',e.target.value)} placeholder={nomeF.placeholder||''} style={iSt}/></div>}
           {cognomeF&&<div><label style={lbSt}>{cognomeF.label}</label><input type="text" value={values.cognome||''} onChange={e=>setVal('cognome',e.target.value)} placeholder={cognomeF.placeholder||''} style={iSt}/></div>}
         </div>
@@ -544,10 +544,58 @@ export default function LandingPagePublic() {
         @keyframes heroIn{from{opacity:0;transform:translateY(20px)}to{opacity:1;transform:translateY(0)}}
         .lp-hero-content{animation:heroIn .8s ease .2s both}
         .lp-hero-logo{animation:heroIn .6s ease both}
+
+        /* ── Responsive LP ──────────────────────────── */
+        .lp-blocco-titolo h2 { font-size: clamp(20px,5vw,38px) !important; }
+        .lp-blocco-titolo p  { font-size: clamp(13px,2.5vw,18px) !important; }
+
+        @media (max-width: 600px) {
+          /* Hero: titoli proporzionali */
+          .lp-hero-content h1 {
+            font-size: clamp(22px, 7vw, 42px) !important;
+            letter-spacing: -0.03em !important;
+            word-break: break-word !important;
+          }
+          .lp-hero-content h2 {
+            font-size: clamp(15px, 4.5vw, 24px) !important;
+          }
+          .lp-hero-content p {
+            font-size: clamp(13px, 3.5vw, 17px) !important;
+          }
+
+          /* Padding hero ridotto */
+          .lp-hero-wrap { padding: 40px 16px !important; }
+
+          /* Contenuto blocchi */
+          .lp-block-wrap { padding: 32px 16px !important; }
+
+          /* Stats: 2 colonne su mobile */
+          .lp-stats { flex-wrap: wrap !important; gap: 16px !important; }
+          .lp-stats > div { min-width: calc(50% - 8px) !important; flex: 1 1 calc(50% - 8px) !important; }
+
+          /* Griglia: sempre 1 colonna se card < 280px — auto-fit lo gestisce già */
+          /* Badge list: max 2 col */
+
+          /* Timeline: più spazio al testo */
+          .lp-timeline-text { overflow-wrap: break-word !important; word-break: break-word !important; }
+
+          /* Testimonial card: testo leggibile */
+          .lp-testimonial-grid > div { min-width: 100% !important; }
+
+          /* Form: nome+cognome in colonna unica */
+          .lp-form-name-row { grid-template-columns: 1fr !important; }
+
+          /* Bottone CTA */
+          .lp-cta-btn { width: 100% !important; text-align: center !important; box-sizing: border-box !important; }
+
+          /* Titoli blocco contenuto */
+          .lp-section-title { font-size: clamp(20px, 5.5vw, 32px) !important; }
+          .lp-section-sub   { font-size: clamp(12px, 3vw, 16px) !important; }
+        }
       `}</style>
 
       {/* HERO */}
-      <div style={{
+      <div className="lp-hero-wrap" style={{
         position:'relative', minHeight:altezzaHero+'px', display:'flex', flexDirection:'column',
         alignItems, justifyContent:'center', padding:'60px 24px',
         background: lp.hero_immagine_url?`url(${lp.hero_immagine_url}) ${bgPosition}/cover no-repeat`:cp,
@@ -565,7 +613,7 @@ export default function LandingPagePublic() {
             <img src={logoSrc} alt="CNA Roma" style={{height:logoAltezza+'px',objectFit:'contain',display:'block'}} />
           </div>
         </div>
-        <div className="lp-hero-content" style={{position:'relative',zIndex:1,maxWidth:'740px',textAlign,width:'100%'}}>
+        <div className="lp-hero-content" style={{position:'relative',zIndex:1,maxWidth:'740px',textAlign,width:'100%',overflowWrap:'break-word'}}>
           {lp.hero_titolo&&<h1 style={{fontSize:titoloSize,fontWeight:titoloGrassetto?'900':'400',color:titoloColore,margin:'0 0 12px',letterSpacing:'-0.04em',lineHeight:1.05,textTransform:titoloMaiuscolo?'uppercase':'none'}}>{lp.hero_titolo}</h1>}
           {lp.hero_titolo2&&<h2 style={{fontSize:titolo2Size,fontWeight:titolo2Grassetto?'700':'400',color:titolo2Colore,margin:'0 0 20px',letterSpacing:'-0.02em',lineHeight:1.3}}>{lp.hero_titolo2}</h2>}
           {lp.hero_sottotitolo&&<p style={{fontSize:'clamp(14px,1.8vw,18px)',color:'rgba(255,255,255,.80)',margin:'0 0 28px',lineHeight:1.7,fontWeight:'400'}}>{lp.hero_sottotitolo}</p>}
@@ -586,7 +634,7 @@ export default function LandingPagePublic() {
 
       {/* CONTENUTO */}
       {hasContenuto&&(
-        <div style={{maxWidth:'800px',margin:'0 auto',padding:'64px 24px'}}>
+        <div className="lp-block-wrap" style={{maxWidth:'800px',margin:'0 auto',padding:'clamp(32px,6vw,64px) clamp(16px,4vw,40px)'}}>
           {lp.contenuto.map((block,i)=>(
             <BlockRenderer key={block.id||i} block={block} cp={cp} />
           ))}
@@ -595,7 +643,7 @@ export default function LandingPagePublic() {
 
       {/* FORM */}
       {lp.form_abilitato&&(
-        <div id="lp-form" style={{background:tema.sfondo_sezioni||'#F9FAFB',padding:'64px 24px'}}>
+        <div id="lp-form" style={{background:tema.sfondo_sezioni||'#F9FAFB',padding:'clamp(32px,6vw,64px) clamp(16px,4vw,24px)'}}>
           <div style={{maxWidth:'520px',margin:'0 auto'}}>
             <Animate animation="fadeup">
               {lp.form_titolo&&<h2 style={{fontSize:'28px',fontWeight:'800',color:tema.heading_colore||'#0A0A0A',margin:'0 0 8px',letterSpacing:'-0.03em',textAlign:'center'}}>{lp.form_titolo}</h2>}
