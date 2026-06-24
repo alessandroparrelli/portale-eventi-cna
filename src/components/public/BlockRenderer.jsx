@@ -4,6 +4,7 @@
  *          timeline | accordion | video | testimonial | countdown | immagine | separatore
  */
 import { useState, useEffect, useRef } from 'react'
+import { IconDisplay } from '../editor/BlockIcons'
 
 // ── Animazione Intersection Observer ─────────────────────────────
 export function Animate({ children, animation = 'fadeup', delay = 0 }) {
@@ -192,7 +193,7 @@ export default function BlockRenderer({ block, cp = '#003DA5', formTarget = '#lp
               onMouseEnter={e => { e.currentTarget.style.boxShadow = `0 8px 24px ${cp}20`; e.currentTarget.style.transform = 'translateY(-2px)' }}
               onMouseLeave={e => { e.currentTarget.style.boxShadow = 'none'; e.currentTarget.style.transform = 'translateY(0)' }}
             >
-              {col.icona && <div style={{ fontSize: '26px', marginBottom: '10px' }}>{col.icona}</div>}
+              {col.icona && <div style={{ marginBottom: '10px' }}><IconDisplay iconId={col.icona} color={col.icona_colore||cp} size={32} /></div>}
               {col.titolo && <h3 style={{ fontSize: '16px', fontWeight: '800', color: '#0A0A0A', margin: '0 0 8px', letterSpacing: '-.02em' }}>{col.titolo}</h3>}
               {col.testo && <p style={{ fontSize: '14px', color: '#6B7280', lineHeight: '1.65', margin: 0 }}>{col.testo}</p>}
             </div>
@@ -209,7 +210,7 @@ export default function BlockRenderer({ block, cp = '#003DA5', formTarget = '#lp
         <div style={{ display: 'grid', gridTemplateColumns: `repeat(auto-fit, minmax(min(100%, ${colonne === 1 ? '100%' : colonne === 3 ? '150px' : '210px'}), 1fr))`, gap: '10px', marginBottom: '24px' }}>
           {(block.items || []).map((item, i) => (
             <div key={i} style={{ display: 'flex', alignItems: 'center', gap: '10px', padding: '12px 14px', background: '#fff', border: '1px solid #E5E7EB', borderRadius: '8px' }}>
-              <span style={{ color: block.colore || cp, fontWeight: '800', fontSize: '16px', flexShrink: 0 }}>{item.icona || '✓'}</span>
+              <IconDisplay iconId={item.icona||'check'} color={item.icona_colore||block.colore||cp} size={20} />
               <span style={{ fontSize: '14px', color: '#374151', fontWeight: '500' }}>{item.testo}</span>
             </div>
           ))}

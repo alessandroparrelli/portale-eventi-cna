@@ -6,6 +6,7 @@
 import { useState } from 'react'
 import RichEditor from './RichEditor'
 import ImageUploader from './ImageUploader'
+import { BLOCK_ICONS, IconPicker, IconDisplay } from './BlockIcons'
 
 const uid = () => Math.random().toString(36).slice(2, 9)
 
@@ -14,7 +15,7 @@ export function newBlock(tipo) {
   switch (tipo) {
     case 'testo':       return { ...base, html: '<p>Scrivi qui…</p>' }
     case 'stats':       return { ...base, items: [{ num: '100+', label: 'Partecipanti' }, { num: '10', label: 'Relatori' }], colore: '#003DA5', animato: true }
-    case 'griglia':     return { ...base, cols: [{ icona:'🎯', titolo: 'Titolo 1', testo: 'Descrizione.' }, { icona:'💡', titolo: 'Titolo 2', testo: 'Descrizione.' }, { icona:'🚀', titolo: 'Titolo 3', testo: 'Descrizione.' }] }
+    case 'griglia':     return { ...base, cols: [{ icona:'target', icona_colore:'#003DA5', titolo: 'Titolo 1', testo: 'Descrizione.' }, { icona:'lightbulb', icona_colore:'#059669', titolo: 'Titolo 2', testo: 'Descrizione.' }, { icona:'rocket', icona_colore:'#7C3AED', titolo: 'Titolo 3', testo: 'Descrizione.' }] }
     case 'cta':         return { ...base, titolo: 'Pronti a iniziare?', testo_btn: 'Contattaci →', colore: '#003DA5', stile: 'pieno' }
     case 'separatore':  return { ...base, stile: 'linea' }
     case 'immagine':    return { ...base, src: '', didascalia: '' }
@@ -25,26 +26,26 @@ export function newBlock(tipo) {
     case 'video':       return { ...base, url: '', didascalia: '' }
     case 'testimonial': return { ...base, items: [{ testo: 'Un servizio eccellente, lo consiglio a tutti.', nome: 'Mario Rossi', ruolo: 'Artigiano' }] }
     case 'countdown':   return { ...base, data: '', titolo: 'Evento tra:', messaggio_scaduto: 'L\'evento è iniziato!' }
-    case 'badge_list':  return { ...base, items: [{ icona: '✓', testo: 'Vantaggio uno' }, { icona: '✓', testo: 'Vantaggio due' }, { icona: '✓', testo: 'Vantaggio tre' }], colore: '#003DA5', colonne: 2 }
+    case 'badge_list':  return { ...base, items: [{ icona: 'check', icona_colore:'#003DA5', testo: 'Vantaggio uno' }, { icona: 'check', icona_colore:'#003DA5', testo: 'Vantaggio due' }, { icona: 'check', icona_colore:'#003DA5', testo: 'Vantaggio tre' }], colore: '#003DA5', colonne: 2 }
     default:            return base
   }
 }
 
 const BLOCK_TYPES = [
-  { tipo: 'testo',       emoji: '📝', label: 'Testo ricco',     group: 'Base' },
-  { tipo: 'titolo',      emoji: '🔤', label: 'Titolo sezione',  group: 'Base' },
-  { tipo: 'immagine',    emoji: '🖼',  label: 'Immagine',        group: 'Base' },
-  { tipo: 'separatore',  emoji: '—',  label: 'Separatore',      group: 'Base' },
-  { tipo: 'stats',       emoji: '📊', label: 'Statistiche',     group: 'Contenuto' },
-  { tipo: 'griglia',     emoji: '⊞',  label: 'Griglia card',    group: 'Contenuto' },
-  { tipo: 'badge_list',  emoji: '✅', label: 'Lista vantaggi',  group: 'Contenuto' },
-  { tipo: 'timeline',    emoji: '📅', label: 'Timeline',        group: 'Contenuto' },
-  { tipo: 'accordion',   emoji: '❓', label: 'FAQ / Accordion', group: 'Contenuto' },
-  { tipo: 'testimonial', emoji: '💬', label: 'Testimonial',     group: 'Contenuto' },
-  { tipo: 'countdown',   emoji: '⏱',  label: 'Countdown',       group: 'Interattivo' },
-  { tipo: 'video',       emoji: '▶️', label: 'Video embed',     group: 'Interattivo' },
-  { tipo: 'cta',         emoji: '🎯', label: 'Call to action',  group: 'Interattivo' },
-  { tipo: 'banner',      emoji: '📣', label: 'Banner avviso',   group: 'Interattivo' },
+  { tipo: 'testo',       label: 'Testo ricco',     group: 'Base' },
+  { tipo: 'titolo',      label: 'Titolo sezione',  group: 'Base' },
+  { tipo: 'immagine',    label: 'Immagine',        group: 'Base' },
+  { tipo: 'separatore',  label: 'Separatore',      group: 'Base' },
+  { tipo: 'stats',       label: 'Statistiche',     group: 'Contenuto' },
+  { tipo: 'griglia',     label: 'Griglia card',    group: 'Contenuto' },
+  { tipo: 'badge_list',  label: 'Lista vantaggi',  group: 'Contenuto' },
+  { tipo: 'timeline',    label: 'Timeline',        group: 'Contenuto' },
+  { tipo: 'accordion',   label: 'FAQ / Accordion', group: 'Contenuto' },
+  { tipo: 'testimonial', label: 'Testimonial',     group: 'Contenuto' },
+  { tipo: 'countdown',   label: 'Countdown',       group: 'Interattivo' },
+  { tipo: 'video',       label: 'Video embed',     group: 'Interattivo' },
+  { tipo: 'cta',         label: 'Call to action',  group: 'Interattivo' },
+  { tipo: 'banner',      label: 'Banner avviso',   group: 'Interattivo' },
 ]
 
 // ── Editors singoli blocchi ─────────────────────────────────────────
@@ -119,7 +120,14 @@ function GrigliaEditor({ block, onChange }) {
       </div>
       {(block.cols||[]).map((col,i)=>(
         <div key={i} style={{border:'1px solid #E5E7EB',borderRadius:'8px',padding:'12px',display:'flex',flexDirection:'column',gap:'8px'}}>
-          <input value={col.icona||''} onChange={e=>{const cols=[...block.cols];cols[i]={...cols[i],icona:e.target.value};onChange({...block,cols})}} placeholder="🎯 Emoji opzionale" style={{...inp,width:'140px'}} />
+          <div style={{display:'flex',gap:'8px',alignItems:'center'}}>
+            <IconPicker
+              value={col.icona||''}
+              color={col.icona_colore||'#003DA5'}
+              onChangeIcon={id=>{const cols=[...block.cols];cols[i]={...cols[i],icona:id};onChange({...block,cols})}}
+              onChangeColor={c=>{const cols=[...block.cols];cols[i]={...cols[i],icona_colore:c};onChange({...block,cols})}}
+            />
+          </div>
           <input value={col.titolo||''} onChange={e=>{const cols=[...block.cols];cols[i]={...cols[i],titolo:e.target.value};onChange({...block,cols})}} placeholder="Titolo" style={{...inp,fontWeight:'700'}} />
           <textarea value={col.testo||''} onChange={e=>{const cols=[...block.cols];cols[i]={...cols[i],testo:e.target.value};onChange({...block,cols})}} rows={2} style={{...inp,resize:'vertical',fontFamily:"'Inter',sans-serif"}} />
         </div>
@@ -283,7 +291,12 @@ function BadgeListEditor({ block, onChange }) {
       </div>
       {(block.items||[]).map((item,i)=>(
         <div key={i} style={{display:'flex',gap:'8px',alignItems:'center'}}>
-          <input value={item.icona||''} onChange={e=>{const items=[...block.items];items[i]={...items[i],icona:e.target.value};onChange({...block,items})}} placeholder="✓" style={{...inp,width:'50px',textAlign:'center'}} />
+          <IconPicker
+            value={item.icona||'check'}
+            color={item.icona_colore||block.colore||'#003DA5'}
+            onChangeIcon={id=>{const items=[...block.items];items[i]={...items[i],icona:id};onChange({...block,items})}}
+            onChangeColor={c=>{const items=[...block.items];items[i]={...items[i],icona_colore:c};onChange({...block,items})}}
+          />
           <input value={item.testo||''} onChange={e=>{const items=[...block.items];items[i]={...items[i],testo:e.target.value};onChange({...block,items})}} placeholder="Descrizione vantaggio" style={{...inp,flex:1}} />
           <button onClick={()=>onChange({...block,items:block.items.filter((_,j)=>j!==i)})} style={btnDel}>✕</button>
         </div>
@@ -296,11 +309,12 @@ function BadgeListEditor({ block, onChange }) {
 // ── Wrapper blocco ──────────────────────────────────────────────────
 function Block({ block, index, total, onChange, onDelete, onMoveUp, onMoveDown }) {
   const [collapsed, setCollapsed] = useState(false)
-  const typeInfo = BLOCK_TYPES.find(t=>t.tipo===block.tipo) || { emoji:'📦', label:block.tipo }
+  const typeInfo = BLOCK_TYPES.find(t=>t.tipo===block.tipo) || { label:block.tipo }
+  const blockIcon = BLOCK_ICONS[block.tipo]
   return (
     <div style={{ border:'1.5px solid #E5E7EB', borderRadius:'10px', overflow:'hidden', marginBottom:'8px', background:'#fff' }}>
       <div style={{ display:'flex', alignItems:'center', gap:'8px', padding:'10px 14px', background:'#FAFAFA', borderBottom:collapsed?'none':'1px solid #E5E7EB', cursor:'pointer' }} onClick={()=>setCollapsed(c=>!c)}>
-        <span style={{fontSize:'16px'}}>{typeInfo.emoji}</span>
+        <span style={{ display:'flex', alignItems:'center', width:'20px', height:'20px', flexShrink:0 }}>{blockIcon}</span>
         <span style={{flex:1,fontSize:'13px',fontWeight:'700',color:'#374151'}}>{typeInfo.label}
           {block.tipo==='testo'&&block.html&&<span style={{fontSize:'11px',fontWeight:'400',color:'#9CA3AF',marginLeft:'8px'}}>{block.html.replace(/<[^>]+>/g,'').slice(0,50)}…</span>}
           {block.tipo==='titolo'&&block.testo&&<span style={{fontSize:'11px',fontWeight:'400',color:'#9CA3AF',marginLeft:'8px'}}>{block.testo.slice(0,50)}</span>}
@@ -374,7 +388,7 @@ export default function BlockEditor({ blocks = [], onChange }) {
                 <div style={{padding:'8px 18px',background:'#F9FAFB',borderBottom:'1px solid #F3F4F6'}}>
                   <span style={{fontSize:'11px',fontWeight:'700',color:'#9CA3AF',textTransform:'uppercase',letterSpacing:'.06em'}}>{group}</span>
                 </div>
-                {BLOCK_TYPES.filter(t=>t.group===group).map(({tipo,emoji,label})=>(
+                {BLOCK_TYPES.filter(t=>t.group===group).map(({tipo,label})=>(
                   <button key={tipo} type="button" onClick={()=>addBlock(tipo)} style={{
                     display:'flex',alignItems:'center',gap:'14px',width:'100%',padding:'12px 18px',
                     border:'none',borderBottom:'1px solid #F3F4F6',background:'#fff',cursor:'pointer',
@@ -382,7 +396,9 @@ export default function BlockEditor({ blocks = [], onChange }) {
                   }}
                   onMouseEnter={e=>e.currentTarget.style.background='#EEF3FF'}
                   onMouseLeave={e=>e.currentTarget.style.background='#fff'}>
-                    <span style={{fontSize:'20px',flexShrink:0,width:'24px'}}>{emoji}</span>
+                    <span style={{display:'flex',alignItems:'center',width:'22px',height:'22px',flexShrink:0}}>
+                      {BLOCK_ICONS[tipo]}
+                    </span>
                     <span style={{fontSize:'13px',fontWeight:'600',color:'#0A0A0A'}}>{label}</span>
                   </button>
                 ))}
