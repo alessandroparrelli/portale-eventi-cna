@@ -87,7 +87,7 @@ export default function LandingEditorPage() {
   // helper per layout_hero
   function setH(k) {
     return v => {
-      const val = typeof v === 'string' ? v : v?.target?.value
+      const val = typeof v === 'boolean' ? v : typeof v === 'string' ? v : v?.target?.value
       setData(p => ({ ...p, layout_hero: { ...(p.layout_hero||LAYOUT_HERO_DEFAULT), [k]: val } }))
       setSaved(false)
     }
