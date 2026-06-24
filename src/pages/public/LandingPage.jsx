@@ -6,6 +6,7 @@ import { temaConDefault } from '../../components/editor/AspettoTab'
 import { MapPin, Calendar, ChevronRight, AlertCircle, Download, Share2 } from 'lucide-react'
 import { RICH_CSS } from '../../components/editor/RichEditor'
 import FormIscrizione from './FormIscrizione'
+import BlockRenderer from '../../components/public/BlockRenderer'
 
 function fmtData(ts) {
   if (!ts) return null
@@ -162,87 +163,7 @@ function ModalConferma({ reg, event, onClose }) {
 }
 
 /* ── SEZIONI RENDERER ────────────────────────────────── */
-function BlockRenderer({ block, colore_primario }) {
-  if (!block) return null
 
-  if (block.tipo === 'testo') return (
-    <div className="rich-content" style={{ marginBottom:'16px' }}
-      dangerouslySetInnerHTML={{ __html: block.html || '' }}/>
-  )
-
-  if (block.tipo === 'stats') return (
-    <div style={{ display:'flex', flexWrap:'wrap', gap:'32px', justifyContent:'center', padding:'32px 0', marginBottom:'16px' }}>
-      {(block.items || []).map((item, i) => (
-        <div key={i} style={{ textAlign:'center', flex:'1 1 100px' }}>
-          <p style={{ fontSize:'clamp(36px,6vw,52px)', fontWeight:'900', color:block.colore||colore_primario||'#003DA5', letterSpacing:'-.04em', margin:'0 0 4px', lineHeight:1 }}>
-            {item.num || item.numero}
-          </p>
-          <p style={{ fontSize:'13px', color:'#6B7280', fontWeight:'700', margin:0, textTransform:'uppercase', letterSpacing:'.05em' }}>
-            {item.label}
-          </p>
-        </div>
-      ))}
-    </div>
-  )
-
-  if (block.tipo === 'griglia') {
-    const cols = block.cols || block.colonne || []
-    return (
-      <div style={{ display:'grid', gridTemplateColumns:`repeat(${Math.min(cols.length,3)},1fr)`, gap:'16px', marginBottom:'16px' }}>
-        {cols.map((col, i) => (
-          <div key={i} style={{ backgroundColor:'#FFFFFF', border:'1px solid #E5E7EB', borderRadius:'10px', padding:'20px' }}>
-            {col.icona && <div style={{ fontSize:'26px', marginBottom:'10px' }}>{col.icona}</div>}
-            {col.titolo && <h3 style={{ fontSize:'16px', fontWeight:'800', color:'#0A0A0A', margin:'0 0 8px', letterSpacing:'-.02em' }}>{col.titolo}</h3>}
-            {col.testo && <p style={{ fontSize:'14px', color:'#6B7280', lineHeight:'1.6', margin:0 }}>{col.testo}</p>}
-          </div>
-        ))}
-      </div>
-    )
-  }
-
-  if (block.tipo === 'cta') return (
-    <div style={{ backgroundColor:'#EEF3FF', border:'1px solid #C7D9F8', borderRadius:'12px', padding:'28px 24px', textAlign:'center', marginBottom:'16px' }}>
-      {block.titolo && <h2 style={{ fontSize:'clamp(18px,3vw,26px)', fontWeight:'900', color:'#0A0A0A', letterSpacing:'-.03em', margin:'0 0 16px' }}>{block.titolo}</h2>}
-      <a href="#form-iscrizione"
-        style={{ display:'inline-block', backgroundColor:block.colore||'#003DA5', color:'#FFF', borderRadius:'8px', padding:'13px 32px', fontSize:'15px', fontWeight:'800', textDecoration:'none' }}>
-        {block.testo_btn || block.testo || 'Iscriviti ora →'}
-      </a>
-    </div>
-  )
-
-  if (block.tipo === 'immagine') {
-    const maxW   = block.size==='small'?'33%':block.size==='medium'?'60%':'100%'
-    const align  = block.align || 'center'
-    const margin = align==='center'?'0 auto':align==='right'?'0 0 0 auto':'0 auto 0 0'
-    return (
-      <div style={{ marginBottom:'16px', textAlign: align }}>
-        {block.src && <img src={block.src} alt={block.didascalia||''}
-          style={{ maxWidth: maxW, width:'100%', display:'inline-block', margin: align==='center'?'0 auto':'0' }}/>}
-        {block.didascalia && <p style={{ fontSize:'13px', color:'#9CA3AF', marginTop:'8px', fontStyle:'italic' }}>{block.didascalia}</p>}
-      </div>
-    )
-  }
-
-  if (block.tipo === 'separatore') return (
-    <hr style={{ border:'none', borderTop:'2px solid #E5E7EB', margin:'24px 0' }}/>
-  )
-
-  // Retrocompatibilità vecchie sezioni
-  if (block.tipo === 'stats' || block.colore_numeri) return (
-    <div style={{ display:'flex', flexWrap:'wrap', gap:'24px', justifyContent:'center', padding:'24px 0' }}>
-      {(block.items||[]).map((item,i) => (
-        <div key={i} style={{ textAlign:'center' }}>
-          <p style={{ fontSize:'clamp(32px,5vw,48px)', fontWeight:'900', color:block.colore_numeri||'#003DA5', margin:'0 0 4px' }}>{item.numero}</p>
-          <p style={{ fontSize:'12px', color:'#6B7280', fontWeight:'700', margin:0, textTransform:'uppercase' }}>{item.label}</p>
-        </div>
-      ))}
-    </div>
-  )
-
-  return null
-}
-
-/* ── LANDING PAGE ────────────────────────────────────── */
 export default function LandingPage() {
   const { slug } = useParams()
   const [event,       setEvent]       = useState(null)
@@ -518,7 +439,7 @@ export default function LandingPage() {
         {(event.sezioni||[]).length > 0 && (
           <div style={{ marginBottom:'16px' }}>
             {event.sezioni.map((block,i) => (
-              <BlockRenderer key={block.id||i} block={block} colore_primario={event.colore_primario}/>
+              <BlockRenderer key={block.id||i} block={block} cp={event.colore_primario||'#003DA5'} formTarget="#form-iscrizione"/>
             ))}
           </div>
         )}
