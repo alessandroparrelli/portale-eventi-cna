@@ -79,6 +79,9 @@ const s = {
     display: 'flex', alignItems: 'center',
     padding: '0 20px', gap: '14px',
     boxShadow: '0 1px 4px rgba(0,0,0,0.06)',
+    paddingTop: 'env(safe-area-inset-top, 0px)',
+    WebkitTransform: 'translateZ(0)',
+    transform: 'translateZ(0)',
   },
   hamburger: {
     background: 'none', border: 'none', cursor: 'pointer',
@@ -98,7 +101,7 @@ const s = {
   },
   main: {
     minHeight: '100vh',
-    paddingTop: '80px',
+    paddingTop: 'calc(80px + env(safe-area-inset-top, 0px))',
     paddingBottom: '40px',
     paddingLeft: '32px',
     paddingRight: '32px',
