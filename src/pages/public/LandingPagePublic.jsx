@@ -5,6 +5,7 @@ import { RICH_CSS } from '../../components/editor/RichEditor'
 import { temaConDefault } from '../../components/editor/AspettoTab'
 
 const LOGO_URL = 'https://raw.githubusercontent.com/alessandroparrelli/fileappoggio/main/NUOVO-LOGO-CNA-ROMA-SOLO-ROMA.png'
+const DEFAULT_LOGO = LOGO_URL
 
 // ── Animazione al scroll (Intersection Observer) ─────────────────
 function Animate({ children, animation = 'fadeup', delay = 0 }) {
@@ -436,6 +437,7 @@ export default function LandingPagePublic() {
 
   const tema = temaConDefault(lp.tema)
   const cp   = tema.colore_primario||'#003DA5'
+  const logoSrc = lp.logo_url || LOGO_URL
   const textAlign = lp.hero_layout==='sinistra'?'left':lp.hero_layout==='destra'?'right':'center'
   const alignItems = lp.hero_layout==='sinistra'?'flex-start':lp.hero_layout==='destra'?'flex-end':'center'
   const hasContenuto = lp.contenuto&&lp.contenuto.length>0
@@ -457,7 +459,7 @@ export default function LandingPagePublic() {
       }}>
         <div style={{position:'absolute',inset:0,background:'rgba(0,0,0,0.45)'}} />
         <div className="lp-hero-logo" style={{position:'relative',zIndex:1,textAlign:'center',width:'100%',marginBottom:'40px'}}>
-          <img src={LOGO_URL} alt="CNA Roma" style={{height:(tema.logo_altezza||'44')+'px',objectFit:'contain',filter:'brightness(0) invert(1)'}} />
+          <img src={logoSrc} alt="CNA Roma" style={{height:(tema.logo_altezza||'44')+'px',objectFit:'contain',filter:'brightness(0) invert(1)'}} />
         </div>
         <div className="lp-hero-content" style={{position:'relative',zIndex:1,maxWidth:'740px',textAlign,width:'100%'}}>
           {lp.hero_titolo&&<h1 style={{fontSize:'clamp(28px,5vw,56px)',fontWeight:'900',color:'#fff',margin:'0 0 16px',letterSpacing:'-0.04em',lineHeight:1.05}}>{lp.hero_titolo}</h1>}
@@ -501,7 +503,7 @@ export default function LandingPagePublic() {
 
       {/* FOOTER */}
       <footer style={{background:tema.sfondo_footer||'#0A0A0A',padding:'36px 24px',textAlign:'center'}}>
-        <img src={LOGO_URL} alt="CNA Roma" style={{height:'36px',objectFit:'contain',filter:'brightness(0) invert(1)',marginBottom:'12px',display:'block',margin:'0 auto 12px'}} />
+        <img src={logoSrc} alt="CNA Roma" style={{height:'36px',objectFit:'contain',filter:'brightness(0) invert(1)',marginBottom:'12px',display:'block',margin:'0 auto 12px'}} />
         {lp.footer_testo&&<p style={{fontSize:'13px',color:tema.testo_footer||'rgba(255,255,255,0.5)',margin:'0 0 4px'}}>{lp.footer_testo}</p>}
         <p style={{fontSize:'12px',color:'rgba(255,255,255,0.3)',margin:0}}>© {new Date().getFullYear()} CNA Roma</p>
       </footer>
