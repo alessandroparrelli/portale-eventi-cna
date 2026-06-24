@@ -309,20 +309,29 @@ export default function CheckinPage() {
       {selectedEvento && (
         <>
           {/* ── Contatore presenze — GlowStatCard ── */}
-          <div style={{ display:'grid', gridTemplateColumns:'repeat(3,1fr)', gap:'10px', marginBottom:'14px' }} className="stat-grid-3">
-            <GlowStatCard icon="check"    label="Presenti"    value={presenti.length}                              palette="green"/>
-            <GlowStatCard icon="clock"    label="In attesa"   value={nonPresenti}                                  palette="amber"/>
-            <GlowStatCard icon="percent"  label="Tasso check-in" value={`${pct}%`}
-              sub={`${totali} iscritti totali`} palette="blue"/>
+          {/* ── Contatori — riga singola orizzontale ── */}
+          <div style={{ display:'flex', gap:'6px', marginBottom:'8px', alignItems:'stretch' }}>
+            <div style={{ flex:1, display:'flex', alignItems:'center', gap:'8px', background:'linear-gradient(135deg,#059669,#10b981)', borderRadius:'8px', padding:'9px 12px' }}>
+              <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="#fff" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round"><circle cx="12" cy="12" r="10"/><polyline points="9 12 11 14 15 10"/></svg>
+              <span style={{ fontSize:'22px', fontWeight:'900', color:'#fff', letterSpacing:'-0.03em', lineHeight:1 }}>{presenti.length}</span>
+              <span style={{ fontSize:'11px', fontWeight:'700', color:'rgba(255,255,255,.85)', textTransform:'uppercase', letterSpacing:'0.04em', lineHeight:1.2 }}>Presenti</span>
+            </div>
+            <div style={{ flex:1, display:'flex', alignItems:'center', gap:'8px', background:'linear-gradient(135deg,#b45309,#d97706)', borderRadius:'8px', padding:'9px 12px' }}>
+              <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="#fff" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round"><circle cx="12" cy="12" r="10"/><polyline points="12 6 12 12 16 14"/></svg>
+              <span style={{ fontSize:'22px', fontWeight:'900', color:'#fff', letterSpacing:'-0.03em', lineHeight:1 }}>{nonPresenti}</span>
+              <span style={{ fontSize:'11px', fontWeight:'700', color:'rgba(255,255,255,.85)', textTransform:'uppercase', letterSpacing:'0.04em', lineHeight:1.2 }}>In attesa</span>
+            </div>
+            <div style={{ display:'flex', alignItems:'center', gap:'6px', background:'linear-gradient(135deg,#0e7490,#0891b2)', borderRadius:'8px', padding:'9px 10px', flexShrink:0 }}>
+              <span style={{ fontSize:'20px', fontWeight:'900', color:'#fff', letterSpacing:'-0.03em', lineHeight:1 }}>{pct}%</span>
+              <button onClick={loadPresenti} disabled={loadingP}
+                style={{ background:'rgba(255,255,255,.25)', border:'none', borderRadius:'5px', cursor:'pointer', padding:'5px', display:'flex', alignItems:'center', color:'#fff' }}>
+                <RefreshCw size={12} style={{ animation: loadingP ? 'spin .8s linear infinite' : 'none' }}/>
+              </button>
+            </div>
           </div>
-          {/* Barra percentuale */}
-          <div style={{ ...s.pctBar, marginBottom:'14px', position:'relative' }}>
-            <div style={{ ...s.pctFill, width:`${pct}%` }}/>
-            <button onClick={loadPresenti} disabled={loadingP}
-              style={{ position:'absolute', right:8, top:'50%', transform:'translateY(-50%)', background:'rgba(255,255,255,.9)', border:'none', borderRadius:'6px', cursor:'pointer', padding:'4px 8px', display:'flex', alignItems:'center', gap:'4px', fontSize:'12px', color:'#003DA5', fontWeight:'700' }}>
-              <RefreshCw size={13} style={{ animation: loadingP ? 'spin .8s linear infinite' : 'none' }}/>
-              Aggiorna
-            </button>
+          {/* Barra percentuale sottile */}
+          <div style={{ height:'3px', backgroundColor:'#E5E7EB', borderRadius:'2px', marginBottom:'12px', overflow:'hidden' }}>
+            <div style={{ width:`${pct}%`, height:'100%', background:'linear-gradient(90deg,#059669,#10b981)', borderRadius:'2px', transition:'width .5s' }}/>
           </div>
 
           {/* ── Banner risultato ── */}
@@ -592,47 +601,44 @@ export default function CheckinPage() {
             <p style={{ fontSize: '13px', color: '#6B7280', margin: 0 }}>
               Aggiunge il partecipante direttamente tra i presenti. Tutti i campi sono obbligatori.
             </p>
-            <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '12px' }}>
-              <Field label="Nome *" error={walkinErrors.nome}>
-                <Input value={walkin.nome} onChange={e => setWalkin(p => ({ ...p, nome: e.target.value }))} placeholder="Mario" />
-              </Field>
-              <Field label="Cognome *" error={walkinErrors.cognome}>
-                <Input value={walkin.cognome} onChange={e => setWalkin(p => ({ ...p, cognome: e.target.value }))} placeholder="Rossi" />
-              </Field>
-              <div style={{ gridColumn: '1/-1' }}>
-                <Field label="Email *" error={walkinErrors.email}>
-                  <Input type="email" value={walkin.email} onChange={e => setWalkin(p => ({ ...p, email: e.target.value }))} placeholder="mario@example.it" />
+            <div style={{ display:'flex', flexDirection:'column', gap:'10px' }}>
+              {/* Nome + Cognome affiancati solo se c'è spazio */}
+              <div style={{ display:'grid', gridTemplateColumns:'1fr 1fr', gap:'10px' }} className="form-grid-2col">
+                <Field label="Nome *" error={walkinErrors.nome}>
+                  <Input value={walkin.nome} onChange={e => setWalkin(p => ({ ...p, nome: e.target.value }))} placeholder="Mario" />
+                </Field>
+                <Field label="Cognome *" error={walkinErrors.cognome}>
+                  <Input value={walkin.cognome} onChange={e => setWalkin(p => ({ ...p, cognome: e.target.value }))} placeholder="Rossi" />
                 </Field>
               </div>
-              <Field label="Cellulare *" error={walkinErrors.cellulare}>
-                <Input value={walkin.cellulare} onChange={e => setWalkin(p => ({ ...p, cellulare: e.target.value }))} placeholder="333 1234567" />
+              <Field label="Email *" error={walkinErrors.email}>
+                <Input type="email" value={walkin.email} onChange={e => setWalkin(p => ({ ...p, email: e.target.value }))} placeholder="mario@example.it" />
               </Field>
-              <Field label="CAP *" error={walkinErrors.cap}>
-                <Input value={walkin.cap || ''} onChange={e => setWalkin(p => ({ ...p, cap: e.target.value }))} placeholder="00100" />
+              <div style={{ display:'grid', gridTemplateColumns:'1fr 1fr', gap:'10px' }} className="form-grid-2col">
+                <Field label="Cellulare *" error={walkinErrors.cellulare}>
+                  <Input value={walkin.cellulare} onChange={e => setWalkin(p => ({ ...p, cellulare: e.target.value }))} placeholder="333 1234567" />
+                </Field>
+                <Field label="CAP *" error={walkinErrors.cap}>
+                  <Input value={walkin.cap || ''} onChange={e => setWalkin(p => ({ ...p, cap: e.target.value }))} placeholder="00100" />
+                </Field>
+              </div>
+              <Field label="Ragione Sociale *" error={walkinErrors.ragione_sociale}>
+                <Input value={walkin.ragione_sociale} onChange={e => setWalkin(p => ({ ...p, ragione_sociale: e.target.value }))} placeholder="Rossi Falegnameria Srl" />
               </Field>
-              <div style={{ gridColumn: '1/-1' }}>
-                <Field label="Ragione Sociale *" error={walkinErrors.ragione_sociale}>
-                  <Input value={walkin.ragione_sociale} onChange={e => setWalkin(p => ({ ...p, ragione_sociale: e.target.value }))} placeholder="Rossi Falegnameria Srl" />
-                </Field>
-              </div>
-              <div style={{ gridColumn: '1/-1' }}>
-                <Field label="Partita IVA *" error={walkinErrors.partita_iva}>
-                  <Input value={walkin.partita_iva || ''} onChange={e => setWalkin(p => ({ ...p, partita_iva: e.target.value }))} placeholder="12345670015" />
-                </Field>
-              </div>
-              <div style={{ gridColumn: '1/-1' }}>
-                <Field label="Categoria professionale *" error={walkinErrors.mestiere_id}>
-                  <select
-                    value={walkin.mestiere_id || ''}
-                    onChange={e => setWalkin(p => ({ ...p, mestiere_id: e.target.value }))}
-                    style={{ width: '100%', padding: '10px 12px', border: `1px solid ${walkinErrors.mestiere_id ? '#DC2626' : '#D1D5DB'}`, borderRadius: '6px', fontSize: '14px', fontFamily: "'Inter',sans-serif", outline: 'none', backgroundColor: '#FFF' }}
-                  >
-                    <option value="">— Seleziona —</option>
-                    {mestieri.map(m => <option key={m.id} value={m.id}>{m.nome}</option>)}
-                  </select>
-                  {walkinErrors.mestiere_id && <span style={{ fontSize: '12px', color: '#DC2626' }}>{walkinErrors.mestiere_id}</span>}
-                </Field>
-              </div>
+              <Field label="Partita IVA *" error={walkinErrors.partita_iva}>
+                <Input value={walkin.partita_iva || ''} onChange={e => setWalkin(p => ({ ...p, partita_iva: e.target.value }))} placeholder="12345670015" />
+              </Field>
+              <Field label="Categoria professionale *" error={walkinErrors.mestiere_id}>
+                <select
+                  value={walkin.mestiere_id || ''}
+                  onChange={e => setWalkin(p => ({ ...p, mestiere_id: e.target.value }))}
+                  style={{ width:'100%', padding:'10px 12px', border:`1px solid ${walkinErrors.mestiere_id ? '#DC2626' : '#D1D5DB'}`, borderRadius:'6px', fontSize:'16px', fontFamily:"'Inter',sans-serif", outline:'none', backgroundColor:'#FFF', appearance:'none' }}
+                >
+                  <option value="">— Seleziona categoria —</option>
+                  {mestieri.map(m => <option key={m.id} value={m.id}>{m.nome}</option>)}
+                </select>
+                {walkinErrors.mestiere_id && <span style={{ fontSize:'12px', color:'#DC2626' }}>{walkinErrors.mestiere_id}</span>}
+              </Field>
             </div>
             <div style={{ display: 'flex', gap: '10px', justifyContent: 'flex-end', marginTop: '4px' }}>
               <Btn variant="ghost" onClick={() => setWalkinModal(false)}>Annulla</Btn>
