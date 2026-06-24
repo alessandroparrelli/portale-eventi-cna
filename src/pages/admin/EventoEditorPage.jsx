@@ -339,6 +339,7 @@ export default function EventoEditorPage() {
     layout_hero:{ altezza:'380', overlay_opacita:'55', allineamento:'sinistra', titolo_colore:'#FFFFFF', titolo_dimensione:'clamp(26px,5vw,54px)', titolo_grassetto:true, titolo_maiuscolo:false },
     sezioni:[],
   })
+  const eventRef = useRef(null)   // sempre aggiornato — evita race condition nel save
   const [saving, setSaving] = useState(false)
   const [saved, setSaved] = useState(false)
   const [activeTab, setActiveTab] = useState('info')
@@ -360,43 +361,65 @@ export default function EventoEditorPage() {
       if (data.descrizione_html && sezioni.length === 0) {
         sezioni = [{ id: 'migrated-' + Date.now().toString(36), tipo: 'testo', html: data.descrizione_html }]
       }
-      setEvent({
-        ...data,
-        data_inizio: data.data_inizio?.slice(0,16)||'',
-        data_fine:   data.data_fine?.slice(0,16)||'',
-        layout_hero: data.layout_hero || { altezza:'380', overlay_opacita:'55', allineamento:'sinistra' },
-        logo_url: data.logo_url || null,
-        sottotitolo: data.sottotitolo || '',
-        footer_testo: data.footer_testo || '',
-        tema: data.tema || {},
-        sezioni,
-        // Azzera descrizione_html se è stata migrata nei blocchi
-        descrizione_html: sezioni.length > 0 ? null : data.descrizione_html,
+      setEvent(prev => {
+        const next = {
+          ...data,
+          data_inizio: data.data_inizio?.slice(0,16)||'',
+          data_fine:   data.data_fine?.slice(0,16)||'',
+          layout_hero: data.layout_hero || { altezza:'380', overlay_opacita:'55', allineamento:'sinistra' },
+          logo_url: data.logo_url || null,
+          sottotitolo: data.sottotitolo || '',
+          footer_testo: data.footer_testo || '',
+          tema: data.tema || {},
+          sezioni,
+          descrizione_html: sezioni.length > 0 ? null : data.descrizione_html,
+        }
+        eventRef.current = next
+        return next
       })
     }
   }
 
-  function setH(k) { return v => setEvent(p=>({...p,layout_hero:{...p.layout_hero,[k]:typeof v==='boolean'?v:typeof v==='string'?v:v?.target?.value}})) }
+  function setH(k) {
+    return v => {
+      const val = typeof v === 'boolean' ? v : typeof v === 'string' ? v : v?.target?.value
+      setEvent(p => {
+        const next = { ...p, layout_hero: { ...p.layout_hero, [k]: val } }
+        eventRef.current = next
+        return next
+      })
+    }
+  }
+
+  // Wrapper setEvent che mantiene sempre il ref aggiornato
+  function updEvent(updater) {
+    setEvent(p => {
+      const next = typeof updater === 'function' ? updater(p) : { ...p, ...updater }
+      eventRef.current = next
+      return next
+    })
+  }
 
   async function save() {
-    if (!event.titolo.trim()) return alert('Il titolo è obbligatorio')
+    const ev = eventRef.current || event   // usa sempre il valore più recente
+    if (!ev.titolo.trim()) return alert('Il titolo è obbligatorio')
     setSaving(true)
     const payload = {
-      titolo:event.titolo, slug:event.slug||toSlug(event.titolo),
-      stato:event.stato, data_inizio:event.data_inizio||null,
-      data_fine:event.data_fine||null, luogo:event.luogo||null,
-      descrizione_html:event.descrizione_html||null,
-      immagine_hero:event.immagine_hero||null,
-      colore_primario:event.colore_primario,
-      colore_sfondo:event.colore_sfondo,
-      layout_hero:event.layout_hero,
-      sezioni:event.sezioni,
-      capienza_max:event.capienza_max||null,
-      posti_per_utente:event.posti_per_utente||1,
-      logo_url:event.logo_url||null,
-      sottotitolo:event.sottotitolo||null,
-      footer_testo:event.footer_testo||null,
-      tema:event.tema||{},
+      titolo:ev.titolo, slug:ev.slug||toSlug(ev.titolo),
+      stato:ev.stato, data_inizio:ev.data_inizio||null,
+      data_fine:ev.data_fine||null, luogo:ev.luogo||null,
+      descrizione_html:ev.descrizione_html||null,
+      immagine_hero:ev.immagine_hero||null,
+      colore_primario:ev.colore_primario,
+      colore_sfondo:ev.colore_sfondo,
+      layout_hero:ev.layout_hero,
+      sezioni:ev.sezioni,
+      capienza_max:ev.capienza_max||null,
+      posti_per_utente:ev.posti_per_utente||1,
+      logo_url:ev.logo_url||null,
+      sottotitolo:ev.sottotitolo||null,
+      footer_testo:ev.footer_testo||null,
+      tema:ev.tema||{},
     }
     if (isNew) {
       const { data } = await supabase.from('events').insert(payload).select().single()
@@ -444,7 +467,7 @@ export default function EventoEditorPage() {
       const { error } = await supabase.storage.from('eventi-immagini').upload(path, file, { upsert:true })
       if (!error) {
         const { data: urlData } = supabase.storage.from('eventi-immagini').getPublicUrl(path)
-        setEvent(p=>({...p,immagine_hero:urlData.publicUrl}))
+        updEvent(p=>({...p,immagine_hero:urlData.publicUrl}))
       }
     } catch(e) {
       alert('Errore nella generazione. Riprova.')
@@ -456,8 +479,8 @@ export default function EventoEditorPage() {
     const sec = newSection(tipo)
     setEvent(p => ({ ...p, sezioni: [...(p.sezioni||[]), sec] }))
   }
-  function updateSection(idx, sec) { setEvent(p=>{ const s=[...p.sezioni]; s[idx]=sec; return {...p,sezioni:s} }) }
-  function deleteSection(idx)     { setEvent(p=>({...p,sezioni:p.sezioni.filter((_,i)=>i!==idx)})) }
+  function updateSection(idx, sec) { updEvent(p=>{ const s=[...p.sezioni]; s[idx]=sec; return {...p,sezioni:s} }) }
+  function deleteSection(idx)     { updEvent(p=>({...p,sezioni:p.sezioni.filter((_,i)=>i!==idx)})) }
   function moveSection(idx, dir)  {
     setEvent(p=>{
       const s=[...p.sezioni]; const t=s[idx]; s[idx]=s[idx+dir]; s[idx+dir]=t
@@ -486,7 +509,7 @@ export default function EventoEditorPage() {
         <div style={{ display:'flex', alignItems:'center', gap:'12px', flex:1, minWidth:0, margin:'0 16px' }}>
           <input
             value={event.titolo}
-            onChange={e=>setEvent(p=>({...p, titolo:e.target.value, slug:p.slug||toSlug(e.target.value)}))}
+            onChange={e=>updEvent(p=>({...p, titolo:e.target.value, slug:p.slug||toSlug(e.target.value)}))}
             placeholder="Titolo evento…"
             style={p.titleInput}
           />
@@ -523,22 +546,22 @@ export default function EventoEditorPage() {
                 <Field label="Slug URL (generato automaticamente dal titolo)">
                   <div style={{ display:'flex', alignItems:'center', gap:'0' }}>
                     <span style={{ padding:'9px 12px', backgroundColor:'#F4F5F7', border:'1px solid #D1D5DB', borderRight:'none', borderRadius:'6px 0 0 6px', fontSize:'13px', color:'#9CA3AF', whiteSpace:'nowrap' }}>/eventi/</span>
-                    <Input value={event.slug||''} onChange={e=>setEvent(p=>({...p,slug:toSlug(e.target.value)}))}
+                    <Input value={event.slug||''} onChange={e=>updEvent(p=>({...p,slug:toSlug(e.target.value)}))}
                       placeholder="slug-url-evento" style={{ borderRadius:'0 6px 6px 0' }}/>
                   </div>
                 </Field>
               </div>
               <Field label="Data e ora inizio">
-                <Input type="datetime-local" value={event.data_inizio||''} onChange={e=>setEvent(p=>({...p,data_inizio:e.target.value}))}/>
+                <Input type="datetime-local" value={event.data_inizio||''} onChange={e=>updEvent(p=>({...p,data_inizio:e.target.value}))}/>
               </Field>
               <Field label="Data e ora fine">
-                <Input type="datetime-local" value={event.data_fine||''} onChange={e=>setEvent(p=>({...p,data_fine:e.target.value}))}/>
+                <Input type="datetime-local" value={event.data_fine||''} onChange={e=>updEvent(p=>({...p,data_fine:e.target.value}))}/>
               </Field>
               <div style={{ gridColumn:'1/-1' }}>
                 <Field label="Sottotitolo evento">
                   <Input
                     value={event.sottotitolo||''}
-                    onChange={e=>setEvent(p=>({...p,sottotitolo:e.target.value}))}
+                    onChange={e=>updEvent(p=>({...p,sottotitolo:e.target.value}))}
                     placeholder="es. Insieme da 80 anni, il futuro ha radici nelle persone"
                   />
                 </Field>
@@ -578,7 +601,7 @@ export default function EventoEditorPage() {
               </p>
               <LogoManager
                 value={event.logo_url}
-                onChange={url => setEvent(p => ({ ...p, logo_url: url }))}
+                onChange={url => updEvent(p => ({ ...p, logo_url: url }))}
               />
               {/* Slider dimensione + sfondo logo */}
               <div style={{ marginTop:'14px', display:'grid', gridTemplateColumns:'1fr 1fr', gap:'16px' }}>
@@ -623,7 +646,7 @@ export default function EventoEditorPage() {
 
             {/* Immagine hero */}
             <div style={{ marginBottom:'20px' }}>
-              <ImageUploader value={event.immagine_hero} onChange={url=>setEvent(p=>({...p,immagine_hero:url}))}/>
+              <ImageUploader value={event.immagine_hero} onChange={url=>updEvent(p=>({...p,immagine_hero:url}))}/>
             </div>
 
             {/* Controlli layout */}
