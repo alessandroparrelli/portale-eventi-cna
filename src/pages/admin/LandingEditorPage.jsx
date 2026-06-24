@@ -229,10 +229,27 @@ export default function LandingEditorPage() {
 
                 <div style={{ marginTop:'14px' }}>
                   <Field label={`Dimensione logo: ${lh.logo_altezza||'48'}px`}>
-                    <input type="range" min="28" max="100" step="4"
+                    <input type="range" min="28" max="160" step="4"
                       value={lh.logo_altezza||'48'} onChange={setH('logo_altezza')}
                       style={{ width:'100%' }} />
                   </Field>
+                  {/* Anteprima logo con dimensione corrente */}
+                  <div style={{ marginTop:'10px', padding:'12px', background:'#1a1a2e', borderRadius:'8px', textAlign:'center' }}>
+                    <div style={{
+                      background: (lh.logo_sfondo||'trasparente')==='bianco' ? '#fff'
+                                : (lh.logo_sfondo||'trasparente')==='colore_primario' ? (data.tema?.colore_primario||'#003DA5')
+                                : 'transparent',
+                      padding: (lh.logo_sfondo && lh.logo_sfondo!=='trasparente') ? '5px 12px' : 0,
+                      borderRadius:'6px', display:'inline-flex', alignItems:'center'
+                    }}>
+                      <img
+                        src={data.logo_url || 'https://raw.githubusercontent.com/alessandroparrelli/fileappoggio/main/NUOVO-LOGO-CNA-ROMA-SOLO-ROMA.png'}
+                        alt="Logo preview"
+                        style={{ height: (lh.logo_altezza||'48')+'px', objectFit:'contain', display:'block' }}
+                      />
+                    </div>
+                    <p style={{ fontSize:'10px', color:'rgba(255,255,255,0.5)', margin:'6px 0 0' }}>Anteprima su sfondo scuro</p>
+                  </div>
                 </div>
                 <div style={{ marginTop:'10px' }}>
                   <Field label="Sfondo del logo" hint="Utile per rendere il logo leggibile sull'hero">

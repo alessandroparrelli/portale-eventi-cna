@@ -488,7 +488,16 @@ export default function LandingPagePublic() {
 
   useEffect(() => {
     supabase.from('landing_pages').select('*').eq('slug',slug).eq('stato','pubblicata').single()
-      .then(({data}) => { if(!data) setNotFound(true); else setLp(data); setLoading(false) })
+      .then(({data}) => {
+        if(!data) setNotFound(true)
+        else {
+          setLp(data)
+          // Titolo tab del browser = H1 della pagina
+          if (data.hero_titolo) document.title = data.hero_titolo + ' — CNA Roma'
+          else if (data.titolo) document.title = data.titolo + ' — CNA Roma'
+        }
+        setLoading(false)
+      })
   }, [slug])
 
   if (loading) return (
