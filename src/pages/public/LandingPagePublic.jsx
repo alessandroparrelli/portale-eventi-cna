@@ -545,7 +545,16 @@ export default function LandingPagePublic() {
       }}>
         <div style={{position:'absolute',inset:0,background:`rgba(0,0,0,${overlayOpacita})`}} />
         <div className="lp-hero-logo" style={{position:'relative',zIndex:1,textAlign:'center',width:'100%',marginBottom:'36px'}}>
-          <img src={logoSrc} alt="CNA Roma" style={{height:logoAltezza+'px',objectFit:'contain',filter: lh.logo_filtro==='originale' ? 'none' : lh.logo_filtro==='nero' ? 'brightness(0)' : 'brightness(0) invert(1)'}} />
+          <div style={{
+            background: lh.logo_sfondo==='bianco' ? '#FFFFFF'
+                      : lh.logo_sfondo==='colore_primario' ? cp
+                      : 'transparent',
+            padding: lh.logo_sfondo && lh.logo_sfondo !== 'trasparente' ? '5px 12px' : 0,
+            borderRadius: '6px',
+            display: 'inline-flex', alignItems: 'center',
+          }}>
+            <img src={logoSrc} alt="CNA Roma" style={{height:logoAltezza+'px',objectFit:'contain',display:'block'}} />
+          </div>
         </div>
         <div className="lp-hero-content" style={{position:'relative',zIndex:1,maxWidth:'740px',textAlign,width:'100%'}}>
           {lp.hero_titolo&&<h1 style={{fontSize:titoloSize,fontWeight:titoloGrassetto?'900':'400',color:titoloColore,margin:'0 0 12px',letterSpacing:'-0.04em',lineHeight:1.05,textTransform:titoloMaiuscolo?'uppercase':'none'}}>{lp.hero_titolo}</h1>}
@@ -590,7 +599,7 @@ export default function LandingPagePublic() {
 
       {/* FOOTER */}
       <footer style={{background:tema.sfondo_footer||'#0A0A0A',padding:'36px 24px',textAlign:'center'}}>
-        <img src={logoSrc} alt="CNA Roma" style={{height:'36px',objectFit:'contain',filter: lh.logo_filtro==='originale' ? 'none' : lh.logo_filtro==='nero' ? 'brightness(0)' : 'brightness(0) invert(1)',marginBottom:'12px',display:'block',margin:'0 auto 12px'}} />
+        <img src={logoSrc} alt="CNA Roma" style={{height:'36px',objectFit:'contain',display:'block',margin:'0 auto 12px'}} />
         {lp.footer_testo&&<p style={{fontSize:'13px',color:tema.testo_footer||'rgba(255,255,255,0.5)',margin:'0 0 4px'}}>{lp.footer_testo}</p>}
         <p style={{fontSize:'12px',color:'rgba(255,255,255,0.3)',margin:0}}>© {new Date().getFullYear()} CNA Roma</p>
       </footer>

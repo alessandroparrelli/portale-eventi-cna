@@ -235,19 +235,26 @@ export default function LandingEditorPage() {
                   </Field>
                 </div>
                 <div style={{ marginTop:'10px' }}>
-                  <Field label="Colore logo sull'hero">
+                  <Field label="Sfondo del logo" hint="Utile per rendere il logo leggibile sull'hero">
                     <div style={{ display:'flex', gap:'8px' }}>
-                      {[['bianco','⬜ Bianco'],['nessuno','🎨 Originale'],['nero','⬛ Nero']].map(([v,l]) => (
-                        <button key={v} onClick={() => setH('logo_filtro')(v)} style={{
-                          flex:1, padding:'8px 6px', border:`1px solid ${(lh.logo_filtro||'bianco')===v?'#003DA5':'#E5E7EB'}`,
-                          borderRadius:'6px', background:(lh.logo_filtro||'bianco')===v?'#EEF3FF':'#fff',
+                      {[
+                        ['trasparente', '⬜ Trasparente'],
+                        ['bianco',      '🤍 Bianco'],
+                        ['colore_primario', '🎨 Colore tema'],
+                      ].map(([v, l]) => (
+                        <button key={v} onClick={() => setH('logo_sfondo')(v)} style={{
+                          flex:1, padding:'8px 6px',
+                          border:`1px solid ${(lh.logo_sfondo||'trasparente')===v?'#003DA5':'#E5E7EB'}`,
+                          borderRadius:'6px',
+                          background:(lh.logo_sfondo||'trasparente')===v?'#EEF3FF':'#fff',
                           cursor:'pointer', fontSize:'12px', fontWeight:'600',
-                          fontFamily:'Inter,sans-serif', color:(lh.logo_filtro||'bianco')===v?'#003DA5':'#6B7280'
+                          fontFamily:'Inter,sans-serif',
+                          color:(lh.logo_sfondo||'trasparente')===v?'#003DA5':'#6B7280'
                         }}>{l}</button>
                       ))}
                     </div>
                     <p style={{ fontSize:'11px', color:'#9CA3AF', margin:'4px 0 0' }}>
-                      "Bianco" per sfondi scuri · "Originale" mantiene i colori del logo
+                      "Trasparente" mostra il logo com'è · "Bianco" aggiunge sfondo bianco per sfondi scuri
                     </p>
                   </Field>
                 </div>
