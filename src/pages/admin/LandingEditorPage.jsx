@@ -1,4 +1,4 @@
-import { useState, useEffect } from 'react'
+import React, { useState, useEffect } from 'react'
 import { useParams, useNavigate } from 'react-router-dom'
 import { supabase } from '../../lib/supabase'
 import ImageUploader from '../../components/editor/ImageUploader'
@@ -63,6 +63,7 @@ export default function LandingEditorPage() {
   const navigate = useNavigate()
   const [tab, setTab] = useState('info')
   const [data, setData] = useState(null)
+  const dataRef = React.useRef(null)
   const [saving, setSaving] = useState(false)
   const [saved, setSaved] = useState(false)
   // campo custom in modifica
@@ -76,11 +77,16 @@ export default function LandingEditorPage() {
       if (!lp.layout_hero) lp.layout_hero = { ...LAYOUT_HERO_DEFAULT }
       if (!lp.form_fields) lp.form_fields = STD_FIELDS.map(f => ({ ...f, std:true, enabled:f.default_on }))
       setData(lp)
+      dataRef.current = lp
     }
   }
 
   function upd(field, value) {
-    setData(d => ({ ...d, [field]: value }))
+    setData(d => {
+      const next = { ...d, [field]: value }
+      dataRef.current = next
+      return next
+    })
     setSaved(false)
   }
 
@@ -88,7 +94,11 @@ export default function LandingEditorPage() {
   function setH(k) {
     return v => {
       const val = typeof v === 'boolean' ? v : typeof v === 'string' ? v : v?.target?.value
-      setData(p => ({ ...p, layout_hero: { ...(p.layout_hero||LAYOUT_HERO_DEFAULT), [k]: val } }))
+      setData(p => {
+        const next = { ...p, layout_hero: { ...(p.layout_hero||LAYOUT_HERO_DEFAULT), [k]: val } }
+        dataRef.current = next
+        return next
+      })
       setSaved(false)
     }
   }
@@ -102,25 +112,29 @@ export default function LandingEditorPage() {
   function setFakeEvent(updater) {
     setData(prev => {
       const u = typeof updater === 'function' ? updater(prev) : updater
-      return { ...prev, logo_url: u.logo_url ?? prev.logo_url, tema: u.tema ?? prev.tema }
+      const next = { ...prev, logo_url: u.logo_url ?? prev.logo_url, tema: u.tema ?? prev.tema }
+      dataRef.current = next
+      return next
     })
     setSaved(false)
   }
 
   async function save() {
+    const d = dataRef.current || data
+    if (!d) return
     setSaving(true)
     const { error } = await supabase.from('landing_pages').update({
-      titolo: data.titolo, slug: data.slug, stato: data.stato,
-      hero_titolo: data.hero_titolo, hero_sottotitolo: data.hero_sottotitolo,
-      hero_titolo2: data.hero_titolo2,
-      hero_immagine_url: data.hero_immagine_url, hero_layout: data.hero_layout,
-      layout_hero: data.layout_hero, logo_url: data.logo_url,
-      contenuto: data.contenuto, tema: data.tema,
-      form_abilitato: data.form_abilitato, form_titolo: data.form_titolo,
-      form_testo: data.form_testo, form_fields: data.form_fields,
-      form_bottone_testo: data.form_bottone_testo,
-      form_messaggio_conferma: data.form_messaggio_conferma,
-      footer_testo: data.footer_testo, meta_descrizione: data.meta_descrizione,
+      titolo: d.titolo, slug: d.slug, stato: d.stato,
+      hero_titolo: d.hero_titolo, hero_sottotitolo: d.hero_sottotitolo,
+      hero_titolo2: d.hero_titolo2,
+      hero_immagine_url: d.hero_immagine_url, hero_layout: d.hero_layout,
+      layout_hero: d.layout_hero, logo_url: d.logo_url,
+      contenuto: d.contenuto, tema: d.tema,
+      form_abilitato: d.form_abilitato, form_titolo: d.form_titolo,
+      form_testo: d.form_testo, form_fields: d.form_fields,
+      form_bottone_testo: d.form_bottone_testo,
+      form_messaggio_conferma: d.form_messaggio_conferma,
+      footer_testo: d.footer_testo, meta_descrizione: d.meta_descrizione,
     }).eq('id', id)
     setSaving(false)
     if (!error) { setSaved(true); setTimeout(() => setSaved(false), 2500) }
