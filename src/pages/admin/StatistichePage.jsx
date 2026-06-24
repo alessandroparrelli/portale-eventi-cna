@@ -1,4 +1,5 @@
 import { useEffect, useState } from 'react'
+import { usePageTitle } from '../../hooks/usePageTitle'
 import { supabase } from '../../lib/supabase'
 import { Select, Field, EmptyState } from '../../components/ui'
 import { BarChart2, Star, TrendingUp, Users, CheckCircle2, UserX, UserCheck, Search, Calendar, Award, Clock, ArrowRight, Download } from 'lucide-react'
@@ -67,6 +68,7 @@ function fmtDt(ts) {
 }
 
 export default function StatistichePage() {
+  usePageTitle('Statistiche')
   const [tab, setTab] = useState('evento') // evento | utenti
   const [eventi, setEventi] = useState([])
   const [selectedEvento, setSelectedEvento] = useState('')

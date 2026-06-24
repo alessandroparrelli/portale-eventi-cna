@@ -1,4 +1,5 @@
 import { useEffect, useState } from 'react'
+import { usePageTitle } from '../../hooks/usePageTitle'
 import { supabase } from '../../lib/supabase'
 import { Activity, Search, RefreshCw, User, CalendarDays, Filter, ChevronDown } from 'lucide-react'
 import GlowTabBar from '../../components/GlowTabBar'
@@ -47,6 +48,7 @@ function relTime(ts) {
 }
 
 export default function ActivityLogPage() {
+  usePageTitle('Log attività')
   const [logs, setLogs] = useState([])
   const [loading, setLoading] = useState(true)
   const [search, setSearch] = useState('')

@@ -1,4 +1,5 @@
 import { useEffect, useRef, useState } from 'react'
+import { usePageTitle } from '../../hooks/usePageTitle'
 import { useNavigate } from 'react-router-dom'
 import { supabase } from '../../lib/supabase'
 import { useRole } from '../../hooks/useRole'
@@ -286,6 +287,7 @@ const ee = {
 
 /* ─── PAGINA PRINCIPALE ───────────────────────────────────────── */
 export default function EventiPage() {
+  usePageTitle('Gestione eventi')
   const [events,     setEvents]     = useState([])
   const [counts,     setCounts]     = useState({})
   const [loading,    setLoading]    = useState(true)

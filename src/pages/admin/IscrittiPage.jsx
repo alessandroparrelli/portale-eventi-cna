@@ -1,4 +1,5 @@
 import { useEffect, useState } from 'react'
+import { usePageTitle } from '../../hooks/usePageTitle'
 import { useSearchParams } from 'react-router-dom'
 import { supabase } from '../../lib/supabase'
 import { useRole } from '../../hooks/useRole'
@@ -15,6 +16,7 @@ function formatDt(ts) {
 }
 
 export default function IscrittiPage() {
+  usePageTitle('Iscritti')
   const [searchParams] = useSearchParams()
   const [eventi, setEventi] = useState([])
   const [selectedEvento, setSelectedEvento] = useState(searchParams.get('evento') || '')

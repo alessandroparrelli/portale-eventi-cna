@@ -1,4 +1,5 @@
 import { useState, useEffect } from 'react'
+import { usePageTitle } from '../../hooks/usePageTitle'
 import { supabase } from '../../lib/supabase'
 import RichEditor from '../../components/editor/RichEditor'
 import { Mail, Save, CheckCircle, Code, Eye as EyeIcon } from 'lucide-react'
@@ -30,6 +31,7 @@ const PREVIEW_MAP = {
 }
 
 export default function EmailPage() {
+  usePageTitle('Email')
   const [selected, setSelected] = useState('conferma')
   const [templates, setTemplates] = useState({})
   const [saving, setSaving] = useState(false)

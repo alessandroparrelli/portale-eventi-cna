@@ -1,4 +1,5 @@
 import { useEffect, useRef, useState } from 'react'
+import { usePageTitle } from '../../hooks/usePageTitle'
 import { supabase } from '../../lib/supabase'
 import { useRole } from '../../hooks/useRole'
 import { Modal, Btn, Select, Field, Input } from '../../components/ui'
@@ -99,6 +100,7 @@ function ResultBanner({ result, onClose }) {
 
 /* ─── PAGINA CHECKIN ──────────────────────────────────────────── */
 export default function CheckinPage() {
+  usePageTitle('Check-in')
   const [eventi,         setEventi]        = useState([])
   const [selectedEvento, setSelectedEvento]= useState('')
   const [scanning,       setScanning]      = useState(false)

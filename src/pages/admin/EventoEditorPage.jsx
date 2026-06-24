@@ -1,4 +1,5 @@
 import React, { useEffect, useRef, useState } from 'react'
+import { usePageTitle } from '../../hooks/usePageTitle'
 import { useNavigate, useParams } from 'react-router-dom'
 import { supabase } from '../../lib/supabase'
 import { useRole } from '../../hooks/useRole'
@@ -340,8 +341,10 @@ export default function EventoEditorPage() {
   })
   const [saving, setSaving] = useState(false)
   const [saved, setSaved] = useState(false)
-  const [activeTab, setActiveTab] = useState('info') // info | hero | sezioni | aspetto
+  const [activeTab, setActiveTab] = useState('info')
   const { canWrite } = useRole()
+
+  usePageTitle(event.titolo ? `Modifica — ${event.titolo}` : 'Nuovo evento')
 
 
 

@@ -1,4 +1,5 @@
 import { useEffect, useState } from 'react'
+import { usePageTitle } from '../../hooks/usePageTitle'
 import { useNavigate } from 'react-router-dom'
 import { supabase } from '../../lib/supabase'
 import GlowTabBar from '../../components/GlowTabBar'
@@ -76,6 +77,7 @@ function formatDateShort(ts) {
 }
 
 export default function DashboardPage() {
+  usePageTitle('Dashboard')
   const [events, setEvents]           = useState([])
   const [stats, setStats]             = useState({ totale:0, pubblicati:0, iscritti:0, presenti:0, oggi:0, prossimi:0 })
   const [weeklyData, setWeeklyData]   = useState([])
