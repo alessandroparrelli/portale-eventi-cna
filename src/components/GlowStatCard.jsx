@@ -41,10 +41,9 @@ export default function GlowStatCard({ icon, label, value, sub, palette = 'blue'
         gap: '10px',
         padding: '10px 14px',
         backgroundColor: hovered ? p.bg : '#ffffff',
-        border: '1px solid #E5E7EB',
-        borderLeft: `3px solid ${p.border}`,
+        border: `1px solid ${hovered ? p.border + '40' : '#E5E7EB'}`,
         borderRadius: '8px',
-        transition: 'background-color 0.15s, box-shadow 0.15s, transform 0.15s',
+        transition: 'all 0.15s ease',
         boxShadow: hovered
           ? `0 4px 12px ${p.accent}22, 0 1px 3px rgba(0,0,0,.06)`
           : '0 1px 3px rgba(0,0,0,.04)',
