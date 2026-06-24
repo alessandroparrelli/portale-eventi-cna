@@ -4,6 +4,7 @@ import { supabase } from '../../lib/supabase'
 import ImageUploader from '../../components/editor/ImageUploader'
 import BlockEditor from '../../components/editor/BlockEditor'
 import LogoManager from '../../components/editor/LogoManager'
+import HeroDragPreview from '../../components/editor/HeroDragPreview'
 import AspettoTab, { TEMA_DEFAULT, temaConDefault } from '../../components/editor/AspettoTab'
 
 const TABS = [
@@ -21,14 +22,41 @@ const STATO_OPTS = [
   { value:'archiviata', label:'Archiviata' },
 ]
 
-const FORM_FIELDS_STD = [
-  { key:'nome',     label:'Nome',     default_on:true },
-  { key:'cognome',  label:'Cognome',  default_on:true },
-  { key:'email',    label:'Email',    default_on:true, required:true },
-  { key:'telefono', label:'Telefono', default_on:false },
-  { key:'azienda',  label:'Azienda',  default_on:false },
-  { key:'citta',    label:'Città',    default_on:false },
+// Tipi di campo custom supportati
+const FIELD_TYPES = [
+  { value:'testo',    label:'Testo libero' },
+  { value:'email',    label:'Email' },
+  { value:'tel',      label:'Telefono' },
+  { value:'textarea', label:'Testo lungo' },
+  { value:'select',   label:'Menu a tendina' },
+  { value:'radio',    label:'Scelta singola (bottoni)' },
+  { value:'checkbox', label:'Scelta multipla (bottoni)' },
+  { value:'number',   label:'Numero' },
 ]
+
+// Campi standard sempre presenti (non eliminabili)
+const STD_FIELDS = [
+  { key:'nome',     label:'Nome',     tipo:'testo',  default_on:true  },
+  { key:'cognome',  label:'Cognome',  tipo:'testo',  default_on:true  },
+  { key:'email',    label:'Email',    tipo:'email',  default_on:true,  required:true },
+  { key:'telefono', label:'Telefono', tipo:'tel',    default_on:false  },
+  { key:'azienda',  label:'Azienda',  tipo:'testo',  default_on:false  },
+  { key:'citta',    label:'Città',    tipo:'testo',  default_on:false  },
+]
+
+const LAYOUT_HERO_DEFAULT = {
+  altezza: '420',
+  overlay_opacita: '50',
+  allineamento: 'centro',
+  titolo_colore: '#FFFFFF',
+  titolo_dimensione: 'clamp(26px,5vw,54px)',
+  titolo_grassetto: true,
+  titolo_maiuscolo: false,
+  bg_position: '50% 50%',
+  logo_altezza: '48',
+}
+
+function uid() { return Math.random().toString(36).slice(2,9) }
 
 export default function LandingEditorPage() {
   const { id } = useParams()
@@ -37,15 +65,16 @@ export default function LandingEditorPage() {
   const [data, setData] = useState(null)
   const [saving, setSaving] = useState(false)
   const [saved, setSaved] = useState(false)
+  // campo custom in modifica
+  const [editingField, setEditingField] = useState(null) // null | { index, field }
 
   useEffect(() => { load() }, [id])
 
   async function load() {
     const { data: lp } = await supabase.from('landing_pages').select('*').eq('id', id).single()
     if (lp) {
-      if (!lp.form_fields || lp.form_fields.length === 0) {
-        lp.form_fields = FORM_FIELDS_STD.map(f => ({ ...f, enabled: f.default_on }))
-      }
+      if (!lp.layout_hero) lp.layout_hero = { ...LAYOUT_HERO_DEFAULT }
+      if (!lp.form_fields) lp.form_fields = STD_FIELDS.map(f => ({ ...f, std:true, enabled:f.default_on }))
       setData(lp)
     }
   }
@@ -55,13 +84,25 @@ export default function LandingEditorPage() {
     setSaved(false)
   }
 
-  // Adattatore: AspettoTab si aspetta { event, setEvent }
-  // costruiamo un event fittizio con logo_url e tema
-  const fakeEvent = data ? { ...data, colore_primario: data.tema?.colore_primario || '#003DA5', colore_sfondo: data.tema?.sfondo_pagina || '#ffffff' } : null
+  // helper per layout_hero
+  function setH(k) {
+    return v => {
+      const val = typeof v === 'string' ? v : v?.target?.value
+      setData(p => ({ ...p, layout_hero: { ...(p.layout_hero||LAYOUT_HERO_DEFAULT), [k]: val } }))
+      setSaved(false)
+    }
+  }
+
+  // Adattatore AspettoTab (si aspetta { event, setEvent })
+  const fakeEvent = data ? {
+    ...data,
+    colore_primario: data.tema?.colore_primario || '#003DA5',
+    colore_sfondo: data.tema?.sfondo_pagina || '#ffffff',
+  } : null
   function setFakeEvent(updater) {
     setData(prev => {
-      const updated = typeof updater === 'function' ? updater(prev) : updater
-      return { ...prev, logo_url: updated.logo_url ?? prev.logo_url, tema: updated.tema ?? prev.tema }
+      const u = typeof updater === 'function' ? updater(prev) : updater
+      return { ...prev, logo_url: u.logo_url ?? prev.logo_url, tema: u.tema ?? prev.tema }
     })
     setSaved(false)
   }
@@ -69,37 +110,34 @@ export default function LandingEditorPage() {
   async function save() {
     setSaving(true)
     const { error } = await supabase.from('landing_pages').update({
-      titolo: data.titolo,
-      slug: data.slug,
-      stato: data.stato,
-      hero_titolo: data.hero_titolo,
-      hero_sottotitolo: data.hero_sottotitolo,
-      hero_immagine_url: data.hero_immagine_url,
-      hero_layout: data.hero_layout,
-      logo_url: data.logo_url,
-      contenuto: data.contenuto,
-      tema: data.tema,
-      form_abilitato: data.form_abilitato,
-      form_titolo: data.form_titolo,
-      form_testo: data.form_testo,
-      form_fields: data.form_fields,
+      titolo: data.titolo, slug: data.slug, stato: data.stato,
+      hero_titolo: data.hero_titolo, hero_sottotitolo: data.hero_sottotitolo,
+      hero_immagine_url: data.hero_immagine_url, hero_layout: data.hero_layout,
+      layout_hero: data.layout_hero, logo_url: data.logo_url,
+      contenuto: data.contenuto, tema: data.tema,
+      form_abilitato: data.form_abilitato, form_titolo: data.form_titolo,
+      form_testo: data.form_testo, form_fields: data.form_fields,
       form_bottone_testo: data.form_bottone_testo,
       form_messaggio_conferma: data.form_messaggio_conferma,
-      footer_testo: data.footer_testo,
-      meta_descrizione: data.meta_descrizione,
+      footer_testo: data.footer_testo, meta_descrizione: data.meta_descrizione,
     }).eq('id', id)
     setSaving(false)
     if (!error) { setSaved(true); setTimeout(() => setSaved(false), 2500) }
   }
 
-  if (!data) return <div style={{ padding:'40px', color:'#9CA3AF', fontSize:'14px', fontFamily:'Inter,sans-serif' }}>Caricamento...</div>
+  if (!data) return (
+    <div style={{ padding:'40px', color:'#9CA3AF', fontSize:'14px', fontFamily:'Inter,sans-serif' }}>
+      Caricamento...
+    </div>
+  )
 
+  const lh = data.layout_hero || LAYOUT_HERO_DEFAULT
   const publicUrl = `${window.location.origin}/lp/${data.slug}`
 
   return (
     <div style={{ display:'flex', flexDirection:'column', height:'100vh', background:'#F9FAFB', fontFamily:'Inter,sans-serif' }}>
 
-      {/* Header */}
+      {/* ── Header ── */}
       <div style={{ background:'#fff', borderBottom:'1px solid #E5E7EB', padding:'0 20px', display:'flex', alignItems:'center', gap:'12px', height:'56px', flexShrink:0 }}>
         <button onClick={() => navigate('/admin/landing')} style={{ background:'none', border:'none', cursor:'pointer', padding:'4px', color:'#6B7280' }}>
           <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2"><path d="M19 12H5M12 5l-7 7 7 7"/></svg>
@@ -120,13 +158,14 @@ export default function LandingEditorPage() {
         )}
         <button onClick={save} disabled={saving} style={{
           background: saved ? '#059669' : '#003DA5', color:'#fff', border:'none', borderRadius:'8px',
-          padding:'8px 18px', fontFamily:'Inter,sans-serif', fontSize:'13px', fontWeight:'700', cursor:'pointer', minWidth:'80px', transition:'background .2s'
+          padding:'8px 18px', fontFamily:'Inter,sans-serif', fontSize:'13px', fontWeight:'700',
+          cursor:'pointer', minWidth:'80px', transition:'background .2s'
         }}>
           {saving ? '...' : saved ? '✓ Salvato' : 'Salva'}
         </button>
       </div>
 
-      {/* Tab bar */}
+      {/* ── Tab bar ── */}
       <div style={{ background:'#fff', borderBottom:'1px solid #E5E7EB', padding:'0 20px', display:'flex', flexShrink:0, overflowX:'auto' }}>
         {TABS.map(t => (
           <button key={t.key} onClick={() => setTab(t.key)} style={{
@@ -140,158 +179,163 @@ export default function LandingEditorPage() {
         ))}
       </div>
 
-      {/* Contenuto tab */}
+      {/* ── Contenuto ── */}
       <div style={{ flex:1, overflow:'auto', padding:'24px' }}>
         <div style={{ maxWidth: tab === 'aspetto' ? '100%' : '760px' }}>
 
-          {/* INFO */}
+          {/* ═══ INFO ═══ */}
           {tab === 'info' && (
             <div style={{ display:'flex', flexDirection:'column', gap:'20px' }}>
               <Field label="Titolo interno" hint="Visibile solo nell'admin">
-                <input value={data.titolo} onChange={e => upd('titolo', e.target.value)} style={inputSt} />
+                <input value={data.titolo} onChange={e => upd('titolo', e.target.value)} style={iSt} />
               </Field>
               <Field label="Slug URL" hint={`Pagina accessibile su /lp/${data.slug}`}>
-                <input value={data.slug} onChange={e => upd('slug', e.target.value.toLowerCase().replace(/[^a-z0-9-]/g, '-'))} style={inputSt} />
+                <input value={data.slug} onChange={e => upd('slug', e.target.value.toLowerCase().replace(/[^a-z0-9-]/g,'-'))} style={iSt} />
               </Field>
               <Field label="Meta descrizione" hint="Usata da Google e nei link condivisi">
-                <textarea value={data.meta_descrizione || ''} onChange={e => upd('meta_descrizione', e.target.value)} rows={3} style={{ ...inputSt, resize:'vertical' }} />
+                <textarea value={data.meta_descrizione||''} onChange={e => upd('meta_descrizione', e.target.value)} rows={3} style={{ ...iSt, resize:'vertical' }} />
               </Field>
               <Field label="Testo footer">
-                <textarea value={data.footer_testo || ''} onChange={e => upd('footer_testo', e.target.value)} rows={2} style={{ ...inputSt, resize:'vertical' }} />
+                <textarea value={data.footer_testo||''} onChange={e => upd('footer_testo', e.target.value)} rows={2} style={{ ...iSt, resize:'vertical' }} />
               </Field>
             </div>
           )}
 
-          {/* HERO */}
+          {/* ═══ HERO ═══ */}
           {tab === 'hero' && (
-            <div style={{ display:'flex', flexDirection:'column', gap:'24px' }}>
-              <Field label="Immagine di sfondo hero">
-                <ImageUploader
-                  value={data.hero_immagine_url || null}
-                  onChange={url => upd('hero_immagine_url', url || '')}
-                />
-              </Field>
+            <div style={{ display:'flex', flexDirection:'column', gap:'20px' }}>
 
-              <div style={{ background:'#F8F4FF', border:'1px solid #E9D5FF', borderRadius:'10px', padding:'16px' }}>
-                <p style={{ fontSize:'12px', fontWeight:'700', color:'#7C3AED', margin:'0 0 12px', textTransform:'uppercase', letterSpacing:'.04em' }}>Logo pagina</p>
-                <p style={{ fontSize:'12px', color:'#7C3AED', margin:'0 0 12px', lineHeight:'1.5' }}>
-                  Scegli il logo che apparirà nell'header della pagina. Usa i loghi CNA Roma o carica un logo personalizzato.
+              {/* Logo */}
+              <div style={{ padding:'16px', background:'#F9FAFB', border:'1px solid #E5E7EB', borderRadius:'10px' }}>
+                <p style={{ fontSize:'12px', fontWeight:'700', color:'#6B7280', textTransform:'uppercase', letterSpacing:'.06em', margin:'0 0 10px' }}>
+                  🏷 Logo header
                 </p>
-                <LogoManager
-                  value={data.logo_url}
-                  onChange={url => upd('logo_url', url)}
-                />
+                <LogoManager value={data.logo_url} onChange={url => upd('logo_url', url)} />
+
+                <div style={{ marginTop:'14px' }}>
+                  <Field label={`Dimensione logo: ${lh.logo_altezza||'48'}px`}>
+                    <input type="range" min="28" max="100" step="4"
+                      value={lh.logo_altezza||'48'} onChange={setH('logo_altezza')}
+                      style={{ width:'100%' }} />
+                  </Field>
+                </div>
               </div>
 
+              {/* Immagine hero */}
+              <Field label="Immagine di sfondo">
+                <ImageUploader
+                  value={data.hero_immagine_url||null}
+                  onChange={url => upd('hero_immagine_url', url||'')}
+                />
+              </Field>
+
+              {/* Controlli layout */}
+              <div style={{ display:'grid', gridTemplateColumns:'1fr 1fr 1fr', gap:'16px' }}>
+                <Field label={`Altezza hero: ${lh.altezza||'420'}px`}>
+                  <input type="range" min="220" max="700" step="20"
+                    value={lh.altezza||'420'} onChange={setH('altezza')}
+                    style={{ width:'100%' }} />
+                </Field>
+                <Field label={`Opacità overlay: ${lh.overlay_opacita||'50'}%`}>
+                  <input type="range" min="0" max="90" step="5"
+                    value={lh.overlay_opacita||'50'} onChange={setH('overlay_opacita')}
+                    style={{ width:'100%' }} />
+                </Field>
+                <Field label="Allineamento testo">
+                  <div style={{ display:'flex', gap:'6px' }}>
+                    {['sinistra','centro'].map(a => (
+                      <button key={a} onClick={() => setH('allineamento')(a)} style={{
+                        flex:1, padding:'8px 6px', border:`1px solid ${lh.allineamento===a?'#003DA5':'#E5E7EB'}`,
+                        borderRadius:'6px', background:lh.allineamento===a?'#EEF3FF':'#fff',
+                        cursor:'pointer', fontSize:'12px', fontWeight:'600', fontFamily:'Inter,sans-serif',
+                        color:lh.allineamento===a?'#003DA5':'#6B7280'
+                      }}>
+                        {a === 'sinistra' ? '◀ Sin.' : '▶ Centro'}
+                      </button>
+                    ))}
+                  </div>
+                </Field>
+              </div>
+
+              {/* Testi hero */}
               <Field label="Titolo hero">
-                <input value={data.hero_titolo || ''} onChange={e => upd('hero_titolo', e.target.value)} style={inputSt} placeholder="Es. Scopri i servizi CNA Roma per la tua impresa" />
+                <input value={data.hero_titolo||''} onChange={e => upd('hero_titolo', e.target.value)} style={iSt} />
               </Field>
               <Field label="Sottotitolo hero">
-                <textarea value={data.hero_sottotitolo || ''} onChange={e => upd('hero_sottotitolo', e.target.value)} rows={3} style={{ ...inputSt, resize:'vertical' }} />
+                <textarea value={data.hero_sottotitolo||''} onChange={e => upd('hero_sottotitolo', e.target.value)} rows={3} style={{ ...iSt, resize:'vertical' }} />
               </Field>
-              <Field label="Allineamento testo">
-                <div style={{ display:'flex', gap:'8px' }}>
-                  {[['centrato','Centro'], ['sinistra','Sinistra'], ['destra','Destra']].map(([v, l]) => (
-                    <button key={v} onClick={() => upd('hero_layout', v)} style={{
-                      padding:'8px 18px', borderRadius:'8px', border:'1px solid',
-                      borderColor: data.hero_layout === v ? '#003DA5' : '#E5E7EB',
-                      background: data.hero_layout === v ? '#EFF6FF' : '#fff',
-                      color: data.hero_layout === v ? '#003DA5' : '#374151',
-                      fontWeight: data.hero_layout === v ? '700' : '500',
-                      fontSize:'13px', cursor:'pointer', fontFamily:'Inter,sans-serif'
-                    }}>{l}</button>
-                  ))}
+
+              {/* Stile titolo */}
+              <div style={{ padding:'16px', background:'#F9FAFB', border:'1px solid #E5E7EB', borderRadius:'10px' }}>
+                <p style={{ fontSize:'12px', fontWeight:'700', color:'#6B7280', textTransform:'uppercase', letterSpacing:'.06em', margin:'0 0 12px' }}>Stile titolo</p>
+                <div style={{ display:'grid', gridTemplateColumns:'1fr 1fr 1fr', gap:'12px' }}>
+                  <Field label="Colore titolo">
+                    <div style={{ display:'flex', gap:'8px', alignItems:'center' }}>
+                      <input type="color" value={lh.titolo_colore||'#FFFFFF'} onChange={setH('titolo_colore')}
+                        style={{ width:'40px', height:'34px', border:'1px solid #D1D5DB', borderRadius:'6px', cursor:'pointer', padding:'2px' }} />
+                      <input value={lh.titolo_colore||'#FFFFFF'} onChange={setH('titolo_colore')} style={{ ...iSt, flex:1 }} />
+                    </div>
+                  </Field>
+                  <Field label="Dimensione">
+                    <select value={lh.titolo_dimensione||'clamp(26px,5vw,54px)'} onChange={setH('titolo_dimensione')} style={iSt}>
+                      <option value="clamp(20px,3vw,32px)">Piccolo</option>
+                      <option value="clamp(24px,4vw,42px)">Medio</option>
+                      <option value="clamp(26px,5vw,54px)">Grande</option>
+                      <option value="clamp(32px,6vw,68px)">Extra grande</option>
+                    </select>
+                  </Field>
+                  <Field label="Stile">
+                    <div style={{ display:'flex', gap:'6px' }}>
+                      <button onClick={() => setH('titolo_grassetto')(!lh.titolo_grassetto)} style={{
+                        flex:1, padding:'7px', border:`1px solid ${lh.titolo_grassetto?'#003DA5':'#E5E7EB'}`,
+                        borderRadius:'6px', background:lh.titolo_grassetto?'#EEF3FF':'#fff',
+                        cursor:'pointer', fontSize:'14px', fontWeight:'800', fontFamily:'Inter,sans-serif',
+                        color:lh.titolo_grassetto?'#003DA5':'#6B7280'
+                      }}>B</button>
+                      <button onClick={() => setH('titolo_maiuscolo')(!lh.titolo_maiuscolo)} style={{
+                        flex:1, padding:'7px', border:`1px solid ${lh.titolo_maiuscolo?'#003DA5':'#E5E7EB'}`,
+                        borderRadius:'6px', background:lh.titolo_maiuscolo?'#EEF3FF':'#fff',
+                        cursor:'pointer', fontSize:'12px', fontWeight:'600', fontFamily:'Inter,sans-serif',
+                        color:lh.titolo_maiuscolo?'#003DA5':'#6B7280'
+                      }}>AA</button>
+                    </div>
+                  </Field>
                 </div>
-              </Field>
+              </div>
+
+              {/* Posizione immagine drag */}
+              <HeroDragPreview
+                event={{ ...data, immagine_hero: data.hero_immagine_url, layout_hero: lh }}
+                setH={setH}
+              />
             </div>
           )}
 
-          {/* CONTENUTO */}
+          {/* ═══ CONTENUTO ═══ */}
           {tab === 'contenuto' && (
             <div>
               <p style={{ fontSize:'13px', color:'#6B7280', margin:'0 0 16px', lineHeight:'1.6' }}>
                 Aggiungi sezioni di contenuto che appariranno sotto l'hero della pagina.
               </p>
-              <BlockEditor
-                blocks={data.contenuto || []}
-                onChange={blocks => upd('contenuto', blocks)}
-              />
+              <BlockEditor blocks={data.contenuto||[]} onChange={blocks => upd('contenuto', blocks)} />
             </div>
           )}
 
-          {/* FORM */}
+          {/* ═══ FORM ═══ */}
           {tab === 'form' && (
-            <div style={{ display:'flex', flexDirection:'column', gap:'20px' }}>
-              <label style={{ display:'flex', alignItems:'center', gap:'10px', cursor:'pointer' }}>
-                <input type="checkbox" checked={!!data.form_abilitato}
-                  onChange={e => upd('form_abilitato', e.target.checked)}
-                  style={{ width:'16px', height:'16px', accentColor:'#003DA5', cursor:'pointer' }} />
-                <span style={{ fontSize:'14px', fontWeight:'700', color:'#0A0A0A' }}>Form contatti abilitato</span>
-              </label>
-
-              {data.form_abilitato && (
-                <>
-                  <Field label="Titolo del form">
-                    <input value={data.form_titolo || ''} onChange={e => upd('form_titolo', e.target.value)} style={inputSt} />
-                  </Field>
-                  <Field label="Testo introduttivo">
-                    <textarea value={data.form_testo || ''} onChange={e => upd('form_testo', e.target.value)} rows={3} style={{ ...inputSt, resize:'vertical' }} />
-                  </Field>
-                  <Field label="Testo pulsante">
-                    <input value={data.form_bottone_testo || ''} onChange={e => upd('form_bottone_testo', e.target.value)} style={inputSt} />
-                  </Field>
-                  <Field label="Messaggio di conferma post-invio">
-                    <input value={data.form_messaggio_conferma || ''} onChange={e => upd('form_messaggio_conferma', e.target.value)} style={inputSt} />
-                  </Field>
-
-                  <div>
-                    <p style={{ fontSize:'13px', fontWeight:'700', color:'#374151', margin:'0 0 10px' }}>Campi del form</p>
-                    <div style={{ border:'1px solid #E5E7EB', borderRadius:'8px', overflow:'hidden' }}>
-                      {FORM_FIELDS_STD.map((f, i) => {
-                        const saved = (data.form_fields || []).find(x => x.key === f.key)
-                        const enabled = saved ? saved.enabled : f.default_on
-                        return (
-                          <div key={f.key} style={{ display:'flex', alignItems:'center', gap:'12px', padding:'11px 16px', borderBottom: i < FORM_FIELDS_STD.length - 1 ? '1px solid #F3F4F6' : 'none', background: i % 2 === 0 ? '#fff' : '#FAFAFA' }}>
-                            <input type="checkbox" checked={enabled || !!f.required} disabled={!!f.required}
-                              onChange={() => {
-                                const fields = FORM_FIELDS_STD.map(ff => {
-                                  const cur = (data.form_fields || []).find(x => x.key === ff.key)
-                                  const curEnabled = cur ? cur.enabled : ff.default_on
-                                  return { ...ff, enabled: ff.key === f.key ? !enabled : curEnabled }
-                                })
-                                upd('form_fields', fields)
-                              }}
-                              style={{ width:'15px', height:'15px', accentColor:'#003DA5', cursor: f.required ? 'default' : 'pointer', flexShrink:0 }}
-                            />
-                            <span style={{ fontSize:'14px', color: (enabled || f.required) ? '#0A0A0A' : '#9CA3AF', flex:1 }}>{f.label}</span>
-                            {f.required && <span style={{ fontSize:'11px', color:'#9CA3AF', fontStyle:'italic' }}>obbligatorio</span>}
-                          </div>
-                        )
-                      })}
-                      {['Consenso privacy (obbligatorio)', 'Consenso newsletter (opzionale)'].map((l, i) => (
-                        <div key={l} style={{ display:'flex', alignItems:'center', gap:'12px', padding:'11px 16px', borderTop:'1px solid #F3F4F6', background: i === 0 ? '#FEF9C3' : '#F0FDF4' }}>
-                          <input type="checkbox" checked disabled style={{ width:'15px', height:'15px', flexShrink:0 }} />
-                          <span style={{ fontSize:'14px', color:'#0A0A0A', flex:1 }}>{l}</span>
-                          <span style={{ fontSize:'11px', color:'#9CA3AF', fontStyle:'italic' }}>sempre incluso</span>
-                        </div>
-                      ))}
-                    </div>
-                  </div>
-                </>
-              )}
-            </div>
+            <FormTab data={data} upd={upd} editingField={editingField} setEditingField={setEditingField} />
           )}
 
-          {/* ASPETTO — usa AspettoTab originale con adattatore */}
+          {/* ═══ ASPETTO ═══ */}
           {tab === 'aspetto' && fakeEvent && (
             <AspettoTab event={fakeEvent} setEvent={setFakeEvent} />
           )}
 
-          {/* PREVIEW */}
+          {/* ═══ PREVIEW ═══ */}
           {tab === 'preview' && (
             <div>
               <div style={{ display:'flex', alignItems:'center', justifyContent:'space-between', marginBottom:'12px' }}>
-                <p style={{ fontSize:'13px', color:'#6B7280', margin:0 }}>Salva prima di vedere le modifiche nell'anteprima.</p>
+                <p style={{ fontSize:'13px', color:'#6B7280', margin:0 }}>Salva prima di vedere le modifiche.</p>
                 <a href={`/lp/${data.slug}`} target="_blank" rel="noreferrer"
                   style={{ fontSize:'13px', color:'#003DA5', fontWeight:'700', textDecoration:'none', display:'flex', alignItems:'center', gap:'4px' }}>
                   Apri in nuova scheda
@@ -310,6 +354,274 @@ export default function LandingEditorPage() {
   )
 }
 
+// ═══════════════════════════════════════════════════════
+// TAB FORM — gestione campi standard + custom
+// ═══════════════════════════════════════════════════════
+function FormTab({ data, upd, editingField, setEditingField }) {
+  const fields = data.form_fields || STD_FIELDS.map(f => ({ ...f, std:true, enabled:f.default_on }))
+
+  function setFields(f) { upd('form_fields', f) }
+
+  function toggleStd(key) {
+    setFields(fields.map(f => f.key === key ? { ...f, enabled: !f.enabled } : f))
+  }
+
+  function addCustom() {
+    const newField = { id: Math.random().toString(36).slice(2,9), key: 'campo_' + Date.now(), label: 'Nuovo campo', tipo: 'testo', required: false, opzioni: [], std: false, enabled: true }
+    const newFields = [...fields, newField]
+    setFields(newFields)
+    setEditingField({ index: newFields.length - 1, field: newField })
+  }
+
+  function deleteCustom(idx) {
+    setFields(fields.filter((_,i) => i !== idx))
+    if (editingField?.index === idx) setEditingField(null)
+  }
+
+  function moveField(idx, dir) {
+    const arr = [...fields]
+    const j = idx + dir
+    if (j < 0 || j >= arr.length) return
+    ;[arr[idx], arr[j]] = [arr[j], arr[idx]]
+    setFields(arr)
+    if (editingField?.index === idx) setEditingField({ ...editingField, index: j })
+  }
+
+  function saveEdit(idx, updated) {
+    setFields(fields.map((f,i) => i === idx ? { ...updated, std: f.std } : f))
+    setEditingField(null)
+  }
+
+  const stdFields = fields.filter(f => f.std)
+  const customFields = fields.filter(f => !f.std)
+  const customStartIdx = fields.findIndex(f => !f.std)
+
+  return (
+    <div style={{ display:'flex', flexDirection:'column', gap:'20px' }}>
+      {/* Toggle form abilitato */}
+      <label style={{ display:'flex', alignItems:'center', gap:'10px', cursor:'pointer' }}>
+        <input type="checkbox" checked={!!data.form_abilitato} onChange={e => upd('form_abilitato', e.target.checked)}
+          style={{ width:'16px', height:'16px', accentColor:'#003DA5', cursor:'pointer' }} />
+        <span style={{ fontSize:'14px', fontWeight:'700', color:'#0A0A0A' }}>Form contatti abilitato</span>
+      </label>
+
+      {data.form_abilitato && (<>
+        {/* Testi form */}
+        <Field label="Titolo del form">
+          <input value={data.form_titolo||''} onChange={e => upd('form_titolo', e.target.value)} style={iSt} />
+        </Field>
+        <Field label="Testo introduttivo">
+          <textarea value={data.form_testo||''} onChange={e => upd('form_testo', e.target.value)} rows={3} style={{ ...iSt, resize:'vertical' }} />
+        </Field>
+        <Field label="Testo pulsante">
+          <input value={data.form_bottone_testo||''} onChange={e => upd('form_bottone_testo', e.target.value)} style={iSt} />
+        </Field>
+        <Field label="Messaggio di conferma">
+          <input value={data.form_messaggio_conferma||''} onChange={e => upd('form_messaggio_conferma', e.target.value)} style={iSt} />
+        </Field>
+
+        {/* Campi standard */}
+        <div>
+          <p style={{ fontSize:'13px', fontWeight:'700', color:'#374151', margin:'0 0 10px' }}>Campi standard</p>
+          <div style={{ border:'1px solid #E5E7EB', borderRadius:'8px', overflow:'hidden' }}>
+            {STD_FIELDS.map((f, i) => {
+              const cur = fields.find(x => x.key === f.key)
+              const enabled = cur ? cur.enabled : f.default_on
+              return (
+                <div key={f.key} style={{ display:'flex', alignItems:'center', gap:'12px', padding:'11px 16px', borderBottom: i < STD_FIELDS.length-1 ? '1px solid #F3F4F6' : 'none', background: i%2===0?'#fff':'#FAFAFA' }}>
+                  <input type="checkbox" checked={enabled || !!f.required} disabled={!!f.required}
+                    onChange={() => toggleStd(f.key)}
+                    style={{ width:'15px', height:'15px', accentColor:'#003DA5', cursor:f.required?'default':'pointer', flexShrink:0 }} />
+                  <span style={{ fontSize:'14px', color:(enabled||f.required)?'#0A0A0A':'#9CA3AF', flex:1 }}>{f.label}</span>
+                  <span style={{ fontSize:'11px', color:'#9CA3AF', background:'#F3F4F6', padding:'2px 7px', borderRadius:'4px' }}>{f.tipo}</span>
+                  {f.required && <span style={{ fontSize:'11px', color:'#9CA3AF', fontStyle:'italic' }}>obbligatorio</span>}
+                </div>
+              )
+            })}
+            {/* Consensi fissi */}
+            {[
+              { label:'Consenso privacy',    bg:'#FEF9C3' },
+              { label:'Consenso newsletter', bg:'#F0FDF4' },
+            ].map((c,i) => (
+              <div key={c.label} style={{ display:'flex', alignItems:'center', gap:'12px', padding:'11px 16px', borderTop:'1px solid #F3F4F6', background:c.bg }}>
+                <input type="checkbox" checked disabled style={{ width:'15px', height:'15px', flexShrink:0 }} />
+                <span style={{ fontSize:'14px', color:'#0A0A0A', flex:1 }}>{c.label}</span>
+                <span style={{ fontSize:'11px', color:'#9CA3AF', fontStyle:'italic' }}>sempre incluso</span>
+              </div>
+            ))}
+          </div>
+        </div>
+
+        {/* Campi custom */}
+        <div>
+          <div style={{ display:'flex', alignItems:'center', justifyContent:'space-between', marginBottom:'10px' }}>
+            <p style={{ fontSize:'13px', fontWeight:'700', color:'#374151', margin:0 }}>Campi personalizzati</p>
+            <button onClick={addCustom} style={{
+              background:'#003DA5', color:'#fff', border:'none', borderRadius:'6px',
+              padding:'7px 14px', fontFamily:'Inter,sans-serif', fontSize:'12px', fontWeight:'700', cursor:'pointer',
+              display:'flex', alignItems:'center', gap:'5px'
+            }}>
+              <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5"><path d="M12 5v14M5 12h14"/></svg>
+              Aggiungi campo
+            </button>
+          </div>
+
+          {customFields.length === 0 && (
+            <div style={{ border:'2px dashed #E5E7EB', borderRadius:'8px', padding:'24px', textAlign:'center', color:'#9CA3AF' }}>
+              <p style={{ margin:0, fontSize:'13px' }}>Nessun campo personalizzato</p>
+              <p style={{ margin:'4px 0 0', fontSize:'12px' }}>Aggiungi tendine, bottoni di scelta, checkbox e altro</p>
+            </div>
+          )}
+
+          {customFields.length > 0 && (
+            <div style={{ display:'flex', flexDirection:'column', gap:'6px' }}>
+              {fields.map((f, idx) => {
+                if (f.std) return null
+                const isEditing = editingField?.index === idx
+                return (
+                  <div key={f.id||f.key} style={{ border:`1.5px solid ${isEditing?'#003DA5':'#E5E7EB'}`, borderRadius:'8px', overflow:'hidden' }}>
+                    {/* Header campo */}
+                    <div style={{ display:'flex', alignItems:'center', gap:'8px', padding:'10px 14px', background:isEditing?'#EFF6FF':'#FAFAFA', cursor:'pointer' }}
+                      onClick={() => setEditingField(isEditing ? null : { index: idx, field: f })}>
+                      <span style={{ flex:1, fontSize:'13px', fontWeight:'700', color: isEditing?'#003DA5':'#374151' }}>{f.label}</span>
+                      <span style={{ fontSize:'11px', background:'#E5E7EB', color:'#6B7280', padding:'2px 8px', borderRadius:'4px' }}>
+                        {FIELD_TYPES.find(t=>t.value===f.tipo)?.label || f.tipo}
+                      </span>
+                      {!f.required && (
+                        <span style={{ fontSize:'11px', color:'#9CA3AF' }}>opzionale</span>
+                      )}
+                      <button onClick={e=>{e.stopPropagation();moveField(idx,-1)}} style={btnIco} title="Su">↑</button>
+                      <button onClick={e=>{e.stopPropagation();moveField(idx,1)}} style={btnIco} title="Giù">↓</button>
+                      <button onClick={e=>{e.stopPropagation();deleteCustom(idx)}} style={{...btnIco,color:'#DC2626',borderColor:'#FECACA'}} title="Elimina">✕</button>
+                      <span style={{ fontSize:'11px', color:'#9CA3AF' }}>{isEditing?'▼':'▶'}</span>
+                    </div>
+                    {/* Editor campo */}
+                    {isEditing && (
+                      <FieldEditor
+                        field={f}
+                        onSave={updated => saveEdit(idx, updated)}
+                        onCancel={() => setEditingField(null)}
+                      />
+                    )}
+                  </div>
+                )
+              })}
+            </div>
+          )}
+        </div>
+      </>)}
+    </div>
+  )
+}
+
+// ═══════════════════════════════════════════════════════
+// EDITOR singolo campo custom
+// ═══════════════════════════════════════════════════════
+function FieldEditor({ field, onSave, onCancel }) {
+  const [f, setF] = useState({ ...field, opzioni: field.opzioni || [] })
+
+  function updF(k, v) { setF(p => ({ ...p, [k]: v })) }
+
+  function addOpzione() {
+    setF(p => ({ ...p, opzioni: [...p.opzioni, { value: 'opzione_' + Date.now(), label: 'Opzione' }] }))
+  }
+
+  function updOpzione(i, k, v) {
+    setF(p => ({ ...p, opzioni: p.opzioni.map((o,j) => j===i ? {...o,[k]:v} : o) }))
+  }
+
+  function delOpzione(i) {
+    setF(p => ({ ...p, opzioni: p.opzioni.filter((_,j) => j!==i) }))
+  }
+
+  const needsOpzioni = ['select','radio','checkbox'].includes(f.tipo)
+
+  return (
+    <div style={{ padding:'16px', borderTop:'1px solid #E5E7EB', display:'flex', flexDirection:'column', gap:'14px' }}>
+      <div style={{ display:'grid', gridTemplateColumns:'1fr 1fr', gap:'12px' }}>
+        <Field label="Etichetta campo">
+          <input value={f.label} onChange={e => updF('label', e.target.value)} style={iSt} />
+        </Field>
+        <Field label="Tipo di campo">
+          <select value={f.tipo} onChange={e => updF('tipo', e.target.value)} style={iSt}>
+            {FIELD_TYPES.map(t => <option key={t.value} value={t.value}>{t.label}</option>)}
+          </select>
+        </Field>
+      </div>
+
+      <Field label="Testo aiuto (placeholder / hint)">
+        <input value={f.placeholder||''} onChange={e => updF('placeholder', e.target.value)} style={iSt} placeholder="Testo suggerito all'utente..." />
+      </Field>
+
+      <label style={{ display:'flex', alignItems:'center', gap:'8px', cursor:'pointer' }}>
+        <input type="checkbox" checked={!!f.required} onChange={e => updF('required', e.target.checked)}
+          style={{ width:'15px', height:'15px', accentColor:'#003DA5' }} />
+        <span style={{ fontSize:'13px', fontWeight:'600', color:'#374151' }}>Campo obbligatorio</span>
+      </label>
+
+      {/* Opzioni per select / radio / checkbox */}
+      {needsOpzioni && (
+        <div>
+          <div style={{ display:'flex', alignItems:'center', justifyContent:'space-between', marginBottom:'8px' }}>
+            <p style={{ margin:0, fontSize:'12px', fontWeight:'700', color:'#374151' }}>
+              {f.tipo === 'select' ? 'Voci del menu' : 'Opzioni di scelta'}
+            </p>
+            <button onClick={addOpzione} style={{ background:'#F3F4F6', border:'none', borderRadius:'5px', padding:'5px 10px', fontSize:'12px', fontWeight:'600', color:'#374151', cursor:'pointer', fontFamily:'Inter,sans-serif' }}>
+              + Aggiungi opzione
+            </button>
+          </div>
+          {f.opzioni.length === 0 && (
+            <p style={{ fontSize:'12px', color:'#9CA3AF', margin:0, fontStyle:'italic' }}>Nessuna opzione. Aggiungine almeno una.</p>
+          )}
+          <div style={{ display:'flex', flexDirection:'column', gap:'6px' }}>
+            {f.opzioni.map((o, i) => (
+              <div key={i} style={{ display:'flex', gap:'8px', alignItems:'center' }}>
+                <input value={o.label} onChange={e => updOpzione(i,'label',e.target.value)}
+                  placeholder="Etichetta visibile" style={{ ...iSt, flex:2 }} />
+                <input value={o.value} onChange={e => updOpzione(i,'value',e.target.value)}
+                  placeholder="valore_interno" style={{ ...iSt, flex:1, fontSize:'12px', color:'#9CA3AF' }} />
+                <button onClick={() => delOpzione(i)} style={{ ...btnIco, color:'#DC2626', borderColor:'#FECACA', flexShrink:0 }}>✕</button>
+              </div>
+            ))}
+          </div>
+          {/* Anteprima */}
+          {f.opzioni.length > 0 && (
+            <div style={{ marginTop:'12px', padding:'12px', background:'#F9FAFB', borderRadius:'8px' }}>
+              <p style={{ fontSize:'11px', fontWeight:'700', color:'#9CA3AF', margin:'0 0 8px', textTransform:'uppercase' }}>Anteprima</p>
+              {f.tipo === 'select' && (
+                <select disabled style={{ ...iSt, background:'#fff', width:'auto', minWidth:'200px' }}>
+                  <option>{f.placeholder || 'Seleziona...'}</option>
+                  {f.opzioni.map(o => <option key={o.value}>{o.label}</option>)}
+                </select>
+              )}
+              {(f.tipo === 'radio' || f.tipo === 'checkbox') && (
+                <div style={{ display:'flex', flexWrap:'wrap', gap:'8px' }}>
+                  {f.opzioni.map(o => (
+                    <div key={o.value} style={{
+                      padding:'7px 14px', border:'1px solid #E5E7EB', borderRadius:'6px',
+                      fontSize:'13px', fontWeight:'600', color:'#374151', background:'#fff'
+                    }}>{o.label}</div>
+                  ))}
+                </div>
+              )}
+            </div>
+          )}
+        </div>
+      )}
+
+      <div style={{ display:'flex', gap:'8px', justifyContent:'flex-end', paddingTop:'4px', borderTop:'1px solid #F3F4F6' }}>
+        <button onClick={onCancel} style={{ padding:'8px 16px', border:'1px solid #E5E7EB', borderRadius:'6px', background:'#fff', fontSize:'13px', fontWeight:'600', color:'#374151', cursor:'pointer', fontFamily:'Inter,sans-serif' }}>
+          Annulla
+        </button>
+        <button onClick={() => onSave(f)} style={{ padding:'8px 16px', border:'none', borderRadius:'6px', background:'#003DA5', fontSize:'13px', fontWeight:'700', color:'#fff', cursor:'pointer', fontFamily:'Inter,sans-serif' }}>
+          Conferma
+        </button>
+      </div>
+    </div>
+  )
+}
+
+// ─── helpers ──────────────────────────────────────────
 function Field({ label, hint, children }) {
   return (
     <div>
@@ -320,8 +632,5 @@ function Field({ label, hint, children }) {
   )
 }
 
-const inputSt = {
-  width:'100%', boxSizing:'border-box', padding:'10px 12px',
-  border:'1px solid #E5E7EB', borderRadius:'8px',
-  fontSize:'14px', fontFamily:'Inter,sans-serif', outline:'none', color:'#0A0A0A', background:'#fff'
-}
+const iSt = { width:'100%', boxSizing:'border-box', padding:'10px 12px', border:'1px solid #E5E7EB', borderRadius:'8px', fontSize:'14px', fontFamily:'Inter,sans-serif', outline:'none', color:'#0A0A0A', background:'#fff' }
+const btnIco = { background:'none', border:'1px solid #E5E7EB', borderRadius:'5px', cursor:'pointer', width:'26px', height:'26px', display:'flex', alignItems:'center', justifyContent:'center', fontSize:'12px', color:'#6B7280', flexShrink:0 }

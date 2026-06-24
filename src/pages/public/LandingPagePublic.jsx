@@ -326,74 +326,146 @@ function BlockRenderer({ block, cp }) {
   return null
 }
 
-// ── Form contatti ─────────────────────────────────────────────────
+// ── Form contatti (campi standard + custom) ───────────────────────
 function FormContatti({ lp, tema }) {
   const cp = tema.colore_primario||'#003DA5'
-  const [form, setForm] = useState({ nome:'', cognome:'', email:'', telefono:'', azienda:'', citta:'', consenso_privacy:false, consenso_newsletter:false })
+  const [values, setValues] = useState({})
+  const [privacy, setPrivacy] = useState(false)
+  const [newsletter, setNewsletter] = useState(false)
   const [submitting, setSubmitting] = useState(false)
   const [submitted, setSubmitted] = useState(false)
   const [err, setErr] = useState('')
 
-  const fields = lp.form_fields&&lp.form_fields.length>0
-    ? lp.form_fields
-    : [{key:'nome',enabled:true},{key:'cognome',enabled:true},{key:'email',enabled:true,required:true},{key:'telefono',enabled:false}]
-  const labels = { nome:'Nome', cognome:'Cognome', email:'Email *', telefono:'Telefono', azienda:'Azienda', citta:'Città' }
-  const types  = { email:'email', telefono:'tel' }
+  const fields = (lp.form_fields&&lp.form_fields.length>0)
+    ? lp.form_fields.filter(f=>f.enabled!==false)
+    : [{key:'nome',label:'Nome',tipo:'testo',enabled:true,std:true},{key:'cognome',label:'Cognome',tipo:'testo',enabled:true,std:true},{key:'email',label:'Email',tipo:'email',enabled:true,required:true,std:true}]
+
+  function setVal(key, val) { setValues(p=>({...p,[key]:val})) }
+  function toggleMulti(key, val) {
+    setValues(p=>{const cur=Array.isArray(p[key])?p[key]:[]; return {...p,[key]:cur.includes(val)?cur.filter(x=>x!==val):[...cur,val]}})
+  }
 
   async function submit(e) {
     e.preventDefault()
-    if (!form.email) { setErr("L'email è obbligatoria"); return }
-    if (!form.consenso_privacy) { setErr("Il consenso alla privacy è obbligatorio"); return }
+    const emailF = fields.find(f=>f.tipo==='email'||f.key==='email')
+    if (emailF&&!values[emailF.key]) { setErr("L'email è obbligatoria"); return }
+    const miss = fields.filter(f=>f.required&&!values[f.key])
+    if (miss.length>0) { setErr('Campo obbligatorio: '+miss[0].label); return }
+    if (!privacy) { setErr("Il consenso alla privacy è obbligatorio"); return }
     setErr(''); setSubmitting(true)
-    const { error } = await supabase.from('lp_contacts').insert({
-      landing_page_id:lp.id, nome:form.nome, cognome:form.cognome,
-      email:form.email, telefono:form.telefono,
-      dati_extra:{ azienda:form.azienda, citta:form.citta },
-      consenso_privacy:form.consenso_privacy, consenso_newsletter:form.consenso_newsletter,
+    const std={}; const extra={}
+    for (const f of fields) {
+      if (['nome','cognome','email','telefono'].includes(f.key)) std[f.key]=values[f.key]||''
+      else extra[f.key]=values[f.key]
+    }
+    const {error} = await supabase.from('lp_contacts').insert({
+      landing_page_id:lp.id,...std,dati_extra:extra,
+      consenso_privacy:privacy,consenso_newsletter:newsletter,
     })
     setSubmitting(false)
     if (!error) setSubmitted(true)
-    else setErr('Errore nell\'invio. Riprova.')
+    else setErr("Errore nell'invio. Riprova.")
   }
 
-  const btnRadius = tema.btn_stile==='pill'?'999px':(tema.btn_raggio||'8')+'px'
+  const btnR = tema.btn_stile==='pill'?'999px':(tema.btn_raggio||'8')+'px'
 
   if (submitted) return (
-    <div style={{ background:'#D1FAE5', border:'1px solid #6EE7B7', borderRadius:'12px', padding:'32px', textAlign:'center' }}>
+    <div style={{background:'#D1FAE5',border:'1px solid #6EE7B7',borderRadius:'12px',padding:'32px',textAlign:'center'}}>
       <svg width="40" height="40" viewBox="0 0 24 24" fill="none" stroke="#059669" strokeWidth="2" style={{marginBottom:'12px'}}><path d="M22 11.08V12a10 10 0 1 1-5.93-9.14"/><polyline points="22 4 12 14.01 9 11.01"/></svg>
       <p style={{fontSize:'16px',fontWeight:'700',color:'#065F46',margin:'0 0 4px'}}>Grazie!</p>
       <p style={{fontSize:'14px',color:'#059669',margin:0}}>{lp.form_messaggio_conferma||'Ti ricontatteremo presto.'}</p>
     </div>
   )
 
-  const nome_field = fields.find(f=>f.key==='nome'&&f.enabled)
-  const cognome_field = fields.find(f=>f.key==='cognome'&&f.enabled)
-  const altri = fields.filter(f=>f.enabled&&f.key!=='nome'&&f.key!=='cognome')
+  const nomeF    = fields.find(f=>f.key==='nome')
+  const cognomeF = fields.find(f=>f.key==='cognome')
+  const altriF   = fields.filter(f=>f.key!=='nome'&&f.key!=='cognome')
+
+  function renderField(f) {
+    const val = values[f.key]||''
+    const lbl = <label style={lbSt}>{f.label}{f.required?' *':''}</label>
+    if (f.tipo==='textarea') return (
+      <div key={f.key}>{lbl}
+        <textarea value={val} onChange={e=>setVal(f.key,e.target.value)} placeholder={f.placeholder||''} rows={3}
+          style={{...iSt,resize:'vertical',fontFamily:'Inter,sans-serif'}}/>
+      </div>
+    )
+    if (f.tipo==='select') return (
+      <div key={f.key}>{lbl}
+        <select value={val} onChange={e=>setVal(f.key,e.target.value)} style={iSt}>
+          <option value="">{f.placeholder||'Seleziona...'}</option>
+          {(f.opzioni||[]).map(o=><option key={o.value} value={o.value}>{o.label}</option>)}
+        </select>
+      </div>
+    )
+    if (f.tipo==='radio') return (
+      <div key={f.key}>{lbl}
+        <div style={{display:'flex',flexWrap:'wrap',gap:'8px',marginTop:'4px'}}>
+          {(f.opzioni||[]).map(o=>(
+            <button type="button" key={o.value} onClick={()=>setVal(f.key,o.value)} style={{
+              padding:'8px 16px',border:`1.5px solid ${val===o.value?cp:'#D1D5DB'}`,
+              borderRadius:'8px',background:val===o.value?cp:'#fff',
+              color:val===o.value?'#fff':'#374151',fontSize:'13px',fontWeight:'600',
+              cursor:'pointer',fontFamily:'Inter,sans-serif',transition:'all .15s'
+            }}>{o.label}</button>
+          ))}
+        </div>
+      </div>
+    )
+    if (f.tipo==='checkbox') {
+      const sel = Array.isArray(values[f.key])?values[f.key]:[]
+      return (
+        <div key={f.key}>{lbl}
+          <div style={{display:'flex',flexWrap:'wrap',gap:'8px',marginTop:'4px'}}>
+            {(f.opzioni||[]).map(o=>{
+              const on=sel.includes(o.value)
+              return (
+                <button type="button" key={o.value} onClick={()=>toggleMulti(f.key,o.value)} style={{
+                  padding:'8px 16px',border:`1.5px solid ${on?cp:'#D1D5DB'}`,
+                  borderRadius:'8px',background:on?cp:'#fff',
+                  color:on?'#fff':'#374151',fontSize:'13px',fontWeight:'600',
+                  cursor:'pointer',fontFamily:'Inter,sans-serif',transition:'all .15s',
+                  display:'flex',alignItems:'center',gap:'6px'
+                }}>
+                  {on&&<svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="3"><polyline points="20 6 9 17 4 12"/></svg>}
+                  {o.label}
+                </button>
+              )
+            })}
+          </div>
+        </div>
+      )
+    }
+    return (
+      <div key={f.key}>{lbl}
+        <input type={f.tipo||'text'} value={val} onChange={e=>setVal(f.key,e.target.value)}
+          placeholder={f.placeholder||''} style={iSt}/>
+      </div>
+    )
+  }
 
   return (
-    <form onSubmit={submit} style={{ display:'flex', flexDirection:'column', gap:'14px' }}>
-      {(nome_field||cognome_field)&&(
-        <div style={{ display:'grid', gridTemplateColumns:`${nome_field?'1fr':''}${nome_field&&cognome_field?' ':''}${cognome_field?'1fr':''}`, gap:'14px' }}>
-          {nome_field&&<div><label style={lbSt}>{labels.nome}</label><input type="text" value={form.nome} onChange={e=>setForm(p=>({...p,nome:e.target.value}))} style={iSt} /></div>}
-          {cognome_field&&<div><label style={lbSt}>{labels.cognome}</label><input type="text" value={form.cognome} onChange={e=>setForm(p=>({...p,cognome:e.target.value}))} style={iSt} /></div>}
+    <form onSubmit={submit} style={{display:'flex',flexDirection:'column',gap:'14px'}}>
+      {(nomeF||cognomeF)&&(
+        <div style={{display:'grid',gridTemplateColumns:`${nomeF?'1fr':''}${nomeF&&cognomeF?' ':''}${cognomeF?'1fr':''}`,gap:'12px'}}>
+          {nomeF&&<div><label style={lbSt}>{nomeF.label}</label><input type="text" value={values.nome||''} onChange={e=>setVal('nome',e.target.value)} placeholder={nomeF.placeholder||''} style={iSt}/></div>}
+          {cognomeF&&<div><label style={lbSt}>{cognomeF.label}</label><input type="text" value={values.cognome||''} onChange={e=>setVal('cognome',e.target.value)} placeholder={cognomeF.placeholder||''} style={iSt}/></div>}
         </div>
       )}
-      {altri.map(f=>(
-        <div key={f.key}><label style={lbSt}>{labels[f.key]||f.key}{f.required?' *':''}</label><input type={types[f.key]||'text'} value={form[f.key]||''} onChange={e=>setForm(p=>({...p,[f.key]:e.target.value}))} style={iSt} /></div>
-      ))}
+      {altriF.map(f=>renderField(f))}
       <label style={{display:'flex',alignItems:'flex-start',gap:'10px',cursor:'pointer'}}>
-        <input type="checkbox" checked={form.consenso_privacy} onChange={e=>setForm(p=>({...p,consenso_privacy:e.target.checked}))} style={{marginTop:'2px',flexShrink:0,accentColor:cp}} />
+        <input type="checkbox" checked={privacy} onChange={e=>setPrivacy(e.target.checked)} style={{marginTop:'2px',flexShrink:0,accentColor:cp}}/>
         <span style={{fontSize:'13px',color:'#374151',lineHeight:1.5}}>Ho letto e accetto la <a href="#" style={{color:cp}}>Privacy Policy</a> *</span>
       </label>
       <label style={{display:'flex',alignItems:'flex-start',gap:'10px',cursor:'pointer'}}>
-        <input type="checkbox" checked={form.consenso_newsletter} onChange={e=>setForm(p=>({...p,consenso_newsletter:e.target.checked}))} style={{marginTop:'2px',flexShrink:0,accentColor:cp}} />
+        <input type="checkbox" checked={newsletter} onChange={e=>setNewsletter(e.target.checked)} style={{marginTop:'2px',flexShrink:0,accentColor:cp}}/>
         <span style={{fontSize:'13px',color:'#374151',lineHeight:1.5}}>Desidero ricevere comunicazioni da CNA Roma</span>
       </label>
       {err&&<p style={{fontSize:'13px',color:'#DC2626',margin:0}}>{err}</p>}
       <button type="submit" disabled={submitting} style={{
-        background:tema.colore_pulsanti||cp, color:tema.colore_testo_btn||'#fff',
-        border:'none', borderRadius:btnRadius, padding:'14px', fontFamily:'Inter,sans-serif',
-        fontSize:'15px', fontWeight:'700', cursor:'pointer', transition:'transform .15s,box-shadow .15s'
+        background:tema.colore_pulsanti||cp,color:tema.colore_testo_btn||'#fff',
+        border:'none',borderRadius:btnR,padding:'14px',fontFamily:'Inter,sans-serif',
+        fontSize:'15px',fontWeight:'700',cursor:'pointer',transition:'transform .15s,box-shadow .15s'
       }}
         onMouseEnter={e=>{e.currentTarget.style.transform='translateY(-1px)';e.currentTarget.style.boxShadow=`0 6px 16px ${cp}40`}}
         onMouseLeave={e=>{e.currentTarget.style.transform='translateY(0)';e.currentTarget.style.boxShadow='none'}}>
@@ -403,8 +475,6 @@ function FormContatti({ lp, tema }) {
   )
 }
 
-const lbSt = { display:'block', fontSize:'13px', fontWeight:'600', color:'#374151', marginBottom:'5px' }
-const iSt  = { width:'100%', boxSizing:'border-box', padding:'11px 14px', border:'1px solid #E5E7EB', borderRadius:'8px', fontSize:'15px', fontFamily:'Inter,sans-serif', outline:'none', color:'#0A0A0A' }
 
 // ── Pagina pubblica ───────────────────────────────────────────────
 export default function LandingPagePublic() {
@@ -438,8 +508,18 @@ export default function LandingPagePublic() {
   const tema = temaConDefault(lp.tema)
   const cp   = tema.colore_primario||'#003DA5'
   const logoSrc = lp.logo_url || LOGO_URL
-  const textAlign = lp.hero_layout==='sinistra'?'left':lp.hero_layout==='destra'?'right':'center'
-  const alignItems = lp.hero_layout==='sinistra'?'flex-start':lp.hero_layout==='destra'?'flex-end':'center'
+  const lh = lp.layout_hero || {}
+  const altezzaHero = parseInt(lh.altezza||'420')
+  const overlayOpacita = parseFloat(lh.overlay_opacita||'50') / 100
+  const allineamento = lh.allineamento || 'centro'
+  const textAlign = allineamento === 'sinistra' ? 'left' : 'center'
+  const alignItems = allineamento === 'sinistra' ? 'flex-start' : 'center'
+  const bgPosition = lh.bg_position || '50% 50%'
+  const logoAltezza = parseInt(lh.logo_altezza||'48')
+  const titoloColore = lh.titolo_colore || '#ffffff'
+  const titoloSize = lh.titolo_dimensione || 'clamp(26px,5vw,54px)'
+  const titoloGrassetto = lh.titolo_grassetto !== false
+  const titoloMaiuscolo = !!lh.titolo_maiuscolo
   const hasContenuto = lp.contenuto&&lp.contenuto.length>0
 
   return (
@@ -453,16 +533,16 @@ export default function LandingPagePublic() {
 
       {/* HERO */}
       <div style={{
-        position:'relative', minHeight:'520px', display:'flex', flexDirection:'column',
+        position:'relative', minHeight:altezzaHero+'px', display:'flex', flexDirection:'column',
         alignItems, justifyContent:'center', padding:'60px 24px',
-        background: lp.hero_immagine_url?`url(${lp.hero_immagine_url}) center/cover no-repeat`:cp,
+        background: lp.hero_immagine_url?`url(${lp.hero_immagine_url}) ${bgPosition}/cover no-repeat`:cp,
       }}>
-        <div style={{position:'absolute',inset:0,background:'rgba(0,0,0,0.45)'}} />
-        <div className="lp-hero-logo" style={{position:'relative',zIndex:1,textAlign:'center',width:'100%',marginBottom:'40px'}}>
-          <img src={logoSrc} alt="CNA Roma" style={{height:(tema.logo_altezza||'44')+'px',objectFit:'contain',filter:'brightness(0) invert(1)'}} />
+        <div style={{position:'absolute',inset:0,background:`rgba(0,0,0,${overlayOpacita})`}} />
+        <div className="lp-hero-logo" style={{position:'relative',zIndex:1,textAlign:'center',width:'100%',marginBottom:'36px'}}>
+          <img src={logoSrc} alt="CNA Roma" style={{height:logoAltezza+'px',objectFit:'contain',filter:'brightness(0) invert(1)'}} />
         </div>
         <div className="lp-hero-content" style={{position:'relative',zIndex:1,maxWidth:'740px',textAlign,width:'100%'}}>
-          {lp.hero_titolo&&<h1 style={{fontSize:'clamp(28px,5vw,56px)',fontWeight:'900',color:'#fff',margin:'0 0 16px',letterSpacing:'-0.04em',lineHeight:1.05}}>{lp.hero_titolo}</h1>}
+          {lp.hero_titolo&&<h1 style={{fontSize:titoloSize,fontWeight:titoloGrassetto?'900':'400',color:titoloColore,margin:'0 0 16px',letterSpacing:'-0.04em',lineHeight:1.05,textTransform:titoloMaiuscolo?'uppercase':'none'}}>{lp.hero_titolo}</h1>}
           {lp.hero_sottotitolo&&<p style={{fontSize:'clamp(15px,2vw,20px)',color:'rgba(255,255,255,.88)',margin:'0 0 28px',lineHeight:1.65,fontWeight:'400'}}>{lp.hero_sottotitolo}</p>}
           {lp.form_abilitato&&(
             <a href="#lp-form" style={{
