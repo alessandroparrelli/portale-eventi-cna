@@ -1,4 +1,7 @@
 import React, { useState, useEffect } from 'react'
+const DIM_MAP={'clamp(13px,1.5vw,16px)':'16px','clamp(15px,2vw,20px)':'22px','clamp(18px,2.5vw,26px)':'30px','clamp(22px,3vw,34px)':'40px'}
+function normDim(v){return DIM_MAP[v]||v||'22px'}
+
 import { useParams, useNavigate } from 'react-router-dom'
 import { supabase } from '../../lib/supabase'
 import ImageUploader from '../../components/editor/ImageUploader'
@@ -381,12 +384,12 @@ export default function LandingEditorPage() {
                       </div>
                     </Field>
                     <Field label="Dimensione">
-                      <select value={lh.titolo2_dimensione||'clamp(15px,2vw,20px)'}
+                      <select value={normDim(lh.titolo2_dimensione)||'22px'}
                         onChange={e => setH('titolo2_dimensione')(e.target.value)} style={iSt}>
-                        <option value="clamp(13px,1.5vw,16px)">Piccolo</option>
-                        <option value="clamp(15px,2vw,20px)">Medio</option>
-                        <option value="clamp(18px,2.5vw,26px)">Grande</option>
-                        <option value="clamp(22px,3vw,34px)">Extra grande</option>
+                        <option value="16px">Piccolo (16px)</option>
+                        <option value="22px">Medio (22px)</option>
+                        <option value="30px">Grande (30px)</option>
+                        <option value="40px">Extra grande (40px)</option>
                       </select>
                     </Field>
                     <Field label="Stile">

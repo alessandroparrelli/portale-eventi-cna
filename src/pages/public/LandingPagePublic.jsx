@@ -215,7 +215,7 @@ export default function LandingPagePublic() {
   const titoloGrassetto = lh.titolo_grassetto !== false
   const titoloMaiuscolo = !!lh.titolo_maiuscolo
   const titolo2Colore = lh.titolo2_colore || 'rgba(255,255,255,0.88)'
-  const titolo2Size = lh.titolo2_dimensione || 'clamp(15px,2vw,20px)'
+  const _dimMap={'clamp(13px,1.5vw,16px)':'16px','clamp(15px,2vw,20px)':'22px','clamp(18px,2.5vw,26px)':'30px','clamp(22px,3vw,34px)':'40px'}; const titolo2Size = _dimMap[lh.titolo2_dimensione]||lh.titolo2_dimensione||'22px'
   const titolo2Grassetto = !!lh.titolo2_grassetto
   const hasContenuto = lp.contenuto&&lp.contenuto.length>0
 
