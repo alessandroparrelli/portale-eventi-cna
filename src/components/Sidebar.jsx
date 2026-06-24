@@ -56,6 +56,11 @@ const icons = {
       <rect x="2" y="4" width="20" height="16" rx="2"/><polyline points="2,4 12,13 22,4"/>
     </svg>
   ),
+  landing: (c='#6B7280') => (
+    <svg width="17" height="17" viewBox="0 0 24 24" fill="none" stroke={c} strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+      <rect x="3" y="3" width="18" height="18" rx="2"/><path d="M3 9h18"/><path d="M9 21V9"/>
+    </svg>
+  ),
   usercog: (c='#6B7280') => (
     <svg width="17" height="17" viewBox="0 0 24 24" fill="none" stroke={c} strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
       <circle cx="9" cy="7" r="4"/><path d="M3 21v-2a4 4 0 0 1 4-4h4"/>
@@ -106,6 +111,12 @@ const NAV_GROUPS = [
     label: 'Comunicazioni',
     items: [
       { to:'/admin/email',       label:'Email',        iconKey:'mail',                 activeColor:'#E85D24' },
+    ],
+  },
+  {
+    label: 'Marketing',
+    items: [
+      { to:'/admin/landing',     label:'Landing Page', iconKey:'landing',              activeColor:'#0891B2' },
     ],
   },
 ]

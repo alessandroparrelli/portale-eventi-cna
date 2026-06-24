@@ -17,6 +17,10 @@ import StatistichePage from './pages/admin/StatistichePage'
 import UtentiPage from './pages/admin/UtentiPage'
 import ProfiloPage from './pages/admin/ProfiloPage'
 import ActivityLogPage from './pages/admin/ActivityLogPage'
+import LandingPageListPage from './pages/admin/LandingPageListPage'
+import LandingEditorPage from './pages/admin/LandingEditorPage'
+import LandingContactsPage from './pages/admin/LandingContactsPage'
+import LandingPagePublic from './pages/public/LandingPagePublic'
 
 export default function App() {
   return (
@@ -26,6 +30,7 @@ export default function App() {
           {/* Pubbliche */}
           <Route path="/login" element={<LoginPage />} />
           <Route path="/eventi/:slug" element={<LandingPage />} />
+          <Route path="/lp/:slug" element={<LandingPagePublic />} />
           <Route path="/questionario" element={<QuestionarioPage />} />
           <Route path="/iscrizione/:codice" element={<Iscrizione />} />
           <Route path="/iscrizione" element={<Iscrizione />} />
@@ -41,6 +46,8 @@ export default function App() {
             <Route path="utenti" element={<UtentiPage />} />
             <Route path="profilo" element={<ProfiloPage />} />
             <Route path="log" element={<ActivityLogPage />} />
+            <Route path="landing" element={<LandingPageListPage />} />
+            <Route path="landing/:id/contatti" element={<LandingContactsPage />} />
           </Route>
 
           {/* Editor a schermo intero (fuori dal layout sidebar) */}
@@ -52,6 +59,8 @@ export default function App() {
             element={<ProtectedRoute><EmailEditorPage /></ProtectedRoute>} />
           <Route path="/admin/email/nuovo"
             element={<ProtectedRoute><EmailEditorPage /></ProtectedRoute>} />
+          <Route path="/admin/landing/:id/editor"
+            element={<ProtectedRoute><LandingEditorPage /></ProtectedRoute>} />
 
           <Route path="*" element={<Navigate to="/admin" replace />} />
         </Routes>
