@@ -480,12 +480,12 @@ export default function EventoEditorPage() {
 
   function addSection(tipo) {
     const sec = newSection(tipo)
-    setEvent(p => ({ ...p, sezioni: [...(p.sezioni||[]), sec] }))
+    updEvent(p => ({ ...p, sezioni: [...(p.sezioni||[]), sec] }))
   }
   function updateSection(idx, sec) { updEvent(p=>{ const s=[...p.sezioni]; s[idx]=sec; return {...p,sezioni:s} }) }
   function deleteSection(idx)     { updEvent(p=>({...p,sezioni:p.sezioni.filter((_,i)=>i!==idx)})) }
   function moveSection(idx, dir)  {
-    setEvent(p=>{
+    updEvent(p=>{
       const s=[...p.sezioni]; const t=s[idx]; s[idx]=s[idx+dir]; s[idx+dir]=t
       return {...p,sezioni:s}
     })
@@ -573,12 +573,12 @@ export default function EventoEditorPage() {
                 <Field label="Sede / Indirizzo completo">
                   <AddressSearch
                     value={event.luogo||''}
-                    onChange={(addr) => setEvent(p => ({ ...p, luogo: addr }))}
+                    onChange={(addr) => updEvent(p => ({ ...p, luogo: addr }))}
                   />
                 </Field>
               </div>
               <Field label="Stato">
-                <Select value={event.stato} onChange={e=>setEvent(p=>({...p,stato:e.target.value}))}>
+                <Select value={event.stato} onChange={e=>updEvent(p=>({...p,stato:e.target.value}))}>
                   <option value="bozza">📝 Bozza</option>
                   <option value="pubblicato">🟢 Pubblicato</option>
                   <option value="chiuso">🔴 Chiuso</option>
@@ -784,7 +784,7 @@ export default function EventoEditorPage() {
             </p>
             <BlockEditor
               blocks={event.sezioni || []}
-              onChange={blocks => setEvent(p => ({ ...p, sezioni: blocks }))}
+              onChange={blocks => updEvent(p => ({ ...p, sezioni: blocks }))}
             />
           </div>
         )}
