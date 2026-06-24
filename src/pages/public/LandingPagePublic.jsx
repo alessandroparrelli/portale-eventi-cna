@@ -476,6 +476,9 @@ function FormContatti({ lp, tema }) {
 }
 
 
+const lbSt = { display:'block', fontSize:'13px', fontWeight:'600', color:'#374151', marginBottom:'6px' }
+const iSt  = { width:'100%', boxSizing:'border-box', padding:'11px 14px', border:'1px solid #E5E7EB', borderRadius:'8px', fontSize:'15px', fontFamily:'Inter,sans-serif', outline:'none', color:'#0A0A0A' }
+
 // ── Pagina pubblica ───────────────────────────────────────────────
 export default function LandingPagePublic() {
   const { slug } = useParams()
@@ -520,6 +523,9 @@ export default function LandingPagePublic() {
   const titoloSize = lh.titolo_dimensione || 'clamp(26px,5vw,54px)'
   const titoloGrassetto = lh.titolo_grassetto !== false
   const titoloMaiuscolo = !!lh.titolo_maiuscolo
+  const titolo2Colore = lh.titolo2_colore || 'rgba(255,255,255,0.88)'
+  const titolo2Size = lh.titolo2_dimensione || 'clamp(15px,2vw,20px)'
+  const titolo2Grassetto = !!lh.titolo2_grassetto
   const hasContenuto = lp.contenuto&&lp.contenuto.length>0
 
   return (
@@ -542,8 +548,9 @@ export default function LandingPagePublic() {
           <img src={logoSrc} alt="CNA Roma" style={{height:logoAltezza+'px',objectFit:'contain',filter:'brightness(0) invert(1)'}} />
         </div>
         <div className="lp-hero-content" style={{position:'relative',zIndex:1,maxWidth:'740px',textAlign,width:'100%'}}>
-          {lp.hero_titolo&&<h1 style={{fontSize:titoloSize,fontWeight:titoloGrassetto?'900':'400',color:titoloColore,margin:'0 0 16px',letterSpacing:'-0.04em',lineHeight:1.05,textTransform:titoloMaiuscolo?'uppercase':'none'}}>{lp.hero_titolo}</h1>}
-          {lp.hero_sottotitolo&&<p style={{fontSize:'clamp(15px,2vw,20px)',color:'rgba(255,255,255,.88)',margin:'0 0 28px',lineHeight:1.65,fontWeight:'400'}}>{lp.hero_sottotitolo}</p>}
+          {lp.hero_titolo&&<h1 style={{fontSize:titoloSize,fontWeight:titoloGrassetto?'900':'400',color:titoloColore,margin:'0 0 12px',letterSpacing:'-0.04em',lineHeight:1.05,textTransform:titoloMaiuscolo?'uppercase':'none'}}>{lp.hero_titolo}</h1>}
+          {lp.hero_titolo2&&<h2 style={{fontSize:titolo2Size,fontWeight:titolo2Grassetto?'700':'400',color:titolo2Colore,margin:'0 0 20px',letterSpacing:'-0.02em',lineHeight:1.3}}>{lp.hero_titolo2}</h2>}
+          {lp.hero_sottotitolo&&<p style={{fontSize:'clamp(14px,1.8vw,18px)',color:'rgba(255,255,255,.80)',margin:'0 0 28px',lineHeight:1.7,fontWeight:'400'}}>{lp.hero_sottotitolo}</p>}
           {lp.form_abilitato&&(
             <a href="#lp-form" style={{
               display:'inline-block', background:'#fff', color:cp,

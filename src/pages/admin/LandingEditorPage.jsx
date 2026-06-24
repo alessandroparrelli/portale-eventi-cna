@@ -112,6 +112,7 @@ export default function LandingEditorPage() {
     const { error } = await supabase.from('landing_pages').update({
       titolo: data.titolo, slug: data.slug, stato: data.stato,
       hero_titolo: data.hero_titolo, hero_sottotitolo: data.hero_sottotitolo,
+      hero_titolo2: data.hero_titolo2,
       hero_immagine_url: data.hero_immagine_url, hero_layout: data.hero_layout,
       layout_hero: data.layout_hero, logo_url: data.logo_url,
       contenuto: data.contenuto, tema: data.tema,
@@ -258,22 +259,25 @@ export default function LandingEditorPage() {
               </div>
 
               {/* Testi hero */}
-              <Field label="Titolo hero">
-                <input value={data.hero_titolo||''} onChange={e => upd('hero_titolo', e.target.value)} style={iSt} />
+              <Field label="Titolo principale (H1)">
+                <input value={data.hero_titolo||''} onChange={e => upd('hero_titolo', e.target.value)} style={iSt} placeholder="Il titolo grande in evidenza" />
               </Field>
-              <Field label="Sottotitolo hero">
+              <Field label="Secondo titolo (H2 — opzionale)" hint="Appare sotto il titolo principale, più piccolo">
+                <input value={data.hero_titolo2||''} onChange={e => upd('hero_titolo2', e.target.value)} style={iSt} placeholder="Es. Sottotitolo di lancio, slogan, frase chiave..." />
+              </Field>
+              <Field label="Testo descrittivo (paragrafo)" hint="Testo più leggero sotto i titoli">
                 <textarea value={data.hero_sottotitolo||''} onChange={e => upd('hero_sottotitolo', e.target.value)} rows={3} style={{ ...iSt, resize:'vertical' }} />
               </Field>
 
-              {/* Stile titolo */}
+              {/* Stile titoli */}
               <div style={{ padding:'16px', background:'#F9FAFB', border:'1px solid #E5E7EB', borderRadius:'10px' }}>
-                <p style={{ fontSize:'12px', fontWeight:'700', color:'#6B7280', textTransform:'uppercase', letterSpacing:'.06em', margin:'0 0 12px' }}>Stile titolo</p>
+                <p style={{ fontSize:'12px', fontWeight:'700', color:'#6B7280', textTransform:'uppercase', letterSpacing:'.06em', margin:'0 0 14px' }}>Stile titolo principale (H1)</p>
                 <div style={{ display:'grid', gridTemplateColumns:'1fr 1fr 1fr', gap:'12px' }}>
-                  <Field label="Colore titolo">
+                  <Field label="Colore">
                     <div style={{ display:'flex', gap:'8px', alignItems:'center' }}>
                       <input type="color" value={lh.titolo_colore||'#FFFFFF'} onChange={setH('titolo_colore')}
-                        style={{ width:'40px', height:'34px', border:'1px solid #D1D5DB', borderRadius:'6px', cursor:'pointer', padding:'2px' }} />
-                      <input value={lh.titolo_colore||'#FFFFFF'} onChange={setH('titolo_colore')} style={{ ...iSt, flex:1 }} />
+                        style={{ width:'40px', height:'34px', border:'1px solid #D1D5DB', borderRadius:'6px', cursor:'pointer', padding:'2px', flexShrink:0 }} />
+                      <input value={lh.titolo_colore||'#FFFFFF'} onChange={setH('titolo_colore')} style={{ ...iSt, flex:1, fontSize:'12px' }} />
                     </div>
                   </Field>
                   <Field label="Dimensione">
@@ -287,10 +291,10 @@ export default function LandingEditorPage() {
                   <Field label="Stile">
                     <div style={{ display:'flex', gap:'6px' }}>
                       <button onClick={() => setH('titolo_grassetto')(!lh.titolo_grassetto)} style={{
-                        flex:1, padding:'7px', border:`1px solid ${lh.titolo_grassetto?'#003DA5':'#E5E7EB'}`,
-                        borderRadius:'6px', background:lh.titolo_grassetto?'#EEF3FF':'#fff',
+                        flex:1, padding:'7px', border:`1px solid ${lh.titolo_grassetto!==false?'#003DA5':'#E5E7EB'}`,
+                        borderRadius:'6px', background:lh.titolo_grassetto!==false?'#EEF3FF':'#fff',
                         cursor:'pointer', fontSize:'14px', fontWeight:'800', fontFamily:'Inter,sans-serif',
-                        color:lh.titolo_grassetto?'#003DA5':'#6B7280'
+                        color:lh.titolo_grassetto!==false?'#003DA5':'#6B7280'
                       }}>B</button>
                       <button onClick={() => setH('titolo_maiuscolo')(!lh.titolo_maiuscolo)} style={{
                         flex:1, padding:'7px', border:`1px solid ${lh.titolo_maiuscolo?'#003DA5':'#E5E7EB'}`,
@@ -300,6 +304,37 @@ export default function LandingEditorPage() {
                       }}>AA</button>
                     </div>
                   </Field>
+                </div>
+
+                <div style={{ borderTop:'1px solid #E5E7EB', marginTop:'14px', paddingTop:'14px' }}>
+                  <p style={{ fontSize:'12px', fontWeight:'700', color:'#6B7280', textTransform:'uppercase', letterSpacing:'.06em', margin:'0 0 12px' }}>Stile secondo titolo (H2)</p>
+                  <div style={{ display:'grid', gridTemplateColumns:'1fr 1fr 1fr', gap:'12px' }}>
+                    <Field label="Colore">
+                      <div style={{ display:'flex', gap:'8px', alignItems:'center' }}>
+                        <input type="color" value={lh.titolo2_colore||'#FFFFFFDD'} onChange={setH('titolo2_colore')}
+                          style={{ width:'40px', height:'34px', border:'1px solid #D1D5DB', borderRadius:'6px', cursor:'pointer', padding:'2px', flexShrink:0 }} />
+                        <input value={lh.titolo2_colore||''} onChange={setH('titolo2_colore')} placeholder="#FFFFFF" style={{ ...iSt, flex:1, fontSize:'12px' }} />
+                      </div>
+                    </Field>
+                    <Field label="Dimensione">
+                      <select value={lh.titolo2_dimensione||'clamp(15px,2vw,20px)'} onChange={setH('titolo2_dimensione')} style={iSt}>
+                        <option value="clamp(13px,1.5vw,16px)">Piccolo</option>
+                        <option value="clamp(15px,2vw,20px)">Medio</option>
+                        <option value="clamp(18px,2.5vw,26px)">Grande</option>
+                        <option value="clamp(22px,3vw,34px)">Extra grande</option>
+                      </select>
+                    </Field>
+                    <Field label="Stile">
+                      <div style={{ display:'flex', gap:'6px' }}>
+                        <button onClick={() => setH('titolo2_grassetto')(!lh.titolo2_grassetto)} style={{
+                          flex:1, padding:'7px', border:`1px solid ${lh.titolo2_grassetto?'#003DA5':'#E5E7EB'}`,
+                          borderRadius:'6px', background:lh.titolo2_grassetto?'#EEF3FF':'#fff',
+                          cursor:'pointer', fontSize:'14px', fontWeight:'800', fontFamily:'Inter,sans-serif',
+                          color:lh.titolo2_grassetto?'#003DA5':'#6B7280'
+                        }}>B</button>
+                      </div>
+                    </Field>
+                  </div>
                 </div>
               </div>
 
