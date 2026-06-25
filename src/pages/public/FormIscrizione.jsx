@@ -295,6 +295,13 @@ export default function FormIscrizione({ event, onSuccess }) {
         nome: persone[0].nome?.trim(), cognome: persone[0].cognome?.trim(),
         email: persone[0].email?.trim(), accompagnatori: persone.length - 1,
       })
+
+      // Email conferma iscritto + notifica admin (fire-and-forget)
+      const emailPayload = { iscrizione_id: reg0.id }
+      supabase.functions.invoke('send-event-email', { body: { tipo: 'conferma_iscrizione', ...emailPayload } })
+        .catch(e => console.warn('Email conferma fallita:', e))
+      supabase.functions.invoke('send-event-email', { body: { tipo: 'notifica_admin', ...emailPayload } })
+        .catch(e => console.warn('Email admin fallita:', e))
     } catch (err) {
       setErrGen(err.message?.includes('capienza_esaurita')
         ? 'Spiacenti, i posti disponibili sono esauriti.'
