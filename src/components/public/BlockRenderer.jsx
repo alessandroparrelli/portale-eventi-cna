@@ -349,5 +349,165 @@ export default function BlockRenderer({ block, cp = '#003DA5', formTarget = '#lp
 
   if (block.tipo === 'separatore') return <hr style={{ border: 'none', borderTop: '1px solid #E5E7EB', margin: '32px 0' }} />
 
+  if (block.tipo === 'carosello') return <CaroselloBlock block={block} />
+
+  if (block.tipo === 'social') return <SocialBlock block={block} cp={cp} />
+
   return null
+}
+
+// ── Carosello ─────────────────────────────────────────────────────
+function CaroselloBlock({ block }) {
+  const [current, setCurrent] = useState(0)
+  const imgs = (block.immagini || []).filter(i => i.src)
+  if (!imgs.length) return null
+
+  const ratio = block.rapporto === '16:9' ? '56.25%' : block.rapporto === '4:5' ? '125%' : '100%'
+
+  const prev = () => setCurrent(c => (c - 1 + imgs.length) % imgs.length)
+  const next = () => setCurrent(c => (c + 1) % imgs.length)
+
+  return (
+    <Animate animation="fadein">
+      <div style={{ marginBottom: '24px', maxWidth: '560px', margin: '0 auto 24px' }}>
+        {/* Immagine principale */}
+        <div style={{ position: 'relative', borderRadius: '12px', overflow: 'hidden', background: '#000' }}>
+          <div style={{ position: 'relative', paddingBottom: ratio }}>
+            <img
+              src={imgs[current].src}
+              alt={imgs[current].didascalia || ''}
+              style={{ position: 'absolute', inset: 0, width: '100%', height: '100%', objectFit: 'cover', transition: 'opacity .3s' }}
+            />
+          </div>
+
+          {/* Frecce */}
+          {imgs.length > 1 && <>
+            <button onClick={prev} style={{ position:'absolute', left:'10px', top:'50%', transform:'translateY(-50%)', width:'36px', height:'36px', borderRadius:'50%', background:'rgba(255,255,255,.85)', border:'none', cursor:'pointer', display:'flex', alignItems:'center', justifyContent:'center', backdropFilter:'blur(4px)', zIndex:2 }}>
+              <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="#0A0A0A" strokeWidth="2.5"><path d="M15 18l-6-6 6-6"/></svg>
+            </button>
+            <button onClick={next} style={{ position:'absolute', right:'10px', top:'50%', transform:'translateY(-50%)', width:'36px', height:'36px', borderRadius:'50%', background:'rgba(255,255,255,.85)', border:'none', cursor:'pointer', display:'flex', alignItems:'center', justifyContent:'center', backdropFilter:'blur(4px)', zIndex:2 }}>
+              <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="#0A0A0A" strokeWidth="2.5"><path d="M9 18l6-6-6-6"/></svg>
+            </button>
+          </>}
+
+          {/* Counter */}
+          {imgs.length > 1 && (
+            <div style={{ position:'absolute', top:'10px', right:'12px', background:'rgba(0,0,0,.55)', color:'#fff', fontSize:'12px', fontWeight:'600', padding:'3px 8px', borderRadius:'10px', backdropFilter:'blur(4px)' }}>
+              {current + 1} / {imgs.length}
+            </div>
+          )}
+        </div>
+
+        {/* Dots */}
+        {imgs.length > 1 && (
+          <div style={{ display:'flex', justifyContent:'center', gap:'6px', marginTop:'10px' }}>
+            {imgs.map((_, i) => (
+              <button key={i} onClick={() => setCurrent(i)} style={{ width: i === current ? '20px' : '8px', height:'8px', borderRadius:'4px', background: i === current ? '#0A0A0A' : '#D1D5DB', border:'none', cursor:'pointer', transition:'all .2s', padding:0 }} />
+            ))}
+          </div>
+        )}
+
+        {/* Thumbnail strip */}
+        {imgs.length > 1 && (
+          <div style={{ display:'flex', gap:'6px', marginTop:'8px', overflowX:'auto', paddingBottom:'4px' }}>
+            {imgs.map((img, i) => (
+              <button key={i} onClick={() => setCurrent(i)} style={{ flexShrink:0, width:'52px', height:'52px', borderRadius:'6px', overflow:'hidden', border:`2px solid ${i === current ? '#0A0A0A' : 'transparent'}`, padding:0, cursor:'pointer', transition:'border-color .2s' }}>
+                <img src={img.src} alt="" style={{ width:'100%', height:'100%', objectFit:'cover' }} />
+              </button>
+            ))}
+          </div>
+        )}
+
+        {/* Didascalia */}
+        {(imgs[current].didascalia || block.didascalia) && (
+          <p style={{ fontSize:'13px', color:'#9CA3AF', textAlign:'center', margin:'8px 0 0', fontStyle:'italic' }}>
+            {imgs[current].didascalia || block.didascalia}
+          </p>
+        )}
+      </div>
+    </Animate>
+  )
+}
+
+// ── Social & Condivisione ─────────────────────────────────────────
+function SocialBlock({ block, cp }) {
+  const [copied, setCopied] = useState(false)
+  const pageUrl = typeof window !== 'undefined' ? window.location.href : ''
+  const encoded = encodeURIComponent(pageUrl)
+  const titolo  = encodeURIComponent(document?.title || 'CNA Roma')
+
+  function copyLink() {
+    navigator.clipboard.writeText(pageUrl).then(() => { setCopied(true); setTimeout(() => setCopied(false), 2000) })
+  }
+
+  const embedUrl = () => {
+    const url = block.url_post || ''
+    if (block.tipo_social === 'instagram') {
+      // Trasforma URL post in URL embed
+      const clean = url.replace(/\/$/, '')
+      return clean + '/embed/'
+    }
+    if (block.tipo_social === 'facebook') {
+      return `https://www.facebook.com/plugins/post.php?href=${encodeURIComponent(url)}&show_text=true&width=500`
+    }
+    if (block.tipo_social === 'x') {
+      // Estrae tweet id
+      const match = url.match(/status\/(\d+)/)
+      if (match) return `https://platform.twitter.com/embed/Tweet.html?id=${match[1]}`
+    }
+    return null
+  }
+
+  const shareButtons = [
+    { label:'WhatsApp', color:'#25D366', icon:<svg viewBox="0 0 24 24" fill="currentColor"><path d="M17.472 14.382c-.297-.149-1.758-.867-2.03-.967-.273-.099-.471-.148-.67.15-.197.297-.767.966-.94 1.164-.173.199-.347.223-.644.075-.297-.15-1.255-.463-2.39-1.475-.883-.788-1.48-1.761-1.653-2.059-.173-.297-.018-.458.13-.606.134-.133.298-.347.446-.52.149-.174.198-.298.298-.497.099-.198.05-.371-.025-.52-.075-.149-.669-1.612-.916-2.207-.242-.579-.487-.5-.669-.51-.173-.008-.371-.01-.57-.01-.198 0-.52.074-.792.372-.272.297-1.04 1.016-1.04 2.479 0 1.462 1.065 2.875 1.213 3.074.149.198 2.096 3.2 5.077 4.487.709.306 1.262.489 1.694.625.712.227 1.36.195 1.871.118.571-.085 1.758-.719 2.006-1.413.248-.694.248-1.289.173-1.413-.074-.124-.272-.198-.57-.347m-5.421 7.403h-.004a9.87 9.87 0 01-5.031-1.378l-.361-.214-3.741.982.998-3.648-.235-.374a9.86 9.86 0 01-1.51-5.26c.001-5.45 4.436-9.884 9.888-9.884 2.64 0 5.122 1.03 6.988 2.898a9.825 9.825 0 012.893 6.994c-.003 5.45-4.437 9.884-9.885 9.884m8.413-18.297A11.815 11.815 0 0012.05 0C5.495 0 .16 5.335.157 11.892c0 2.096.547 4.142 1.588 5.945L.057 24l6.305-1.654a11.882 11.882 0 005.683 1.448h.005c6.554 0 11.89-5.335 11.893-11.893a11.821 11.821 0 00-3.48-8.413z"/></svg>, href:`https://wa.me/?text=${titolo}%20${encoded}` },
+    { label:'Email',     color:'#6B7280', icon:<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2"><rect x="2" y="4" width="20" height="16" rx="2"/><polyline points="2,4 12,13 22,4"/></svg>, href:`mailto:?subject=${titolo}&body=${encoded}` },
+    { label:'Facebook',  color:'#1877F2', icon:<svg viewBox="0 0 24 24" fill="currentColor"><path d="M24 12.073c0-6.627-5.373-12-12-12s-12 5.373-12 12c0 5.99 4.388 10.954 10.125 11.854v-8.385H7.078v-3.47h3.047V9.43c0-3.007 1.792-4.669 4.533-4.669 1.312 0 2.686.235 2.686.235v2.953H15.83c-1.491 0-1.956.925-1.956 1.874v2.25h3.328l-.532 3.47h-2.796v8.385C19.612 23.027 24 18.062 24 12.073z"/></svg>, href:`https://www.facebook.com/sharer/sharer.php?u=${encoded}` },
+    { label:'X',         color:'#0A0A0A', icon:<svg viewBox="0 0 24 24" fill="currentColor"><path d="M18.244 2.25h3.308l-7.227 8.26 8.502 11.24H16.17l-4.714-6.231-5.401 6.231H2.744l7.737-8.835L1.254 2.25H8.08l4.259 5.632 5.905-5.632zm-1.161 17.52h1.833L7.084 4.126H5.117z"/></svg>, href:`https://x.com/intent/tweet?url=${encoded}&text=${titolo}` },
+    { label: copied ? 'Copiato!' : 'Copia link', color: copied ? '#059669' : '#374151', icon:<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2"><path d="M10 13a5 5 0 0 0 7.54.54l3-3a5 5 0 0 0-7.07-7.07l-1.72 1.71"/><path d="M14 11a5 5 0 0 0-7.54-.54l-3 3a5 5 0 0 0 7.07 7.07l1.71-1.71"/></svg>, onClick: copyLink },
+  ]
+
+  return (
+    <Animate animation="fadeup">
+      <div style={{ marginBottom:'24px' }}>
+        {block.titolo && <h3 style={{ fontSize:'18px', fontWeight:'800', color:'#0A0A0A', textAlign:'center', margin:'0 0 20px', letterSpacing:'-.02em' }}>{block.titolo}</h3>}
+
+        {/* Embed post social */}
+        {block.url_post && block.tipo_social !== 'condivisione' && embedUrl() && (
+          <div style={{ marginBottom:'20px', borderRadius:'12px', overflow:'hidden', border:'1px solid #E5E7EB', maxWidth:'540px', margin:'0 auto 20px' }}>
+            <iframe
+              src={embedUrl()}
+              style={{ width:'100%', minHeight: block.tipo_social === 'instagram' ? '540px' : '400px', border:'none', display:'block' }}
+              scrolling="no"
+              allowTransparency={true}
+              title="Post social"
+            />
+          </div>
+        )}
+
+        {/* Pulsanti condivisione */}
+        {block.mostra_condivisione !== false && (
+          <div>
+            <p style={{ fontSize:'12px', fontWeight:'700', color:'#9CA3AF', textTransform:'uppercase', letterSpacing:'.06em', textAlign:'center', margin:'0 0 12px' }}>Condividi</p>
+            <div style={{ display:'flex', flexWrap:'wrap', gap:'8px', justifyContent:'center' }}>
+              {shareButtons.map((btn, i) => (
+                btn.href
+                  ? <a key={i} href={btn.href} target="_blank" rel="noreferrer" style={{ display:'flex', alignItems:'center', gap:'7px', padding:'9px 16px', background:btn.color+'15', border:`1px solid ${btn.color}30`, borderRadius:'8px', textDecoration:'none', fontSize:'13px', fontWeight:'700', color:btn.color, transition:'all .15s', fontFamily:"'Inter',sans-serif" }}
+                      onMouseEnter={e=>{e.currentTarget.style.background=btn.color+'25'}}
+                      onMouseLeave={e=>{e.currentTarget.style.background=btn.color+'15'}}>
+                      <span style={{ width:'18px', height:'18px', flexShrink:0 }}>{btn.icon}</span>
+                      {btn.label}
+                    </a>
+                  : <button key={i} type="button" onClick={btn.onClick} style={{ display:'flex', alignItems:'center', gap:'7px', padding:'9px 16px', background:btn.color+'15', border:`1px solid ${btn.color}30`, borderRadius:'8px', fontSize:'13px', fontWeight:'700', color:btn.color, cursor:'pointer', fontFamily:"'Inter',sans-serif", transition:'all .15s' }}
+                      onMouseEnter={e=>{e.currentTarget.style.background=btn.color+'25'}}
+                      onMouseLeave={e=>{e.currentTarget.style.background=btn.color+'15'}}>
+                      <span style={{ width:'18px', height:'18px', flexShrink:0 }}>{btn.icon}</span>
+                      {btn.label}
+                    </button>
+              ))}
+            </div>
+          </div>
+        )}
+      </div>
+    </Animate>
+  )
 }

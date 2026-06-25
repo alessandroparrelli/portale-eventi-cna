@@ -78,6 +78,18 @@ export const BLOCK_ICONS = {
       <path d="M4 15s1-1 4-1 5 2 8 2 4-1 4-1V3s-1 1-4 1-5-2-8-2-4 1-4 1z"/><path d="M4 22v-7"/>
     </svg>
   ),
+  carosello: (
+    <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="#EC4899" strokeWidth="2" strokeLinecap="round">
+      <rect x="2" y="4" width="20" height="16" rx="2"/>
+      <path d="M8 4v16M16 4v16M2 12h4M18 12h4"/>
+    </svg>
+  ),
+  social: (
+    <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="#0891B2" strokeWidth="2" strokeLinecap="round">
+      <circle cx="18" cy="5" r="3"/><circle cx="6" cy="12" r="3"/><circle cx="18" cy="19" r="3"/>
+      <path d="M8.59 13.51l6.83 3.98M15.41 6.51l-6.82 3.98"/>
+    </svg>
+  ),
 }
 
 // ── Icone disponibili per griglia/badge con picker ─────────────────

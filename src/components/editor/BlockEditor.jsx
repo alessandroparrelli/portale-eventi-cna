@@ -27,6 +27,8 @@ export function newBlock(tipo) {
     case 'testimonial': return { ...base, items: [{ testo: 'Un servizio eccellente, lo consiglio a tutti.', nome: 'Mario Rossi', ruolo: 'Artigiano' }] }
     case 'countdown':   return { ...base, data: '', titolo: 'Evento tra:', messaggio_scaduto: 'L\'evento è iniziato!' }
     case 'badge_list':  return { ...base, items: [{ icona: 'check', icona_colore:'#003DA5', testo: 'Vantaggio uno' }, { icona: 'check', icona_colore:'#003DA5', testo: 'Vantaggio due' }, { icona: 'check', icona_colore:'#003DA5', testo: 'Vantaggio tre' }], colore: '#003DA5', colonne: 2 }
+    case 'carosello':   return { ...base, immagini: [], didascalia: '', rapporto: '1:1' }
+    case 'social':      return { ...base, tipo_social: 'condivisione', url_post: '', mostra_condivisione: true }
     default:            return base
   }
 }
@@ -46,6 +48,8 @@ const BLOCK_TYPES = [
   { tipo: 'video',       label: 'Video embed',     group: 'Interattivo' },
   { tipo: 'cta',         label: 'Call to action',  group: 'Interattivo' },
   { tipo: 'banner',      label: 'Banner avviso',   group: 'Interattivo' },
+  { tipo: 'carosello',   label: 'Carosello foto',  group: 'Social' },
+  { tipo: 'social',      label: 'Social & Condividi', group: 'Social' },
 ]
 
 // ── Editors singoli blocchi ─────────────────────────────────────────
@@ -307,6 +311,97 @@ function BadgeListEditor({ block, onChange }) {
 }
 
 // ── Wrapper blocco ──────────────────────────────────────────────────
+function CaroselloEditor({ block, onChange }) {
+  return (
+    <div style={{ padding:'16px', display:'flex', flexDirection:'column', gap:'14px' }}>
+      {/* Rapporto aspetto */}
+      <div>
+        <label style={{ fontSize:'12px', fontWeight:'700', color:'#6B7280', textTransform:'uppercase', letterSpacing:'.06em', display:'block', marginBottom:'6px' }}>Formato immagini</label>
+        <div style={{ display:'flex', gap:'8px' }}>
+          {[['1:1','Quadrato'],['4:5','Portrait'],['16:9','Landscape']].map(([v,l])=>(
+            <button key={v} type="button" onClick={()=>onChange({...block,rapporto:v})}
+              style={{ flex:1, padding:'7px 4px', border:`1px solid ${(block.rapporto||'1:1')===v?'#003DA5':'#E5E7EB'}`, borderRadius:'6px', background:(block.rapporto||'1:1')===v?'#EEF3FF':'#fff', cursor:'pointer', fontSize:'12px', fontWeight:'600', color:(block.rapporto||'1:1')===v?'#003DA5':'#6B7280', fontFamily:"'Inter',sans-serif" }}>
+              {l}
+            </button>
+          ))}
+        </div>
+      </div>
+      {/* Lista immagini */}
+      <div>
+        <label style={{ fontSize:'12px', fontWeight:'700', color:'#6B7280', textTransform:'uppercase', letterSpacing:'.06em', display:'block', marginBottom:'6px' }}>Immagini ({(block.immagini||[]).length})</label>
+        <div style={{ display:'flex', flexDirection:'column', gap:'8px' }}>
+          {(block.immagini||[]).map((img,i)=>(
+            <div key={i} style={{ display:'flex', gap:'8px', alignItems:'center', background:'#F9FAFB', borderRadius:'8px', padding:'8px 10px' }}>
+              {img.src && <img src={img.src} alt="" style={{ width:'48px', height:'48px', objectFit:'cover', borderRadius:'6px', flexShrink:0 }} />}
+              <div style={{ flex:1, minWidth:0 }}>
+                <input value={img.src||''} onChange={e=>{const imgs=[...block.immagini];imgs[i]={...imgs[i],src:e.target.value};onChange({...block,immagini:imgs})}}
+                  placeholder="URL immagine" style={{...inp, fontSize:'12px', marginBottom:'4px'}} />
+                <input value={img.didascalia||''} onChange={e=>{const imgs=[...block.immagini];imgs[i]={...imgs[i],didascalia:e.target.value};onChange({...block,immagini:imgs})}}
+                  placeholder="Didascalia opzionale" style={{...inp, fontSize:'12px'}} />
+              </div>
+              <button onClick={()=>onChange({...block,immagini:block.immagini.filter((_,j)=>j!==i)})} style={btnDel}>✕</button>
+            </div>
+          ))}
+        </div>
+        <button onClick={()=>onChange({...block,immagini:[...(block.immagini||[]),{src:'',didascalia:''}]})} style={{...btnAdd,marginTop:'8px'}}>+ Aggiungi immagine</button>
+      </div>
+      {/* Didascalia generale */}
+      <div>
+        <label style={{ fontSize:'12px', fontWeight:'700', color:'#6B7280', textTransform:'uppercase', letterSpacing:'.06em', display:'block', marginBottom:'6px' }}>Didascalia generale (opzionale)</label>
+        <input value={block.didascalia||''} onChange={e=>onChange({...block,didascalia:e.target.value})}
+          placeholder="Es. Foto dall'evento" style={inp} />
+      </div>
+    </div>
+  )
+}
+
+function SocialEditor({ block, onChange }) {
+  const tipi = [
+    { v:'condivisione', l:'Solo pulsanti condivisione' },
+    { v:'instagram',    l:'Post Instagram' },
+    { v:'facebook',     l:'Post Facebook' },
+    { v:'x',            l:'Post X (Twitter)' },
+  ]
+  return (
+    <div style={{ padding:'16px', display:'flex', flexDirection:'column', gap:'14px' }}>
+      <div>
+        <label style={{ fontSize:'12px', fontWeight:'700', color:'#6B7280', textTransform:'uppercase', letterSpacing:'.06em', display:'block', marginBottom:'6px' }}>Tipo</label>
+        <select value={block.tipo_social||'condivisione'} onChange={e=>onChange({...block,tipo_social:e.target.value})} style={inp}>
+          {tipi.map(t=><option key={t.v} value={t.v}>{t.l}</option>)}
+        </select>
+      </div>
+      {block.tipo_social && block.tipo_social !== 'condivisione' && (
+        <div>
+          <label style={{ fontSize:'12px', fontWeight:'700', color:'#6B7280', textTransform:'uppercase', letterSpacing:'.06em', display:'block', marginBottom:'6px' }}>URL del post</label>
+          <input value={block.url_post||''} onChange={e=>onChange({...block,url_post:e.target.value})}
+            placeholder={`Incolla l'URL del post ${block.tipo_social}`} style={inp} />
+          <p style={{ fontSize:'11px', color:'#9CA3AF', margin:'4px 0 0' }}>
+            {block.tipo_social==='instagram' && 'Es. https://www.instagram.com/p/CODICE/'}
+            {block.tipo_social==='facebook'  && 'Es. https://www.facebook.com/permalink.php?...'}
+            {block.tipo_social==='x'         && 'Es. https://x.com/utente/status/12345'}
+          </p>
+        </div>
+      )}
+      <div>
+        <label style={{ display:'flex', alignItems:'center', gap:'8px', cursor:'pointer', fontSize:'13px', fontWeight:'600', color:'#374151' }}>
+          <input type="checkbox" checked={block.mostra_condivisione !== false}
+            onChange={e=>onChange({...block,mostra_condivisione:e.target.checked})}
+            style={{ width:'16px', height:'16px' }} />
+          Mostra pulsanti di condivisione
+        </label>
+        <p style={{ fontSize:'11px', color:'#9CA3AF', margin:'4px 0 0 24px' }}>
+          WhatsApp, email, copia link, Facebook, X
+        </p>
+      </div>
+      <div>
+        <label style={{ fontSize:'12px', fontWeight:'700', color:'#6B7280', textTransform:'uppercase', letterSpacing:'.06em', display:'block', marginBottom:'6px' }}>Titolo sezione (opzionale)</label>
+        <input value={block.titolo||''} onChange={e=>onChange({...block,titolo:e.target.value})}
+          placeholder="Es. Seguici sui social" style={inp} />
+      </div>
+    </div>
+  )
+}
+
 function Block({ block, index, total, onChange, onDelete, onMoveUp, onMoveDown }) {
   const [collapsed, setCollapsed] = useState(false)
   const typeInfo = BLOCK_TYPES.find(t=>t.tipo===block.tipo) || { label:block.tipo }
@@ -339,6 +434,8 @@ function Block({ block, index, total, onChange, onDelete, onMoveUp, onMoveDown }
           {block.tipo==='testimonial' && <TestimonialEditor block={block} onChange={onChange} />}
           {block.tipo==='countdown'   && <CountdownEditor block={block} onChange={onChange} />}
           {block.tipo==='badge_list'  && <BadgeListEditor block={block} onChange={onChange} />}
+          {block.tipo==='carosello'   && <CaroselloEditor block={block} onChange={onChange} />}
+          {block.tipo==='social'      && <SocialEditor block={block} onChange={onChange} />}
           {block.tipo==='separatore'  && <div style={{padding:'16px',color:'#9CA3AF',fontSize:'13px',textAlign:'center'}}>— Linea separatrice —</div>}
         </>
       )}
