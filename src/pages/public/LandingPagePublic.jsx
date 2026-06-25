@@ -40,13 +40,21 @@ function FormContatti({ lp, tema }) {
       if (['nome','cognome','email','telefono'].includes(f.key)) std[f.key]=values[f.key]||''
       else extra[f.key]=values[f.key]
     }
-    const {error} = await supabase.from('lp_contacts').insert({
+    const {error, data: inserted} = await supabase.from('lp_contacts').insert({
       landing_page_id:lp.id,...std,dati_extra:extra,
       consenso_privacy:privacy,consenso_newsletter:newsletter,
-    })
+    }).select('id').single()
     setSubmitting(false)
-    if (!error) setSubmitted(true)
-    else setErr("Errore nell'invio. Riprova.")
+    if (!error && inserted?.id) {
+      // Invia email notifica admin + conferma utente (fire-and-forget)
+      supabase.functions.invoke('send-contact-email', { body: { contact_id: inserted.id } })
+        .catch(e => console.warn('Email send failed:', e))
+      setSubmitted(true)
+    } else if (!error) {
+      setSubmitted(true)
+    } else {
+      setErr("Errore nell'invio. Riprova.")
+    }
   }
 
   const btnR = tema.btn_stile==='pill'?'999px':(tema.btn_raggio||'8')+'px'
