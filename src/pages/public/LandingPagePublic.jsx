@@ -40,17 +40,27 @@ function FormContatti({ lp, tema }) {
       if (['nome','cognome','email','telefono'].includes(f.key)) std[f.key]=values[f.key]||''
       else extra[f.key]=values[f.key]
     }
-    const {error, data: inserted} = await supabase.from('lp_contacts').insert({
+    const {error} = await supabase.from('lp_contacts').insert({
       landing_page_id:lp.id,...std,dati_extra:extra,
       consenso_privacy:privacy,consenso_newsletter:newsletter,
-    }).select('id').single()
+    })
     setSubmitting(false)
-    if (!error && inserted?.id) {
-      // Invia email notifica admin + conferma utente (fire-and-forget)
-      supabase.functions.invoke('send-contact-email', { body: { contact_id: inserted.id } })
-        .catch(e => console.warn('Email send failed:', e))
-      setSubmitted(true)
-    } else if (!error) {
+    if (!error) {
+      // Invia email passando i dati direttamente (evita problema RLS su SELECT)
+      supabase.functions.invoke('send-contact-email', {
+        body: {
+          lp_id: lp.id,
+          lp_titolo: lp.titolo,
+          lp_slug: lp.slug,
+          nome: std.nome || '',
+          cognome: std.cognome || '',
+          email: std.email || '',
+          telefono: std.telefono || '',
+          dati_extra: extra,
+          consenso_privacy: privacy,
+          consenso_newsletter: newsletter,
+        }
+      }).catch(e => console.warn('Email send failed:', e))
       setSubmitted(true)
     } else {
       setErr("Errore nell'invio. Riprova.")
