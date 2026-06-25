@@ -226,8 +226,9 @@ export default function FormIscrizione({ event, onSuccess }) {
       const campiAttivi = f && f.length > 0 ? f : defaultCampi
       setCampi(campiAttivi)
       const empty = emptyPersona(campiAttivi)
-      setPersone(Array.from({ length: postiPerUtente }, () => ({ ...empty })))
-      setErrors(Array.from({ length: postiPerUtente }, () => ({})))
+      // Inizializza sempre con 1 persona — l'utente può aggiungerne fino a postiPerUtente
+      setPersone([{ ...empty }])
+      setErrors([{}])
     })
   }, [event.id])
 
@@ -244,7 +245,19 @@ export default function FormIscrizione({ event, onSuccess }) {
     })
   }
 
-  async function submit(e) {
+  function addPersona() {
+    if (persone.length >= postiPerUtente) return
+    const empty = emptyPersona(campi)
+    setPersone(prev => [...prev, { ...empty }])
+    setErrors(prev => [...prev, {}])
+  }
+
+  function removePersona(idx) {
+    if (persone.length <= 1) return
+    setPersone(prev => prev.filter((_, i) => i !== idx))
+    setErrors(prev => prev.filter((_, i) => i !== idx))
+  }
+
     e.preventDefault()
     setErrGen('')
 
@@ -317,28 +330,58 @@ export default function FormIscrizione({ event, onSuccess }) {
       {errGen && <div style={s.errBox}>{errGen}</div>}
 
       {postiPerUtente > 1 && (
-        <div style={{ background: '#F0FDF4', border: '1px solid #86EFAC', borderRadius: '8px', padding: '12px 16px', marginBottom: '16px', display: 'flex', alignItems: 'center', gap: '10px' }}>
-          <Users size={18} style={{ color: '#16A34A', flexShrink: 0 }} />
-          <p style={{ fontSize: '13px', color: '#166534', margin: 0, fontWeight: '600' }}>
-            Puoi prenotare fino a <strong>{postiPerUtente} posti</strong>. Compila i dati di ogni partecipante.
+        <div style={{ background:'#F9FAFB', border:'1px solid #E5E7EB', borderRadius:'10px', padding:'14px 16px', marginBottom:'20px' }}>
+          <div style={{ display:'flex', alignItems:'center', justifyContent:'space-between', gap:'12px' }}>
+            <div style={{ display:'flex', alignItems:'center', gap:'8px' }}>
+              <Users size={18} style={{ color:'#003DA5', flexShrink:0 }} />
+              <p style={{ fontSize:'14px', color:'#374151', margin:0, fontWeight:'600' }}>
+                Quante persone?
+              </p>
+            </div>
+            <div style={{ display:'flex', alignItems:'center', gap:'10px' }}>
+              <button type="button" onClick={() => removePersona(persone.length - 1)}
+                disabled={persone.length <= 1}
+                style={{ width:'32px', height:'32px', borderRadius:'50%', border:'1.5px solid #E5E7EB', background: persone.length <= 1 ? '#F9FAFB' : '#fff', cursor: persone.length <= 1 ? 'not-allowed' : 'pointer', fontSize:'18px', fontWeight:'700', color: persone.length <= 1 ? '#D1D5DB' : '#003DA5', display:'flex', alignItems:'center', justifyContent:'center', lineHeight:1 }}>
+                −
+              </button>
+              <span style={{ fontSize:'20px', fontWeight:'800', color:'#0A0A0A', minWidth:'20px', textAlign:'center' }}>
+                {persone.length}
+              </span>
+              <button type="button" onClick={addPersona}
+                disabled={persone.length >= postiPerUtente}
+                style={{ width:'32px', height:'32px', borderRadius:'50%', border:'1.5px solid #E5E7EB', background: persone.length >= postiPerUtente ? '#F9FAFB' : '#003DA5', cursor: persone.length >= postiPerUtente ? 'not-allowed' : 'pointer', fontSize:'18px', fontWeight:'700', color: persone.length >= postiPerUtente ? '#D1D5DB' : '#fff', display:'flex', alignItems:'center', justifyContent:'center', lineHeight:1 }}>
+                +
+              </button>
+            </div>
+          </div>
+          <p style={{ fontSize:'12px', color:'#9CA3AF', margin:'8px 0 0' }}>
+            Puoi registrare da 1 a <strong>{postiPerUtente} persone</strong>
           </p>
         </div>
       )}
 
       {persone.map((dati, idx) => (
-        <PersonaForm
-          key={idx} idx={idx} dati={dati}
-          onChange={handleChange} errors={errors[idx] || {}}
-          campi={campi} mestieri={mestieri}
-          isAccompagnatore={idx > 0}
-        />
+        <div key={idx} style={{ position:'relative' }}>
+          {idx > 0 && (
+            <button type="button" onClick={() => removePersona(idx)}
+              style={{ position:'absolute', top:'16px', right:'16px', zIndex:1, background:'#FEF2F2', border:'1px solid #FECACA', borderRadius:'6px', padding:'4px 10px', fontSize:'12px', color:'#DC2626', fontWeight:'600', cursor:'pointer', fontFamily:"'Inter',sans-serif" }}>
+              Rimuovi
+            </button>
+          )}
+          <PersonaForm
+            key={idx} idx={idx} dati={dati}
+            onChange={handleChange} errors={errors[idx] || {}}
+            campi={campi} mestieri={mestieri}
+            isAccompagnatore={idx > 0}
+          />
+        </div>
       ))}
 
       <button type="submit" disabled={loading} style={{ ...s.submitBtn, opacity: loading ? 0.7 : 1 }}>
         {loading
           ? <><Loader2 size={18} style={{ animation: 'spin 1s linear infinite' }} /> Invio in corso…</>
-          : postiPerUtente > 1
-          ? `Conferma iscrizione (${postiPerUtente} posti) →`
+          : persone.length > 1
+          ? `Conferma iscrizione (${persone.length} person${persone.length === 1 ? 'a' : 'e'}) →`
           : 'Conferma iscrizione →'}
       </button>
 
