@@ -479,7 +479,7 @@ export default function BlockEditor({ blocks = [], onChange }) {
           {showAddMenu?'Chiudi':'Aggiungi blocco'}
         </button>
         {showAddMenu&&(
-          <div style={{marginTop:'6px',border:'1px solid #E5E7EB',borderRadius:'10px',overflow:'hidden',boxShadow:'0 4px 16px rgba(0,0,0,.08)'}}>
+          <div style={{marginTop:'6px',border:'1px solid #E5E7EB',borderRadius:'10px',overflow:'hidden',boxShadow:'0 4px 16px rgba(0,0,0,.08)',maxHeight:'480px',overflowY:'auto'}}>
             {groups.map(group=>(
               <div key={group}>
                 <div style={{padding:'8px 18px',background:'#F9FAFB',borderBottom:'1px solid #F3F4F6'}}>
