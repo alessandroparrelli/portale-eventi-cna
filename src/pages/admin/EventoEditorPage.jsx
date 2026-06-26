@@ -340,7 +340,7 @@ export default function EventoEditorPage() {
     luogo:'', sottotitolo:'', footer_testo:'', descrizione_html:'', immagine_hero:null, logo_url:null,
     colore_primario:'#003DA5', colore_sfondo:'#F4F5F7', tema:{},
     layout_hero:{ altezza:'380', overlay_opacita:'55', allineamento:'sinistra', titolo_colore:'#FFFFFF', titolo_dimensione:'clamp(26px,5vw,54px)', titolo_grassetto:true, titolo_maiuscolo:false },
-    sezioni:[], email_organizzatore:'',
+    sezioni:[], email_organizzatore:'', email_mittente:'', email_cc:'',
   })
   const eventRef = useRef(null)   // sempre aggiornato — evita race condition nel save
   const [saving, setSaving] = useState(false)
@@ -377,6 +377,8 @@ export default function EventoEditorPage() {
           sezioni,
           descrizione_html: sezioni.length > 0 ? null : data.descrizione_html,
           email_organizzatore: data.email_organizzatore || '',
+          email_mittente: data.email_mittente || '',
+          email_cc: data.email_cc || '',
         }
         eventRef.current = next
         return next
@@ -425,6 +427,8 @@ export default function EventoEditorPage() {
       footer_testo:ev.footer_testo||null,
       tema:ev.tema||{},
       email_organizzatore:ev.email_organizzatore||null,
+      email_mittente:ev.email_mittente||null,
+      email_cc:ev.email_cc||null,
     }
     if (isNew) {
       const { data } = await supabase.from('events').insert(payload).select().single()
@@ -579,13 +583,32 @@ export default function EventoEditorPage() {
                   />
                 </Field>
               </div>
-              <div style={{ gridColumn:'1/-1' }}>
-                <Field label="Email organizzatore" hint="Riceverà la notifica per ogni nuova iscrizione">
+              {/* ── Impostazioni email ── */}
+              <div style={{ gridColumn:'1/-1', background:'#F9FAFB', border:'1px solid #E5E7EB', borderRadius:'10px', padding:'16px', display:'flex', flexDirection:'column', gap:'12px' }}>
+                <p style={{ margin:0, fontSize:'12px', fontWeight:'700', color:'#6B7280', textTransform:'uppercase', letterSpacing:'.06em' }}>Impostazioni email</p>
+                <div style={{ display:'grid', gridTemplateColumns:'1fr 1fr', gap:'12px' }}>
+                  <Field label="Mittente (From)" hint="Es. eventi@cnaroma.it — default: marketing@cnaroma.it">
+                    <Input
+                      type="email"
+                      value={event.email_mittente||''}
+                      onChange={e=>updEvent(p=>({...p,email_mittente:e.target.value}))}
+                      placeholder="marketing@cnaroma.it"
+                    />
+                  </Field>
+                  <Field label="Destinatario principale" hint="Riceve ogni nuova iscrizione">
+                    <Input
+                      type="email"
+                      value={event.email_organizzatore||''}
+                      onChange={e=>updEvent(p=>({...p,email_organizzatore:e.target.value}))}
+                      placeholder="es. responsabile@cnaroma.it"
+                    />
+                  </Field>
+                </div>
+                <Field label="Altri destinatari (CC)" hint="Separati da virgola — ricevono copia di ogni iscrizione">
                   <Input
-                    type="email"
-                    value={event.email_organizzatore||''}
-                    onChange={e=>updEvent(p=>({...p,email_organizzatore:e.target.value}))}
-                    placeholder="es. mario.rossi@cnaroma.it"
+                    value={event.email_cc||''}
+                    onChange={e=>updEvent(p=>({...p,email_cc:e.target.value}))}
+                    placeholder="es. direzione@cnaroma.it, segreteria@cnaroma.it"
                   />
                 </Field>
               </div>

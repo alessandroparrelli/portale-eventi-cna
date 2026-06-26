@@ -139,6 +139,8 @@ export default function LandingEditorPage() {
       form_messaggio_conferma: d.form_messaggio_conferma,
       footer_testo: d.footer_testo, meta_descrizione: d.meta_descrizione,
       email_responsabile: d.email_responsabile || null,
+      email_mittente: d.email_mittente || null,
+      email_cc: d.email_cc || null,
     }).eq('id', id)
     setSaving(false)
     if (!error) { setSaved(true); setTimeout(() => setSaved(false), 2500) }
@@ -217,9 +219,22 @@ export default function LandingEditorPage() {
               <Field label="Testo footer">
                 <textarea value={data.footer_testo||''} onChange={e => upd('footer_testo', e.target.value)} rows={2} style={{ ...iSt, resize:'vertical' }} />
               </Field>
-              <Field label="Email organizzatore" hint="Riceverà la notifica per ogni nuovo contatto dalla landing page">
-                <input type="email" value={data.email_responsabile||''} onChange={e => upd('email_responsabile', e.target.value)} placeholder="es. mario.rossi@cnaroma.it" style={iSt} />
-              </Field>
+
+              {/* ── Impostazioni email ── */}
+              <div style={{ background:'#F9FAFB', border:'1px solid #E5E7EB', borderRadius:'10px', padding:'16px', display:'flex', flexDirection:'column', gap:'12px' }}>
+                <p style={{ margin:0, fontSize:'12px', fontWeight:'700', color:'#6B7280', textTransform:'uppercase', letterSpacing:'.06em' }}>Impostazioni email</p>
+                <div style={{ display:'grid', gridTemplateColumns:'1fr 1fr', gap:'12px' }}>
+                  <Field label="Mittente (From)" hint="Es. info@cnaroma.it — default: marketing@cnaroma.it">
+                    <input type="email" value={data.email_mittente||''} onChange={e => upd('email_mittente', e.target.value)} placeholder="marketing@cnaroma.it" style={iSt} />
+                  </Field>
+                  <Field label="Destinatario principale" hint="Riceve ogni nuovo contatto">
+                    <input type="email" value={data.email_responsabile||''} onChange={e => upd('email_responsabile', e.target.value)} placeholder="es. responsabile@cnaroma.it" style={iSt} />
+                  </Field>
+                </div>
+                <Field label="Altri destinatari (CC)" hint="Separati da virgola — ricevono copia di ogni contatto">
+                  <input value={data.email_cc||''} onChange={e => upd('email_cc', e.target.value)} placeholder="es. direzione@cnaroma.it, segreteria@cnaroma.it" style={iSt} />
+                </Field>
+              </div>
             </div>
           )}
 
