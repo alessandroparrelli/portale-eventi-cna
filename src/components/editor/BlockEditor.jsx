@@ -4,6 +4,7 @@
  *        titolo | banner | timeline | accordion | video | testimonial | countdown | badge_list
  */
 import { useState } from 'react'
+import { createPortal } from 'react-dom'
 import RichEditor from './RichEditor'
 import ImageUploader from './ImageUploader'
 import { BLOCK_ICONS, IconPicker, IconDisplay } from './BlockIcons'
@@ -478,8 +479,8 @@ export default function BlockEditor({ blocks = [], onChange }) {
           <span style={{fontSize:'18px'}}>+</span>
           Aggiungi blocco
         </button>
-        {showAddMenu&&(
-          <div style={{ position:'fixed', inset:0, zIndex:1000, display:'flex', alignItems:'center', justifyContent:'center', background:'rgba(0,0,0,.45)', backdropFilter:'blur(2px)' }}
+        {showAddMenu && createPortal(
+          <div style={{ position:'fixed', inset:0, zIndex:9999, display:'flex', alignItems:'center', justifyContent:'center', background:'rgba(0,0,0,.45)', backdropFilter:'blur(2px)' }}
             onClick={e=>{ if(e.target===e.currentTarget) setShowAddMenu(false) }}>
             <div style={{ background:'#fff', borderRadius:'14px', width:'360px', maxWidth:'90vw', maxHeight:'80vh', overflowY:'auto', boxShadow:'0 20px 60px rgba(0,0,0,.2)' }}>
               <div style={{ position:'sticky', top:0, background:'#fff', borderBottom:'1px solid #E5E7EB', padding:'14px 18px', display:'flex', alignItems:'center', justifyContent:'space-between', borderRadius:'14px 14px 0 0', zIndex:1 }}>
@@ -508,7 +509,8 @@ export default function BlockEditor({ blocks = [], onChange }) {
               </div>
               ))}
             </div>
-          </div>
+          </div>,
+          document.body
         )}
       </div>
     </div>
