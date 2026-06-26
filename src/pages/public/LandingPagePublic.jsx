@@ -54,6 +54,7 @@ function FormContatti({ lp, tema }) {
           lp_slug: lp.slug,
           email_responsabile: lp.email_responsabile || null,
           email_mittente: lp.email_mittente || null,
+          nome_mittente: lp.nome_mittente || null,
           email_cc: lp.email_cc || null,
           nome: std.nome || '',
           cognome: std.cognome || '',

@@ -141,6 +141,7 @@ export default function LandingEditorPage() {
       email_responsabile: d.email_responsabile || null,
       email_mittente: d.email_mittente || null,
       email_cc: d.email_cc || null,
+      nome_mittente: d.nome_mittente || null,
     }).eq('id', id)
     setSaving(false)
     if (!error) { setSaved(true); setTimeout(() => setSaved(false), 2500) }
@@ -224,9 +225,14 @@ export default function LandingEditorPage() {
               <div style={{ background:'#F9FAFB', border:'1px solid #E5E7EB', borderRadius:'10px', padding:'16px', display:'flex', flexDirection:'column', gap:'12px' }}>
                 <p style={{ margin:0, fontSize:'12px', fontWeight:'700', color:'#6B7280', textTransform:'uppercase', letterSpacing:'.06em' }}>Impostazioni email</p>
                 <div style={{ display:'grid', gridTemplateColumns:'1fr 1fr', gap:'12px' }}>
-                  <Field label="Mittente (From)" hint="Es. info@cnaroma.it — default: marketing@cnaroma.it">
+                  <Field label="Indirizzo mittente" hint="Default: marketing@cnaroma.it">
                     <input type="email" value={data.email_mittente||''} onChange={e => upd('email_mittente', e.target.value)} placeholder="marketing@cnaroma.it" style={iSt} />
                   </Field>
+                  <Field label="Nome mittente" hint="Es. Agroalimentare CNA di Roma">
+                    <input value={data.nome_mittente||''} onChange={e => upd('nome_mittente', e.target.value)} placeholder="CNA Roma" style={iSt} />
+                  </Field>
+                </div>
+                <div style={{ display:'grid', gridTemplateColumns:'1fr 1fr', gap:'12px' }}>
                   <Field label="Destinatario principale" hint="Riceve ogni nuovo contatto">
                     <input type="email" value={data.email_responsabile||''} onChange={e => upd('email_responsabile', e.target.value)} placeholder="es. responsabile@cnaroma.it" style={iSt} />
                   </Field>

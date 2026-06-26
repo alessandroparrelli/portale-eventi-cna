@@ -340,7 +340,7 @@ export default function EventoEditorPage() {
     luogo:'', sottotitolo:'', footer_testo:'', descrizione_html:'', immagine_hero:null, logo_url:null,
     colore_primario:'#003DA5', colore_sfondo:'#F4F5F7', tema:{},
     layout_hero:{ altezza:'380', overlay_opacita:'55', allineamento:'sinistra', titolo_colore:'#FFFFFF', titolo_dimensione:'clamp(26px,5vw,54px)', titolo_grassetto:true, titolo_maiuscolo:false },
-    sezioni:[], email_organizzatore:'', email_mittente:'', email_cc:'',
+    sezioni:[], email_organizzatore:'', email_mittente:'', email_cc:'', nome_mittente:'',
   })
   const eventRef = useRef(null)   // sempre aggiornato — evita race condition nel save
   const [saving, setSaving] = useState(false)
@@ -379,6 +379,7 @@ export default function EventoEditorPage() {
           email_organizzatore: data.email_organizzatore || '',
           email_mittente: data.email_mittente || '',
           email_cc: data.email_cc || '',
+          nome_mittente: data.nome_mittente || '',
         }
         eventRef.current = next
         return next
@@ -429,6 +430,7 @@ export default function EventoEditorPage() {
       email_organizzatore:ev.email_organizzatore||null,
       email_mittente:ev.email_mittente||null,
       email_cc:ev.email_cc||null,
+      nome_mittente:ev.nome_mittente||null,
     }
     if (isNew) {
       const { data } = await supabase.from('events').insert(payload).select().single()
@@ -587,7 +589,7 @@ export default function EventoEditorPage() {
               <div style={{ gridColumn:'1/-1', background:'#F9FAFB', border:'1px solid #E5E7EB', borderRadius:'10px', padding:'16px', display:'flex', flexDirection:'column', gap:'12px' }}>
                 <p style={{ margin:0, fontSize:'12px', fontWeight:'700', color:'#6B7280', textTransform:'uppercase', letterSpacing:'.06em' }}>Impostazioni email</p>
                 <div style={{ display:'grid', gridTemplateColumns:'1fr 1fr', gap:'12px' }}>
-                  <Field label="Mittente (From)" hint="Es. eventi@cnaroma.it — default: marketing@cnaroma.it">
+                  <Field label="Indirizzo mittente" hint="Default: marketing@cnaroma.it">
                     <Input
                       type="email"
                       value={event.email_mittente||''}
@@ -595,6 +597,15 @@ export default function EventoEditorPage() {
                       placeholder="marketing@cnaroma.it"
                     />
                   </Field>
+                  <Field label="Nome mittente" hint="Es. Agroalimentare CNA di Roma">
+                    <Input
+                      value={event.nome_mittente||''}
+                      onChange={e=>updEvent(p=>({...p,nome_mittente:e.target.value}))}
+                      placeholder="CNA Roma"
+                    />
+                  </Field>
+                </div>
+                <div style={{ display:'grid', gridTemplateColumns:'1fr 1fr', gap:'12px' }}>
                   <Field label="Destinatario principale" hint="Riceve ogni nuova iscrizione">
                     <Input
                       type="email"
