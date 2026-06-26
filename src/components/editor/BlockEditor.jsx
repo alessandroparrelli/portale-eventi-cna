@@ -3,11 +3,12 @@
  * Tipi: testo | stats | griglia | cta | separatore | immagine
  *        titolo | banner | timeline | accordion | video | testimonial | countdown | badge_list
  */
-import { useState } from 'react'
+import { useState, useRef } from 'react'
 import { createPortal } from 'react-dom'
 import RichEditor from './RichEditor'
 import ImageUploader from './ImageUploader'
 import { BLOCK_ICONS, IconPicker, IconDisplay } from './BlockIcons'
+import { supabase } from '../../lib/supabase'
 
 const uid = () => Math.random().toString(36).slice(2, 9)
 
@@ -313,6 +314,42 @@ function BadgeListEditor({ block, onChange }) {
 
 // ── Wrapper blocco ──────────────────────────────────────────────────
 function CaroselloEditor({ block, onChange }) {
+  const [uploading, setUploading] = useState({}) // { [index]: true }
+  const fileRefs = useRef({})
+
+  async function handleUpload(file, index) {
+    if (!file || !file.type.startsWith('image/')) return
+    if (file.size > 5 * 1024 * 1024) { alert('File troppo grande (max 5MB)'); return }
+    setUploading(u => ({ ...u, [index]: true }))
+    try {
+      const base64 = await new Promise((res, rej) => {
+        const r = new FileReader()
+        r.onload = () => res(r.result.split(',')[1])
+        r.onerror = rej
+        r.readAsDataURL(file)
+      })
+      const { data: { session } } = await supabase.auth.getSession()
+      const jwt = session?.access_token
+      if (!jwt) throw new Error('Non autenticato')
+      const res = await fetch(
+        `${import.meta.env.VITE_SUPABASE_URL}/functions/v1/upload-carosello-image`,
+        {
+          method: 'POST',
+          headers: { 'Authorization': `Bearer ${jwt}`, 'Content-Type': 'application/json' },
+          body: JSON.stringify({ filename: file.name, base64 }),
+        }
+      )
+      const result = await res.json()
+      if (!res.ok || result.error) throw new Error(result.error || 'Errore upload')
+      const imgs = [...(block.immagini || [])]
+      imgs[index] = { ...imgs[index], src: result.url }
+      onChange({ ...block, immagini: imgs })
+    } catch (e) {
+      alert(e.message || 'Errore durante il caricamento')
+    }
+    setUploading(u => ({ ...u, [index]: false }))
+  }
+
   return (
     <div style={{ padding:'16px', display:'flex', flexDirection:'column', gap:'14px' }}>
       {/* Rapporto aspetto */}
@@ -332,11 +369,36 @@ function CaroselloEditor({ block, onChange }) {
         <label style={{ fontSize:'12px', fontWeight:'700', color:'#6B7280', textTransform:'uppercase', letterSpacing:'.06em', display:'block', marginBottom:'6px' }}>Immagini ({(block.immagini||[]).length})</label>
         <div style={{ display:'flex', flexDirection:'column', gap:'8px' }}>
           {(block.immagini||[]).map((img,i)=>(
-            <div key={i} style={{ display:'flex', gap:'8px', alignItems:'center', background:'#F9FAFB', borderRadius:'8px', padding:'8px 10px' }}>
-              {img.src && <img src={img.src} alt="" style={{ width:'48px', height:'48px', objectFit:'cover', borderRadius:'6px', flexShrink:0 }} />}
-              <div style={{ flex:1, minWidth:0 }}>
+            <div key={i} style={{ display:'flex', gap:'8px', alignItems:'flex-start', background:'#F9FAFB', borderRadius:'8px', padding:'8px 10px' }}>
+              {/* Anteprima o dropzone */}
+              <div
+                onClick={() => fileRefs.current[i]?.click()}
+                style={{
+                  width:'64px', height:'64px', flexShrink:0, borderRadius:'8px',
+                  border: img.src ? 'none' : '2px dashed #D1D5DB',
+                  background: img.src ? 'transparent' : '#F3F4F6',
+                  cursor:'pointer', overflow:'hidden', position:'relative',
+                  display:'flex', alignItems:'center', justifyContent:'center',
+                }}
+              >
+                {uploading[i] ? (
+                  <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="#6B7280" strokeWidth="2.5"
+                    style={{ animation:'spin .7s linear infinite' }}>
+                    <path d="M12 2v4M12 18v4M4.93 4.93l2.83 2.83M16.24 16.24l2.83 2.83M2 12h4M18 12h4M4.93 19.07l2.83-2.83M16.24 7.76l2.83-2.83"/>
+                  </svg>
+                ) : img.src ? (
+                  <img src={img.src} alt="" style={{ width:'100%', height:'100%', objectFit:'cover' }} />
+                ) : (
+                  <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="#9CA3AF" strokeWidth="1.5">
+                    <path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"/><polyline points="17 8 12 3 7 8"/><line x1="12" y1="3" x2="12" y2="15"/>
+                  </svg>
+                )}
+              </div>
+              <input ref={el => fileRefs.current[i] = el} type="file" accept="image/*" style={{ display:'none' }}
+                onChange={e => handleUpload(e.target.files[0], i)} />
+              <div style={{ flex:1, minWidth:0, display:'flex', flexDirection:'column', gap:'4px' }}>
                 <input value={img.src||''} onChange={e=>{const imgs=[...block.immagini];imgs[i]={...imgs[i],src:e.target.value};onChange({...block,immagini:imgs})}}
-                  placeholder="URL immagine" style={{...inp, fontSize:'12px', marginBottom:'4px'}} />
+                  placeholder="URL immagine (o carica con il tasto ←)" style={{...inp, fontSize:'12px'}} />
                 <input value={img.didascalia||''} onChange={e=>{const imgs=[...block.immagini];imgs[i]={...imgs[i],didascalia:e.target.value};onChange({...block,immagini:imgs})}}
                   placeholder="Didascalia opzionale" style={{...inp, fontSize:'12px'}} />
               </div>
@@ -352,6 +414,7 @@ function CaroselloEditor({ block, onChange }) {
         <input value={block.didascalia||''} onChange={e=>onChange({...block,didascalia:e.target.value})}
           placeholder="Es. Foto dall'evento" style={inp} />
       </div>
+      <style>{`@keyframes spin { from{transform:rotate(0deg)} to{transform:rotate(360deg)} }`}</style>
     </div>
   )
 }
