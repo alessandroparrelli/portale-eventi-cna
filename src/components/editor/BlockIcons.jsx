@@ -157,6 +157,7 @@ export function IconPicker({ value, color = '#003DA5', onChangeIcon, onChangeCol
   const [open, setOpen] = useState(false)
   const [pos, setPos] = useState({ top: 0, left: 0 })
   const btnRef = useRef(null)
+  const panelRef = useRef(null)
   const current = ICON_LIBRARY.find(i => i.id === value)
 
   useEffect(() => {
@@ -166,7 +167,10 @@ export function IconPicker({ value, color = '#003DA5', onChangeIcon, onChangeCol
       setPos({ top: rect.bottom + 6 + window.scrollY, left: rect.left + window.scrollX })
     }
     const close = (e) => {
-      if (!btnRef.current?.contains(e.target)) setOpen(false)
+      if (
+        !btnRef.current?.contains(e.target) &&
+        !panelRef.current?.contains(e.target)
+      ) setOpen(false)
     }
     document.addEventListener('mousedown', close)
     return () => document.removeEventListener('mousedown', close)
@@ -197,7 +201,7 @@ export function IconPicker({ value, color = '#003DA5', onChangeIcon, onChangeCol
 
       {/* Pannello picker — montato su document.body via portal */}
       {open && createPortal(
-        <div style={{
+        <div ref={panelRef} style={{
           position:'absolute', top: pos.top, left: pos.left, zIndex:9999,
           background:'#fff', border:'1px solid #E5E7EB', borderRadius:'12px',
           boxShadow:'0 8px 32px rgba(0,0,0,0.12)', padding:'14px',
