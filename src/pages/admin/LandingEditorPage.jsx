@@ -138,6 +138,7 @@ export default function LandingEditorPage() {
       form_bottone_testo: d.form_bottone_testo,
       form_messaggio_conferma: d.form_messaggio_conferma,
       footer_testo: d.footer_testo, meta_descrizione: d.meta_descrizione,
+      email_responsabile: d.email_responsabile || null,
     }).eq('id', id)
     setSaving(false)
     if (!error) { setSaved(true); setTimeout(() => setSaved(false), 2500) }
@@ -215,6 +216,9 @@ export default function LandingEditorPage() {
               </Field>
               <Field label="Testo footer">
                 <textarea value={data.footer_testo||''} onChange={e => upd('footer_testo', e.target.value)} rows={2} style={{ ...iSt, resize:'vertical' }} />
+              </Field>
+              <Field label="Email organizzatore" hint="Riceverà la notifica per ogni nuovo contatto dalla landing page">
+                <input type="email" value={data.email_responsabile||''} onChange={e => upd('email_responsabile', e.target.value)} placeholder="es. mario.rossi@cnaroma.it" style={iSt} />
               </Field>
             </div>
           )}

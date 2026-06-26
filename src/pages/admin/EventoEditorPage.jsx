@@ -340,7 +340,7 @@ export default function EventoEditorPage() {
     luogo:'', sottotitolo:'', footer_testo:'', descrizione_html:'', immagine_hero:null, logo_url:null,
     colore_primario:'#003DA5', colore_sfondo:'#F4F5F7', tema:{},
     layout_hero:{ altezza:'380', overlay_opacita:'55', allineamento:'sinistra', titolo_colore:'#FFFFFF', titolo_dimensione:'clamp(26px,5vw,54px)', titolo_grassetto:true, titolo_maiuscolo:false },
-    sezioni:[],
+    sezioni:[], email_organizzatore:'',
   })
   const eventRef = useRef(null)   // sempre aggiornato — evita race condition nel save
   const [saving, setSaving] = useState(false)
@@ -376,6 +376,7 @@ export default function EventoEditorPage() {
           tema: data.tema || {},
           sezioni,
           descrizione_html: sezioni.length > 0 ? null : data.descrizione_html,
+          email_organizzatore: data.email_organizzatore || '',
         }
         eventRef.current = next
         return next
@@ -423,6 +424,7 @@ export default function EventoEditorPage() {
       sottotitolo:ev.sottotitolo||null,
       footer_testo:ev.footer_testo||null,
       tema:ev.tema||{},
+      email_organizzatore:ev.email_organizzatore||null,
     }
     if (isNew) {
       const { data } = await supabase.from('events').insert(payload).select().single()
@@ -574,6 +576,16 @@ export default function EventoEditorPage() {
                   <AddressSearch
                     value={event.luogo||''}
                     onChange={(addr) => updEvent(p => ({ ...p, luogo: addr }))}
+                  />
+                </Field>
+              </div>
+              <div style={{ gridColumn:'1/-1' }}>
+                <Field label="Email organizzatore" hint="Riceverà la notifica per ogni nuova iscrizione">
+                  <Input
+                    type="email"
+                    value={event.email_organizzatore||''}
+                    onChange={e=>updEvent(p=>({...p,email_organizzatore:e.target.value}))}
+                    placeholder="es. mario.rossi@cnaroma.it"
                   />
                 </Field>
               </div>
