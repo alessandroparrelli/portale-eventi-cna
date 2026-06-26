@@ -150,16 +150,33 @@ export const ICON_COLORS = [
 ]
 
 // ── Componente IconPicker ─────────────────────────────────────────
-import { useState } from 'react'
+import { useState, useRef, useEffect } from 'react'
+import { createPortal } from 'react-dom'
 
 export function IconPicker({ value, color = '#003DA5', onChangeIcon, onChangeColor }) {
   const [open, setOpen] = useState(false)
+  const [pos, setPos] = useState({ top: 0, left: 0 })
+  const btnRef = useRef(null)
   const current = ICON_LIBRARY.find(i => i.id === value)
+
+  useEffect(() => {
+    if (!open) return
+    const rect = btnRef.current?.getBoundingClientRect()
+    if (rect) {
+      setPos({ top: rect.bottom + 6 + window.scrollY, left: rect.left + window.scrollX })
+    }
+    const close = (e) => {
+      if (!btnRef.current?.contains(e.target)) setOpen(false)
+    }
+    document.addEventListener('mousedown', close)
+    return () => document.removeEventListener('mousedown', close)
+  }, [open])
 
   return (
     <div style={{ position:'relative' }}>
       {/* Bottone trigger */}
       <button
+        ref={btnRef}
         type="button"
         onClick={() => setOpen(o => !o)}
         style={{
@@ -178,10 +195,10 @@ export function IconPicker({ value, color = '#003DA5', onChangeIcon, onChangeCol
         <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="#9CA3AF" strokeWidth="2"><path d="M6 9l6 6 6-6"/></svg>
       </button>
 
-      {/* Pannello picker */}
-      {open && (
+      {/* Pannello picker — montato su document.body via portal */}
+      {open && createPortal(
         <div style={{
-          position:'absolute', top:'calc(100% + 6px)', left:0, zIndex:100,
+          position:'absolute', top: pos.top, left: pos.left, zIndex:9999,
           background:'#fff', border:'1px solid #E5E7EB', borderRadius:'12px',
           boxShadow:'0 8px 32px rgba(0,0,0,0.12)', padding:'14px',
           width:'280px', maxHeight:'360px', overflowY:'auto',
@@ -231,7 +248,8 @@ export function IconPicker({ value, color = '#003DA5', onChangeIcon, onChangeCol
             style={{ marginTop:'8px', width:'100%', padding:'7px', border:'1px dashed #E5E7EB', borderRadius:'6px', background:'#fff', cursor:'pointer', fontSize:'12px', color:'#9CA3AF', fontFamily:'Inter,sans-serif' }}>
             Nessuna icona
           </button>
-        </div>
+        </div>,
+        document.body
       )}
     </div>
   )
