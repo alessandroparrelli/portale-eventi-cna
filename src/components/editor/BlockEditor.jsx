@@ -475,12 +475,18 @@ export default function BlockEditor({ blocks = [], onChange }) {
           cursor:'pointer',fontSize:'14px',fontWeight:'700',
           color:showAddMenu?'#003DA5':'#6B7280',fontFamily:"'Inter',sans-serif",transition:'all .15s',
         }}>
-          <span style={{fontSize:'18px'}}>{showAddMenu?'✕':'+'}</span>
-          {showAddMenu?'Chiudi':'Aggiungi blocco'}
+          <span style={{fontSize:'18px'}}>+</span>
+          Aggiungi blocco
         </button>
         {showAddMenu&&(
-          <div style={{marginTop:'6px',border:'1px solid #E5E7EB',borderRadius:'10px',overflow:'hidden',boxShadow:'0 4px 16px rgba(0,0,0,.08)',maxHeight:'480px',overflowY:'auto'}}>
-            {groups.map(group=>(
+          <div style={{ position:'fixed', inset:0, zIndex:1000, display:'flex', alignItems:'center', justifyContent:'center', background:'rgba(0,0,0,.45)', backdropFilter:'blur(2px)' }}
+            onClick={e=>{ if(e.target===e.currentTarget) setShowAddMenu(false) }}>
+            <div style={{ background:'#fff', borderRadius:'14px', width:'360px', maxWidth:'90vw', maxHeight:'80vh', overflowY:'auto', boxShadow:'0 20px 60px rgba(0,0,0,.2)' }}>
+              <div style={{ position:'sticky', top:0, background:'#fff', borderBottom:'1px solid #E5E7EB', padding:'14px 18px', display:'flex', alignItems:'center', justifyContent:'space-between', borderRadius:'14px 14px 0 0', zIndex:1 }}>
+                <span style={{ fontSize:'14px', fontWeight:'800', color:'#0A0A0A' }}>Aggiungi blocco</span>
+                <button onClick={()=>setShowAddMenu(false)} style={{ background:'none', border:'none', cursor:'pointer', fontSize:'20px', color:'#6B7280', lineHeight:1, padding:'2px 6px' }}>✕</button>
+              </div>
+              {groups.map(group=>(
               <div key={group}>
                 <div style={{padding:'8px 18px',background:'#F9FAFB',borderBottom:'1px solid #F3F4F6'}}>
                   <span style={{fontSize:'11px',fontWeight:'700',color:'#9CA3AF',textTransform:'uppercase',letterSpacing:'.06em'}}>{group}</span>
@@ -500,7 +506,8 @@ export default function BlockEditor({ blocks = [], onChange }) {
                   </button>
                 ))}
               </div>
-            ))}
+              ))}
+            </div>
           </div>
         )}
       </div>
