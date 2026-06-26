@@ -258,6 +258,7 @@ export default function FormIscrizione({ event, onSuccess }) {
     setErrors(prev => prev.filter((_, i) => i !== idx))
   }
 
+  async function submit(e) {
     e.preventDefault()
     setErrGen('')
 
