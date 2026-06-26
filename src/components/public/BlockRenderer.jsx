@@ -369,32 +369,53 @@ function CaroselloBlock({ block }) {
 
   return (
     <Animate animation="fadein">
-      <div style={{ marginBottom: '24px', maxWidth: '560px', margin: '0 auto 24px' }}>
-        {/* Immagine principale */}
-        <div style={{ position: 'relative', borderRadius: '12px', overflow: 'hidden', background: '#000' }}>
-          <div style={{ position: 'relative', paddingBottom: ratio }}>
-            <img
-              src={imgs[current].src}
-              alt={imgs[current].didascalia || ''}
-              style={{ position: 'absolute', inset: 0, width: '100%', height: '100%', objectFit: 'cover', transition: 'opacity .3s' }}
-            />
+      <div style={{ marginBottom: '24px', maxWidth: '600px', margin: '0 auto 24px', padding: '0 24px' }}>
+        {/* Wrapper con frecce ai lati */}
+        <div style={{ position: 'relative' }}>
+          {/* Freccia sinistra */}
+          {imgs.length > 1 && (
+            <button onClick={prev} style={{
+              position:'absolute', left:'-20px', top:'50%', transform:'translateY(-50%)',
+              width:'40px', height:'40px', borderRadius:'50%',
+              background:'#0A0A0A', border:'none', cursor:'pointer',
+              display:'flex', alignItems:'center', justifyContent:'center',
+              zIndex:3, boxShadow:'0 2px 8px rgba(0,0,0,0.35)',
+              flexShrink:0,
+            }}>
+              <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="#fff" strokeWidth="3" strokeLinecap="round" strokeLinejoin="round"><path d="M15 18l-6-6 6-6"/></svg>
+            </button>
+          )}
+
+          {/* Immagine principale */}
+          <div style={{ position: 'relative', borderRadius: '12px', overflow: 'hidden', background: '#000' }}>
+            <div style={{ position: 'relative', paddingBottom: ratio }}>
+              <img
+                src={imgs[current].src}
+                alt={imgs[current].didascalia || ''}
+                style={{ position: 'absolute', inset: 0, width: '100%', height: '100%', objectFit: 'cover', transition: 'opacity .3s' }}
+              />
+            </div>
+
+            {/* Counter */}
+            {imgs.length > 1 && (
+              <div style={{ position:'absolute', top:'10px', right:'12px', background:'rgba(0,0,0,.55)', color:'#fff', fontSize:'12px', fontWeight:'600', padding:'3px 8px', borderRadius:'10px', backdropFilter:'blur(4px)' }}>
+                {current + 1} / {imgs.length}
+              </div>
+            )}
           </div>
 
-          {/* Frecce */}
-          {imgs.length > 1 && <>
-            <button onClick={prev} style={{ position:'absolute', left:'10px', top:'50%', transform:'translateY(-50%)', width:'36px', height:'36px', borderRadius:'50%', background:'rgba(255,255,255,.85)', border:'none', cursor:'pointer', display:'flex', alignItems:'center', justifyContent:'center', backdropFilter:'blur(4px)', zIndex:2 }}>
-              <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="#0A0A0A" strokeWidth="2.5"><path d="M15 18l-6-6 6-6"/></svg>
-            </button>
-            <button onClick={next} style={{ position:'absolute', right:'10px', top:'50%', transform:'translateY(-50%)', width:'36px', height:'36px', borderRadius:'50%', background:'rgba(255,255,255,.85)', border:'none', cursor:'pointer', display:'flex', alignItems:'center', justifyContent:'center', backdropFilter:'blur(4px)', zIndex:2 }}>
-              <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="#0A0A0A" strokeWidth="2.5"><path d="M9 18l6-6-6-6"/></svg>
-            </button>
-          </>}
-
-          {/* Counter */}
+          {/* Freccia destra */}
           {imgs.length > 1 && (
-            <div style={{ position:'absolute', top:'10px', right:'12px', background:'rgba(0,0,0,.55)', color:'#fff', fontSize:'12px', fontWeight:'600', padding:'3px 8px', borderRadius:'10px', backdropFilter:'blur(4px)' }}>
-              {current + 1} / {imgs.length}
-            </div>
+            <button onClick={next} style={{
+              position:'absolute', right:'-20px', top:'50%', transform:'translateY(-50%)',
+              width:'40px', height:'40px', borderRadius:'50%',
+              background:'#0A0A0A', border:'none', cursor:'pointer',
+              display:'flex', alignItems:'center', justifyContent:'center',
+              zIndex:3, boxShadow:'0 2px 8px rgba(0,0,0,0.35)',
+              flexShrink:0,
+            }}>
+              <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="#fff" strokeWidth="3" strokeLinecap="round" strokeLinejoin="round"><path d="M9 18l6-6-6-6"/></svg>
+            </button>
           )}
         </div>
 
