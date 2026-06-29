@@ -1,7 +1,7 @@
 import { useEffect, useState } from 'react'
 import { supabase } from '../../lib/supabase'
 
-const DEFAULT_LOGO = 'https://raw.githubusercontent.com/alessandroparrelli/fileappoggio/main/NUOVO-LOGO-CNA-ROMA-SOLO-ROMA.png'
+const DEFAULT_LOGO = 'https://customer31551.img.musvc2.net/static/31551/images/1/CNARoma%20NEGATIVO%20COLORE%20SOLO%20ROMA.png'
 const BLU = '#003DA5'
 const NERO = '#0A0A0A'
 const MESI_IT = ['Gennaio','Febbraio','Marzo','Aprile','Maggio','Giugno','Luglio','Agosto','Settembre','Ottobre','Novembre','Dicembre']
@@ -105,38 +105,51 @@ export default function CalendarioPage() {
       `}</style>
 
       {/* NAVBAR */}
-      <header style={{position:'sticky',top:0,zIndex:100,backgroundColor:'rgba(255,255,255,0.97)',
-        backdropFilter:'blur(16px)',borderBottom:'1px solid #E5E7EB'}}>
+      <header style={{position:'sticky',top:0,zIndex:100,
+        background:`linear-gradient(135deg,${color} 0%,#001f6b 100%)`,
+        boxShadow:'0 4px 24px rgba(0,61,165,0.35)'}}>
         {/* Logo centrato + CTA */}
         <div style={{display:'flex',alignItems:'center',justifyContent:'center',
-          padding:'16px 40px',position:'relative',minHeight:'80px'}}>
-          <img src={logo} alt="CNA Roma" style={{height:'64px',objectFit:'contain'}}/>
+          padding:'18px 40px',position:'relative',minHeight:'88px'}}>
+          <img src={logo} alt="CNA Roma" style={{height:'68px',objectFit:'contain',filter:'brightness(0) invert(1)'}}/>
           {cfg?.url_cta && (
             <a href={cfg.url_cta} target="_blank" rel="noopener noreferrer"
               style={{position:'absolute',right:'40px',top:'50%',transform:'translateY(-50%)',
-                fontSize:'13px',fontWeight:'700',color:'#ffffff',backgroundColor:color,
-                textDecoration:'none',padding:'8px 18px',borderRadius:'6px',whiteSpace:'nowrap'}}>
-              {cfg.testo_cta || 'cnaroma.it'} ↗
+                display:'flex',alignItems:'center',gap:'8px',
+                fontSize:'13px',fontWeight:'700',color:color,
+                backgroundColor:'#ffffff',
+                textDecoration:'none',padding:'10px 20px',borderRadius:'8px',
+                whiteSpace:'nowrap',boxShadow:'0 2px 12px rgba(0,0,0,0.18)',
+                transition:'all 0.15s'}}
+              onMouseEnter={e=>{e.currentTarget.style.transform='translateY(calc(-50% - 1px))';e.currentTarget.style.boxShadow='0 4px 20px rgba(0,0,0,0.25)'}}
+              onMouseLeave={e=>{e.currentTarget.style.transform='translateY(-50%)';e.currentTarget.style.boxShadow='0 2px 12px rgba(0,0,0,0.18)'}}>
+              <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5">
+                <circle cx="12" cy="12" r="10"/>
+                <line x1="2" y1="12" x2="22" y2="12"/>
+                <path d="M12 2a15.3 15.3 0 0 1 4 10 15.3 15.3 0 0 1-4 10 15.3 15.3 0 0 1-4-10 15.3 15.3 0 0 1 4-10z"/>
+              </svg>
+              {cfg.testo_cta || 'cnaroma.it'}
             </a>
           )}
         </div>
         {/* Tab menu sezioni */}
-        <div style={{display:'flex',borderTop:'1px solid #F3F4F6'}}>
+        <div style={{display:'flex',borderTop:'1px solid rgba(255,255,255,0.15)'}}>
           {[
-            {k:'eventi',   l: cfg?.testo_sezione_eventi  || 'Eventi',             n: eventi.length,   c: color},
-            {k:'mestieri', l: cfg?.testo_sezione_landing || 'Pagine di mestiere', n: landings.length, c: '#7C3AED'},
+            {k:'eventi',   l: cfg?.testo_sezione_eventi  || 'Eventi',             n: eventi.length,   c:'#ffffff'},
+            {k:'mestieri', l: cfg?.testo_sezione_landing || 'Pagine di mestiere', n: landings.length, c:'#ffffff'},
           ].map(t => (
             <button key={t.k} onClick={() => setSezione(t.k)}
               style={{flex:1,padding:'14px 24px',border:'none',cursor:'pointer',
                 fontFamily:"'Inter',sans-serif",fontSize:'14px',fontWeight:'700',
-                backgroundColor:'transparent',transition:'all 0.15s',
-                color: sezione===t.k ? t.c : '#9CA3AF',
-                borderBottom: sezione===t.k ? `2px solid ${t.c}` : '2px solid transparent',
+                backgroundColor: sezione===t.k ? 'rgba(255,255,255,0.15)' : 'transparent',
+                transition:'all 0.15s',
+                color: sezione===t.k ? '#ffffff' : 'rgba(255,255,255,0.5)',
+                borderBottom: sezione===t.k ? '2px solid #ffffff' : '2px solid transparent',
                 display:'flex',alignItems:'center',justifyContent:'center',gap:'8px'}}>
               {t.l}
-              <span style={{fontSize:'12px',fontWeight:'800',
-                backgroundColor: sezione===t.k ? t.c+'18' : '#F3F4F6',
-                color: sezione===t.k ? t.c : '#C4C4C4',
+              <span style={{fontSize:'11px',fontWeight:'800',
+                backgroundColor: sezione===t.k ? 'rgba(255,255,255,0.25)' : 'rgba(255,255,255,0.1)',
+                color: sezione===t.k ? '#ffffff' : 'rgba(255,255,255,0.4)',
                 borderRadius:'999px',padding:'2px 9px',transition:'all 0.15s'}}>
                 {t.n}
               </span>
@@ -154,7 +167,7 @@ export default function CalendarioPage() {
             filter:'blur(3px) brightness(0.22)',transform:'scale(1.06)'}}/>
         )}
         <div style={{position:'absolute',inset:0,
-          background:`linear-gradient(135deg,${color}dd 0%,rgba(10,10,10,0.96) 100%)`}}/>
+          background:`linear-gradient(180deg,${color}f0 0%,rgba(0,15,60,0.97) 100%)`}}/>
         <div style={{position:'absolute',inset:0,opacity:0.04,
           backgroundImage:'radial-gradient(circle,rgba(255,255,255,0.8) 1px,transparent 1px)',
           backgroundSize:'32px 32px'}}/>
