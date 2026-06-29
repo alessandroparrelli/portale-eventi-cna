@@ -3,7 +3,7 @@ import { usePageTitle } from '../../hooks/usePageTitle'
 import { supabase } from '../../lib/supabase'
 import { Btn, Field, Input } from '../../components/ui'
 import LogoManager from '../../components/editor/LogoManager'
-import ImagePicker from '../../components/editor/ImagePicker'
+import ImageUploader from '../../components/editor/ImageUploader'
 import { Save, ExternalLink, Eye } from 'lucide-react'
 
 const CFG_ID = '00000000-0000-0000-0000-000000000001'
@@ -95,7 +95,7 @@ export default function CalendarioAdminPage() {
               style={{ ...iSt, resize: 'vertical' }}/>
           </Field>
           <Field label="Immagine di sfondo hero" hint="Verrà sfocata e oscurata — usa immagini ad alta risoluzione">
-            <ImagePicker
+            <ImageUploader
               value={cfg.hero_immagine_url || ''}
               onChange={url => upd('hero_immagine_url', url || '')}
             />
