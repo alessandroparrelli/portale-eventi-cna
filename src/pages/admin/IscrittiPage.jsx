@@ -336,9 +336,15 @@ export default function IscrittiPage() {
               ]}/>
               <tbody>
                 {filtered.map(r=>(
-                  <tr key={r.id} style={s.tr}
-                    onMouseEnter={e=>e.currentTarget.style.backgroundColor='#F9FAFB'}
-                    onMouseLeave={e=>e.currentTarget.style.backgroundColor='transparent'}>
+                  {(() => {
+                    const _piva = (r.partita_iva||'').toString().replace(/\s/g,'').replace(/^0+/,'')
+                    const _ass = verificaEseguita ? associatiMap[_piva] : null
+                    const _rowBg = _ass?.associato ? '#F0FDF4' : 'transparent'
+                    const _rowHover = _ass?.associato ? '#DCFCE7' : '#F9FAFB'
+                    return (
+                  <tr key={r.id} style={{...s.tr, backgroundColor: _rowBg}}
+                    onMouseEnter={e=>e.currentTarget.style.backgroundColor=_rowHover}
+                    onMouseLeave={e=>e.currentTarget.style.backgroundColor=_rowBg}>
                     <td style={s.td}>
                       <p style={s.name}>{r.nome} {r.cognome}</p>
                       {r.ragione_sociale && <p style={s.sub}>{r.ragione_sociale}</p>}
@@ -381,6 +387,7 @@ export default function IscrittiPage() {
                       </div>
                     </td>
                   </tr>
+                    )})()}
                 ))}
               </tbody>
             </table>
