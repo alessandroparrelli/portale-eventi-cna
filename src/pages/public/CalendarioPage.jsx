@@ -54,7 +54,7 @@ export default function CalendarioPage() {
       ;[...eList,...lList].forEach(i => (i.tags||[]).forEach(tag => t.add(tag)))
       setAllTags([...t].sort())
       const pross = eList.filter(e=>!isPast(e.data_inizio))
-      if (pross.length) setFeatured(pross[0])
+      if (pross.length) setFeatured(pross.slice(0, 3))
       setLoading(false)
     })()
   }, [])
