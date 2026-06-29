@@ -481,8 +481,15 @@ function EventCard({evento,index,color}) {
             : 'linear-gradient(to bottom, transparent 25%, rgba(255,255,255,0.65) 100%)'
         }}/>
         {past && <div style={{position:'absolute',inset:0,backgroundColor:'rgba(10,10,10,0.22)'}}/>}
-        {/* Titolo sovrapposto in basso sull'immagine */}
+        {/* Titolo + sottotitolo sovrapposti in basso sull'immagine */}
         <div style={{position:'absolute',bottom:0,left:0,right:0,padding:'12px 14px 14px'}}>
+          {evento.sottotitolo && (
+            <p style={{fontSize:'12px',fontWeight:'500',color:titleColor,opacity:0.8,
+              margin:'0 0 4px',lineHeight:1.4,textShadow:titleShadow,
+              display:'-webkit-box',WebkitLineClamp:2,WebkitBoxOrient:'vertical',overflow:'hidden'}}>
+              {evento.sottotitolo}
+            </p>
+          )}
           <h3 className='cal-card-title' style={{
             fontSize:'19px',fontWeight:'900',letterSpacing:'-0.03em',
             color: titleColor,
@@ -508,12 +515,7 @@ function EventCard({evento,index,color}) {
         </div>
       </div>
       <div style={{padding:'20px'}}>
-        {evento.sottotitolo && (
-          <p style={{fontSize:'13px',color:'#9CA3AF',margin:'0 0 12px',lineHeight:'1.5',
-            display:'-webkit-box',WebkitLineClamp:2,WebkitBoxOrient:'vertical',overflow:'hidden'}}>
-            {evento.sottotitolo}
-          </p>
-        )}
+
         <div style={{display:'flex',flexDirection:'column',gap:'5px',marginBottom:'12px'}}>
           <MRow icon={<IcClock color={c}/>} text={`${fData(evento.data_inizio)} · ${fOra(evento.data_inizio)}`}/>
           {evento.luogo && <MRow icon={<IcPin color={c}/>} text={evento.luogo}/>}
@@ -562,6 +564,13 @@ function LandingCard({landing,index}) {
           Mestiere
         </div>
         <div style={{position:'absolute',bottom:0,left:0,right:0,padding:'12px 14px 14px'}}>
+          {landing.hero_sottotitolo && (
+            <p style={{fontSize:'12px',fontWeight:'500',color:titleColor,opacity:0.8,
+              margin:'0 0 4px',lineHeight:1.4,textShadow:titleShadow,
+              display:'-webkit-box',WebkitLineClamp:2,WebkitBoxOrient:'vertical',overflow:'hidden'}}>
+              {landing.hero_sottotitolo}
+            </p>
+          )}
           <h3 className='cal-card-title' style={{
             fontSize:'19px',fontWeight:'900',letterSpacing:'-0.03em',
             color: titleColor, margin:0, lineHeight:1.2,
@@ -572,12 +581,7 @@ function LandingCard({landing,index}) {
         </div>
       </div>
       <div style={{padding:'16px 20px 20px'}}>
-        {landing.hero_sottotitolo && (
-          <p style={{fontSize:'13px',color:'#9CA3AF',margin:'0 0 12px',lineHeight:'1.5',
-            display:'-webkit-box',WebkitLineClamp:2,WebkitBoxOrient:'vertical',overflow:'hidden'}}>
-            {landing.hero_sottotitolo}
-          </p>
-        )}
+
         {(landing.tags||[]).length>0 && (
           <div style={{display:'flex',gap:'5px',flexWrap:'wrap',marginBottom:'12px'}}>
             {landing.tags.map(t=><Tag key={t} label={t} color='#7C3AED'/>)}
