@@ -554,8 +554,7 @@ function LandingCard({landing,index}) {
           Mestiere
         </div>
       </div>
-      <div style={{padding:'20px'}}>
-        <h3 style={{fontSize:'16px',fontWeight:'800',letterSpacing:'-0.025em',color:NERO,margin:'0 0 6px',lineHeight:1.3}}>{landing.titolo}</h3>
+      <div style={{padding:'16px 20px 20px'}}>
         {landing.hero_sottotitolo && (
           <p style={{fontSize:'13px',color:'#9CA3AF',margin:'0 0 12px',lineHeight:'1.5',
             display:'-webkit-box',WebkitLineClamp:2,WebkitBoxOrient:'vertical',overflow:'hidden'}}>
