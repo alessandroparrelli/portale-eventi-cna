@@ -1,4 +1,4 @@
-import { useEffect, useState } from 'react'
+import { useEffect, useState, useRef } from 'react'
 import { usePageTitle } from '../../hooks/usePageTitle'
 import { useSearchParams } from 'react-router-dom'
 import { supabase } from '../../lib/supabase'
@@ -6,7 +6,7 @@ import { useRole } from '../../hooks/useRole'
 import GlowTableHead from '../../components/GlowTableHead'
 import GlowStatCard from '../../components/GlowStatCard'
 import { Modal, PresenzaBadge, Field, Input, Select, Btn, EmptyState } from '../../components/ui'
-import { Users, Search, Download, Eye, Trash2, UserCheck } from 'lucide-react'
+import { Users, Search, Download, Upload, Eye, Trash2, UserCheck, AlertCircle, CheckCircle2, X } from 'lucide-react'
 import * as XLSX from 'xlsx'
 import EventSelector from '../../components/EventSelector'
 
@@ -28,6 +28,12 @@ export default function IscrittiPage() {
   const [detail, setDetail] = useState(null)
   const [delConfirm, setDelConfirm] = useState(null)
   const { canDelete } = useRole()
+  const [importModal, setImportModal] = useState(false)
+  const [importPreview, setImportPreview] = useState([])
+  const [importErrors, setImportErrors] = useState([])
+  const [importing, setImporting] = useState(false)
+  const [importDone, setImportDone] = useState(null)
+  const fileInputRef = useRef(null)
 
   useEffect(() => {
     supabase.from('events').select('id,titolo,slug').order('data_inizio',{ascending:false}).then(({data})=>setEventi(data||[]))
@@ -85,6 +91,71 @@ export default function IscrittiPage() {
     XLSX.writeFile(wb, `iscritti-${eventoTitle.toLowerCase().replace(/\s+/g,'-')}.xlsx`)
   }
 
+  function downloadTemplate() {
+    const rows = [{ 'Nome':'Mario','Cognome':'Rossi','Email':'mario@esempio.it','Cellulare':'3331234567','Ragione Sociale':'Rossi Srl','P.IVA':'01234567890','CAP':'00100' }]
+    const ws = XLSX.utils.json_to_sheet(rows)
+    const wb = XLSX.utils.book_new()
+    XLSX.utils.book_append_sheet(wb, ws, 'Iscritti')
+    XLSX.writeFile(wb, 'template-import-iscritti.xlsx')
+  }
+
+  function handleFileImport(e) {
+    const file = e.target.files[0]
+    if (!file) return
+    const reader = new FileReader()
+    reader.onload = (ev) => {
+      const wb = XLSX.read(ev.target.result, { type: 'array' })
+      const ws = wb.Sheets[wb.SheetNames[0]]
+      const rows = XLSX.utils.sheet_to_json(ws, { defval: '' })
+      const preview = []
+      const errors = []
+      rows.forEach((row, i) => {
+        const nome = (row['Nome']||'').toString().trim()
+        const cognome = (row['Cognome']||'').toString().trim()
+        const email = (row['Email']||'').toString().trim()
+        if (!nome && !cognome) { errors.push(`Riga ${i+2}: Nome e Cognome mancanti`); return }
+        if (!email) { errors.push(`Riga ${i+2}: Email mancante per ${nome} ${cognome}`); return }
+        preview.push({
+          nome, cognome, email,
+          cellulare: (row['Cellulare']||'').toString().trim(),
+          ragione_sociale: (row['Ragione Sociale']||'').toString().trim(),
+          partita_iva: (row['P.IVA']||'').toString().trim(),
+          cap: (row['CAP']||'').toString().trim(),
+        })
+      })
+      setImportPreview(preview)
+      setImportErrors(errors)
+    }
+    reader.readAsArrayBuffer(file)
+    e.target.value = ''
+  }
+
+  async function confirmImport() {
+    if (!selectedEvento || importPreview.length === 0) return
+    setImporting(true)
+    let ok = 0, fail = 0
+    for (const row of importPreview) {
+      const qr = `IMP-${Date.now()}-${Math.random().toString(36).slice(2,7).toUpperCase()}`
+      const { error } = await supabase.from('registrations').insert({
+        event_id: selectedEvento,
+        qr_code: qr,
+        stato: 'confermato',
+        ...row,
+      })
+      if (error) fail++; else ok++
+    }
+    setImporting(false)
+    setImportDone({ ok, fail })
+    if (ok > 0) loadRegs()
+  }
+
+  function resetImport() {
+    setImportModal(false)
+    setImportPreview([])
+    setImportErrors([])
+    setImportDone(null)
+  }
+
   const totPresenti = registrations.filter(r=>r.presente).length
   const totConfermati = registrations.filter(r=>r.stato==='confermato').length
 
@@ -97,6 +168,12 @@ export default function IscrittiPage() {
         </div>
         {selectedEvento && (
           <div style={{ display:'flex', gap:'10px' }}>
+            <Btn variant="secondary" onClick={downloadTemplate} size="md" title="Scarica template Excel">
+              <Download size={16}/> Template
+            </Btn>
+            <Btn variant="secondary" onClick={() => { setImportModal(true); setImportDone(null); setImportPreview([]); setImportErrors([]) }} size="md">
+              <Upload size={16}/> Importa
+            </Btn>
             <Btn variant="secondary" onClick={exportExcel} size="md">
               <Download size={16}/> Esporta Excel
             </Btn>
@@ -225,6 +302,111 @@ export default function IscrittiPage() {
             <Btn variant="ghost" onClick={()=>setDelConfirm(null)}>Annulla</Btn>
             <Btn variant="danger" onClick={deleteReg}>Elimina</Btn>
           </div>
+        </Modal>
+      )}
+      {/* MODAL IMPORT */}
+      {importModal && (
+        <Modal title="Importa iscritti da Excel" onClose={resetImport} width="600px">
+          {importDone ? (
+            <div style={{ textAlign:'center', padding:'24px 0' }}>
+              <CheckCircle2 size={48} style={{ color:'#16A34A', marginBottom:'16px' }}/>
+              <p style={{ fontSize:'18px', fontWeight:'800', color:'#0A0A0A', margin:'0 0 8px' }}>
+                Importazione completata
+              </p>
+              <p style={{ fontSize:'14px', color:'#6B7280', margin:'0 0 24px' }}>
+                <strong style={{ color:'#16A34A' }}>{importDone.ok} iscritti importati</strong>
+                {importDone.fail > 0 && <span style={{ color:'#DC2626' }}> · {importDone.fail} errori</span>}
+              </p>
+              <Btn variant="primary" onClick={resetImport}>Chiudi</Btn>
+            </div>
+          ) : (
+            <>
+              {/* Step 1: carica file */}
+              {importPreview.length === 0 && importErrors.length === 0 && (
+                <div>
+                  <p style={{ fontSize:'14px', color:'#374151', marginBottom:'16px', lineHeight:'1.6' }}>
+                    Carica un file Excel (.xlsx) con le colonne: <strong>Nome, Cognome, Email</strong> (obbligatori),
+                    Cellulare, Ragione Sociale, P.IVA, CAP (opzionali).
+                  </p>
+                  <div style={{ border:'2px dashed #D1D5DB', borderRadius:'8px', padding:'32px', textAlign:'center',
+                    backgroundColor:'#FAFAFA', cursor:'pointer' }}
+                    onClick={() => fileInputRef.current?.click()}
+                    onDragOver={e => { e.preventDefault(); e.currentTarget.style.borderColor='#003DA5' }}
+                    onDragLeave={e => e.currentTarget.style.borderColor='#D1D5DB'}
+                    onDrop={e => { e.preventDefault(); e.currentTarget.style.borderColor='#D1D5DB';
+                      const f = e.dataTransfer.files[0]; if (f) { const dt = new DataTransfer(); dt.items.add(f); fileInputRef.current.files = dt.files; handleFileImport({ target: fileInputRef.current }) } }}>
+                    <Upload size={32} style={{ color:'#9CA3AF', marginBottom:'12px' }}/>
+                    <p style={{ fontSize:'14px', fontWeight:'600', color:'#374151', margin:'0 0 4px' }}>
+                      Trascina il file qui o clicca per selezionare
+                    </p>
+                    <p style={{ fontSize:'12px', color:'#9CA3AF', margin:0 }}>Supporta .xlsx e .xls</p>
+                  </div>
+                  <input ref={fileInputRef} type="file" accept=".xlsx,.xls" onChange={handleFileImport} style={{ display:'none' }}/>
+                  <div style={{ marginTop:'16px', display:'flex', justifyContent:'space-between', alignItems:'center' }}>
+                    <button onClick={downloadTemplate} style={{ fontSize:'13px', color:'#003DA5', background:'none', border:'none', cursor:'pointer', fontWeight:'600', padding:0 }}>
+                      ↓ Scarica template Excel
+                    </button>
+                    <Btn variant="ghost" onClick={resetImport}>Annulla</Btn>
+                  </div>
+                </div>
+              )}
+
+              {/* Preview + errori */}
+              {(importPreview.length > 0 || importErrors.length > 0) && (
+                <div>
+                  {importErrors.length > 0 && (
+                    <div style={{ backgroundColor:'#FEF2F2', border:'1px solid #FECACA', borderRadius:'6px', padding:'12px 16px', marginBottom:'16px' }}>
+                      <div style={{ display:'flex', alignItems:'center', gap:'8px', marginBottom:'8px' }}>
+                        <AlertCircle size={16} style={{ color:'#DC2626' }}/>
+                        <span style={{ fontSize:'13px', fontWeight:'700', color:'#DC2626' }}>{importErrors.length} righe con errori (verranno saltate)</span>
+                      </div>
+                      {importErrors.map((e,i) => <p key={i} style={{ fontSize:'12px', color:'#DC2626', margin:'2px 0', paddingLeft:'24px' }}>{e}</p>)}
+                    </div>
+                  )}
+
+                  {importPreview.length > 0 && (
+                    <>
+                      <p style={{ fontSize:'13px', fontWeight:'600', color:'#374151', marginBottom:'10px' }}>
+                        <CheckCircle2 size={14} style={{ color:'#16A34A', verticalAlign:'middle', marginRight:'6px' }}/>
+                        {importPreview.length} iscritti pronti per l&apos;importazione
+                      </p>
+                      <div style={{ maxHeight:'260px', overflowY:'auto', border:'1px solid #E5E7EB', borderRadius:'6px' }}>
+                        <table style={{ width:'100%', borderCollapse:'collapse', fontSize:'13px' }}>
+                          <thead>
+                            <tr style={{ backgroundColor:'#F9FAFB' }}>
+                              {['Nome','Cognome','Email','Cellulare'].map(h => (
+                                <th key={h} style={{ padding:'8px 12px', textAlign:'left', fontSize:'11px', fontWeight:'600',
+                                  color:'#6B7280', textTransform:'uppercase', letterSpacing:'0.04em', borderBottom:'1px solid #E5E7EB' }}>{h}</th>
+                              ))}
+                            </tr>
+                          </thead>
+                          <tbody>
+                            {importPreview.map((r,i) => (
+                              <tr key={i} style={{ borderBottom:'1px solid #F3F4F6' }}>
+                                <td style={{ padding:'8px 12px', color:'#0A0A0A', fontWeight:'500' }}>{r.nome}</td>
+                                <td style={{ padding:'8px 12px', color:'#0A0A0A', fontWeight:'500' }}>{r.cognome}</td>
+                                <td style={{ padding:'8px 12px', color:'#374151' }}>{r.email}</td>
+                                <td style={{ padding:'8px 12px', color:'#374151' }}>{r.cellulare||'—'}</td>
+                              </tr>
+                            ))}
+                          </tbody>
+                        </table>
+                      </div>
+                    </>
+                  )}
+
+                  <div style={{ marginTop:'20px', display:'flex', justifyContent:'space-between' }}>
+                    <Btn variant="ghost" onClick={() => { setImportPreview([]); setImportErrors([]) }}>
+                      ← Indietro
+                    </Btn>
+                    <Btn variant="primary" onClick={confirmImport} disabled={importing || importPreview.length === 0}>
+                      {importing ? 'Importazione…' : `Importa ${importPreview.length} iscritti`}
+                    </Btn>
+                  </div>
+                </div>
+              )}
+            </>
+          )}
         </Modal>
       )}
     </div>

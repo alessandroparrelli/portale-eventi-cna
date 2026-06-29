@@ -21,6 +21,7 @@ import LandingPageListPage from './pages/admin/LandingPageListPage'
 import LandingEditorPage from './pages/admin/LandingEditorPage'
 import LandingContactsPage from './pages/admin/LandingContactsPage'
 import LandingPagePublic from './pages/public/LandingPagePublic'
+import CalendarioPage from './pages/public/CalendarioPage'
 
 export default function App() {
   return (
@@ -31,6 +32,7 @@ export default function App() {
           <Route path="/login" element={<LoginPage />} />
           <Route path="/eventi/:slug" element={<LandingPage />} />
           <Route path="/lp/:slug" element={<LandingPagePublic />} />
+          <Route path="/calendario" element={<CalendarioPage />} />
           <Route path="/questionario" element={<QuestionarioPage />} />
           <Route path="/iscrizione/:codice" element={<Iscrizione />} />
           <Route path="/iscrizione" element={<Iscrizione />} />

@@ -78,7 +78,13 @@ const icons = {
       <polyline points="16 17 21 12 16 7"/><line x1="21" y1="12" x2="9" y2="12"/>
     </svg>
   ),
-  close: (c='#6B7280') => (
+  globe: (c='#6B7280') => (
+    <svg width="17" height="17" viewBox="0 0 24 24" fill="none" stroke={c} strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+      <circle cx="12" cy="12" r="10"/>
+      <line x1="2" y1="12" x2="22" y2="12"/>
+      <path d="M12 2a15.3 15.3 0 0 1 4 10 15.3 15.3 0 0 1-4 10 15.3 15.3 0 0 1-4-10 15.3 15.3 0 0 1 4-10z"/>
+    </svg>
+  ),
     <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke={c} strokeWidth="2" strokeLinecap="round">
       <line x1="18" y1="6" x2="6" y2="18"/><line x1="6" y1="6" x2="18" y2="18"/>
     </svg>
@@ -117,6 +123,7 @@ const NAV_GROUPS = [
     label: 'Marketing',
     items: [
       { to:'/admin/landing',     label:'Landing Page', iconKey:'landing',              activeColor:'#0891B2' },
+      { to:'/calendario',        label:'Calendario pubblico', iconKey:'globe',          activeColor:'#059669', external:true },
     ],
   },
 ]
@@ -206,7 +213,22 @@ export default function Sidebar({ mobileOpen, onMobileClose, isMobile }) {
           {allGroups.map(group => (
             <div key={group.label} style={st.group}>
               <p style={st.groupLabel}>{group.label}</p>
-              {group.items.map(({ to, label, iconKey, end, activeColor }) => (
+              {group.items.map(({ to, label, iconKey, end, activeColor, external }) => (
+                external ? (
+                  <a key={to} href={to} target="_blank" rel="noopener noreferrer" onClick={handleNavClick}
+                    style={{ ...st.navLink, color:'#4B5563', textDecoration:'none' }}
+                    onMouseEnter={e => e.currentTarget.style.backgroundColor='#F3F4F6'}
+                    onMouseLeave={e => e.currentTarget.style.backgroundColor='transparent'}>
+                    <div style={st.iconWrap}>
+                      {icons[iconKey]?.('#9CA3AF')}
+                    </div>
+                    <span className="nav-label" style={{ fontSize:'13px', fontWeight:'500', letterSpacing:'-0.01em', flex:1 }}>{label}</span>
+                    <svg width="11" height="11" viewBox="0 0 24 24" fill="none" stroke="#9CA3AF" strokeWidth="2">
+                      <path d="M18 13v6a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2V8a2 2 0 0 1 2-2h6"/>
+                      <polyline points="15 3 21 3 21 9"/><line x1="10" y1="14" x2="21" y2="3"/>
+                    </svg>
+                  </a>
+                ) : (
                 <NavLink key={to} to={to} end={end} onClick={handleNavClick}
                   style={({ isActive }) => ({
                     ...st.navLink,
@@ -226,6 +248,7 @@ export default function Sidebar({ mobileOpen, onMobileClose, isMobile }) {
                     </>
                   )}
                 </NavLink>
+                )
               ))}
             </div>
           ))}

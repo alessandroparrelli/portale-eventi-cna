@@ -22,6 +22,7 @@ import EventEmailTab from '../../components/editor/EventEmailTab'
 import IscrizioniTab from '../../components/editor/IscrizioniTab'
 import AspettoTab from '../../components/editor/AspettoTab'
 import SessioniTab from '../../components/editor/SessioniTab'
+import QuestionarioTab from '../../components/editor/QuestionarioTab'
 import GlowTabBar from '../../components/GlowTabBar'
 
 const toSlug = s => s.toLowerCase().normalize('NFD').replace(/[\u0300-\u036f]/g,'')
@@ -500,14 +501,15 @@ export default function EventoEditorPage() {
   }
 
   const TABS = [
-    { id:'info',       label:'Info & Date',  icon:'📋', color:'blue'   },
-    { id:'hero',       label:'Hero',         icon:'🖼',  color:'cyan'   },
-    { id:'contenuto',  label:'Contenuto',    icon:'📝', color:'green'  },
-    { id:'aspetto',    label:'Aspetto',      icon:'🎨', color:'violet' },
-    { id:'sessioni',   label:'Sessioni',     icon:'🗓', color:'amber'  },
-    { id:'iscrizioni', label:'Iscrizioni',   icon:'🎟', color:'coral'  },
-    { id:'email',      label:'Email',        icon:'✉️', color:'rose'   },
-    { id:'preview',    label:'Preview',      icon:'👁',  color:'amber'  },
+    { id:'info',         label:'Info & Date',    icon:'📋', color:'blue'   },
+    { id:'hero',         label:'Hero',           icon:'🖼',  color:'cyan'   },
+    { id:'contenuto',    label:'Contenuto',      icon:'📝', color:'green'  },
+    { id:'aspetto',      label:'Aspetto',        icon:'🎨', color:'violet' },
+    { id:'sessioni',     label:'Sessioni',       icon:'🗓', color:'amber'  },
+    { id:'iscrizioni',   label:'Iscrizioni',     icon:'🎟', color:'coral'  },
+    { id:'questionario', label:'Questionario',   icon:'⭐', color:'amber'  },
+    { id:'email',        label:'Email',          icon:'✉️', color:'rose'   },
+    { id:'preview',      label:'Preview',        icon:'👁',  color:'amber'  },
   ]
 
   return (
@@ -854,6 +856,14 @@ export default function EventoEditorPage() {
           <div style={p.panel}>
             <h2 style={p.panelTitle}>Programma / Sessioni</h2>
             <SessioniTab event={event} setEvent={setEvent} />
+          </div>
+        )}
+
+        {/* ── QUESTIONARIO ── */}
+        {activeTab==='questionario' && (
+          <div style={p.panel}>
+            <h2 style={p.panelTitle}>Questionario post-evento</h2>
+            <QuestionarioTab eventoId={id} />
           </div>
         )}
 
