@@ -6,6 +6,7 @@ import { Modal, Btn, Select, Field, Input } from '../../components/ui'
 import GlowStatCard from '../../components/GlowStatCard'
 import { QrCode, UserPlus, CheckCircle2, XCircle, AlertTriangle, RefreshCw, Search, Camera, CameraOff, Users, WifiOff } from 'lucide-react'
 import EventSelector from '../../components/EventSelector'
+import PwaInstallBanner from '../../components/PwaInstallBanner'
 
 function OfflineBanner() {
   const [offline, setOffline] = useState(!navigator.onLine)
@@ -100,6 +101,13 @@ function ResultBanner({ result, onClose }) {
 
 /* ─── PAGINA CHECKIN ──────────────────────────────────────────── */
 export default function CheckinPage() {
+  // Registra service worker per PWA offline
+  useEffect(() => {
+    if ('serviceWorker' in navigator) {
+      navigator.serviceWorker.register('/sw.js').catch(() => {})
+    }
+  }, [])
+
   usePageTitle('Check-in')
   const [eventi,         setEventi]        = useState([])
   const [selectedEvento, setSelectedEvento]= useState('')
@@ -286,6 +294,7 @@ export default function CheckinPage() {
     <div style={s.page}>
 
       <OfflineBanner />
+      <PwaInstallBanner />
 
       {/* ── Selettore evento ── */}
       <EventSelector

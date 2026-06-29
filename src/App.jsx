@@ -21,6 +21,8 @@ import LandingPageListPage from './pages/admin/LandingPageListPage'
 import LandingEditorPage from './pages/admin/LandingEditorPage'
 import LandingContactsPage from './pages/admin/LandingContactsPage'
 import CalendarioAdminPage from './pages/admin/CalendarioAdminPage'
+import AnaliticsPage from './pages/admin/AnaliticsPage'
+import CertificatoPage from './pages/public/CertificatoPage'
 import LandingPagePublic from './pages/public/LandingPagePublic'
 import CalendarioPage from './pages/public/CalendarioPage'
 
@@ -34,6 +36,7 @@ export default function App() {
           <Route path="/eventi/:slug" element={<LandingPage />} />
           <Route path="/lp/:slug" element={<LandingPagePublic />} />
           <Route path="/calendario" element={<CalendarioPage />} />
+          <Route path="/verifica-certificato/:codice" element={<CertificatoPage />} />
           <Route path="/questionario" element={<QuestionarioPage />} />
           <Route path="/iscrizione/:codice" element={<Iscrizione />} />
           <Route path="/iscrizione" element={<Iscrizione />} />
@@ -52,6 +55,7 @@ export default function App() {
             <Route path="landing" element={<LandingPageListPage />} />
             <Route path="landing/:id/contatti" element={<LandingContactsPage />} />
             <Route path="calendario" element={<CalendarioAdminPage />} />
+            <Route path="analytics" element={<AnaliticsPage />} />
           </Route>
 
           {/* Editor a schermo intero (fuori dal layout sidebar) */}

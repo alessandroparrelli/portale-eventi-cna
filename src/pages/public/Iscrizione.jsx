@@ -54,6 +54,18 @@ QR Code: ${pageUrl}
   )
 }
 
+function CertificatoBtn({ registrationId }) {
+  return (
+    <a href={`https://hnkhckcclgabunkqfmrz.supabase.co/functions/v1/genera-certificato?registration_id=${registrationId}`}
+      target="_blank" rel="noopener noreferrer"
+      style={{ display:'inline-flex', alignItems:'center', gap:'6px', backgroundColor:'#F59E0B', color:'#fff',
+        borderRadius:'8px', padding:'10px 16px', fontSize:'13px', fontWeight:'700',
+        textDecoration:'none', fontFamily:"'Inter',sans-serif", marginTop:'12px' }}>
+      🏆 Scarica certificato di partecipazione
+    </a>
+  )
+}
+
 function QRCodeDisplay({ value }) {
   const [dataUrl, setDataUrl] = useState(null)
   const [err, setErr] = useState(false)
@@ -316,6 +328,11 @@ export default function Iscrizione() {
                   ? <>
                       <QRCodeDisplay value={reg.qr_code} />
                       <QRActions qrValue={reg.qr_code} codice={reg.codice_iscrizione} eventoTitolo={event?.titolo} />
+                      {event?.certificato_abilitato && reg.presente && (
+                        <div style={{ textAlign:'center' }}>
+                          <CertificatoBtn registrationId={reg.id} />
+                        </div>
+                      )}
                     </>
                   : <p style={{ fontSize:'13px', color:'#9CA3AF', textAlign:'center' }}>QR code non disponibile</p>
                 }

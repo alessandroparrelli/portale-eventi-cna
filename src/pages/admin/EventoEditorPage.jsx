@@ -342,6 +342,7 @@ export default function EventoEditorPage() {
     titolo:'', slug:'', stato:'bozza', data_inizio:'', data_fine:'',
     luogo:'', sottotitolo:'', footer_testo:'', descrizione_html:'', immagine_hero:null, logo_url:null,
       modalita:'presenza', link_riunione:null,
+      certificato_abilitato:false, certificato_titolo:null,
     colore_primario:'#003DA5', colore_sfondo:'#F4F5F7', tema:{},
     layout_hero:{ altezza:'380', overlay_opacita:'55', allineamento:'sinistra', titolo_colore:'#FFFFFF', titolo_dimensione:'clamp(26px,5vw,54px)', titolo_grassetto:true, titolo_maiuscolo:false },
     sezioni:[], email_organizzatore:'', email_mittente:'', email_cc:'', nome_mittente:'',
@@ -421,6 +422,7 @@ export default function EventoEditorPage() {
       stato:ev.stato, data_inizio:ev.data_inizio||null,
       data_fine:ev.data_fine||null, luogo:ev.luogo||null,
         modalita:ev.modalita||'presenza', link_riunione:ev.link_riunione||null,
+        certificato_abilitato:ev.certificato_abilitato||false, certificato_titolo:ev.certificato_titolo||null,
       descrizione_html:ev.descrizione_html||null,
       immagine_hero:ev.immagine_hero||null,
       colore_primario:ev.colore_primario,
@@ -624,6 +626,32 @@ export default function EventoEditorPage() {
                   </Field>
                 </div>
               )}
+
+              {/* ── Certificati ── */}
+              <div style={{ gridColumn:'1/-1' }}>
+                <div style={{ background:'#F9FAFB', border:'1px solid #E5E7EB', borderRadius:'10px', padding:'16px', display:'flex', flexDirection:'column', gap:'14px' }}>
+                  <p style={{ margin:0, fontSize:'12px', fontWeight:'700', color:'#6B7280', textTransform:'uppercase', letterSpacing:'.06em' }}>Certificati di partecipazione</p>
+                  <label style={{ display:'flex', alignItems:'center', gap:'10px', cursor:'pointer' }}>
+                    <div style={{ position:'relative', width:'40px', height:'22px', flexShrink:0 }}
+                      onClick={() => updEvent(p=>({...p, certificato_abilitato:!p.certificato_abilitato}))}>
+                      <div style={{ position:'absolute', inset:0, borderRadius:'999px', transition:'background 0.2s',
+                        backgroundColor: event.certificato_abilitato ? '#003DA5' : '#D1D5DB' }}/>
+                      <div style={{ position:'absolute', top:'3px', left: event.certificato_abilitato ? '21px' : '3px', width:'16px', height:'16px',
+                        borderRadius:'50%', backgroundColor:'#ffffff', transition:'left 0.2s', boxShadow:'0 1px 4px rgba(0,0,0,0.2)' }}/>
+                    </div>
+                    <div>
+                      <p style={{ fontSize:'14px', fontWeight:'600', color:'#0A0A0A', margin:'0 0 2px' }}>Abilita certificati di partecipazione</p>
+                      <p style={{ fontSize:'12px', color:'#9CA3AF', margin:0 }}>Gli iscritti potranno scaricare il certificato dopo l&apos;evento</p>
+                    </div>
+                  </label>
+                  {event.certificato_abilitato && (
+                    <Field label="Testo introduttivo certificato" hint="Es. 'Si certifica la partecipazione di'">
+                      <Input value={event.certificato_titolo||''} onChange={e=>updEvent(p=>({...p,certificato_titolo:e.target.value||null}))}
+                        placeholder="Si certifica che"/>
+                    </Field>
+                  )}
+                </div>
+              </div>
 
               {/* ── Impostazioni email ── */}
               <div style={{ gridColumn:'1/-1', background:'#F9FAFB', border:'1px solid #E5E7EB', borderRadius:'10px', padding:'16px', display:'flex', flexDirection:'column', gap:'12px' }}>

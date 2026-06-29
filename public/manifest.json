@@ -1,19 +1,14 @@
 {
-  "name": "Eventi CNA",
-  "short_name": "Eventi CNA",
-  "description": "Portale gestione eventi CNA Roma",
-  "start_url": "/admin",
+  "name": "CNA Roma Check-in",
+  "short_name": "CNA Check-in",
+  "description": "App check-in eventi CNA Roma",
+  "start_url": "/checkin",
   "display": "standalone",
-  "background_color": "#003DA5",
+  "background_color": "#ffffff",
   "theme_color": "#003DA5",
-  "orientation": "portrait-primary",
-  "lang": "it",
+  "orientation": "portrait",
   "icons": [
-    { "src": "/favicon-32.png",     "sizes": "32x32",   "type": "image/png" },
-    { "src": "/icon-144.png",       "sizes": "144x144", "type": "image/png", "purpose": "any" },
-    { "src": "/icon-192.png",       "sizes": "192x192", "type": "image/png", "purpose": "any" },
-    { "src": "/icon-192-bg.png",    "sizes": "192x192", "type": "image/png", "purpose": "maskable" },
-    { "src": "/icon-512.png",       "sizes": "512x512", "type": "image/png", "purpose": "any maskable" },
-    { "src": "/apple-touch-icon.png","sizes": "180x180","type": "image/png", "purpose": "any" }
+    { "src": "/logo192.png", "sizes": "192x192", "type": "image/png", "purpose": "any maskable" },
+    { "src": "/logo512.png", "sizes": "512x512", "type": "image/png" }
   ]
 }
