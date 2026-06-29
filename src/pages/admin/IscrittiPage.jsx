@@ -193,7 +193,7 @@ export default function IscrittiPage() {
   function getMestiere(id) { return mestieri.find(m=>m.id===id)?.nome || '—' }
 
   // Reset pagina su cambio filtri
-  useEffect(() => { setPagina(1) }, [selectedEvento, search, filterStato, filterPresente])
+  useEffect(() => { setPagina(1) }, [selectedEvento, search, filterStato])
 
   const filtered = registrations.filter(r => {
     const q = search.toLowerCase()
