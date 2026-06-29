@@ -218,36 +218,13 @@ export default function IscrittiPage() {
 
   return (
     <div style={s.page}>
+      <style>{`@keyframes spin{to{transform:rotate(360deg)}}`}</style>
       <div style={s.header} className="page-header-row">
         <div>
           <h1 style={s.title}>Iscritti</h1>
           <p style={s.subtitle}>{selectedEvento ? `${registrations.length} iscritti · ${totPresenti} presenti · ${totConfermati} confermati` : 'Seleziona un evento'}</p>
         </div>
       </div>
-      {/* Bottoni azioni — separati dall'header per non andare fuori schermo */}
-      {selectedEvento && (
-        <div style={{ display:'flex', gap:'8px', flexWrap:'wrap', padding:'0 0 16px', alignItems:'center' }}>
-          <Btn variant="secondary" onClick={verificaAssociati} disabled={verificaInCorso} size="md"
-            title="Incrocia P.IVA con tabella associati CNA Roma">
-            {verificaInCorso ? '⏳ Verifica…' : '🔍 Verifica associati'}
-          </Btn>
-          {eventi.find(e=>e.id===selectedEvento)?.certificato_abilitato && (
-            <Btn variant="secondary" onClick={inviaCertificati} disabled={invioInCorso} size="md">
-              🏆 {invioInCorso ? 'Invio…' : 'Invia certificati'}
-            </Btn>
-          )}
-          <Btn variant="secondary" onClick={downloadTemplate} size="md" title="Scarica template Excel">
-            <Download size={16}/> Template
-          </Btn>
-          <Btn variant="secondary" onClick={() => { setImportModal(true); setImportDone(null); setImportPreview([]); setImportErrors([]) }} size="md">
-            <Upload size={16}/> Importa
-          </Btn>
-          <Btn variant="secondary" onClick={exportExcel} size="md">
-            <Download size={16}/> Esporta Excel
-          </Btn>
-        </div>
-      )}
-
       {/* Selettore evento + filtri */}
       <div style={s.filters} className="iscritti-filters">
         <EventSelector
@@ -273,6 +250,32 @@ export default function IscrittiPage() {
       </div>
 
       {/* Stats cards */}
+      {/* Bottoni azioni — DOPO il selettore evento */}
+      {selectedEvento && (
+        <div style={{ display:'flex', gap:'8px', flexWrap:'wrap', marginBottom:'16px', alignItems:'center' }}>
+          <Btn variant="primary" onClick={verificaAssociati} disabled={verificaInCorso} size="md"
+            title="Incrocia P.IVA degli iscritti con la tabella associati CNA">
+            {verificaInCorso
+              ? <><span style={{animation:'spin 1s linear infinite',display:'inline-block'}}>⏳</span> Verifica in corso…</>
+              : '🔍 Verifica associati CNA'}
+          </Btn>
+          {Object.keys(associatiMap).length > 0 && (
+            <span style={{fontSize:'12px',color:'#059669',fontWeight:'600'}}>
+              ✓ {Object.keys(associatiMap).length} trovati
+            </span>
+          )}
+          <div style={{flex:1}}/>
+          {eventi.find(e=>e.id===selectedEvento)?.certificato_abilitato && (
+            <Btn variant="secondary" onClick={inviaCertificati} disabled={invioInCorso} size="md">
+              🏆 {invioInCorso ? 'Invio…' : 'Invia certificati'}
+            </Btn>
+          )}
+          <Btn variant="secondary" onClick={downloadTemplate} size="md"><Download size={16}/> Template</Btn>
+          <Btn variant="secondary" onClick={() => { setImportModal(true); setImportDone(null); setImportPreview([]); setImportErrors([]) }} size="md"><Upload size={16}/> Importa</Btn>
+          <Btn variant="secondary" onClick={exportExcel} size="md"><Download size={16}/> Esporta Excel</Btn>
+        </div>
+      )}
+
       {selectedEvento && (
         <div style={{ display:'grid', gridTemplateColumns:'repeat(auto-fit,minmax(140px,1fr))', gap:'10px', marginBottom:'16px' }} className="stat-grid-auto">
           <GlowStatCard icon="users"     label="Tot. iscritti" value={registrations.length}                                    palette="blue"/>
@@ -301,8 +304,8 @@ export default function IscrittiPage() {
                 { label:'Iscritto il',color:'amber',  hideOnMobile:true },
                 { label:'Stato',      color:'green' },
                 ...(Object.keys(associatiMap).length > 0 ? [
-                  { label:'Associato',   color:'emerald', hideOnMobile:true },
-                  { label:'Contratto',   color:'indigo',  hideOnMobile:true },
+                  { label:'Associato',   color:'green',   hideOnMobile:true },
+                  { label:'Contratto',   color:'cyan',    hideOnMobile:true },
                   { label:'Data stipula',color:'amber',   hideOnMobile:true },
                 ] : []),
                 { label:'Azioni',     color:'neutral' },
