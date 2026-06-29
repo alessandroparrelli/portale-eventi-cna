@@ -147,7 +147,6 @@ export default function IscrittiPage() {
         'Mestiere': getMestiere(r.mestiere_id),
         'CAP': r.cap||'',
         'Associato CNA': ass ? (ass.associato ? 'Sì' : 'No (Disdetto)') : (piva ? 'Non trovato' : '—'),
-        'Contratto': ass?.contratto||'',
         'Data stipula': ass?.datastipula||'',
       }
     })
@@ -304,6 +303,23 @@ export default function IscrittiPage() {
         ) : filtered.length === 0 ? (
           <EmptyState icon={Users} title="Nessun iscritto trovato" desc="Nessun risultato per i filtri selezionati"/>
         ) : (
+          {/* BANNER VERIFICA ASSOCIATI — sopra la tabella */}
+          {verificaInfo && (
+            <div style={{ marginBottom:'14px', padding:'12px 18px', borderRadius:'8px',
+              backgroundColor: verificaInfo.errore ? '#FEF2F2' : '#EFF6FF',
+              border: `1px solid ${verificaInfo.errore ? '#FECACA' : '#BFDBFE'}`,
+              display:'flex', alignItems:'center', justifyContent:'space-between', gap:'12px' }}>
+              <p style={{ fontSize:'13px', fontWeight:'700', margin:0,
+                color: verificaInfo.errore ? '#DC2626' : '#1D4ED8' }}>
+                {verificaInfo.errore
+                  ? `❌ ${verificaInfo.errore}`
+                  : `✅ ${verificaInfo.trovati} associati trovati su ${verificaInfo.cercati} P.IVA — colonne Associato CNA e Data stipula aggiornate`}
+              </p>
+              <button onClick={() => setVerificaInfo(null)}
+                style={{ background:'none', border:'none', cursor:'pointer', color:'#9CA3AF', fontSize:'18px', padding:0, flexShrink:0 }}>×</button>
+            </div>
+          )}
+
           <div style={{ overflowX:'auto' }} className="table-wrap">
             <table style={s.table}>
               <GlowTableHead columns={[
@@ -313,9 +329,8 @@ export default function IscrittiPage() {
                 { label:'Iscritto il',color:'amber',  hideOnMobile:true },
                 { label:'Stato',      color:'green' },
                 ...(verificaEseguita ? [
-                  { label:'Associato',   color:'green',   hideOnMobile:true },
-                  { label:'Contratto',   color:'cyan',    hideOnMobile:true },
-                  { label:'Data stipula',color:'amber',   hideOnMobile:true },
+                  { label:'Associato CNA', color:'green', hideOnMobile:true },
+                  { label:'Data stipula',  color:'amber', hideOnMobile:true },
                 ] : []),
                 { label:'Azioni',     color:'neutral' },
               ]}/>
@@ -347,9 +362,6 @@ export default function IscrittiPage() {
                                 </span>
                               : <span style={{color:'#9CA3AF',fontSize:'12px'}}>Non trovato</span>
                           }
-                        </td>
-                        <td style={s.td} className="col-hide-mobile">
-                          <span style={{fontSize:'12px',color:'#374151'}}>{ass?.contratto||'—'}</span>
                         </td>
                         <td style={s.td} className="col-hide-mobile">
                           <span style={{fontSize:'12px',color:'#374151'}}>{ass?.datastipula||'—'}</span>
@@ -412,23 +424,6 @@ export default function IscrittiPage() {
           </div>
         </Modal>
       )}
-      {/* BANNER VERIFICA ASSOCIATI */}
-      {verificaInfo && (
-        <div style={{ margin:'0 0 16px', padding:'12px 18px', borderRadius:'8px',
-          backgroundColor: verificaInfo.errore ? '#FEF2F2' : '#EFF6FF',
-          border: `1px solid ${verificaInfo.errore ? '#FECACA' : '#BFDBFE'}`,
-          display:'flex', alignItems:'center', justifyContent:'space-between', gap:'12px' }}>
-          <p style={{ fontSize:'13px', fontWeight:'600', margin:0,
-            color: verificaInfo.errore ? '#DC2626' : '#1D4ED8' }}>
-            {verificaInfo.errore
-              ? `❌ ${verificaInfo.errore}`
-              : `✅ ${verificaInfo.trovati} associati trovati su ${verificaInfo.cercati} P.IVA — colonne Associato, Contratto e Data stipula aggiornate`}
-          </p>
-          <button onClick={() => setVerificaInfo(null)}
-            style={{ background:'none', border:'none', cursor:'pointer', color:'#9CA3AF', fontSize:'18px', padding:0 }}>×</button>
-        </div>
-      )}
-
       {/* BANNER RISULTATO CERTIFICATI */}
       {invioRisultato && (
         <div style={{ margin:'0 0 16px', padding:'14px 18px', borderRadius:'8px',
