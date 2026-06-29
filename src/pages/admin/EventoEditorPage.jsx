@@ -341,6 +341,7 @@ export default function EventoEditorPage() {
   const [event, setEvent] = useState({
     titolo:'', slug:'', stato:'bozza', data_inizio:'', data_fine:'',
     luogo:'', sottotitolo:'', footer_testo:'', descrizione_html:'', immagine_hero:null, logo_url:null,
+      modalita:'presenza', link_riunione:null,
     colore_primario:'#003DA5', colore_sfondo:'#F4F5F7', tema:{},
     layout_hero:{ altezza:'380', overlay_opacita:'55', allineamento:'sinistra', titolo_colore:'#FFFFFF', titolo_dimensione:'clamp(26px,5vw,54px)', titolo_grassetto:true, titolo_maiuscolo:false },
     sezioni:[], email_organizzatore:'', email_mittente:'', email_cc:'', nome_mittente:'',
@@ -419,6 +420,7 @@ export default function EventoEditorPage() {
       titolo:ev.titolo, slug:ev.slug||toSlug(ev.titolo),
       stato:ev.stato, data_inizio:ev.data_inizio||null,
       data_fine:ev.data_fine||null, luogo:ev.luogo||null,
+        modalita:ev.modalita||'presenza', link_riunione:ev.link_riunione||null,
       descrizione_html:ev.descrizione_html||null,
       immagine_hero:ev.immagine_hero||null,
       colore_primario:ev.colore_primario,
@@ -592,6 +594,37 @@ export default function EventoEditorPage() {
                   />
                 </Field>
               </div>
+              {/* ── Modalità evento ── */}
+              <div style={{ gridColumn:'1/-1' }}>
+                <Field label="Modalità evento">
+                  <div style={{ display:'flex', gap:'8px', flexWrap:'wrap' }}>
+                    {[{v:'presenza',l:'🏛 In presenza'},{v:'online',l:'💻 Online'},{v:'ibrido',l:'🔀 Ibrido'}].map(opt => (
+                      <button key={opt.v} type="button"
+                        onClick={() => updEvent(p => ({ ...p, modalita: opt.v }))}
+                        style={{ padding:'9px 18px', borderRadius:'7px', border:'1px solid',
+                          borderColor: event.modalita===opt.v ? '#003DA5' : '#D1D5DB',
+                          backgroundColor: event.modalita===opt.v ? '#EFF6FF' : '#ffffff',
+                          color: event.modalita===opt.v ? '#003DA5' : '#374151',
+                          fontSize:'13px', fontWeight:'700', cursor:'pointer',
+                          fontFamily:"'Inter',sans-serif", transition:'all 0.15s' }}>
+                        {opt.l}
+                      </button>
+                    ))}
+                  </div>
+                </Field>
+              </div>
+              {(event.modalita === 'online' || event.modalita === 'ibrido') && (
+                <div style={{ gridColumn:'1/-1' }}>
+                  <Field label="Link riunione (Zoom / Meet / Teams)" hint="Visibile solo agli iscritti — non appare nella pagina pubblica">
+                    <Input
+                      value={event.link_riunione||''}
+                      onChange={e => updEvent(p => ({ ...p, link_riunione: e.target.value || null }))}
+                      placeholder="https://zoom.us/j/... oppure https://meet.google.com/..."
+                    />
+                  </Field>
+                </div>
+              )}
+
               {/* ── Impostazioni email ── */}
               <div style={{ gridColumn:'1/-1', background:'#F9FAFB', border:'1px solid #E5E7EB', borderRadius:'10px', padding:'16px', display:'flex', flexDirection:'column', gap:'12px' }}>
                 <p style={{ margin:0, fontSize:'12px', fontWeight:'700', color:'#6B7280', textTransform:'uppercase', letterSpacing:'.06em' }}>Impostazioni email</p>
