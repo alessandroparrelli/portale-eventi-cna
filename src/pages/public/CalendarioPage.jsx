@@ -341,26 +341,39 @@ export default function CalendarioPage() {
               </svg>
             </span>
             <div>
-              <p className='cal-banner-title' style={{fontSize:'13px',fontWeight:'700',color:'#1D4ED8',margin:0}}>Aggiungi al tuo calendario</p>
-              <p className='cal-banner-sub' style={{fontSize:'12px',color:'#3B82F6',margin:0}}>Ricevi tutti gli eventi su Apple Calendar, Google Calendar, Outlook</p>
+              <p className='cal-banner-title' style={{fontSize:'13px',fontWeight:'700',color:'#1D4ED8',margin:0}}>Abbonati al calendario CNA Roma</p>
+              <p className='cal-banner-sub' style={{fontSize:'12px',color:'#3B82F6',margin:0}}>Ricevi automaticamente tutti i nuovi eventi su Apple Calendar, Google Calendar, Outlook</p>
             </div>
           </div>
-          <a href="https://hnkhckcclgabunkqfmrz.supabase.co/functions/v1/calendario-ics" download="cna-roma-eventi.ics"
-            className='cal-ics-btn' style={{display:'flex',alignItems:'center',gap:'10px',padding:'12px 20px',
-              backgroundColor:'#003DA5',color:'#ffffff',borderRadius:'8px',
-              fontSize:'14px',fontWeight:'700',textDecoration:'none',fontFamily:"'Inter',sans-serif",
-              lineHeight:'1.35',maxWidth:'380px'}}>
-            <svg width="20" height="20" viewBox="0 0 24 24" fill="none" strokeWidth="2" strokeLinecap="round" style={{flexShrink:0}}>
-              <rect x="3" y="4" width="18" height="18" rx="2" stroke="white" fill="rgba(255,255,255,0.15)"/>
-              <line x1="16" y1="2" x2="16" y2="6" stroke="white"/>
-              <line x1="8" y1="2" x2="8" y2="6" stroke="white"/>
-              <line x1="3" y1="10" x2="21" y2="10" stroke="white"/>
-              <circle cx="8" cy="15" r="1" fill="white"/>
-              <circle cx="12" cy="15" r="1" fill="white"/>
-              <circle cx="16" cy="15" r="1" fill="white"/>
-            </svg>
-            Iscriviti e ricevi gli aggiornamenti sui prossimi eventi della CNA di Roma
-          </a>
+          <div style={{display:'flex',flexDirection:'column',gap:'8px',maxWidth:'420px',width:'100%'}}>
+            {/* Abbonamento live — si aggiorna automaticamente */}
+            <a href="webcal://hnkhckcclgabunkqfmrz.supabase.co/functions/v1/calendario-ics"
+              className='cal-ics-btn' style={{display:'flex',alignItems:'center',gap:'10px',padding:'13px 20px',
+                backgroundColor:'#003DA5',color:'#ffffff',borderRadius:'8px',
+                fontSize:'14px',fontWeight:'700',textDecoration:'none',fontFamily:"'Inter',sans-serif",
+                lineHeight:'1.35'}}>
+              <svg width="20" height="20" viewBox="0 0 24 24" fill="none" strokeWidth="2" strokeLinecap="round" style={{flexShrink:0}}>
+                <rect x="3" y="4" width="18" height="18" rx="2" stroke="white" fill="rgba(255,255,255,0.15)"/>
+                <line x1="16" y1="2" x2="16" y2="6" stroke="white"/>
+                <line x1="8" y1="2" x2="8" y2="6" stroke="white"/>
+                <line x1="3" y1="10" x2="21" y2="10" stroke="white"/>
+                <circle cx="8" cy="15" r="1" fill="white"/>
+                <circle cx="12" cy="15" r="1" fill="white"/>
+                <circle cx="16" cy="15" r="1" fill="white"/>
+              </svg>
+              Iscriviti e ricevi gli aggiornamenti sui prossimi eventi della CNA di Roma
+            </a>
+            {/* Fallback per Outlook / Google Calendar web */}
+            <p style={{fontSize:'11px',color:'#6B7280',margin:0,lineHeight:'1.5'}}>
+              Su iPhone e Mac si apre direttamente Apple Calendar.
+              Su Android usa <a href="https://calendar.google.com/calendar/r?cid=webcal%3A%2F%2Fhnkhckcclgabunkqfmrz.supabase.co%2Ffunctions%2Fv1%2Fcalendario-ics"
+                target="_blank" rel="noopener noreferrer"
+                style={{color:'#003DA5',fontWeight:'600',textDecoration:'none'}}>Google Calendar</a>.
+              Su Outlook: <a href="https://hnkhckcclgabunkqfmrz.supabase.co/functions/v1/calendario-ics"
+                target="_blank" rel="noopener noreferrer"
+                style={{color:'#003DA5',fontWeight:'600',textDecoration:'none'}}>aggiungi da URL</a>.
+            </p>
+          </div>
         </div>
       </div>
 
