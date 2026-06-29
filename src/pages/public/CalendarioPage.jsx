@@ -108,21 +108,20 @@ export default function CalendarioPage() {
       <header style={{position:'sticky',top:0,zIndex:100,
         background:`linear-gradient(135deg,${color} 0%,#001f6b 100%)`,
         boxShadow:'0 4px 24px rgba(0,61,165,0.35)'}}>
-        {/* Logo centrato + CTA */}
-        <div style={{display:'flex',alignItems:'center',justifyContent:'center',
-          padding:'18px 40px',position:'relative',minHeight:'88px'}}>
-          <img src={logo} alt="CNA Roma" style={{height:'68px',objectFit:'contain',filter:'brightness(0) invert(1)'}}/>
+        {/* Logo + CTA — flex row, logo a sx, CTA a dx, no overlap su mobile */}
+        <div style={{display:'flex',alignItems:'center',justifyContent:'space-between',
+          padding:'14px 24px',gap:'12px',flexWrap:'wrap'}}>
+          <img src={logo} alt="CNA Roma" style={{height:'56px',objectFit:'contain',maxWidth:'200px'}}/>
           {cfg?.url_cta && (
             <a href={cfg.url_cta} target="_blank" rel="noopener noreferrer"
-              style={{position:'absolute',right:'40px',top:'50%',transform:'translateY(-50%)',
-                display:'flex',alignItems:'center',gap:'8px',
+              style={{display:'flex',alignItems:'center',gap:'8px',flexShrink:0,
                 fontSize:'13px',fontWeight:'700',color:color,
                 backgroundColor:'#ffffff',
-                textDecoration:'none',padding:'10px 20px',borderRadius:'8px',
-                whiteSpace:'nowrap',boxShadow:'0 2px 12px rgba(0,0,0,0.18)',
-                transition:'all 0.15s'}}
-              onMouseEnter={e=>{e.currentTarget.style.transform='translateY(calc(-50% - 1px))';e.currentTarget.style.boxShadow='0 4px 20px rgba(0,0,0,0.25)'}}
-              onMouseLeave={e=>{e.currentTarget.style.transform='translateY(-50%)';e.currentTarget.style.boxShadow='0 2px 12px rgba(0,0,0,0.18)'}}>
+                textDecoration:'none',padding:'10px 18px',borderRadius:'8px',
+                whiteSpace:'nowrap',boxShadow:'0 2px 12px rgba(0,0,0,0.2)',
+                transition:'box-shadow 0.15s'}}
+              onMouseEnter={e=>e.currentTarget.style.boxShadow='0 4px 20px rgba(0,0,0,0.28)'}
+              onMouseLeave={e=>e.currentTarget.style.boxShadow='0 2px 12px rgba(0,0,0,0.2)'}>
               <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5">
                 <circle cx="12" cy="12" r="10"/>
                 <line x1="2" y1="12" x2="22" y2="12"/>
@@ -172,7 +171,7 @@ export default function CalendarioPage() {
           backgroundImage:'radial-gradient(circle,rgba(255,255,255,0.8) 1px,transparent 1px)',
           backgroundSize:'32px 32px'}}/>
 
-        <div style={{position:'relative',zIndex:1,maxWidth:'1100px',margin:'0 auto',padding:'72px 40px',width:'100%'}}>
+        <div style={{position:'relative',zIndex:1,maxWidth:'1100px',margin:'0 auto',padding:'48px 24px',width:'100%',boxSizing:'border-box'}}>
           {nProssimi > 0 && (
             <div style={{display:'inline-flex',alignItems:'center',gap:'8px',
               backgroundColor:'rgba(255,255,255,0.1)',border:'1px solid rgba(255,255,255,0.18)',
@@ -196,7 +195,7 @@ export default function CalendarioPage() {
           </p>
 
           {featured && (
-            <a href={`/eventi/${featured.slug}`} style={{textDecoration:'none',display:'inline-block',maxWidth:'460px',width:'100%'}}>
+            <a href={`/eventi/${featured.slug}`} style={{textDecoration:'none',display:'block',maxWidth:'460px',width:'100%'}}>
               <div style={{backgroundColor:'rgba(255,255,255,0.09)',backdropFilter:'blur(12px)',
                 border:'1px solid rgba(255,255,255,0.18)',borderRadius:'14px',padding:'22px',transition:'all 0.2s'}}
                 onMouseEnter={e=>{e.currentTarget.style.backgroundColor='rgba(255,255,255,0.16)';e.currentTarget.style.transform='translateY(-2px)'}}
