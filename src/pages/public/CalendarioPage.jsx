@@ -1,4 +1,4 @@
-import { useEffect, useState } from 'react'
+import React, { useEffect, useState } from 'react'
 import { supabase } from '../../lib/supabase'
 
 const DEFAULT_LOGO = 'https://customer31551.img.musvc2.net/static/31551/images/1/CNARoma%20NEGATIVO%20COLORE%20SOLO%20ROMA.png'
@@ -418,18 +418,55 @@ export default function CalendarioPage() {
   )
 }
 
+/* ── Hook luminosità immagine ── */
+function useImgLuminosity(src) {
+  const [dark, setDark] = React.useState(true) // default: assume scura → testo bianco
+  React.useEffect(() => {
+    if (!src) return
+    const img = new Image()
+    img.crossOrigin = 'anonymous'
+    img.onload = () => {
+      try {
+        const canvas = document.createElement('canvas')
+        const W = 80, H = 40
+        canvas.width = W; canvas.height = H
+        const ctx = canvas.getContext('2d')
+        // Campiona solo la zona in basso (dove c'è il titolo)
+        ctx.drawImage(img, 0, img.height * 0.6, img.width, img.height * 0.4, 0, 0, W, H)
+        const data = ctx.getImageData(0, 0, W, H).data
+        let lum = 0, count = 0
+        for (let i = 0; i < data.length; i += 16) {
+          const r = data[i], g = data[i+1], b = data[i+2]
+          // Luminanza percettiva
+          lum += 0.299*r + 0.587*g + 0.114*b
+          count++
+        }
+        setDark((lum / count) < 140)
+      } catch(_) { setDark(true) }
+    }
+    img.onerror = () => setDark(true)
+    img.src = src
+  }, [src])
+  return dark
+}
+
 /* ── Event Card ── */
 function EventCard({evento,index,color}) {
   const past = isPast(evento.data_inizio)
   const c = past ? '#9CA3AF' : (evento.colore_primario || color)
   const d = new Date(evento.data_inizio)
+  const imgDark = useImgLuminosity(evento.immagine_hero)
+  const titleColor = past ? 'rgba(255,255,255,0.85)' : (imgDark ? '#ffffff' : '#0A0A0A')
+  const titleShadow = imgDark
+    ? '0 1px 12px rgba(0,0,0,0.7)'
+    : '0 1px 6px rgba(255,255,255,0.8)'
   return (
     <a href={`/eventi/${evento.slug}`} style={{textDecoration:'none',display:'block',borderRadius:'14px',
       overflow:'hidden',border:'1px solid #E5E7EB',backgroundColor:'#ffffff',transition:'all 0.2s',
       animation:`fadeUp 0.35s ease ${Math.min(index,5)*0.07}s both`}}
       onMouseEnter={e=>{e.currentTarget.style.transform='translateY(-4px)';e.currentTarget.style.boxShadow='0 12px 40px rgba(0,0,0,0.1)';e.currentTarget.style.borderColor=c}}
       onMouseLeave={e=>{e.currentTarget.style.transform='none';e.currentTarget.style.boxShadow='none';e.currentTarget.style.borderColor='#E5E7EB'}}>
-      <div style={{position:'relative',height:'190px',backgroundColor:c+'12',overflow:'hidden'}}>
+      <div style={{position:'relative',height:'220px',backgroundColor:c+'12',overflow:'hidden'}}>
         {evento.immagine_hero
           ? <img src={evento.immagine_hero} alt={evento.titolo}
               style={{width:'100%',height:'100%',objectFit:'cover',filter:past?'grayscale(55%) brightness(0.88)':'none',transition:'transform 0.35s'}}
@@ -437,7 +474,24 @@ function EventCard({evento,index,color}) {
               onMouseLeave={e=>e.target.style.transform='none'}/>
           : <NoImg color={c}/>
         }
-        {past && <div style={{position:'absolute',inset:0,backgroundColor:'rgba(10,10,10,0.28)'}}/>}
+        {/* Overlay gradiente bottom per leggibilità titolo */}
+        <div style={{position:'absolute',inset:0,
+          background: imgDark
+            ? 'linear-gradient(to bottom, transparent 25%, rgba(0,0,0,0.72) 100%)'
+            : 'linear-gradient(to bottom, transparent 25%, rgba(255,255,255,0.65) 100%)'
+        }}/>
+        {past && <div style={{position:'absolute',inset:0,backgroundColor:'rgba(10,10,10,0.22)'}}/>}
+        {/* Titolo sovrapposto in basso sull'immagine */}
+        <div style={{position:'absolute',bottom:0,left:0,right:0,padding:'12px 14px 14px'}}>
+          <h3 className='cal-card-title' style={{
+            fontSize:'19px',fontWeight:'900',letterSpacing:'-0.03em',
+            color: titleColor,
+            margin:0,lineHeight:1.2,
+            textShadow: titleShadow
+          }}>
+            {evento.titolo}
+          </h3>
+        </div>
         <div style={{position:'absolute',top:'13px',left:'13px',backgroundColor:'#ffffff',
           borderRadius:'10px',padding:'7px 11px',boxShadow:'0 4px 14px rgba(0,0,0,0.14)',textAlign:'center',minWidth:'46px'}}>
           <div style={{fontSize:'20px',fontWeight:'900',letterSpacing:'-0.04em',color:NERO,lineHeight:1}}>
