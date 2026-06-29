@@ -247,6 +247,39 @@ export default function CalendarioPage() {
         </div>
       </div>
 
+      {/* AGGIUNGI AL CALENDARIO */}
+      <div style={{backgroundColor:'#EFF6FF',borderBottom:'1px solid #BFDBFE',padding:'12px 24px'}}>
+        <div style={{maxWidth:'1100px',margin:'0 auto',display:'flex',alignItems:'center',justifyContent:'space-between',flexWrap:'wrap',gap:'12px'}}>
+          <div style={{display:'flex',alignItems:'center',gap:'10px'}}>
+            <span style={{fontSize:'20px'}}>📅</span>
+            <div>
+              <p style={{fontSize:'13px',fontWeight:'700',color:'#1D4ED8',margin:0}}>Aggiungi al tuo calendario</p>
+              <p style={{fontSize:'12px',color:'#3B82F6',margin:0}}>Ricevi tutti gli eventi su Apple Calendar, Google Calendar, Outlook</p>
+            </div>
+          </div>
+          <div style={{display:'flex',gap:'8px',flexWrap:'wrap'}}>
+            <a href="https://hnkhckcclgabunkqfmrz.supabase.co/functions/v1/calendario-ics" download="cna-roma-eventi.ics"
+              style={{display:'flex',alignItems:'center',gap:'6px',padding:'9px 16px',
+                backgroundColor:'#003DA5',color:'#ffffff',borderRadius:'7px',
+                fontSize:'13px',fontWeight:'700',textDecoration:'none',fontFamily:"'Inter',sans-serif",
+                whiteSpace:'nowrap'}}>
+              <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5">
+                <rect x="3" y="4" width="18" height="18" rx="2"/><line x1="16" y1="2" x2="16" y2="6"/>
+                <line x1="8" y1="2" x2="8" y2="6"/><line x1="3" y1="10" x2="21" y2="10"/>
+              </svg>
+              Scarica .ics
+            </a>
+            <a href="webcal://hnkhckcclgabunkqfmrz.supabase.co/functions/v1/calendario-ics"
+              style={{display:'flex',alignItems:'center',gap:'6px',padding:'9px 16px',
+                backgroundColor:'#ffffff',color:'#003DA5',border:'1px solid #BFDBFE',borderRadius:'7px',
+                fontSize:'13px',fontWeight:'700',textDecoration:'none',fontFamily:"'Inter',sans-serif",
+                whiteSpace:'nowrap'}}>
+              🍎 Apri in Apple / Outlook
+            </a>
+          </div>
+        </div>
+      </div>
+
       {loading ? (
         <div style={{textAlign:'center',padding:'80px'}}>
           <div style={{width:'32px',height:'32px',border:`3px solid #E5E7EB`,borderTopColor:color,
