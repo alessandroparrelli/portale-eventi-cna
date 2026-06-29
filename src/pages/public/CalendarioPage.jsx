@@ -29,7 +29,10 @@ export default function CalendarioPage() {
   const [searchLanding, setSearchLanding] = useState('')
   const [tagFilter, setTagFilter] = useState('')
   const [allTags, setAllTags] = useState([])
-  const [featured, setFeatured] = useState(null)
+  const [featured, setFeatured] = useState([])
+  const [slide, setSlide] = useState(0)
+  const safeSlide = featured.length > 0 ? Math.min(slide, featured.length - 1) : 0
+  const cur = featured[safeSlide] ?? null
 
   useEffect(() => {
     ;(async () => {
@@ -143,9 +146,9 @@ export default function CalendarioPage() {
       {/* NAVBAR */}
       {/* HERO BLOCK: logo + contenuto + tab — tutto un unico blocco blu, niente sticky che taglia */}
       <div style={{background:`linear-gradient(160deg,${color} 0%,#001a5e 100%)`,position:'relative',overflow:'hidden'}}>
-        {(cfg?.hero_immagine_url || featured[slide]?.immagine_hero) && (
+        {(cfg?.hero_immagine_url || cur?.immagine_hero) && (
           <div style={{position:'absolute',inset:0,
-            backgroundImage:`url(${cfg?.hero_immagine_url || featured[slide]?.immagine_hero})`,
+            backgroundImage:`url(${cfg?.hero_immagine_url || cur?.immagine_hero})`,
             backgroundSize:'cover',backgroundPosition:'center',
             filter:'blur(3px) brightness(0.18)',transform:'scale(1.06)'}}/>
         )}
@@ -201,9 +204,9 @@ export default function CalendarioPage() {
             {cfg?.sottotitolo || 'Formazione, networking e opportunità di crescita per le imprese associate.'}
           </p>
 
-          {featured.length > 0 && (
+          {featured.length > 0 && cur && (
             <div style={{maxWidth:'520px',width:'100%'}}>
-              <a href={`/eventi/${featured[slide].slug}`}
+              <a href={`/eventi/${cur?.slug || '#'}`}
                 style={{textDecoration:'none',display:'block',marginBottom:'14px'}}>
                 <div className='cal-featured-box' style={{backgroundColor:'rgba(255,255,255,0.09)',
                   backdropFilter:'blur(12px)',border:'1px solid rgba(255,255,255,0.18)',
@@ -212,16 +215,16 @@ export default function CalendarioPage() {
                   onMouseLeave={e=>{e.currentTarget.style.backgroundColor='rgba(255,255,255,0.09)'}}>
                   <p className='cal-hero-label' style={{fontSize:'11px',fontWeight:'800',color:'#60A5FA',
                     textTransform:'uppercase',letterSpacing:'0.08em',margin:'0 0 8px'}}>
-                    ✦ Prossimi eventi — {slide+1}/{featured.length}
+                    ✦ Prossimi eventi — {safeSlide+1}/{featured.length}
                   </p>
                   <h3 className='cal-hero-title' style={{fontSize:'18px',fontWeight:'800',color:'#ffffff',
                     letterSpacing:'-0.02em',margin:'0 0 10px',lineHeight:1.3,minHeight:'48px'}}>
-                    {featured[slide].titolo}
+                    {cur?.titolo || ''}
                   </h3>
                   <div style={{display:'flex',gap:'12px',flexWrap:'wrap'}}>
-                    <FChip icon="cal" text={fData(featured[slide].data_inizio)}/>
-                    {featured[slide].luogo && <FChip icon="pin" text={featured[slide].luogo}/>}
-                    <FChip icon="clock" text={fOra(featured[slide].data_inizio)}/>
+                    <FChip icon="cal" text={fData(cur?.data_inizio)}/>
+                    {cur?.luogo && <FChip icon="pin" text={cur.luogo}/>}
+                    <FChip icon="clock" text={fOra(cur?.data_inizio)}/>
                   </div>
                   <p className='cal-hero-cta' style={{fontSize:'13px',fontWeight:'700',color:'#60A5FA',
                     margin:'12px 0 0',display:'flex',alignItems:'center',gap:'5px'}}>
@@ -242,7 +245,7 @@ export default function CalendarioPage() {
                   <div style={{display:'flex',gap:'7px',flex:1}}>
                     {featured.map((_,i) => (
                       <button key={i} onClick={e=>{e.preventDefault();setSlide(i)}}
-                        style={{height:'4px',flex:i===slide?3:1,borderRadius:'2px',border:'none',cursor:'pointer',
+                        style={{height:'4px',flex:i===safeSlide?3:1,borderRadius:'2px',border:'none',cursor:'pointer',
                           backgroundColor:i===slide?'#ffffff':'rgba(255,255,255,0.3)',
                           transition:'all 0.35s',padding:0}}/>
                     ))}
