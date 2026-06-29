@@ -120,21 +120,28 @@ export default function IscrittiPage() {
 
   function exportExcel() {
     const eventoTitle = eventi.find(e=>e.id===selectedEvento)?.titolo || 'evento'
-    const rows = filtered.map(r => ({
-      'ID': r.id,
-      'Data iscrizione': formatDt(r.created_at),
-      'Stato': r.stato,
-      'Presente': r.presente ? 'Sì' : 'No',
-      'Check-in': formatDt(r.checkin_at),
-      'Nome': r.nome||'',
-      'Cognome': r.cognome||'',
-      'Ragione Sociale': r.ragione_sociale||'',
-      'P.IVA': r.partita_iva||'',
-      'Cellulare': r.cellulare||'',
-      'Email': r.email||'',
-      'Mestiere': getMestiere(r.mestiere_id),
-      'CAP': r.cap||'',
-    }))
+    const rows = filtered.map(r => {
+      const piva = (r.partita_iva||'').toString().replace(/\s/g,'').replace(/^0+/,'')
+      const ass = associatiMap[piva]
+      return {
+        'ID': r.id,
+        'Data iscrizione': formatDt(r.created_at),
+        'Stato': r.stato,
+        'Presente': r.presente ? 'Sì' : 'No',
+        'Check-in': formatDt(r.checkin_at),
+        'Nome': r.nome||'',
+        'Cognome': r.cognome||'',
+        'Ragione Sociale': r.ragione_sociale||'',
+        'P.IVA': r.partita_iva||'',
+        'Cellulare': r.cellulare||'',
+        'Email': r.email||'',
+        'Mestiere': getMestiere(r.mestiere_id),
+        'CAP': r.cap||'',
+        'Associato CNA': ass ? (ass.associato ? 'Sì' : 'No (Disdetto)') : (piva ? 'Non trovato' : '—'),
+        'Contratto': ass?.contratto||'',
+        'Data stipula': ass?.datastipula||'',
+      }
+    })
     const ws = XLSX.utils.json_to_sheet(rows)
     const wb = XLSX.utils.book_new()
     XLSX.utils.book_append_sheet(wb, ws, 'Iscritti')
@@ -216,30 +223,30 @@ export default function IscrittiPage() {
           <h1 style={s.title}>Iscritti</h1>
           <p style={s.subtitle}>{selectedEvento ? `${registrations.length} iscritti · ${totPresenti} presenti · ${totConfermati} confermati` : 'Seleziona un evento'}</p>
         </div>
-        {selectedEvento && (
-          <div style={{ display:'flex', gap:'10px' }}>
-            <Btn variant="secondary" onClick={downloadTemplate} size="md" title="Scarica template Excel">
-              <Download size={16}/> Template
-            </Btn>
-            <Btn variant="secondary" onClick={verificaAssociati} disabled={verificaInCorso} size="md"
-              title="Incrocia P.IVA con tabella associati CNA">
-              {verificaInCorso ? '⏳ Verifica…' : '🔍 Verifica associati'}
-            </Btn>
-            {eventi.find(e=>e.id===selectedEvento)?.certificato_abilitato && (
-              <Btn variant="secondary" onClick={inviaCertificati} disabled={invioInCorso} size="md"
-                title="Invia certificati a chi ha partecipato">
-                🏆 {invioInCorso ? 'Invio…' : 'Invia certificati'}
-              </Btn>
-            )}
-            <Btn variant="secondary" onClick={() => { setImportModal(true); setImportDone(null); setImportPreview([]); setImportErrors([]) }} size="md">
-              <Upload size={16}/> Importa
-            </Btn>
-            <Btn variant="secondary" onClick={exportExcel} size="md">
-              <Download size={16}/> Esporta Excel
-            </Btn>
-          </div>
-        )}
       </div>
+      {/* Bottoni azioni — separati dall'header per non andare fuori schermo */}
+      {selectedEvento && (
+        <div style={{ display:'flex', gap:'8px', flexWrap:'wrap', padding:'0 0 16px', alignItems:'center' }}>
+          <Btn variant="secondary" onClick={verificaAssociati} disabled={verificaInCorso} size="md"
+            title="Incrocia P.IVA con tabella associati CNA Roma">
+            {verificaInCorso ? '⏳ Verifica…' : '🔍 Verifica associati'}
+          </Btn>
+          {eventi.find(e=>e.id===selectedEvento)?.certificato_abilitato && (
+            <Btn variant="secondary" onClick={inviaCertificati} disabled={invioInCorso} size="md">
+              🏆 {invioInCorso ? 'Invio…' : 'Invia certificati'}
+            </Btn>
+          )}
+          <Btn variant="secondary" onClick={downloadTemplate} size="md" title="Scarica template Excel">
+            <Download size={16}/> Template
+          </Btn>
+          <Btn variant="secondary" onClick={() => { setImportModal(true); setImportDone(null); setImportPreview([]); setImportErrors([]) }} size="md">
+            <Upload size={16}/> Importa
+          </Btn>
+          <Btn variant="secondary" onClick={exportExcel} size="md">
+            <Download size={16}/> Esporta Excel
+          </Btn>
+        </div>
+      )}
 
       {/* Selettore evento + filtri */}
       <div style={s.filters} className="iscritti-filters">
