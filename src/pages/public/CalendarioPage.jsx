@@ -466,7 +466,7 @@ function EventCard({evento,index,color}) {
       animation:`fadeUp 0.35s ease ${Math.min(index,5)*0.07}s both`}}
       onMouseEnter={e=>{e.currentTarget.style.transform='translateY(-4px)';e.currentTarget.style.boxShadow='0 12px 40px rgba(0,0,0,0.1)';e.currentTarget.style.borderColor=c}}
       onMouseLeave={e=>{e.currentTarget.style.transform='none';e.currentTarget.style.boxShadow='none';e.currentTarget.style.borderColor='#E5E7EB'}}>
-      <div style={{position:'relative',height:'220px',backgroundColor:c+'12',overflow:'hidden'}}>
+      <div style={{position:'relative',height:'240px',backgroundColor:c+'12',overflow:'hidden'}}>
         {evento.immagine_hero
           ? <img src={evento.immagine_hero} alt={evento.titolo}
               style={{width:'100%',height:'100%',objectFit:'cover',filter:past?'grayscale(55%) brightness(0.88)':'none',transition:'transform 0.35s'}}
@@ -483,13 +483,6 @@ function EventCard({evento,index,color}) {
         {past && <div style={{position:'absolute',inset:0,backgroundColor:'rgba(10,10,10,0.22)'}}/>}
         {/* Titolo + sottotitolo sovrapposti in basso sull'immagine */}
         <div style={{position:'absolute',bottom:0,left:0,right:0,padding:'12px 14px 14px'}}>
-          {evento.sottotitolo && (
-            <p style={{fontSize:'12px',fontWeight:'500',color:titleColor,opacity:0.8,
-              margin:'0 0 4px',lineHeight:1.4,textShadow:titleShadow,
-              display:'-webkit-box',WebkitLineClamp:2,WebkitBoxOrient:'vertical',overflow:'hidden'}}>
-              {evento.sottotitolo}
-            </p>
-          )}
           <h3 className='cal-card-title' style={{
             fontSize:'19px',fontWeight:'900',letterSpacing:'-0.03em',
             color: titleColor,
@@ -498,6 +491,13 @@ function EventCard({evento,index,color}) {
           }}>
             {evento.titolo}
           </h3>
+          {evento.sottotitolo && (
+            <p style={{fontSize:'14px',fontWeight:'400',color:titleColor,opacity:0.85,
+              margin:'5px 0 0',lineHeight:1.45,textShadow:titleShadow,
+              display:'-webkit-box',WebkitLineClamp:2,WebkitBoxOrient:'vertical',overflow:'hidden'}}>
+              {evento.sottotitolo}
+            </p>
+          )}
         </div>
         <div style={{position:'absolute',top:'13px',left:'13px',backgroundColor:'#ffffff',
           borderRadius:'10px',padding:'7px 11px',boxShadow:'0 4px 14px rgba(0,0,0,0.14)',textAlign:'center',minWidth:'46px'}}>
@@ -546,7 +546,7 @@ function LandingCard({landing,index}) {
       animation:`fadeUp 0.35s ease ${Math.min(index,5)*0.07}s both`}}
       onMouseEnter={e=>{e.currentTarget.style.transform='translateY(-4px)';e.currentTarget.style.boxShadow='0 12px 40px rgba(0,0,0,0.1)';e.currentTarget.style.borderColor='#7C3AED'}}
       onMouseLeave={e=>{e.currentTarget.style.transform='none';e.currentTarget.style.boxShadow='none';e.currentTarget.style.borderColor='#E5E7EB'}}>
-      <div style={{position:'relative',height:'220px',backgroundColor:'#7C3AED12',overflow:'hidden'}}>
+      <div style={{position:'relative',height:'240px',backgroundColor:'#7C3AED12',overflow:'hidden'}}>
         {landing.hero_immagine_url
           ? <img src={landing.hero_immagine_url} alt={landing.titolo}
               style={{width:'100%',height:'100%',objectFit:'cover',transition:'transform 0.35s'}}
@@ -564,13 +564,6 @@ function LandingCard({landing,index}) {
           Mestiere
         </div>
         <div style={{position:'absolute',bottom:0,left:0,right:0,padding:'12px 14px 14px'}}>
-          {landing.hero_sottotitolo && (
-            <p style={{fontSize:'12px',fontWeight:'500',color:titleColor,opacity:0.8,
-              margin:'0 0 4px',lineHeight:1.4,textShadow:titleShadow,
-              display:'-webkit-box',WebkitLineClamp:2,WebkitBoxOrient:'vertical',overflow:'hidden'}}>
-              {landing.hero_sottotitolo}
-            </p>
-          )}
           <h3 className='cal-card-title' style={{
             fontSize:'19px',fontWeight:'900',letterSpacing:'-0.03em',
             color: titleColor, margin:0, lineHeight:1.2,
@@ -578,6 +571,13 @@ function LandingCard({landing,index}) {
           }}>
             {landing.titolo}
           </h3>
+          {landing.hero_sottotitolo && (
+            <p style={{fontSize:'14px',fontWeight:'400',color:titleColor,opacity:0.85,
+              margin:'5px 0 0',lineHeight:1.45,textShadow:titleShadow,
+              display:'-webkit-box',WebkitLineClamp:2,WebkitBoxOrient:'vertical',overflow:'hidden'}}>
+              {landing.hero_sottotitolo}
+            </p>
+          )}
         </div>
       </div>
       <div style={{padding:'16px 20px 20px'}}>
