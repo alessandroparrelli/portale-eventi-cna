@@ -124,7 +124,7 @@ const NAV_GROUPS = [
     label: 'Marketing',
     items: [
       { to:'/admin/landing',     label:'Landing Page', iconKey:'landing',              activeColor:'#0891B2' },
-      { to:'/calendario',        label:'Calendario pubblico', iconKey:'globe',          activeColor:'#059669', external:true },
+      { to:'/admin/calendario',  label:'Calendario',          iconKey:'globe',          activeColor:'#059669' },
     ],
   },
 ]

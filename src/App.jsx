@@ -20,6 +20,7 @@ import ActivityLogPage from './pages/admin/ActivityLogPage'
 import LandingPageListPage from './pages/admin/LandingPageListPage'
 import LandingEditorPage from './pages/admin/LandingEditorPage'
 import LandingContactsPage from './pages/admin/LandingContactsPage'
+import CalendarioAdminPage from './pages/admin/CalendarioAdminPage'
 import LandingPagePublic from './pages/public/LandingPagePublic'
 import CalendarioPage from './pages/public/CalendarioPage'
 
@@ -50,6 +51,7 @@ export default function App() {
             <Route path="log" element={<ActivityLogPage />} />
             <Route path="landing" element={<LandingPageListPage />} />
             <Route path="landing/:id/contatti" element={<LandingContactsPage />} />
+            <Route path="calendario" element={<CalendarioAdminPage />} />
           </Route>
 
           {/* Editor a schermo intero (fuori dal layout sidebar) */}
