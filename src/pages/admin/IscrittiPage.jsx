@@ -37,6 +37,7 @@ export default function IscrittiPage() {
   const [invioInCorso, setInvioInCorso] = useState(false)
   const [invioRisultato, setInvioRisultato] = useState(null)
   const [associatiMap, setAssociatiMap] = useState({})   // partita_iva -> {contratto, datastipula, associato}
+  const [verificaEseguita, setVerificaEseguita] = useState(false)
   const [verificaInCorso, setVerificaInCorso] = useState(false)
   const [verificaInfo, setVerificaInfo] = useState(null) // {trovati, cercati}
 
@@ -60,6 +61,7 @@ export default function IscrittiPage() {
       const data = await res.json()
       if (data.error) throw new Error(data.error)
       setAssociatiMap(data.associati || {})
+      setVerificaEseguita(true)
       setVerificaInfo({ trovati: data.trovati, cercati: data.cercati })
     } catch (e) {
       setVerificaInfo({ errore: String(e) })
@@ -93,6 +95,13 @@ export default function IscrittiPage() {
   useEffect(() => {
     if (!selectedEvento) { setRegistrations([]); return }
     loadRegs()
+  }, [selectedEvento])
+
+  // Reset verifica quando cambia evento
+  useEffect(() => {
+    setAssociatiMap({})
+    setVerificaEseguita(false)
+    setVerificaInfo(null)
   }, [selectedEvento])
 
   async function loadRegs() {
@@ -259,7 +268,7 @@ export default function IscrittiPage() {
               ? <><span style={{animation:'spin 1s linear infinite',display:'inline-block'}}>⏳</span> Verifica in corso…</>
               : '🔍 Verifica associati CNA'}
           </Btn>
-          {Object.keys(associatiMap).length > 0 && (
+          {verificaEseguita && (
             <span style={{fontSize:'12px',color:'#059669',fontWeight:'600'}}>
               ✓ {Object.keys(associatiMap).length} trovati
             </span>
@@ -303,7 +312,7 @@ export default function IscrittiPage() {
                 { label:'Mestiere',   color:'violet', hideOnMobile:true },
                 { label:'Iscritto il',color:'amber',  hideOnMobile:true },
                 { label:'Stato',      color:'green' },
-                ...(Object.keys(associatiMap).length > 0 ? [
+                ...(verificaEseguita ? [
                   { label:'Associato',   color:'green',   hideOnMobile:true },
                   { label:'Contratto',   color:'cyan',    hideOnMobile:true },
                   { label:'Data stipula',color:'amber',   hideOnMobile:true },
@@ -323,7 +332,7 @@ export default function IscrittiPage() {
                     <td style={s.td} className="col-hide-mobile"><span style={s.cell}>{getMestiere(r.mestiere_id)}</span></td>
                     <td style={s.td} className="col-hide-mobile"><span style={s.cell}>{formatDt(r.created_at)}</span></td>
                     <td style={s.td}><PresenzaBadge stato={r.stato}/></td>
-                    {Object.keys(associatiMap).length > 0 && (() => {
+                    {verificaEseguita && (() => {
                       const piva = (r.partita_iva||'').toString().replace(/\s/g,'').replace(/^0+/,'')
                       const ass = associatiMap[piva]
                       return (<>
