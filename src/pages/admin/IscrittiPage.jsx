@@ -40,6 +40,16 @@ export default function IscrittiPage() {
   const [verificaEseguita, setVerificaEseguita] = useState(false)
   const [verificaInCorso, setVerificaInCorso] = useState(false)
   const [verificaInfo, setVerificaInfo] = useState(null) // {trovati, cercati}
+  const [sortCol, setSortCol] = useState(null)   // chiave colonna
+  const [sortDir, setSortDir] = useState('asc')  // 'asc' | 'desc'
+  const [pagina, setPagina] = useState(1)
+  const PAGE_SIZE = 20
+
+  function toggleSort(col) {
+    if (sortCol === col) setSortDir(d => d === 'asc' ? 'desc' : 'asc')
+    else { setSortCol(col); setSortDir('asc') }
+    setPagina(1)
+  }
 
   async function verificaAssociati() {
     if (!registrations.length) return
@@ -138,6 +148,9 @@ export default function IscrittiPage() {
   }
 
   function getMestiere(id) { return mestieri.find(m=>m.id===id)?.nome || '—' }
+
+  // Reset pagina su cambio filtri
+  useEffect(() => { setPagina(1) }, [selectedEvento, search, filterStato, filterPresente])
 
   const filtered = registrations.filter(r => {
     const q = search.toLowerCase()
@@ -313,6 +326,82 @@ export default function IscrittiPage() {
     setImportDone(null)
   }
 
+  // Ordinamento
+  const SORT_KEYS = {
+    'Nominativo': r => `${r.cognome||''} ${r.nome||''}`.toLowerCase(),
+    'Email': r => (r.email||'').toLowerCase(),
+    'Mestiere': r => getMestiere(r.mestiere_id).toLowerCase(),
+    'Iscritto il': r => r.created_at||'',
+    'Stato': r => r.stato||'',
+    'Associato CNA': r => {
+      const p = (r.partita_iva||'').toString().replace(/\s/g,'').replace(/^0+/,'')
+      if (!p) return '3'
+      const a = verificaEseguita ? associatiMap[p] : null
+      if (!a) return '2'
+      return a.associato ? '0' : '1'
+    },
+    'Data stipula': r => {
+      const p = (r.partita_iva||'').toString().replace(/\s/g,'').replace(/^0+/,'')
+      // Componente header ordinabile
+  function SortableHead({ columns, sortCol, sortDir, onSort }) {
+    const PALETTES = {
+      blue:    { from:'#003DA5', to:'#1a56db', text:'#ffffff' },
+      green:   { from:'#059669', to:'#10b981', text:'#ffffff' },
+      violet:  { from:'#7c3aed', to:'#8b5cf6', text:'#ffffff' },
+      amber:   { from:'#d97706', to:'#f59e0b', text:'#ffffff' },
+      cyan:    { from:'#0891b2', to:'#06b6d4', text:'#ffffff' },
+      neutral: { from:'#F9FAFB', to:'#F3F4F6', text:'#6B7280' },
+    }
+    return (
+      <thead>
+        <tr>
+          {columns.map((col,i) => {
+            const p = PALETTES[col.color] || PALETTES.blue
+            const isActive = sortCol === col.label
+            return (
+              <th key={i}
+                className={col.hideOnMobile ? 'col-hide-mobile' : undefined}
+                onClick={() => col.sortable && onSort(col.label)}
+                style={{
+                  background:`linear-gradient(135deg,${p.from},${p.to})`,
+                  color:p.text, padding:'10px 14px', textAlign:'left',
+                  fontSize:'11px', fontWeight:'700', letterSpacing:'.05em',
+                  textTransform:'uppercase', userSelect:'none',
+                  cursor: col.sortable ? 'pointer' : 'default',
+                  whiteSpace:'nowrap',
+                  transition:'filter 0.15s',
+                }}>
+                <span style={{display:'inline-flex',alignItems:'center',gap:'5px'}}>
+                  {col.label}
+                  {col.sortable && (
+                    <span style={{fontSize:'10px',opacity: isActive ? 1 : 0.4}}>
+                      {isActive ? (sortDir==='asc' ? '▲' : '▼') : '⇅'}
+                    </span>
+                  )}
+                </span>
+              </th>
+            )
+          })}
+        </tr>
+      </thead>
+    )
+  }
+
+  return (verificaEseguita && associatiMap[p]?.datastipula) || ''
+    },
+  }
+
+  const sorted = sortCol && SORT_KEYS[sortCol]
+    ? [...filtered].sort((a,b) => {
+        const va = SORT_KEYS[sortCol](a)
+        const vb = SORT_KEYS[sortCol](b)
+        return sortDir === 'asc' ? va.localeCompare(vb) : vb.localeCompare(va)
+      })
+    : filtered
+
+  const totalPages = Math.ceil(sorted.length / PAGE_SIZE)
+  const paginated = sorted.slice((pagina-1)*PAGE_SIZE, pagina*PAGE_SIZE)
+
   // 4 colori per stato verifica associati
   const RC = {
     assoc:    { bg:'#F0FDF4', hov:'#DCFCE7' }, // verde
@@ -442,20 +531,23 @@ export default function IscrittiPage() {
             )}
             <div style={{ overflowX:'auto' }} className="table-wrap">
               <table style={s.table}>
-                <GlowTableHead columns={[
-                  { label:'Nominativo', color:'blue' },
-                  { label:'Email',      color:'cyan',   hideOnMobile:true },
-                  { label:'Mestiere',   color:'violet', hideOnMobile:true },
-                  { label:'Iscritto il',color:'amber',  hideOnMobile:true },
-                  { label:'Stato',      color:'green' },
-                  ...(verificaEseguita ? [
-                    { label:'Associato CNA', color:'green', hideOnMobile:true },
-                    { label:'Data stipula',  color:'amber', hideOnMobile:true },
-                  ] : []),
-                  { label:'Azioni', color:'neutral' },
-                ]}/>
+                <SortableHead
+                  columns={[
+                    { label:'Nominativo',  color:'blue',    sortable:true },
+                    { label:'Email',       color:'cyan',    sortable:true, hideOnMobile:true },
+                    { label:'Mestiere',    color:'violet',  sortable:true, hideOnMobile:true },
+                    { label:'Iscritto il', color:'amber',   sortable:true, hideOnMobile:true },
+                    { label:'Stato',       color:'green',   sortable:true },
+                    ...(verificaEseguita ? [
+                      { label:'Associato CNA', color:'green', sortable:true, hideOnMobile:true },
+                      { label:'Data stipula',  color:'amber', sortable:true, hideOnMobile:true },
+                    ] : []),
+                    { label:'Azioni', color:'neutral', sortable:false },
+                  ]}
+                  sortCol={sortCol} sortDir={sortDir} onSort={toggleSort}
+                />
                 <tbody>
-                  {filtered.map(r => {
+                  {paginated.map(r => {
                     const _rc = getRC(r)
                     const _piva = (r.partita_iva||'').toString().replace(/\s/g,'').replace(/^0+/,'')
                     const _ass = verificaEseguita ? (associatiMap[_piva] || null) : null
@@ -504,6 +596,71 @@ export default function IscrittiPage() {
                 </tbody>
               </table>
             </div>
+
+            {/* PAGINAZIONE */}
+            {totalPages > 1 && (
+              <div style={{display:'flex',alignItems:'center',justifyContent:'space-between',
+                padding:'14px 0 0',borderTop:'1px solid #F3F4F6',flexWrap:'wrap',gap:'8px'}}>
+                <span style={{fontSize:'13px',color:'#6B7280'}}>
+                  {(pagina-1)*PAGE_SIZE+1}–{Math.min(pagina*PAGE_SIZE,sorted.length)} di {sorted.length} iscritti
+                </span>
+                <div style={{display:'flex',gap:'4px',alignItems:'center'}}>
+                  <button onClick={()=>setPagina(1)} disabled={pagina===1}
+                    style={{padding:'6px 10px',border:'1px solid #E5E7EB',borderRadius:'6px',
+                      backgroundColor:pagina===1?'#F9FAFB':'#fff',cursor:pagina===1?'default':'pointer',
+                      fontSize:'13px',color:pagina===1?'#D1D5DB':'#374151'}}>«</button>
+                  <button onClick={()=>setPagina(p=>Math.max(1,p-1))} disabled={pagina===1}
+                    style={{padding:'6px 12px',border:'1px solid #E5E7EB',borderRadius:'6px',
+                      backgroundColor:pagina===1?'#F9FAFB':'#fff',cursor:pagina===1?'default':'pointer',
+                      fontSize:'13px',color:pagina===1?'#D1D5DB':'#374151'}}>‹</button>
+                  {[...Array(totalPages)].map((_,i)=>i+1).filter(p=>
+                    p===1||p===totalPages||Math.abs(p-pagina)<=1
+                  ).reduce((acc,p,i,arr)=>{
+                    if(i>0&&arr[i-1]!==p-1) acc.push('…')
+                    acc.push(p); return acc
+                  },[]).map((p,i)=>
+                    p==='…' ? <span key={`e${i}`} style={{padding:'6px 4px',fontSize:'13px',color:'#9CA3AF'}}>…</span>
+                    : <button key={p} onClick={()=>setPagina(p)}
+                        style={{padding:'6px 11px',border:'1px solid',
+                          borderColor:pagina===p?'#003DA5':'#E5E7EB',borderRadius:'6px',
+                          backgroundColor:pagina===p?'#003DA5':'#fff',
+                          color:pagina===p?'#fff':'#374151',
+                          fontWeight:pagina===p?'700':'400',
+                          cursor:'pointer',fontSize:'13px',fontFamily:"'Inter',sans-serif"}}>
+                        {p}
+                      </button>
+                  )}
+                  <button onClick={()=>setPagina(p=>Math.min(totalPages,p+1))} disabled={pagina===totalPages}
+                    style={{padding:'6px 12px',border:'1px solid #E5E7EB',borderRadius:'6px',
+                      backgroundColor:pagina===totalPages?'#F9FAFB':'#fff',cursor:pagina===totalPages?'default':'pointer',
+                      fontSize:'13px',color:pagina===totalPages?'#D1D5DB':'#374151'}}>›</button>
+                  <button onClick={()=>setPagina(totalPages)} disabled={pagina===totalPages}
+                    style={{padding:'6px 10px',border:'1px solid #E5E7EB',borderRadius:'6px',
+                      backgroundColor:pagina===totalPages?'#F9FAFB':'#fff',cursor:pagina===totalPages?'default':'pointer',
+                      fontSize:'13px',color:pagina===totalPages?'#D1D5DB':'#374151'}}>»</button>
+                </div>
+              </div>
+            )}
+
+            {/* LEGGENDA COLORI */}
+            {verificaEseguita && (
+              <div style={{display:'flex',gap:'12px',flexWrap:'wrap',padding:'14px 0 0',
+                borderTop:'1px solid #F3F4F6',marginTop:'4px'}}>
+                <span style={{fontSize:'11px',fontWeight:'600',color:'#6B7280',alignSelf:'center'}}>LEGENDA:</span>
+                {[
+                  {bg:'#F0FDF4',color:'#15803D',label:'✓ Associato CNA'},
+                  {bg:'#FEF2F2',color:'#DC2626',label:'✗ Disdetto'},
+                  {bg:'#F1F5F9',color:'#64748B',label:'◌ Non trovato in archivio'},
+                  {bg:'#FFF7ED',color:'#EA580C',label:'⚠ P.IVA assente'},
+                ].map(({bg,color,label})=>(
+                  <div key={label} style={{display:'flex',alignItems:'center',gap:'7px'}}>
+                    <div style={{width:'14px',height:'14px',borderRadius:'3px',backgroundColor:bg,
+                      border:`1px solid ${color}33`,flexShrink:0}}/>
+                    <span style={{fontSize:'12px',color,fontWeight:'600'}}>{label}</span>
+                  </div>
+                ))}
+              </div>
+            )}
           </>
         )}
       </div>
