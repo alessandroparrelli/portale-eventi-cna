@@ -152,31 +152,98 @@ export default function IscrittiPage() {
     loadRegs()
   }
 
+  function getAssLabel(r) {
+    if (!verificaEseguita) return ''
+    const p = (r.partita_iva||'').toString().replace(/\s/g,'').replace(/^0+/,'')
+    if (!p) return 'P.IVA assente'
+    const a = associatiMap[p]
+    if (!a) return 'Non trovato'
+    return a.associato ? 'Associato' : 'Disdetto'
+  }
+
   function exportExcel() {
     const eventoTitle = eventi.find(e=>e.id===selectedEvento)?.titolo || 'evento'
+    // Colori Excel ARGB
+    const XC = {
+      assoc:    { fill:'FFF0FDF4', font:'FF15803D', brd:'FFD1FAE5' },
+      disdetto: { fill:'FFFEF2F2', font:'FFDC2626', brd:'FFFECACA' },
+      notFound: { fill:'FFF1F5F9', font:'FF64748B', brd:'FFE2E8F0' },
+      noPiva:   { fill:'FFFFF7ED', font:'FFEA580C', brd:'FFFED7AA' },
+      header:   { fill:'FF003DA5', font:'FFFFFFFF' },
+    }
+    function getXC(r) {
+      if (!verificaEseguita) return null
+      const p = (r.partita_iva||'').toString().replace(/\s/g,'').replace(/^0+/,'')
+      if (!p) return XC.noPiva
+      const a = associatiMap[p]
+      if (!a) return XC.notFound
+      return a.associato ? XC.assoc : XC.disdetto
+    }
+
+    const cols = ['Nome','Cognome','Ragione Sociale','P.IVA','Email','Cellulare',
+      'Mestiere','CAP','Stato','Presente','Check-in','Data iscrizione',
+      ...(verificaEseguita ? ['Associato CNA','Data stipula'] : [])]
+
     const rows = filtered.map(r => {
       const piva = (r.partita_iva||'').toString().replace(/\s/g,'').replace(/^0+/,'')
       const ass = associatiMap[piva]
-      return {
-        'ID': r.id,
-        'Data iscrizione': formatDt(r.created_at),
-        'Stato': r.stato,
-        'Presente': r.presente ? 'Sì' : 'No',
-        'Check-in': formatDt(r.checkin_at),
-        'Nome': r.nome||'',
-        'Cognome': r.cognome||'',
-        'Ragione Sociale': r.ragione_sociale||'',
-        'P.IVA': r.partita_iva||'',
-        'Cellulare': r.cellulare||'',
-        'Email': r.email||'',
-        'Mestiere': getMestiere(r.mestiere_id),
-        'CAP': r.cap||'',
-        'Associato CNA': ass ? (ass.associato ? 'Sì' : 'No (Disdetto)') : (piva ? 'Non trovato' : '—'),
-        'Data stipula': ass?.datastipula||'',
+      const base = {
+        'Nome':r.nome||'', 'Cognome':r.cognome||'', 'Ragione Sociale':r.ragione_sociale||'',
+        'P.IVA':r.partita_iva||'', 'Email':r.email||'', 'Cellulare':r.cellulare||'',
+        'Mestiere':getMestiere(r.mestiere_id), 'CAP':r.cap||'',
+        'Stato':r.stato, 'Presente':r.presente?'Sì':'No',
+        'Check-in':formatDt(r.checkin_at), 'Data iscrizione':formatDt(r.created_at),
+      }
+      if (verificaEseguita) {
+        base['Associato CNA'] = getAssLabel(r)
+        base['Data stipula'] = ass?.datastipula||''
+      }
+      return base
+    })
+
+    const ws = XLSX.utils.json_to_sheet(rows, { header: cols })
+    const wb = XLSX.utils.book_new()
+
+    // Larghezze colonne
+    ws['!cols'] = cols.map(col =>
+      ({ wch: col==='Ragione Sociale'?42 : col==='Email'?32 : col==='P.IVA'?14 :
+              col==='Associato CNA'?16 : col==='Data stipula'?14 : col==='Nome'||col==='Cognome'?20 : 16 }))
+
+    const range = XLSX.utils.decode_range(ws['!ref'])
+    // Header row
+    for (let ci = range.s.c; ci <= range.e.c; ci++) {
+      const cell = ws[XLSX.utils.encode_cell({r:0,c:ci})]
+      if (cell) cell.s = {
+        fill:{patternType:'solid',fgColor:{rgb:XC.header.fill}},
+        font:{bold:true,color:{rgb:XC.header.font},sz:11},
+        alignment:{horizontal:'center',vertical:'center',wrapText:false},
+        border:{bottom:{style:'medium',color:{rgb:'FF1E3A8A'}}}
+      }
+    }
+    // Righe dati
+    filtered.forEach((r, ri) => {
+      const xc = getXC(r)
+      if (!xc) return
+      const assColI = cols.indexOf('Associato CNA')
+      for (let ci = range.s.c; ci <= range.e.c; ci++) {
+        const addr = XLSX.utils.encode_cell({r:ri+1,c:ci})
+        if (!ws[addr]) ws[addr] = {t:'s',v:''}
+        ws[addr].s = {
+          fill:{patternType:'solid',fgColor:{rgb:xc.fill}},
+          font:{color:{rgb:xc.font},sz:10,
+            bold: ci===assColI},
+          border:{
+            top:{style:'thin',color:{rgb:xc.brd}},
+            bottom:{style:'thin',color:{rgb:xc.brd}},
+            left:{style:'thin',color:{rgb:'FFF3F4F6'}},
+            right:{style:'thin',color:{rgb:'FFF3F4F6'}},
+          },
+          alignment:{vertical:'center'}
+        }
       }
     })
-    const ws = XLSX.utils.json_to_sheet(rows)
-    const wb = XLSX.utils.book_new()
+
+    ws['!freeze'] = {xSplit:0,ySplit:1,topLeftCell:'A2',activePane:'bottomLeft',state:'frozen'}
     XLSX.utils.book_append_sheet(wb, ws, 'Iscritti')
     XLSX.writeFile(wb, `iscritti-${eventoTitle.toLowerCase().replace(/\s+/g,'-')}.xlsx`)
   }
@@ -246,6 +313,22 @@ export default function IscrittiPage() {
     setImportDone(null)
   }
 
+  // 4 colori per stato verifica associati
+  const RC = {
+    assoc:    { bg:'#F0FDF4', hov:'#DCFCE7' }, // verde
+    disdetto: { bg:'#FEF2F2', hov:'#FECACA' }, // rosso
+    notFound: { bg:'#F1F5F9', hov:'#E2E8F0' }, // grigio
+    noPiva:   { bg:'#FFF7ED', hov:'#FED7AA' }, // arancione
+    none:     { bg:'transparent', hov:'#F9FAFB' },
+  }
+  function getRC(r) {
+    if (!verificaEseguita) return RC.none
+    const p = (r.partita_iva||'').toString().replace(/\s/g,'').replace(/^0+/,'')
+    if (!p) return RC.noPiva
+    const a = associatiMap[p]
+    if (!a) return RC.notFound
+    return a.associato ? RC.assoc : RC.disdetto
+  }
   const totPresenti = registrations.filter(r=>r.presente).length
   const totConfermati = registrations.filter(r=>r.stato==='confermato').length
 
@@ -373,14 +456,13 @@ export default function IscrittiPage() {
                 ]}/>
                 <tbody>
                   {filtered.map(r => {
+                    const _rc = getRC(r)
                     const _piva = (r.partita_iva||'').toString().replace(/\s/g,'').replace(/^0+/,'')
                     const _ass = verificaEseguita ? (associatiMap[_piva] || null) : null
-                    const _bg = _ass?.associato ? '#F0FDF4' : 'transparent'
-                    const _hov = _ass?.associato ? '#DCFCE7' : '#F9FAFB'
                     return (
-                      <tr key={r.id} style={{...s.tr, backgroundColor:_bg}}
-                        onMouseEnter={e=>e.currentTarget.style.backgroundColor=_hov}
-                        onMouseLeave={e=>e.currentTarget.style.backgroundColor=_bg}>
+                      <tr key={r.id} style={{...s.tr, backgroundColor:_rc.bg}}
+                        onMouseEnter={e=>e.currentTarget.style.backgroundColor=_rc.hov}
+                        onMouseLeave={e=>e.currentTarget.style.backgroundColor=_rc.bg}>
                         <td style={s.td}>
                           <p style={s.name}>{r.nome} {r.cognome}</p>
                           {r.ragione_sociale && <p style={s.sub}>{r.ragione_sociale}</p>}
@@ -392,15 +474,12 @@ export default function IscrittiPage() {
                         {verificaEseguita && <>
                           <td style={s.td} className="col-hide-mobile">
                             {!_piva
-                              ? <span style={{color:'#D1D5DB',fontSize:'13px'}}>—</span>
-                              : _ass
-                                ? <span style={{display:'inline-flex',alignItems:'center',gap:'5px',fontSize:'12px',fontWeight:'700',
-                                    color:_ass.associato?'#059669':'#DC2626',
-                                    backgroundColor:_ass.associato?'#F0FDF4':'#FEF2F2',
-                                    padding:'3px 10px',borderRadius:'999px'}}>
-                                    {_ass.associato ? '✓ Associato' : '✗ Disdetto'}
-                                  </span>
-                                : <span style={{color:'#9CA3AF',fontSize:'12px'}}>Non trovato</span>
+                              ? <span style={{fontSize:'11px',fontWeight:'700',color:'#EA580C',backgroundColor:'#FFF7ED',padding:'3px 10px',borderRadius:'999px'}}>⚠ P.IVA assente</span>
+                              : !_ass
+                                ? <span style={{fontSize:'11px',fontWeight:'700',color:'#64748B',backgroundColor:'#F1F5F9',padding:'3px 10px',borderRadius:'999px'}}>◌ Non trovato</span>
+                                : _ass.associato
+                                  ? <span style={{fontSize:'11px',fontWeight:'700',color:'#15803D',backgroundColor:'#F0FDF4',padding:'3px 10px',borderRadius:'999px'}}>✓ Associato</span>
+                                  : <span style={{fontSize:'11px',fontWeight:'700',color:'#DC2626',backgroundColor:'#FEF2F2',padding:'3px 10px',borderRadius:'999px'}}>✗ Disdetto</span>
                             }
                           </td>
                           <td style={s.td} className="col-hide-mobile">
