@@ -59,6 +59,13 @@ export default function CalendarioPage() {
   const color = cfg?.colore_primario || BLU
   const logo = cfg?.logo_url || DEFAULT_LOGO
 
+  // Autoplay carosello featured
+  React.useEffect(() => {
+    if (featured.length <= 1) return
+    const t = setInterval(() => setSlide(s => (s + 1) % featured.length), 4000)
+    return () => clearInterval(t)
+  }, [featured.length])
+
   // Ordina: tutti = prossimi prima (asc) poi passati (desc più recenti in fondo)
   const eventiOrdinati = [...eventi].sort((a,b) => {
     const aP = isPast(a.data_inizio), bP = isPast(b.data_inizio)
@@ -136,9 +143,9 @@ export default function CalendarioPage() {
       {/* NAVBAR */}
       {/* HERO BLOCK: logo + contenuto + tab — tutto un unico blocco blu, niente sticky che taglia */}
       <div style={{background:`linear-gradient(160deg,${color} 0%,#001a5e 100%)`,position:'relative',overflow:'hidden'}}>
-        {(cfg?.hero_immagine_url || featured?.immagine_hero) && (
+        {(cfg?.hero_immagine_url || featured[slide]?.immagine_hero) && (
           <div style={{position:'absolute',inset:0,
-            backgroundImage:`url(${cfg?.hero_immagine_url || featured?.immagine_hero})`,
+            backgroundImage:`url(${cfg?.hero_immagine_url || featured[slide]?.immagine_hero})`,
             backgroundSize:'cover',backgroundPosition:'center',
             filter:'blur(3px) brightness(0.18)',transform:'scale(1.06)'}}/>
         )}
@@ -194,24 +201,63 @@ export default function CalendarioPage() {
             {cfg?.sottotitolo || 'Formazione, networking e opportunità di crescita per le imprese associate.'}
           </p>
 
-          {featured && (
-            <a href={`/eventi/${featured.slug}`} style={{textDecoration:'none',display:'block',maxWidth:'460px',width:'100%'}}>
-              <div className='cal-featured-box' style={{backgroundColor:'rgba(255,255,255,0.09)',backdropFilter:'blur(12px)',
-                border:'1px solid rgba(255,255,255,0.18)',borderRadius:'14px',padding:'22px',transition:'all 0.2s'}}
-                onMouseEnter={e=>{e.currentTarget.style.backgroundColor='rgba(255,255,255,0.16)';e.currentTarget.style.transform='translateY(-2px)'}}
-                onMouseLeave={e=>{e.currentTarget.style.backgroundColor='rgba(255,255,255,0.09)';e.currentTarget.style.transform='none'}}>
-                <p className='cal-hero-label' style={{fontSize:'11px',fontWeight:'800',color:'#60A5FA',textTransform:'uppercase',letterSpacing:'0.08em',margin:'0 0 10px'}}>✦ Prossimo evento</p>
-                <h3 className='cal-hero-title' style={{fontSize:'18px',fontWeight:'800',color:'#ffffff',letterSpacing:'-0.02em',margin:'0 0 12px',lineHeight:1.3}}>{featured.titolo}</h3>
-                <div style={{display:'flex',gap:'14px',flexWrap:'wrap'}}>
-                  <FChip icon="cal" text={fData(featured.data_inizio)}/>
-                  {featured.luogo && <FChip icon="pin" text={featured.luogo}/>}
-                  <FChip icon="clock" text={fOra(featured.data_inizio)}/>
+          {featured.length > 0 && (
+            <div style={{maxWidth:'520px',width:'100%'}}>
+              <a href={`/eventi/${featured[slide].slug}`}
+                style={{textDecoration:'none',display:'block',marginBottom:'14px'}}>
+                <div className='cal-featured-box' style={{backgroundColor:'rgba(255,255,255,0.09)',
+                  backdropFilter:'blur(12px)',border:'1px solid rgba(255,255,255,0.18)',
+                  borderRadius:'14px',padding:'22px',transition:'background 0.2s'}}
+                  onMouseEnter={e=>{e.currentTarget.style.backgroundColor='rgba(255,255,255,0.16)'}}
+                  onMouseLeave={e=>{e.currentTarget.style.backgroundColor='rgba(255,255,255,0.09)'}}>
+                  <p className='cal-hero-label' style={{fontSize:'11px',fontWeight:'800',color:'#60A5FA',
+                    textTransform:'uppercase',letterSpacing:'0.08em',margin:'0 0 8px'}}>
+                    ✦ Prossimi eventi — {slide+1}/{featured.length}
+                  </p>
+                  <h3 className='cal-hero-title' style={{fontSize:'18px',fontWeight:'800',color:'#ffffff',
+                    letterSpacing:'-0.02em',margin:'0 0 10px',lineHeight:1.3,minHeight:'48px'}}>
+                    {featured[slide].titolo}
+                  </h3>
+                  <div style={{display:'flex',gap:'12px',flexWrap:'wrap'}}>
+                    <FChip icon="cal" text={fData(featured[slide].data_inizio)}/>
+                    {featured[slide].luogo && <FChip icon="pin" text={featured[slide].luogo}/>}
+                    <FChip icon="clock" text={fOra(featured[slide].data_inizio)}/>
+                  </div>
+                  <p className='cal-hero-cta' style={{fontSize:'13px',fontWeight:'700',color:'#60A5FA',
+                    margin:'12px 0 0',display:'flex',alignItems:'center',gap:'5px'}}>
+                    Scopri e iscriviti <Arrow/>
+                  </p>
                 </div>
-                <p className='cal-hero-cta' style={{fontSize:'13px',fontWeight:'700',color:'#60A5FA',margin:'14px 0 0',display:'flex',alignItems:'center',gap:'5px'}}>
-                  Scopri e iscriviti <Arrow/>
-                </p>
-              </div>
-            </a>
+              </a>
+              {featured.length > 1 && (
+                <div style={{display:'flex',alignItems:'center',gap:'12px'}}>
+                  <button onClick={e=>{e.preventDefault();setSlide(s=>(s-1+featured.length)%featured.length)}}
+                    style={{width:'34px',height:'34px',borderRadius:'50%',border:'1px solid rgba(255,255,255,0.3)',
+                      backgroundColor:'rgba(255,255,255,0.1)',color:'#ffffff',cursor:'pointer',
+                      display:'flex',alignItems:'center',justifyContent:'center',flexShrink:0}}>
+                    <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round">
+                      <polyline points="15 18 9 12 15 6"/>
+                    </svg>
+                  </button>
+                  <div style={{display:'flex',gap:'7px',flex:1}}>
+                    {featured.map((_,i) => (
+                      <button key={i} onClick={e=>{e.preventDefault();setSlide(i)}}
+                        style={{height:'4px',flex:i===slide?3:1,borderRadius:'2px',border:'none',cursor:'pointer',
+                          backgroundColor:i===slide?'#ffffff':'rgba(255,255,255,0.3)',
+                          transition:'all 0.35s',padding:0}}/>
+                    ))}
+                  </div>
+                  <button onClick={e=>{e.preventDefault();setSlide(s=>(s+1)%featured.length)}}
+                    style={{width:'34px',height:'34px',borderRadius:'50%',border:'1px solid rgba(255,255,255,0.3)',
+                      backgroundColor:'rgba(255,255,255,0.1)',color:'#ffffff',cursor:'pointer',
+                      display:'flex',alignItems:'center',justifyContent:'center',flexShrink:0}}>
+                    <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round">
+                      <polyline points="9 18 15 12 9 6"/>
+                    </svg>
+                  </button>
+                </div>
+              )}
+            </div>
           )}
         </div>
 
