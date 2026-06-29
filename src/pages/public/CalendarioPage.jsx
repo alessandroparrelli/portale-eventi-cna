@@ -158,7 +158,7 @@ export default function CalendarioPage() {
       </header>
 
       {/* HERO */}
-      <section style={{position:'relative',overflow:'hidden',display:'flex',alignItems:'flex-start',backgroundColor:NERO}}>
+      <section style={{position:'relative',overflow:'hidden',backgroundColor:NERO}}>
         {(cfg?.hero_immagine_url || featured?.immagine_hero) && (
           <div style={{position:'absolute',inset:0,
             backgroundImage:`url(${cfg?.hero_immagine_url || featured?.immagine_hero})`,
@@ -171,7 +171,7 @@ export default function CalendarioPage() {
           backgroundImage:'radial-gradient(circle,rgba(255,255,255,0.8) 1px,transparent 1px)',
           backgroundSize:'32px 32px'}}/>
 
-        <div style={{position:'relative',zIndex:1,maxWidth:'1100px',margin:'0 auto',padding:'48px 24px',width:'100%',boxSizing:'border-box'}}>
+        <div style={{position:'relative',zIndex:1,maxWidth:'1100px',margin:'0 auto',padding:'48px 24px 56px',width:'100%',boxSizing:'border-box'}}>
           {nProssimi > 0 && (
             <div style={{display:'inline-flex',alignItems:'center',gap:'8px',
               backgroundColor:'rgba(255,255,255,0.1)',border:'1px solid rgba(255,255,255,0.18)',
