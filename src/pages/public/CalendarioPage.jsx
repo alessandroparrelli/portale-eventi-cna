@@ -105,23 +105,32 @@ export default function CalendarioPage() {
       `}</style>
 
       {/* NAVBAR */}
-      <header style={{position:'sticky',top:0,zIndex:100,
-        background:`linear-gradient(135deg,${color} 0%,#001f6b 100%)`,
-        boxShadow:'0 4px 24px rgba(0,61,165,0.35)'}}>
-        {/* Logo + CTA — flex row, logo a sx, CTA a dx, no overlap su mobile */}
-        <div style={{display:'flex',alignItems:'center',justifyContent:'space-between',
-          padding:'14px 24px',gap:'12px',flexWrap:'wrap'}}>
-          <img src={logo} alt="CNA Roma" style={{height:'56px',objectFit:'contain',maxWidth:'200px'}}/>
+      {/* HERO BLOCK: logo + contenuto + tab — tutto un unico blocco blu, niente sticky che taglia */}
+      <div style={{background:`linear-gradient(160deg,${color} 0%,#001a5e 100%)`,position:'relative',overflow:'hidden'}}>
+        {(cfg?.hero_immagine_url || featured?.immagine_hero) && (
+          <div style={{position:'absolute',inset:0,
+            backgroundImage:`url(${cfg?.hero_immagine_url || featured?.immagine_hero})`,
+            backgroundSize:'cover',backgroundPosition:'center',
+            filter:'blur(3px) brightness(0.18)',transform:'scale(1.06)'}}/>
+        )}
+        <div style={{position:'absolute',inset:0,opacity:0.04,
+          backgroundImage:'radial-gradient(circle,rgba(255,255,255,0.8) 1px,transparent 1px)',
+          backgroundSize:'32px 32px'}}/>
+
+        {/* Navbar logo + CTA */}
+        <div style={{position:'relative',zIndex:2,display:'flex',alignItems:'center',
+          justifyContent:'space-between',padding:'16px 24px',gap:'12px',flexWrap:'wrap'}}>
+          <a href="/calendario" onClick={e=>{e.preventDefault();window.location.href='/calendario'}} style={{display:'block',flexShrink:0}}>
+            <img src={logo} alt="CNA Roma" style={{height:'52px',objectFit:'contain',maxWidth:'220px',display:'block'}}/>
+          </a>
           {cfg?.url_cta && (
             <a href={cfg.url_cta} target="_blank" rel="noopener noreferrer"
               style={{display:'flex',alignItems:'center',gap:'8px',flexShrink:0,
-                fontSize:'13px',fontWeight:'700',color:color,
-                backgroundColor:'#ffffff',
+                fontSize:'13px',fontWeight:'700',color:color,backgroundColor:'#ffffff',
                 textDecoration:'none',padding:'10px 18px',borderRadius:'8px',
-                whiteSpace:'nowrap',boxShadow:'0 2px 12px rgba(0,0,0,0.2)',
-                transition:'box-shadow 0.15s'}}
-              onMouseEnter={e=>e.currentTarget.style.boxShadow='0 4px 20px rgba(0,0,0,0.28)'}
-              onMouseLeave={e=>e.currentTarget.style.boxShadow='0 2px 12px rgba(0,0,0,0.2)'}>
+                whiteSpace:'nowrap',boxShadow:'0 2px 12px rgba(0,0,0,0.25)',transition:'box-shadow 0.15s'}}
+              onMouseEnter={e=>e.currentTarget.style.boxShadow='0 4px 20px rgba(0,0,0,0.35)'}
+              onMouseLeave={e=>e.currentTarget.style.boxShadow='0 2px 12px rgba(0,0,0,0.25)'}>
               <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5">
                 <circle cx="12" cy="12" r="10"/>
                 <line x1="2" y1="12" x2="22" y2="12"/>
@@ -131,47 +140,9 @@ export default function CalendarioPage() {
             </a>
           )}
         </div>
-        {/* Tab menu sezioni */}
-        <div style={{display:'flex',borderTop:'1px solid rgba(255,255,255,0.15)'}}>
-          {[
-            {k:'eventi',   l: cfg?.testo_sezione_eventi  || 'Eventi',             n: eventi.length,   c:'#ffffff'},
-            {k:'mestieri', l: cfg?.testo_sezione_landing || 'Pagine di mestiere', n: landings.length, c:'#ffffff'},
-          ].map(t => (
-            <button key={t.k} onClick={() => setSezione(t.k)}
-              style={{flex:1,padding:'14px 24px',border:'none',cursor:'pointer',
-                fontFamily:"'Inter',sans-serif",fontSize:'14px',fontWeight:'700',
-                backgroundColor: sezione===t.k ? 'rgba(255,255,255,0.15)' : 'transparent',
-                transition:'all 0.15s',
-                color: sezione===t.k ? '#ffffff' : 'rgba(255,255,255,0.5)',
-                borderBottom: sezione===t.k ? '2px solid #ffffff' : '2px solid transparent',
-                display:'flex',alignItems:'center',justifyContent:'center',gap:'8px'}}>
-              {t.l}
-              <span style={{fontSize:'11px',fontWeight:'800',
-                backgroundColor: sezione===t.k ? 'rgba(255,255,255,0.25)' : 'rgba(255,255,255,0.1)',
-                color: sezione===t.k ? '#ffffff' : 'rgba(255,255,255,0.4)',
-                borderRadius:'999px',padding:'2px 9px',transition:'all 0.15s'}}>
-                {t.n}
-              </span>
-            </button>
-          ))}
-        </div>
-      </header>
 
-      {/* HERO */}
-      <section style={{position:'relative',overflow:'hidden',backgroundColor:NERO}}>
-        {(cfg?.hero_immagine_url || featured?.immagine_hero) && (
-          <div style={{position:'absolute',inset:0,
-            backgroundImage:`url(${cfg?.hero_immagine_url || featured?.immagine_hero})`,
-            backgroundSize:'cover',backgroundPosition:'center',
-            filter:'blur(3px) brightness(0.22)',transform:'scale(1.06)'}}/>
-        )}
-        <div style={{position:'absolute',inset:0,
-          background:`linear-gradient(180deg,${color}f0 0%,rgba(0,15,60,0.97) 100%)`}}/>
-        <div style={{position:'absolute',inset:0,opacity:0.04,
-          backgroundImage:'radial-gradient(circle,rgba(255,255,255,0.8) 1px,transparent 1px)',
-          backgroundSize:'32px 32px'}}/>
-
-        <div style={{position:'relative',zIndex:1,maxWidth:'1100px',margin:'0 auto',padding:'48px 24px 56px',width:'100%',boxSizing:'border-box'}}>
+        {/* Contenuto hero */}
+        <div style={{position:'relative',zIndex:1,maxWidth:'1100px',margin:'0 auto',padding:'32px 24px 0',width:'100%',boxSizing:'border-box'}}>
           {nProssimi > 0 && (
             <div style={{display:'inline-flex',alignItems:'center',gap:'8px',
               backgroundColor:'rgba(255,255,255,0.1)',border:'1px solid rgba(255,255,255,0.18)',
@@ -214,7 +185,35 @@ export default function CalendarioPage() {
             </a>
           )}
         </div>
-      </section>
+
+        {/* Tab sticky dentro il blocco blu */}
+        <div style={{position:'sticky',top:0,zIndex:100,display:'flex',
+          borderTop:'1px solid rgba(255,255,255,0.15)',marginTop:'32px',
+          background:`linear-gradient(160deg,${color} 0%,#001a5e 100%)`,
+          boxShadow:'0 4px 16px rgba(0,20,80,0.4)'}}>
+          {[
+            {k:'eventi',   l: cfg?.testo_sezione_eventi  || 'Eventi',             n: eventi.length},
+            {k:'mestieri', l: cfg?.testo_sezione_landing || 'Pagine di mestiere', n: landings.length},
+          ].map(t => (
+            <button key={t.k} onClick={() => setSezione(t.k)}
+              style={{flex:1,padding:'14px 20px',border:'none',cursor:'pointer',
+                fontFamily:"'Inter',sans-serif",fontSize:'14px',fontWeight:'700',
+                backgroundColor: sezione===t.k ? 'rgba(255,255,255,0.15)' : 'transparent',
+                transition:'all 0.15s',
+                color: sezione===t.k ? '#ffffff' : 'rgba(255,255,255,0.5)',
+                borderBottom: sezione===t.k ? '3px solid #ffffff' : '3px solid transparent',
+                display:'flex',alignItems:'center',justifyContent:'center',gap:'8px'}}>
+              {t.l}
+              <span style={{fontSize:'11px',fontWeight:'800',
+                backgroundColor: sezione===t.k ? 'rgba(255,255,255,0.25)' : 'rgba(255,255,255,0.1)',
+                color: sezione===t.k ? '#ffffff' : 'rgba(255,255,255,0.35)',
+                borderRadius:'999px',padding:'2px 9px'}}>
+                {t.n}
+              </span>
+            </button>
+          ))}
+        </div>
+      </div>{/* fine hero block */}
 
       {/* STATS BAR */}
       <div style={{backgroundColor:'#F8FAFF',borderBottom:'1px solid #E5E7EB',padding:'16px 40px'}}>
