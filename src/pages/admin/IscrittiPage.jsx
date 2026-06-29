@@ -36,6 +36,36 @@ export default function IscrittiPage() {
   const fileInputRef = useRef(null)
   const [invioInCorso, setInvioInCorso] = useState(false)
   const [invioRisultato, setInvioRisultato] = useState(null)
+  const [associatiMap, setAssociatiMap] = useState({})   // partita_iva -> {contratto, datastipula, associato}
+  const [verificaInCorso, setVerificaInCorso] = useState(false)
+  const [verificaInfo, setVerificaInfo] = useState(null) // {trovati, cercati}
+
+  async function verificaAssociati() {
+    if (!registrations.length) return
+    setVerificaInCorso(true)
+    setVerificaInfo(null)
+    try {
+      // Prendi tutte le P.IVA non vuote degli iscritti
+      const pive = [...new Set(
+        registrations
+          .map(r => (r.partita_iva || '').toString().trim())
+          .filter(p => p.length >= 5)
+      )]
+      if (!pive.length) { setVerificaInfo({ trovati: 0, cercati: 0, errore: 'Nessuna P.IVA presente tra gli iscritti' }); setVerificaInCorso(false); return }
+      const res = await fetch('https://hnkhckcclgabunkqfmrz.supabase.co/functions/v1/verifica-associati', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ partite_iva: pive })
+      })
+      const data = await res.json()
+      if (data.error) throw new Error(data.error)
+      setAssociatiMap(data.associati || {})
+      setVerificaInfo({ trovati: data.trovati, cercati: data.cercati })
+    } catch (e) {
+      setVerificaInfo({ errore: String(e) })
+    }
+    setVerificaInCorso(false)
+  }
 
   async function inviaCertificati() {
     if (!selectedEvento) return
@@ -191,6 +221,10 @@ export default function IscrittiPage() {
             <Btn variant="secondary" onClick={downloadTemplate} size="md" title="Scarica template Excel">
               <Download size={16}/> Template
             </Btn>
+            <Btn variant="secondary" onClick={verificaAssociati} disabled={verificaInCorso} size="md"
+              title="Incrocia P.IVA con tabella associati CNA">
+              {verificaInCorso ? '⏳ Verifica…' : '🔍 Verifica associati'}
+            </Btn>
             {eventi.find(e=>e.id===selectedEvento)?.certificato_abilitato && (
               <Btn variant="secondary" onClick={inviaCertificati} disabled={invioInCorso} size="md"
                 title="Invia certificati a chi ha partecipato">
@@ -259,6 +293,11 @@ export default function IscrittiPage() {
                 { label:'Mestiere',   color:'violet', hideOnMobile:true },
                 { label:'Iscritto il',color:'amber',  hideOnMobile:true },
                 { label:'Stato',      color:'green' },
+                ...(Object.keys(associatiMap).length > 0 ? [
+                  { label:'Associato',   color:'emerald', hideOnMobile:true },
+                  { label:'Contratto',   color:'indigo',  hideOnMobile:true },
+                  { label:'Data stipula',color:'amber',   hideOnMobile:true },
+                ] : []),
                 { label:'Azioni',     color:'neutral' },
               ]}/>
               <tbody>
@@ -274,6 +313,30 @@ export default function IscrittiPage() {
                     <td style={s.td} className="col-hide-mobile"><span style={s.cell}>{getMestiere(r.mestiere_id)}</span></td>
                     <td style={s.td} className="col-hide-mobile"><span style={s.cell}>{formatDt(r.created_at)}</span></td>
                     <td style={s.td}><PresenzaBadge stato={r.stato}/></td>
+                    {Object.keys(associatiMap).length > 0 && (() => {
+                      const piva = (r.partita_iva||'').toString().replace(/\s/g,'').replace(/^0+/,'')
+                      const ass = associatiMap[piva]
+                      return (<>
+                        <td style={s.td} className="col-hide-mobile">
+                          {!piva ? <span style={{color:'#D1D5DB',fontSize:'13px'}}>—</span>
+                            : ass
+                              ? <span style={{display:'inline-flex',alignItems:'center',gap:'5px',fontSize:'12px',fontWeight:'700',
+                                  color: ass.associato ? '#059669' : '#DC2626',
+                                  backgroundColor: ass.associato ? '#F0FDF4' : '#FEF2F2',
+                                  padding:'3px 10px',borderRadius:'999px'}}>
+                                  {ass.associato ? '✓ Associato' : '✗ Disdetto'}
+                                </span>
+                              : <span style={{color:'#9CA3AF',fontSize:'12px'}}>Non trovato</span>
+                          }
+                        </td>
+                        <td style={s.td} className="col-hide-mobile">
+                          <span style={{fontSize:'12px',color:'#374151'}}>{ass?.contratto||'—'}</span>
+                        </td>
+                        <td style={s.td} className="col-hide-mobile">
+                          <span style={{fontSize:'12px',color:'#374151'}}>{ass?.datastipula||'—'}</span>
+                        </td>
+                      </>)
+                    })()}
                     <td style={s.td}>
                       <div style={{ display:'flex', gap:'6px' }}>
                         <button style={s.iconBtn} title="Dettaglio" onClick={()=>setDetail(r)}>
@@ -330,6 +393,23 @@ export default function IscrittiPage() {
           </div>
         </Modal>
       )}
+      {/* BANNER VERIFICA ASSOCIATI */}
+      {verificaInfo && (
+        <div style={{ margin:'0 0 16px', padding:'12px 18px', borderRadius:'8px',
+          backgroundColor: verificaInfo.errore ? '#FEF2F2' : '#EFF6FF',
+          border: `1px solid ${verificaInfo.errore ? '#FECACA' : '#BFDBFE'}`,
+          display:'flex', alignItems:'center', justifyContent:'space-between', gap:'12px' }}>
+          <p style={{ fontSize:'13px', fontWeight:'600', margin:0,
+            color: verificaInfo.errore ? '#DC2626' : '#1D4ED8' }}>
+            {verificaInfo.errore
+              ? `❌ ${verificaInfo.errore}`
+              : `✅ ${verificaInfo.trovati} associati trovati su ${verificaInfo.cercati} P.IVA — colonne Associato, Contratto e Data stipula aggiornate`}
+          </p>
+          <button onClick={() => setVerificaInfo(null)}
+            style={{ background:'none', border:'none', cursor:'pointer', color:'#9CA3AF', fontSize:'18px', padding:0 }}>×</button>
+        </div>
+      )}
+
       {/* BANNER RISULTATO CERTIFICATI */}
       {invioRisultato && (
         <div style={{ margin:'0 0 16px', padding:'14px 18px', borderRadius:'8px',
