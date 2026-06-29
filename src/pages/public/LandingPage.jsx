@@ -6,6 +6,7 @@ import { temaConDefault } from '../../components/editor/AspettoTab'
 import { MapPin, Calendar, ChevronRight, AlertCircle, Download, Share2 } from 'lucide-react'
 import { RICH_CSS } from '../../components/editor/RichEditor'
 import FormIscrizione from './FormIscrizione'
+import PushButton from '../../components/PushButton'
 import BlockRenderer from '../../components/public/BlockRenderer'
 
 function fmtData(ts) {
@@ -524,7 +525,7 @@ export default function LandingPage() {
         {!conferma && (
           <section style={{ ...s.ctaSection, backgroundColor: tema.cta_bg || '#EEF3FF' }}>
             <div style={s.ctaRow}>
-              <div>
+              <div style={{ flex:1 }}>
                 <h2 style={s.ctaTitle}>Partecipa all'evento</h2>
                 <p style={s.ctaSub}>
                   {esaurito ? 'I posti sono esauriti.' : 'Registrazione gratuita. Ricevi il QR Code per l\'ingresso.'}
@@ -553,7 +554,19 @@ export default function LandingPage() {
         {formVisible && !esaurito && !conferma && (
           <div id="form-iscrizione" style={s.formWrap}>
             <h3 style={s.formTitle}>Modulo di iscrizione</h3>
-            <FormIscrizione event={event} onSuccess={dati => {
+            {/* Notifiche per questo evento */}
+          {event?.id && (
+            <div style={{ marginBottom:'16px' }}>
+              <PushButton
+                eventId={event.id}
+                tipo="evento"
+                label="🔔 Ricevi aggiornamenti su questo evento"
+                labelOff="🔔 Aggiornamenti attivi"
+              />
+            </div>
+          )}
+
+          <FormIscrizione event={event} onSuccess={dati => {
               setFormVisible(false)
               setConferma(dati)
             }}/>

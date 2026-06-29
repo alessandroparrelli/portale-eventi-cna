@@ -1,5 +1,6 @@
 import React, { useEffect, useState } from 'react'
 import { supabase } from '../../lib/supabase'
+import PushButton from '../../components/PushButton'
 
 const DEFAULT_LOGO = 'https://customer31551.img.musvc2.net/static/31551/images/1/CNARoma%20NEGATIVO%20COLORE%20SOLO%20ROMA.png'
 const BLU = '#003DA5'
@@ -300,8 +301,15 @@ export default function CalendarioPage() {
           <Pill n={nProssimi} label="In programma" color='#059669'/>
           <Pill n={nPassati} label="Conclusi" color='#9CA3AF'/>
           {cfg?.mostra_landing !== false && <Pill n={landings.length} label="Mestieri" color='#7C3AED'/>}
+          <div style={{marginLeft:'auto',display:'flex',alignItems:'center',gap:'10px'}}>
+            <PushButton
+              tipo="calendario"
+              label="🔔 Notifiche nuovi eventi"
+              labelOff="🔔 Notifiche attive"
+            />
+          </div>
           {allTags.length > 0 && (
-            <div style={{display:'flex',gap:'6px',flexWrap:'wrap',alignItems:'center',marginLeft:'auto'}}>
+            <div style={{display:'flex',gap:'6px',flexWrap:'wrap',alignItems:'center'}}>
               {tagFilter && (
                 <button onClick={()=>setTagFilter('')}
                   style={{display:'flex',alignItems:'center',gap:'4px',padding:'4px 10px',borderRadius:'999px',
