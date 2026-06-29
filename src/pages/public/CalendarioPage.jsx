@@ -23,6 +23,7 @@ export default function CalendarioPage() {
   const [eventi, setEventi] = useState([])
   const [landings, setLandings] = useState([])
   const [loading, setLoading] = useState(true)
+  const [sezione, setSezione] = useState('eventi')      // eventi | mestieri
   const [tabEventi, setTabEventi] = useState('prossimi') // tutti | prossimi | passati
   const [searchEventi, setSearchEventi] = useState('')
   const [searchLanding, setSearchLanding] = useState('')
@@ -104,18 +105,45 @@ export default function CalendarioPage() {
       `}</style>
 
       {/* NAVBAR */}
-      <nav style={{position:'sticky',top:0,zIndex:100,backgroundColor:'rgba(255,255,255,0.96)',
-        backdropFilter:'blur(12px)',borderBottom:'1px solid #E5E7EB',padding:'0 40px',height:'72px',
-        display:'flex',alignItems:'center',justifyContent:'space-between'}}>
-        <img src={logo} alt="CNA Roma" style={{height:'52px',objectFit:'contain'}}/>
-        {cfg?.url_cta && (
-          <a href={cfg.url_cta} target="_blank" rel="noopener noreferrer"
-            style={{fontSize:'13px',fontWeight:'700',color:'#ffffff',backgroundColor:color,
-              textDecoration:'none',padding:'9px 20px',borderRadius:'6px',whiteSpace:'nowrap'}}>
-            {cfg.testo_cta || 'cnaroma.it'} ↗
-          </a>
-        )}
-      </nav>
+      <header style={{position:'sticky',top:0,zIndex:100,backgroundColor:'rgba(255,255,255,0.97)',
+        backdropFilter:'blur(16px)',borderBottom:'1px solid #E5E7EB'}}>
+        {/* Logo centrato + CTA */}
+        <div style={{display:'flex',alignItems:'center',justifyContent:'center',
+          padding:'16px 40px',position:'relative',minHeight:'80px'}}>
+          <img src={logo} alt="CNA Roma" style={{height:'64px',objectFit:'contain'}}/>
+          {cfg?.url_cta && (
+            <a href={cfg.url_cta} target="_blank" rel="noopener noreferrer"
+              style={{position:'absolute',right:'40px',top:'50%',transform:'translateY(-50%)',
+                fontSize:'13px',fontWeight:'700',color:'#ffffff',backgroundColor:color,
+                textDecoration:'none',padding:'8px 18px',borderRadius:'6px',whiteSpace:'nowrap'}}>
+              {cfg.testo_cta || 'cnaroma.it'} ↗
+            </a>
+          )}
+        </div>
+        {/* Tab menu sezioni */}
+        <div style={{display:'flex',borderTop:'1px solid #F3F4F6'}}>
+          {[
+            {k:'eventi',   l: cfg?.testo_sezione_eventi  || 'Eventi',             n: eventi.length,   c: color},
+            {k:'mestieri', l: cfg?.testo_sezione_landing || 'Pagine di mestiere', n: landings.length, c: '#7C3AED'},
+          ].map(t => (
+            <button key={t.k} onClick={() => setSezione(t.k)}
+              style={{flex:1,padding:'14px 24px',border:'none',cursor:'pointer',
+                fontFamily:"'Inter',sans-serif",fontSize:'14px',fontWeight:'700',
+                backgroundColor:'transparent',transition:'all 0.15s',
+                color: sezione===t.k ? t.c : '#9CA3AF',
+                borderBottom: sezione===t.k ? `2px solid ${t.c}` : '2px solid transparent',
+                display:'flex',alignItems:'center',justifyContent:'center',gap:'8px'}}>
+              {t.l}
+              <span style={{fontSize:'12px',fontWeight:'800',
+                backgroundColor: sezione===t.k ? t.c+'18' : '#F3F4F6',
+                color: sezione===t.k ? t.c : '#C4C4C4',
+                borderRadius:'999px',padding:'2px 9px',transition:'all 0.15s'}}>
+                {t.n}
+              </span>
+            </button>
+          ))}
+        </div>
+      </header>
 
       {/* HERO */}
       <section style={{position:'relative',overflow:'hidden',minHeight:'480px',display:'flex',alignItems:'center',backgroundColor:NERO}}>
@@ -218,7 +246,7 @@ export default function CalendarioPage() {
         <main style={{maxWidth:'1100px',margin:'0 auto',padding:'56px 40px 80px'}}>
 
           {/* ── SEZIONE EVENTI ── */}
-          <section style={{marginBottom:'72px'}}>
+          {sezione === 'eventi' && (<section style={{marginBottom:'72px'}}>
             <div style={{display:'flex',alignItems:'center',justifyContent:'space-between',flexWrap:'wrap',gap:'16px',marginBottom:'28px'}}>
               <div>
                 <h2 style={{fontSize:'28px',fontWeight:'900',letterSpacing:'-0.03em',color:NERO,margin:'0 0 4px'}}>
@@ -267,8 +295,10 @@ export default function CalendarioPage() {
             )}
           </section>
 
+          )}
+
           {/* ── SEZIONE LANDING ── */}
-          {cfg?.mostra_landing !== false && landings.length > 0 && (
+          {sezione === 'mestieri' && cfg?.mostra_landing !== false && landings.length > 0 && (
             <section>
               <div style={{display:'flex',alignItems:'center',justifyContent:'space-between',flexWrap:'wrap',gap:'16px',marginBottom:'28px'}}>
                 <div>
