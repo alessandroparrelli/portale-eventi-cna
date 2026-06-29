@@ -535,13 +535,16 @@ function EventCard({evento,index,color}) {
 
 /* ── Landing Card ── */
 function LandingCard({landing,index}) {
+  const imgDark = useImgLuminosity(landing.hero_immagine_url)
+  const titleColor = imgDark ? '#ffffff' : '#0A0A0A'
+  const titleShadow = imgDark ? '0 1px 12px rgba(0,0,0,0.7)' : '0 1px 6px rgba(255,255,255,0.8)'
   return (
     <a href={`/lp/${landing.slug}`} style={{textDecoration:'none',display:'block',borderRadius:'14px',
       overflow:'hidden',border:'1px solid #E5E7EB',backgroundColor:'#ffffff',transition:'all 0.2s',
       animation:`fadeUp 0.35s ease ${Math.min(index,5)*0.07}s both`}}
       onMouseEnter={e=>{e.currentTarget.style.transform='translateY(-4px)';e.currentTarget.style.boxShadow='0 12px 40px rgba(0,0,0,0.1)';e.currentTarget.style.borderColor='#7C3AED'}}
       onMouseLeave={e=>{e.currentTarget.style.transform='none';e.currentTarget.style.boxShadow='none';e.currentTarget.style.borderColor='#E5E7EB'}}>
-      <div style={{position:'relative',height:'190px',backgroundColor:'#7C3AED12',overflow:'hidden'}}>
+      <div style={{position:'relative',height:'220px',backgroundColor:'#7C3AED12',overflow:'hidden'}}>
         {landing.hero_immagine_url
           ? <img src={landing.hero_immagine_url} alt={landing.titolo}
               style={{width:'100%',height:'100%',objectFit:'cover',transition:'transform 0.35s'}}
@@ -549,9 +552,23 @@ function LandingCard({landing,index}) {
               onMouseLeave={e=>e.target.style.transform='none'}/>
           : <NoImg color='#7C3AED'/>
         }
+        <div style={{position:'absolute',inset:0,
+          background: imgDark
+            ? 'linear-gradient(to bottom, transparent 25%, rgba(0,0,0,0.72) 100%)'
+            : 'linear-gradient(to bottom, transparent 25%, rgba(255,255,255,0.65) 100%)'
+        }}/>
         <div style={{position:'absolute',top:'13px',right:'13px',backgroundColor:'#7C3AED',
           borderRadius:'6px',padding:'4px 10px',fontSize:'11px',fontWeight:'700',color:'#ffffff'}}>
           Mestiere
+        </div>
+        <div style={{position:'absolute',bottom:0,left:0,right:0,padding:'12px 14px 14px'}}>
+          <h3 className='cal-card-title' style={{
+            fontSize:'19px',fontWeight:'900',letterSpacing:'-0.03em',
+            color: titleColor, margin:0, lineHeight:1.2,
+            textShadow: titleShadow
+          }}>
+            {landing.titolo}
+          </h3>
         </div>
       </div>
       <div style={{padding:'16px 20px 20px'}}>
