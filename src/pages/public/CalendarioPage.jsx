@@ -177,7 +177,7 @@ export default function CalendarioPage() {
               backgroundColor:'rgba(255,255,255,0.1)',border:'1px solid rgba(255,255,255,0.18)',
               borderRadius:'999px',padding:'6px 16px',marginBottom:'24px'}}>
               <span style={{width:'7px',height:'7px',borderRadius:'50%',backgroundColor:'#4ADE80',
-                display:'inline-block',animation:'blink 2s ease infinite'}}/>
+                display:'inline-block'}}/>
               <span className="cal-hero-badge" style={{fontSize:'12px',fontWeight:'700',color:'rgba(255,255,255,0.85)',
                 letterSpacing:'0.06em',textTransform:'uppercase'}}>
                 {nProssimi} {nProssimi===1?'evento':'eventi'} in programma
@@ -280,7 +280,7 @@ export default function CalendarioPage() {
       <div style={{backgroundColor:'#EFF6FF',borderBottom:'1px solid #BFDBFE',padding:'12px 24px'}}>
         <div style={{maxWidth:'1100px',margin:'0 auto',display:'flex',alignItems:'center',justifyContent:'space-between',flexWrap:'wrap',gap:'12px'}}>
           <div style={{display:'flex',alignItems:'center',gap:'10px'}}>
-            <span className='cal-banner-icon' style={{display:'flex',alignItems:'center',filter:'drop-shadow(0 0 8px #60A5FA)'}}>
+            <span className='cal-banner-icon' style={{display:'flex',alignItems:'center'}}>
               <svg width="24" height="24" viewBox="0 0 24 24" fill="none" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
                 <rect x="3" y="4" width="18" height="18" rx="2" stroke="#3B82F6" fill="#3B82F611"/>
                 <line x1="16" y1="2" x2="16" y2="6" stroke="#60A5FA"/>
@@ -301,7 +301,7 @@ export default function CalendarioPage() {
               backgroundColor:'#003DA5',color:'#ffffff',borderRadius:'8px',
               fontSize:'14px',fontWeight:'700',textDecoration:'none',fontFamily:"'Inter',sans-serif",
               lineHeight:'1.35',maxWidth:'380px'}}>
-            <svg width="20" height="20" viewBox="0 0 24 24" fill="none" strokeWidth="2" strokeLinecap="round" style={{flexShrink:0,filter:'drop-shadow(0 0 6px rgba(255,255,255,0.6))'}}>
+            <svg width="20" height="20" viewBox="0 0 24 24" fill="none" strokeWidth="2" strokeLinecap="round" style={{flexShrink:0}}>
               <rect x="3" y="4" width="18" height="18" rx="2" stroke="white" fill="rgba(255,255,255,0.15)"/>
               <line x1="16" y1="2" x2="16" y2="6" stroke="white"/>
               <line x1="8" y1="2" x2="8" y2="6" stroke="white"/>
@@ -614,7 +614,7 @@ function FChip({icon,text}) {
     </svg>,
   }
   return <div style={{display:'flex',alignItems:'center',gap:'6px'}}>
-    <span className='cal-fchip-icon' style={{display:'flex',alignItems:'center',filter:'drop-shadow(0 0 4px currentColor)'}}>{icons[icon]}</span>
+    <span className='cal-fchip-icon' style={{display:'flex',alignItems:'center'}}>{icons[icon]}</span>
     <span className='cal-fchip-text' style={{fontSize:'12px',color:'rgba(255,255,255,0.82)',fontWeight:'500'}}>{text}</span>
   </div>
 }
@@ -646,13 +646,13 @@ function Arrow({color='currentColor'}) {
   </svg>
 }
 function IcClock({color}) {
-  return <svg width="13" height="13" viewBox="0 0 24 24" fill="none" strokeWidth="2" style={{flexShrink:0,filter:`drop-shadow(0 0 3px ${color}88)`}}>
+  return <svg width="13" height="13" viewBox="0 0 24 24" fill="none" strokeWidth="2" style={{flexShrink:0}}>
     <circle cx="12" cy="12" r="10" stroke={color} fill={color+'11'}/>
     <polyline points="12 6 12 12 16 14" stroke={color} strokeLinecap="round"/>
   </svg>
 }
 function IcPin({color}) {
-  return <svg width="13" height="13" viewBox="0 0 24 24" fill="none" strokeWidth="2" style={{flexShrink:0,filter:`drop-shadow(0 0 3px ${color}88)`}}>
+  return <svg width="13" height="13" viewBox="0 0 24 24" fill="none" strokeWidth="2" style={{flexShrink:0}}>
     <path d="M12 2C8.13 2 5 5.13 5 9c0 5.25 7 13 7 13s7-7.75 7-13c0-3.87-3.13-7-7-7z" stroke={color} fill={color+'22'}/>
     <circle cx="12" cy="9" r="2.5" stroke={color} fill={color+'44'}/>
   </svg>
@@ -672,7 +672,7 @@ function SearchBox({value,onChange,color,placeholder}) {
 }
 function Empty({text}) {
   return <div style={{textAlign:'center',padding:'60px 0',gridColumn:'1/-1'}}>
-    <div style={{display:'flex',justifyContent:'center',marginBottom:'16px',filter:'drop-shadow(0 0 12px #93C5FD)'}}>
+    <div style={{display:'flex',justifyContent:'center',marginBottom:'16px'}}>
       <svg width="52" height="52" viewBox="0 0 24 24" fill="none" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round">
         <path d="M22 13V6a2 2 0 0 0-2-2H4a2 2 0 0 0-2 2v12a2 2 0 0 0 2 2h8" stroke="#60A5FA"/>
         <path d="M22 7l-9.5 6.5L3 7" stroke="#60A5FA"/>
