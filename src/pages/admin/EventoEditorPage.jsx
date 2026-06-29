@@ -23,6 +23,7 @@ import IscrizioniTab from '../../components/editor/IscrizioniTab'
 import AspettoTab from '../../components/editor/AspettoTab'
 import SessioniTab from '../../components/editor/SessioniTab'
 import QuestionarioTab from '../../components/editor/QuestionarioTab'
+import TagInput from '../../components/editor/TagInput'
 import GlowTabBar from '../../components/GlowTabBar'
 
 const toSlug = s => s.toLowerCase().normalize('NFD').replace(/[\u0300-\u036f]/g,'')
@@ -380,6 +381,7 @@ export default function EventoEditorPage() {
           email_organizzatore: data.email_organizzatore || '',
           email_mittente: data.email_mittente || '',
           email_cc: data.email_cc || '',
+        tags: data.tags || [],
           nome_mittente: data.nome_mittente || '',
         }
         eventRef.current = next
@@ -427,6 +429,7 @@ export default function EventoEditorPage() {
       logo_url:ev.logo_url||null,
       sottotitolo:ev.sottotitolo||null,
       footer_testo:ev.footer_testo||null,
+      tags:ev.tags||[],
       tema:ev.tema||{},
       email_organizzatore:ev.email_organizzatore||null,
       email_mittente:ev.email_mittente||null,
@@ -625,6 +628,12 @@ export default function EventoEditorPage() {
                   />
                 </Field>
               </div>
+              <Field label="Tag" hint="Usati per filtrare nel calendario pubblico — premi Invio o virgola per aggiungere">
+                <TagInput
+                  value={event.tags||[]}
+                  onChange={tags=>updEvent(p=>({...p,tags}))}
+                />
+              </Field>
               <Field label="Stato">
                 <Select value={event.stato} onChange={e=>updEvent(p=>({...p,stato:e.target.value}))}>
                   <option value="bozza">📝 Bozza</option>

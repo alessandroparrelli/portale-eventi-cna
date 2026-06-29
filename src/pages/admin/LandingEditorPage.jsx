@@ -4,6 +4,7 @@ function normDim(v){return DIM_MAP[v]||v||'22px'}
 
 import { useParams, useNavigate } from 'react-router-dom'
 import { supabase } from '../../lib/supabase'
+import TagInput from '../../components/editor/TagInput'
 import ImageUploader from '../../components/editor/ImageUploader'
 import BlockEditor from '../../components/editor/BlockEditor'
 import LogoManager from '../../components/editor/LogoManager'
@@ -137,7 +138,7 @@ export default function LandingEditorPage() {
       form_testo: d.form_testo, form_fields: d.form_fields,
       form_bottone_testo: d.form_bottone_testo,
       form_messaggio_conferma: d.form_messaggio_conferma,
-      footer_testo: d.footer_testo, meta_descrizione: d.meta_descrizione,
+      footer_testo: d.footer_testo, meta_descrizione: d.meta_descrizione, tags: d.tags || [],
       email_responsabile: d.email_responsabile || null,
       email_mittente: d.email_mittente || null,
       email_cc: d.email_cc || null,
@@ -219,6 +220,9 @@ export default function LandingEditorPage() {
               </Field>
               <Field label="Testo footer">
                 <textarea value={data.footer_testo||''} onChange={e => upd('footer_testo', e.target.value)} rows={2} style={{ ...iSt, resize:'vertical' }} />
+              </Field>
+              <Field label="Tag" hint="Usati per filtrare nel calendario pubblico — premi Invio o virgola per aggiungere">
+                <TagInput value={data.tags||[]} onChange={tags => upd('tags', tags)} />
               </Field>
 
               {/* ── Impostazioni email ── */}

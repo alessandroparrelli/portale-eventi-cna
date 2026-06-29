@@ -64,7 +64,7 @@ export default function App() {
           <Route path="/admin/landing/:id/editor"
             element={<ProtectedRoute><LandingEditorPage /></ProtectedRoute>} />
 
-          <Route path="*" element={<Navigate to="/admin" replace />} />
+          <Route path="/admin/*" element={<Navigate to="/admin" replace />} />
         </Routes>
       </AuthProvider>
     </BrowserRouter>
