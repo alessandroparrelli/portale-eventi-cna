@@ -120,7 +120,7 @@ export default function CalendarioPage() {
           .cal-banner-icon svg { width:30px !important; height:30px !important; }
           .cal-pill-n { font-size:28px !important; }
           .cal-pill-l { font-size:14px !important; }
-          .cal-card-title { font-size:18px !important; }
+          .cal-card-title { font-size:22px !important; }
           .cal-card-sub { font-size:14px !important; }
           .cal-card-meta { font-size:14px !important; }
           .cal-card-meta svg { width:15px !important; height:15px !important; }
@@ -454,7 +454,6 @@ function EventCard({evento,index,color}) {
         </div>
       </div>
       <div style={{padding:'20px'}}>
-        <h3 className='cal-card-title' style={{fontSize:'16px',fontWeight:'800',letterSpacing:'-0.025em',color:past?'#6B7280':NERO,margin:'0 0 6px',lineHeight:1.3}}>{evento.titolo}</h3>
         {evento.sottotitolo && (
           <p style={{fontSize:'13px',color:'#9CA3AF',margin:'0 0 12px',lineHeight:'1.5',
             display:'-webkit-box',WebkitLineClamp:2,WebkitBoxOrient:'vertical',overflow:'hidden'}}>
