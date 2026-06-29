@@ -303,95 +303,92 @@ export default function IscrittiPage() {
         ) : filtered.length === 0 ? (
           <EmptyState icon={Users} title="Nessun iscritto trovato" desc="Nessun risultato per i filtri selezionati"/>
         ) : (
-          {/* BANNER VERIFICA ASSOCIATI — sopra la tabella */}
-          {verificaInfo && (
-            <div style={{ marginBottom:'14px', padding:'12px 18px', borderRadius:'8px',
-              backgroundColor: verificaInfo.errore ? '#FEF2F2' : '#EFF6FF',
-              border: `1px solid ${verificaInfo.errore ? '#FECACA' : '#BFDBFE'}`,
-              display:'flex', alignItems:'center', justifyContent:'space-between', gap:'12px' }}>
-              <p style={{ fontSize:'13px', fontWeight:'700', margin:0,
-                color: verificaInfo.errore ? '#DC2626' : '#1D4ED8' }}>
-                {verificaInfo.errore
-                  ? `❌ ${verificaInfo.errore}`
-                  : `✅ ${verificaInfo.trovati} associati trovati su ${verificaInfo.cercati} P.IVA — colonne Associato CNA e Data stipula aggiornate`}
-              </p>
-              <button onClick={() => setVerificaInfo(null)}
-                style={{ background:'none', border:'none', cursor:'pointer', color:'#9CA3AF', fontSize:'18px', padding:0, flexShrink:0 }}>×</button>
-            </div>
-          )}
-
-          <div style={{ overflowX:'auto' }} className="table-wrap">
-            <table style={s.table}>
-              <GlowTableHead columns={[
-                { label:'Nominativo', color:'blue' },
-                { label:'Email',      color:'cyan',   hideOnMobile:true },
-                { label:'Mestiere',   color:'violet', hideOnMobile:true },
-                { label:'Iscritto il',color:'amber',  hideOnMobile:true },
-                { label:'Stato',      color:'green' },
-                ...(verificaEseguita ? [
-                  { label:'Associato CNA', color:'green', hideOnMobile:true },
-                  { label:'Data stipula',  color:'amber', hideOnMobile:true },
-                ] : []),
-                { label:'Azioni',     color:'neutral' },
-              ]}/>
-              <tbody>
-                {filtered.map(r=>(
-                  {(() => {
+          <>
+            {/* BANNER VERIFICA — sopra la tabella */}
+            {verificaInfo && (
+              <div style={{ marginBottom:'14px', padding:'12px 18px', borderRadius:'8px',
+                backgroundColor: verificaInfo.errore ? '#FEF2F2' : '#EFF6FF',
+                border: `1px solid ${verificaInfo.errore ? '#FECACA' : '#BFDBFE'}`,
+                display:'flex', alignItems:'center', justifyContent:'space-between', gap:'12px' }}>
+                <p style={{ fontSize:'13px', fontWeight:'700', margin:0,
+                  color: verificaInfo.errore ? '#DC2626' : '#1D4ED8' }}>
+                  {verificaInfo.errore
+                    ? `❌ ${verificaInfo.errore}`
+                    : `✅ ${verificaInfo.trovati} associati trovati su ${verificaInfo.cercati} P.IVA — colonne Associato CNA e Data stipula aggiornate`}
+                </p>
+                <button onClick={() => setVerificaInfo(null)}
+                  style={{ background:'none', border:'none', cursor:'pointer', color:'#9CA3AF', fontSize:'18px', padding:0, flexShrink:0 }}>×</button>
+              </div>
+            )}
+            <div style={{ overflowX:'auto' }} className="table-wrap">
+              <table style={s.table}>
+                <GlowTableHead columns={[
+                  { label:'Nominativo', color:'blue' },
+                  { label:'Email',      color:'cyan',   hideOnMobile:true },
+                  { label:'Mestiere',   color:'violet', hideOnMobile:true },
+                  { label:'Iscritto il',color:'amber',  hideOnMobile:true },
+                  { label:'Stato',      color:'green' },
+                  ...(verificaEseguita ? [
+                    { label:'Associato CNA', color:'green', hideOnMobile:true },
+                    { label:'Data stipula',  color:'amber', hideOnMobile:true },
+                  ] : []),
+                  { label:'Azioni', color:'neutral' },
+                ]}/>
+                <tbody>
+                  {filtered.map(r => {
                     const _piva = (r.partita_iva||'').toString().replace(/\s/g,'').replace(/^0+/,'')
-                    const _ass = verificaEseguita ? associatiMap[_piva] : null
-                    const _rowBg = _ass?.associato ? '#F0FDF4' : 'transparent'
-                    const _rowHover = _ass?.associato ? '#DCFCE7' : '#F9FAFB'
+                    const _ass = verificaEseguita ? (associatiMap[_piva] || null) : null
+                    const _bg = _ass?.associato ? '#F0FDF4' : 'transparent'
+                    const _hov = _ass?.associato ? '#DCFCE7' : '#F9FAFB'
                     return (
-                  <tr key={r.id} style={{...s.tr, backgroundColor: _rowBg}}
-                    onMouseEnter={e=>e.currentTarget.style.backgroundColor=_rowHover}
-                    onMouseLeave={e=>e.currentTarget.style.backgroundColor=_rowBg}>
-                    <td style={s.td}>
-                      <p style={s.name}>{r.nome} {r.cognome}</p>
-                      {r.ragione_sociale && <p style={s.sub}>{r.ragione_sociale}</p>}
-                    </td>
-                    <td style={s.td} className="col-hide-mobile"><span style={s.cell}>{r.email||'—'}</span></td>
-                    <td style={s.td} className="col-hide-mobile"><span style={s.cell}>{getMestiere(r.mestiere_id)}</span></td>
-                    <td style={s.td} className="col-hide-mobile"><span style={s.cell}>{formatDt(r.created_at)}</span></td>
-                    <td style={s.td}><PresenzaBadge stato={r.stato}/></td>
-                    {verificaEseguita && (() => {
-                      const piva = (r.partita_iva||'').toString().replace(/\s/g,'').replace(/^0+/,'')
-                      const ass = associatiMap[piva]
-                      return (<>
-                        <td style={s.td} className="col-hide-mobile">
-                          {!piva ? <span style={{color:'#D1D5DB',fontSize:'13px'}}>—</span>
-                            : ass
-                              ? <span style={{display:'inline-flex',alignItems:'center',gap:'5px',fontSize:'12px',fontWeight:'700',
-                                  color: ass.associato ? '#059669' : '#DC2626',
-                                  backgroundColor: ass.associato ? '#F0FDF4' : '#FEF2F2',
-                                  padding:'3px 10px',borderRadius:'999px'}}>
-                                  {ass.associato ? '✓ Associato' : '✗ Disdetto'}
-                                </span>
-                              : <span style={{color:'#9CA3AF',fontSize:'12px'}}>Non trovato</span>
-                          }
+                      <tr key={r.id} style={{...s.tr, backgroundColor:_bg}}
+                        onMouseEnter={e=>e.currentTarget.style.backgroundColor=_hov}
+                        onMouseLeave={e=>e.currentTarget.style.backgroundColor=_bg}>
+                        <td style={s.td}>
+                          <p style={s.name}>{r.nome} {r.cognome}</p>
+                          {r.ragione_sociale && <p style={s.sub}>{r.ragione_sociale}</p>}
                         </td>
-                        <td style={s.td} className="col-hide-mobile">
-                          <span style={{fontSize:'12px',color:'#374151'}}>{ass?.datastipula||'—'}</span>
+                        <td style={s.td} className="col-hide-mobile"><span style={s.cell}>{r.email||'—'}</span></td>
+                        <td style={s.td} className="col-hide-mobile"><span style={s.cell}>{getMestiere(r.mestiere_id)}</span></td>
+                        <td style={s.td} className="col-hide-mobile"><span style={s.cell}>{formatDt(r.created_at)}</span></td>
+                        <td style={s.td}><PresenzaBadge stato={r.stato}/></td>
+                        {verificaEseguita && <>
+                          <td style={s.td} className="col-hide-mobile">
+                            {!_piva
+                              ? <span style={{color:'#D1D5DB',fontSize:'13px'}}>—</span>
+                              : _ass
+                                ? <span style={{display:'inline-flex',alignItems:'center',gap:'5px',fontSize:'12px',fontWeight:'700',
+                                    color:_ass.associato?'#059669':'#DC2626',
+                                    backgroundColor:_ass.associato?'#F0FDF4':'#FEF2F2',
+                                    padding:'3px 10px',borderRadius:'999px'}}>
+                                    {_ass.associato ? '✓ Associato' : '✗ Disdetto'}
+                                  </span>
+                                : <span style={{color:'#9CA3AF',fontSize:'12px'}}>Non trovato</span>
+                            }
+                          </td>
+                          <td style={s.td} className="col-hide-mobile">
+                            <span style={{fontSize:'12px',color:'#374151'}}>{_ass?.datastipula||'—'}</span>
+                          </td>
+                        </>}
+                        <td style={s.td}>
+                          <div style={{ display:'flex', gap:'6px' }}>
+                            <button style={s.iconBtn} title="Dettaglio" onClick={()=>setDetail(r)}>
+                              <Eye size={15}/>
+                            </button>
+                            {canDelete && (
+                              <button style={{...s.iconBtn, color:'#DC2626'}} title="Elimina" onClick={()=>setDelConfirm(r)}>
+                                <Trash2 size={15}/>
+                              </button>
+                            )}
+                          </div>
                         </td>
-                      </>)
-                    })()}
-                    <td style={s.td}>
-                      <div style={{ display:'flex', gap:'6px' }}>
-                        <button style={s.iconBtn} title="Dettaglio" onClick={()=>setDetail(r)}>
-                          <Eye size={15}/>
-                        </button>
-                        {canDelete && (
-                          <button style={{...s.iconBtn, color:'#DC2626'}} title="Elimina" onClick={()=>setDelConfirm(r)}>
-                            <Trash2 size={15}/>
-                          </button>
-                        )}
-                      </div>
-                    </td>
-                  </tr>
-                    )})()}
-                ))}
-              </tbody>
-            </table>
-          </div>
+                      </tr>
+                    )
+                  })}
+                </tbody>
+              </table>
+            </div>
+          </>
         )}
       </div>
 
