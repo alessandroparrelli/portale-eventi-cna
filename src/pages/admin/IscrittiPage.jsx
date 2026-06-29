@@ -15,6 +15,49 @@ function formatDt(ts) {
   return new Date(ts).toLocaleString('it-IT', { day:'2-digit', month:'2-digit', year:'numeric', hour:'2-digit', minute:'2-digit' })
 }
 
+function SortableHead({ columns, sortCol, sortDir, onSort }) {
+  const PALETTES = {
+    blue:    { from:'#003DA5', to:'#1a56db', text:'#ffffff' },
+    green:   { from:'#059669', to:'#10b981', text:'#ffffff' },
+    violet:  { from:'#7c3aed', to:'#8b5cf6', text:'#ffffff' },
+    amber:   { from:'#d97706', to:'#f59e0b', text:'#ffffff' },
+    cyan:    { from:'#0891b2', to:'#06b6d4', text:'#ffffff' },
+    neutral: { from:'#F9FAFB', to:'#F3F4F6', text:'#6B7280' },
+  }
+  return (
+    <thead>
+      <tr>
+        {columns.map((col,i) => {
+          const pal = PALETTES[col.color] || PALETTES.blue
+          const isActive = sortCol === col.label
+          return (
+            <th key={i}
+              className={col.hideOnMobile ? 'col-hide-mobile' : undefined}
+              onClick={() => col.sortable && onSort(col.label)}
+              style={{
+                background:`linear-gradient(135deg,${pal.from},${pal.to})`,
+                color:pal.text, padding:'10px 14px', textAlign:'left',
+                fontSize:'11px', fontWeight:'700', letterSpacing:'.05em',
+                textTransform:'uppercase', userSelect:'none',
+                cursor: col.sortable ? 'pointer' : 'default',
+                whiteSpace:'nowrap',
+              }}>
+              <span style={{display:'inline-flex',alignItems:'center',gap:'5px'}}>
+                {col.label}
+                {col.sortable && (
+                  <span style={{fontSize:'10px',opacity: isActive ? 1 : 0.4}}>
+                    {isActive ? (sortDir==='asc' ? '\u25b2' : '\u25bc') : '\u21c5'}
+                  </span>
+                )}
+              </span>
+            </th>
+          )
+        })}
+      </tr>
+    </thead>
+  )
+}
+
 export default function IscrittiPage() {
   usePageTitle('Iscritti')
   const [searchParams] = useSearchParams()
@@ -342,52 +385,7 @@ export default function IscrittiPage() {
     },
     'Data stipula': r => {
       const p = (r.partita_iva||'').toString().replace(/\s/g,'').replace(/^0+/,'')
-      // Componente header ordinabile
-  function SortableHead({ columns, sortCol, sortDir, onSort }) {
-    const PALETTES = {
-      blue:    { from:'#003DA5', to:'#1a56db', text:'#ffffff' },
-      green:   { from:'#059669', to:'#10b981', text:'#ffffff' },
-      violet:  { from:'#7c3aed', to:'#8b5cf6', text:'#ffffff' },
-      amber:   { from:'#d97706', to:'#f59e0b', text:'#ffffff' },
-      cyan:    { from:'#0891b2', to:'#06b6d4', text:'#ffffff' },
-      neutral: { from:'#F9FAFB', to:'#F3F4F6', text:'#6B7280' },
-    }
-    return (
-      <thead>
-        <tr>
-          {columns.map((col,i) => {
-            const p = PALETTES[col.color] || PALETTES.blue
-            const isActive = sortCol === col.label
-            return (
-              <th key={i}
-                className={col.hideOnMobile ? 'col-hide-mobile' : undefined}
-                onClick={() => col.sortable && onSort(col.label)}
-                style={{
-                  background:`linear-gradient(135deg,${p.from},${p.to})`,
-                  color:p.text, padding:'10px 14px', textAlign:'left',
-                  fontSize:'11px', fontWeight:'700', letterSpacing:'.05em',
-                  textTransform:'uppercase', userSelect:'none',
-                  cursor: col.sortable ? 'pointer' : 'default',
-                  whiteSpace:'nowrap',
-                  transition:'filter 0.15s',
-                }}>
-                <span style={{display:'inline-flex',alignItems:'center',gap:'5px'}}>
-                  {col.label}
-                  {col.sortable && (
-                    <span style={{fontSize:'10px',opacity: isActive ? 1 : 0.4}}>
-                      {isActive ? (sortDir==='asc' ? '▲' : '▼') : '⇅'}
-                    </span>
-                  )}
-                </span>
-              </th>
-            )
-          })}
-        </tr>
-      </thead>
-    )
-  }
-
-  return (verificaEseguita && associatiMap[p]?.datastipula) || ''
+      return (verificaEseguita && associatiMap[p]?.datastipula) || ''
     },
   }
 
