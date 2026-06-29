@@ -34,6 +34,26 @@ export default function IscrittiPage() {
   const [importing, setImporting] = useState(false)
   const [importDone, setImportDone] = useState(null)
   const fileInputRef = useRef(null)
+  const [invioInCorso, setInvioInCorso] = useState(false)
+  const [invioRisultato, setInvioRisultato] = useState(null)
+
+  async function inviaCertificati() {
+    if (!selectedEvento) return
+    setInvioInCorso(true)
+    setInvioRisultato(null)
+    try {
+      const res = await fetch('https://hnkhckcclgabunkqfmrz.supabase.co/functions/v1/invia-certificati', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ event_id: selectedEvento, invio_manuale: true })
+      })
+      const data = await res.json()
+      setInvioRisultato(data)
+    } catch (e) {
+      setInvioRisultato({ error: String(e) })
+    }
+    setInvioInCorso(false)
+  }
 
   useEffect(() => {
     supabase.from('events').select('id,titolo,slug').order('data_inizio',{ascending:false}).then(({data})=>setEventi(data||[]))
@@ -171,6 +191,12 @@ export default function IscrittiPage() {
             <Btn variant="secondary" onClick={downloadTemplate} size="md" title="Scarica template Excel">
               <Download size={16}/> Template
             </Btn>
+            {eventi.find(e=>e.id===selectedEvento)?.certificato_abilitato && (
+              <Btn variant="secondary" onClick={inviaCertificati} disabled={invioInCorso} size="md"
+                title="Invia certificati a chi ha partecipato">
+                🏆 {invioInCorso ? 'Invio…' : 'Invia certificati'}
+              </Btn>
+            )}
             <Btn variant="secondary" onClick={() => { setImportModal(true); setImportDone(null); setImportPreview([]); setImportErrors([]) }} size="md">
               <Upload size={16}/> Importa
             </Btn>
@@ -304,7 +330,24 @@ export default function IscrittiPage() {
           </div>
         </Modal>
       )}
-      {/* MODAL IMPORT */}
+      {/* BANNER RISULTATO CERTIFICATI */}
+      {invioRisultato && (
+        <div style={{ margin:'0 0 16px', padding:'14px 18px', borderRadius:'8px',
+          backgroundColor: invioRisultato.error ? '#FEF2F2' : '#F0FDF4',
+          border: `1px solid ${invioRisultato.error ? '#FECACA' : '#BBF7D0'}`,
+          display:'flex', alignItems:'center', justifyContent:'space-between', gap:'12px' }}>
+          <p style={{ fontSize:'14px', fontWeight:'600', margin:0,
+            color: invioRisultato.error ? '#DC2626' : '#059669' }}>
+            {invioRisultato.error
+              ? `❌ Errore: ${invioRisultato.error}`
+              : `✅ ${invioRisultato.sent} certificati inviati su ${invioRisultato.processed} eventi`}
+          </p>
+          <button onClick={() => setInvioRisultato(null)}
+            style={{ background:'none', border:'none', cursor:'pointer', color:'#9CA3AF', fontSize:'18px', padding:0 }}>×</button>
+        </div>
+      )}
+
+      {/* MODAL IMPORT */}}
       {importModal && (
         <Modal title="Importa iscritti da Excel" onClose={resetImport} width="600px">
           {importDone ? (

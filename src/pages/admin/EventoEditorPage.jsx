@@ -342,7 +342,8 @@ export default function EventoEditorPage() {
     titolo:'', slug:'', stato:'bozza', data_inizio:'', data_fine:'',
     luogo:'', sottotitolo:'', footer_testo:'', descrizione_html:'', immagine_hero:null, logo_url:null,
       modalita:'presenza', link_riunione:null,
-      certificato_abilitato:false, certificato_titolo:null,
+      certificato_abilitato:false, certificato_titolo:null, certificato_invio_auto:true,
+      certificato_colore:'#003DA5', certificato_logo_url:null, certificato_firma_nome:null, certificato_firma_ruolo:null,
     colore_primario:'#003DA5', colore_sfondo:'#F4F5F7', tema:{},
     layout_hero:{ altezza:'380', overlay_opacita:'55', allineamento:'sinistra', titolo_colore:'#FFFFFF', titolo_dimensione:'clamp(26px,5vw,54px)', titolo_grassetto:true, titolo_maiuscolo:false },
     sezioni:[], email_organizzatore:'', email_mittente:'', email_cc:'', nome_mittente:'',
@@ -423,6 +424,8 @@ export default function EventoEditorPage() {
       data_fine:ev.data_fine||null, luogo:ev.luogo||null,
         modalita:ev.modalita||'presenza', link_riunione:ev.link_riunione||null,
         certificato_abilitato:ev.certificato_abilitato||false, certificato_titolo:ev.certificato_titolo||null,
+        certificato_invio_auto:ev.certificato_invio_auto!==false, certificato_colore:ev.certificato_colore||'#003DA5',
+        certificato_logo_url:ev.certificato_logo_url||null, certificato_firma_nome:ev.certificato_firma_nome||null, certificato_firma_ruolo:ev.certificato_firma_ruolo||null,
       descrizione_html:ev.descrizione_html||null,
       immagine_hero:ev.immagine_hero||null,
       colore_primario:ev.colore_primario,
@@ -645,10 +648,62 @@ export default function EventoEditorPage() {
                     </div>
                   </label>
                   {event.certificato_abilitato && (
-                    <Field label="Testo introduttivo certificato" hint="Es. 'Si certifica la partecipazione di'">
-                      <Input value={event.certificato_titolo||''} onChange={e=>updEvent(p=>({...p,certificato_titolo:e.target.value||null}))}
-                        placeholder="Si certifica che"/>
-                    </Field>
+                    <div style={{ display:'flex', flexDirection:'column', gap:'14px' }}>
+                      {/* Toggle invio automatico */}
+                      <label style={{ display:'flex', alignItems:'center', gap:'10px', cursor:'pointer' }}>
+                        <div style={{ position:'relative', width:'40px', height:'22px', flexShrink:0 }}
+                          onClick={() => updEvent(p=>({...p, certificato_invio_auto:!p.certificato_invio_auto}))}>
+                          <div style={{ position:'absolute', inset:0, borderRadius:'999px', transition:'background 0.2s',
+                            backgroundColor: event.certificato_invio_auto ? '#059669' : '#D1D5DB' }}/>
+                          <div style={{ position:'absolute', top:'3px', left: event.certificato_invio_auto ? '21px' : '3px', width:'16px', height:'16px',
+                            borderRadius:'50%', backgroundColor:'#ffffff', transition:'left 0.2s', boxShadow:'0 1px 4px rgba(0,0,0,0.2)' }}/>
+                        </div>
+                        <div>
+                          <p style={{ fontSize:'14px', fontWeight:'600', color:'#0A0A0A', margin:'0 0 2px' }}>
+                            {event.certificato_invio_auto ? '✅ Invio automatico attivo' : '⏸ Invio manuale'}
+                          </p>
+                          <p style={{ fontSize:'12px', color:'#9CA3AF', margin:0 }}>
+                            {event.certificato_invio_auto
+                              ? 'I certificati vengono inviati automaticamente dopo l'evento'
+                              : 'I certificati vengono inviati solo manualmente dalla pagina Iscritti'}
+                          </p>
+                        </div>
+                      </label>
+                      <Field label="Testo introduttivo" hint="Es. 'Si certifica la partecipazione di'">
+                        <Input value={event.certificato_titolo||''} onChange={e=>updEvent(p=>({...p,certificato_titolo:e.target.value||null}))}
+                          placeholder="Si certifica che"/>
+                      </Field>
+                      <div style={{ display:'grid', gridTemplateColumns:'1fr 1fr', gap:'12px' }}>
+                        <Field label="Nome in firma">
+                          <Input value={event.certificato_firma_nome||''} onChange={e=>updEvent(p=>({...p,certificato_firma_nome:e.target.value||null}))}
+                            placeholder="CNA Roma"/>
+                        </Field>
+                        <Field label="Ruolo in firma">
+                          <Input value={event.certificato_firma_ruolo||''} onChange={e=>updEvent(p=>({...p,certificato_firma_ruolo:e.target.value||null}))}
+                            placeholder="Confederazione Nazionale dell'Artigianato"/>
+                        </Field>
+                      </div>
+                      <div style={{ display:'flex', alignItems:'center', gap:'12px' }}>
+                        <Field label="Colore certificato">
+                          <div style={{ display:'flex', alignItems:'center', gap:'10px' }}>
+                            <input type="color" value={event.certificato_colore||'#003DA5'}
+                              onChange={e=>updEvent(p=>({...p,certificato_colore:e.target.value}))}
+                              style={{ width:'44px', height:'36px', border:'1px solid #D1D5DB', borderRadius:'6px', cursor:'pointer', padding:'2px' }}/>
+                            <Input value={event.certificato_colore||'#003DA5'} onChange={e=>updEvent(p=>({...p,certificato_colore:e.target.value}))}
+                              style={{ maxWidth:'130px' }}/>
+                          </div>
+                        </Field>
+                      </div>
+                      {/* Anteprima */}
+                      {id && (
+                        <a href={`https://hnkhckcclgabunkqfmrz.supabase.co/functions/v1/genera-certificato?registration_id=preview&preview=1`}
+                          target="_blank" rel="noopener noreferrer"
+                          style={{ display:'inline-flex', alignItems:'center', gap:'6px', fontSize:'13px', fontWeight:'600',
+                            color:'#003DA5', textDecoration:'none' }}>
+                          👁 Anteprima certificato ↗
+                        </a>
+                      )}
+                    </div>
                   )}
                 </div>
               </div>
