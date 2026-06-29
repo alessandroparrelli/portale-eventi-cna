@@ -5,6 +5,7 @@ function normDim(v){return DIM_MAP[v]||v||'22px'}
 import { useParams, useNavigate } from 'react-router-dom'
 import { supabase } from '../../lib/supabase'
 import TagInput from '../../components/editor/TagInput'
+import EmbedWidget from '../../components/editor/EmbedWidget'
 import ImageUploader from '../../components/editor/ImageUploader'
 import BlockEditor from '../../components/editor/BlockEditor'
 import LogoManager from '../../components/editor/LogoManager'
@@ -17,6 +18,7 @@ const TABS = [
   { key:'contenuto', label:'Contenuto' },
   { key:'form',      label:'Form' },
   { key:'aspetto',   label:'Aspetto' },
+  { key:'embed',    label:'Embed' },
   { key:'preview',   label:'Anteprima' },
 ]
 
@@ -464,6 +466,29 @@ export default function LandingEditorPage() {
           )}
 
           {/* ═══ PREVIEW ═══ */}
+          {tab === 'embed' && (
+            <div style={{ padding:'24px', maxWidth:'720px' }}>
+              <h2 style={{ fontSize:'20px', fontWeight:'900', letterSpacing:'-0.02em', color:'#0A0A0A', margin:'0 0 4px' }}>
+                Codice embed
+              </h2>
+              <p style={{ fontSize:'14px', color:'#6B7280', margin:'0 0 24px' }}>
+                Incorpora questa pagina in qualsiasi sito esterno.
+              </p>
+              {!data.slug || data.stato !== 'pubblicata' ? (
+                <div style={{backgroundColor:'#FEF3C7',border:'1px solid #FDE68A',borderRadius:'8px',padding:'16px 18px'}}>
+                  <p style={{fontSize:'14px',color:'#92400E',margin:0,fontWeight:'600'}}>
+                    ⚠️ La landing page deve essere <strong>pubblicata</strong> e avere uno <strong>slug</strong> per generare il codice embed.
+                  </p>
+                </div>
+              ) : (
+                <EmbedWidget
+                  url={`${window.location.origin}/lp/${data.slug}`}
+                  titolo={data.titolo}
+                />
+              )}
+            </div>
+          )}
+
           {tab === 'preview' && (
             <div>
               <div style={{ display:'flex', alignItems:'center', justifyContent:'space-between', marginBottom:'12px' }}>

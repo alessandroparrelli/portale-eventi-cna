@@ -24,6 +24,7 @@ import AspettoTab from '../../components/editor/AspettoTab'
 import SessioniTab from '../../components/editor/SessioniTab'
 import QuestionarioTab from '../../components/editor/QuestionarioTab'
 import TagInput from '../../components/editor/TagInput'
+import EmbedWidget from '../../components/editor/EmbedWidget'
 import GlowTabBar from '../../components/GlowTabBar'
 
 const toSlug = s => s.toLowerCase().normalize('NFD').replace(/[\u0300-\u036f]/g,'')
@@ -512,6 +513,7 @@ export default function EventoEditorPage() {
     { id:'iscrizioni',   label:'Iscrizioni',     icon:'🎟', color:'coral'  },
     { id:'questionario', label:'Questionario',   icon:'⭐', color:'amber'  },
     { id:'email',        label:'Email',          icon:'✉️', color:'rose'   },
+    { id:'embed',        label:'Embed',          icon:'🔗', color:'indigo' },
     { id:'preview',      label:'Preview',        icon:'👁',  color:'amber'  },
   ]
 
@@ -873,6 +875,25 @@ export default function EventoEditorPage() {
           <div style={p.panel}>
             <h2 style={p.panelTitle}>Questionario post-evento</h2>
             <QuestionarioTab eventoId={id} />
+          </div>
+        )}
+
+        {/* ── EMBED ── */}
+        {activeTab==='embed' && (
+          <div style={p.panel}>
+            <h2 style={p.panelTitle}>Codice embed</h2>
+            {!event.slug || event.stato !== 'pubblicato' ? (
+              <div style={{backgroundColor:'#FEF3C7',border:'1px solid #FDE68A',borderRadius:'8px',padding:'16px 18px'}}>
+                <p style={{fontSize:'14px',color:'#92400E',margin:0,fontWeight:'600'}}>
+                  ⚠️ L&apos;evento deve essere <strong>pubblicato</strong> e avere uno <strong>slug</strong> per generare il codice embed.
+                </p>
+              </div>
+            ) : (
+              <EmbedWidget
+                url={`${window.location.origin}/eventi/${event.slug}`}
+                titolo={event.titolo}
+              />
+            )}
           </div>
         )}
 
