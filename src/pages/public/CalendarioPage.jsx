@@ -102,6 +102,35 @@ export default function CalendarioPage() {
         @keyframes blink{0%,100%{opacity:1}50%{opacity:0.3}}
         @keyframes fadeUp{from{opacity:0;transform:translateY(14px)}to{opacity:1;transform:none}}
         @keyframes spin{to{transform:rotate(360deg)}}
+
+        /* Mobile scaling */
+        @media (max-width: 640px) {
+          .cal-hero-badge { font-size:13px !important; padding:8px 18px !important; }
+          .cal-hero-h1 { font-size:36px !important; margin-bottom:14px !important; }
+          .cal-hero-sub { font-size:16px !important; margin-bottom:28px !important; }
+          .cal-hero-label { font-size:13px !important; }
+          .cal-hero-title { font-size:20px !important; }
+          .cal-hero-cta { font-size:15px !important; }
+          .cal-fchip-icon svg { width:18px !important; height:18px !important; }
+          .cal-fchip-text { font-size:14px !important; }
+          .cal-tab-btn { font-size:15px !important; padding:16px 12px !important; }
+          .cal-tab-count { font-size:13px !important; padding:3px 10px !important; }
+          .cal-banner-title { font-size:15px !important; }
+          .cal-banner-sub { font-size:13px !important; }
+          .cal-banner-icon svg { width:30px !important; height:30px !important; }
+          .cal-pill-n { font-size:28px !important; }
+          .cal-pill-l { font-size:14px !important; }
+          .cal-card-title { font-size:18px !important; }
+          .cal-card-sub { font-size:14px !important; }
+          .cal-card-meta { font-size:14px !important; }
+          .cal-card-meta svg { width:15px !important; height:15px !important; }
+          .cal-card-cta { font-size:15px !important; }
+          .cal-ics-btn { font-size:15px !important; padding:14px 22px !important; }
+          .cal-ics-btn svg { width:22px !important; height:22px !important; }
+          .cal-section-h2 { font-size:24px !important; }
+          .cal-section-sub { font-size:14px !important; }
+          .cal-featured-box { padding:20px !important; }
+        }
       `}</style>
 
       {/* NAVBAR */}
@@ -149,36 +178,36 @@ export default function CalendarioPage() {
               borderRadius:'999px',padding:'6px 16px',marginBottom:'24px'}}>
               <span style={{width:'7px',height:'7px',borderRadius:'50%',backgroundColor:'#4ADE80',
                 display:'inline-block',animation:'blink 2s ease infinite'}}/>
-              <span style={{fontSize:'12px',fontWeight:'700',color:'rgba(255,255,255,0.85)',
+              <span className="cal-hero-badge" style={{fontSize:'12px',fontWeight:'700',color:'rgba(255,255,255,0.85)',
                 letterSpacing:'0.06em',textTransform:'uppercase'}}>
                 {nProssimi} {nProssimi===1?'evento':'eventi'} in programma
               </span>
             </div>
           )}
 
-          <h1 style={{fontSize:'clamp(36px,6vw,68px)',fontWeight:'900',color:'#ffffff',
+          <h1 className="cal-hero-h1" style={{fontSize:'clamp(36px,6vw,68px)',fontWeight:'900',color:'#ffffff',
             letterSpacing:'-0.04em',margin:'0 0 16px',lineHeight:1.05,maxWidth:'700px'}}>
             {cfg?.titolo || 'Gli eventi CNA Roma'}
           </h1>
-          <p style={{fontSize:'clamp(15px,2vw,18px)',color:'rgba(255,255,255,0.68)',margin:'0 0 40px',
+          <p className='cal-hero-sub' style={{fontSize:'clamp(15px,2vw,18px)',color:'rgba(255,255,255,0.68)',margin:'0 0 40px',
             maxWidth:'500px',lineHeight:'1.65'}}>
             {cfg?.sottotitolo || 'Formazione, networking e opportunità di crescita per le imprese associate.'}
           </p>
 
           {featured && (
             <a href={`/eventi/${featured.slug}`} style={{textDecoration:'none',display:'block',maxWidth:'460px',width:'100%'}}>
-              <div style={{backgroundColor:'rgba(255,255,255,0.09)',backdropFilter:'blur(12px)',
+              <div className='cal-featured-box' style={{backgroundColor:'rgba(255,255,255,0.09)',backdropFilter:'blur(12px)',
                 border:'1px solid rgba(255,255,255,0.18)',borderRadius:'14px',padding:'22px',transition:'all 0.2s'}}
                 onMouseEnter={e=>{e.currentTarget.style.backgroundColor='rgba(255,255,255,0.16)';e.currentTarget.style.transform='translateY(-2px)'}}
                 onMouseLeave={e=>{e.currentTarget.style.backgroundColor='rgba(255,255,255,0.09)';e.currentTarget.style.transform='none'}}>
-                <p style={{fontSize:'11px',fontWeight:'800',color:'#60A5FA',textTransform:'uppercase',letterSpacing:'0.08em',margin:'0 0 10px'}}>✦ Prossimo evento</p>
-                <h3 style={{fontSize:'18px',fontWeight:'800',color:'#ffffff',letterSpacing:'-0.02em',margin:'0 0 12px',lineHeight:1.3}}>{featured.titolo}</h3>
+                <p className='cal-hero-label' style={{fontSize:'11px',fontWeight:'800',color:'#60A5FA',textTransform:'uppercase',letterSpacing:'0.08em',margin:'0 0 10px'}}>✦ Prossimo evento</p>
+                <h3 className='cal-hero-title' style={{fontSize:'18px',fontWeight:'800',color:'#ffffff',letterSpacing:'-0.02em',margin:'0 0 12px',lineHeight:1.3}}>{featured.titolo}</h3>
                 <div style={{display:'flex',gap:'14px',flexWrap:'wrap'}}>
                   <FChip icon="cal" text={fData(featured.data_inizio)}/>
                   {featured.luogo && <FChip icon="pin" text={featured.luogo}/>}
                   <FChip icon="clock" text={fOra(featured.data_inizio)}/>
                 </div>
-                <p style={{fontSize:'13px',fontWeight:'700',color:'#60A5FA',margin:'14px 0 0',display:'flex',alignItems:'center',gap:'5px'}}>
+                <p className='cal-hero-cta' style={{fontSize:'13px',fontWeight:'700',color:'#60A5FA',margin:'14px 0 0',display:'flex',alignItems:'center',gap:'5px'}}>
                   Scopri e iscriviti <Arrow/>
                 </p>
               </div>
@@ -196,7 +225,7 @@ export default function CalendarioPage() {
             {k:'mestieri', l: cfg?.testo_sezione_landing || 'Pagine di mestiere', n: landings.length},
           ].map(t => (
             <button key={t.k} onClick={() => setSezione(t.k)}
-              style={{flex:1,padding:'14px 20px',border:'none',cursor:'pointer',
+              className='cal-tab-btn' style={{flex:1,padding:'14px 20px',border:'none',cursor:'pointer',
                 fontFamily:"'Inter',sans-serif",fontSize:'14px',fontWeight:'700',
                 backgroundColor: sezione===t.k ? 'rgba(255,255,255,0.15)' : 'transparent',
                 transition:'all 0.15s',
@@ -204,7 +233,7 @@ export default function CalendarioPage() {
                 borderBottom: sezione===t.k ? '3px solid #ffffff' : '3px solid transparent',
                 display:'flex',alignItems:'center',justifyContent:'center',gap:'8px'}}>
               {t.l}
-              <span style={{fontSize:'11px',fontWeight:'800',
+              <span className='cal-tab-count' style={{fontSize:'11px',fontWeight:'800',
                 backgroundColor: sezione===t.k ? 'rgba(255,255,255,0.25)' : 'rgba(255,255,255,0.1)',
                 color: sezione===t.k ? '#ffffff' : 'rgba(255,255,255,0.35)',
                 borderRadius:'999px',padding:'2px 9px'}}>
@@ -251,7 +280,7 @@ export default function CalendarioPage() {
       <div style={{backgroundColor:'#EFF6FF',borderBottom:'1px solid #BFDBFE',padding:'12px 24px'}}>
         <div style={{maxWidth:'1100px',margin:'0 auto',display:'flex',alignItems:'center',justifyContent:'space-between',flexWrap:'wrap',gap:'12px'}}>
           <div style={{display:'flex',alignItems:'center',gap:'10px'}}>
-            <span style={{display:'flex',alignItems:'center',filter:'drop-shadow(0 0 8px #60A5FA)'}}>
+            <span className='cal-banner-icon' style={{display:'flex',alignItems:'center',filter:'drop-shadow(0 0 8px #60A5FA)'}}>
               <svg width="24" height="24" viewBox="0 0 24 24" fill="none" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
                 <rect x="3" y="4" width="18" height="18" rx="2" stroke="#3B82F6" fill="#3B82F611"/>
                 <line x1="16" y1="2" x2="16" y2="6" stroke="#60A5FA"/>
@@ -263,12 +292,12 @@ export default function CalendarioPage() {
               </svg>
             </span>
             <div>
-              <p style={{fontSize:'13px',fontWeight:'700',color:'#1D4ED8',margin:0}}>Aggiungi al tuo calendario</p>
-              <p style={{fontSize:'12px',color:'#3B82F6',margin:0}}>Ricevi tutti gli eventi su Apple Calendar, Google Calendar, Outlook</p>
+              <p className='cal-banner-title' style={{fontSize:'13px',fontWeight:'700',color:'#1D4ED8',margin:0}}>Aggiungi al tuo calendario</p>
+              <p className='cal-banner-sub' style={{fontSize:'12px',color:'#3B82F6',margin:0}}>Ricevi tutti gli eventi su Apple Calendar, Google Calendar, Outlook</p>
             </div>
           </div>
           <a href="https://hnkhckcclgabunkqfmrz.supabase.co/functions/v1/calendario-ics" download="cna-roma-eventi.ics"
-            style={{display:'flex',alignItems:'center',gap:'10px',padding:'12px 20px',
+            className='cal-ics-btn' style={{display:'flex',alignItems:'center',gap:'10px',padding:'12px 20px',
               backgroundColor:'#003DA5',color:'#ffffff',borderRadius:'8px',
               fontSize:'14px',fontWeight:'700',textDecoration:'none',fontFamily:"'Inter',sans-serif",
               lineHeight:'1.35',maxWidth:'380px'}}>
@@ -299,7 +328,7 @@ export default function CalendarioPage() {
           {sezione === 'eventi' && (<section style={{marginBottom:'72px'}}>
             <div style={{display:'flex',alignItems:'center',justifyContent:'space-between',flexWrap:'wrap',gap:'16px',marginBottom:'28px'}}>
               <div>
-                <h2 style={{fontSize:'28px',fontWeight:'900',letterSpacing:'-0.03em',color:NERO,margin:'0 0 4px'}}>
+                <h2 className='cal-section-h2' style={{fontSize:'28px',fontWeight:'900',letterSpacing:'-0.03em',color:NERO,margin:'0 0 4px'}}>
                   {cfg?.testo_sezione_eventi || 'Prossimi eventi'}
                 </h2>
                 <p style={{fontSize:'13px',color:'#9CA3AF',margin:0}}>
@@ -352,7 +381,7 @@ export default function CalendarioPage() {
             <section>
               <div style={{display:'flex',alignItems:'center',justifyContent:'space-between',flexWrap:'wrap',gap:'16px',marginBottom:'28px'}}>
                 <div>
-                  <h2 style={{fontSize:'28px',fontWeight:'900',letterSpacing:'-0.03em',color:NERO,margin:'0 0 4px'}}>
+                  <h2 className='cal-section-h2' style={{fontSize:'28px',fontWeight:'900',letterSpacing:'-0.03em',color:NERO,margin:'0 0 4px'}}>
                     {cfg?.testo_sezione_landing || 'Le nostre iniziative'}
                   </h2>
                   <p style={{fontSize:'13px',color:'#9CA3AF',margin:0}}>{landings.length} pagine di mestiere</p>
@@ -425,7 +454,7 @@ function EventCard({evento,index,color}) {
         </div>
       </div>
       <div style={{padding:'20px'}}>
-        <h3 style={{fontSize:'16px',fontWeight:'800',letterSpacing:'-0.025em',color:past?'#6B7280':NERO,margin:'0 0 6px',lineHeight:1.3}}>{evento.titolo}</h3>
+        <h3 className='cal-card-title' style={{fontSize:'16px',fontWeight:'800',letterSpacing:'-0.025em',color:past?'#6B7280':NERO,margin:'0 0 6px',lineHeight:1.3}}>{evento.titolo}</h3>
         {evento.sottotitolo && (
           <p style={{fontSize:'13px',color:'#9CA3AF',margin:'0 0 12px',lineHeight:'1.5',
             display:'-webkit-box',WebkitLineClamp:2,WebkitBoxOrient:'vertical',overflow:'hidden'}}>
@@ -442,7 +471,7 @@ function EventCard({evento,index,color}) {
           </div>
         )}
         <div style={{display:'flex',alignItems:'center',justifyContent:'flex-end'}}>
-          <span style={{fontSize:'13px',fontWeight:'700',color:past?'#9CA3AF':c,display:'flex',alignItems:'center',gap:'4px'}}>
+          <span className='cal-card-cta' style={{fontSize:'13px',fontWeight:'700',color:past?'#9CA3AF':c,display:'flex',alignItems:'center',gap:'4px'}}>
             {past?'Visualizza':'Iscriviti'} <Arrow color={past?'#9CA3AF':c}/>
           </span>
         </div>
@@ -516,14 +545,14 @@ function FChip({icon,text}) {
     </svg>,
   }
   return <div style={{display:'flex',alignItems:'center',gap:'6px'}}>
-    <span style={{display:'flex',alignItems:'center',filter:'drop-shadow(0 0 4px currentColor)'}}>{icons[icon]}</span>
-    <span style={{fontSize:'12px',color:'rgba(255,255,255,0.82)',fontWeight:'500'}}>{text}</span>
+    <span className='cal-fchip-icon' style={{display:'flex',alignItems:'center',filter:'drop-shadow(0 0 4px currentColor)'}}>{icons[icon]}</span>
+    <span className='cal-fchip-text' style={{fontSize:'12px',color:'rgba(255,255,255,0.82)',fontWeight:'500'}}>{text}</span>
   </div>
 }
 function MRow({icon,text}) {
   return <div style={{display:'flex',alignItems:'center',gap:'6px'}}>
     {icon}
-    <span style={{fontSize:'12px',color:'#6B7280',fontWeight:'500',lineHeight:1.4}}>{text}</span>
+    <span className='cal-card-meta' style={{fontSize:'12px',color:'#6B7280',fontWeight:'500',lineHeight:1.4}}>{text}</span>
   </div>
 }
 function Tag({label,color}) {
