@@ -23,7 +23,7 @@ export default function CalendarioPage() {
   const [eventi, setEventi] = useState([])
   const [landings, setLandings] = useState([])
   const [loading, setLoading] = useState(true)
-  const [tabEventi, setTabEventi] = useState('prossimi')
+  const [tabEventi, setTabEventi] = useState('prossimi') // tutti | prossimi | passati
   const [searchEventi, setSearchEventi] = useState('')
   const [searchLanding, setSearchLanding] = useState('')
   const [tagFilter, setTagFilter] = useState('')
@@ -58,13 +58,27 @@ export default function CalendarioPage() {
   const color = cfg?.colore_primario || BLU
   const logo = cfg?.logo_url || DEFAULT_LOGO
 
-  const filteredEventi = eventi.filter(e => {
+  // Ordina: tutti = prossimi prima (asc) poi passati (desc più recenti in fondo)
+  const eventiOrdinati = [...eventi].sort((a,b) => {
+    const aP = isPast(a.data_inizio), bP = isPast(b.data_inizio)
+    if (tabEventi === 'tutti') {
+      // prossimi prima (asc), poi passati (desc)
+      if (!aP && bP) return -1
+      if (aP && !bP) return 1
+      if (!aP && !bP) return new Date(a.data_inizio) - new Date(b.data_inizio)
+      return new Date(b.data_inizio) - new Date(a.data_inizio)
+    }
+    if (tabEventi === 'prossimi') return new Date(a.data_inizio) - new Date(b.data_inizio)
+    return new Date(b.data_inizio) - new Date(a.data_inizio)
+  })
+
+  const filteredEventi = eventiOrdinati.filter(e => {
     if (tabEventi === 'prossimi' && isPast(e.data_inizio)) return false
     if (tabEventi === 'passati' && !isPast(e.data_inizio)) return false
     if (tagFilter && !(e.tags||[]).includes(tagFilter)) return false
     if (searchEventi) {
       const q = searchEventi.toLowerCase()
-      return e.titolo?.toLowerCase().includes(q) || e.luogo?.toLowerCase().includes(q)
+      return e.titolo?.toLowerCase().includes(q) || e.luogo?.toLowerCase().includes(q) || e.sottotitolo?.toLowerCase().includes(q)
     }
     return true
   })
@@ -215,16 +229,27 @@ export default function CalendarioPage() {
                 </p>
               </div>
               <div style={{display:'flex',gap:'8px',alignItems:'center',flexWrap:'wrap'}}>
-                {/* Tab prossimi/passati */}
-                <div style={{display:'flex',gap:'3px',backgroundColor:'#F3F4F6',borderRadius:'10px',padding:'3px'}}>
-                  {[{k:'prossimi',l:`Prossimi (${nProssimi})`},{k:'passati',l:`Passati (${nPassati})`}].map(t=>(
+                {/* Tab tutti/prossimi/passati */}
+                <div style={{display:'flex',gap:'2px',backgroundColor:'#F3F4F6',borderRadius:'10px',padding:'3px'}}>
+                  {[
+                    {k:'tutti',    l:'Tutti',              n:eventi.length,  c:color},
+                    {k:'prossimi', l:'In programma',       n:nProssimi,      c:'#059669'},
+                    {k:'passati',  l:'Passati',            n:nPassati,       c:'#6B7280'},
+                  ].map(t=>(
                     <button key={t.k} onClick={()=>setTabEventi(t.k)}
-                      style={{padding:'8px 16px',borderRadius:'7px',border:'none',cursor:'pointer',
+                      style={{padding:'8px 14px',borderRadius:'7px',border:'none',cursor:'pointer',
                         fontFamily:"'Inter',sans-serif",fontSize:'13px',fontWeight:'700',transition:'all 0.15s',
                         backgroundColor:tabEventi===t.k?'#ffffff':'transparent',
-                        color:tabEventi===t.k?(t.k==='passati'?'#6B7280':color):'#9CA3AF',
-                        boxShadow:tabEventi===t.k?'0 1px 6px rgba(0,0,0,0.08)':'none'}}>
+                        color:tabEventi===t.k?t.c:'#9CA3AF',
+                        boxShadow:tabEventi===t.k?'0 1px 6px rgba(0,0,0,0.08)':'none',
+                        display:'flex',alignItems:'center',gap:'5px',whiteSpace:'nowrap'}}>
                       {t.l}
+                      <span style={{fontSize:'11px',fontWeight:'800',
+                        backgroundColor:tabEventi===t.k?t.c+'18':'transparent',
+                        color:tabEventi===t.k?t.c:'#C4C4C4',
+                        borderRadius:'999px',padding:'1px 7px',transition:'all 0.15s'}}>
+                        {t.n}
+                      </span>
                     </button>
                   ))}
                 </div>
@@ -234,7 +259,7 @@ export default function CalendarioPage() {
             </div>
 
             {filteredEventi.length === 0 ? (
-              <Empty text={searchEventi ? `Nessun risultato per "${searchEventi}"` : tabEventi==='prossimi' ? 'Nessun evento in programma' : 'Nessun evento passato'}/>
+              <Empty text={searchEventi ? `Nessun risultato per "${searchEventi}"` : tagFilter ? `Nessun evento con tag "${tagFilter}"` : tabEventi==='prossimi' ? 'Nessun evento in programma' : tabEventi==='passati' ? 'Nessun evento passato' : 'Nessun evento pubblicato'}/>
             ) : (
               <div style={{display:'grid',gridTemplateColumns:'repeat(auto-fill,minmax(300px,1fr))',gap:'22px'}}>
                 {filteredEventi.map((e,i) => <EventCard key={e.id} evento={e} index={i} color={color}/>)}
