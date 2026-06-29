@@ -664,7 +664,7 @@ export default function EventoEditorPage() {
                           </p>
                           <p style={{ fontSize:'12px', color:'#9CA3AF', margin:0 }}>
                             {event.certificato_invio_auto
-                              ? 'I certificati vengono inviati automaticamente dopo l'evento'
+                              ? 'I certificati vengono inviati automaticamente dopo l\u2019evento'
                               : 'I certificati vengono inviati solo manualmente dalla pagina Iscritti'}
                           </p>
                         </div>

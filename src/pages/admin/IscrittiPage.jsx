@@ -437,7 +437,7 @@ export default function IscrittiPage() {
         </div>
       )}
 
-      {/* MODAL IMPORT */}}
+      {/* MODAL IMPORT */}
       {importModal && (
         <Modal title="Importa iscritti da Excel" onClose={resetImport} width="600px">
           {importDone ? (
