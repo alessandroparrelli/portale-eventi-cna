@@ -60,9 +60,17 @@ export default function IscrittiPage() {
       })
       const data = await res.json()
       if (data.error) throw new Error(data.error)
-      setAssociatiMap(data.associati || {})
+      const newMap = data.associati || {}
+      setAssociatiMap(newMap)
       setVerificaEseguita(true)
       setVerificaInfo({ trovati: data.trovati, cercati: data.cercati })
+      // Persiste su localStorage — sopravvive a refresh e navigazione
+      try {
+        localStorage.setItem(`associati_${selectedEvento}`, JSON.stringify({
+          map: newMap,
+          ts: new Date().toISOString(),
+        }))
+      } catch {}
     } catch (e) {
       setVerificaInfo({ errore: String(e) })
     }
@@ -97,11 +105,28 @@ export default function IscrittiPage() {
     loadRegs()
   }, [selectedEvento])
 
-  // Reset verifica quando cambia evento
+  // Carica dati verifica dal localStorage quando cambia evento
   useEffect(() => {
-    setAssociatiMap({})
-    setVerificaEseguita(false)
     setVerificaInfo(null)
+    if (!selectedEvento) {
+      setAssociatiMap({})
+      setVerificaEseguita(false)
+      return
+    }
+    try {
+      const saved = localStorage.getItem(`associati_${selectedEvento}`)
+      if (saved) {
+        const parsed = JSON.parse(saved)
+        setAssociatiMap(parsed.map || {})
+        setVerificaEseguita(true)
+      } else {
+        setAssociatiMap({})
+        setVerificaEseguita(false)
+      }
+    } catch {
+      setAssociatiMap({})
+      setVerificaEseguita(false)
+    }
   }, [selectedEvento])
 
   async function loadRegs() {
@@ -270,6 +295,18 @@ export default function IscrittiPage() {
           {verificaEseguita && (
             <span style={{fontSize:'12px',color:'#059669',fontWeight:'600'}}>
               ✓ {Object.keys(associatiMap).length} trovati
+              {(() => {
+                try {
+                  const s = localStorage.getItem(`associati_${selectedEvento}`)
+                  if (s) {
+                    const d = JSON.parse(s).ts
+                    return d ? <span style={{color:'#9CA3AF',fontWeight:'400',marginLeft:'6px'}}>
+                      · aggiornato {new Date(d).toLocaleDateString('it-IT')} {new Date(d).toLocaleTimeString('it-IT',{hour:'2-digit',minute:'2-digit'})}
+                    </span> : null
+                  }
+                } catch {}
+                return null
+              })()}
             </span>
           )}
           <div style={{flex:1}}/>
