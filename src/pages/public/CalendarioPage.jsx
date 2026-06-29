@@ -158,7 +158,7 @@ export default function CalendarioPage() {
       </header>
 
       {/* HERO */}
-      <section style={{position:'relative',overflow:'hidden',minHeight:'480px',display:'flex',alignItems:'center',backgroundColor:NERO}}>
+      <section style={{position:'relative',overflow:'hidden',display:'flex',alignItems:'flex-start',backgroundColor:NERO}}>
         {(cfg?.hero_immagine_url || featured?.immagine_hero) && (
           <div style={{position:'absolute',inset:0,
             backgroundImage:`url(${cfg?.hero_immagine_url || featured?.immagine_hero})`,
@@ -336,7 +336,7 @@ export default function CalendarioPage() {
 
       {/* FOOTER */}
       <footer style={{backgroundColor:NERO,padding:'40px',textAlign:'center'}}>
-        <img src={logo} alt="CNA Roma" style={{height:'28px',marginBottom:'14px',filter:'brightness(0) invert(1)',opacity:0.45}}/>
+        <img src={logo} alt="CNA Roma" style={{height:'28px',marginBottom:'14px',opacity:0.5}}/>
         <p style={{fontSize:'13px',color:'rgba(255,255,255,0.38)',margin:'0 0 5px'}}>
           © {new Date().getFullYear()} CNA Roma · Confederazione Nazionale dell&apos;Artigianato e della Piccola e Media Impresa
         </p>
