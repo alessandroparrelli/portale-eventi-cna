@@ -154,9 +154,9 @@ export default function CalendarioAdminPage() {
             <Input value={cfg.testo_sezione_eventi || ''} onChange={e => upd('testo_sezione_eventi', e.target.value)}
               placeholder="Prossimi eventi"/>
           </Field>
-          <Field label="Titolo sezione iniziative">
+          <Field label="Titolo sezione mestieri">
             <Input value={cfg.testo_sezione_landing || ''} onChange={e => upd('testo_sezione_landing', e.target.value)}
-              placeholder="Le nostre iniziative"/>
+              placeholder="Mestieri e categorie"/>
           </Field>
         </Section>
 
@@ -164,7 +164,7 @@ export default function CalendarioAdminPage() {
         <Section title="Visibilità contenuti" icon="👁">
           <div style={{ display: 'flex', flexDirection: 'column', gap: '14px' }}>
             <Toggle
-              label="Mostra sezione Iniziative (Landing Page)"
+              label="Mostra sezione Mestieri (Landing Page)"
               hint="Se disattivato, la pagina mostra solo gli eventi"
               value={cfg.mostra_landing !== false}
               onChange={v => upd('mostra_landing', v)}

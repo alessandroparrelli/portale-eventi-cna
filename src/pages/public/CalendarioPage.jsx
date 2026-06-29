@@ -168,7 +168,7 @@ export default function CalendarioPage() {
           <Pill n={eventi.length} label="Tot. eventi" color={color}/>
           <Pill n={nProssimi} label="In programma" color='#059669'/>
           <Pill n={nPassati} label="Conclusi" color='#9CA3AF'/>
-          {cfg?.mostra_landing !== false && <Pill n={landings.length} label="Iniziative" color='#7C3AED'/>}
+          {cfg?.mostra_landing !== false && <Pill n={landings.length} label="Mestieri" color='#7C3AED'/>}
           {allTags.length > 0 && (
             <div style={{display:'flex',gap:'6px',flexWrap:'wrap',alignItems:'center',marginLeft:'auto'}}>
               {tagFilter && (
@@ -250,7 +250,7 @@ export default function CalendarioPage() {
                   <h2 style={{fontSize:'28px',fontWeight:'900',letterSpacing:'-0.03em',color:NERO,margin:'0 0 4px'}}>
                     {cfg?.testo_sezione_landing || 'Le nostre iniziative'}
                   </h2>
-                  <p style={{fontSize:'13px',color:'#9CA3AF',margin:0}}>{landings.length} iniziative attive</p>
+                  <p style={{fontSize:'13px',color:'#9CA3AF',margin:0}}>{landings.length} pagine di mestiere</p>
                 </div>
                 <SearchBox value={searchLanding} onChange={setSearchLanding} color='#7C3AED' placeholder="Cerca iniziativa…"/>
               </div>
@@ -364,7 +364,7 @@ function LandingCard({landing,index}) {
         }
         <div style={{position:'absolute',top:'13px',right:'13px',backgroundColor:'#7C3AED',
           borderRadius:'6px',padding:'4px 10px',fontSize:'11px',fontWeight:'700',color:'#ffffff'}}>
-          Iniziativa
+          Mestiere
         </div>
       </div>
       <div style={{padding:'20px'}}>
