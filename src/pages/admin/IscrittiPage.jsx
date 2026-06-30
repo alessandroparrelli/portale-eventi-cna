@@ -7,7 +7,7 @@ import GlowTableHead from '../../components/GlowTableHead'
 import GlowStatCard from '../../components/GlowStatCard'
 import { Modal, PresenzaBadge, Field, Input, Select, Btn, EmptyState } from '../../components/ui'
 import { Users, Search, Download, Upload, Eye, Trash2, UserCheck, AlertCircle, CheckCircle2, X } from 'lucide-react'
-import * as XLSX from 'xlsx-js-style'
+import * as XLSX from 'xlsx'
 import EventSelector from '../../components/EventSelector'
 
 function formatDt(ts) {
