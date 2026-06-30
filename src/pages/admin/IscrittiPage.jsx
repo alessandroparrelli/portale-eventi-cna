@@ -392,6 +392,7 @@ export default function IscrittiPage() {
       const fg = stato ? stato.fg : C.nero
       const br = stato ? stato.br : C.bordoCh
       const assColIdx = cols.indexOf('Stato associazione')
+      const pivaColIdx = cols.indexOf('P.IVA')
 
       for (let ci = 0; ci < nCols; ci++) {
         const isPresenteCol = cols[ci] === 'Presente'
@@ -409,6 +410,16 @@ export default function IscrittiPage() {
           },
           alignment:{ vertical:'center', horizontal: ['Presente','Stato iscrizione','Stato associazione'].includes(cols[ci]) ? 'center' : 'left' },
         })
+        // Forza la P.IVA come testo esplicito — Excel altrimenti la
+        // interpreta come numero e tronca eventuali zeri iniziali.
+        if (ci === pivaColIdx) {
+          const addr = XLSX.utils.encode_cell({ r: rowIdx, c: ci })
+          if (ws[addr]) {
+            ws[addr].t = 's'
+            ws[addr].v = (r.partita_iva || '').toString()
+            ws[addr].z = '@' // formato numero "Testo" in Excel
+          }
+        }
       }
     })
 
