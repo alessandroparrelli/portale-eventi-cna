@@ -1,18 +1,40 @@
-const CACHE = 'cna-checkin-v1'
-const OFFLINE_ASSETS = ['/', '/checkin', '/manifest.json']
+const CACHE = 'cna-portale-v2'
 
 self.addEventListener('install', e => {
-  e.waitUntil(caches.open(CACHE).then(c => c.addAll(OFFLINE_ASSETS)).then(() => self.skipWaiting()))
+  // Non pre-cachiamo nulla per evitare fallimenti di install che rompono il SW.
+  // La cache si popola progressivamente durante la navigazione (fetch handler).
+  self.skipWaiting()
 })
+
 self.addEventListener('activate', e => {
-  e.waitUntil(clients.claim())
-})
-self.addEventListener('fetch', e => {
-  if (e.request.method !== 'GET') return
-  e.respondWith(
-    fetch(e.request).catch(() => caches.match(e.request))
+  e.waitUntil(
+    caches.keys().then(keys =>
+      Promise.all(keys.filter(k => k !== CACHE).map(k => caches.delete(k)))
+    ).then(() => clients.claim())
   )
 })
+
+self.addEventListener('fetch', e => {
+  if (e.request.method !== 'GET') return
+  // Mai intercettare navigazioni HTML o richieste cross-origin (API Supabase ecc.)
+  // per evitare di servire pagine bianche cachate al posto del contenuto reale.
+  const url = new URL(e.request.url)
+  if (url.origin !== self.location.origin) return
+
+  e.respondWith(
+    fetch(e.request)
+      .then(res => {
+        // Cache solo risposte valide e same-origin, per uso offline futuro
+        if (res.ok) {
+          const resClone = res.clone()
+          caches.open(CACHE).then(c => c.put(e.request, resClone)).catch(() => {})
+        }
+        return res
+      })
+      .catch(() => caches.match(e.request))
+  )
+})
+
 self.addEventListener('push', e => {
   const data = e.data?.json() || {}
   e.waitUntil(
@@ -24,6 +46,7 @@ self.addEventListener('push', e => {
     })
   )
 })
+
 self.addEventListener('notificationclick', e => {
   e.notification.close()
   e.waitUntil(clients.openWindow(e.notification.data?.url || '/'))

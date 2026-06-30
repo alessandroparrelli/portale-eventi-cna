@@ -2,7 +2,7 @@
   "name": "CNA Roma Check-in",
   "short_name": "CNA Check-in",
   "description": "App check-in eventi CNA Roma",
-  "start_url": "/checkin",
+  "start_url": "/admin",
   "display": "standalone",
   "background_color": "#ffffff",
   "theme_color": "#003DA5",
