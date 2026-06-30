@@ -1,8 +1,6 @@
-const CACHE = 'cna-portale-v2'
+const CACHE = 'cna-portale-v3'
 
-self.addEventListener('install', e => {
-  // Non pre-cachiamo nulla per evitare fallimenti di install che rompono il SW.
-  // La cache si popola progressivamente durante la navigazione (fetch handler).
+self.addEventListener('install', () => {
   self.skipWaiting()
 })
 
@@ -15,23 +13,34 @@ self.addEventListener('activate', e => {
 })
 
 self.addEventListener('fetch', e => {
-  if (e.request.method !== 'GET') return
-  // Mai intercettare navigazioni HTML o richieste cross-origin (API Supabase ecc.)
-  // per evitare di servire pagine bianche cachate al posto del contenuto reale.
-  const url = new URL(e.request.url)
+  const req = e.request
+  if (req.method !== 'GET') return
+
+  const url = new URL(req.url)
   if (url.origin !== self.location.origin) return
 
+  // CRITICO: non intercettare MAI le navigazioni HTML (cambio pagina/route).
+  // Se le mettiamo in cache, rischiamo di servire pagine HTML vecchie/rotte
+  // di build precedenti invece del contenuto fresco dal server, anche
+  // quando la rete funziona perfettamente. Le navigazioni vanno sempre
+  // dirette alla rete, mai alla cache.
+  if (req.mode === 'navigate') {
+    e.respondWith(fetch(req).catch(() => caches.match('/')))
+    return
+  }
+
+  // Solo asset statici (immagini, font, JS, CSS) possono essere cachati
+  // per uso offline, mai documenti HTML di navigazione.
   e.respondWith(
-    fetch(e.request)
+    fetch(req)
       .then(res => {
-        // Cache solo risposte valide e same-origin, per uso offline futuro
         if (res.ok) {
           const resClone = res.clone()
-          caches.open(CACHE).then(c => c.put(e.request, resClone)).catch(() => {})
+          caches.open(CACHE).then(c => c.put(req, resClone)).catch(() => {})
         }
         return res
       })
-      .catch(() => caches.match(e.request))
+      .catch(() => caches.match(req))
   )
 })
 
