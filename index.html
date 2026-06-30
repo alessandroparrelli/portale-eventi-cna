@@ -35,6 +35,49 @@
   </head>
   <body>
     <div id="root"></div>
+    <script>
+      // Self-heal eseguito PRIMA di qualsiasi bundle JS, indipendente da
+      // React/Vite. Se questo file HTML viene servito da una cache vecchia
+      // (SW corrotto, cache Safari aggressiva), questo script gira comunque
+      // perché è inline qui dentro, non in un file .js separato che potrebbe
+      // essere a sua volta cachato. Confronta una versione salvata in
+      // localStorage con BUILD_STAMP: se diversa, pulisce tutto e ricarica
+      // UNA sola volta prima di montare l'app React.
+      (function () {
+        var BUILD_STAMP = '2026-06-30-fix-header-layout';
+        try {
+          var saved = localStorage.getItem('cna-build-stamp');
+          if (saved === BUILD_STAMP) return;
+
+          var cleanup = [];
+          if ('caches' in window) {
+            cleanup.push(
+              caches.keys().then(function (names) {
+                return Promise.all(names.map(function (n) { return caches.delete(n); }));
+              })
+            );
+          }
+          if ('serviceWorker' in navigator) {
+            cleanup.push(
+              navigator.serviceWorker.getRegistrations().then(function (regs) {
+                return Promise.all(regs.map(function (r) { return r.unregister(); }));
+              })
+            );
+          }
+          Promise.all(cleanup).finally(function () {
+            localStorage.setItem('cna-build-stamp', BUILD_STAMP);
+            if (saved) {
+              // C'era una versione precedente diversa: ricarica per
+              // garantire che il bundle JS fresco venga scaricato.
+              window.location.reload();
+            }
+          });
+        } catch (e) {
+          // Ambiente senza supporto storage/cache: nessun self-heal possibile,
+          // ma l'app prosegue comunque a caricarsi normalmente.
+        }
+      })();
+    </script>
     <script type="module" src="/src/main.jsx"></script>
   </body>
 </html>
