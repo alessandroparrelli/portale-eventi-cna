@@ -32,6 +32,7 @@ export default function App() {
       <AuthProvider>
         <Routes>
           {/* Pubbliche */}
+          <Route path="/" element={<Navigate to="/calendario" replace />} />
           <Route path="/login" element={<LoginPage />} />
           <Route path="/eventi/:slug" element={<LandingPage />} />
           <Route path="/lp/:slug" element={<LandingPagePublic />} />
@@ -71,6 +72,9 @@ export default function App() {
             element={<ProtectedRoute><LandingEditorPage /></ProtectedRoute>} />
 
           <Route path="/admin/*" element={<Navigate to="/admin" replace />} />
+
+          {/* Catch-all: qualsiasi altro path sconosciuto -> calendario pubblico (no pagina bianca) */}
+          <Route path="*" element={<Navigate to="/calendario" replace />} />
         </Routes>
       </AuthProvider>
     </BrowserRouter>
