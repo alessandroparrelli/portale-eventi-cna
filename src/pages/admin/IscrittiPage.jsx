@@ -97,36 +97,26 @@ export default function IscrittiPage() {
     setPagina(1)
   }
 
-  async function verificaAssociati() {
-    if (!registrations.length) return
+  // La verifica viene scritta direttamente sulle righe di `registrations` (associato_cna,
+  // associato_data_stipula, associato_verificato_at) cosi\u0300 e\u0300 definitiva: una volta eseguita,
+  // resta visibile su qualsiasi device e non va ripetuta. Un rilancio verifica SOLO gli
+  // iscritti non ancora controllati (nuovi arrivi) senza toccare quelli gia\u0300 fatti, a meno
+  // che non si chieda esplicitamente una riverifica completa.
+  async function verificaAssociati(forzaRiverifica = false) {
+    if (!selectedEvento || !registrations.length) return
     setVerificaInCorso(true)
     setVerificaInfo(null)
     try {
-      // Prendi tutte le P.IVA non vuote degli iscritti
-      const pive = [...new Set(
-        registrations
-          .map(r => (r.partita_iva || '').toString().trim())
-          .filter(p => p.length >= 5)
-      )]
-      if (!pive.length) { setVerificaInfo({ trovati: 0, cercati: 0, errore: 'Nessuna P.IVA presente tra gli iscritti' }); setVerificaInCorso(false); return }
       const res = await fetch('https://hnkhckcclgabunkqfmrz.supabase.co/functions/v1/verifica-associati', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ partite_iva: pive })
+        body: JSON.stringify({ event_id: selectedEvento, forza_riverifica: forzaRiverifica })
       })
       const data = await res.json()
       if (data.error) throw new Error(data.error)
-      const newMap = data.associati || {}
-      setAssociatiMap(newMap)
+      await loadRegs() // ricarica le righe aggiornate dal DB
       setVerificaEseguita(true)
-      setVerificaInfo({ trovati: data.trovati, cercati: data.cercati })
-      // Persiste su localStorage — sopravvive a refresh e navigazione
-      try {
-        localStorage.setItem(`associati_${selectedEvento}`, JSON.stringify({
-          map: newMap,
-          ts: new Date().toISOString(),
-        }))
-      } catch {}
+      setVerificaInfo({ trovati: data.trovati, cercati: data.cercati, aggiornati: data.aggiornati })
     } catch (e) {
       setVerificaInfo({ errore: String(e) })
     }
@@ -161,29 +151,30 @@ export default function IscrittiPage() {
     loadRegs()
   }, [selectedEvento])
 
-  // Carica dati verifica dal localStorage quando cambia evento
+  // Lo stato "verifica eseguita" si deduce dai dati gia\u0300 presenti sulle righe caricate dal DB:
+  // se almeno un iscritto ha associato_verificato_at valorizzato, la verifica e\u0300 gia\u0300 stata fatta
+  // (per quell'evento) ed e\u0300 visibile su qualunque device, senza bisogno di rifarla.
   useEffect(() => {
     setVerificaInfo(null)
-    if (!selectedEvento) {
-      setAssociatiMap({})
+    if (!selectedEvento || !registrations.length) {
       setVerificaEseguita(false)
       return
     }
-    try {
-      const saved = localStorage.getItem(`associati_${selectedEvento}`)
-      if (saved) {
-        const parsed = JSON.parse(saved)
-        setAssociatiMap(parsed.map || {})
-        setVerificaEseguita(true)
-      } else {
-        setAssociatiMap({})
-        setVerificaEseguita(false)
-      }
-    } catch {
-      setAssociatiMap({})
-      setVerificaEseguita(false)
+    setVerificaEseguita(registrations.some(r => !!r.associato_verificato_at))
+  }, [selectedEvento, registrations])
+
+  // Ricostruisce la mappa partita_iva -> esito a partire dalle colonne persistite sul DB
+  // (associato_cna, associato_data_stipula), scritte dall'Edge Function verifica-associati.
+  useEffect(() => {
+    const map = {}
+    for (const r of registrations) {
+      if (!r.associato_verificato_at) continue
+      const p = (r.partita_iva || '').toString().replace(/\s/g, '').replace(/^0+/, '')
+      if (!p) continue
+      map[p] = { associato: !!r.associato_cna, datastipula: r.associato_data_stipula || null }
     }
-  }, [selectedEvento])
+    setAssociatiMap(map)
+  }, [registrations])
 
   async function loadRegs() {
     setLoading(true)
@@ -630,26 +621,30 @@ export default function IscrittiPage() {
       {/* Bottoni azioni — DOPO il selettore evento */}
       {selectedEvento && (
         <div style={{ display:'flex', gap:'8px', flexWrap:'wrap', marginBottom:'16px', alignItems:'center' }}>
-          <Btn variant="primary" onClick={verificaAssociati} disabled={verificaInCorso} size="md"
-            title="Incrocia P.IVA degli iscritti con la tabella associati CNA">
+          <Btn variant="primary" onClick={() => verificaAssociati(false)} disabled={verificaInCorso} size="md"
+            title="Incrocia le P.IVA dei nuovi iscritti (non ancora controllati) con la tabella associati CNA">
             {verificaInCorso
               ? <><span style={{animation:'spin 1s linear infinite',display:'inline-block'}}>⏳</span> Verifica in corso…</>
               : '🔍 Verifica associati CNA'}
           </Btn>
           {verificaEseguita && (
+            <Btn variant="secondary" onClick={() => verificaAssociati(true)} disabled={verificaInCorso} size="md"
+              title="Ricontrolla TUTTI gli iscritti, sovrascrivendo anche i dati gi\u00e0 verificati">
+              ↻ Riverifica tutti
+            </Btn>
+          )}
+          {verificaEseguita && (
             <span style={{fontSize:'12px',color:'#059669',fontWeight:'600'}}>
               ✓ {Object.keys(associatiMap).length} trovati
               {(() => {
-                try {
-                  const s = localStorage.getItem(`associati_${selectedEvento}`)
-                  if (s) {
-                    const d = JSON.parse(s).ts
-                    return d ? <span style={{color:'#9CA3AF',fontWeight:'400',marginLeft:'6px'}}>
-                      · aggiornato {new Date(d).toLocaleDateString('it-IT')} {new Date(d).toLocaleTimeString('it-IT',{hour:'2-digit',minute:'2-digit'})}
-                    </span> : null
-                  }
-                } catch {}
-                return null
+                const ultima = registrations
+                  .map(r => r.associato_verificato_at)
+                  .filter(Boolean)
+                  .sort()
+                  .pop()
+                return ultima ? <span style={{color:'#9CA3AF',fontWeight:'400',marginLeft:'6px'}}>
+                  · aggiornato {new Date(ultima).toLocaleDateString('it-IT')} {new Date(ultima).toLocaleTimeString('it-IT',{hour:'2-digit',minute:'2-digit'})}
+                </span> : null
               })()}
             </span>
           )}
