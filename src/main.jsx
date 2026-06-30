@@ -20,7 +20,7 @@ if ('serviceWorker' in navigator) {
         // Forza il controllo di una nuova versione del SW ad ogni avvio
         reg.update().catch(() => {})
       }
-      const reg = await navigator.serviceWorker.register('/sw.js')
+      const reg = await navigator.serviceWorker.register('/sw.js', { updateViaCache: 'none' })
       console.log('[SW] Registrato:', reg.scope)
     } catch (err) {
       console.warn('[SW] Registrazione fallita, rimuovo eventuali SW corrotti:', err)
