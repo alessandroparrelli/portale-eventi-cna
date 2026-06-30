@@ -6,6 +6,7 @@ import { usePageTitle } from '../../hooks/usePageTitle'
 import { useNavigate, useParams } from 'react-router-dom'
 import { supabase } from '../../lib/supabase'
 import { useRole } from '../../hooks/useRole'
+import { logAttivita } from '../../lib/activityLog'
 import RichEditor from '../../components/editor/RichEditor'
 import BlockEditor, { newBlock } from '../../components/editor/BlockEditor'
 import ImageUploader from '../../components/editor/ImageUploader'
@@ -352,7 +353,8 @@ export default function EventoEditorPage() {
   const [saving, setSaving] = useState(false)
   const [saved, setSaved] = useState(false)
   const [activeTab, setActiveTab] = useState('info')
-  const { canWrite } = useRole()
+  const { canManage } = useRole()
+  const canWrite = canManage('eventi')
 
   usePageTitle(event.titolo ? `Modifica — ${event.titolo}` : 'Nuovo evento')
 
@@ -449,10 +451,12 @@ export default function EventoEditorPage() {
       if (data) {
         // Inizializza i campi del form per il nuovo evento
         await supabase.rpc('init_form_fields', { p_event_id: data.id }).catch(() => {})
+        logAttivita('evento_creato', { eventoId: data.id, eventoTitolo: data.titolo })
         navigate(`/admin/eventi/${data.id}/editor`, { replace:true })
       }
     } else {
       await supabase.from('events').update(payload).eq('id', id)
+      logAttivita('evento_modificato', { eventoId: id, eventoTitolo: payload.titolo })
     }
     setSaving(false); setSaved(true); setTimeout(()=>setSaved(false),2500)
   }

@@ -107,37 +107,44 @@ const NAV_GROUPS = [
   {
     label: 'Gestione',
     items: [
-      { to:'/admin',             label:'Dashboard',    iconKey:'dashboard', end:true,  activeColor:'#003DA5' },
-      { to:'/admin/eventi',      label:'Eventi',       iconKey:'calendar',             activeColor:'#003DA5' },
-      { to:'/admin/iscritti',    label:'Iscritti',     iconKey:'users',                activeColor:'#059669' },
-      { to:'/admin/checkin',     label:'Check-in',     iconKey:'qr',                   activeColor:'#7C3AED' },
+      { to:'/admin',             label:'Dashboard',    iconKey:'dashboard', end:true,  activeColor:'#003DA5', sezione:'dashboard' },
+      { to:'/admin/eventi',      label:'Eventi',       iconKey:'calendar',             activeColor:'#003DA5', sezione:'eventi' },
+      { to:'/admin/iscritti',    label:'Iscritti',     iconKey:'users',                activeColor:'#059669', sezione:'iscritti' },
+      { to:'/admin/checkin',     label:'Check-in',     iconKey:'qr',                   activeColor:'#7C3AED', sezione:'checkin' },
     ],
   },
   {
     label: 'Analisi',
     items: [
-      { to:'/admin/statistiche', label:'Statistiche',  iconKey:'chart',                activeColor:'#D97706' },
-      { to:'/admin/log',         label:'Log attività', iconKey:'activity',             activeColor:'#0891B2' },
+      { to:'/admin/statistiche', label:'Statistiche',  iconKey:'chart',                activeColor:'#D97706', sezione:'statistiche' },
+      { to:'/admin/log',         label:'Log attività', iconKey:'activity',             activeColor:'#0891B2', sezione:'log' },
     ],
   },
   {
     label: 'Comunicazioni',
     items: [
-      { to:'/admin/email',       label:'Email',        iconKey:'mail',                 activeColor:'#E85D24' },
+      { to:'/admin/email',       label:'Email',        iconKey:'mail',                 activeColor:'#E85D24', sezione:'email' },
     ],
   },
   {
     label: 'Marketing',
     items: [
-      { to:'/admin/landing',     label:'Landing Page', iconKey:'landing',              activeColor:'#0891B2' },
-      { to:'/admin/calendario',  label:'Calendario',          iconKey:'globe',          activeColor:'#059669' },
+      { to:'/admin/landing',     label:'Landing Page', iconKey:'landing',              activeColor:'#0891B2', sezione:'landing' },
+      { to:'/admin/calendario',  label:'Calendario',          iconKey:'globe',          activeColor:'#059669', sezione:'calendario' },
+    ],
+  },
+  {
+    label: 'Amministrazione',
+    items: [
+      { to:'/admin/utenti',      label:'Utenti',       iconKey:'usercog',              activeColor:'#7C3AED', sezione:'utenti' },
+      { to:'/admin/ruoli',       label:'Ruoli',        iconKey:'usercog',              activeColor:'#7C3AED', sezione:'ruoli' },
     ],
   },
 ]
 
 export default function Sidebar({ mobileOpen, onMobileClose, isMobile }) {
   const { user, signOut } = useAuth()
-  const { ruolo, isAdmin } = useRole()
+  const { ruolo, canView } = useRole()
   const [avatarUrl, setAvatarUrl] = useState(null)
   const [displayName, setDisplayName] = useState('')
 
@@ -157,13 +164,9 @@ export default function Sidebar({ mobileOpen, onMobileClose, isMobile }) {
     ? displayName.split(' ').map(w => w[0]).slice(0,2).join('').toUpperCase()
     : '?'
 
-  const allGroups = [
-    ...NAV_GROUPS,
-    ...(isAdmin ? [{
-      label: 'Amministrazione',
-      items: [{ to:'/admin/utenti', label:'Utenti', iconKey:'usercog', activeColor:'#7C3AED' }],
-    }] : []),
-  ]
+  const allGroups = NAV_GROUPS
+    .map(group => ({ ...group, items: group.items.filter(it => canView(it.sezione)) }))
+    .filter(group => group.items.length > 0)
 
   const handleNavClick = () => { if (onMobileClose) onMobileClose() }
 

@@ -1,6 +1,7 @@
 import { BrowserRouter, Routes, Route, Navigate } from 'react-router-dom'
 import { AuthProvider } from './hooks/useAuth'
 import ProtectedRoute from './components/ProtectedRoute'
+import RequireSection from './components/RequireSection'
 import AdminLayout from './components/AdminLayout'
 import LoginPage from './pages/LoginPage'
 import LandingPage from './pages/public/LandingPage'
@@ -15,6 +16,7 @@ import EmailPage from './pages/admin/EmailPage'
 import EmailEditorPage from './pages/admin/EmailEditorPage'
 import StatistichePage from './pages/admin/StatistichePage'
 import UtentiPage from './pages/admin/UtentiPage'
+import RuoliPage from './pages/admin/RuoliPage'
 import ProfiloPage from './pages/admin/ProfiloPage'
 import ActivityLogPage from './pages/admin/ActivityLogPage'
 import LandingPageListPage from './pages/admin/LandingPageListPage'
@@ -42,34 +44,36 @@ export default function App() {
           <Route path="/iscrizione/:codice" element={<Iscrizione />} />
           <Route path="/iscrizione" element={<Iscrizione />} />
 
-          {/* Admin — layout sidebar */}
+          {/* Admin — layout sidebar (ogni sezione protetta dal proprio permesso) */}
           <Route path="/admin" element={<ProtectedRoute><AdminLayout /></ProtectedRoute>}>
-            <Route index element={<DashboardPage />} />
-            <Route path="eventi" element={<EventiPage />} />
-            <Route path="iscritti" element={<IscrittiPage />} />
-            <Route path="email" element={<EmailPage />} />
-            <Route path="checkin" element={<CheckinPage />} />
-            <Route path="statistiche" element={<StatistichePage />} />
-            <Route path="utenti" element={<UtentiPage />} />
+            <Route index element={<RequireSection sezione="dashboard"><DashboardPage /></RequireSection>} />
+            <Route path="eventi" element={<RequireSection sezione="eventi"><EventiPage /></RequireSection>} />
+            <Route path="iscritti" element={<RequireSection sezione="iscritti"><IscrittiPage /></RequireSection>} />
+            <Route path="email" element={<RequireSection sezione="email"><EmailPage /></RequireSection>} />
+            <Route path="checkin" element={<RequireSection sezione="checkin"><CheckinPage /></RequireSection>} />
+            <Route path="statistiche" element={<RequireSection sezione="statistiche"><StatistichePage /></RequireSection>} />
+            <Route path="utenti" element={<RequireSection sezione="utenti"><UtentiPage /></RequireSection>} />
+            <Route path="ruoli" element={<RequireSection sezione="ruoli"><RuoliPage /></RequireSection>} />
+            {/* Profilo personale: sempre accessibile a chi è loggato, nessun permesso di sezione richiesto */}
             <Route path="profilo" element={<ProfiloPage />} />
-            <Route path="log" element={<ActivityLogPage />} />
-            <Route path="landing" element={<LandingPageListPage />} />
-            <Route path="landing/:id/contatti" element={<LandingContactsPage />} />
-            <Route path="calendario" element={<CalendarioAdminPage />} />
-            <Route path="analytics" element={<AnaliticsPage />} />
+            <Route path="log" element={<RequireSection sezione="log"><ActivityLogPage /></RequireSection>} />
+            <Route path="landing" element={<RequireSection sezione="landing"><LandingPageListPage /></RequireSection>} />
+            <Route path="landing/:id/contatti" element={<RequireSection sezione="landing"><LandingContactsPage /></RequireSection>} />
+            <Route path="calendario" element={<RequireSection sezione="calendario"><CalendarioAdminPage /></RequireSection>} />
+            <Route path="analytics" element={<RequireSection sezione="analytics"><AnaliticsPage /></RequireSection>} />
           </Route>
 
-          {/* Editor a schermo intero (fuori dal layout sidebar) */}
+          {/* Editor a schermo intero (fuori dal layout sidebar) — richiedono permesso "gestisci" */}
           <Route path="/admin/eventi/nuovo/editor"
-            element={<ProtectedRoute><EventoEditorPage /></ProtectedRoute>} />
+            element={<ProtectedRoute><RequireSection sezione="eventi" min="gestisci"><EventoEditorPage /></RequireSection></ProtectedRoute>} />
           <Route path="/admin/eventi/:id/editor"
-            element={<ProtectedRoute><EventoEditorPage /></ProtectedRoute>} />
+            element={<ProtectedRoute><RequireSection sezione="eventi" min="gestisci"><EventoEditorPage /></RequireSection></ProtectedRoute>} />
           <Route path="/admin/email/:id/editor"
-            element={<ProtectedRoute><EmailEditorPage /></ProtectedRoute>} />
+            element={<ProtectedRoute><RequireSection sezione="email" min="gestisci"><EmailEditorPage /></RequireSection></ProtectedRoute>} />
           <Route path="/admin/email/nuovo"
-            element={<ProtectedRoute><EmailEditorPage /></ProtectedRoute>} />
+            element={<ProtectedRoute><RequireSection sezione="email" min="gestisci"><EmailEditorPage /></RequireSection></ProtectedRoute>} />
           <Route path="/admin/landing/:id/editor"
-            element={<ProtectedRoute><LandingEditorPage /></ProtectedRoute>} />
+            element={<ProtectedRoute><RequireSection sezione="landing" min="gestisci"><LandingEditorPage /></RequireSection></ProtectedRoute>} />
 
           <Route path="/admin/*" element={<Navigate to="/admin" replace />} />
 

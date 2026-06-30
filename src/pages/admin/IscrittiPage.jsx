@@ -9,6 +9,7 @@ import { Modal, PresenzaBadge, Field, Input, Select, Btn, EmptyState } from '../
 import { Users, Search, Download, Upload, Eye, Trash2, UserCheck, AlertCircle, CheckCircle2, X } from 'lucide-react'
 import * as XLSX from 'xlsx'
 import ExcelJS from 'exceljs/dist/exceljs.min.js'
+import { logAttivita } from '../../lib/activityLog'
 import EventSelector from '../../components/EventSelector'
 
 function formatDt(ts) {
@@ -71,7 +72,8 @@ export default function IscrittiPage() {
   const [filterStato, setFilterStato] = useState('tutti')
   const [detail, setDetail] = useState(null)
   const [delConfirm, setDelConfirm] = useState(null)
-  const { canDelete } = useRole()
+  const { canManage } = useRole()
+  const canDelete = canManage('iscritti')
   const [importModal, setImportModal] = useState(false)
   const [importPreview, setImportPreview] = useState([])
   const [importErrors, setImportErrors] = useState([])
@@ -205,6 +207,7 @@ export default function IscrittiPage() {
 
   async function deleteReg() {
     await supabase.from('registrations').delete().eq('id', delConfirm.id)
+    logAttivita('iscritto_eliminato', { eventoId: selectedEvento, dettagli: { nome: [delConfirm.nome, delConfirm.cognome].filter(Boolean).join(' ') } })
     setDelConfirm(null)
     loadRegs()
   }
@@ -469,6 +472,7 @@ export default function IscrittiPage() {
     a.click()
     document.body.removeChild(a)
     URL.revokeObjectURL(url)
+    logAttivita('iscritti_esportati', { eventoId: selectedEvento, eventoTitolo: eventoTitle, dettagli: { totale: filtered.length } })
   }
 
   function downloadTemplate() {
@@ -526,7 +530,10 @@ export default function IscrittiPage() {
     }
     setImporting(false)
     setImportDone({ ok, fail })
-    if (ok > 0) loadRegs()
+    if (ok > 0) {
+      logAttivita('iscritti_importati', { eventoId: selectedEvento, dettagli: { ok, fail } })
+      loadRegs()
+    }
   }
 
   function resetImport() {

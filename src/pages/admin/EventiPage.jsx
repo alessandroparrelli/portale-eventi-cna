@@ -3,6 +3,7 @@ import { usePageTitle } from '../../hooks/usePageTitle'
 import { useNavigate } from 'react-router-dom'
 import { supabase } from '../../lib/supabase'
 import { useRole } from '../../hooks/useRole'
+import { logAttivita } from '../../lib/activityLog'
 import { Modal, StatoBadge, Field, Input, Textarea, Select, Btn, EmptyState } from '../../components/ui'
 import ImageUploader from '../../components/editor/ImageUploader'
 import GlowTabBar from '../../components/GlowTabBar'
@@ -299,7 +300,9 @@ export default function EventiPage() {
   const [errors,     setErrors]     = useState({})
   const [linkModal,  setLinkModal]  = useState(null)
   const [copied,     setCopied]     = useState(false)
-  const { canWrite, canDelete } = useRole()
+  const { canManage } = useRole()
+  const canWrite = canManage('eventi')
+  const canDelete = canManage('eventi')
   const navigate = useNavigate()
   const PUBLIC_BASE = window.location.origin
 
@@ -355,6 +358,7 @@ export default function EventiPage() {
   async function deleteEvent() {
     setSaving(true)
     await supabase.from('events').delete().eq('id',cur.id)
+    logAttivita('evento_eliminato', { eventoId: cur.id, eventoTitolo: cur.titolo })
     setSaving(false); setModal(null); loadData()
   }
 

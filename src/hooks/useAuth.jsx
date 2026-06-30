@@ -1,5 +1,6 @@
 import { createContext, useContext, useEffect, useState } from 'react'
 import { supabase } from '../lib/supabase'
+import { logAttivita, resetActivityLogCache } from '../lib/activityLog'
 
 const AuthContext = createContext(null)
 
@@ -41,11 +42,17 @@ export function AuthProvider({ children }) {
 
     // Successo: aspetta che la sessione sia salvata, poi naviga
     await new Promise(r => setTimeout(r, 300))
+    if (data?.user?.id) {
+      logAttivita('login')
+      supabase.from('admin_profiles').update({ ultimo_accesso: new Date().toISOString() }).eq('id', data.user.id)
+    }
     window.location.href = '/admin'
     return { data, error: null }
   }
 
   const signOut = async () => {
+    await logAttivita('logout')
+    resetActivityLogCache()
     await supabase.auth.signOut()
     await new Promise(r => setTimeout(r, 150))
     window.location.href = '/login'

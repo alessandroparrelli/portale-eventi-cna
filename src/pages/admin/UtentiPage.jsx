@@ -1,19 +1,21 @@
 import { useEffect, useState } from 'react'
+import { Link } from 'react-router-dom'
 import { supabase } from '../../lib/supabase'
 import { useRole } from '../../hooks/useRole'
 import { useAuth } from '../../hooks/useAuth'
 import { adminApi } from '../../lib/adminApi'
+import { logAttivita } from '../../lib/activityLog'
 import { Modal, RuoloBadge, Field, Input, Select, Btn, EmptyState } from '../../components/ui'
-import { Users, Plus, Pencil, Trash2, ShieldCheck, Eye, EyeOff, Activity, Clock, ToggleLeft, ToggleRight } from 'lucide-react'
+import { Users, Plus, Pencil, Trash2, ShieldCheck, Eye, EyeOff, Activity, Clock, ToggleLeft, ToggleRight, Settings } from 'lucide-react'
 
 const RUOLO_COL  = { admin:'#003DA5', supervisore:'#D97706', utente:'#6B7280' }
-const RUOLO_DESC = {
+const RUOLO_DESC_FALLBACK = {
   admin:       'Accesso completo: crea, modifica, elimina, gestisce utenti.',
   supervisore: 'Crea e modifica eventi. Non elimina né gestisce utenti.',
   utente:      'Sola lettura.',
 }
-const LOG_ICONS  = { login:'🔑',logout:'👋',profilo_aggiornato:'✏️',avatar_aggiornato:'📸',password_cambiata:'🔒',evento_creato:'📅',evento_modificato:'✏️',evento_eliminato:'🗑️',checkin_effettuato:'✅',utente_creato:'👤',utente_eliminato:'🗑️' }
-const LOG_LABELS = { login:'Accesso',logout:'Disconnessione',profilo_aggiornato:'Profilo aggiornato',avatar_aggiornato:'Foto aggiornata',password_cambiata:'Password modificata',evento_creato:'Evento creato',evento_modificato:'Evento modificato',evento_eliminato:'Evento eliminato',checkin_effettuato:'Check-in',utente_creato:'Utente creato',utente_eliminato:'Utente eliminato' }
+const LOG_ICONS  = { login:'🔑',logout:'👋',profilo_aggiornato:'✏️',avatar_aggiornato:'📸',password_cambiata:'🔒',evento_creato:'📅',evento_modificato:'✏️',evento_eliminato:'🗑️',checkin_qr:'✅',checkin_manuale:'✅',utente_creato:'👤',utente_modificato:'✏️',utente_eliminato:'🗑️',ruolo_creato:'🛡️',ruolo_modificato:'🛡️',ruolo_eliminato:'🛡️',iscritto_eliminato:'🗑️',iscritti_importati:'📥',iscritti_esportati:'📤',email_template_salvato:'📧',email_test_inviata:'📧' }
+const LOG_LABELS = { login:'Accesso',logout:'Disconnessione',profilo_aggiornato:'Profilo aggiornato',avatar_aggiornato:'Foto aggiornata',password_cambiata:'Password modificata',evento_creato:'Evento creato',evento_modificato:'Evento modificato',evento_eliminato:'Evento eliminato',checkin_qr:'Check-in QR',checkin_manuale:'Check-in manuale',utente_creato:'Utente creato',utente_modificato:'Utente modificato',utente_eliminato:'Utente eliminato',ruolo_creato:'Ruolo creato',ruolo_modificato:'Ruolo modificato',ruolo_eliminato:'Ruolo eliminato',iscritto_eliminato:'Iscritto eliminato',iscritti_importati:'Iscritti importati',iscritti_esportati:'Iscritti esportati',email_template_salvato:'Template email salvato',email_test_inviata:'Email di test inviata' }
 
 const EMPTY = { username:'', email:'', password:'', ruolo:'utente', nome:'', cognome:'' }
 
@@ -39,10 +41,17 @@ export default function UtentiPage() {
   const [log,         setLog]         = useState([])
   const [logLoading,  setLogLoading]  = useState(false)
   const [toast,       setToast]       = useState(null)
-  const { isAdmin }  = useRole()
+  const [roles,       setRoles]       = useState([])
+  const { canManage }  = useRole()
+  const canManageUtenti = canManage('utenti')
   const { user: me } = useAuth()
 
-  useEffect(() => { loadUsers() }, [])
+  useEffect(() => { loadUsers(); loadRoles() }, [])
+
+  async function loadRoles() {
+    const { data } = await supabase.from('roles').select('*').order('is_sistema', { ascending:false }).order('nome')
+    setRoles(data || [])
+  }
 
   async function loadUsers() {
     setLoading(true)
@@ -74,7 +83,7 @@ export default function UtentiPage() {
     try {
       if (modal === 'create') {
         await adminApi.createUser(cur.email.trim(), cur.password, cur.username.trim(), cur.ruolo)
-        await supabase.rpc('log_activity',{p_azione:'utente_creato',p_dettagli:{email:cur.email}}).catch(()=>{})
+        logAttivita('utente_creato', { dettagli: { email: cur.email, ruolo: cur.ruolo } })
         ok('Utente creato!')
       } else {
         await adminApi.updateUser(cur.id, {
@@ -85,6 +94,7 @@ export default function UtentiPage() {
           attivo:   cur.attivo!==false,
           ...(cur.password?.trim() ? { password: cur.password } : {})
         })
+        logAttivita('utente_modificato', { dettagli: { username: cur.username, ruolo: cur.ruolo } })
         ok('Utente aggiornato!')
       }
       setModal(null); loadUsers()
@@ -103,18 +113,18 @@ export default function UtentiPage() {
     setSaving(true)
     try {
       await adminApi.deleteUser(cur.id)
-      await supabase.rpc('log_activity',{p_azione:'utente_eliminato',p_dettagli:{username:cur.username}}).catch(()=>{})
+      logAttivita('utente_eliminato', { dettagli: { username: cur.username } })
       ok('Utente eliminato')
       setModal(null); loadUsers()
     } catch(e) { err(e.message) }
     setSaving(false)
   }
 
-  if (!isAdmin) return (
+  if (!canManageUtenti) return (
     <div style={{ display:'flex', alignItems:'center', justifyContent:'center', minHeight:'60vh', flexDirection:'column', gap:'12px', textAlign:'center' }}>
       <ShieldCheck size={48} style={{ color:'#D1D5DB' }}/>
       <p style={{ fontSize:'18px', fontWeight:'700', color:'#0A0A0A' }}>Accesso non autorizzato</p>
-      <p style={{ fontSize:'14px', color:'#6B7280' }}>Solo gli admin possono gestire gli utenti.</p>
+      <p style={{ fontSize:'14px', color:'#6B7280' }}>Non hai i permessi per gestire gli utenti.</p>
     </div>
   )
 
@@ -125,7 +135,10 @@ export default function UtentiPage() {
           <h1 style={{ fontSize:'32px', fontWeight:'900', color:'#0A0A0A', letterSpacing:'-.03em', margin:0 }}>Gestione Utenti</h1>
           <p style={{ fontSize:'14px', color:'#6B7280', margin:'4px 0 0' }}>{users.length} utenti</p>
         </div>
-        <Btn onClick={openCreate}><Plus size={18}/> Nuovo utente</Btn>
+        <div style={{ display:'flex', gap:'8px' }}>
+          <Link to="/admin/ruoli"><Btn variant="secondary"><Settings size={16}/> Gestisci ruoli</Btn></Link>
+          <Btn onClick={openCreate}><Plus size={18}/> Nuovo utente</Btn>
+        </div>
       </div>
 
       <div style={{ backgroundColor:'#FFFFFF', borderRadius:'8px', border:'1px solid #E5E7EB', overflow:'hidden' }}>
@@ -214,11 +227,16 @@ export default function UtentiPage() {
             </Field>
             <Field label="Ruolo">
               <Select value={cur.ruolo} onChange={e=>setCur(p=>({...p,ruolo:e.target.value}))}>
-                <option value="utente">👁 Utente — solo lettura</option>
-                <option value="supervisore">✏️ Supervisore — crea e modifica</option>
-                <option value="admin">⚡ Admin — accesso completo</option>
+                {roles.map(r => (
+                  <option key={r.id} value={r.nome}>
+                    {r.nome==='admin'?'⚡ ':r.nome==='supervisore'?'✏️ ':r.nome==='utente'?'👁 ':'🏷️ '}
+                    {r.nome.charAt(0).toUpperCase()+r.nome.slice(1)}
+                  </option>
+                ))}
               </Select>
-              <p style={{ fontSize:'12px', color:'#6B7280', margin:'4px 0 0' }}>{RUOLO_DESC[cur.ruolo]}</p>
+              <p style={{ fontSize:'12px', color:'#6B7280', margin:'4px 0 0' }}>
+                {roles.find(r=>r.nome===cur.ruolo)?.descrizione || RUOLO_DESC_FALLBACK[cur.ruolo] || ''}
+              </p>
             </Field>
             <div style={{ display:'flex', justifyContent:'flex-end', gap:'10px', paddingTop:'8px', borderTop:'1px solid #F3F4F6' }}>
               <Btn variant="ghost" onClick={()=>setModal(null)}>Annulla</Btn>

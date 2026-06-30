@@ -5,6 +5,7 @@
 import { useEffect, useState, useRef } from 'react'
 import { useNavigate, useParams } from 'react-router-dom'
 import { supabase } from '../../lib/supabase'
+import { logAttivita } from '../../lib/activityLog'
 import { ArrowLeft, Save, Eye, EyeOff, Loader2, Mail, Code2, Layers, Plus, Trash2, GripVertical, ChevronUp, ChevronDown, Send } from 'lucide-react'
 import { Field, Input, Select, Btn } from '../../components/ui'
 
@@ -326,6 +327,7 @@ export default function EmailEditorPage() {
     }
     if (isNew) await supabase.from('email_templates').insert(payload)
     else       await supabase.from('email_templates').update(payload).eq('id', id)
+    logAttivita('email_template_salvato', { eventoId: template.event_id, dettagli: { tipo: template.tipo } })
     setSaving(false); setSaved(true); setTimeout(()=>setSaved(false),2500)
   }
 
@@ -342,6 +344,7 @@ export default function EmailEditorPage() {
       headers: { 'Authorization': `Bearer ${session?.access_token}`, 'Content-Type': 'application/json' },
       body: JSON.stringify({ to: testEmail, oggetto: template.oggetto || '(test)', html: fullHtml }),
     })
+    logAttivita('email_test_inviata', { eventoId: template.event_id, dettagli: { tipo: template.tipo, a: testEmail } })
     setSending(false); setShowTest(false)
     alert(`Email di test inviata a ${testEmail}`)
   }

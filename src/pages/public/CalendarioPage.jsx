@@ -114,6 +114,14 @@ export default function CalendarioPage() {
         @keyframes fadeUp{from{opacity:0;transform:translateY(14px)}to{opacity:1;transform:none}}
         @keyframes spin{to{transform:rotate(360deg)}}
 
+        /* Navbar: logo grande e centrato su desktop, a sinistra (invariato) su mobile */
+        @media (min-width: 641px) {
+          .cal-navbar { display:grid !important; grid-template-columns: 1fr auto 1fr; }
+          .cal-navbar-logo-link { grid-column: 2; justify-self: center; }
+          .cal-navbar-cta { grid-column: 3; justify-self: end; }
+          .cal-navbar-logo { height: 64px !important; }
+        }
+
         /* Mobile scaling */
         @media (max-width: 640px) {
           .cal-hero-badge { font-size:13px !important; padding:8px 18px !important; }
@@ -158,13 +166,13 @@ export default function CalendarioPage() {
           backgroundSize:'32px 32px'}}/>
 
         {/* Navbar logo + CTA */}
-        <div style={{position:'relative',zIndex:2,display:'flex',alignItems:'center',
+        <div className="cal-navbar" style={{position:'relative',zIndex:2,display:'flex',alignItems:'center',
           justifyContent:'space-between',padding:'16px 24px',gap:'12px',flexWrap:'wrap'}}>
-          <a href="/calendario" onClick={e=>{e.preventDefault();window.location.href='/calendario'}} style={{display:'block',flexShrink:0}}>
-            <img src={logo} alt="CNA Roma" style={{height:'52px',objectFit:'contain',maxWidth:'220px',display:'block'}}/>
+          <a href="/calendario" onClick={e=>{e.preventDefault();window.location.href='/calendario'}} className="cal-navbar-logo-link" style={{display:'block',flexShrink:0}}>
+            <img src={logo} alt="CNA Roma" className="cal-navbar-logo" style={{height:'52px',objectFit:'contain',maxWidth:'220px',display:'block'}}/>
           </a>
           {cfg?.url_cta && (
-            <a href={cfg.url_cta} target="_blank" rel="noopener noreferrer"
+            <a href={cfg.url_cta} target="_blank" rel="noopener noreferrer" className="cal-navbar-cta"
               style={{display:'flex',alignItems:'center',gap:'8px',flexShrink:0,
                 fontSize:'13px',fontWeight:'700',color:color,backgroundColor:'#ffffff',
                 textDecoration:'none',padding:'10px 18px',borderRadius:'8px',

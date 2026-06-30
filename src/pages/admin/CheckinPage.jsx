@@ -2,6 +2,7 @@ import { useEffect, useRef, useState } from 'react'
 import { usePageTitle } from '../../hooks/usePageTitle'
 import { supabase } from '../../lib/supabase'
 import { useRole } from '../../hooks/useRole'
+import { logAttivita } from '../../lib/activityLog'
 import { Modal, Btn, Select, Field, Input } from '../../components/ui'
 import GlowStatCard from '../../components/GlowStatCard'
 import { QrCode, UserPlus, CheckCircle2, XCircle, AlertTriangle, RefreshCw, Search, Camera, CameraOff, Users, WifiOff } from 'lucide-react'
@@ -130,7 +131,8 @@ export default function CheckinPage() {
   const [checkingId,     setCheckingId]    = useState(null)
   const html5QrRef = useRef(null)
   const resultTimerRef = useRef(null)
-  const { canWrite } = useRole()
+  const { canManage } = useRole()
+  const canWrite = canManage('checkin')
 
   useEffect(() => {
     supabase.from('events').select('id,titolo,stato')
@@ -209,13 +211,16 @@ export default function CheckinPage() {
     setCheckingId(null)
   }
 
-  async function doCheckin(qr) {
+  async function doCheckin(qr, manuale = false) {
     if (!qr.trim()) return
     setProcessing(true)
     const { data, error } = await supabase.rpc('checkin_by_qr', { p_qr_code: qr.trim() })
     setResult(error ? { ok: false, error: 'non_trovato' } : data)
     setProcessing(false)
-    if (data?.ok) loadPresenti()
+    if (data?.ok) {
+      logAttivita(manuale ? 'checkin_manuale' : 'checkin_qr', { eventoId: selectedEvento, dettagli: { nome: data.nome } })
+      loadPresenti()
+    }
   }
 
   async function startScanner() {
@@ -466,14 +471,14 @@ export default function CheckinPage() {
             <Input
               value={manualQr}
               onChange={e => setManualQr(e.target.value)}
-              onKeyDown={e => { if (e.key === 'Enter' && manualQr.trim()) { doCheckin(manualQr); setManualModal(false); setManualQr('') } }}
+              onKeyDown={e => { if (e.key === 'Enter' && manualQr.trim()) { doCheckin(manualQr, true); setManualModal(false); setManualQr('') } }}
               placeholder="QR-XXXXXXXXXXXXXXXX"
               autoFocus
               style={{ flex: 1 }}
             />
             <Btn
               disabled={!manualQr.trim() || processing}
-              onClick={() => { doCheckin(manualQr); setManualModal(false); setManualQr('') }}
+              onClick={() => { doCheckin(manualQr, true); setManualModal(false); setManualQr('') }}
             >
               {processing ? '…' : 'Check-in'}
             </Btn>

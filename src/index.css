@@ -140,6 +140,18 @@ header img { display: block; }
   main { padding-left: 48px !important; padding-right: 48px !important; }
 }
 
+/* Header admin: logo grande e centrato su desktop, a sinistra (invariato) su mobile */
+@media (min-width: 769px) {
+  .admin-header {
+    display: grid !important;
+    grid-template-columns: 1fr auto 1fr;
+    align-items: center;
+  }
+  .admin-header-logo-wrap { grid-column: 2; justify-self: center; }
+  .admin-header-meta { grid-column: 1; justify-self: start; }
+  .admin-header-logo { height: 52px !important; }
+}
+
 /* ══════════════════════════════════════════════════════
    MOBILE ≤ 768px  — iPhone 17 Pro = 393px
 ══════════════════════════════════════════════════════ */

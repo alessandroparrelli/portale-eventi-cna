@@ -25,7 +25,7 @@ export default function AdminLayout() {
           Questo evita ogni bug noto di iOS Safari/PWA legato a fixed
           positioning + safe-area + viewport dinamico. Vedi
           docs/IOS_FIXED_HEADER_BUG.md per la storia completa. ── */}
-      <header style={s.header}>
+      <header style={s.header} className="admin-header">
         {isMobile && (
           <button onClick={() => setMobileOpen(true)} style={s.hamburger} aria-label="Apri menu">
             <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round">
@@ -33,15 +33,20 @@ export default function AdminLayout() {
             </svg>
           </button>
         )}
-        <img
-          src="https://raw.githubusercontent.com/alessandroparrelli/fileappoggio/main/NUOVO-LOGO-CNA-ROMA-SOLO-ROMA.png"
-          alt="CNA Roma"
-          style={{ ...s.logo, cursor: 'pointer' }}
-          onClick={() => window.location.reload()}
-          title="Ricarica pagina"
-        />
-        <div style={s.divider}/>
-        <span style={s.pageTitle}>Eventi</span>
+        <div className="admin-header-logo-wrap">
+          <img
+            src="https://raw.githubusercontent.com/alessandroparrelli/fileappoggio/main/NUOVO-LOGO-CNA-ROMA-SOLO-ROMA.png"
+            alt="CNA Roma"
+            className="admin-header-logo"
+            style={{ ...s.logo, cursor: 'pointer' }}
+            onClick={() => window.location.reload()}
+            title="Ricarica pagina"
+          />
+        </div>
+        <div className="admin-header-meta" style={{ display:'flex', alignItems:'center', gap:'14px' }}>
+          <div style={s.divider}/>
+          <span style={s.pageTitle}>Eventi</span>
+        </div>
       </header>
 
       {/* ── CORPO: sidebar (desktop) + contenuto, sotto l'header nel flusso normale ── */}
