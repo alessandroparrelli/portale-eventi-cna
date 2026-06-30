@@ -3,9 +3,8 @@ import { Outlet } from 'react-router-dom'
 import Sidebar from './Sidebar'
 
 export default function AdminLayout() {
-  const [sidebarWidth, setSidebarWidth] = useState(240)
-  const [mobileOpen,   setMobileOpen]   = useState(false)
-  const [isMobile,     setIsMobile]     = useState(false)
+  const [mobileOpen, setMobileOpen] = useState(false)
+  const [isMobile,   setIsMobile]   = useState(false)
 
   useEffect(() => {
     function check() {
@@ -18,23 +17,14 @@ export default function AdminLayout() {
     return () => window.removeEventListener('resize', check)
   }, [])
 
-  useEffect(() => {
-    if (isMobile) { setSidebarWidth(0); return }
-    const observer = new ResizeObserver(entries => {
-      for (const e of entries) setSidebarWidth(Math.round(e.contentRect.width))
-    })
-    const sidebar = document.querySelector('aside')
-    if (sidebar) observer.observe(sidebar)
-    return () => observer.disconnect()
-  }, [isMobile])
-
   const closeMobile = useCallback(() => setMobileOpen(false), [])
 
   return (
     <div style={s.root}>
-      <Sidebar mobileOpen={mobileOpen} onMobileClose={closeMobile} isMobile={isMobile}/>
-
-      {/* ── HEADER fisso full-width ── */}
+      {/* ── HEADER: nel flusso normale del documento, NON position:fixed.
+          Questo evita ogni bug noto di iOS Safari/PWA legato a fixed
+          positioning + safe-area + viewport dinamico. Vedi
+          docs/IOS_FIXED_HEADER_BUG.md per la storia completa. ── */}
       <header style={s.header}>
         {isMobile && (
           <button onClick={() => setMobileOpen(true)} style={s.hamburger} aria-label="Apri menu">
@@ -54,34 +44,36 @@ export default function AdminLayout() {
         <span style={s.pageTitle}>Eventi</span>
       </header>
 
-      {/* ── MAIN ── */}
-      <main style={{
-        ...s.main,
-        marginLeft: isMobile ? '0' : `${sidebarWidth}px`,
-      }}>
-        <Outlet />
-      </main>
+      {/* ── CORPO: sidebar (desktop) + contenuto, sotto l'header nel flusso normale ── */}
+      <div style={s.body}>
+        <Sidebar mobileOpen={mobileOpen} onMobileClose={closeMobile} isMobile={isMobile}/>
+
+        <main style={s.main}>
+          <Outlet />
+        </main>
+      </div>
     </div>
   )
 }
 
 const s = {
   root: {
+    display: 'flex',
+    flexDirection: 'column',
     minHeight: '100vh',
     minHeight: '100dvh',
     backgroundColor: '#F4F5F7',
     fontFamily: "'Inter', sans-serif",
   },
   header: {
-    position: 'fixed', top: 0, right: 0, left: 0, zIndex: 200,
+    flexShrink: 0,
     backgroundColor: '#FFFFFF',
     borderBottom: '1.5px solid #E5E7EB',
-    minHeight: '56px',
     display: 'flex', alignItems: 'center', flexWrap: 'nowrap',
     paddingLeft: '20px',
     paddingRight: '20px',
-    paddingTop: 'calc(env(safe-area-inset-top, 0px) + 10px)',
-    paddingBottom: '10px',
+    paddingTop: 'calc(env(safe-area-inset-top, 0px) + 12px)',
+    paddingBottom: '12px',
     gap: '14px',
     boxShadow: '0 1px 4px rgba(0,0,0,0.06)',
     boxSizing: 'border-box',
@@ -102,14 +94,15 @@ const s = {
     lineHeight: 1,
     whiteSpace: 'nowrap',
   },
+  body: {
+    flex: 1,
+    display: 'flex',
+    minHeight: 0,
+  },
   main: {
-    minHeight: '100vh',
-    minHeight: '100dvh',
-    paddingTop: 'calc(76px + env(safe-area-inset-top, 0px) + 24px)',
-    paddingBottom: '40px',
-    paddingLeft: '32px',
-    paddingRight: '32px',
-    transition: 'margin-left 0.2s ease',
+    flex: 1,
+    minWidth: 0,
+    padding: '24px 32px 40px',
     boxSizing: 'border-box',
   },
 }

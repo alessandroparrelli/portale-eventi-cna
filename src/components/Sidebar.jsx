@@ -178,7 +178,15 @@ export default function Sidebar({ mobileOpen, onMobileClose, isMobile }) {
 
       <aside style={{
         ...st.sidebar,
-        transform: isMobile ? (mobileOpen ? 'translateX(0)' : 'translateX(-100%)') : 'translateX(0)',
+        // Mobile: drawer overlay fullscreen, sempre position:fixed (necessario
+        // per coprire tutto lo schermo indipendentemente dallo scroll).
+        // Desktop: sticky, resta affiancata al contenuto nel flusso normale
+        // (NON fixed — evita i bug iOS documentati in IOS_FIXED_HEADER_BUG.md).
+        position: isMobile ? 'fixed' : 'sticky',
+        top: isMobile ? 0 : 0,
+        height: isMobile ? '100vh' : '100vh',
+        maxHeight: isMobile ? '100dvh' : '100dvh',
+        transform: isMobile ? (mobileOpen ? 'translateX(0)' : 'translateX(-100%)') : 'none',
       }}>
 
         {isMobile && (
@@ -300,8 +308,10 @@ export default function Sidebar({ mobileOpen, onMobileClose, isMobile }) {
 
 const st = {
   sidebar: {
-    width:'220px', height:'calc(100vh - 56px)', top:'56px',
-    position:'fixed', left:0, zIndex:100,
+    width:'220px', flexShrink:0,
+    position:'sticky', top:0, alignSelf:'flex-start',
+    height:'100vh', maxHeight:'100dvh',
+    zIndex:100,
     backgroundColor:'#FFFFFF', borderRight:'1px solid #E5E7EB',
     display:'flex', flexDirection:'column',
     transition:'transform .22s cubic-bezier(.4,0,.2,1)',
