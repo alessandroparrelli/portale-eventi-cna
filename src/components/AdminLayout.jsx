@@ -68,6 +68,7 @@ export default function AdminLayout() {
 const s = {
   root: {
     minHeight: '100vh',
+    minHeight: '100dvh',
     backgroundColor: '#F4F5F7',
     fontFamily: "'Inter', sans-serif",
   },
@@ -76,16 +77,14 @@ const s = {
     backgroundColor: '#FFFFFF',
     borderBottom: '1.5px solid #E5E7EB',
     minHeight: '56px',
-    paddingTop: 'max(env(safe-area-inset-top, 0px), 0px)',
     display: 'flex', alignItems: 'center', flexWrap: 'nowrap',
-    padding: '0 20px',
+    paddingLeft: '20px',
+    paddingRight: '20px',
     paddingTop: 'calc(env(safe-area-inset-top, 0px) + 10px)',
     paddingBottom: '10px',
     gap: '14px',
     boxShadow: '0 1px 4px rgba(0,0,0,0.06)',
     boxSizing: 'border-box',
-    WebkitTransform: 'translateZ(0)',
-    transform: 'translateZ(0)',
   },
   hamburger: {
     background: 'none', border: 'none', cursor: 'pointer',
@@ -105,6 +104,7 @@ const s = {
   },
   main: {
     minHeight: '100vh',
+    minHeight: '100dvh',
     paddingTop: 'calc(76px + env(safe-area-inset-top, 0px) + 24px)',
     paddingBottom: '40px',
     paddingLeft: '32px',
