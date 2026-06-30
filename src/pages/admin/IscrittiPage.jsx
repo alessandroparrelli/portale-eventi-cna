@@ -7,7 +7,7 @@ import GlowTableHead from '../../components/GlowTableHead'
 import GlowStatCard from '../../components/GlowStatCard'
 import { Modal, PresenzaBadge, Field, Input, Select, Btn, EmptyState } from '../../components/ui'
 import { Users, Search, Download, Upload, Eye, Trash2, UserCheck, AlertCircle, CheckCircle2, X } from 'lucide-react'
-import * as XLSX from 'xlsx'
+import * as XLSX from 'xlsx-js-style'
 import EventSelector from '../../components/EventSelector'
 
 function formatDt(ts) {
@@ -218,89 +218,253 @@ export default function IscrittiPage() {
   }
 
   function exportExcel() {
-    const eventoTitle = eventi.find(e=>e.id===selectedEvento)?.titolo || 'evento'
-    // Colori Excel ARGB
-    const XC = {
-      assoc:    { fill:'FFF0FDF4', font:'FF15803D', brd:'FFD1FAE5' },
-      disdetto: { fill:'FFFEF2F2', font:'FFDC2626', brd:'FFFECACA' },
-      notFound: { fill:'FFF1F5F9', font:'FF64748B', brd:'FFE2E8F0' },
-      noPiva:   { fill:'FFFFF7ED', font:'FFEA580C', brd:'FFFED7AA' },
-      header:   { fill:'FF003DA5', font:'FFFFFFFF' },
+    const evento = eventi.find(e=>e.id===selectedEvento)
+    const eventoTitle = evento?.titolo || 'evento'
+    const dataExport = new Date().toLocaleDateString('it-IT',{day:'2-digit',month:'long',year:'numeric'})
+    const oraExport = new Date().toLocaleTimeString('it-IT',{hour:'2-digit',minute:'2-digit'})
+
+    // ── Palette colori (ARGB) ──────────────────────────────
+    const C = {
+      bluCna:    'FF003DA5',
+      bluScuro:  'FF002A73',
+      bianco:    'FFFFFFFF',
+      nero:      'FF0A0A0A',
+      grigio:    'FF6B7280',
+      grigioCh:  'FFF4F5F7',
+      bordoCh:   'FFE5E7EB',
+      assocBg:   'FFF0FDF4', assocFg: 'FF15803D', assocBr: 'FFBBF7D0',
+      disdBg:    'FFFEF2F2', disdFg:  'FFDC2626', disdBr:  'FFFECACA',
+      nfBg:      'FFF1F5F9', nfFg:    'FF475569', nfBr:    'FFCBD5E1',
+      noPivaBg:  'FFFFF7ED', noPivaFg:'FFC2410C', noPivaBr:'FFFED7AA',
+      presenteBg:'FFEFF6FF', presenteFg:'FF1D4ED8',
     }
-    function getXC(r) {
+
+    function rigaStile(r) {
       if (!verificaEseguita) return null
       const p = (r.partita_iva||'').toString().replace(/\s/g,'').replace(/^0+/,'')
-      if (!p) return XC.noPiva
+      if (!p) return { bg:C.noPivaBg, fg:C.noPivaFg, br:C.noPivaBr, label:'P.IVA assente' }
       const a = associatiMap[p]
-      if (!a) return XC.notFound
-      return a.associato ? XC.assoc : XC.disdetto
+      if (!a) return { bg:C.nfBg, fg:C.nfFg, br:C.nfBr, label:'Non trovato' }
+      return a.associato
+        ? { bg:C.assocBg, fg:C.assocFg, br:C.assocBr, label:'Associato CNA' }
+        : { bg:C.disdBg, fg:C.disdFg, br:C.disdBr, label:'Disdetto' }
     }
 
     const cols = ['Nome','Cognome','Ragione Sociale','P.IVA','Email','Cellulare',
-      'Mestiere','CAP','Stato','Presente','Check-in','Data iscrizione',
-      ...(verificaEseguita ? ['Associato CNA','Data stipula'] : [])]
+      'Mestiere','CAP','Stato iscrizione','Presente','Check-in','Iscritto il',
+      ...(verificaEseguita ? ['Stato associazione','Data stipula'] : [])]
+    const nCols = cols.length
 
-    const rows = filtered.map(r => {
+    // ── Costruzione manuale Aoa (array of arrays) per controllo totale del layout ──
+    const aoa = []
+
+    // Riga 1: titolo documento (merge su tutte le colonne)
+    aoa.push(['ELENCO ISCRITTI — ' + eventoTitle.toUpperCase()])
+    // Riga 2: sottotitolo
+    aoa.push([`Esportato il ${dataExport} alle ${oraExport} · CNA Roma — Portale Eventi`])
+    // Riga 3: vuota (spaziatura)
+    aoa.push([])
+    // Riga 4: card riepilogo statistiche (etichette)
+    const totIscritti = filtered.length
+    const totPresenti = filtered.filter(r=>r.presente).length
+    const totAssociati = verificaEseguita ? filtered.filter(r=>{
+      const p=(r.partita_iva||'').toString().replace(/\s/g,'').replace(/^0+/,'')
+      return associatiMap[p]?.associato
+    }).length : null
+    aoa.push(['TOT. ISCRITTI', '', 'PRESENTI', '', ...(verificaEseguita ? ['ASSOCIATI CNA',''] : [])])
+    aoa.push([String(totIscritti), '', String(totPresenti), '', ...(verificaEseguita ? [String(totAssociati),''] : [])])
+    aoa.push([]) // spaziatura
+    // Riga header tabella
+    const headerRowIdx = aoa.length
+    aoa.push(cols)
+    // Righe dati
+    const dataStartIdx = aoa.length
+    filtered.forEach(r => {
       const piva = (r.partita_iva||'').toString().replace(/\s/g,'').replace(/^0+/,'')
       const ass = associatiMap[piva]
-      const base = {
-        'Nome':r.nome||'', 'Cognome':r.cognome||'', 'Ragione Sociale':r.ragione_sociale||'',
-        'P.IVA':r.partita_iva||'', 'Email':r.email||'', 'Cellulare':r.cellulare||'',
-        'Mestiere':getMestiere(r.mestiere_id), 'CAP':r.cap||'',
-        'Stato':r.stato, 'Presente':r.presente?'Sì':'No',
-        'Check-in':formatDt(r.checkin_at), 'Data iscrizione':formatDt(r.created_at),
-      }
+      const row = [
+        r.nome||'', r.cognome||'', r.ragione_sociale||'', r.partita_iva||'',
+        r.email||'', r.cellulare||'', getMestiere(r.mestiere_id), r.cap||'',
+        r.stato||'', r.presente?'Sì':'No', formatDt(r.checkin_at), formatDt(r.created_at),
+      ]
       if (verificaEseguita) {
-        base['Associato CNA'] = getAssLabel(r)
-        base['Data stipula'] = ass?.datastipula||''
+        row.push(getAssLabel(r))
+        row.push(ass?.datastipula||'')
       }
-      return base
+      aoa.push(row)
     })
 
-    const ws = XLSX.utils.json_to_sheet(rows, { header: cols })
+    const ws = XLSX.utils.aoa_to_sheet(aoa)
     const wb = XLSX.utils.book_new()
 
-    // Larghezze colonne
-    ws['!cols'] = cols.map(col =>
-      ({ wch: col==='Ragione Sociale'?42 : col==='Email'?32 : col==='P.IVA'?14 :
-              col==='Associato CNA'?16 : col==='Data stipula'?14 : col==='Nome'||col==='Cognome'?20 : 16 }))
+    // ── Larghezze colonne ──
+    ws['!cols'] = cols.map(col => ({
+      wch: col==='Ragione Sociale'?38 : col==='Email'?30 : col==='P.IVA'?15 :
+           col==='Stato associazione'?20 : col==='Data stipula'?14 :
+           col==='Nome'||col==='Cognome'?18 : col==='Mestiere'?22 : 15
+    }))
 
-    const range = XLSX.utils.decode_range(ws['!ref'])
-    // Header row
-    for (let ci = range.s.c; ci <= range.e.c; ci++) {
-      const cell = ws[XLSX.utils.encode_cell({r:0,c:ci})]
-      if (cell) cell.s = {
-        fill:{patternType:'solid',fgColor:{rgb:XC.header.fill}},
-        font:{bold:true,color:{rgb:XC.header.font},sz:11},
-        alignment:{horizontal:'center',vertical:'center',wrapText:false},
-        border:{bottom:{style:'medium',color:{rgb:'FF1E3A8A'}}}
-      }
+    // ── Altezze righe ──
+    ws['!rows'] = []
+    ws['!rows'][0] = { hpx: 32 }
+    ws['!rows'][1] = { hpx: 20 }
+    ws['!rows'][3] = { hpx: 18 }
+    ws['!rows'][4] = { hpx: 34 }
+    ws['!rows'][headerRowIdx] = { hpx: 26 }
+
+    // ── Merge celle: titolo, sottotitolo, etichette/valori riepilogo ──
+    ws['!merges'] = [
+      { s:{r:0,c:0}, e:{r:0,c:nCols-1} },
+      { s:{r:1,c:0}, e:{r:1,c:nCols-1} },
+      { s:{r:3,c:0}, e:{r:3,c:1} },
+      { s:{r:3,c:2}, e:{r:3,c:3} },
+      { s:{r:4,c:0}, e:{r:4,c:1} },
+      { s:{r:4,c:2}, e:{r:4,c:3} },
+    ]
+    if (verificaEseguita) {
+      ws['!merges'].push({ s:{r:3,c:4}, e:{r:3,c:5} })
+      ws['!merges'].push({ s:{r:4,c:4}, e:{r:4,c:5} })
     }
-    // Righe dati
+
+    function setCell(r, cIdx, opts) {
+      const addr = XLSX.utils.encode_cell({ r, c: cIdx })
+      if (!ws[addr]) ws[addr] = { t:'s', v:'' }
+      ws[addr].s = opts
+    }
+
+    // ── Stile: titolo principale (riga 0) — banner blu CNA ──
+    for (let ci = 0; ci < nCols; ci++) {
+      setCell(0, ci, {
+        fill:{ patternType:'solid', fgColor:{ rgb: C.bluCna } },
+        font:{ bold:true, sz:16, color:{ rgb: C.bianco }, name:'Calibri' },
+        alignment:{ horizontal: ci===0?'left':'center', vertical:'center', indent: ci===0?1:0 },
+      })
+    }
+    // ── Sottotitolo (riga 1) ──
+    for (let ci = 0; ci < nCols; ci++) {
+      setCell(1, ci, {
+        fill:{ patternType:'solid', fgColor:{ rgb: C.bluScuro } },
+        font:{ italic:true, sz:10, color:{ rgb:'FFD6E4FF' }, name:'Calibri' },
+        alignment:{ horizontal: ci===0?'left':'center', vertical:'center', indent: ci===0?1:0 },
+      })
+    }
+    // ── Card riepilogo: etichette (riga 3) ──
+    const cardLabelCols = verificaEseguita ? [0,2,4] : [0,2]
+    cardLabelCols.forEach(ci => {
+      setCell(3, ci, {
+        fill:{ patternType:'solid', fgColor:{ rgb: C.grigioCh } },
+        font:{ bold:true, sz:9, color:{ rgb: C.grigio }, name:'Calibri' },
+        alignment:{ horizontal:'center', vertical:'center' },
+        border:{ top:{style:'thin',color:{rgb:C.bordoCh}}, left:{style:'thin',color:{rgb:C.bordoCh}}, right:{style:'thin',color:{rgb:C.bordoCh}} },
+      })
+    })
+    // ── Card riepilogo: valori (riga 4) — colori differenziati ──
+    const cardColors = [
+      { bg:'FFEFF6FF', fg:C.bluCna },     // tot iscritti — blu
+      { bg:'FFF0FDF4', fg:'FF15803D' },   // presenti — verde
+      { bg:'FFF0FDF4', fg:'FF15803D' },   // associati — verde
+    ]
+    cardLabelCols.forEach((ci, idx) => {
+      setCell(4, ci, {
+        fill:{ patternType:'solid', fgColor:{ rgb: cardColors[idx].bg } },
+        font:{ bold:true, sz:20, color:{ rgb: cardColors[idx].fg }, name:'Calibri' },
+        alignment:{ horizontal:'center', vertical:'center' },
+        border:{ bottom:{style:'thin',color:{rgb:C.bordoCh}}, left:{style:'thin',color:{rgb:C.bordoCh}}, right:{style:'thin',color:{rgb:C.bordoCh}} },
+      })
+    })
+
+    // ── Header tabella (riga headerRowIdx) ──
+    for (let ci = 0; ci < nCols; ci++) {
+      setCell(headerRowIdx, ci, {
+        fill:{ patternType:'solid', fgColor:{ rgb: C.bluCna } },
+        font:{ bold:true, sz:10, color:{ rgb: C.bianco }, name:'Calibri' },
+        alignment:{ horizontal:'center', vertical:'center', wrapText:true },
+        border:{ bottom:{style:'medium',color:{rgb:C.bluScuro}} },
+      })
+    }
+
+    // ── Righe dati: colorate per stato associazione, zebra altrimenti ──
     filtered.forEach((r, ri) => {
-      const xc = getXC(r)
-      if (!xc) return
-      const assColI = cols.indexOf('Associato CNA')
-      for (let ci = range.s.c; ci <= range.e.c; ci++) {
-        const addr = XLSX.utils.encode_cell({r:ri+1,c:ci})
-        if (!ws[addr]) ws[addr] = {t:'s',v:''}
-        ws[addr].s = {
-          fill:{patternType:'solid',fgColor:{rgb:xc.fill}},
-          font:{color:{rgb:xc.font},sz:10,
-            bold: ci===assColI},
-          border:{
-            top:{style:'thin',color:{rgb:xc.brd}},
-            bottom:{style:'thin',color:{rgb:xc.brd}},
-            left:{style:'thin',color:{rgb:'FFF3F4F6'}},
-            right:{style:'thin',color:{rgb:'FFF3F4F6'}},
+      const rowIdx = dataStartIdx + ri
+      const stato = rigaStile(r)
+      const zebra = ri % 2 === 1
+      const bg = stato ? stato.bg : (zebra ? C.grigioCh : C.bianco)
+      const fg = stato ? stato.fg : C.nero
+      const br = stato ? stato.br : C.bordoCh
+      const assColIdx = cols.indexOf('Stato associazione')
+
+      for (let ci = 0; ci < nCols; ci++) {
+        const isPresenteCol = cols[ci] === 'Presente'
+        const presenteVal = r.presente
+        setCell(rowIdx, ci, {
+          fill:{ patternType:'solid', fgColor:{ rgb: (isPresenteCol && presenteVal) ? C.presenteBg : bg } },
+          font:{
+            sz:10, name:'Calibri',
+            color:{ rgb: (isPresenteCol && presenteVal) ? C.presenteFg : fg },
+            bold: ci === assColIdx || (isPresenteCol && presenteVal),
           },
-          alignment:{vertical:'center'}
-        }
+          border:{
+            top:{style:'thin',color:{rgb:br}}, bottom:{style:'thin',color:{rgb:br}},
+            left:{style:'thin',color:{rgb:C.bordoCh}}, right:{style:'thin',color:{rgb:C.bordoCh}},
+          },
+          alignment:{ vertical:'center', horizontal: ['Presente','Stato iscrizione','Stato associazione'].includes(cols[ci]) ? 'center' : 'left' },
+        })
       }
     })
 
-    ws['!freeze'] = {xSplit:0,ySplit:1,topLeftCell:'A2',activePane:'bottomLeft',state:'frozen'}
+    // ── Freeze pane sotto l'header tabella ──
+    ws['!freeze'] = { xSplit:0, ySplit:headerRowIdx+1, topLeftCell: XLSX.utils.encode_cell({r:headerRowIdx+1,c:0}), activePane:'bottomLeft', state:'frozen' }
+
+    // ── Larghezza area di stampa e foglio ──
+    ws['!autofilter'] = { ref: XLSX.utils.encode_range({ s:{r:headerRowIdx,c:0}, e:{r:headerRowIdx,c:nCols-1} }) }
+
     XLSX.utils.book_append_sheet(wb, ws, 'Iscritti')
+
+    // ── Foglio 2: legenda colori (solo se verifica eseguita) ──
+    if (verificaEseguita) {
+      const legAoa = [
+        ['LEGENDA STATO ASSOCIAZIONE CNA'],
+        [],
+        ['Colore', 'Significato'],
+        ['Associato CNA', 'Socio attivo, nessuna disdetta registrata'],
+        ['Disdetto', 'Socio con disdetta registrata in archivio'],
+        ['Non trovato', 'P.IVA non presente in archivio associati'],
+        ['P.IVA assente', 'Iscritto senza P.IVA — verifica non eseguibile'],
+      ]
+      const wsLeg = XLSX.utils.aoa_to_sheet(legAoa)
+      wsLeg['!cols'] = [{wch:24},{wch:55}]
+      wsLeg['!merges'] = [{ s:{r:0,c:0}, e:{r:0,c:1} }]
+      for (let ci=0;ci<2;ci++) {
+        const a = XLSX.utils.encode_cell({r:0,c:ci})
+        if (!wsLeg[a]) wsLeg[a] = {t:'s',v:''}
+        wsLeg[a].s = { fill:{patternType:'solid',fgColor:{rgb:C.bluCna}}, font:{bold:true,sz:13,color:{rgb:C.bianco}}, alignment:{horizontal:'left',vertical:'center',indent:1} }
+      }
+      const legColors = [
+        { bg:C.assocBg, fg:C.assocFg },
+        { bg:C.disdBg, fg:C.disdFg },
+        { bg:C.nfBg, fg:C.nfFg },
+        { bg:C.noPivaBg, fg:C.noPivaFg },
+      ]
+      ;['Colore','Significato'].forEach((_,ci) => {
+        const a = XLSX.utils.encode_cell({r:2,c:ci})
+        if (!wsLeg[a]) wsLeg[a] = {t:'s',v:''}
+        wsLeg[a].s = { fill:{patternType:'solid',fgColor:{rgb:C.grigioCh}}, font:{bold:true,sz:10,color:{rgb:C.grigio}} }
+      })
+      legColors.forEach((col, idx) => {
+        const r = 3 + idx
+        for (let ci=0; ci<2; ci++) {
+          const a = XLSX.utils.encode_cell({r,c:ci})
+          if (!wsLeg[a]) wsLeg[a] = {t:'s',v:''}
+          wsLeg[a].s = {
+            fill:{patternType:'solid',fgColor:{rgb:col.bg}},
+            font:{sz:10,color:{rgb:col.fg},bold:ci===0},
+            border:{top:{style:'thin',color:{rgb:C.bordoCh}},bottom:{style:'thin',color:{rgb:C.bordoCh}}},
+          }
+        }
+      })
+      XLSX.utils.book_append_sheet(wb, wsLeg, 'Legenda')
+    }
+
     XLSX.writeFile(wb, `iscritti-${eventoTitle.toLowerCase().replace(/\s+/g,'-')}.xlsx`)
   }
 
