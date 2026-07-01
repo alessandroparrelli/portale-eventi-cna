@@ -434,9 +434,13 @@ export default function EventoEditorPage() {
     })
   }
 
+  const contentRef = useRef(null)
+
   async function save() {
     const ev = eventRef.current || event   // usa sempre il valore più recente
     if (!ev.titolo.trim()) return alert('Il titolo è obbligatorio')
+    // Salva la posizione di scroll prima del salvataggio
+    const scrollTop = contentRef.current?.scrollTop || 0
     setSaving(true)
     const payload = {
       titolo:ev.titolo, slug:ev.slug||toSlug(ev.titolo),
@@ -480,6 +484,8 @@ export default function EventoEditorPage() {
       logAttivita('evento_modificato', { eventoId: id, eventoTitolo: payload.titolo })
     }
     setSaving(false); setSaved(true); setTimeout(()=>setSaved(false),2500)
+    // Ripristina la posizione di scroll dopo il salvataggio
+    if (contentRef.current) contentRef.current.scrollTop = scrollTop
   }
 
   async function generateHeroImage() {
@@ -586,7 +592,7 @@ export default function EventoEditorPage() {
       </div>
 
       {/* CONTENT */}
-      <div style={p.content}>
+      <div ref={contentRef} style={p.content}>
 
         {/* ── INFO ── */}
         {activeTab==='info' && (
