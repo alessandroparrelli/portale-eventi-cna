@@ -2,6 +2,19 @@ import React, { useEffect, useRef, useState } from 'react'
 const DIM_MAP={'clamp(13px,1.5vw,16px)':'16px','clamp(15px,2vw,20px)':'22px','clamp(18px,2.5vw,26px)':'30px','clamp(22px,3vw,34px)':'40px'}
 function normDim(v){return DIM_MAP[v]||v||'22px'}
 
+// Converte una stringa ISO UTC in "YYYY-MM-DDTHH:MM" nell'orario locale del browser
+function toLocalDatetimeStr(isoUtc) {
+  if (!isoUtc) return ''
+  const d = new Date(isoUtc)
+  const pad = n => String(n).padStart(2,'0')
+  return `${d.getFullYear()}-${pad(d.getMonth()+1)}-${pad(d.getDate())}T${pad(d.getHours())}:${pad(d.getMinutes())}`
+}
+// Converte una stringa "YYYY-MM-DDTHH:MM" locale in ISO UTC per il salvataggio
+function toUTCISOStr(localStr) {
+  if (!localStr) return null
+  return new Date(localStr).toISOString()
+}
+
 import { usePageTitle } from '../../hooks/usePageTitle'
 import { useNavigate, useParams } from 'react-router-dom'
 import { supabase } from '../../lib/supabase'
@@ -378,11 +391,13 @@ export default function EventoEditorPage() {
       setEvent(prev => {
         const next = {
           ...data,
-          data_inizio: data.data_inizio?.slice(0,16)||'',
-          data_fine:   data.data_fine?.slice(0,16)||'',
+          data_inizio: data.data_inizio ? toLocalDatetimeStr(data.data_inizio) : '',
+          data_fine:   data.data_fine   ? toLocalDatetimeStr(data.data_fine)   : '',
           layout_hero: data.layout_hero || { altezza:'380', overlay_opacita:'55', allineamento:'sinistra' },
           logo_url: data.logo_url || null,
           sottotitolo: data.sottotitolo || '',
+          sottotitolo_bold: data.sottotitolo_bold || false,
+          sottotitolo_size: data.sottotitolo_size || null,
           footer_testo: data.footer_testo || '',
           tema: data.tema || {},
           sezioni,
@@ -425,8 +440,8 @@ export default function EventoEditorPage() {
     setSaving(true)
     const payload = {
       titolo:ev.titolo, slug:ev.slug||toSlug(ev.titolo),
-      stato:ev.stato, data_inizio:ev.data_inizio||null,
-      data_fine:ev.data_fine||null, luogo:ev.luogo||null,
+      stato:ev.stato, data_inizio: toUTCISOStr(ev.data_inizio),
+      data_fine: toUTCISOStr(ev.data_fine), luogo:ev.luogo||null,
         modalita:ev.modalita||'presenza', link_riunione:ev.link_riunione||null,
         certificato_abilitato:ev.certificato_abilitato||false, certificato_titolo:ev.certificato_titolo||null,
         certificato_invio_auto:ev.certificato_invio_auto!==false, certificato_colore:ev.certificato_colore||'#003DA5',
@@ -442,6 +457,8 @@ export default function EventoEditorPage() {
       posti_per_utente:ev.posti_per_utente||1,
       logo_url:ev.logo_url||null,
       sottotitolo:ev.sottotitolo||null,
+      sottotitolo_bold:ev.sottotitolo_bold||false,
+      sottotitolo_size:ev.sottotitolo_size||null,
       footer_testo:ev.footer_testo||null,
       tags:ev.tags||[],
       tema:ev.tema||{},
@@ -598,6 +615,28 @@ export default function EventoEditorPage() {
                     onChange={e=>updEvent(p=>({...p,sottotitolo:e.target.value}))}
                     placeholder="es. Insieme da 80 anni, il futuro ha radici nelle persone"
                   />
+                  <div style={{ display:'flex', gap:'8px', marginTop:'8px', alignItems:'center', flexWrap:'wrap' }}>
+                    <button type="button"
+                      onClick={() => updEvent(p => ({ ...p, sottotitolo_bold: !p.sottotitolo_bold }))}
+                      style={{ padding:'5px 12px', borderRadius:'6px', border:'1px solid',
+                        borderColor: event.sottotitolo_bold ? '#003DA5' : '#D1D5DB',
+                        background: event.sottotitolo_bold ? '#EFF6FF' : '#fff',
+                        color: event.sottotitolo_bold ? '#003DA5' : '#374151',
+                        fontSize:'13px', fontWeight:'800', cursor:'pointer' }}>
+                      <strong>B</strong> Grassetto
+                    </button>
+                    <div style={{ display:'flex', alignItems:'center', gap:'6px' }}>
+                      <span style={{ fontSize:'12px', color:'#6B7280', whiteSpace:'nowrap' }}>Dimensione:</span>
+                      <button type="button" onClick={() => updEvent(p => ({ ...p, sottotitolo_size: Math.max(10, (p.sottotitolo_size||18)-1) }))}
+                        style={{ width:'26px', height:'26px', border:'1px solid #D1D5DB', borderRadius:'5px', background:'#fff', cursor:'pointer', fontSize:'14px', fontWeight:'700' }}>−</button>
+                      <span style={{ fontSize:'13px', fontWeight:'700', color:'#003DA5', minWidth:'32px', textAlign:'center' }}>{event.sottotitolo_size||18}px</span>
+                      <button type="button" onClick={() => updEvent(p => ({ ...p, sottotitolo_size: Math.min(60, (p.sottotitolo_size||18)+1) }))}
+                        style={{ width:'26px', height:'26px', border:'1px solid #D1D5DB', borderRadius:'5px', background:'#fff', cursor:'pointer', fontSize:'14px', fontWeight:'700' }}>+</button>
+                    </div>
+                    <span style={{ fontSize:'11px', color:'#9CA3AF' }}>Anteprima: <span style={{ fontWeight: event.sottotitolo_bold ? 700 : 400, fontSize: (event.sottotitolo_size||18)+'px', color:'#374151' }}>
+                      {event.sottotitolo?.slice(0,30) || 'Sottotitolo…'}
+                    </span></span>
+                  </div>
                 </Field>
               </div>
               <div style={{ gridColumn:'1/-1' }}>
@@ -730,7 +769,7 @@ export default function EventoEditorPage() {
               {/* Slider dimensione + sfondo logo */}
               <div style={{ marginTop:'14px', display:'grid', gridTemplateColumns:'1fr 1fr', gap:'16px' }}>
                 <Field label={`Dimensione logo: ${event.layout_hero?.logo_altezza||'48'}px`}>
-                  <input type="range" min="28" max="160" step="4"
+                  <input type="range" min="28" max="300" step="4"
                     value={event.layout_hero?.logo_altezza||'48'}
                     onChange={e=>setH('logo_altezza')(e.target.value)}
                     style={{ width:'100%' }}/>

@@ -222,7 +222,7 @@ const CERT_FONTS = [
   { label:'Inter (Sans)',            value:'inter',     stack:'"Inter", Helvetica, Arial, sans-serif' },
   { label:'Helvetica (Sans)',        value:'helvetica', stack:'Helvetica, Arial, sans-serif' },
   { label:'Times New Roman (Serif)', value:'times',     stack:'"Times New Roman", Times, serif' },
-  { label:'Palatino (Serif)',        value:'palatino',  stack:'"Palatino Linotype", "Book Antiqua", Palatino, serif' },
+  { label:'Palatino (Serif)',        value:'palatino',  stack:'"EB Garamond", "Palatino Linotype", Palatino, serif' },
   { label:'Georgia (Serif)',         value:'georgia',   stack:'Georgia, serif' },
   { label:'Garamond (Serif)',        value:'garamond',  stack:'Garamond, "EB Garamond", serif' },
   { label:'Courier (Monospace)',     value:'courier',   stack:'"Courier New", Courier, monospace' },

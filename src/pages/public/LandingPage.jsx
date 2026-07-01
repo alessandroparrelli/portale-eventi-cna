@@ -1,5 +1,6 @@
 import { useEffect, useState, useRef } from 'react'
 import { usePageTitle } from '../../hooks/usePageTitle'
+import { useOGMeta } from '../../hooks/useOGMeta'
 import { useParams } from 'react-router-dom'
 import { supabase } from '../../lib/supabase'
 import { temaConDefault } from '../../components/editor/AspettoTab'
@@ -175,6 +176,11 @@ export default function LandingPage() {
   const [conferma,    setConferma]    = useState(null)
 
   usePageTitle(event?.titolo || null)
+  useOGMeta({
+    title: event?.titolo || null,
+    description: event?.sottotitolo || null,
+    image: event?.immagine_hero || null,
+  })
 
   // ── Blocca zoom su mobile ──────────────────────────
   useEffect(() => {
@@ -339,11 +345,11 @@ export default function LandingPage() {
           {/* Sottotitolo evento */}
           {event.sottotitolo && (
             <p style={{
-              color:         'rgba(255,255,255,.82)',
-              fontSize:      'clamp(14px,2vw,18px)',
-              fontWeight:    '400',
+              color:         'rgba(255,255,255,.92)',
+              fontSize:      event.sottotitolo_size ? `${event.sottotitolo_size}px` : 'clamp(14px,2vw,20px)',
+              fontWeight:    event.sottotitolo_bold ? '700' : '400',
               margin:        0,
-              lineHeight:    1.6,
+              lineHeight:    1.5,
             }}>{event.sottotitolo}</p>
           )}
         </div>

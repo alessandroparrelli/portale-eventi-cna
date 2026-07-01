@@ -263,7 +263,7 @@ export default function LandingEditorPage() {
 
                 <div style={{ marginTop:'14px' }}>
                   <Field label={`Dimensione logo: ${lh.logo_altezza||'48'}px`}>
-                    <input type="range" min="28" max="160" step="4"
+                    <input type="range" min="28" max="300" step="4"
                       value={lh.logo_altezza||'48'} onChange={setH('logo_altezza')}
                       style={{ width:'100%' }} />
                   </Field>
