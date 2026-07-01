@@ -21,11 +21,8 @@ export default function AdminLayout() {
 
   return (
     <div style={s.root}>
-      {/* ── HEADER: nel flusso normale del documento, NON position:fixed.
-          Questo evita ogni bug noto di iOS Safari/PWA legato a fixed
-          positioning + safe-area + viewport dinamico. Vedi
-          docs/IOS_FIXED_HEADER_BUG.md per la storia completa. ── */}
       <header style={s.header} className="admin-header">
+        {/* Mobile: hamburger a sinistra */}
         {isMobile && (
           <button onClick={() => setMobileOpen(true)} style={s.hamburger} aria-label="Apri menu">
             <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round">
@@ -33,25 +30,29 @@ export default function AdminLayout() {
             </svg>
           </button>
         )}
-        <div className="admin-header-logo-wrap">
+
+        {/* Centro: logo + titolo affiancato */}
+        <div className="admin-header-center">
           <img
             src="https://customer31551.img.musvc2.net/static/31551/images/1/CNARoma%20NEGATIVO%20COLORE%20SOLO%20ROMA.png"
             alt="CNA Roma"
             className="admin-header-logo"
-            style={{ ...s.logo, cursor: 'pointer' }}
+            style={{ cursor: 'pointer', objectFit: 'contain', flexShrink: 0 }}
             onClick={() => window.location.reload()}
             title="Ricarica pagina"
           />
+          <div style={s.titleBlock}>
+            <span style={s.pageTitle}>Eventi</span>
+            <span style={s.pageSubtitle}>Portale CNA Roma</span>
+          </div>
         </div>
-        <div className="admin-header-meta" style={{ display:'flex', alignItems:'center', justifyContent:'center', flex:1, minWidth:0 }}>
-          <span style={s.pageTitle}>Eventi</span>
-        </div>
+
+        {/* Destra: placeholder per bilanciamento (desktop) */}
+        <div className="admin-header-right" />
       </header>
 
-      {/* ── CORPO: sidebar (desktop) + contenuto, sotto l'header nel flusso normale ── */}
       <div style={s.body}>
         <Sidebar mobileOpen={mobileOpen} onMobileClose={closeMobile} isMobile={isMobile}/>
-
         <main style={s.main}>
           <Outlet />
         </main>
@@ -64,22 +65,22 @@ const s = {
   root: {
     display: 'flex',
     flexDirection: 'column',
-    minHeight: '100vh',
     minHeight: '100dvh',
     backgroundColor: '#F4F5F7',
     fontFamily: "'Inter', sans-serif",
   },
   header: {
     flexShrink: 0,
-    background: 'linear-gradient(120deg, #001B4D 0%, #003DA5 55%, #2E7BE0 100%)',
+    background: 'linear-gradient(120deg, #001B4D 0%, #003DA5 60%, #2E7BE0 100%)',
     borderBottom: 'none',
-    display: 'flex', alignItems: 'center', flexWrap: 'nowrap',
+    display: 'flex',
+    alignItems: 'center',
     paddingLeft: '20px',
     paddingRight: '20px',
-    paddingTop: 'calc(env(safe-area-inset-top, 0px) + 12px)',
-    paddingBottom: '12px',
-    gap: '14px',
-    boxShadow: '0 2px 10px rgba(0,20,60,0.18)',
+    paddingTop: 'calc(env(safe-area-inset-top, 0px) + 10px)',
+    paddingBottom: '10px',
+    gap: '12px',
+    boxShadow: '0 3px 14px rgba(0,20,60,0.22)',
     boxSizing: 'border-box',
   },
   hamburger: {
@@ -87,16 +88,31 @@ const s = {
     color: '#FFFFFF', display: 'flex', alignItems: 'center',
     padding: '6px', borderRadius: '6px', flexShrink: 0,
   },
-  logo: { height: '34px', objectFit: 'contain', flexShrink: 0 },
-  divider: { width: '1px', height: '20px', backgroundColor: 'rgba(255,255,255,0.3)', flexShrink: 0 },
+  titleBlock: {
+    display: 'flex',
+    flexDirection: 'column',
+    justifyContent: 'center',
+    paddingLeft: '14px',
+    borderLeft: '1.5px solid rgba(255,255,255,0.28)',
+  },
   pageTitle: {
-    fontSize: '18px',
+    fontSize: '22px',
     fontWeight: '800',
     color: '#FFFFFF',
     letterSpacing: '-0.04em',
     fontFamily: "'Inter', sans-serif",
+    lineHeight: 1.1,
+    whiteSpace: 'nowrap',
+  },
+  pageSubtitle: {
+    fontSize: '11px',
+    fontWeight: '500',
+    color: 'rgba(255,255,255,0.6)',
+    letterSpacing: '0.01em',
+    fontFamily: "'Inter', sans-serif",
     lineHeight: 1,
     whiteSpace: 'nowrap',
+    marginTop: '2px',
   },
   body: {
     flex: 1,

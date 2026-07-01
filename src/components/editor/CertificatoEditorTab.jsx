@@ -1,8 +1,9 @@
-import { useEffect, useRef, useState } from 'react'
+import { useEffect, useRef, useState, useCallback } from 'react'
 import {
   Award, Eye, Download, Loader2, Type, Square, Minus, Circle as CircleIcon,
   QrCode, Image as ImageIcon, Copy, Trash2, ChevronUp, ChevronDown, AlignLeft, AlignCenter, AlignRight,
   Bold, Italic, LayoutTemplate, Underline, Upload, X, ChevronRight,
+  Save, BookOpen, Search, Plus, Pencil, CheckCircle, ExternalLink,
 } from 'lucide-react'
 import { Field, Input } from '../ui'
 import LogoManager from './LogoManager'
@@ -300,6 +301,23 @@ export default function CertificatoEditorTab({ event, setEvent }) {
   const [uploadingImg, setUploadingImg] = useState(false)
   const [uploadImgErr, setUploadImgErr] = useState('')
   const [replaceTargetId, setReplaceTargetId] = useState(null)
+  const [imgGalleryOpen, setImgGalleryOpen] = useState(false)
+  // Template management
+  const [tplList, setTplList] = useState([])
+  const [tplLoading, setTplLoading] = useState(false)
+  const [tplDrawerOpen, setTplDrawerOpen] = useState(false)
+  const [savingTpl, setSavingTpl] = useState(false)
+  const [saveNameModalOpen, setSaveNameModalOpen] = useState(false)
+  const [saveNameValue, setSaveNameValue] = useState('')
+  const [saveNameMode, setSaveNameMode] = useState('new') // 'new' | 'overwrite'
+  const [saveNameTargetId, setSaveNameTargetId] = useState(null)
+  const [tplMsg, setTplMsg] = useState('')
+  // Online search
+  const [searchOpen, setSearchOpen] = useState(false)
+  const [searchQuery, setSearchQuery] = useState('certificate diploma elegant')
+  const [searchResults, setSearchResults] = useState([])
+  const [searchLoading, setSearchLoading] = useState(false)
+  const [searchErr, setSearchErr] = useState('')
   const dragRef = useRef(null)
   const stageRef = useRef(null)
   const imgFileRef = useRef(null)
@@ -334,6 +352,123 @@ export default function CertificatoEditorTab({ event, setEvent }) {
     return el
   }
 
+  /* ── Template: carica lista ── */
+  const fetchTemplates = useCallback(async () => {
+    setTplLoading(true)
+    try {
+      const { data, error } = await supabase.from('certificato_templates').select('*').order('nome')
+      if (!error) setTplList(data || [])
+    } catch {}
+    setTplLoading(false)
+  }, [])
+
+  useEffect(() => { if (tplDrawerOpen) fetchTemplates() }, [tplDrawerOpen, fetchTemplates])
+
+  /* ── Template: carica un template nell'editor ── */
+  function loadTemplate(tpl) {
+    if (elements.length > 0 && !confirm(`Caricare "${tpl.nome}"? Il disegno attuale verrà sostituito.`)) return
+    update({ elements: tpl.elements || [], colore_primario: tpl.colore_primario || colore, logo_url: tpl.logo_url || logoUrl })
+    setSelectedId(null)
+    setTplDrawerOpen(false)
+    setTplMsg(`Modello "${tpl.nome}" caricato`)
+    setTimeout(() => setTplMsg(''), 3000)
+  }
+
+  /* ── Template: salva/aggiorna ── */
+  async function saveTemplate(name, id) {
+    setSavingTpl(true)
+    try {
+      const payload = { nome: name, elements, colore_primario: colore, logo_url: logoUrl, updated_at: new Date().toISOString() }
+      if (id) {
+        await supabase.from('certificato_templates').update(payload).eq('id', id)
+        setTplMsg(`Modello "${name}" aggiornato`)
+      } else {
+        await supabase.from('certificato_templates').insert(payload)
+        setTplMsg(`Modello "${name}" salvato`)
+      }
+      await fetchTemplates()
+    } catch (e) {
+      setTplMsg('Errore durante il salvataggio')
+    }
+    setSavingTpl(false)
+    setSaveNameModalOpen(false)
+    setTimeout(() => setTplMsg(''), 3500)
+  }
+
+  function openSaveNew() {
+    setSaveNameValue(`Modello ${new Date().toLocaleDateString('it-IT')}`)
+    setSaveNameMode('new')
+    setSaveNameTargetId(null)
+    setSaveNameModalOpen(true)
+  }
+  function openSaveOverwrite(tpl) {
+    setSaveNameValue(tpl.nome)
+    setSaveNameMode('overwrite')
+    setSaveNameTargetId(tpl.id)
+    setSaveNameModalOpen(true)
+  }
+
+  async function deleteTemplate(tpl) {
+    if (!confirm(`Eliminare il modello "${tpl.nome}"?`)) return
+    await supabase.from('certificato_templates').delete().eq('id', tpl.id)
+    await fetchTemplates()
+  }
+
+  /* ── Ricerca immagini online ── */
+  async function searchOnline() {
+    if (!searchQuery.trim()) return
+    setSearchLoading(true); setSearchErr(''); setSearchResults([])
+    try {
+      const res = await fetch(`${import.meta.env.VITE_SUPABASE_URL}/functions/v1/image-search`, {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ query: searchQuery }),
+      })
+      const data = await res.json()
+      if (!res.ok || data.error) throw new Error(data.error || 'Errore ricerca')
+      setSearchResults(data.images || [])
+    } catch (e) {
+      setSearchErr(e.message || 'Errore durante la ricerca')
+    }
+    setSearchLoading(false)
+  }
+
+  /* ── Import immagine da URL esterno come sfondo ── */
+  async function importImageFromUrl(url) {
+    try {
+      const base64 = await new Promise((res, rej) => {
+        const img = new window.Image()
+        img.crossOrigin = 'anonymous'
+        img.onload = () => {
+          const c = document.createElement('canvas')
+          c.width = img.naturalWidth; c.height = img.naturalHeight
+          c.getContext('2d').drawImage(img, 0, 0)
+          res(c.toDataURL('image/jpeg', 0.92).split(',')[1])
+        }
+        img.onerror = () => rej(new Error('Impossibile caricare questa immagine (CORS)'))
+        img.src = url
+      })
+      const { data: { session } } = await supabase.auth.getSession()
+      const jwt = session?.access_token
+      const ts = Date.now()
+      const res = await fetch(`${import.meta.env.VITE_SUPABASE_URL}/functions/v1/github-upload-logo`, {
+        method: 'POST',
+        headers: { 'Authorization': `Bearer ${jwt}`, 'Content-Type': 'application/json' },
+        body: JSON.stringify({ filename: `imported-${ts}.jpg`, base64, folder: 'certificati-immagini' }),
+      })
+      const result = await res.json()
+      if (!res.ok || result.error) throw new Error(result.error)
+      // Aggiunge come sfondo piena pagina (zIndex 0)
+      const bgEl = { id: uid(), type: 'image', field: 'custom', src: result.url, x: 0, y: 0, w: 842, h: 595, zIndex: 0 }
+      setElements([bgEl, ...elements])
+      setSearchOpen(false)
+      setTplMsg('Immagine importata come sfondo — trascinala o ridimensionala a piacere')
+      setTimeout(() => setTplMsg(''), 4000)
+    } catch (e) {
+      setSearchErr('Impossibile importare: ' + (e.message || 'Errore'))
+    }
+  }
+
   async function uploadFreeImage(file) {
     if (!file) return
     if (!file.type.startsWith('image/')) { setUploadImgErr('Solo immagini (PNG, JPG, SVG, WebP)'); return }
@@ -352,17 +487,20 @@ export default function CertificatoEditorTab({ event, setEvent }) {
       const res = await fetch(`${import.meta.env.VITE_SUPABASE_URL}/functions/v1/github-upload-logo`, {
         method: 'POST',
         headers: { 'Authorization': `Bearer ${jwt}`, 'Content-Type': 'application/json' },
-        body: JSON.stringify({ filename: file.name, base64 }),
+        body: JSON.stringify({ filename: file.name, base64, folder: 'certificati-immagini' }),
       })
       const result = await res.json()
       if (!res.ok || result.error) throw new Error(result.error || 'Errore upload')
+      if (!result.propagated) {
+        // Attende fino a 6 secondi aggiuntivi per la propagazione CDN
+        await new Promise(r => setTimeout(r, 3000))
+      }
       if (replaceTargetId) {
         updateElement(replaceTargetId, { src: result.url })
         setReplaceTargetId(null)
         setUploadingImg(false)
         return
       }
-      // stima dimensioni immagine per proporzioni corrette sul certificato
       const dims = await new Promise(resolve => {
         const img = new window.Image()
         img.onload = () => resolve({ w: img.naturalWidth, h: img.naturalHeight })
@@ -474,6 +612,164 @@ export default function CertificatoEditorTab({ event, setEvent }) {
       </div>
 
       {event.certificato_abilitato && (<>
+        {/* ── Barra template + ricerca ── */}
+        <div style={{ display:'flex', flexWrap:'wrap', alignItems:'center', gap:'10px', padding:'12px 16px', background:'#EFF6FF', border:'1px solid #BFDBFE', borderRadius:'10px' }}>
+          <span style={{ fontSize:'12px', fontWeight:'700', color:'#1E40AF', marginRight:'2px' }}>Modelli:</span>
+          <button type="button" onClick={openSaveNew} disabled={elements.length === 0 || savingTpl}
+            style={{ display:'inline-flex', alignItems:'center', gap:'6px', padding:'7px 14px', borderRadius:'8px', border:'1px solid #003DA5', background:'#003DA5', color:'#fff', fontSize:'12px', fontWeight:'700', cursor: elements.length === 0 ? 'not-allowed' : 'pointer', opacity: elements.length === 0 ? 0.5 : 1 }}>
+            <Save size={13} /> Salva come nuovo modello
+          </button>
+          <button type="button" onClick={() => { setTplDrawerOpen(v => !v); setSearchOpen(false); setImgGalleryOpen(false) }}
+            style={{ display:'inline-flex', alignItems:'center', gap:'6px', padding:'7px 14px', borderRadius:'8px', border:`1px solid ${tplDrawerOpen ? '#003DA5' : '#D1D5DB'}`, background: tplDrawerOpen ? '#EFF6FF' : '#fff', color: tplDrawerOpen ? '#003DA5' : '#374151', fontSize:'12px', fontWeight:'700', cursor:'pointer' }}>
+            <BookOpen size={13} /> I miei modelli {tplList.length > 0 && <span style={{ background:'#003DA5', color:'#fff', borderRadius:'99px', padding:'1px 6px', fontSize:'10px' }}>{tplList.length}</span>}
+          </button>
+          <button type="button" onClick={() => { setImgGalleryOpen(v => !v); setSearchOpen(false); setTplDrawerOpen(false) }}
+            style={{ display:'inline-flex', alignItems:'center', gap:'6px', padding:'7px 14px', borderRadius:'8px', border:`1px solid ${imgGalleryOpen ? '#003DA5' : '#D1D5DB'}`, background: imgGalleryOpen ? '#EFF6FF' : '#fff', color: imgGalleryOpen ? '#003DA5' : '#374151', fontSize:'12px', fontWeight:'700', cursor:'pointer' }}>
+            <ImageIcon size={13} /> Galleria immagini
+          </button>
+          <button type="button" onClick={() => { setSearchOpen(v => !v); setTplDrawerOpen(false); setImgGalleryOpen(false); if (!searchResults.length && !searchOpen) searchOnline() }}
+            style={{ display:'inline-flex', alignItems:'center', gap:'6px', padding:'7px 14px', borderRadius:'8px', border:`1px solid ${searchOpen ? '#003DA5' : '#D1D5DB'}`, background: searchOpen ? '#EFF6FF' : '#fff', color: searchOpen ? '#003DA5' : '#374151', fontSize:'12px', fontWeight:'700', cursor:'pointer' }}>
+            <Search size={13} /> Cerca sfondi online
+          </button>
+          {tplMsg && <span style={{ fontSize:'12px', color:'#16A34A', fontWeight:'600', display:'flex', alignItems:'center', gap:'5px' }}><CheckCircle size={13} />{tplMsg}</span>}
+        </div>
+
+        {/* ── Drawer "I miei modelli" ── */}
+        {tplDrawerOpen && (
+          <div style={{ border:'1px solid #E5E7EB', borderRadius:'10px', padding:'16px', background:'#fff' }}>
+            <div style={{ display:'flex', alignItems:'center', justifyContent:'space-between', marginBottom:'12px' }}>
+              <p style={{ margin:0, fontSize:'14px', fontWeight:'800', color:'#0A0A0A' }}>I miei modelli salvati</p>
+              <button type="button" onClick={() => setTplDrawerOpen(false)} style={{ background:'none', border:'none', cursor:'pointer', color:'#9CA3AF' }}><X size={16}/></button>
+            </div>
+            {tplLoading ? (
+              <div style={{ display:'flex', gap:'8px', color:'#9CA3AF', fontSize:'13px', alignItems:'center' }}><Loader2 size={15} style={{ animation:'spin .8s linear infinite' }}/> Caricamento…</div>
+            ) : tplList.length === 0 ? (
+              <p style={{ fontSize:'13px', color:'#9CA3AF', margin:0 }}>Nessun modello ancora salvato. Crea un certificato e premi "Salva come nuovo modello".</p>
+            ) : (
+              <div style={{ display:'flex', flexDirection:'column', gap:'8px' }}>
+                {tplList.map(tpl => (
+                  <div key={tpl.id} style={{ display:'flex', alignItems:'center', gap:'10px', padding:'10px 12px', border:'1px solid #E5E7EB', borderRadius:'8px', background:'#FAFAFA' }}>
+                    <div style={{ width:'80px', height:'45px', flexShrink:0, background:'#fff', border:'1px solid #E5E7EB', borderRadius:'5px', display:'flex', alignItems:'center', justifyContent:'center', overflow:'hidden' }}>
+                      <div style={{ transform:'scale(0.095)', transformOrigin:'top left', width:`${PAGE_W}px`, height:`${PAGE_H}px`, position:'relative', background:'#fff' }}>
+                        {(tpl.elements || []).filter(el => el.type === 'shape' && el.fill).slice(0,8).map(el => (
+                          <div key={el.id} style={{ position:'absolute', left:el.x, top:el.y, width:el.w, height:el.h, background:el.fill || 'transparent', borderRadius: el.shape==='circle' ? '50%' : 0 }} />
+                        ))}
+                      </div>
+                    </div>
+                    <div style={{ flex:1, minWidth:0 }}>
+                      <p style={{ margin:'0 0 2px', fontSize:'13px', fontWeight:'700', color:'#0A0A0A', overflow:'hidden', textOverflow:'ellipsis', whiteSpace:'nowrap' }}>{tpl.nome}</p>
+                      <p style={{ margin:0, fontSize:'11px', color:'#9CA3AF' }}>{tpl.elements?.length || 0} elementi · {new Date(tpl.updated_at).toLocaleDateString('it-IT')}</p>
+                    </div>
+                    <button type="button" onClick={() => loadTemplate(tpl)}
+                      style={{ padding:'7px 12px', borderRadius:'7px', border:'1px solid #003DA5', background:'#003DA5', color:'#fff', fontSize:'12px', fontWeight:'700', cursor:'pointer', flexShrink:0 }}>Carica</button>
+                    <button type="button" onClick={() => openSaveOverwrite(tpl)} title="Aggiorna con il disegno corrente"
+                      style={{ padding:'7px 10px', borderRadius:'7px', border:'1px solid #E5E7EB', background:'#fff', color:'#374151', cursor:'pointer', flexShrink:0 }}><Pencil size={13}/></button>
+                    <button type="button" onClick={() => deleteTemplate(tpl)}
+                      style={{ padding:'7px 10px', borderRadius:'7px', border:'1px solid #FECACA', background:'#FEF2F2', color:'#DC2626', cursor:'pointer', flexShrink:0 }}><Trash2 size={13}/></button>
+                  </div>
+                ))}
+              </div>
+            )}
+          </div>
+        )}
+
+        {/* ── Drawer "Cerca sfondi online" ── */}
+        {searchOpen && (
+          <div style={{ border:'1px solid #E5E7EB', borderRadius:'10px', padding:'16px', background:'#fff' }}>
+            <div style={{ display:'flex', alignItems:'center', justifyContent:'space-between', marginBottom:'8px' }}>
+              <p style={{ margin:0, fontSize:'14px', fontWeight:'800', color:'#0A0A0A' }}>Cerca sfondi e immagini online</p>
+              <button type="button" onClick={() => setSearchOpen(false)} style={{ background:'none', border:'none', cursor:'pointer', color:'#9CA3AF' }}><X size={16}/></button>
+            </div>
+            <p style={{ fontSize:'12px', color:'#9CA3AF', margin:'0 0 12px' }}>Cerca tra milioni di immagini gratuite (Pexels). Cliccane una per importarla come sfondo del certificato. In inglese si trovano più risultati.</p>
+            <div style={{ display:'flex', gap:'8px', marginBottom:'12px' }}>
+              <input value={searchQuery} onChange={e => setSearchQuery(e.target.value)} onKeyDown={e => e.key === 'Enter' && searchOnline()}
+                placeholder="diploma elegant, parchment, certificate frame, blue geometric…"
+                style={{ flex:1, padding:'9px 12px', border:'1px solid #D1D5DB', borderRadius:'8px', fontSize:'13px', fontFamily:"'Inter',sans-serif" }} />
+              <button type="button" onClick={searchOnline} disabled={searchLoading}
+                style={{ padding:'9px 16px', borderRadius:'8px', background:'#003DA5', color:'#fff', border:'none', fontSize:'13px', fontWeight:'700', cursor:'pointer', display:'flex', alignItems:'center', gap:'6px' }}>
+                {searchLoading ? <Loader2 size={14} style={{ animation:'spin .8s linear infinite' }}/> : <Search size={14}/>} Cerca
+              </button>
+            </div>
+            {searchErr && <p style={{ fontSize:'12px', color:'#DC2626', margin:'0 0 10px' }}>{searchErr}</p>}
+            {searchResults.length > 0 && (
+              <div style={{ display:'grid', gridTemplateColumns:'repeat(auto-fill, minmax(140px, 1fr))', gap:'8px', maxHeight:'340px', overflowY:'auto' }}>
+                {searchResults.map((img, i) => (
+                  <div key={i} style={{ position:'relative', borderRadius:'8px', overflow:'hidden', cursor:'pointer', border:'1px solid #E5E7EB', aspectRatio:'16/9' }}
+                    onClick={() => importImageFromUrl(img.url)}>
+                    <img src={img.thumb} alt="" style={{ width:'100%', height:'100%', objectFit:'cover', display:'block' }} onError={e => { e.target.style.display='none' }} />
+                    <div style={{ position:'absolute', inset:0, background:'transparent', transition:'background .15s', display:'flex', alignItems:'center', justifyContent:'center' }}
+                      onMouseEnter={e => { e.currentTarget.style.background='rgba(0,30,100,0.4)' }}
+                      onMouseLeave={e => { e.currentTarget.style.background='transparent' }}>
+                      <div style={{ position:'absolute', bottom:'4px', left:'5px', fontSize:'9px', color:'rgba(255,255,255,0.9)', background:'rgba(0,0,0,0.45)', padding:'2px 5px', borderRadius:'3px' }}>{img.source}</div>
+                    </div>
+                  </div>
+                ))}
+              </div>
+            )}
+            {!searchLoading && !searchErr && searchResults.length === 0 && (
+              <p style={{ fontSize:'12px', color:'#9CA3AF', margin:0 }}>Scrivi una ricerca sopra e premi Cerca.</p>
+            )}
+          </div>
+        )}
+
+        {/* ── Galleria immagini certificato ── */}
+        {imgGalleryOpen && (
+          <div style={{ border:'1px solid #E5E7EB', borderRadius:'10px', padding:'16px', background:'#fff' }}>
+            <div style={{ display:'flex', alignItems:'center', justifyContent:'space-between', marginBottom:'12px' }}>
+              <div>
+                <p style={{ margin:'0 0 2px', fontSize:'14px', fontWeight:'800', color:'#0A0A0A' }}>Galleria immagini certificato</p>
+                <p style={{ margin:0, fontSize:'12px', color:'#9CA3AF' }}>Queste immagini sono usate solo nei certificati, non appaiono nell&apos;hero degli eventi.</p>
+              </div>
+              <button type="button" onClick={() => setImgGalleryOpen(false)} style={{ background:'none', border:'none', cursor:'pointer', color:'#9CA3AF' }}><X size={16}/></button>
+            </div>
+            <LogoManager
+              folder="certificati-immagini"
+              showDefault={false}
+              heading="Immagini caricate per i certificati"
+              uploadHeading="Carica nuova immagine"
+              value={null}
+              compact
+              onChange={url => {
+                if (!url) return
+                const img2 = new window.Image()
+                img2.onload = () => {
+                  const s = Math.min(200 / img2.naturalWidth, 200 / img2.naturalHeight, 1)
+                  addElement('image', { src: url, w: Math.round(img2.naturalWidth * s), h: Math.round(img2.naturalHeight * s) })
+                  setImgGalleryOpen(false)
+                }
+                img2.onerror = () => { addElement('image', { src: url, w: 150, h: 150 }); setImgGalleryOpen(false) }
+                img2.src = url
+              }}
+            />
+          </div>
+        )}
+
+        {/* ── Modale: salva con nome ── */}
+        {saveNameModalOpen && (
+          <div style={{ position:'fixed', inset:0, background:'rgba(0,0,0,0.4)', display:'flex', alignItems:'center', justifyContent:'center', zIndex:9999 }}>
+            <div style={{ background:'#fff', borderRadius:'14px', padding:'28px 32px', width:'420px', maxWidth:'90vw', boxShadow:'0 20px 60px rgba(0,0,0,0.2)' }}>
+              <h3 style={{ margin:'0 0 6px', fontSize:'18px', fontWeight:'800', color:'#0A0A0A' }}>
+                {saveNameMode === 'overwrite' ? 'Aggiorna modello esistente' : 'Salva come nuovo modello'}
+              </h3>
+              <p style={{ margin:'0 0 16px', fontSize:'13px', color:'#6B7280' }}>
+                {saveNameMode === 'overwrite' ? `Sostituirà il disegno di "${saveNameValue}" con quello corrente.` : 'Dai un nome al modello per ritrovarlo rapidamente.'}
+              </p>
+              <input value={saveNameValue} onChange={e => setSaveNameValue(e.target.value)}
+                onKeyDown={e => e.key === 'Enter' && saveNameValue.trim() && saveTemplate(saveNameValue.trim(), saveNameTargetId)}
+                autoFocus placeholder="Es. Diploma elegante, Certificato CNA 2026…"
+                style={{ width:'100%', padding:'10px 12px', border:'1.5px solid #D1D5DB', borderRadius:'8px', fontSize:'14px', fontFamily:"'Inter',sans-serif", boxSizing:'border-box', marginBottom:'16px' }} />
+              <div style={{ display:'flex', gap:'10px', justifyContent:'flex-end' }}>
+                <button type="button" onClick={() => setSaveNameModalOpen(false)}
+                  style={{ padding:'9px 20px', borderRadius:'8px', border:'1px solid #E5E7EB', background:'#fff', color:'#374151', fontSize:'13px', fontWeight:'700', cursor:'pointer' }}>Annulla</button>
+                <button type="button" onClick={() => saveTemplate(saveNameValue.trim(), saveNameTargetId)} disabled={!saveNameValue.trim() || savingTpl}
+                  style={{ padding:'9px 20px', borderRadius:'8px', border:'none', background: saveNameValue.trim() ? '#003DA5' : '#D1D5DB', color:'#fff', fontSize:'13px', fontWeight:'700', cursor: saveNameValue.trim() ? 'pointer' : 'not-allowed', display:'flex', alignItems:'center', gap:'6px' }}>
+                  {savingTpl ? <><Loader2 size={14} style={{ animation:'spin .8s linear infinite' }}/> Salvataggio…</> : <><Save size={14}/> Salva</>}
+                </button>
+              </div>
+            </div>
+          </div>
+        )}
+
         {/* Modelli + colore + logo */}
         <div style={{ display: 'flex', flexWrap: 'wrap', gap: '20px', alignItems: 'flex-start' }}>
           <div style={{ flex: '1 1 320px' }}>
