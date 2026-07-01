@@ -93,7 +93,6 @@ const s = {
     flexDirection: 'column',
     justifyContent: 'center',
     paddingLeft: '14px',
-    borderLeft: '1.5px solid rgba(255,255,255,0.28)',
   },
   pageTitle: {
     fontSize: '22px',
