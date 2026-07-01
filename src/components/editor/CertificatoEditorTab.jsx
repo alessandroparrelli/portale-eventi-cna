@@ -312,12 +312,13 @@ export default function CertificatoEditorTab({ event, setEvent }) {
   const [saveNameMode, setSaveNameMode] = useState('new') // 'new' | 'overwrite'
   const [saveNameTargetId, setSaveNameTargetId] = useState(null)
   const [tplMsg, setTplMsg] = useState('')
-  // Online search
+  // Catalogo modelli grafici
   const [searchOpen, setSearchOpen] = useState(false)
-  const [searchQuery, setSearchQuery] = useState('certificate diploma elegant')
+  const [searchQuery, setSearchQuery] = useState('')
   const [searchResults, setSearchResults] = useState([])
   const [searchLoading, setSearchLoading] = useState(false)
   const [searchErr, setSearchErr] = useState('')
+  const [searchCategory, setSearchCategory] = useState('all')
   const dragRef = useRef(null)
   const stageRef = useRef(null)
   const imgFileRef = useRef(null)
@@ -414,23 +415,39 @@ export default function CertificatoEditorTab({ event, setEvent }) {
     await fetchTemplates()
   }
 
-  /* ── Ricerca immagini online ── */
-  async function searchOnline() {
-    if (!searchQuery.trim()) return
+  /* ── Categorie di ricerca curate per certificati/diplomi ── */
+  const SEARCH_CATEGORIES = [
+    { id:'elegante',    label:'🏅 Elegante',    query:'elegant certificate border gold frame ornamental' },
+    { id:'accademico',  label:'🎓 Accademico',  query:'academic diploma parchment certificate scroll' },
+    { id:'botanico',    label:'🌿 Botanico',    query:'floral botanical certificate frame flowers' },
+    { id:'moderno',     label:'⚡ Moderno',     query:'modern professional certificate geometric abstract' },
+    { id:'vintage',     label:'📜 Vintage',     query:'vintage antique certificate frame ornate diploma' },
+    { id:'minimal',     label:'◻ Minimal',      query:'minimal clean certificate white simple border' },
+    { id:'corporate',   label:'💼 Corporate',   query:'corporate award certificate business professional' },
+    { id:'classico',    label:'🏛 Classico',    query:'classical ornate certificate roman border frame' },
+  ]
+
+  async function searchOnline(query) {
+    const q = (query || searchQuery || SEARCH_CATEGORIES[0].query).trim()
     setSearchLoading(true); setSearchErr(''); setSearchResults([])
     try {
       const res = await fetch(`${import.meta.env.VITE_SUPABASE_URL}/functions/v1/image-search`, {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ query: searchQuery }),
+        body: JSON.stringify({ query: q }),
       })
       const data = await res.json()
-      if (!res.ok || data.error) throw new Error(data.error || 'Errore ricerca')
+      if (!res.ok || data.error) throw new Error(data.error || 'Nessun risultato trovato')
       setSearchResults(data.images || [])
     } catch (e) {
       setSearchErr(e.message || 'Errore durante la ricerca')
     }
     setSearchLoading(false)
+  }
+
+  function openSearch() {
+    setSearchOpen(true); setTplDrawerOpen(false); setImgGalleryOpen(false)
+    if (!searchResults.length) { setSearchCategory('elegante'); searchOnline(SEARCH_CATEGORIES[0].query) }
   }
 
   /* ── Import immagine da URL esterno come sfondo ── */
@@ -627,9 +644,9 @@ export default function CertificatoEditorTab({ event, setEvent }) {
             style={{ display:'inline-flex', alignItems:'center', gap:'6px', padding:'7px 14px', borderRadius:'8px', border:`1px solid ${imgGalleryOpen ? '#003DA5' : '#D1D5DB'}`, background: imgGalleryOpen ? '#EFF6FF' : '#fff', color: imgGalleryOpen ? '#003DA5' : '#374151', fontSize:'12px', fontWeight:'700', cursor:'pointer' }}>
             <ImageIcon size={13} /> Galleria immagini
           </button>
-          <button type="button" onClick={() => { setSearchOpen(v => !v); setTplDrawerOpen(false); setImgGalleryOpen(false); if (!searchResults.length && !searchOpen) searchOnline() }}
+          <button type="button" onClick={() => { searchOpen ? setSearchOpen(false) : openSearch() }}
             style={{ display:'inline-flex', alignItems:'center', gap:'6px', padding:'7px 14px', borderRadius:'8px', border:`1px solid ${searchOpen ? '#003DA5' : '#D1D5DB'}`, background: searchOpen ? '#EFF6FF' : '#fff', color: searchOpen ? '#003DA5' : '#374151', fontSize:'12px', fontWeight:'700', cursor:'pointer' }}>
-            <Search size={13} /> Cerca sfondi online
+            <Search size={13} /> Modelli grafici online
           </button>
           {tplMsg && <span style={{ fontSize:'12px', color:'#16A34A', fontWeight:'600', display:'flex', alignItems:'center', gap:'5px' }}><CheckCircle size={13} />{tplMsg}</span>}
         </div>
@@ -673,44 +690,107 @@ export default function CertificatoEditorTab({ event, setEvent }) {
           </div>
         )}
 
-        {/* ── Drawer "Cerca sfondi online" ── */}
+        {/* ── Drawer "Modelli grafici online" ── */}
         {searchOpen && (
-          <div style={{ border:'1px solid #E5E7EB', borderRadius:'10px', padding:'16px', background:'#fff' }}>
-            <div style={{ display:'flex', alignItems:'center', justifyContent:'space-between', marginBottom:'8px' }}>
-              <p style={{ margin:0, fontSize:'14px', fontWeight:'800', color:'#0A0A0A' }}>Cerca sfondi e immagini online</p>
-              <button type="button" onClick={() => setSearchOpen(false)} style={{ background:'none', border:'none', cursor:'pointer', color:'#9CA3AF' }}><X size={16}/></button>
+          <div style={{ border:'1px solid #E5E7EB', borderRadius:'10px', background:'#fff', overflow:'hidden' }}>
+            <div style={{ padding:'14px 16px', borderBottom:'1px solid #E5E7EB', display:'flex', alignItems:'center', justifyContent:'space-between' }}>
+              <div>
+                <p style={{ margin:'0 0 2px', fontSize:'14px', fontWeight:'800', color:'#0A0A0A', display:'flex', alignItems:'center', gap:'8px' }}>
+                  <Search size={15} /> Cerca modelli per attestati e diplomi
+                </p>
+                <p style={{ margin:0, fontSize:'12px', color:'#9CA3AF' }}>
+                  Clicca su una categoria per trovare modelli grafici professionali. Poi clicca sul risultato per usarlo come sfondo nell&apos;editor.
+                </p>
+              </div>
+              <button type="button" onClick={() => setSearchOpen(false)} style={{ background:'none', border:'none', cursor:'pointer', color:'#9CA3AF', flexShrink:0 }}><X size={16}/></button>
             </div>
-            <p style={{ fontSize:'12px', color:'#9CA3AF', margin:'0 0 12px' }}>Cerca tra milioni di immagini gratuite (Pexels). Cliccane una per importarla come sfondo del certificato. In inglese si trovano più risultati.</p>
-            <div style={{ display:'flex', gap:'8px', marginBottom:'12px' }}>
-              <input value={searchQuery} onChange={e => setSearchQuery(e.target.value)} onKeyDown={e => e.key === 'Enter' && searchOnline()}
-                placeholder="diploma elegant, parchment, certificate frame, blue geometric…"
-                style={{ flex:1, padding:'9px 12px', border:'1px solid #D1D5DB', borderRadius:'8px', fontSize:'13px', fontFamily:"'Inter',sans-serif" }} />
-              <button type="button" onClick={searchOnline} disabled={searchLoading}
-                style={{ padding:'9px 16px', borderRadius:'8px', background:'#003DA5', color:'#fff', border:'none', fontSize:'13px', fontWeight:'700', cursor:'pointer', display:'flex', alignItems:'center', gap:'6px' }}>
-                {searchLoading ? <Loader2 size={14} style={{ animation:'spin .8s linear infinite' }}/> : <Search size={14}/>} Cerca
+
+            {/* Categorie rapide */}
+            <div style={{ padding:'12px 16px', borderBottom:'1px solid #F3F4F6', display:'flex', flexWrap:'wrap', gap:'6px' }}>
+              {SEARCH_CATEGORIES.map(cat => (
+                <button key={cat.id} type="button"
+                  onClick={() => { setSearchCategory(cat.id); searchOnline(cat.query) }}
+                  style={{ padding:'6px 12px', borderRadius:'20px', border:'1px solid', fontSize:'12px', fontWeight:'700', cursor:'pointer', transition:'all .15s',
+                    borderColor: searchCategory === cat.id ? '#003DA5' : '#E5E7EB',
+                    background: searchCategory === cat.id ? '#003DA5' : '#F9FAFB',
+                    color: searchCategory === cat.id ? '#fff' : '#374151',
+                  }}>
+                  {cat.label}
+                </button>
+              ))}
+            </div>
+
+            {/* Ricerca libera */}
+            <div style={{ padding:'10px 16px', borderBottom:'1px solid #F3F4F6', display:'flex', gap:'8px', alignItems:'center' }}>
+              <input value={searchQuery} onChange={e => setSearchQuery(e.target.value)}
+                onKeyDown={e => e.key === 'Enter' && searchOnline()}
+                placeholder="oppure scrivi qui: certificate elegant, diploma ornamental…"
+                style={{ flex:1, padding:'8px 12px', border:'1px solid #D1D5DB', borderRadius:'8px', fontSize:'13px', fontFamily:"'Inter',sans-serif" }} />
+              <button type="button" onClick={() => searchOnline()} disabled={searchLoading}
+                style={{ padding:'8px 16px', borderRadius:'8px', background:'#003DA5', color:'#fff', border:'none', fontSize:'13px', fontWeight:'700', cursor:'pointer', display:'flex', alignItems:'center', gap:'6px', flexShrink:0 }}>
+                {searchLoading ? <Loader2 size={14} style={{ animation:'spin .8s linear infinite' }}/> : <Search size={14}/>}
+                Cerca
               </button>
             </div>
-            {searchErr && <p style={{ fontSize:'12px', color:'#DC2626', margin:'0 0 10px' }}>{searchErr}</p>}
-            {searchResults.length > 0 && (
-              <div style={{ display:'grid', gridTemplateColumns:'repeat(auto-fill, minmax(140px, 1fr))', gap:'8px', maxHeight:'340px', overflowY:'auto' }}>
-                {searchResults.map((img, i) => (
-                  <div key={i} style={{ position:'relative', borderRadius:'8px', overflow:'hidden', cursor:'pointer', border:'1px solid #E5E7EB', aspectRatio:'16/9' }}
-                    onClick={() => importImageFromUrl(img.url)}>
-                    <img src={img.thumb} alt="" style={{ width:'100%', height:'100%', objectFit:'cover', display:'block' }} onError={e => { e.target.style.display='none' }} />
-                    <div style={{ position:'absolute', inset:0, background:'transparent', transition:'background .15s', display:'flex', alignItems:'center', justifyContent:'center' }}
-                      onMouseEnter={e => { e.currentTarget.style.background='rgba(0,30,100,0.4)' }}
-                      onMouseLeave={e => { e.currentTarget.style.background='transparent' }}>
-                      <div style={{ position:'absolute', bottom:'4px', left:'5px', fontSize:'9px', color:'rgba(255,255,255,0.9)', background:'rgba(0,0,0,0.45)', padding:'2px 5px', borderRadius:'3px' }}>{img.source}</div>
-                    </div>
+
+            {/* Nota Microsoft PowerPoint */}
+            <div style={{ padding:'8px 16px', background:'#EFF6FF', display:'flex', alignItems:'center', gap:'8px', borderBottom:'1px solid #DBEAFE' }}>
+              <span style={{ fontSize:'14px' }}>💡</span>
+              <p style={{ margin:0, fontSize:'11px', color:'#1E40AF' }}>
+                Per i template di PowerPoint di Microsoft vai direttamente a{' '}
+                <a href="https://create.microsoft.com/en-us/templates/certificates" target="_blank" rel="noopener noreferrer"
+                  style={{ fontWeight:'700', color:'#003DA5', display:'inline-flex', alignItems:'center', gap:'3px' }}>
+                  create.microsoft.com/certificates <ExternalLink size={11}/>
+                </a>
+                — richiedono login Microsoft e non sono importabili direttamente qui.
+              </p>
+            </div>
+
+            {/* Risultati */}
+            <div style={{ padding:'12px 16px' }}>
+              {searchErr && <p style={{ fontSize:'12px', color:'#DC2626', margin:'0 0 10px' }}>{searchErr}</p>}
+              {searchLoading && (
+                <div style={{ display:'flex', alignItems:'center', justifyContent:'center', gap:'10px', padding:'32px', color:'#9CA3AF', fontSize:'13px' }}>
+                  <Loader2 size={18} style={{ animation:'spin .8s linear infinite' }}/> Ricerca in corso…
+                </div>
+              )}
+              {!searchLoading && searchResults.length > 0 && (
+                <>
+                  <p style={{ fontSize:'11px', color:'#9CA3AF', margin:'0 0 10px' }}>
+                    {searchResults.length} risultati — clicca su un&apos;immagine per usarla come sfondo (verrà caricata e importata nell&apos;editor)
+                  </p>
+                  <div style={{ display:'grid', gridTemplateColumns:'repeat(auto-fill, minmax(150px, 1fr))', gap:'8px', maxHeight:'360px', overflowY:'auto' }}>
+                    {searchResults.map((img, i) => (
+                      <div key={i}
+                        style={{ position:'relative', borderRadius:'8px', overflow:'hidden', cursor:'pointer', border:'1px solid #E5E7EB', aspectRatio:'4/3', background:'#F9FAFB' }}
+                        onClick={() => importImageFromUrl(img.url)}
+                        onMouseEnter={e => e.currentTarget.style.boxShadow='0 4px 12px rgba(0,0,0,0.15)'}
+                        onMouseLeave={e => e.currentTarget.style.boxShadow='none'}>
+                        <img src={img.thumb} alt="" style={{ width:'100%', height:'100%', objectFit:'cover', display:'block' }}
+                          onError={e => { e.target.style.display='none' }} />
+                        <div style={{ position:'absolute', inset:0, background:'linear-gradient(to top, rgba(0,0,0,0.5) 0%, transparent 50%)', opacity:0, transition:'opacity .2s' }}
+                          onMouseEnter={e => { e.currentTarget.style.opacity=1 }}
+                          onMouseLeave={e => { e.currentTarget.style.opacity=0 }}>
+                          <div style={{ position:'absolute', bottom:'6px', left:'7px', right:'7px' }}>
+                            <p style={{ margin:0, fontSize:'10px', fontWeight:'700', color:'#fff' }}>Usa come sfondo</p>
+                            <p style={{ margin:'1px 0 0', fontSize:'9px', color:'rgba(255,255,255,0.7)' }}>© {img.source} {img.author ? `· ${img.author}` : ''}</p>
+                          </div>
+                        </div>
+                      </div>
+                    ))}
                   </div>
-                ))}
-              </div>
-            )}
-            {!searchLoading && !searchErr && searchResults.length === 0 && (
-              <p style={{ fontSize:'12px', color:'#9CA3AF', margin:0 }}>Scrivi una ricerca sopra e premi Cerca.</p>
-            )}
+                </>
+              )}
+              {!searchLoading && !searchErr && searchResults.length === 0 && (
+                <div style={{ textAlign:'center', padding:'24px', color:'#9CA3AF' }}>
+                  <p style={{ margin:'0 0 6px', fontSize:'24px' }}>🔍</p>
+                  <p style={{ margin:0, fontSize:'13px' }}>Seleziona una categoria qui sopra o scrivi una ricerca</p>
+                </div>
+              )}
+            </div>
           </div>
         )}
+
 
         {/* ── Galleria immagini certificato ── */}
         {imgGalleryOpen && (
