@@ -1,7 +1,7 @@
 import { useEffect, useRef, useState, useCallback } from 'react'
 import {
   Award, Eye, Download, Loader2, Type, Square, Minus, Circle as CircleIcon,
-  QrCode, Image as ImageIcon, Copy, Trash2, ChevronUp, ChevronDown, AlignLeft, AlignCenter, AlignRight,
+  QrCode, Image as ImageIcon, Copy, Trash2, ChevronUp, ChevronDown,
   Bold, Italic, LayoutTemplate, Underline, Upload, X, ChevronRight,
   Save, BookOpen, Search, Plus, Pencil, CheckCircle, ExternalLink,
 } from 'lucide-react'
@@ -217,11 +217,73 @@ const PRESETS = [
   { id: 'colonne', label: 'Greco a colonne', desc: 'Colonne laterali a greca, stile classico', build: presetGrecoColonne },
 ]
 
+/* ─── Font disponibili sul certificato ─────────────────────── */
+const CERT_FONTS = [
+  { label:'Helvetica (Sans)',        value:'helvetica', stack:'Helvetica, Arial, sans-serif' },
+  { label:'Times New Roman (Serif)', value:'times',     stack:'"Times New Roman", Times, serif' },
+  { label:'Courier (Monospace)',     value:'courier',   stack:'"Courier New", Courier, monospace' },
+  { label:'Georgia (Serif)',         value:'georgia',   stack:'Georgia, serif' },
+  { label:'Palatino (Serif)',        value:'palatino',  stack:'"Palatino Linotype", Palatino, serif' },
+  { label:'Garamond (Serif)',        value:'garamond',  stack:'Garamond, serif' },
+  { label:'Arial (Sans)',            value:'arial',     stack:'Arial, Helvetica, sans-serif' },
+  { label:'Trebuchet (Sans)',        value:'trebuchet', stack:'"Trebuchet MS", sans-serif' },
+  { label:'Verdana (Sans)',          value:'verdana',   stack:'Verdana, Geneva, sans-serif' },
+  { label:'Impact (Display)',        value:'impact',    stack:'Impact, "Arial Narrow", sans-serif' },
+]
+const CERT_FONT_STACK = Object.fromEntries(CERT_FONTS.map(f => [f.value, f.stack]))
+
 function fontStack(family) {
-  if (family === 'times') return "'Times New Roman', Times, serif"
-  if (family === 'courier') return "'Courier New', Courier, monospace"
-  return "Helvetica, Arial, sans-serif"
+  return CERT_FONT_STACK[family] || 'Helvetica, Arial, sans-serif'
 }
+
+/* ─── Palette colori certificato (40 colori) ────────────────── */
+const CERT_COLORS = [
+  '#000000','#0A0A0A','#1F2937','#374151','#6B7280','#9CA3AF','#D1D5DB','#FFFFFF',
+  '#001B4D','#002E7A','#003DA5','#1d4ed8','#3B82F6','#93C5FD','#BFDBFE','#EFF6FF',
+  '#064E3B','#16A34A','#22C55E','#86EFAC','#991B1B','#DC2626','#FCA5A5','#FEF2F2',
+  '#451A03','#78350F','#B45309','#D97706','#F59E0B','#FCD34D','#FEF3C7','#FFFBEB',
+  '#4C1D95','#7C3AED','#EC4899','#0E7490','#F5F5DC','#FFF8E7','#F0EDE0','#E8E0D0',
+]
+
+/* ─── Palette colori + picker custom ───────────────────────── */
+function ColorSwatchPicker({ value, onChange }) {
+  const [showCustom, setShowCustom] = useState(false)
+  const [customVal, setCustomVal] = useState(value || '#003DA5')
+  return (
+    <div>
+      <div style={{ display:'flex', flexWrap:'wrap', gap:'4px', marginBottom: showCustom ? '6px' : 0 }}>
+        {CERT_COLORS.map(c => (
+          <button key={c} type="button" onClick={() => onChange(c)} title={c}
+            style={{ width:'22px', height:'22px', borderRadius:'4px', background:c, flexShrink:0,
+              border: value===c ? '2.5px solid #003DA5' : c==='#FFFFFF' ? '1px solid #D1D5DB' : '1.5px solid rgba(0,0,0,.1)',
+              cursor:'pointer', boxSizing:'border-box', transition:'transform .1s' }}
+            onMouseEnter={e => e.currentTarget.style.transform='scale(1.3)'}
+            onMouseLeave={e => e.currentTarget.style.transform='scale(1)'}
+          />
+        ))}
+        <button type="button" title="Colore personalizzato" onClick={() => setShowCustom(v => !v)}
+          style={{ width:'22px', height:'22px', borderRadius:'4px',
+            background:'conic-gradient(red,yellow,lime,aqua,blue,magenta,red)',
+            border:'1px solid #E5E7EB', cursor:'pointer', flexShrink:0 }} />
+      </div>
+      {showCustom && (
+        <div style={{ display:'flex', gap:'6px', alignItems:'center', padding:'8px', background:'#F9FAFB', borderRadius:'8px', border:'1px solid #E5E7EB' }}>
+          <input type="color" value={customVal} onChange={e => setCustomVal(e.target.value)}
+            style={{ width:'40px', height:'32px', border:'1px solid #D1D5DB', borderRadius:'5px', cursor:'pointer', padding:'2px' }} />
+          <input type="text" value={customVal} onChange={e => setCustomVal(e.target.value)} placeholder="#000000"
+            style={{ flex:1, padding:'5px 8px', border:'1px solid #D1D5DB', borderRadius:'5px', fontSize:'12px', fontFamily:'monospace' }} />
+          <button type="button" onClick={() => { onChange(customVal); setShowCustom(false) }}
+            style={{ padding:'5px 12px', background:'#003DA5', color:'#fff', border:'none', borderRadius:'5px', fontSize:'12px', fontWeight:'700', cursor:'pointer' }}>Applica</button>
+        </div>
+      )}
+    </div>
+  )
+}
+
+/* ─── SVG icone allineamento (evita conflitto con lucide) ────── */
+const AlignLeft   = ({ size=14 }) => <svg width={size} height={size} viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2"><line x1="3" y1="6" x2="21" y2="6"/><line x1="3" y1="12" x2="15" y2="12"/><line x1="3" y1="18" x2="18" y2="18"/></svg>
+const AlignCenter = ({ size=14 }) => <svg width={size} height={size} viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2"><line x1="3" y1="6" x2="21" y2="6"/><line x1="6" y1="12" x2="18" y2="12"/><line x1="4" y1="18" x2="20" y2="18"/></svg>
+const AlignRight  = ({ size=14 }) => <svg width={size} height={size} viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2"><line x1="3" y1="6" x2="21" y2="6"/><line x1="9" y1="12" x2="21" y2="12"/><line x1="6" y1="18" x2="21" y2="18"/></svg>
 
 const SAMPLE = { nome: 'Mario Rossi', evento: 'Nome Evento di Esempio', data: '20 giugno 2026', luogo: 'Roma, Sede CNA', codice: 'AB12-CD34-EF56', anno: String(new Date().getFullYear()), azienda: 'Rossi Artigiani Srl', mestiere: 'Falegname', email: 'mario.rossi@esempio.it' }
 
@@ -240,7 +302,8 @@ function CanvasElement({ el, selected, onSelect, onDragStart, onResizeStart, log
         width: '100%', height: '100%', fontFamily: fontStack(el.fontFamily), fontSize: el.fontSize || 14,
         fontWeight: el.bold ? 700 : 400, fontStyle: el.italic ? 'italic' : 'normal', color: el.color || '#0A0A0A',
         textAlign: el.align || 'left', lineHeight: el.lineHeight || 1.25, whiteSpace: 'pre-wrap', overflow: 'hidden',
-        userSelect: 'none', textTransform: el.uppercase ? 'uppercase' : 'none', textDecoration: el.underline ? 'underline' : 'none',
+        userSelect: 'none', textTransform: el.uppercase ? 'uppercase' : 'none',
+        textDecoration: [el.underline && 'underline', el.strikethrough && 'line-through'].filter(Boolean).join(' ') || 'none',
         letterSpacing: el.letterSpacing ? `${el.letterSpacing}px` : 'normal', backgroundColor: el.bgColor || 'transparent',
       }}>{text}</div>
     )
@@ -604,6 +667,7 @@ export default function CertificatoEditorTab({ event, setEvent }) {
   }
 
   const toolBtn = { display: 'flex', flexDirection: 'column', alignItems: 'center', gap: '3px', padding: '8px 6px', borderRadius: '8px', border: '1px solid #E5E7EB', background: '#fff', cursor: 'pointer', fontSize: '10px', color: '#374151', fontWeight: '600', minWidth: '56px' }
+  const btnSm = { width:'28px', height:'28px', border:'1px solid #D1D5DB', borderRadius:'5px', background:'#fff', fontSize:'16px', fontWeight:'700', cursor:'pointer', display:'flex', alignItems:'center', justifyContent:'center', flexShrink:0, color:'#374151', padding:0 }
 
   return (
     <div style={{ display: 'flex', flexDirection: 'column', gap: '20px' }}>
@@ -917,7 +981,7 @@ export default function CertificatoEditorTab({ event, setEvent }) {
         {uploadImgErr && <p style={{ fontSize: '12px', color: '#DC2626', margin: 0 }}>{uploadImgErr}</p>}
 
         {/* Canvas + pannello proprietà */}
-        <div style={{ display: 'grid', gridTemplateColumns: `${STAGE_W}px 320px`, gap: '20px', alignItems: 'flex-start' }} className="cert-canvas-grid">
+        <div style={{ display: 'grid', gridTemplateColumns: `${STAGE_W}px 360px`, gap: '20px', alignItems: 'flex-start' }} className="cert-canvas-grid">
           <div>
             <div
               ref={stageRef}
@@ -958,64 +1022,130 @@ export default function CertificatoEditorTab({ event, setEvent }) {
               </p>
 
               {selected.type === 'text' && (<>
-                <Field label="Contenuto">
+
+                {/* Contenuto / campo dinamico */}
+                <div>
+                  <p style={{ margin:'0 0 5px', fontSize:'10px', fontWeight:'700', color:'#9CA3AF', textTransform:'uppercase', letterSpacing:'.06em' }}>Contenuto</p>
                   <select value={selected.field || 'custom'} onChange={e => updateElement(selected.id, { field: e.target.value })}
-                    style={{ width: '100%', padding: '8px 10px', border: '1px solid #D1D5DB', borderRadius: '6px', fontSize: '13px', fontFamily: "'Inter',sans-serif" }}>
+                    style={{ width:'100%', padding:'7px 10px', border:'1px solid #D1D5DB', borderRadius:'6px', fontSize:'12px', fontFamily:"'Inter',sans-serif", marginBottom:'6px' }}>
                     {FIELD_OPTIONS.map(o => <option key={o.v} value={o.v}>{o.l}</option>)}
                   </select>
-                </Field>
-                {(selected.field || 'custom') === 'custom' && (
-                  <Field label="Testo">
+                  {(selected.field || 'custom') === 'custom' && (
                     <textarea value={selected.text || ''} onChange={e => updateElement(selected.id, { text: e.target.value })} rows={2}
-                      style={{ width: '100%', padding: '8px 10px', border: '1px solid #D1D5DB', borderRadius: '6px', fontSize: '13px', fontFamily: "'Inter',sans-serif", resize: 'vertical' }} />
-                  </Field>
-                )}
-                <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '8px' }}>
-                  <Field label="Famiglia">
-                    <select value={selected.fontFamily || 'helvetica'} onChange={e => updateElement(selected.id, { fontFamily: e.target.value })}
-                      style={{ width: '100%', padding: '8px 10px', border: '1px solid #D1D5DB', borderRadius: '6px', fontSize: '13px' }}>
-                      <option value="helvetica">Sans (Helvetica)</option>
-                      <option value="times">Serif (Times)</option>
-                      <option value="courier">Monospace (Courier)</option>
+                      style={{ width:'100%', padding:'8px 10px', border:'1px solid #D1D5DB', borderRadius:'6px', fontSize:'13px', fontFamily:"'Inter',sans-serif", resize:'vertical', boxSizing:'border-box' }} />
+                  )}
+                </div>
+
+                {/* Font */}
+                <div>
+                  <p style={{ margin:'0 0 5px', fontSize:'10px', fontWeight:'700', color:'#9CA3AF', textTransform:'uppercase', letterSpacing:'.06em' }}>Font</p>
+                  <select value={selected.fontFamily || 'helvetica'} onChange={e => updateElement(selected.id, { fontFamily: e.target.value })}
+                    style={{ width:'100%', padding:'7px 10px', border:'1px solid #D1D5DB', borderRadius:'6px', fontSize:'13px',
+                      fontFamily: CERT_FONT_STACK[selected.fontFamily || 'helvetica'] }}>
+                    {CERT_FONTS.map(f => (
+                      <option key={f.value} value={f.value} style={{ fontFamily: f.stack }}>{f.label}</option>
+                    ))}
+                  </select>
+                </div>
+
+                {/* Dimensione con slider */}
+                <div>
+                  <p style={{ margin:'0 0 5px', fontSize:'10px', fontWeight:'700', color:'#9CA3AF', textTransform:'uppercase', letterSpacing:'.06em' }}>
+                    Dimensione — <span style={{ color:'#003DA5', fontWeight:'800' }}>{selected.fontSize || 14}px</span>
+                  </p>
+                  <div style={{ display:'flex', alignItems:'center', gap:'6px' }}>
+                    <button type="button" onClick={() => updateElement(selected.id, { fontSize: Math.max(6, (selected.fontSize||14) - 1) })}
+                      style={btnSm}>−</button>
+                    <input type="range" min="6" max="96" step="1" value={selected.fontSize || 14}
+                      onChange={e => updateElement(selected.id, { fontSize: Number(e.target.value) })}
+                      style={{ flex:1, accentColor:'#003DA5' }} />
+                    <button type="button" onClick={() => updateElement(selected.id, { fontSize: Math.min(120, (selected.fontSize||14) + 1) })}
+                      style={btnSm}>+</button>
+                    <input type="number" min="6" max="120" value={selected.fontSize || 14}
+                      onChange={e => updateElement(selected.id, { fontSize: Number(e.target.value) || 14 })}
+                      style={{ width:'48px', padding:'4px 6px', border:'1px solid #D1D5DB', borderRadius:'5px', fontSize:'12px', textAlign:'center' }} />
+                  </div>
+                </div>
+
+                {/* Stile */}
+                <div>
+                  <p style={{ margin:'0 0 5px', fontSize:'10px', fontWeight:'700', color:'#9CA3AF', textTransform:'uppercase', letterSpacing:'.06em' }}>Stile</p>
+                  <div style={{ display:'flex', gap:'4px', flexWrap:'wrap' }}>
+                    {[
+                      { key:'bold',          node: <strong style={{fontSize:'13px',fontFamily:'inherit'}}>B</strong>,             title:'Grassetto' },
+                      { key:'italic',        node: <em style={{fontStyle:'italic',fontSize:'13px',fontFamily:'inherit'}}>I</em>,   title:'Corsivo' },
+                      { key:'underline',     node: <span style={{textDecoration:'underline',fontSize:'13px'}}>U</span>,           title:'Sottolineato' },
+                      { key:'strikethrough', node: <span style={{textDecoration:'line-through',fontSize:'13px'}}>S</span>,        title:'Barrato' },
+                      { key:'uppercase',     node: <span style={{fontSize:'11px',fontWeight:'800',letterSpacing:'1px'}}>AA</span>, title:'Maiuscolo' },
+                    ].map(({ key, node, title }) => (
+                      <button key={key} type="button" title={title} onClick={() => updateElement(selected.id, { [key]: !selected[key] })}
+                        style={{ minWidth:'34px', height:'34px', padding:'0 8px', borderRadius:'6px', border:'1px solid',
+                          borderColor: selected[key] ? '#003DA5' : '#D1D5DB',
+                          background: selected[key] ? '#EFF6FF' : '#fff',
+                          color: selected[key] ? '#003DA5' : '#374151',
+                          cursor:'pointer', display:'flex', alignItems:'center', justifyContent:'center' }}>
+                        {node}
+                      </button>
+                    ))}
+                  </div>
+                </div>
+
+                {/* Allineamento */}
+                <div>
+                  <p style={{ margin:'0 0 5px', fontSize:'10px', fontWeight:'700', color:'#9CA3AF', textTransform:'uppercase', letterSpacing:'.06em' }}>Allineamento</p>
+                  <div style={{ display:'flex', gap:'4px' }}>
+                    {[{ v:'left', I:AlignLeft, t:'Sinistra' }, { v:'center', I:AlignCenter, t:'Centro' }, { v:'right', I:AlignRight, t:'Destra' }].map(({ v, I, t }) => (
+                      <button key={v} type="button" title={t} onClick={() => updateElement(selected.id, { align: v })}
+                        style={{ flex:1, height:'34px', borderRadius:'6px', border:'1px solid',
+                          borderColor: (selected.align||'left') === v ? '#003DA5' : '#D1D5DB',
+                          background: (selected.align||'left') === v ? '#EFF6FF' : '#fff',
+                          color: (selected.align||'left') === v ? '#003DA5' : '#374151',
+                          cursor:'pointer', display:'flex', alignItems:'center', justifyContent:'center' }}>
+                        <I size={14} />
+                      </button>
+                    ))}
+                  </div>
+                </div>
+
+                {/* Colore testo */}
+                <div>
+                  <p style={{ margin:'0 0 5px', fontSize:'10px', fontWeight:'700', color:'#9CA3AF', textTransform:'uppercase', letterSpacing:'.06em' }}>
+                    Colore testo
+                    <span style={{ display:'inline-block', width:'12px', height:'12px', background: selected.color||'#0A0A0A', borderRadius:'2px', border:'1px solid #E5E7EB', marginLeft:'6px', verticalAlign:'middle' }} />
+                  </p>
+                  <ColorSwatchPicker value={selected.color || '#0A0A0A'} onChange={v => updateElement(selected.id, { color: v })} />
+                </div>
+
+                {/* Interlinea + Spaziatura */}
+                <div style={{ display:'grid', gridTemplateColumns:'1fr 1fr', gap:'8px' }}>
+                  <div>
+                    <p style={{ margin:'0 0 5px', fontSize:'10px', fontWeight:'700', color:'#9CA3AF', textTransform:'uppercase', letterSpacing:'.06em' }}>Interlinea</p>
+                    <select value={selected.lineHeight || ''} onChange={e => updateElement(selected.id, { lineHeight: e.target.value ? Number(e.target.value) : undefined })}
+                      style={{ width:'100%', padding:'7px 8px', border:'1px solid #D1D5DB', borderRadius:'6px', fontSize:'12px' }}>
+                      <option value="">Auto</option>
+                      {[1, 1.1, 1.2, 1.3, 1.4, 1.5, 1.6, 1.8, 2, 2.5].map(v => <option key={v} value={v}>{v}</option>)}
                     </select>
-                  </Field>
-                  <Field label="Dimensione">
-                    <Input type="number" value={selected.fontSize || 14} onChange={e => updateElement(selected.id, { fontSize: Number(e.target.value) || 14 })} />
-                  </Field>
-                </div>
-                <div style={{ display: 'flex', gap: '6px', alignItems: 'center' }}>
-                  <button type="button" onClick={() => updateElement(selected.id, { bold: !selected.bold })}
-                    style={{ padding: '7px 10px', borderRadius: '6px', border: '1px solid #D1D5DB', background: selected.bold ? '#EFF6FF' : '#fff', color: selected.bold ? '#003DA5' : '#374151', cursor: 'pointer' }}><Bold size={14} /></button>
-                  <button type="button" onClick={() => updateElement(selected.id, { italic: !selected.italic })}
-                    style={{ padding: '7px 10px', borderRadius: '6px', border: '1px solid #D1D5DB', background: selected.italic ? '#EFF6FF' : '#fff', color: selected.italic ? '#003DA5' : '#374151', cursor: 'pointer' }}><Italic size={14} /></button>
-                  <div style={{ width: '1px', height: '24px', background: '#E5E7EB' }} />
-                  {[{ v: 'left', I: AlignLeft }, { v: 'center', I: AlignCenter }, { v: 'right', I: AlignRight }].map(({ v, I }) => (
-                    <button key={v} type="button" onClick={() => updateElement(selected.id, { align: v })}
-                      style={{ padding: '7px 10px', borderRadius: '6px', border: '1px solid #D1D5DB', background: (selected.align || 'left') === v ? '#EFF6FF' : '#fff', color: (selected.align || 'left') === v ? '#003DA5' : '#374151', cursor: 'pointer' }}><I size={14} /></button>
-                  ))}
-                  <input type="color" value={selected.color || '#0A0A0A'} onChange={e => updateElement(selected.id, { color: e.target.value })}
-                    style={{ width: '32px', height: '30px', border: '1px solid #D1D5DB', borderRadius: '6px', cursor: 'pointer', padding: '2px', marginLeft: 'auto' }} />
-                </div>
-                <div style={{ display: 'flex', gap: '6px', alignItems: 'center' }}>
-                  <button type="button" onClick={() => updateElement(selected.id, { uppercase: !selected.uppercase })}
-                    title="Maiuscolo"
-                    style={{ padding: '7px 10px', borderRadius: '6px', border: '1px solid #D1D5DB', background: selected.uppercase ? '#EFF6FF' : '#fff', color: selected.uppercase ? '#003DA5' : '#374151', cursor: 'pointer', fontSize: '11px', fontWeight: '800' }}>AA</button>
-                  <button type="button" onClick={() => updateElement(selected.id, { underline: !selected.underline })}
-                    title="Sottolineato"
-                    style={{ padding: '7px 10px', borderRadius: '6px', border: '1px solid #D1D5DB', background: selected.underline ? '#EFF6FF' : '#fff', color: selected.underline ? '#003DA5' : '#374151', cursor: 'pointer' }}><Underline size={14} /></button>
-                  <div style={{ display: 'flex', alignItems: 'center', gap: '4px' }}>
-                    <span style={{ fontSize: '10px', color: '#9CA3AF' }}>Spaziat.</span>
-                    <Input type="number" step="0.5" value={selected.letterSpacing || 0} onChange={e => updateElement(selected.id, { letterSpacing: Number(e.target.value) || 0 })} style={{ maxWidth: '54px' }} />
+                  </div>
+                  <div>
+                    <p style={{ margin:'0 0 5px', fontSize:'10px', fontWeight:'700', color:'#9CA3AF', textTransform:'uppercase', letterSpacing:'.06em' }}>Spaziatura</p>
+                    <input type="number" step="0.5" min="-5" max="20" value={selected.letterSpacing || 0}
+                      onChange={e => updateElement(selected.id, { letterSpacing: Number(e.target.value) || 0 })}
+                      style={{ width:'100%', padding:'7px 8px', border:'1px solid #D1D5DB', borderRadius:'6px', fontSize:'12px', boxSizing:'border-box' }} />
                   </div>
                 </div>
-                <Field label="Sfondo testo">
-                  <div style={{ display: 'flex', gap: '6px', alignItems: 'center' }}>
-                    <input type="color" value={selected.bgColor || '#FFFFFF'} onChange={e => updateElement(selected.id, { bgColor: e.target.value })}
-                      style={{ width: '32px', height: '30px', border: '1px solid #D1D5DB', borderRadius: '6px', cursor: 'pointer', padding: '2px' }} />
-                    <button type="button" onClick={() => updateElement(selected.id, { bgColor: null })}
-                      style={{ fontSize: '11px', color: '#6B7280', background: 'none', border: '1px solid #D1D5DB', borderRadius: '6px', padding: '6px 8px', cursor: 'pointer' }}>Nessuno</button>
+
+                {/* Sfondo testo */}
+                <div>
+                  <div style={{ display:'flex', alignItems:'center', justifyContent:'space-between', marginBottom:'5px' }}>
+                    <p style={{ margin:0, fontSize:'10px', fontWeight:'700', color:'#9CA3AF', textTransform:'uppercase', letterSpacing:'.06em' }}>Sfondo testo</p>
+                    {selected.bgColor && (
+                      <button type="button" onClick={() => updateElement(selected.id, { bgColor: null })}
+                        style={{ fontSize:'11px', color:'#DC2626', background:'none', border:'none', cursor:'pointer', padding:0 }}>× rimuovi</button>
+                    )}
                   </div>
-                </Field>
+                  <ColorSwatchPicker value={selected.bgColor || null} onChange={v => updateElement(selected.id, { bgColor: v })} />
+                </div>
+
               </>)}
 
               {selected.type === 'shape' && (<>
