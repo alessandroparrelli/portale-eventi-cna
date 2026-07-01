@@ -219,12 +219,13 @@ const PRESETS = [
 
 /* ─── Font disponibili sul certificato ─────────────────────── */
 const CERT_FONTS = [
+  { label:'Inter (Sans)',            value:'inter',     stack:'"Inter", Helvetica, Arial, sans-serif' },
   { label:'Helvetica (Sans)',        value:'helvetica', stack:'Helvetica, Arial, sans-serif' },
   { label:'Times New Roman (Serif)', value:'times',     stack:'"Times New Roman", Times, serif' },
-  { label:'Courier (Monospace)',     value:'courier',   stack:'"Courier New", Courier, monospace' },
+  { label:'Palatino (Serif)',        value:'palatino',  stack:'"Palatino Linotype", "Book Antiqua", Palatino, serif' },
   { label:'Georgia (Serif)',         value:'georgia',   stack:'Georgia, serif' },
-  { label:'Palatino (Serif)',        value:'palatino',  stack:'"Palatino Linotype", Palatino, serif' },
-  { label:'Garamond (Serif)',        value:'garamond',  stack:'Garamond, serif' },
+  { label:'Garamond (Serif)',        value:'garamond',  stack:'Garamond, "EB Garamond", serif' },
+  { label:'Courier (Monospace)',     value:'courier',   stack:'"Courier New", Courier, monospace' },
   { label:'Arial (Sans)',            value:'arial',     stack:'Arial, Helvetica, sans-serif' },
   { label:'Trebuchet (Sans)',        value:'trebuchet', stack:'"Trebuchet MS", sans-serif' },
   { label:'Verdana (Sans)',          value:'verdana',   stack:'Verdana, Geneva, sans-serif' },
