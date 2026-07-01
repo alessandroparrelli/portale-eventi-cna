@@ -20,6 +20,7 @@ import {
 } from 'lucide-react'
 import { Field, Input, Select, Btn, StatoBadge } from '../../components/ui'
 import EventEmailTab from '../../components/editor/EventEmailTab'
+import CertificatoEditorTab from '../../components/editor/CertificatoEditorTab'
 import IscrizioniTab from '../../components/editor/IscrizioniTab'
 import AspettoTab from '../../components/editor/AspettoTab'
 import SessioniTab from '../../components/editor/SessioniTab'
@@ -345,6 +346,7 @@ export default function EventoEditorPage() {
       modalita:'presenza', link_riunione:null,
       certificato_abilitato:false, certificato_titolo:null, certificato_invio_auto:true,
       certificato_colore:'#003DA5', certificato_logo_url:null, certificato_firma_nome:null, certificato_firma_ruolo:null,
+      certificato_template:'laterale', certificato_config:{},
     colore_primario:'#003DA5', colore_sfondo:'#F4F5F7', tema:{},
     layout_hero:{ altezza:'380', overlay_opacita:'55', allineamento:'sinistra', titolo_colore:'#FFFFFF', titolo_dimensione:'clamp(26px,5vw,54px)', titolo_grassetto:true, titolo_maiuscolo:false },
     sezioni:[], email_organizzatore:'', email_mittente:'', email_cc:'', nome_mittente:'',
@@ -428,6 +430,7 @@ export default function EventoEditorPage() {
         certificato_abilitato:ev.certificato_abilitato||false, certificato_titolo:ev.certificato_titolo||null,
         certificato_invio_auto:ev.certificato_invio_auto!==false, certificato_colore:ev.certificato_colore||'#003DA5',
         certificato_logo_url:ev.certificato_logo_url||null, certificato_firma_nome:ev.certificato_firma_nome||null, certificato_firma_ruolo:ev.certificato_firma_ruolo||null,
+        certificato_template:ev.certificato_template||'laterale', certificato_config:ev.certificato_config||{},
       descrizione_html:ev.descrizione_html||null,
       immagine_hero:ev.immagine_hero||null,
       colore_primario:ev.colore_primario,
@@ -523,6 +526,7 @@ export default function EventoEditorPage() {
     { id:'sessioni',     label:'Sessioni',       icon:'🗓', color:'amber'  },
     { id:'iscrizioni',   label:'Iscrizioni',     icon:'🎟', color:'coral'  },
     { id:'questionario', label:'Questionario',   icon:'⭐', color:'amber'  },
+    { id:'certificato',  label:'Certificato',    icon:'🏆', color:'blue'   },
     { id:'email',        label:'Email',          icon:'✉️', color:'rose'   },
     { id:'embed',        label:'Embed',          icon:'🔗', color:'indigo' },
     { id:'preview',      label:'Preview',        icon:'👁',  color:'amber'  },
@@ -634,82 +638,19 @@ export default function EventoEditorPage() {
                 </div>
               )}
 
-              {/* ── Certificati ── */}
+              {/* ── Certificati (rimanda al tab dedicato) ── */}
               <div style={{ gridColumn:'1/-1' }}>
-                <div style={{ background:'#F9FAFB', border:'1px solid #E5E7EB', borderRadius:'10px', padding:'16px', display:'flex', flexDirection:'column', gap:'14px' }}>
-                  <p style={{ margin:0, fontSize:'12px', fontWeight:'700', color:'#6B7280', textTransform:'uppercase', letterSpacing:'.06em' }}>Certificati di partecipazione</p>
-                  <label style={{ display:'flex', alignItems:'center', gap:'10px', cursor:'pointer' }}>
-                    <div style={{ position:'relative', width:'40px', height:'22px', flexShrink:0 }}
-                      onClick={() => updEvent(p=>({...p, certificato_abilitato:!p.certificato_abilitato}))}>
-                      <div style={{ position:'absolute', inset:0, borderRadius:'999px', transition:'background 0.2s',
-                        backgroundColor: event.certificato_abilitato ? '#003DA5' : '#D1D5DB' }}/>
-                      <div style={{ position:'absolute', top:'3px', left: event.certificato_abilitato ? '21px' : '3px', width:'16px', height:'16px',
-                        borderRadius:'50%', backgroundColor:'#ffffff', transition:'left 0.2s', boxShadow:'0 1px 4px rgba(0,0,0,0.2)' }}/>
-                    </div>
-                    <div>
-                      <p style={{ fontSize:'14px', fontWeight:'600', color:'#0A0A0A', margin:'0 0 2px' }}>Abilita certificati di partecipazione</p>
-                      <p style={{ fontSize:'12px', color:'#9CA3AF', margin:0 }}>Gli iscritti potranno scaricare il certificato dopo l&apos;evento</p>
-                    </div>
-                  </label>
-                  {event.certificato_abilitato && (
-                    <div style={{ display:'flex', flexDirection:'column', gap:'14px' }}>
-                      {/* Toggle invio automatico */}
-                      <label style={{ display:'flex', alignItems:'center', gap:'10px', cursor:'pointer' }}>
-                        <div style={{ position:'relative', width:'40px', height:'22px', flexShrink:0 }}
-                          onClick={() => updEvent(p=>({...p, certificato_invio_auto:!p.certificato_invio_auto}))}>
-                          <div style={{ position:'absolute', inset:0, borderRadius:'999px', transition:'background 0.2s',
-                            backgroundColor: event.certificato_invio_auto ? '#059669' : '#D1D5DB' }}/>
-                          <div style={{ position:'absolute', top:'3px', left: event.certificato_invio_auto ? '21px' : '3px', width:'16px', height:'16px',
-                            borderRadius:'50%', backgroundColor:'#ffffff', transition:'left 0.2s', boxShadow:'0 1px 4px rgba(0,0,0,0.2)' }}/>
-                        </div>
-                        <div>
-                          <p style={{ fontSize:'14px', fontWeight:'600', color:'#0A0A0A', margin:'0 0 2px' }}>
-                            {event.certificato_invio_auto ? '✅ Invio automatico attivo' : '⏸ Invio manuale'}
-                          </p>
-                          <p style={{ fontSize:'12px', color:'#9CA3AF', margin:0 }}>
-                            {event.certificato_invio_auto
-                              ? 'I certificati vengono inviati automaticamente dopo l\u2019evento'
-                              : 'I certificati vengono inviati solo manualmente dalla pagina Iscritti'}
-                          </p>
-                        </div>
-                      </label>
-                      <Field label="Testo introduttivo" hint="Es. 'Si certifica la partecipazione di'">
-                        <Input value={event.certificato_titolo||''} onChange={e=>updEvent(p=>({...p,certificato_titolo:e.target.value||null}))}
-                          placeholder="Si certifica che"/>
-                      </Field>
-                      <div style={{ display:'grid', gridTemplateColumns:'1fr 1fr', gap:'12px' }}>
-                        <Field label="Nome in firma">
-                          <Input value={event.certificato_firma_nome||''} onChange={e=>updEvent(p=>({...p,certificato_firma_nome:e.target.value||null}))}
-                            placeholder="CNA Roma"/>
-                        </Field>
-                        <Field label="Ruolo in firma">
-                          <Input value={event.certificato_firma_ruolo||''} onChange={e=>updEvent(p=>({...p,certificato_firma_ruolo:e.target.value||null}))}
-                            placeholder="Confederazione Nazionale dell'Artigianato"/>
-                        </Field>
-                      </div>
-                      <div style={{ display:'flex', alignItems:'center', gap:'12px' }}>
-                        <Field label="Colore certificato">
-                          <div style={{ display:'flex', alignItems:'center', gap:'10px' }}>
-                            <input type="color" value={event.certificato_colore||'#003DA5'}
-                              onChange={e=>updEvent(p=>({...p,certificato_colore:e.target.value}))}
-                              style={{ width:'44px', height:'36px', border:'1px solid #D1D5DB', borderRadius:'6px', cursor:'pointer', padding:'2px' }}/>
-                            <Input value={event.certificato_colore||'#003DA5'} onChange={e=>updEvent(p=>({...p,certificato_colore:e.target.value}))}
-                              style={{ maxWidth:'130px' }}/>
-                          </div>
-                        </Field>
-                      </div>
-                      {/* Anteprima */}
-                      {id && (
-                        <a href={`https://hnkhckcclgabunkqfmrz.supabase.co/functions/v1/genera-certificato?registration_id=preview&preview=1`}
-                          target="_blank" rel="noopener noreferrer"
-                          style={{ display:'inline-flex', alignItems:'center', gap:'6px', fontSize:'13px', fontWeight:'600',
-                            color:'#003DA5', textDecoration:'none' }}>
-                          👁 Anteprima certificato ↗
-                        </a>
-                      )}
-                    </div>
-                  )}
-                </div>
+                <button type="button" onClick={()=>setActiveTab('certificato')}
+                  style={{ width:'100%', textAlign:'left', background:'#F9FAFB', border:'1px solid #E5E7EB', borderRadius:'10px',
+                    padding:'16px', display:'flex', alignItems:'center', justifyContent:'space-between', gap:'12px', cursor:'pointer' }}>
+                  <div>
+                    <p style={{ margin:'0 0 2px', fontSize:'14px', fontWeight:'700', color:'#0A0A0A' }}>🏆 Certificato di partecipazione</p>
+                    <p style={{ margin:0, fontSize:'12px', color:'#9CA3AF' }}>
+                      {event.certificato_abilitato ? 'Abilitato — modello, colori, testi e campi si configurano nel tab dedicato' : 'Vai al tab "Certificato" per abilitarlo e personalizzarlo'}
+                    </p>
+                  </div>
+                  <span style={{ fontSize:'13px', fontWeight:'700', color:'#003DA5', whiteSpace:'nowrap' }}>Apri editor →</span>
+                </button>
               </div>
 
               {/* ── Impostazioni email ── */}
@@ -1014,6 +955,13 @@ export default function EventoEditorPage() {
                 titolo={event.titolo}
               />
             )}
+          </div>
+        )}
+
+        {/* ── CERTIFICATO ── */}
+        {activeTab==='certificato' && (
+          <div style={{ maxWidth:'1360px', margin:'0 auto' }}>
+            <CertificatoEditorTab event={event} setEvent={setEvent} />
           </div>
         )}
 
