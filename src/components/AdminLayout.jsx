@@ -35,7 +35,7 @@ export default function AdminLayout() {
         )}
         <div className="admin-header-logo-wrap">
           <img
-            src="https://raw.githubusercontent.com/alessandroparrelli/fileappoggio/main/NUOVO-LOGO-CNA-ROMA-SOLO-ROMA.png"
+            src="https://customer31551.img.musvc2.net/static/31551/images/1/CNARoma%20NEGATIVO%20COLORE%20SOLO%20ROMA.png"
             alt="CNA Roma"
             className="admin-header-logo"
             style={{ ...s.logo, cursor: 'pointer' }}
@@ -43,8 +43,7 @@ export default function AdminLayout() {
             title="Ricarica pagina"
           />
         </div>
-        <div className="admin-header-meta" style={{ display:'flex', alignItems:'center', gap:'14px' }}>
-          <div style={s.divider}/>
+        <div className="admin-header-meta" style={{ display:'flex', alignItems:'center', justifyContent:'center', flex:1, minWidth:0 }}>
           <span style={s.pageTitle}>Eventi</span>
         </div>
       </header>
@@ -72,28 +71,28 @@ const s = {
   },
   header: {
     flexShrink: 0,
-    backgroundColor: '#FFFFFF',
-    borderBottom: '1.5px solid #E5E7EB',
+    background: 'linear-gradient(120deg, #001B4D 0%, #003DA5 55%, #2E7BE0 100%)',
+    borderBottom: 'none',
     display: 'flex', alignItems: 'center', flexWrap: 'nowrap',
     paddingLeft: '20px',
     paddingRight: '20px',
     paddingTop: 'calc(env(safe-area-inset-top, 0px) + 12px)',
     paddingBottom: '12px',
     gap: '14px',
-    boxShadow: '0 1px 4px rgba(0,0,0,0.06)',
+    boxShadow: '0 2px 10px rgba(0,20,60,0.18)',
     boxSizing: 'border-box',
   },
   hamburger: {
     background: 'none', border: 'none', cursor: 'pointer',
-    color: '#374151', display: 'flex', alignItems: 'center',
+    color: '#FFFFFF', display: 'flex', alignItems: 'center',
     padding: '6px', borderRadius: '6px', flexShrink: 0,
   },
   logo: { height: '34px', objectFit: 'contain', flexShrink: 0 },
-  divider: { width: '1px', height: '20px', backgroundColor: '#E5E7EB', flexShrink: 0 },
+  divider: { width: '1px', height: '20px', backgroundColor: 'rgba(255,255,255,0.3)', flexShrink: 0 },
   pageTitle: {
     fontSize: '18px',
     fontWeight: '800',
-    color: '#0A0A0A',
+    color: '#FFFFFF',
     letterSpacing: '-0.04em',
     fontFamily: "'Inter', sans-serif",
     lineHeight: 1,
