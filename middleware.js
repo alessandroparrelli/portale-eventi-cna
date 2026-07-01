@@ -3,6 +3,7 @@
 
 export const config = {
   matcher: ['/eventi/:slug+'],
+  runtime: 'edge',
 }
 
 const SOCIAL_BOTS = [
