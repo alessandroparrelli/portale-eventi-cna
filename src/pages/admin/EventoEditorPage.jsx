@@ -352,6 +352,7 @@ export default function EventoEditorPage() {
     sezioni:[], email_organizzatore:'', email_mittente:'', email_cc:'', nome_mittente:'',
   })
   const eventRef = useRef(null)   // sempre aggiornato — evita race condition nel save
+  useEffect(() => { eventRef.current = event }, [event])
   const [saving, setSaving] = useState(false)
   const [saved, setSaved] = useState(false)
   const [activeTab, setActiveTab] = useState('info')
@@ -961,7 +962,7 @@ export default function EventoEditorPage() {
         {/* ── CERTIFICATO ── */}
         {activeTab==='certificato' && (
           <div style={{ maxWidth:'1360px', margin:'0 auto' }}>
-            <CertificatoEditorTab event={event} setEvent={setEvent} />
+            <CertificatoEditorTab event={event} setEvent={updEvent} />
           </div>
         )}
 

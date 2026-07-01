@@ -2,14 +2,15 @@ import { useEffect, useRef, useState } from 'react'
 import {
   Award, Eye, Download, Loader2, Type, Square, Minus, Circle as CircleIcon,
   QrCode, Image as ImageIcon, Copy, Trash2, ChevronUp, ChevronDown, AlignLeft, AlignCenter, AlignRight,
-  Bold, Italic, LayoutTemplate,
+  Bold, Italic, LayoutTemplate, Underline, Upload, X, ChevronRight,
 } from 'lucide-react'
 import { Field, Input } from '../ui'
 import LogoManager from './LogoManager'
+import { supabase } from '../../lib/supabase'
 
 const CERT_FN = 'https://hnkhckcclgabunkqfmrz.supabase.co/functions/v1/genera-certificato'
 const PAGE_W = 842, PAGE_H = 595
-const STAGE_W = 720
+const STAGE_W = 880
 const SCALE = STAGE_W / PAGE_W
 const STAGE_H = PAGE_H * SCALE
 
@@ -28,6 +29,9 @@ function encodeConfig(obj) {
 const FIELD_OPTIONS = [
   { v: 'custom', l: 'Testo libero' },
   { v: 'nome', l: 'Nome partecipante' },
+  { v: 'azienda', l: 'Azienda / Ragione sociale' },
+  { v: 'mestiere', l: 'Mestiere / Settore' },
+  { v: 'email', l: 'Email' },
   { v: 'evento', l: 'Nome evento' },
   { v: 'data', l: 'Data evento' },
   { v: 'luogo', l: 'Luogo' },
@@ -218,7 +222,7 @@ function fontStack(family) {
   return "Helvetica, Arial, sans-serif"
 }
 
-const SAMPLE = { nome: 'Mario Rossi', evento: 'Nome Evento di Esempio', data: '20 giugno 2026', luogo: 'Roma, Sede CNA', codice: 'AB12-CD34-EF56', anno: String(new Date().getFullYear()) }
+const SAMPLE = { nome: 'Mario Rossi', evento: 'Nome Evento di Esempio', data: '20 giugno 2026', luogo: 'Roma, Sede CNA', codice: 'AB12-CD34-EF56', anno: String(new Date().getFullYear()), azienda: 'Rossi Artigiani Srl', mestiere: 'Falegname', email: 'mario.rossi@esempio.it' }
 
 /* ─────────────────────────── Elemento sul canvas ─────────────────────────── */
 function CanvasElement({ el, selected, onSelect, onDragStart, onResizeStart, logoUrl }) {
@@ -235,14 +239,15 @@ function CanvasElement({ el, selected, onSelect, onDragStart, onResizeStart, log
         width: '100%', height: '100%', fontFamily: fontStack(el.fontFamily), fontSize: el.fontSize || 14,
         fontWeight: el.bold ? 700 : 400, fontStyle: el.italic ? 'italic' : 'normal', color: el.color || '#0A0A0A',
         textAlign: el.align || 'left', lineHeight: el.lineHeight || 1.25, whiteSpace: 'pre-wrap', overflow: 'hidden',
-        userSelect: 'none',
+        userSelect: 'none', textTransform: el.uppercase ? 'uppercase' : 'none', textDecoration: el.underline ? 'underline' : 'none',
+        letterSpacing: el.letterSpacing ? `${el.letterSpacing}px` : 'normal', backgroundColor: el.bgColor || 'transparent',
       }}>{text}</div>
     )
   } else if (el.type === 'image') {
     const src = el.field === 'logo' ? logoUrl : el.src
     content = src
-      ? <img src={src} draggable={false} style={{ width: '100%', height: '100%', objectFit: 'contain', pointerEvents: 'none' }} />
-      : <div style={{ width: '100%', height: '100%', border: '1px dashed #D1D5DB', display: 'flex', alignItems: 'center', justifyContent: 'center', fontSize: '10px', color: '#9CA3AF' }}>Logo</div>
+      ? <img src={src} draggable={false} style={{ width: '100%', height: '100%', objectFit: 'contain', pointerEvents: 'none', opacity: el.opacity ?? 1 }} />
+      : <div style={{ width: '100%', height: '100%', border: '1px dashed #D1D5DB', display: 'flex', alignItems: 'center', justifyContent: 'center', fontSize: '10px', color: '#9CA3AF' }}>Immagine</div>
   } else if (el.type === 'qrcode') {
     content = (
       <div style={{ width: '100%', height: '100%', border: '1px solid #D1D5DB', display: 'flex', alignItems: 'center', justifyContent: 'center', background: '#fff' }}>
@@ -291,8 +296,13 @@ export default function CertificatoEditorTab({ event, setEvent }) {
   const logoUrl = cfg.logo_url || LOGO_RAW
 
   const [selectedId, setSelectedId] = useState(null)
+  const [logoDrawerOpen, setLogoDrawerOpen] = useState(false)
+  const [uploadingImg, setUploadingImg] = useState(false)
+  const [uploadImgErr, setUploadImgErr] = useState('')
+  const [replaceTargetId, setReplaceTargetId] = useState(null)
   const dragRef = useRef(null)
   const stageRef = useRef(null)
+  const imgFileRef = useRef(null)
 
   function update(patch) {
     setEvent(p => ({ ...p, certificato_config: { ...(p.certificato_config || {}), ...patch } }))
@@ -309,7 +319,7 @@ export default function CertificatoEditorTab({ event, setEvent }) {
     setSelectedId(null)
   }
 
-  function addElement(type) {
+  function addElement(type, extra) {
     const base = { id: uid(), x: 340, y: 260, zIndex: (Math.max(0, ...elements.map(e => e.zIndex || 0)) + 1) }
     let el
     if (type === 'text') el = { ...base, type: 'text', field: 'custom', text: 'Nuovo testo', w: 220, h: 24, fontSize: 14, color: '#0A0A0A', fontFamily: 'helvetica' }
@@ -318,8 +328,54 @@ export default function CertificatoEditorTab({ event, setEvent }) {
     else if (type === 'circle') el = { ...base, type: 'shape', shape: 'circle', w: 70, h: 70, fill: colore }
     else if (type === 'qrcode') el = { ...base, type: 'qrcode', w: 60, h: 60 }
     else if (type === 'logo') el = { ...base, type: 'image', field: 'logo', w: 140, h: 44 }
+    else if (type === 'image') el = { ...base, type: 'image', field: 'custom', src: extra?.src, w: extra?.w || 150, h: extra?.h || 150 }
     setElements([...elements, el])
     setSelectedId(el.id)
+    return el
+  }
+
+  async function uploadFreeImage(file) {
+    if (!file) return
+    if (!file.type.startsWith('image/')) { setUploadImgErr('Solo immagini (PNG, JPG, SVG, WebP)'); return }
+    if (file.size > 2 * 1024 * 1024) { setUploadImgErr('File troppo grande (max 2MB)'); return }
+    setUploadingImg(true); setUploadImgErr('')
+    try {
+      const base64 = await new Promise((res, rej) => {
+        const r = new FileReader()
+        r.onload = () => res(r.result.split(',')[1])
+        r.onerror = rej
+        r.readAsDataURL(file)
+      })
+      const { data: { session } } = await supabase.auth.getSession()
+      const jwt = session?.access_token
+      if (!jwt) throw new Error('Non autenticato')
+      const res = await fetch(`${import.meta.env.VITE_SUPABASE_URL}/functions/v1/github-upload-logo`, {
+        method: 'POST',
+        headers: { 'Authorization': `Bearer ${jwt}`, 'Content-Type': 'application/json' },
+        body: JSON.stringify({ filename: file.name, base64 }),
+      })
+      const result = await res.json()
+      if (!res.ok || result.error) throw new Error(result.error || 'Errore upload')
+      if (replaceTargetId) {
+        updateElement(replaceTargetId, { src: result.url })
+        setReplaceTargetId(null)
+        setUploadingImg(false)
+        return
+      }
+      // stima dimensioni immagine per proporzioni corrette sul certificato
+      const dims = await new Promise(resolve => {
+        const img = new window.Image()
+        img.onload = () => resolve({ w: img.naturalWidth, h: img.naturalHeight })
+        img.onerror = () => resolve({ w: 150, h: 150 })
+        img.src = result.url
+      })
+      const maxDim = 180
+      const scale = Math.min(maxDim / dims.w, maxDim / dims.h, 1)
+      addElement('image', { src: result.url, w: Math.round(dims.w * scale), h: Math.round(dims.h * scale) })
+    } catch (e) {
+      setUploadImgErr(e.message || 'Errore durante il caricamento')
+    }
+    setUploadingImg(false)
   }
 
   function deleteSelected() {
@@ -418,7 +474,7 @@ export default function CertificatoEditorTab({ event, setEvent }) {
       </div>
 
       {event.certificato_abilitato && (<>
-        {/* Modelli + colore */}
+        {/* Modelli + colore + logo */}
         <div style={{ display: 'flex', flexWrap: 'wrap', gap: '20px', alignItems: 'flex-start' }}>
           <div style={{ flex: '1 1 320px' }}>
             <p style={{ margin: '0 0 8px', fontSize: '12px', fontWeight: '700', color: '#6B7280', textTransform: 'uppercase', letterSpacing: '.06em', display: 'flex', alignItems: 'center', gap: '5px' }}>
@@ -442,11 +498,26 @@ export default function CertificatoEditorTab({ event, setEvent }) {
               <Input value={colore} onChange={e => update({ colore_primario: e.target.value })} style={{ maxWidth: '110px' }} />
             </div>
           </div>
-          <div style={{ minWidth: '220px' }}>
-            <p style={{ margin: '0 0 8px', fontSize: '12px', fontWeight: '700', color: '#6B7280', textTransform: 'uppercase', letterSpacing: '.06em' }}>Logo</p>
-            <LogoManager value={logoUrl} onChange={url => update({ logo_url: url })} />
+          <div style={{ width: '240px', flexShrink: 0 }}>
+            <p style={{ margin: '0 0 8px', fontSize: '12px', fontWeight: '700', color: '#6B7280', textTransform: 'uppercase', letterSpacing: '.06em' }}>Logo evento</p>
+            <button type="button" onClick={() => setLogoDrawerOpen(v => !v)}
+              style={{ width: '100%', display: 'flex', alignItems: 'center', gap: '10px', padding: '8px 10px', border: '1px solid #D1D5DB', borderRadius: '8px', background: '#fff', cursor: 'pointer' }}>
+              <div style={{ width: '56px', height: '34px', flexShrink: 0, display: 'flex', alignItems: 'center', justifyContent: 'center', background: '#F9FAFB', borderRadius: '5px', border: '1px solid #E5E7EB' }}>
+                <img src={logoUrl} alt="Logo" style={{ maxWidth: '100%', maxHeight: '100%', objectFit: 'contain' }} />
+              </div>
+              <span style={{ fontSize: '12px', fontWeight: '600', color: '#374151', flex: 1, textAlign: 'left' }}>Cambia logo</span>
+              <ChevronRight size={15} style={{ transform: logoDrawerOpen ? 'rotate(90deg)' : 'none', transition: 'transform .15s', color: '#9CA3AF' }} />
+            </button>
           </div>
         </div>
+
+        {logoDrawerOpen && (
+          <div style={{ maxWidth: '640px', border: '1px solid #E5E7EB', borderRadius: '10px', padding: '16px', background: '#fff', position: 'relative' }}>
+            <button type="button" onClick={() => setLogoDrawerOpen(false)}
+              style={{ position: 'absolute', top: '12px', right: '12px', background: 'none', border: 'none', cursor: 'pointer', color: '#9CA3AF' }}><X size={16} /></button>
+            <LogoManager value={logoUrl} onChange={url => update({ logo_url: url })} />
+          </div>
+        )}
 
         {/* Toolbar aggiungi elementi */}
         <div style={{ display: 'flex', gap: '8px', flexWrap: 'wrap', alignItems: 'center' }}>
@@ -456,15 +527,21 @@ export default function CertificatoEditorTab({ event, setEvent }) {
           <button type="button" onClick={() => addElement('circle')} style={toolBtn}><CircleIcon size={16} />Cerchio</button>
           <button type="button" onClick={() => addElement('qrcode')} style={toolBtn}><QrCode size={16} />QR</button>
           <button type="button" onClick={() => addElement('logo')} style={toolBtn}><ImageIcon size={16} />Logo</button>
+          <button type="button" onClick={() => imgFileRef.current?.click()} disabled={uploadingImg} style={{ ...toolBtn, opacity: uploadingImg ? 0.5 : 1 }}>
+            {uploadingImg ? <Loader2 size={16} style={{ animation: 'spin .8s linear infinite' }} /> : <Upload size={16} />}Immagine
+          </button>
+          <input ref={imgFileRef} type="file" accept="image/png,image/jpeg,image/svg+xml,image/webp" style={{ display: 'none' }}
+            onChange={e => { uploadFreeImage(e.target.files[0]); e.target.value = '' }} />
           <div style={{ width: '1px', height: '32px', background: '#E5E7EB', margin: '0 4px' }} />
           <button type="button" disabled={!selected} onClick={duplicateSelected} style={{ ...toolBtn, opacity: selected ? 1 : 0.4 }}><Copy size={16} />Duplica</button>
           <button type="button" disabled={!selected} onClick={() => reorder('up')} style={{ ...toolBtn, opacity: selected ? 1 : 0.4 }}><ChevronUp size={16} />Avanti</button>
           <button type="button" disabled={!selected} onClick={() => reorder('down')} style={{ ...toolBtn, opacity: selected ? 1 : 0.4 }}><ChevronDown size={16} />Indietro</button>
           <button type="button" disabled={!selected} onClick={deleteSelected} style={{ ...toolBtn, opacity: selected ? 1 : 0.4, color: '#DC2626' }}><Trash2 size={16} />Elimina</button>
         </div>
+        {uploadImgErr && <p style={{ fontSize: '12px', color: '#DC2626', margin: 0 }}>{uploadImgErr}</p>}
 
         {/* Canvas + pannello proprietà */}
-        <div style={{ display: 'grid', gridTemplateColumns: `${STAGE_W}px 300px`, gap: '20px', alignItems: 'flex-start' }} className="cert-canvas-grid">
+        <div style={{ display: 'grid', gridTemplateColumns: `${STAGE_W}px 320px`, gap: '20px', alignItems: 'flex-start' }} className="cert-canvas-grid">
           <div>
             <div
               ref={stageRef}
@@ -501,7 +578,7 @@ export default function CertificatoEditorTab({ event, setEvent }) {
               <p style={{ fontSize: '12px', color: '#9CA3AF', margin: 0 }}>Seleziona un elemento sul certificato per modificarne le proprietà, oppure trascinalo per spostarlo.</p>
             ) : (<>
               <p style={{ margin: 0, fontSize: '11px', fontWeight: '700', color: '#6B7280', textTransform: 'uppercase', letterSpacing: '.06em' }}>
-                {selected.type === 'text' ? 'Testo' : selected.type === 'image' ? 'Logo' : selected.type === 'qrcode' ? 'QR Code' : `Forma — ${selected.shape}`}
+                {selected.type === 'text' ? 'Testo' : selected.type === 'image' ? (selected.field === 'logo' ? 'Logo' : 'Immagine') : selected.type === 'qrcode' ? 'QR Code' : `Forma — ${selected.shape}`}
               </p>
 
               {selected.type === 'text' && (<>
@@ -543,6 +620,26 @@ export default function CertificatoEditorTab({ event, setEvent }) {
                   <input type="color" value={selected.color || '#0A0A0A'} onChange={e => updateElement(selected.id, { color: e.target.value })}
                     style={{ width: '32px', height: '30px', border: '1px solid #D1D5DB', borderRadius: '6px', cursor: 'pointer', padding: '2px', marginLeft: 'auto' }} />
                 </div>
+                <div style={{ display: 'flex', gap: '6px', alignItems: 'center' }}>
+                  <button type="button" onClick={() => updateElement(selected.id, { uppercase: !selected.uppercase })}
+                    title="Maiuscolo"
+                    style={{ padding: '7px 10px', borderRadius: '6px', border: '1px solid #D1D5DB', background: selected.uppercase ? '#EFF6FF' : '#fff', color: selected.uppercase ? '#003DA5' : '#374151', cursor: 'pointer', fontSize: '11px', fontWeight: '800' }}>AA</button>
+                  <button type="button" onClick={() => updateElement(selected.id, { underline: !selected.underline })}
+                    title="Sottolineato"
+                    style={{ padding: '7px 10px', borderRadius: '6px', border: '1px solid #D1D5DB', background: selected.underline ? '#EFF6FF' : '#fff', color: selected.underline ? '#003DA5' : '#374151', cursor: 'pointer' }}><Underline size={14} /></button>
+                  <div style={{ display: 'flex', alignItems: 'center', gap: '4px' }}>
+                    <span style={{ fontSize: '10px', color: '#9CA3AF' }}>Spaziat.</span>
+                    <Input type="number" step="0.5" value={selected.letterSpacing || 0} onChange={e => updateElement(selected.id, { letterSpacing: Number(e.target.value) || 0 })} style={{ maxWidth: '54px' }} />
+                  </div>
+                </div>
+                <Field label="Sfondo testo">
+                  <div style={{ display: 'flex', gap: '6px', alignItems: 'center' }}>
+                    <input type="color" value={selected.bgColor || '#FFFFFF'} onChange={e => updateElement(selected.id, { bgColor: e.target.value })}
+                      style={{ width: '32px', height: '30px', border: '1px solid #D1D5DB', borderRadius: '6px', cursor: 'pointer', padding: '2px' }} />
+                    <button type="button" onClick={() => updateElement(selected.id, { bgColor: null })}
+                      style={{ fontSize: '11px', color: '#6B7280', background: 'none', border: '1px solid #D1D5DB', borderRadius: '6px', padding: '6px 8px', cursor: 'pointer' }}>Nessuno</button>
+                  </div>
+                </Field>
               </>)}
 
               {selected.type === 'shape' && (<>
@@ -577,9 +674,19 @@ export default function CertificatoEditorTab({ event, setEvent }) {
               {selected.type === 'qrcode' && (
                 <p style={{ fontSize: '12px', color: '#6B7280', margin: 0 }}>Genera automaticamente il QR di verifica del certificato. Puoi solo spostarlo e ridimensionarlo.</p>
               )}
-              {selected.type === 'image' && (
+              {selected.type === 'image' && selected.field === 'logo' && (
                 <p style={{ fontSize: '12px', color: '#6B7280', margin: 0 }}>Usa il logo impostato qui sopra. Trascina per riposizionare — le proporzioni sono sempre mantenute.</p>
               )}
+              {selected.type === 'image' && selected.field !== 'logo' && (<>
+                <p style={{ fontSize: '12px', color: '#6B7280', margin: 0 }}>Immagine caricata liberamente. Trascina per spostarla, ridimensiona dall&apos;angolo.</p>
+                <Field label="Opacità">
+                  <input type="range" min="0.1" max="1" step="0.05" value={selected.opacity ?? 1} onChange={e => updateElement(selected.id, { opacity: Number(e.target.value) })} style={{ width: '100%' }} />
+                </Field>
+                <button type="button" onClick={() => { setReplaceTargetId(selected.id); imgFileRef.current?.click() }}
+                  style={{ display: 'inline-flex', alignItems: 'center', gap: '6px', fontSize: '12px', fontWeight: '700', color: '#003DA5', background: 'none', border: '1px solid #D1D5DB', borderRadius: '6px', padding: '7px 10px', cursor: 'pointer', alignSelf: 'flex-start' }}>
+                  <Upload size={13} /> Sostituisci immagine
+                </button>
+              </>)}
 
               <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '8px', paddingTop: '4px', borderTop: '1px solid #E5E7EB' }}>
                 <Field label="X"><Input type="number" value={Math.round(selected.x)} onChange={e => updateElement(selected.id, { x: Number(e.target.value) || 0 })} /></Field>
