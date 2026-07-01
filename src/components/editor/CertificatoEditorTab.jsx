@@ -130,11 +130,86 @@ function presetCornice(colore) {
   ]
 }
 
+/* ─── Greca (motivo a chiave, rettilineo) per bordi in stile diploma/accademico ─── */
+function greekBandH(x0, y0, totalW, bandH, color, unit = 22) {
+  const out = []
+  let x = x0, i = 0
+  while (x + unit * 0.65 <= x0 + totalW) {
+    const tall = i % 2 === 0
+    out.push({ id: uid(), type: 'shape', shape: 'rect', x, y: tall ? y0 : y0 + bandH * 0.4, w: unit * 0.65, h: tall ? bandH : bandH * 0.6, fill: color, zIndex: 2 })
+    x += unit; i++
+  }
+  return out
+}
+function greekBandV(x0, y0, totalH, bandW, color, unit = 26) {
+  const out = []
+  let y = y0, i = 0
+  while (y + unit * 0.65 <= y0 + totalH) {
+    const tall = i % 2 === 0
+    out.push({ id: uid(), type: 'shape', shape: 'rect', x: tall ? x0 : x0 + bandW * 0.4, y, w: tall ? bandW : bandW * 0.6, h: unit * 0.65, fill: color, zIndex: 2 })
+    y += unit; i++
+  }
+  return out
+}
+
+function presetAccademico(colore) {
+  return [
+    { id: uid(), type: 'shape', shape: 'rect', x: 20, y: 20, w: 802, h: 555, stroke: colore, strokeWidth: 3, zIndex: 1 },
+    { id: uid(), type: 'shape', shape: 'rect', x: 30, y: 30, w: 782, h: 535, stroke: colore, strokeWidth: 1, zIndex: 1 },
+    ...greekBandH(50, 46, 742, 14, colore, 22),
+    ...greekBandH(50, 522, 742, 14, colore, 22),
+    { id: uid(), type: 'image', field: 'logo', x: 371, y: 74, w: 100, h: 34, zIndex: 2 },
+    { id: uid(), type: 'text', field: 'custom', text: 'DIPLOMA DI PARTECIPAZIONE', x: 121, y: 116, w: 600, h: 28, fontSize: 22, bold: true, color: colore, fontFamily: 'times', align: 'center', zIndex: 2 },
+    { id: uid(), type: 'shape', shape: 'line', x: 396, y: 150, w: 50, h: 0, stroke: colore, strokeWidth: 1, zIndex: 2 },
+    { id: uid(), type: 'text', field: 'custom', text: 'Si certifica che', x: 171, y: 164, w: 500, h: 18, fontSize: 13, italic: true, color: '#4B5563', fontFamily: 'times', align: 'center', zIndex: 2 },
+    { id: uid(), type: 'text', field: 'nome', x: 121, y: 188, w: 600, h: 42, fontSize: 32, bold: true, color: '#0A0A0A', fontFamily: 'times', align: 'center', zIndex: 2 },
+    { id: uid(), type: 'text', field: 'custom', text: "ha partecipato all'evento", x: 171, y: 234, w: 500, h: 18, fontSize: 12.5, italic: true, color: '#4B5563', fontFamily: 'times', align: 'center', zIndex: 2 },
+    { id: uid(), type: 'text', field: 'evento', x: 121, y: 256, w: 600, h: 22, fontSize: 15, bold: true, color: colore, align: 'center', zIndex: 2 },
+    { id: uid(), type: 'text', field: 'data', x: 171, y: 282, w: 500, h: 16, fontSize: 10.5, color: '#6B7280', align: 'center', zIndex: 2 },
+    { id: uid(), type: 'text', field: 'luogo', x: 171, y: 299, w: 500, h: 16, fontSize: 10.5, color: '#6B7280', align: 'center', zIndex: 2 },
+    { id: uid(), type: 'shape', shape: 'rect', x: 398, y: 410, w: 13, h: 30, fill: colore, zIndex: 1 },
+    { id: uid(), type: 'shape', shape: 'rect', x: 431, y: 410, w: 13, h: 30, fill: colore, zIndex: 1 },
+    { id: uid(), type: 'shape', shape: 'circle', x: 386, y: 350, w: 64, h: 64, fill: colore, zIndex: 2 },
+    { id: uid(), type: 'shape', shape: 'circle', x: 396, y: 360, w: 44, h: 44, stroke: '#FFFFFF', strokeWidth: 1.5, zIndex: 3 },
+    { id: uid(), type: 'text', field: 'custom', text: 'CNA', x: 386, y: 376, w: 64, h: 14, fontSize: 11, bold: true, color: '#FFFFFF', align: 'center', zIndex: 3 },
+    { id: uid(), type: 'text', field: 'custom', text: 'CNA Roma', x: 60, y: 470, w: 260, h: 14, fontSize: 10, bold: true, color: '#0A0A0A', zIndex: 2 },
+    { id: uid(), type: 'text', field: 'custom', text: "Confederazione Nazionale dell'Artigianato", x: 60, y: 484, w: 340, h: 11, fontSize: 8, color: '#9CA3AF', zIndex: 2 },
+    { id: uid(), type: 'text', field: 'custom', text: 'CODICE VERIFICA', x: 592, y: 470, w: 190, h: 10, fontSize: 7, bold: true, color: '#9CA3AF', align: 'right', zIndex: 2 },
+    { id: uid(), type: 'text', field: 'codice', x: 592, y: 482, w: 190, h: 13, fontSize: 8.5, color: '#374151', fontFamily: 'courier', align: 'right', zIndex: 2 },
+    { id: uid(), type: 'qrcode', x: 752, y: 468, w: 40, h: 40, zIndex: 2 },
+  ]
+}
+
+function presetGrecoColonne(colore) {
+  return [
+    ...greekBandV(40, 40, 516, 26, colore, 26),
+    ...greekBandV(776, 40, 516, 26, colore, 26),
+    { id: uid(), type: 'shape', shape: 'line', x: 66, y: 40, w: 710, h: 0, stroke: colore, strokeWidth: 2, zIndex: 2 },
+    { id: uid(), type: 'shape', shape: 'line', x: 66, y: 556, w: 710, h: 0, stroke: colore, strokeWidth: 2, zIndex: 2 },
+    { id: uid(), type: 'image', field: 'logo', x: 371, y: 60, w: 100, h: 36, zIndex: 2 },
+    { id: uid(), type: 'text', field: 'custom', text: 'ATTESTATO ACCADEMICO', x: 121, y: 112, w: 600, h: 28, fontSize: 22, bold: true, color: colore, fontFamily: 'times', align: 'center', zIndex: 2 },
+    { id: uid(), type: 'shape', shape: 'line', x: 396, y: 146, w: 50, h: 0, stroke: colore, strokeWidth: 1, zIndex: 2 },
+    { id: uid(), type: 'text', field: 'custom', text: 'Si certifica che', x: 171, y: 160, w: 500, h: 18, fontSize: 13, italic: true, color: '#4B5563', fontFamily: 'times', align: 'center', zIndex: 2 },
+    { id: uid(), type: 'text', field: 'nome', x: 121, y: 184, w: 600, h: 44, fontSize: 34, bold: true, color: '#0A0A0A', fontFamily: 'times', align: 'center', zIndex: 2 },
+    { id: uid(), type: 'text', field: 'custom', text: "ha partecipato all'evento", x: 171, y: 232, w: 500, h: 18, fontSize: 12.5, italic: true, color: '#4B5563', fontFamily: 'times', align: 'center', zIndex: 2 },
+    { id: uid(), type: 'text', field: 'evento', x: 121, y: 256, w: 600, h: 22, fontSize: 16, bold: true, color: colore, align: 'center', zIndex: 2 },
+    { id: uid(), type: 'text', field: 'data', x: 171, y: 284, w: 500, h: 16, fontSize: 10.5, color: '#6B7280', align: 'center', zIndex: 2 },
+    { id: uid(), type: 'text', field: 'luogo', x: 171, y: 302, w: 500, h: 16, fontSize: 10.5, color: '#6B7280', align: 'center', zIndex: 2 },
+    { id: uid(), type: 'shape', shape: 'line', x: 331, y: 456, w: 180, h: 0, stroke: '#9CA3AF', strokeWidth: 1, zIndex: 2 },
+    { id: uid(), type: 'text', field: 'custom', text: 'CNA Roma', x: 331, y: 464, w: 180, h: 14, fontSize: 10.5, bold: true, color: '#0A0A0A', align: 'center', zIndex: 2 },
+    { id: uid(), type: 'text', field: 'custom', text: "Confederazione Nazionale dell'Artigianato", x: 271, y: 480, w: 300, h: 11, fontSize: 8, color: '#9CA3AF', align: 'center', zIndex: 2 },
+    { id: uid(), type: 'text', field: 'codice', x: 331, y: 497, w: 180, h: 11, fontSize: 7.5, color: '#9CA3AF', align: 'center', fontFamily: 'courier', zIndex: 2 },
+    { id: uid(), type: 'qrcode', x: 401, y: 512, w: 40, h: 40, zIndex: 2 },
+  ]
+}
+
 const PRESETS = [
   { id: 'laterale', label: 'Laterale', desc: 'Fascia colorata a sinistra', build: presetLaterale },
   { id: 'medaglia', label: 'Medaglia', desc: 'Sigillo e nastro, elegante', build: presetMedaglia },
   { id: 'minimal', label: 'Minimal', desc: 'Essenziale, molto spazio bianco', build: presetMinimal },
   { id: 'cornice', label: 'Cornice', desc: 'Doppio bordo, stile istituzionale', build: presetCornice },
+  { id: 'accademico', label: 'Accademico', desc: 'Diploma con greche e sigillo', build: presetAccademico },
+  { id: 'colonne', label: 'Greco a colonne', desc: 'Colonne laterali a greca, stile classico', build: presetGrecoColonne },
 ]
 
 function fontStack(family) {
