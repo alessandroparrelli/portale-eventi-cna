@@ -457,6 +457,9 @@ export default function LandingPage() {
         })()
         }
 
+        {/* CONDIVISIONE — sotto i 3 pulsanti */}
+        <ShareBar event={event} compact />
+
         {/* DESCRIZIONE (solo se non ci sono blocchi) */}
         {(event.descrizione_html || event.descrizione) && !(event.sezioni||[]).length && (
           <section style={s.section}>
