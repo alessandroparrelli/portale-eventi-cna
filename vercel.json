@@ -1,6 +1,10 @@
 {
   "rewrites": [
     {
+      "source": "/eventi/:slug",
+      "destination": "/api/eventi/[slug]"
+    },
+    {
       "source": "/(.*)",
       "destination": "/index.html"
     }
