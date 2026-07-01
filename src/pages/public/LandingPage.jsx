@@ -1,6 +1,7 @@
 import { useEffect, useState, useRef } from 'react'
 import { usePageTitle } from '../../hooks/usePageTitle'
 import { useOGMeta } from '../../hooks/useOGMeta'
+import ShareBar from '../../components/public/ShareBar'
 import { useParams } from 'react-router-dom'
 import { supabase } from '../../lib/supabase'
 import { temaConDefault } from '../../components/editor/AspettoTab'
@@ -602,6 +603,9 @@ export default function LandingPage() {
         )}
 
       </div>
+
+      {/* ── Barra condivisione ── */}
+      <ShareBar event={event} />
 
       <footer style={{ ...s.footer, backgroundColor: tema.sfondo_footer || '#F4F5F7', borderTop: `1px solid ${tema.sfondo_footer || '#F4F5F7'}`, color: tema.testo_footer || '#9CA3AF' }}>
         <img
