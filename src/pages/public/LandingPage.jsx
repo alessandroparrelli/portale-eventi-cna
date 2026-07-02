@@ -54,25 +54,45 @@ function ModalConferma({ reg, event, onClose }) {
   }, [reg.qr_code])
 
   function addToCalendar() {
-    const fmt = ts => ts ? new Date(ts).toISOString().replace(/[-:]/g,'').replace(/\.\d{3}/,'') : null
-    const dtStart = fmt(event.data_inizio)
-    const dtEnd   = fmt(event.data_fine) || dtStart
-    const now     = fmt(new Date().toISOString())
-    const ics = [
-      'BEGIN:VCALENDAR','VERSION:2.0','PRODID:-//CNA Roma//Portale Eventi//IT',
-      'CALSCALE:GREGORIAN','METHOD:PUBLISH','BEGIN:VEVENT',
-      `UID:${reg.id}@cna-eventi`,
-      `DTSTAMP:${now}Z`,`DTSTART:${dtStart}`,`DTEND:${dtEnd}`,
-      `SUMMARY:${event.titolo}`,
-      `LOCATION:${(event.luogo||'').replace(/,/g,'\\,')}`,
-      `DESCRIPTION:Iscrizione di ${reg.nome} ${reg.cognome}\\nQR: ${reg.qr_code}`,
-      'END:VEVENT','END:VCALENDAR',
-    ].join('\r\n')
-    const a = Object.assign(document.createElement('a'), {
-      href: URL.createObjectURL(new Blob([ics],{type:'text/calendar;charset=utf-8'})),
-      download:`${event.slug}.ics`
-    })
-    a.click(); URL.revokeObjectURL(a.href); setCalAdded(true)
+    const fmtIcs  = ts => ts ? new Date(ts).toISOString().replace(/[-:]/g,'').replace(/\.\d{3}/,'') : null
+    const fmtGcal = ts => ts ? new Date(ts).toISOString().replace(/[-:]/g,'').replace(/\.\d{3}Z$/,'Z') : null
+    const dtStart = fmtIcs(event.data_inizio)
+    const dtEnd   = fmtIcs(event.data_fine) || dtStart
+    const isIOS   = /iPad|iPhone|iPod/.test(navigator.userAgent) ||
+                    (navigator.platform === 'MacIntel' && navigator.maxTouchPoints > 1)
+    const descrizione = `Iscrizione di ${reg.nome} ${reg.cognome} — Codice: ${reg.codice_iscrizione}` +
+                        (event.sottotitolo ? '\n' + event.sottotitolo : '')
+
+    if (isIOS) {
+      const now = fmtIcs(new Date().toISOString())
+      const ics = [
+        'BEGIN:VCALENDAR','VERSION:2.0','PRODID:-//CNA Roma//Portale Eventi//IT',
+        'CALSCALE:GREGORIAN','METHOD:PUBLISH','BEGIN:VEVENT',
+        `UID:${reg.id}@cna-eventi`,
+        `DTSTAMP:${now}Z`,`DTSTART:${dtStart}`,`DTEND:${dtEnd}`,
+        `SUMMARY:${event.titolo}`,
+        event.luogo ? `LOCATION:${event.luogo.replace(/,/g,'\\,')}` : '',
+        `DESCRIPTION:${descrizione.replace(/\n/g,'\\n')}`,
+        'END:VEVENT','END:VCALENDAR',
+      ].filter(Boolean).join('\r\n')
+      const blob = new Blob([ics], { type: 'text/calendar;charset=utf-8' })
+      const url  = URL.createObjectURL(blob)
+      window.location.href = url
+      setTimeout(() => URL.revokeObjectURL(url), 3000)
+    } else {
+      // Android + Desktop: Google Calendar apre direttamente il form pre-compilato
+      const gcStart = fmtGcal(event.data_inizio)
+      const gcEnd   = fmtGcal(event.data_fine) || gcStart
+      const params  = new URLSearchParams({
+        action:  'TEMPLATE',
+        text:    event.titolo,
+        dates:   `${gcStart}/${gcEnd}`,
+        details: descrizione,
+        ...(event.luogo ? { location: event.luogo } : {}),
+      })
+      window.open(`https://calendar.google.com/calendar/render?${params}`, '_blank', 'noopener')
+    }
+    setCalAdded(true)
   }
 
   function downloadQR() {
@@ -414,18 +434,37 @@ export default function LandingPage() {
           return (
         <div style={s.actionRow}>
           <button onClick={() => {
-            const fmt = ts => ts ? new Date(ts).toISOString().replace(/[-:]/g,'').replace(/\.\d{3}/,'') : null
-            const dtStart = fmt(event.data_inizio), dtEnd = fmt(event.data_fine)||dtStart
-            const now = fmt(new Date().toISOString())
-            const ics = ['BEGIN:VCALENDAR','VERSION:2.0','PRODID:-//CNA Roma//IT',
-              'CALSCALE:GREGORIAN','METHOD:PUBLISH','BEGIN:VEVENT',
-              `UID:${event.id}@cna-eventi`,`DTSTAMP:${now}Z`,`DTSTART:${dtStart}`,`DTEND:${dtEnd}`,
-              `SUMMARY:${event.titolo}`,`LOCATION:${(event.luogo||'').replace(/,/g,'\\,')}`,
-              'END:VEVENT','END:VCALENDAR'].join('\r\n')
-            Object.assign(document.createElement('a'),{
-              href:URL.createObjectURL(new Blob([ics],{type:'text/calendar;charset=utf-8'})),
-              download:`${event.slug}.ics`
-            }).click()
+            const fmtIcs  = ts => ts ? new Date(ts).toISOString().replace(/[-:]/g,'').replace(/\.\d{3}/,'') : null
+            const fmtGcal = ts => ts ? new Date(ts).toISOString().replace(/[-:]/g,'').replace(/\.\d{3}Z$/,'Z') : null
+            const isIOS   = /iPad|iPhone|iPod/.test(navigator.userAgent) ||
+                            (navigator.platform === 'MacIntel' && navigator.maxTouchPoints > 1)
+            const descrizione = event.sottotitolo || ''
+
+            if (isIOS) {
+              const dtStart = fmtIcs(event.data_inizio), dtEnd = fmtIcs(event.data_fine)||dtStart
+              const now = fmtIcs(new Date().toISOString())
+              const ics = ['BEGIN:VCALENDAR','VERSION:2.0','PRODID:-//CNA Roma//IT',
+                'CALSCALE:GREGORIAN','METHOD:PUBLISH','BEGIN:VEVENT',
+                `UID:${event.id}@cna-eventi`,`DTSTAMP:${now}Z`,`DTSTART:${dtStart}`,`DTEND:${dtEnd}`,
+                `SUMMARY:${event.titolo}`,
+                event.luogo ? `LOCATION:${event.luogo.replace(/,/g,'\\,')}` : '',
+                descrizione ? `DESCRIPTION:${descrizione.replace(/\n/g,'\\n')}` : '',
+                'END:VEVENT','END:VCALENDAR'].filter(Boolean).join('\r\n')
+              const url = URL.createObjectURL(new Blob([ics],{type:'text/calendar;charset=utf-8'}))
+              window.location.href = url
+              setTimeout(() => URL.revokeObjectURL(url), 3000)
+            } else {
+              const gcStart = fmtGcal(event.data_inizio)
+              const gcEnd   = fmtGcal(event.data_fine) || gcStart
+              const params  = new URLSearchParams({
+                action:  'TEMPLATE',
+                text:    event.titolo,
+                dates:   `${gcStart}/${gcEnd}`,
+                ...(descrizione ? { details: descrizione } : {}),
+                ...(event.luogo ? { location: event.luogo } : {}),
+              })
+              window.open(`https://calendar.google.com/calendar/render?${params}`, '_blank', 'noopener')
+            }
           }} style={aBtn}>
             <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round">
               <rect x="3" y="4" width="18" height="18" rx="2"/><line x1="16" y1="2" x2="16" y2="6"/><line x1="8" y1="2" x2="8" y2="6"/><line x1="3" y1="10" x2="21" y2="10"/>
