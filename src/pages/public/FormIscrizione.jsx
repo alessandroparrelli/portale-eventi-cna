@@ -286,32 +286,37 @@ export default function FormIscrizione({ event, onSuccess }) {
       }
 
       const { data: qrData0 } = await supabase.rpc('generate_qr_token')
-      const { data: reg0, error: err0 } = await supabase.from('registrations').insert({
+      const reg0Id  = crypto.randomUUID()
+      const reg0Qr  = qrData0 || ('QR-' + Math.random().toString(36).slice(2,10).toUpperCase())
+
+      const { error: err0 } = await supabase.from('registrations').insert({
+        id: reg0Id,
         ...buildPayload(persone[0]),
-        qr_code: qrData0 || ('QR-' + Math.random().toString(36).slice(2,10).toUpperCase()),
+        qr_code: reg0Qr,
         codice_iscrizione: codiceBase,
-      }).select().single()
+      })
 
       if (err0) throw new Error(err0.message)
 
       for (let i = 1; i < persone.length; i++) {
         const { data: qrAcc } = await supabase.rpc('generate_qr_token')
         await supabase.from('registrations').insert({
+          id: crypto.randomUUID(),
           ...buildPayload(persone[i]),
           qr_code: qrAcc || ('QR-' + Math.random().toString(36).slice(2,10).toUpperCase()),
           codice_iscrizione: codiceBase + suffissi[i],
-          gruppo_id: reg0.id,
+          gruppo_id: reg0Id,
         })
       }
 
       onSuccess?.({
-        id: reg0.id, qr_code: reg0.qr_code, codice_iscrizione: codiceBase,
+        id: reg0Id, qr_code: reg0Qr, codice_iscrizione: codiceBase,
         nome: persone[0].nome?.trim(), cognome: persone[0].cognome?.trim(),
         email: persone[0].email?.trim(), accompagnatori: persone.length - 1,
       })
 
       // Email conferma iscritto + notifica admin (fire-and-forget)
-      const emailPayload = { iscrizione_id: reg0.id }
+      const emailPayload = { iscrizione_id: reg0Id }
       supabase.functions.invoke('send-event-email', { body: { tipo: 'conferma_iscrizione', ...emailPayload } })
         .catch(e => console.warn('Email conferma fallita:', e))
       supabase.functions.invoke('send-event-email', { body: { tipo: 'notifica_admin', ...emailPayload } })
