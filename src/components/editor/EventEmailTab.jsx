@@ -178,12 +178,14 @@ function LogoPicker({ value, onChange }) {
 
 const DEFAULT_LOGO = 'https://raw.githubusercontent.com/alessandroparrelli/fileappoggio/main/NUOVO-LOGO-CNA-ROMA-SOLO-ROMA.png'
 
-function buildFullHtml(mostraHeader, mostraFooter, bodyHtml, logoSrc, hColore, hTitolo) {
+function buildFullHtml(mostraHeader, mostraFooter, bodyHtml, logoSrc, hColore, hTitolo, hLogoH, hTitoloSz) {
   const logo = logoSrc || DEFAULT_LOGO
   const bg = hColore || BLU
-  const titoloHtml = hTitolo ? `<p style="margin:6px 0 0;font-size:13px;font-weight:600;color:rgba(255,255,255,0.85);font-family:Inter,Arial,sans-serif;letter-spacing:0.01em">${hTitolo}</p>` : ''
+  const lh = hLogoH || 48
+  const ts = hTitoloSz || 13
+  const titoloHtml = hTitolo ? `<p style="margin:6px 0 0;font-size:${ts}px;font-weight:700;color:rgba(255,255,255,0.9);font-family:Inter,Arial,sans-serif;letter-spacing:0.01em">${hTitolo}</p>` : ''
   const header = mostraHeader !== false
-    ? `<div style="background:${bg};padding:0"><table style="width:100%;border-collapse:collapse"><tr><td style="padding:16px 32px">${logo ? `<img src="${logo}" alt="CNA Roma" style="height:48px;display:block" />` : ''}${titoloHtml}</td></tr></table></div>` : ''
+    ? `<div style="background:${bg};padding:0"><table style="width:100%;border-collapse:collapse"><tr><td style="padding:16px 32px">${logo ? `<img src="${logo}" alt="CNA Roma" style="height:${lh}px;display:block" />` : ''}${titoloHtml}</td></tr></table></div>` : ''
   const footer = mostraFooter !== false
     ? `<div style="background:#F9FAFB;border-top:1px solid #E5E7EB;padding:20px 32px"><p style="margin:0;font-size:11px;color:#9CA3AF;font-family:Inter,Arial,sans-serif">CNA di Roma — Confederazione Nazionale dell\u2019Artigianato · <a href="mailto:marketing@cnaroma.it" style="color:${BLU}">marketing@cnaroma.it</a></p></div>` : ''
   return `<!DOCTYPE html><html><head><meta charset="UTF-8"><meta name="viewport" content="width=device-width,initial-scale=1"></head><body style="margin:0;padding:0;background:#F0F2F5;font-family:Inter,Arial,sans-serif"><table style="width:100%;border-collapse:collapse"><tr><td style="padding:24px 16px"><div style="max-width:600px;margin:0 auto;background:#fff;border-radius:12px;overflow:hidden;box-shadow:0 2px 20px rgba(0,0,0,0.1)">${header}<div style="padding:32px">${bodyHtml}</div>${footer}</div></td></tr></table></body></html>`
@@ -400,6 +402,8 @@ export default function EventEmailTab({ eventoId }) {
   const [headerColore, setHeaderColore]          = useState(BLU)
   const [headerTitolo, setHeaderTitolo]           = useState('')
   const [showLogoPicker, setShowLogoPicker]       = useState(false)
+  const [logoAltezza,    setLogoAltezza]          = useState(48)
+  const [titoloSize,     setTitoloSize]           = useState(13)
   const [formFields,     setFormFields]           = useState([])
   const [blocchi,         setBlocchi]         = useState({}) // per tipo: { conferma: [...], ... }
   const [saving,          setSaving]          = useState(false)
@@ -439,10 +443,11 @@ export default function EventEmailTab({ eventoId }) {
       setTemplates(tMap)
       setBlocchi(bMap)
       if (firstLogoUrl) setLogoUrl(firstLogoUrl)
-      // carica header settings dal primo template trovato
       const firstTpl = Object.values(tMap)[0]
       if (firstTpl?.header_colore) setHeaderColore(firstTpl.header_colore)
       if (firstTpl?.header_titolo !== undefined) setHeaderTitolo(firstTpl.header_titolo||'')
+      if (firstTpl?.logo_altezza) setLogoAltezza(firstTpl.logo_altezza)
+      if (firstTpl?.titolo_size) setTitoloSize(firstTpl.titolo_size)
     }
   }
 
@@ -506,7 +511,7 @@ export default function EventEmailTab({ eventoId }) {
     setSaving(true)
     const bodyHtml = viewMode==='html' ? current.corpo_html : blocchiToHtml(currBlocchi)
     await supabase.from('email_templates')
-      .update({ oggetto:current.oggetto, corpo_html:bodyHtml, blocchi_json:JSON.stringify(currBlocchi), logo_url:logoUrl||null, header_colore:headerColore||null, header_titolo:headerTitolo||null, personalizzato:true, updated_at:new Date().toISOString() })
+      .update({ oggetto:current.oggetto, corpo_html:bodyHtml, blocchi_json:JSON.stringify(currBlocchi), logo_url:logoUrl||null, header_colore:headerColore||null, header_titolo:headerTitolo||null, logo_altezza:logoAltezza||null, titolo_size:titoloSize||null, personalizzato:true, updated_at:new Date().toISOString() })
       .eq('event_id', eventoId).eq('tipo', selected)
     setSaving(false); setSaved(true); setTimeout(()=>setSaved(false), 2500)
   }
@@ -532,7 +537,7 @@ export default function EventEmailTab({ eventoId }) {
 
   function getPreviewHtml() {
     const bodyHtml = currBlocchi.length ? blocchiToHtml(currBlocchi) : (current.corpo_html||'')
-    return replacePreview(buildFullHtml(true, true, bodyHtml, logoUrl, headerColore, headerTitolo))
+    return replacePreview(buildFullHtml(true, true, bodyHtml, logoUrl, headerColore, headerTitolo, logoAltezza, titoloSize))
   }
 
   const selectedBl = selectedBlock !== null ? currBlocchi[selectedBlock] : null
@@ -619,9 +624,23 @@ export default function EventEmailTab({ eventoId }) {
               <div style={{ padding:'10px 12px', display:'flex', flexDirection:'column', gap:'8px' }}>
                 {/* Preview live header */}
                 <div style={{ background:headerColore||BLU, borderRadius:'6px', padding:'10px 16px', display:'flex', alignItems:'center', gap:'10px' }}>
-                  {logoUrl && <img src={logoUrl} style={{ height:'40px', objectFit:'contain', flexShrink:0 }} alt="logo"/>}
-                  {headerTitolo && <span style={{ color:'rgba(255,255,255,0.9)', fontSize:'12px', fontWeight:'600', fontFamily:'Inter,sans-serif' }}>{headerTitolo}</span>}
+                  {logoUrl && <img src={logoUrl} style={{ height:`${logoAltezza}px`, objectFit:'contain', flexShrink:0, maxWidth:'60%' }} alt="logo"/>}
+                  {headerTitolo && <span style={{ color:'rgba(255,255,255,0.9)', fontSize:`${titoloSize}px`, fontWeight:'700', fontFamily:'Inter,sans-serif' }}>{headerTitolo}</span>}
                   {!logoUrl && !headerTitolo && <span style={{ color:'rgba(255,255,255,0.4)', fontSize:'11px' }}>Anteprima header</span>}
+                </div>
+                {/* Dimensione logo */}
+                <div style={{ display:'flex', alignItems:'center', gap:'8px' }}>
+                  <label style={{ ...lbl, margin:0, flexShrink:0, minWidth:'80px' }}>Logo altezza</label>
+                  <input type="range" min={24} max={96} value={logoAltezza} onChange={e=>setLogoAltezza(+e.target.value)}
+                    style={{ flex:1 }}/>
+                  <span style={{ fontSize:'11px', color:'#6B7280', flexShrink:0, minWidth:'30px' }}>{logoAltezza}px</span>
+                </div>
+                {/* Dimensione titolo */}
+                <div style={{ display:'flex', alignItems:'center', gap:'8px' }}>
+                  <label style={{ ...lbl, margin:0, flexShrink:0, minWidth:'80px' }}>Titolo size</label>
+                  <input type="range" min={10} max={28} value={titoloSize} onChange={e=>setTitoloSize(+e.target.value)}
+                    style={{ flex:1 }}/>
+                  <span style={{ fontSize:'11px', color:'#6B7280', flexShrink:0, minWidth:'30px' }}>{titoloSize}px</span>
                 </div>
                 {/* Colore sfondo */}
                 <div style={{ display:'flex', alignItems:'center', gap:'8px' }}>
@@ -667,7 +686,7 @@ export default function EventEmailTab({ eventoId }) {
           {viewMode === 'blocchi' && (
             <div style={{ display:'flex', gap:'10px' }}>
               {/* Lista blocchi */}
-              <div style={{ width: selectedBl ? '220px' : undefined, flex: selectedBl ? undefined : 1, flexShrink:0 }}>
+              <div style={{ width:'240px', flexShrink:0 }}>
                 {usaDefault && (
                   <div style={{ padding:'8px 12px', background:'#FFFBEB', border:'1px solid #FDE68A', borderRadius:'8px', marginBottom:'8px', fontSize:'11px', color:'#92400E', display:'flex', alignItems:'center', gap:'6px' }}>
                     <span>⚠️</span>
@@ -750,9 +769,8 @@ export default function EventEmailTab({ eventoId }) {
                 </div>
               )}
 
-              {/* Variabili */}
-              {!selectedBl && (
-                <div style={{ width:'160px', flexShrink:0, background:'#EEF3FF', border:'1px solid #BFDBFE', borderRadius:'10px', padding:'10px 12px', alignSelf:'flex-start' }}>
+              {/* Variabili - sempre visibili */}
+              <div style={{ width:'150px', flexShrink:0, background:'#EEF3FF', border:'1px solid #BFDBFE', borderRadius:'10px', padding:'10px 12px', alignSelf:'flex-start', maxHeight:'70vh', overflowY:'auto' }}>
                   <p style={{ margin:'0 0 8px', fontSize:'9px', fontWeight:'800', color:'#1d4ed8', textTransform:'uppercase', letterSpacing:'.07em' }}>Variabili</p>
                   <div style={{ display:'flex', flexDirection:'column', gap:'3px' }}>
                     {VARIABILI.map(v=>(
@@ -779,7 +797,6 @@ export default function EventEmailTab({ eventoId }) {
                     )}
                   </div>
                 </div>
-              )}
             </div>
           )}
 

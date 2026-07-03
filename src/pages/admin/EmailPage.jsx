@@ -180,11 +180,13 @@ function blocchiToHtml(blocchi) {
 // ─── Wrapper HTML completo identico all'email reale ───────────────────────────
 const DEFAULT_LOGO = 'https://raw.githubusercontent.com/alessandroparrelli/fileappoggio/main/NUOVO-LOGO-CNA-ROMA-SOLO-ROMA.png'
 
-function buildFullHtml(bodyHtml, logoSrc, hColore, hTitolo) {
+function buildFullHtml(bodyHtml, logoSrc, hColore, hTitolo, hLogoH, hTitoloSz) {
   const logo  = logoSrc || DEFAULT_LOGO
   const bg    = hColore || BLU
-  const titoloHtml = hTitolo ? `<p style="margin:6px 0 0;font-size:13px;font-weight:600;color:rgba(255,255,255,0.85);font-family:Inter,Arial,sans-serif;letter-spacing:0.01em">${hTitolo}</p>` : ''
-  const header = `<div style="background:${bg};padding:0"><table style="width:100%;border-collapse:collapse"><tr><td style="padding:16px 32px">${logo ? `<img src="${logo}" alt="CNA Roma" style="height:48px;display:block" />` : ''}${titoloHtml}</td></tr></table></div>`
+  const lh    = hLogoH || 48
+  const ts    = hTitoloSz || 13
+  const titoloHtml = hTitolo ? `<p style="margin:6px 0 0;font-size:${ts}px;font-weight:700;color:rgba(255,255,255,0.9);font-family:Inter,Arial,sans-serif;letter-spacing:0.01em">${hTitolo}</p>` : ''
+  const header = `<div style="background:${bg};padding:0"><table style="width:100%;border-collapse:collapse"><tr><td style="padding:16px 32px">${logo ? `<img src="${logo}" alt="CNA Roma" style="height:${lh}px;display:block" />` : ''}${titoloHtml}</td></tr></table></div>`
   const footer = `<div style="background:#F9FAFB;border-top:1px solid #E5E7EB;padding:20px 32px"><p style="margin:0;font-size:11px;color:#9CA3AF;font-family:Inter,Arial,sans-serif">CNA di Roma \u2014 Confederazione Nazionale dell\u2019Artigianato \u00b7 <a href="mailto:marketing@cnaroma.it" style="color:${BLU}">marketing@cnaroma.it</a></p></div>`
   return `<!DOCTYPE html><html><head><meta charset="UTF-8"><meta name="viewport" content="width=device-width,initial-scale=1"></head><body style="margin:0;padding:0;background:#F0F2F5;font-family:Inter,Arial,sans-serif"><table style="width:100%;border-collapse:collapse"><tr><td style="padding:24px 16px"><div style="max-width:600px;margin:0 auto;background:#fff;border-radius:12px;overflow:hidden;box-shadow:0 2px 20px rgba(0,0,0,0.1)">${header}<div style="padding:32px">${bodyHtml}</div>${footer}</div></td></tr></table></body></html>`
 }
@@ -400,6 +402,8 @@ export default function EmailPage() {
   const [headerColore,  setHeaderColore]  = useState(BLU)
   const [headerTitolo,  setHeaderTitolo]  = useState('')
   const [showLogoPicker, setShowLogoPicker] = useState(false)
+  const [logoAltezza,    setLogoAltezza]   = useState(48)
+  const [titoloSize,     setTitoloSize]     = useState(13)
   const dragIdx = useRef(null)
   const dragOverIdx = useRef(null)
 
@@ -474,13 +478,13 @@ export default function EmailPage() {
     setSaving(true)
     const bodyHtml = viewMode==='html' ? current.corpo_html : blocchiToHtml(currBlocchi)
     await supabase.from('email_templates_default')
-      .update({ oggetto:current.oggetto, corpo_html:bodyHtml, blocchi_json:JSON.stringify(currBlocchi), logo_url:logoUrl||null, header_colore:headerColore||null, header_titolo:headerTitolo||null, updated_at:new Date().toISOString() })
+      .update({ oggetto:current.oggetto, corpo_html:bodyHtml, blocchi_json:JSON.stringify(currBlocchi), logo_url:logoUrl||null, header_colore:headerColore||null, header_titolo:headerTitolo||null, logo_altezza:logoAltezza||null, titolo_size:titoloSize||null, updated_at:new Date().toISOString() })
       .eq('tipo', selected)
     setSaving(false); setSaved(true); setTimeout(()=>setSaved(false), 2500)
   }
 
   const previewHtml = replacePreview(
-    buildFullHtml(currBlocchi.length ? blocchiToHtml(currBlocchi) : (current.corpo_html||''), logoUrl, headerColore, headerTitolo)
+    buildFullHtml(currBlocchi.length ? blocchiToHtml(currBlocchi) : (current.corpo_html||''), logoUrl, headerColore, headerTitolo, logoAltezza, titoloSize)
   )
 
   const selectedBl = selectedBlock !== null ? currBlocchi[selectedBlock] : null
@@ -568,9 +572,19 @@ export default function EmailPage() {
               </div>
               <div style={{ padding:'10px 12px', display:'flex', flexDirection:'column', gap:'8px' }}>
                 <div style={{ background:headerColore||BLU, borderRadius:'6px', padding:'10px 16px', display:'flex', alignItems:'center', gap:'10px' }}>
-                  {logoUrl && <img src={logoUrl} style={{ height:'40px', objectFit:'contain', flexShrink:0 }} alt="logo"/>}
-                  {headerTitolo && <span style={{ color:'rgba(255,255,255,0.9)', fontSize:'12px', fontWeight:'600', fontFamily:'Inter,sans-serif' }}>{headerTitolo}</span>}
+                  {logoUrl && <img src={logoUrl} style={{ height:`${logoAltezza}px`, objectFit:'contain', flexShrink:0, maxWidth:'60%' }} alt="logo"/>}
+                  {headerTitolo && <span style={{ color:'rgba(255,255,255,0.9)', fontSize:`${titoloSize}px`, fontWeight:'700', fontFamily:'Inter,sans-serif' }}>{headerTitolo}</span>}
                   {!logoUrl && !headerTitolo && <span style={{ color:'rgba(255,255,255,0.4)', fontSize:'11px' }}>Anteprima header</span>}
+                </div>
+                <div style={{ display:'flex', alignItems:'center', gap:'8px' }}>
+                  <label style={{ ...lbl, margin:0, flexShrink:0, minWidth:'80px' }}>Logo altezza</label>
+                  <input type="range" min={24} max={96} value={logoAltezza} onChange={e=>setLogoAltezza(+e.target.value)} style={{ flex:1 }}/>
+                  <span style={{ fontSize:'11px', color:'#6B7280', flexShrink:0, minWidth:'30px' }}>{logoAltezza}px</span>
+                </div>
+                <div style={{ display:'flex', alignItems:'center', gap:'8px' }}>
+                  <label style={{ ...lbl, margin:0, flexShrink:0, minWidth:'80px' }}>Titolo size</label>
+                  <input type="range" min={10} max={28} value={titoloSize} onChange={e=>setTitoloSize(+e.target.value)} style={{ flex:1 }}/>
+                  <span style={{ fontSize:'11px', color:'#6B7280', flexShrink:0, minWidth:'30px' }}>{titoloSize}px</span>
                 </div>
                 <div style={{ display:'flex', alignItems:'center', gap:'8px' }}>
                   <label style={{ ...lbl, margin:0, flexShrink:0 }}>Colore</label>
@@ -613,7 +627,7 @@ export default function EmailPage() {
           {viewMode === 'blocchi' && (
             <div style={{ display:'flex', gap:'10px', alignItems:'flex-start' }}>
               {/* Canvas blocchi */}
-              <div style={{ width: selectedBl ? '220px' : undefined, flex: selectedBl ? undefined : 1, flexShrink:0 }}>
+              <div style={{ width:'240px', flexShrink:0 }}>
                 {currBlocchi.length === 0 && (
                   <div style={{ textAlign:'center', padding:'36px 16px', color:'#9CA3AF', background:'#fff', border:'1.5px dashed #E5E7EB', borderRadius:'10px' }}>
                     <LayoutTemplate size={28} style={{ marginBottom:'8px', opacity:.3 }}/>
