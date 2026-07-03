@@ -443,7 +443,7 @@ export default function EventEmailTab({ eventoId }) {
     <div style={{ display:'flex', gap:'16px', fontFamily:"'Inter',sans-serif" }}>
 
       {/* ── Sidebar tipi ── */}
-      <div style={{ width:'200px', flexShrink:0 }}>
+      <div style={{ width:'170px', flexShrink:0 }}>
         <div style={{ display:'flex', flexDirection:'column', gap:'5px' }}>
           {TIPI.map(t=>(
             <button key={t.key} type="button"
@@ -570,7 +570,7 @@ export default function EventEmailTab({ eventoId }) {
           {viewMode === 'blocchi' && (
             <div style={{ display:'flex', gap:'10px' }}>
               {/* Lista blocchi */}
-              <div style={{ flex:1 }}>
+              <div style={{ width: selectedBl ? '220px' : undefined, flex: selectedBl ? undefined : 1, flexShrink:0 }}>
                 {usaDefault && (
                   <div style={{ padding:'8px 12px', background:'#FFFBEB', border:'1px solid #FDE68A', borderRadius:'8px', marginBottom:'8px', fontSize:'11px', color:'#92400E', display:'flex', alignItems:'center', gap:'6px' }}>
                     <span>⚠️</span>
@@ -639,7 +639,7 @@ export default function EventEmailTab({ eventoId }) {
 
               {/* Pannello proprietà blocco */}
               {selectedBl && (
-                <div style={{ width:'230px', flexShrink:0, background:'#fff', border:'1px solid #E5E7EB', borderRadius:'10px', overflow:'hidden', alignSelf:'flex-start' }}>
+                <div style={{ flex:1, minWidth:0, background:'#fff', border:'1px solid #E5E7EB', borderRadius:'10px', overflow:'hidden', alignSelf:'flex-start' }}>
                   <div style={{ padding:'9px 12px', borderBottom:'1px solid #E5E7EB', display:'flex', alignItems:'center', justifyContent:'space-between', background:'#F9FAFB' }}>
                     <div style={{ display:'flex', alignItems:'center', gap:'5px' }}>
                       <span style={{ color:BLU, display:'flex' }}>{BLOCK_TYPES.find(t=>t.tipo===selectedBl.tipo)?.icon}</span>
@@ -647,7 +647,7 @@ export default function EventEmailTab({ eventoId }) {
                     </div>
                     <button type="button" onClick={()=>setSelectedBlock(null)} style={{ background:'none', border:'none', cursor:'pointer', color:'#9CA3AF' }}><X size={13}/></button>
                   </div>
-                  <div style={{ padding:'12px', maxHeight:'480px', overflowY:'auto' }}>
+                  <div style={{ padding:'12px', maxHeight:'70vh', overflowY:'auto' }}>
                     <BlockProps block={selectedBl} onChange={nb=>updateBlock(selectedBlock,nb)}/>
                   </div>
                 </div>
@@ -655,7 +655,7 @@ export default function EventEmailTab({ eventoId }) {
 
               {/* Variabili */}
               {!selectedBl && (
-                <div style={{ width:'180px', flexShrink:0, background:'#EEF3FF', border:'1px solid #BFDBFE', borderRadius:'10px', padding:'10px 12px', alignSelf:'flex-start' }}>
+                <div style={{ width:'160px', flexShrink:0, background:'#EEF3FF', border:'1px solid #BFDBFE', borderRadius:'10px', padding:'10px 12px', alignSelf:'flex-start' }}>
                   <p style={{ margin:'0 0 8px', fontSize:'9px', fontWeight:'800', color:'#1d4ed8', textTransform:'uppercase', letterSpacing:'.07em' }}>Variabili</p>
                   <div style={{ display:'flex', flexDirection:'column', gap:'3px' }}>
                     {VARIABILI.map(v=>(

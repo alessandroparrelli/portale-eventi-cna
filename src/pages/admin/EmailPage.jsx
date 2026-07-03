@@ -525,7 +525,7 @@ export default function EmailPage() {
           {viewMode === 'blocchi' && (
             <div style={{ display:'flex', gap:'10px', alignItems:'flex-start' }}>
               {/* Canvas blocchi */}
-              <div style={{ flex:1 }}>
+              <div style={{ width: selectedBl ? '220px' : undefined, flex: selectedBl ? undefined : 1, flexShrink:0 }}>
                 {currBlocchi.length === 0 && (
                   <div style={{ textAlign:'center', padding:'36px 16px', color:'#9CA3AF', background:'#fff', border:'1.5px dashed #E5E7EB', borderRadius:'10px' }}>
                     <LayoutTemplate size={28} style={{ marginBottom:'8px', opacity:.3 }}/>
@@ -582,7 +582,7 @@ export default function EmailPage() {
               </div>
 
               {/* Pannello proprietà / variabili */}
-              <div style={{ width:'220px', flexShrink:0 }}>
+              <div style={{ flex:1, minWidth:0 }}>
                 {selectedBl ? (
                   <div style={{ background:'#fff', border:'1px solid #E5E7EB', borderRadius:'10px', overflow:'hidden' }}>
                     <div style={{ padding:'9px 12px', borderBottom:'1px solid #E5E7EB', display:'flex', alignItems:'center', justifyContent:'space-between', background:'#F9FAFB' }}>
@@ -592,7 +592,7 @@ export default function EmailPage() {
                       </div>
                       <button type="button" onClick={()=>setSelectedBlock(null)} style={{ background:'none', border:'none', cursor:'pointer', color:'#9CA3AF' }}><X size={13}/></button>
                     </div>
-                    <div style={{ padding:'12px', maxHeight:'600px', overflowY:'auto' }}>
+                    <div style={{ padding:'12px', maxHeight:'70vh', overflowY:'auto' }}>
                       <BlockProps block={selectedBl} onChange={nb=>updateBlock(selectedBlock,nb)}/>
                     </div>
                   </div>
