@@ -102,10 +102,12 @@ function blocchiToHtml(blocchi) {
 
 const DEFAULT_LOGO = 'https://raw.githubusercontent.com/alessandroparrelli/fileappoggio/main/NUOVO-LOGO-CNA-ROMA-SOLO-ROMA.png'
 
-function buildFullHtml(mostraHeader, mostraFooter, bodyHtml, logoSrc) {
+function buildFullHtml(mostraHeader, mostraFooter, bodyHtml, logoSrc, hColore, hTitolo) {
   const logo = logoSrc || DEFAULT_LOGO
+  const bg = hColore || BLU
+  const titoloHtml = hTitolo ? `<p style="margin:6px 0 0;font-size:13px;font-weight:600;color:rgba(255,255,255,0.85);font-family:Inter,Arial,sans-serif;letter-spacing:0.01em">${hTitolo}</p>` : ''
   const header = mostraHeader !== false
-    ? `<div style="background:${BLU};padding:0"><table style="width:100%;border-collapse:collapse"><tr><td style="padding:20px 32px"><img src="${logo}" alt="CNA Roma" style="height:40px;display:block" /></td></tr></table></div>` : ''
+    ? `<div style="background:${bg};padding:0"><table style="width:100%;border-collapse:collapse"><tr><td style="padding:16px 32px">${logo ? `<img src="${logo}" alt="CNA Roma" style="height:36px;display:block" />` : ''}${titoloHtml}</td></tr></table></div>` : ''
   const footer = mostraFooter !== false
     ? `<div style="background:#F9FAFB;border-top:1px solid #E5E7EB;padding:20px 32px"><p style="margin:0;font-size:11px;color:#9CA3AF;font-family:Inter,Arial,sans-serif">CNA di Roma — Confederazione Nazionale dell\u2019Artigianato · <a href="mailto:marketing@cnaroma.it" style="color:${BLU}">marketing@cnaroma.it</a></p></div>` : ''
   return `<!DOCTYPE html><html><head><meta charset="UTF-8"><meta name="viewport" content="width=device-width,initial-scale=1"></head><body style="margin:0;padding:0;background:#F0F2F5;font-family:Inter,Arial,sans-serif"><table style="width:100%;border-collapse:collapse"><tr><td style="padding:24px 16px"><div style="max-width:600px;margin:0 auto;background:#fff;border-radius:12px;overflow:hidden;box-shadow:0 2px 20px rgba(0,0,0,0.1)">${header}<div style="padding:32px">${bodyHtml}</div>${footer}</div></td></tr></table></body></html>`
@@ -225,7 +227,10 @@ function BlockProps({ block, onChange }) {
       {alignField()}
     </>
     case 'testo': return <>
-      <div style={{ marginBottom:'8px' }}><label style={lbl}>HTML</label><textarea value={block.html||''} onChange={e=>set('html',e.target.value)} rows={5} style={{ ...inp, fontFamily:'monospace', fontSize:'11px', resize:'vertical' }}/></div>
+      <div style={{ marginBottom:'8px' }}>
+        <label style={lbl}>Testo</label>
+        <RichEditor value={block.html||''} onChange={html=>set('html',html)} minHeight="120px"/>
+      </div>
       {numField('Dimensione','size',15,'px',11,22)}
       {colorField('Colore','colore','#374151')}
     </>
@@ -262,8 +267,14 @@ function BlockProps({ block, onChange }) {
       </div>
     </>
     case 'colonne': return <>
-      <div style={{ marginBottom:'8px' }}><label style={lbl}>Colonna sinistra (HTML)</label><textarea value={block.sinistra||''} onChange={e=>set('sinistra',e.target.value)} rows={3} style={{ ...inp, fontFamily:'monospace', fontSize:'11px', resize:'vertical' }}/></div>
-      <div style={{ marginBottom:'8px' }}><label style={lbl}>Colonna destra (HTML)</label><textarea value={block.destra||''} onChange={e=>set('destra',e.target.value)} rows={3} style={{ ...inp, fontFamily:'monospace', fontSize:'11px', resize:'vertical' }}/></div>
+      <div style={{ marginBottom:'8px' }}>
+        <label style={lbl}>Colonna sinistra</label>
+        <RichEditor value={block.sinistra||''} onChange={v=>set('sinistra',v)} minHeight="80px"/>
+      </div>
+      <div style={{ marginBottom:'8px' }}>
+        <label style={lbl}>Colonna destra</label>
+        <RichEditor value={block.destra||''} onChange={v=>set('destra',v)} minHeight="80px"/>
+      </div>
       {numField('Gap','gap',24,'px',0,48)}
     </>
     case 'info_box': return <>
@@ -292,6 +303,9 @@ export default function EventEmailTab({ eventoId }) {
   const [templates,       setTemplates]       = useState({})
   const [defaultTemplates,setDefaultTemplates]= useState({})
   const [logoUrl, setLogoUrl]                    = useState('')
+  const [headerColore, setHeaderColore]          = useState(BLU)
+  const [headerTitolo, setHeaderTitolo]           = useState('')
+  const [showLogoPicker, setShowLogoPicker]       = useState(false)
   const [blocchi,         setBlocchi]         = useState({}) // per tipo: { conferma: [...], ... }
   const [saving,          setSaving]          = useState(false)
   const [saved,           setSaved]           = useState(false)
@@ -330,6 +344,10 @@ export default function EventEmailTab({ eventoId }) {
       setTemplates(tMap)
       setBlocchi(bMap)
       if (firstLogoUrl) setLogoUrl(firstLogoUrl)
+      // carica header settings dal primo template trovato
+      const firstTpl = Object.values(tMap)[0]
+      if (firstTpl?.header_colore) setHeaderColore(firstTpl.header_colore)
+      if (firstTpl?.header_titolo !== undefined) setHeaderTitolo(firstTpl.header_titolo||'')
     }
   }
 
@@ -393,7 +411,7 @@ export default function EventEmailTab({ eventoId }) {
     setSaving(true)
     const bodyHtml = viewMode==='html' ? current.corpo_html : blocchiToHtml(currBlocchi)
     await supabase.from('email_templates')
-      .update({ oggetto:current.oggetto, corpo_html:bodyHtml, blocchi_json:JSON.stringify(currBlocchi), logo_url:logoUrl||null, personalizzato:true, updated_at:new Date().toISOString() })
+      .update({ oggetto:current.oggetto, corpo_html:bodyHtml, blocchi_json:JSON.stringify(currBlocchi), logo_url:logoUrl||null, header_colore:headerColore||null, header_titolo:headerTitolo||null, personalizzato:true, updated_at:new Date().toISOString() })
       .eq('event_id', eventoId).eq('tipo', selected)
     setSaving(false); setSaved(true); setTimeout(()=>setSaved(false), 2500)
   }
@@ -412,7 +430,7 @@ export default function EventEmailTab({ eventoId }) {
 
   function getPreviewHtml() {
     const bodyHtml = currBlocchi.length ? blocchiToHtml(currBlocchi) : (current.corpo_html||'')
-    return replacePreview(buildFullHtml(true, true, bodyHtml, logoUrl))
+    return replacePreview(buildFullHtml(true, true, bodyHtml, logoUrl, headerColore, headerTitolo))
   }
 
   const selectedBl = selectedBlock !== null ? currBlocchi[selectedBlock] : null
@@ -490,16 +508,61 @@ export default function EventEmailTab({ eventoId }) {
             </div>
           )}
 
-          {/* Logo header */}
+          {/* Header email configurabile */}
           {viewMode !== 'preview' && (
-            <div style={{ background:'#fff', border:'1px solid #E5E7EB', borderRadius:'8px', padding:'10px 12px', display:'flex', alignItems:'center', gap:'8px', flexWrap:'wrap' }}>
-              <span style={{ fontSize:'10px', fontWeight:'800', color:'#9CA3AF', textTransform:'uppercase', letterSpacing:'.07em', flexShrink:0 }}>Logo header</span>
-              {logoUrl && <img src={logoUrl} style={{ height:'28px', borderRadius:'4px', background:'#003DA5', padding:'4px 8px', objectFit:'contain' }} alt="logo"/>}
-              <input value={logoUrl||''} onChange={e=>setLogoUrl(e.target.value)}
-                style={{ ...inp, border:'none', padding:'2px 0', fontSize:'11px', fontFamily:'monospace', background:'transparent', outline:'none', flex:1, minWidth:'180px' }}
-                placeholder="URL logo (lascia vuoto per default CNA Roma)"/>
-              {logoUrl && <button type="button" onClick={()=>setLogoUrl('')}
-                style={{ background:'none', border:'none', cursor:'pointer', color:'#9CA3AF', fontSize:'11px', flexShrink:0 }}>✕ reset</button>}
+            <div style={{ background:'#fff', border:'1px solid #E5E7EB', borderRadius:'8px', overflow:'hidden' }}>
+              <div style={{ padding:'8px 12px', borderBottom:'1px solid #F3F4F6', display:'flex', alignItems:'center', gap:'8px' }}>
+                <span style={{ fontSize:'10px', fontWeight:'800', color:'#9CA3AF', textTransform:'uppercase', letterSpacing:'.07em' }}>Intestazione email</span>
+              </div>
+              <div style={{ padding:'10px 12px', display:'flex', flexDirection:'column', gap:'8px' }}>
+                {/* Preview live header */}
+                <div style={{ background:headerColore||BLU, borderRadius:'6px', padding:'10px 16px', display:'flex', alignItems:'center', gap:'10px' }}>
+                  {logoUrl && <img src={logoUrl} style={{ height:'28px', objectFit:'contain', flexShrink:0 }} alt="logo"/>}
+                  {headerTitolo && <span style={{ color:'rgba(255,255,255,0.9)', fontSize:'12px', fontWeight:'600', fontFamily:'Inter,sans-serif' }}>{headerTitolo}</span>}
+                  {!logoUrl && !headerTitolo && <span style={{ color:'rgba(255,255,255,0.4)', fontSize:'11px' }}>Anteprima header</span>}
+                </div>
+                {/* Colore sfondo */}
+                <div style={{ display:'flex', alignItems:'center', gap:'8px' }}>
+                  <label style={{ ...lbl, margin:0, flexShrink:0 }}>Colore</label>
+                  <input type="color" value={headerColore||BLU} onChange={e=>setHeaderColore(e.target.value)}
+                    style={{ width:'32px', height:'26px', border:'1px solid #E5E7EB', borderRadius:'4px', cursor:'pointer', padding:'1px', flexShrink:0 }}/>
+                  <input value={headerColore||BLU} onChange={e=>setHeaderColore(e.target.value)}
+                    style={{ ...inp, padding:'4px 8px', fontSize:'11px', fontFamily:'monospace', flex:1 }}/>
+                  <button type="button" onClick={()=>setHeaderColore(BLU)}
+                    style={{ background:'none', border:'none', cursor:'pointer', color:'#9CA3AF', fontSize:'10px', flexShrink:0 }}>reset</button>
+                </div>
+                {/* Titolo opzionale */}
+                <div style={{ display:'flex', alignItems:'center', gap:'8px' }}>
+                  <label style={{ ...lbl, margin:0, flexShrink:0 }}>Titolo</label>
+                  <input value={headerTitolo||''} onChange={e=>setHeaderTitolo(e.target.value)}
+                    style={{ ...inp, padding:'4px 8px', fontSize:'12px', flex:1 }}
+                    placeholder="es. {{nome_evento}} oppure Forum CNA 2026"/>
+                </div>
+                {/* Logo */}
+                <div>
+                  <div style={{ display:'flex', alignItems:'center', gap:'6px', marginBottom:'6px' }}>
+                    <label style={{ ...lbl, margin:0 }}>Logo</label>
+                    <button type="button" onClick={()=>setShowLogoPicker(v=>!v)}
+                      style={{ fontSize:'10px', padding:'2px 8px', border:'1px solid #E5E7EB', borderRadius:'4px', cursor:'pointer', background:showLogoPicker?BLU:'#fff', color:showLogoPicker?'#fff':'#374151', fontFamily:'Inter,sans-serif' }}>
+                      {showLogoPicker ? '✕ chiudi' : '📂 scegli logo'}
+                    </button>
+                    {logoUrl && <button type="button" onClick={()=>setLogoUrl('')}
+                      style={{ fontSize:'10px', padding:'2px 8px', border:'1px solid #FEE2E2', borderRadius:'4px', cursor:'pointer', background:'#FFF5F5', color:'#DC2626', fontFamily:'Inter,sans-serif' }}>
+                      ✕ rimuovi
+                    </button>}
+                  </div>
+                  {showLogoPicker && (
+                    <div style={{ border:'1px solid #E5E7EB', borderRadius:'8px', overflow:'hidden', maxHeight:'240px', overflowY:'auto' }}>
+                      <LogoManager
+                        value={logoUrl}
+                        onChange={url=>{ setLogoUrl(url||''); setShowLogoPicker(false) }}
+                        compact={true}
+                        showDefault={true}
+                      />
+                    </div>
+                  )}
+                </div>
+              </div>
             </div>
           )}
 

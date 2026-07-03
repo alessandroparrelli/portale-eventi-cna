@@ -14,6 +14,7 @@ import {
   Upload, X, Check, RotateCcw, Settings, Zap, Clock, Star
 } from 'lucide-react'
 import { Field, Input, Select, Btn } from '../../components/ui'
+import RichEditor from '../../components/editor/RichEditor'
 
 // ─── Costanti ────────────────────────────────────────────────────────────────
 const BLU = '#003DA5'
@@ -343,10 +344,8 @@ function BlockProps({ block, onChange }) {
     case 'testo':
       return <>
         <div style={{ marginBottom:'8px' }}>
-          <label style={lbl}>Contenuto HTML</label>
-          <textarea value={block.html||''} onChange={e=>set('html',e.target.value)}
-            rows={6} style={{ ...inp, fontFamily:'monospace', fontSize:'12px', resize:'vertical' }}
-            placeholder="Usa <strong>, <em>, <br>, ecc. Variabili: {{nome}}, {{nome_evento}}…"/>
+          <label style={lbl}>Testo</label>
+          <RichEditor value={block.html||''} onChange={html=>set('html',html)} minHeight="120px"/>
         </div>
         {numField('Dimensione testo', 'size', 15, 'px', 11, 24)}
         {colorField('Colore testo', 'colore', '#374151')}
@@ -412,14 +411,12 @@ function BlockProps({ block, onChange }) {
     case 'colonne':
       return <>
         <div style={{ marginBottom:'8px' }}>
-          <label style={lbl}>Colonna sinistra (HTML)</label>
-          <textarea value={block.sinistra||''} onChange={e=>set('sinistra',e.target.value)}
-            rows={4} style={{ ...inp, fontFamily:'monospace', fontSize:'12px', resize:'vertical' }}/>
+          <label style={lbl}>Colonna sinistra</label>
+          <RichEditor value={block.sinistra||''} onChange={v=>set('sinistra',v)} minHeight="80px"/>
         </div>
         <div style={{ marginBottom:'8px' }}>
-          <label style={lbl}>Colonna destra (HTML)</label>
-          <textarea value={block.destra||''} onChange={e=>set('destra',e.target.value)}
-            rows={4} style={{ ...inp, fontFamily:'monospace', fontSize:'12px', resize:'vertical' }}/>
+          <label style={lbl}>Colonna destra</label>
+          <RichEditor value={block.destra||''} onChange={v=>set('destra',v)} minHeight="80px"/>
         </div>
         {numField('Gap tra colonne', 'gap', 24, 'px', 0, 48)}
       </>
