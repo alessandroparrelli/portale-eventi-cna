@@ -7,7 +7,7 @@ import { supabase } from '../../lib/supabase'
 import {
   Save, RotateCcw, CheckCircle, Code, Eye as EyeIcon, AlertTriangle,
   Layers, Image as ImageIcon, Type, AlignLeft, Square, Star, Zap, Minus,
-  Columns, LayoutTemplate, ChevronUp, ChevronDown, Trash2, GripVertical,
+  Columns, LayoutTemplate, ChevronUp, ChevronDown, Trash2, GripVertical, MapPin,
   AlignCenter, AlignRight, Upload, X, Loader2, Smartphone, Monitor, Plus
 } from 'lucide-react'
 
@@ -33,6 +33,7 @@ const BLOCK_TYPES = [
   { tipo:'qr',        label:'QR Code',     icon:<Zap size={13}/>,            cat:'evento' },
   { tipo:'separatore',label:'Separatore',  icon:<Minus size={13}/>,          cat:'layout' },
   { tipo:'spazio',    label:'Spazio',      icon:<span style={{fontSize:'12px'}}>↕</span>, cat:'layout' },
+  { tipo:'mappa',     label:'Mappa',       icon:<MapPin size={13}/>,         cat:'evento' },
 ]
 
 const VARIABILI = [
@@ -63,6 +64,7 @@ function blockDefaults(tipo) {
     qr:         { testo:'Il tuo QR code di accesso', size:160 },
     separatore: { colore:'#E5E7EB', spessore:1, spazio:24 },
     spazio:     { altezza:32 },
+    mappa:      { indirizzo:'{{luogo_evento}}', testo:'Come raggiungerci', zoom:15, altezza:200 },
   }
   return { tipo, id:`b_${Date.now()}_${Math.random().toString(36).slice(2,7)}`, ...(map[tipo]||{}) }
 }
@@ -95,6 +97,28 @@ function blocchiToHtml(blocchi) {
         return `<div style="padding:${b.spazio||24}px 0"><hr style="border:none;border-top:${b.spessore||1}px solid ${b.colore||'#E5E7EB'};margin:0"/></div>`
       case 'spazio':
         return `<div style="height:${b.altezza||32}px"></div>`
+      case 'mappa': {
+        const addr    = (b.indirizzo||'').replace(/\{\{luogo_evento\}\}/g, b.indirizzo||'')
+        const addrEnc = encodeURIComponent(addr)
+        const h       = b.altezza||200
+        const mapUrl  = `https://www.google.com/maps/search/?api=1&query=${addrEnc}`
+        // Immagine mappa via OpenStreetMap staticmap (no API key, no billing)
+        const imgUrl  = `https://staticmap.openstreetmap.de/staticmap.php?center=&zoom=${b.zoom||15}&size=560x${h}&maptype=mapnik&markers=${addrEnc},lightblue,`
+        return `<div style="margin:0 0 20px;border-radius:10px;overflow:hidden;border:1.5px solid #E5E7EB">` +
+          `<a href="${mapUrl}" target="_blank" rel="noopener" style="display:block;text-decoration:none">` +
+          `<div style="background:linear-gradient(135deg,#EFF6FF 0%,#DBEAFE 100%);height:${h}px;display:flex;align-items:center;justify-content:center;flex-direction:column;gap:8px">` +
+          `<span style="font-size:40px">🗺️</span>` +
+          `<p style="margin:0;font-size:13px;color:#1D4ED8;font-weight:600;font-family:Inter,Arial,sans-serif">Clicca per aprire la mappa</p>` +
+          `</div>` +
+          `<div style="padding:14px 18px;background:#fff;border-top:1.5px solid #DBEAFE;display:flex;align-items:center;gap:12px">` +
+          `<span style="font-size:22px;flex-shrink:0">📍</span>` +
+          `<div style="flex:1;min-width:0">` +
+          `<p style="margin:0 0 2px;font-size:14px;font-weight:700;color:#0A0A0A;font-family:Inter,Arial,sans-serif">${b.testo||'Come raggiungerci'}</p>` +
+          `<p style="margin:0;font-size:12px;color:#374151;font-family:Inter,Arial,sans-serif">${addr}</p>` +
+          `</div>` +
+          `<span style="font-size:11px;font-weight:700;color:#003DA5;font-family:Inter,Arial,sans-serif;white-space:nowrap;border:1.5px solid #BFDBFE;padding:5px 10px;border-radius:6px;flex-shrink:0">Apri Maps →</span>` +
+          `</div></a></div>`
+      }
       default: return ''
     }
   }).join('\n')
@@ -345,6 +369,24 @@ function BlockProps({ block, onChange }) {
       {numField('Spazio','spazio',24,'px',0,64)}
     </>
     case 'spazio': return numField('Altezza','altezza',32,'px',8,120)
+    case 'mappa': return <>
+      <div style={{ marginBottom:'8px' }}>
+        <label style={lbl}>Indirizzo</label>
+        <input value={block.indirizzo||''} onChange={e=>set('indirizzo',e.target.value)} style={inp}
+          placeholder="Via Roma 1, Roma — oppure {{luogo_evento}}"/>
+        <p style={{ fontSize:'10px', color:'#9CA3AF', margin:'3px 0 0' }}>Puoi usare <code>{'{{luogo_evento}}'}</code> per usare il luogo dell'evento</p>
+      </div>
+      <div style={{ marginBottom:'8px' }}>
+        <label style={lbl}>Testo sotto mappa</label>
+        <input value={block.testo||''} onChange={e=>set('testo',e.target.value)} style={inp}
+          placeholder="Come raggiungerci"/>
+      </div>
+      {numField('Altezza mappa','altezza',200,'px',120,400)}
+      {numField('Zoom','zoom',15,'',8,18)}
+      <p style={{ fontSize:'10px', color:'#9CA3AF', margin:'8px 0 0', fontStyle:'italic' }}>
+        Nella mail: immagine statica cliccabile → apre Google Maps
+      </p>
+    </>
     default: return null
   }
 }
