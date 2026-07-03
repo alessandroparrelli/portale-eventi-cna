@@ -100,9 +100,12 @@ function blocchiToHtml(blocchi) {
   }).join('\n')
 }
 
-function buildFullHtml(mostraHeader, mostraFooter, bodyHtml) {
+const DEFAULT_LOGO = 'https://raw.githubusercontent.com/alessandroparrelli/fileappoggio/main/NUOVO-LOGO-CNA-ROMA-SOLO-ROMA.png'
+
+function buildFullHtml(mostraHeader, mostraFooter, bodyHtml, logoSrc) {
+  const logo = logoSrc || DEFAULT_LOGO
   const header = mostraHeader !== false
-    ? `<div style="background:${BLU};padding:0"><table style="width:100%;border-collapse:collapse"><tr><td style="padding:20px 32px"><img src="https://raw.githubusercontent.com/alessandroparrelli/fileappoggio/main/NUOVO-LOGO-CNA-ROMA-SOLO-ROMA.png" alt="CNA Roma" style="height:40px;display:block" /></td></tr></table></div>` : ''
+    ? `<div style="background:${BLU};padding:0"><table style="width:100%;border-collapse:collapse"><tr><td style="padding:20px 32px"><img src="${logo}" alt="CNA Roma" style="height:40px;display:block" /></td></tr></table></div>` : ''
   const footer = mostraFooter !== false
     ? `<div style="background:#F9FAFB;border-top:1px solid #E5E7EB;padding:20px 32px"><p style="margin:0;font-size:11px;color:#9CA3AF;font-family:Inter,Arial,sans-serif">CNA di Roma — Confederazione Nazionale dell\u2019Artigianato · <a href="mailto:marketing@cnaroma.it" style="color:${BLU}">marketing@cnaroma.it</a></p></div>` : ''
   return `<!DOCTYPE html><html><head><meta charset="UTF-8"><meta name="viewport" content="width=device-width,initial-scale=1"></head><body style="margin:0;padding:0;background:#F0F2F5;font-family:Inter,Arial,sans-serif"><table style="width:100%;border-collapse:collapse"><tr><td style="padding:24px 16px"><div style="max-width:600px;margin:0 auto;background:#fff;border-radius:12px;overflow:hidden;box-shadow:0 2px 20px rgba(0,0,0,0.1)">${header}<div style="padding:32px">${bodyHtml}</div>${footer}</div></td></tr></table></body></html>`
@@ -288,6 +291,7 @@ export default function EventEmailTab({ eventoId }) {
   const [selected,        setSelected]        = useState('conferma')
   const [templates,       setTemplates]       = useState({})
   const [defaultTemplates,setDefaultTemplates]= useState({})
+  const [logoUrl, setLogoUrl]                    = useState('')
   const [blocchi,         setBlocchi]         = useState({}) // per tipo: { conferma: [...], ... }
   const [saving,          setSaving]          = useState(false)
   const [saved,           setSaved]           = useState(false)
@@ -314,8 +318,10 @@ export default function EventEmailTab({ eventoId }) {
     const { data } = await supabase.from('email_templates').select('*').eq('event_id', eventoId)
     if (data) {
       const tMap = {}, bMap = {}
+      let firstLogoUrl = ''
       data.forEach(t => {
         tMap[t.tipo] = t
+        if (t.logo_url && !firstLogoUrl) firstLogoUrl = t.logo_url
         try {
           const parsed = JSON.parse(t.blocchi_json||'[]')
           if (Array.isArray(parsed) && parsed.length) bMap[t.tipo] = parsed
@@ -323,6 +329,7 @@ export default function EventEmailTab({ eventoId }) {
       })
       setTemplates(tMap)
       setBlocchi(bMap)
+      if (firstLogoUrl) setLogoUrl(firstLogoUrl)
     }
   }
 
@@ -338,9 +345,10 @@ export default function EventEmailTab({ eventoId }) {
     if (!def) return []
     try { const p = JSON.parse(def.blocchi_json||'[]'); return Array.isArray(p) ? p : [] } catch { return [] }
   })()
-  const currBlocchi = blocchi[selected] || defaultBlocchi
+  const hasProprioBlocchi = blocchi[selected] != null && blocchi[selected].length > 0
+  const currBlocchi = hasProprioBlocchi ? blocchi[selected] : defaultBlocchi
   const isPersonalizzato = !!templates[selected]?.personalizzato
-  const usaDefault = !blocchi[selected] && defaultBlocchi.length > 0
+  const usaDefault = !hasProprioBlocchi && defaultBlocchi.length > 0
 
   function update(field, value) {
     setTemplates(prev => ({ ...prev, [selected]:{ ...prev[selected], [field]:value, personalizzato:true } }))
@@ -385,7 +393,7 @@ export default function EventEmailTab({ eventoId }) {
     setSaving(true)
     const bodyHtml = viewMode==='html' ? current.corpo_html : blocchiToHtml(currBlocchi)
     await supabase.from('email_templates')
-      .update({ oggetto:current.oggetto, corpo_html:bodyHtml, blocchi_json:JSON.stringify(currBlocchi), personalizzato:true, updated_at:new Date().toISOString() })
+      .update({ oggetto:current.oggetto, corpo_html:bodyHtml, blocchi_json:JSON.stringify(currBlocchi), logo_url:logoUrl||null, personalizzato:true, updated_at:new Date().toISOString() })
       .eq('event_id', eventoId).eq('tipo', selected)
     setSaving(false); setSaved(true); setTimeout(()=>setSaved(false), 2500)
   }
@@ -395,7 +403,7 @@ export default function EventEmailTab({ eventoId }) {
     if (!def) return
     setResetting(true)
     setTemplates(prev => ({ ...prev, [selected]:{ ...prev[selected], oggetto:def.oggetto, corpo_html:def.corpo_html, personalizzato:false } }))
-    setBlocchi(prev => ({ ...prev, [selected]:[] }))
+    setBlocchi(prev => { const n={...prev}; delete n[selected]; return n })
     await supabase.from('email_templates')
       .update({ oggetto:def.oggetto, corpo_html:def.corpo_html, blocchi_json:null, personalizzato:false, updated_at:new Date().toISOString() })
       .eq('event_id', eventoId).eq('tipo', selected)
@@ -404,7 +412,7 @@ export default function EventEmailTab({ eventoId }) {
 
   function getPreviewHtml() {
     const bodyHtml = currBlocchi.length ? blocchiToHtml(currBlocchi) : (current.corpo_html||'')
-    return replacePreview(buildFullHtml(true, true, bodyHtml))
+    return replacePreview(buildFullHtml(true, true, bodyHtml, logoUrl))
   }
 
   const selectedBl = selectedBlock !== null ? currBlocchi[selectedBlock] : null
@@ -479,6 +487,19 @@ export default function EventEmailTab({ eventoId }) {
               <input value={current.oggetto||''} onChange={e=>update('oggetto',e.target.value)}
                 style={{ ...inp, border:'none', padding:'2px 0', fontSize:'13px', fontWeight:'500', background:'transparent', outline:'none' }}
                 placeholder="Oggetto dell'email…"/>
+            </div>
+          )}
+
+          {/* Logo header */}
+          {viewMode !== 'preview' && (
+            <div style={{ background:'#fff', border:'1px solid #E5E7EB', borderRadius:'8px', padding:'10px 12px', display:'flex', alignItems:'center', gap:'8px', flexWrap:'wrap' }}>
+              <span style={{ fontSize:'10px', fontWeight:'800', color:'#9CA3AF', textTransform:'uppercase', letterSpacing:'.07em', flexShrink:0 }}>Logo header</span>
+              {logoUrl && <img src={logoUrl} style={{ height:'28px', borderRadius:'4px', background:'#003DA5', padding:'4px 8px', objectFit:'contain' }} alt="logo"/>}
+              <input value={logoUrl||''} onChange={e=>setLogoUrl(e.target.value)}
+                style={{ ...inp, border:'none', padding:'2px 0', fontSize:'11px', fontFamily:'monospace', background:'transparent', outline:'none', flex:1, minWidth:'180px' }}
+                placeholder="URL logo (lascia vuoto per default CNA Roma)"/>
+              {logoUrl && <button type="button" onClick={()=>setLogoUrl('')}
+                style={{ background:'none', border:'none', cursor:'pointer', color:'#9CA3AF', fontSize:'11px', flexShrink:0 }}>✕ reset</button>}
             </div>
           )}
 

@@ -101,8 +101,11 @@ function blocchiToHtml(blocchi) {
 }
 
 // ─── Wrapper HTML completo identico all'email reale ───────────────────────────
-function buildFullHtml(bodyHtml) {
-  const header = `<div style="background:${BLU};padding:0"><table style="width:100%;border-collapse:collapse"><tr><td style="padding:20px 32px"><img src="https://raw.githubusercontent.com/alessandroparrelli/fileappoggio/main/NUOVO-LOGO-CNA-ROMA-SOLO-ROMA.png" alt="CNA Roma" style="height:40px;display:block" /></td></tr></table></div>`
+const DEFAULT_LOGO = 'https://raw.githubusercontent.com/alessandroparrelli/fileappoggio/main/NUOVO-LOGO-CNA-ROMA-SOLO-ROMA.png'
+
+function buildFullHtml(bodyHtml, logoSrc) {
+  const logo = logoSrc || DEFAULT_LOGO
+  const header = `<div style="background:${BLU};padding:0"><table style="width:100%;border-collapse:collapse"><tr><td style="padding:20px 32px"><img src="${logo}" alt="CNA Roma" style="height:40px;display:block" /></td></tr></table></div>`
   const footer = `<div style="background:#F9FAFB;border-top:1px solid #E5E7EB;padding:20px 32px"><p style="margin:0;font-size:11px;color:#9CA3AF;font-family:Inter,Arial,sans-serif">CNA di Roma \u2014 Confederazione Nazionale dell\u2019Artigianato \u00b7 <a href="mailto:marketing@cnaroma.it" style="color:${BLU}">marketing@cnaroma.it</a></p></div>`
   return `<!DOCTYPE html><html><head><meta charset="UTF-8"><meta name="viewport" content="width=device-width,initial-scale=1"></head><body style="margin:0;padding:0;background:#F0F2F5;font-family:Inter,Arial,sans-serif"><table style="width:100%;border-collapse:collapse"><tr><td style="padding:24px 16px"><div style="max-width:600px;margin:0 auto;background:#fff;border-radius:12px;overflow:hidden;box-shadow:0 2px 20px rgba(0,0,0,0.1)">${header}<div style="padding:32px">${bodyHtml}</div>${footer}</div></td></tr></table></body></html>`
 }
@@ -287,6 +290,7 @@ export default function EmailPage() {
   const [loading,       setLoading]       = useState(true)
   const [selectedBlock, setSelectedBlock] = useState(null)
   const [showVars,      setShowVars]      = useState(false)
+  const [logoUrl,       setLogoUrl]       = useState('')
   const dragIdx = useRef(null)
   const dragOverIdx = useRef(null)
 
@@ -298,8 +302,10 @@ export default function EmailPage() {
     const { data } = await supabase.from('email_templates_default').select('*')
     if (data) {
       const tMap = {}, bMap = {}
+      let firstLogoUrl = ''
       data.forEach(t => {
         tMap[t.tipo] = t
+        if (t.logo_url && !firstLogoUrl) firstLogoUrl = t.logo_url
         try {
           const parsed = JSON.parse(t.blocchi_json||'[]')
           if (Array.isArray(parsed) && parsed.length) bMap[t.tipo] = parsed
@@ -307,6 +313,7 @@ export default function EmailPage() {
       })
       setTemplates(tMap)
       setBlocchi(bMap)
+      if (firstLogoUrl) setLogoUrl(firstLogoUrl)
     }
     setLoading(false)
   }
@@ -355,13 +362,13 @@ export default function EmailPage() {
     setSaving(true)
     const bodyHtml = viewMode==='html' ? current.corpo_html : blocchiToHtml(currBlocchi)
     await supabase.from('email_templates_default')
-      .update({ oggetto:current.oggetto, corpo_html:bodyHtml, blocchi_json:JSON.stringify(currBlocchi), updated_at:new Date().toISOString() })
+      .update({ oggetto:current.oggetto, corpo_html:bodyHtml, blocchi_json:JSON.stringify(currBlocchi), logo_url:logoUrl||null, updated_at:new Date().toISOString() })
       .eq('tipo', selected)
     setSaving(false); setSaved(true); setTimeout(()=>setSaved(false), 2500)
   }
 
   const previewHtml = replacePreview(
-    buildFullHtml(currBlocchi.length ? blocchiToHtml(currBlocchi) : (current.corpo_html||''))
+    buildFullHtml(currBlocchi.length ? blocchiToHtml(currBlocchi) : (current.corpo_html||''), logoUrl)
   )
 
   const selectedBl = selectedBlock !== null ? currBlocchi[selectedBlock] : null
@@ -439,6 +446,18 @@ export default function EmailPage() {
               <input value={current.oggetto||''} onChange={e=>update('oggetto',e.target.value)}
                 style={{ ...inp, border:'none', padding:'2px 0', fontSize:'13px', fontWeight:'500', background:'transparent', outline:'none' }}
                 placeholder="Oggetto dell'email…"/>
+            </div>
+          )}
+
+          {viewMode !== 'preview' && (
+            <div style={{ background:'#fff', border:'1px solid #E5E7EB', borderRadius:'8px', padding:'10px 14px', display:'flex', alignItems:'center', gap:'8px', flexWrap:'wrap' }}>
+              <span style={{ fontSize:'10px', fontWeight:'800', color:'#9CA3AF', textTransform:'uppercase', letterSpacing:'.07em', flexShrink:0 }}>Logo header</span>
+              {logoUrl && <img src={logoUrl} style={{ height:'28px', borderRadius:'4px', background:'#003DA5', padding:'4px 8px', objectFit:'contain' }} alt="logo"/>}
+              <input value={logoUrl||''} onChange={e=>setLogoUrl(e.target.value)}
+                style={{ ...inp, border:'none', padding:'2px 0', fontSize:'11px', fontFamily:'monospace', background:'transparent', outline:'none', flex:1, minWidth:'180px' }}
+                placeholder="URL logo (lascia vuoto per il logo default CNA Roma)"/>
+              {logoUrl && <button type="button" onClick={()=>setLogoUrl('')}
+                style={{ background:'none', border:'none', cursor:'pointer', color:'#9CA3AF', fontSize:'11px' }}>✕ reset</button>}
             </div>
           )}
 
