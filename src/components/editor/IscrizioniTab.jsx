@@ -131,8 +131,8 @@ function RigaCampoExtra({ campo, onChange, onDelete }) {
         <div style={{ marginBottom: '8px' }}>
           <label style={sLabel}>Opzioni (una per riga)</label>
           <textarea
-            value={(campo.opzioni?.choices || []).join('\n')}
-            onChange={e => onChange({ ...campo, opzioni: { choices: e.target.value.split('\n').filter(Boolean) } })}
+            value={(campo.opzioni?._raw ?? (campo.opzioni?.choices || []).join('\n'))}
+            onChange={e => onChange({ ...campo, opzioni: { choices: e.target.value.split('\n').filter(s => s.trim()), _raw: e.target.value } })}
             placeholder={"Opzione 1\nOpzione 2\nOpzione 3"}
             rows={3}
             style={{ ...sInput, resize: 'vertical', fontFamily: "'Inter',sans-serif", fontSize: '13px' }}
@@ -265,14 +265,14 @@ export default function IscrizioniTab({ event, setEvent, eventId }) {
             obbligatorio: c.obbligatorio,
             visibile:    true,
             ordine:      c.ordine,
-            opzioni:     c.opzioni,
+            opzioni:     c.opzioni ? { choices: c.opzioni.choices } : null,
           }).select().single()
           if (error) throw error
           // Sostituisce il record temporaneo con quello reale
           setCampi(prev => prev.map(x => x.id === c.id ? ins : x))
         } else {
           const { error } = await supabase.from('form_fields')
-            .update({ label: c.label, tipo: c.tipo, obbligatorio: c.obbligatorio, ordine: c.ordine, opzioni: c.opzioni })
+            .update({ label: c.label, tipo: c.tipo, obbligatorio: c.obbligatorio, ordine: c.ordine, opzioni: c.opzioni ? { choices: c.opzioni.choices } : null })
             .eq('id', c.id)
           if (error) throw error
         }
