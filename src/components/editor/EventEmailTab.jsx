@@ -100,6 +100,58 @@ function blocchiToHtml(blocchi) {
   }).join('\n')
 }
 
+
+// ─── LogoPicker leggero (solo griglia selezione, senza upload/delete) ────────
+function LogoPicker({ value, onChange }) {
+  const [loghi, setLoghi] = useState([])
+  const [loading, setLoading] = useState(true)
+  const DEFAULT_URL = 'https://raw.githubusercontent.com/alessandroparrelli/fileappoggio/main/NUOVO-LOGO-CNA-ROMA-SOLO-ROMA.png'
+
+  useEffect(() => {
+    async function fetch_() {
+      try {
+        const { data: { session } } = await supabase.auth.getSession()
+        const jwt = session?.access_token
+        if (!jwt) return
+        const res = await fetch(
+          `${import.meta.env.VITE_SUPABASE_URL}/functions/v1/github-list-loghi?folder=loghi`,
+          { headers: { 'Authorization': `Bearer ${jwt}` } }
+        )
+        if (!res.ok) return
+        const data = await res.json()
+        if (data.ok && Array.isArray(data.files)) {
+          setLoghi([
+            { name: 'CNA Roma (default)', url: DEFAULT_URL, isDefault: true },
+            ...data.files.map(f => ({ name: f.name.replace(/\.[^.]+$/, '').replace(/[-_]/g, ' '), url: f.url + '?v=' + Date.now() }))
+          ])
+        }
+      } catch {}
+      setLoading(false)
+    }
+    fetch_()
+  }, [])
+
+  if (loading) return <div style={{ padding:'12px', textAlign:'center', color:'#9CA3AF', fontSize:'12px' }}>Caricamento loghi…</div>
+
+  return (
+    <div style={{ padding:'10px', display:'grid', gridTemplateColumns:'repeat(auto-fill, minmax(72px, 1fr))', gap:'6px' }}>
+      {loghi.map((logo, i) => {
+        const sel = value === logo.url || (!value && logo.isDefault)
+        return (
+          <button key={i} type="button" onClick={() => onChange(logo.isDefault ? '' : logo.url)}
+            style={{ border:`2px solid ${sel ? BLU : '#E5E7EB'}`, borderRadius:'8px', background: sel ? '#EEF3FF' : '#fff', padding:'6px', cursor:'pointer', display:'flex', flexDirection:'column', alignItems:'center', gap:'4px' }}>
+            <img src={logo.url} alt={logo.name} style={{ height:'36px', width:'100%', objectFit:'contain' }}
+              onError={e => e.target.style.opacity = '0.3'}/>
+            <span style={{ fontSize:'9px', color: sel ? BLU : '#6B7280', textAlign:'center', lineHeight:1.2, fontWeight: sel ? '700' : '400', overflow:'hidden', textOverflow:'ellipsis', whiteSpace:'nowrap', maxWidth:'100%' }}>
+              {logo.name}
+            </span>
+          </button>
+        )
+      })}
+    </div>
+  )
+}
+
 const DEFAULT_LOGO = 'https://raw.githubusercontent.com/alessandroparrelli/fileappoggio/main/NUOVO-LOGO-CNA-ROMA-SOLO-ROMA.png'
 
 function buildFullHtml(mostraHeader, mostraFooter, bodyHtml, logoSrc, hColore, hTitolo) {
@@ -107,7 +159,7 @@ function buildFullHtml(mostraHeader, mostraFooter, bodyHtml, logoSrc, hColore, h
   const bg = hColore || BLU
   const titoloHtml = hTitolo ? `<p style="margin:6px 0 0;font-size:13px;font-weight:600;color:rgba(255,255,255,0.85);font-family:Inter,Arial,sans-serif;letter-spacing:0.01em">${hTitolo}</p>` : ''
   const header = mostraHeader !== false
-    ? `<div style="background:${bg};padding:0"><table style="width:100%;border-collapse:collapse"><tr><td style="padding:16px 32px">${logo ? `<img src="${logo}" alt="CNA Roma" style="height:36px;display:block" />` : ''}${titoloHtml}</td></tr></table></div>` : ''
+    ? `<div style="background:${bg};padding:0"><table style="width:100%;border-collapse:collapse"><tr><td style="padding:16px 32px">${logo ? `<img src="${logo}" alt="CNA Roma" style="height:48px;display:block" />` : ''}${titoloHtml}</td></tr></table></div>` : ''
   const footer = mostraFooter !== false
     ? `<div style="background:#F9FAFB;border-top:1px solid #E5E7EB;padding:20px 32px"><p style="margin:0;font-size:11px;color:#9CA3AF;font-family:Inter,Arial,sans-serif">CNA di Roma — Confederazione Nazionale dell\u2019Artigianato · <a href="mailto:marketing@cnaroma.it" style="color:${BLU}">marketing@cnaroma.it</a></p></div>` : ''
   return `<!DOCTYPE html><html><head><meta charset="UTF-8"><meta name="viewport" content="width=device-width,initial-scale=1"></head><body style="margin:0;padding:0;background:#F0F2F5;font-family:Inter,Arial,sans-serif"><table style="width:100%;border-collapse:collapse"><tr><td style="padding:24px 16px"><div style="max-width:600px;margin:0 auto;background:#fff;border-radius:12px;overflow:hidden;box-shadow:0 2px 20px rgba(0,0,0,0.1)">${header}<div style="padding:32px">${bodyHtml}</div>${footer}</div></td></tr></table></body></html>`
@@ -420,10 +472,17 @@ export default function EventEmailTab({ eventoId }) {
     const def = defaultTemplates[selected]
     if (!def) return
     setResetting(true)
-    setTemplates(prev => ({ ...prev, [selected]:{ ...prev[selected], oggetto:def.oggetto, corpo_html:def.corpo_html, personalizzato:false } }))
+    // Resetta blocchi (rimuove chiave → currBlocchi cade su defaultBlocchi)
     setBlocchi(prev => { const n={...prev}; delete n[selected]; return n })
+    // Resetta oggetto e header
+    setTemplates(prev => ({ ...prev, [selected]:{ ...prev[selected], oggetto:def.oggetto, corpo_html:def.corpo_html, personalizzato:false } }))
+    // Resetta header (usa quelli del default, o i valori base)
+    setLogoUrl(def.logo_url || '')
+    setHeaderColore(def.header_colore || BLU)
+    setHeaderTitolo(def.header_titolo || '')
+    setSelectedBlock(null)
     await supabase.from('email_templates')
-      .update({ oggetto:def.oggetto, corpo_html:def.corpo_html, blocchi_json:null, personalizzato:false, updated_at:new Date().toISOString() })
+      .update({ oggetto:def.oggetto, corpo_html:def.corpo_html, blocchi_json:null, logo_url:def.logo_url||null, header_colore:def.header_colore||null, header_titolo:def.header_titolo||null, personalizzato:false, updated_at:new Date().toISOString() })
       .eq('event_id', eventoId).eq('tipo', selected)
     setResetting(false); setShowResetModal(false)
   }
@@ -517,7 +576,7 @@ export default function EventEmailTab({ eventoId }) {
               <div style={{ padding:'10px 12px', display:'flex', flexDirection:'column', gap:'8px' }}>
                 {/* Preview live header */}
                 <div style={{ background:headerColore||BLU, borderRadius:'6px', padding:'10px 16px', display:'flex', alignItems:'center', gap:'10px' }}>
-                  {logoUrl && <img src={logoUrl} style={{ height:'28px', objectFit:'contain', flexShrink:0 }} alt="logo"/>}
+                  {logoUrl && <img src={logoUrl} style={{ height:'40px', objectFit:'contain', flexShrink:0 }} alt="logo"/>}
                   {headerTitolo && <span style={{ color:'rgba(255,255,255,0.9)', fontSize:'12px', fontWeight:'600', fontFamily:'Inter,sans-serif' }}>{headerTitolo}</span>}
                   {!logoUrl && !headerTitolo && <span style={{ color:'rgba(255,255,255,0.4)', fontSize:'11px' }}>Anteprima header</span>}
                 </div>
@@ -552,13 +611,8 @@ export default function EventEmailTab({ eventoId }) {
                     </button>}
                   </div>
                   {showLogoPicker && (
-                    <div style={{ border:'1px solid #E5E7EB', borderRadius:'8px', overflow:'hidden', maxHeight:'240px', overflowY:'auto' }}>
-                      <LogoManager
-                        value={logoUrl}
-                        onChange={url=>{ setLogoUrl(url||''); setShowLogoPicker(false) }}
-                        compact={true}
-                        showDefault={true}
-                      />
+                    <div style={{ border:'1px solid #E5E7EB', borderRadius:'8px', overflow:'hidden', maxHeight:'260px', overflowY:'auto' }}>
+                      <LogoPicker value={logoUrl} onChange={url=>{ setLogoUrl(url); setShowLogoPicker(false) }}/>
                     </div>
                   )}
                 </div>
