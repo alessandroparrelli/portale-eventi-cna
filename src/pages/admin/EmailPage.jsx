@@ -513,7 +513,7 @@ export default function EmailPage() {
                       </div>
                       <button type="button" onClick={()=>setSelectedBlock(null)} style={{ background:'none', border:'none', cursor:'pointer', color:'#9CA3AF' }}><X size={13}/></button>
                     </div>
-                    <div style={{ padding:'12px', maxHeight:'500px', overflowY:'auto' }}>
+                    <div style={{ padding:'12px', maxHeight:'600px', overflowY:'auto' }}>
                       <BlockProps block={selectedBl} onChange={nb=>updateBlock(selectedBlock,nb)}/>
                     </div>
                   </div>
@@ -552,7 +552,7 @@ export default function EmailPage() {
                 <strong>Oggetto:</strong> {replacePreview(current.oggetto||'—')}
               </div>
               <div style={{ maxWidth:previewDevice==='mobile'?'375px':'100%', margin:'0 auto', border:'1px solid #E5E7EB', borderRadius:'8px', overflow:'hidden' }}>
-                <iframe srcDoc={previewHtml} style={{ width:'100%', height:'600px', border:'none', display:'block' }} title="Anteprima email" sandbox="allow-same-origin"/>
+                <iframe srcDoc={previewHtml} style={{ width:'100%', height:'700px', border:'none', display:'block' }} title="Anteprima email" sandbox="allow-same-origin"/>
               </div>
               <p style={{ fontSize:'10px', color:'#9CA3AF', marginTop:'8px', fontFamily:"'Inter',sans-serif" }}>
                 ✅ Layout identico all\u2019email reale ricevuta dall\u2019iscritto — dati di esempio

@@ -332,8 +332,15 @@ export default function EventEmailTab({ eventoId }) {
   }
 
   const current = templates[selected] || { oggetto:'', corpo_html:'' }
-  const currBlocchi = blocchi[selected] || []
+  // Se l'evento non ha blocchi propri, usa i blocchi del template default come fallback (sola lettura finché non salva)
+  const defaultBlocchi = (() => {
+    const def = defaultTemplates[selected]
+    if (!def) return []
+    try { const p = JSON.parse(def.blocchi_json||'[]'); return Array.isArray(p) ? p : [] } catch { return [] }
+  })()
+  const currBlocchi = blocchi[selected] || defaultBlocchi
   const isPersonalizzato = !!templates[selected]?.personalizzato
+  const usaDefault = !blocchi[selected] && defaultBlocchi.length > 0
 
   function update(field, value) {
     setTemplates(prev => ({ ...prev, [selected]:{ ...prev[selected], [field]:value, personalizzato:true } }))
@@ -480,6 +487,12 @@ export default function EventEmailTab({ eventoId }) {
             <div style={{ display:'flex', gap:'10px' }}>
               {/* Lista blocchi */}
               <div style={{ flex:1 }}>
+                {usaDefault && (
+                  <div style={{ padding:'8px 12px', background:'#FFFBEB', border:'1px solid #FDE68A', borderRadius:'8px', marginBottom:'8px', fontSize:'11px', color:'#92400E', display:'flex', alignItems:'center', gap:'6px' }}>
+                    <span>⚠️</span>
+                    <span>Stai visualizzando il <strong>template standard</strong>. Modifica e salva per personalizzare questa email per l’evento.</span>
+                  </div>
+                )}
                 {currBlocchi.length === 0 && (
                   <div style={{ textAlign:'center', padding:'40px 16px', color:'#9CA3AF', background:'#fff', border:'1px dashed #E5E7EB', borderRadius:'10px' }}>
                     <LayoutTemplate size={28} style={{ marginBottom:'8px', opacity:.3 }}/>
@@ -589,7 +602,7 @@ export default function EventEmailTab({ eventoId }) {
                 <strong>Oggetto:</strong> {replacePreview(current.oggetto||'—')}
               </div>
               <div style={{ maxWidth:previewDevice==='mobile'?'375px':'100%', margin:'0 auto', border:'1px solid #E5E7EB', borderRadius:'8px', overflow:'hidden' }}>
-                <iframe srcDoc={getPreviewHtml()} style={{ width:'100%', height:'520px', border:'none', display:'block' }} title="Anteprima email" sandbox="allow-same-origin"/>
+                <iframe srcDoc={getPreviewHtml()} style={{ width:'100%', height:'680px', border:'none', display:'block' }} title="Anteprima email" sandbox="allow-same-origin"/>
               </div>
               <p style={{ fontSize:'10px', color:'#9CA3AF', marginTop:'6px', fontFamily:"'Inter',sans-serif" }}>Anteprima con dati di esempio</p>
             </div>

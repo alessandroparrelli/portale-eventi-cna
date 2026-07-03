@@ -1013,7 +1013,7 @@ export default function EventoEditorPage() {
 
         {/* ── EMAIL ── */}
         {activeTab==='email' && (
-          <div style={p.panel}>
+          <div style={{ ...p.panel, maxWidth:'none' }}>
             <h2 style={p.panelTitle}>Email per questo evento</h2>
             <EventEmailTab eventoId={id} />
           </div>
