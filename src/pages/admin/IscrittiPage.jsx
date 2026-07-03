@@ -71,6 +71,7 @@ export default function IscrittiPage() {
   const [search, setSearch] = useState('')
   const [filterStato, setFilterStato] = useState('tutti')
   const [detail, setDetail] = useState(null)
+  const [formFields, setFormFields] = useState([]) // campi extra dell'evento
   const [delConfirm, setDelConfirm] = useState(null)
   const { canManage } = useRole()
   const canDelete = canManage('iscritti')
@@ -147,8 +148,12 @@ export default function IscrittiPage() {
   }, [])
 
   useEffect(() => {
-    if (!selectedEvento) { setRegistrations([]); return }
+    if (!selectedEvento) { setRegistrations([]); setFormFields([]); return }
     loadRegs()
+    supabase.from('form_fields').select('*')
+      .eq('event_id', selectedEvento).eq('visibile', true).like('colonna_db', 'extra_%')
+      .order('ordine')
+      .then(({ data }) => setFormFields(data || []))
   }, [selectedEvento])
 
   // Lo stato "verifica eseguita" si deduce dai dati gia\u0300 presenti sulle righe caricate dal DB:
@@ -248,6 +253,7 @@ export default function IscrittiPage() {
 
     const cols = ['Nome','Cognome','Ragione Sociale','P.IVA','Email','Cellulare',
       'Mestiere','CAP','Stato iscrizione','Presente','Check-in','Iscritto il',
+      ...formFields.map(f => f.label),
       ...(verificaEseguita ? ['Stato associazione','Data stipula'] : [])]
     const nCols = cols.length
     const pivaColIdx = cols.indexOf('P.IVA')          // 0-based
@@ -270,10 +276,12 @@ export default function IscrittiPage() {
     })
 
     // ── Larghezze colonne ──
+    const extraLabels = new Set(formFields.map(f => f.label))
     ws.columns = cols.map(col => ({
       width: col==='Ragione Sociale'?38 : col==='Email'?30 : col==='P.IVA'?15 :
              col==='Stato associazione'?20 : col==='Data stipula'?14 :
-             col==='Nome'||col==='Cognome'?18 : col==='Mestiere'?22 : 15
+             col==='Nome'||col==='Cognome'?18 : col==='Mestiere'?22 :
+             extraLabels.has(col) ? 24 : 15
     }))
 
     const fill = (argb) => ({ type:'pattern', pattern:'solid', fgColor:{ argb } })
@@ -374,6 +382,7 @@ export default function IscrittiPage() {
         r.nome||'', r.cognome||'', r.ragione_sociale||'', r.partita_iva||'',
         r.email||'', r.cellulare||'', getMestiere(r.mestiere_id), r.cap||'',
         r.stato||'', r.presente?'Sì':'No', formatDt(r.checkin_at), formatDt(r.created_at),
+        ...formFields.map(f => r[f.colonna_db]||''),
       ]
       if (verificaEseguita) {
         values.push(getAssLabel(r))
@@ -706,6 +715,7 @@ export default function IscrittiPage() {
                     { label:'Mestiere',    color:'violet',  sortable:true, hideOnMobile:true },
                     { label:'Iscritto il', color:'amber',   sortable:true, hideOnMobile:true },
                     { label:'Stato',       color:'green',   sortable:true },
+                    ...formFields.map(f => ({ label: f.label, color:'purple', sortable:true, hideOnMobile:true })),
                     ...(verificaEseguita ? [
                       { label:'Associato CNA', color:'green', sortable:true, hideOnMobile:true },
                       { label:'Data stipula',  color:'amber', sortable:true, hideOnMobile:true },
@@ -731,6 +741,13 @@ export default function IscrittiPage() {
                         <td style={s.td} className="col-hide-mobile"><span style={s.cell}>{getMestiere(r.mestiere_id)}</span></td>
                         <td style={s.td} className="col-hide-mobile"><span style={s.cell}>{formatDt(r.created_at)}</span></td>
                         <td style={s.td}><PresenzaBadge stato={r.stato}/></td>
+                        {formFields.map(f => (
+                          <td key={f.colonna_db} style={s.td} className="col-hide-mobile">
+                            <span style={{ ...s.cell, color: r[f.colonna_db] ? '#374151' : '#D1D5DB' }}>
+                              {r[f.colonna_db] || '—'}
+                            </span>
+                          </td>
+                        ))}
                         {verificaEseguita && <>
                           <td style={s.td} className="col-hide-mobile">
                             {!_piva
@@ -843,6 +860,7 @@ export default function IscrittiPage() {
               ['Email', detail.email],['Cellulare', detail.cellulare],
               ['Mestiere', getMestiere(detail.mestiere_id)],['CAP', detail.cap],
               ['Stato', detail.stato],['QR Code', detail.qr_code],
+              ...formFields.map(f => [f.label, detail[f.colonna_db] || '—']),
               ['Iscritto il', formatDt(detail.created_at)],['Check-in', formatDt(detail.checkin_at)],
             ].map(([label, val])=>(
               <div key={label}>

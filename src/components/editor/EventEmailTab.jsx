@@ -358,6 +358,7 @@ export default function EventEmailTab({ eventoId }) {
   const [headerColore, setHeaderColore]          = useState(BLU)
   const [headerTitolo, setHeaderTitolo]           = useState('')
   const [showLogoPicker, setShowLogoPicker]       = useState(false)
+  const [formFields,     setFormFields]           = useState([])
   const [blocchi,         setBlocchi]         = useState({}) // per tipo: { conferma: [...], ... }
   const [saving,          setSaving]          = useState(false)
   const [saved,           setSaved]           = useState(false)
@@ -718,6 +719,22 @@ export default function EventEmailTab({ eventoId }) {
                         {v}
                       </button>
                     ))}
+                    {formFields.length > 0 && (
+                      <>
+                        <div style={{ borderTop:'1px solid #BFDBFE', margin:'4px 0' }}/>
+                        <p style={{ margin:'0 0 2px', fontSize:'9px', fontWeight:'800', color:'#7C3AED', textTransform:'uppercase', letterSpacing:'.07em' }}>Campi extra</p>
+                        {formFields.map(f => {
+                          const v = `{{${f.colonna_db}}}`
+                          return (
+                            <button key={f.colonna_db} type="button" onClick={()=>navigator.clipboard.writeText(v)} title={f.label}
+                              style={{ padding:'3px 7px', background:'#FDF4FF', border:'1px solid #E9D5FF', borderRadius:'4px', cursor:'pointer', fontSize:'10px', color:'#7C3AED', fontFamily:'monospace', textAlign:'left' }}>
+                              {v}
+                              <span style={{ display:'block', fontSize:'9px', color:'#9CA3AF', fontFamily:'Inter,sans-serif', fontWeight:'400', overflow:'hidden', textOverflow:'ellipsis', whiteSpace:'nowrap' }}>{f.label}</span>
+                            </button>
+                          )
+                        })}
+                      </>
+                    )}
                   </div>
                 </div>
               )}
