@@ -72,6 +72,7 @@ function blockDefaults(tipo) {
 // ─── Blocchi → HTML ───────────────────────────────────────────────────────────
 function blocchiToHtml(blocchi) {
   return blocchi.map(b => {
+    try {
     switch (b.tipo) {
       case 'titolo':
         const tag = b.livello||'h2'
@@ -102,25 +103,29 @@ function blocchiToHtml(blocchi) {
         const addrEnc = encodeURIComponent(addr)
         const h       = b.altezza||200
         const mapUrl  = `https://www.google.com/maps/search/?api=1&query=${addrEnc}`
-        // Immagine mappa via OpenStreetMap staticmap (no API key, no billing)
-        const imgUrl  = `https://staticmap.openstreetmap.de/staticmap.php?center=&zoom=${b.zoom||15}&size=560x${h}&maptype=mapnik&markers=${addrEnc},lightblue,`
-        return `<div style="margin:0 0 20px;border-radius:10px;overflow:hidden;border:1.5px solid #E5E7EB">` +
-          `<a href="${mapUrl}" target="_blank" rel="noopener" style="display:block;text-decoration:none">` +
-          `<div style="background:linear-gradient(135deg,#EFF6FF 0%,#DBEAFE 100%);height:${h}px;display:flex;align-items:center;justify-content:center;flex-direction:column;gap:8px">` +
-          `<span style="font-size:40px">🗺️</span>` +
-          `<p style="margin:0;font-size:13px;color:#1D4ED8;font-weight:600;font-family:Inter,Arial,sans-serif">Clicca per aprire la mappa</p>` +
-          `</div>` +
-          `<div style="padding:14px 18px;background:#fff;border-top:1.5px solid #DBEAFE;display:flex;align-items:center;gap:12px">` +
-          `<span style="font-size:22px;flex-shrink:0">📍</span>` +
-          `<div style="flex:1;min-width:0">` +
+        // Email-safe: tabelle invece di flex/grid, niente display:flex
+        return `<table role="presentation" width="100%" cellpadding="0" cellspacing="0" border="0" style="margin:0 0 20px;border-radius:10px;overflow:hidden;border:1.5px solid #E5E7EB">` +
+          `<tr><td><a href="${mapUrl}" target="_blank" rel="noopener" style="display:block;text-decoration:none">` +
+          `<table role="presentation" width="100%" cellpadding="0" cellspacing="0" border="0">` +
+          `<tr><td align="center" valign="middle" height="${h}" style="background:#EFF6FF;background:linear-gradient(135deg,#EFF6FF 0%,#DBEAFE 100%);padding:20px;text-align:center">` +
+          `<div>&#x1F5FA;&#xFE0F;</div>` +
+          `<p style="margin:8px 0 0;font-size:14px;color:#1D4ED8;font-weight:700;font-family:Inter,Arial,sans-serif">Clicca per aprire la mappa</p>` +
+          `</td></tr>` +
+          `<tr><td style="padding:14px 18px;background:#ffffff;border-top:2px solid #DBEAFE">` +
+          `<table role="presentation" width="100%" cellpadding="0" cellspacing="0" border="0"><tr>` +
+          `<td width="30" valign="middle" style="font-size:22px;padding-right:12px">&#x1F4CD;</td>` +
+          `<td valign="middle">` +
           `<p style="margin:0 0 2px;font-size:14px;font-weight:700;color:#0A0A0A;font-family:Inter,Arial,sans-serif">${b.testo||'Come raggiungerci'}</p>` +
           `<p style="margin:0;font-size:12px;color:#374151;font-family:Inter,Arial,sans-serif">${addr}</p>` +
-          `</div>` +
-          `<span style="font-size:11px;font-weight:700;color:#003DA5;font-family:Inter,Arial,sans-serif;white-space:nowrap;border:1.5px solid #BFDBFE;padding:5px 10px;border-radius:6px;flex-shrink:0">Apri Maps →</span>` +
-          `</div></a></div>`
+          `</td>` +
+          `<td width="100" align="right" valign="middle"><span style="font-size:11px;font-weight:700;color:#003DA5;font-family:Inter,Arial,sans-serif;border:1.5px solid #BFDBFE;padding:5px 10px;border-radius:6px;white-space:nowrap">Apri Maps &#8594;</span></td>` +
+          `</tr></table>` +
+          `</td></tr></table>` +
+          `</a></td></tr></table>`
       }
       default: return ''
     }
+    } catch(e) { console.error('blocco error', b.tipo, e); return '' }
   }).join('\n')
 }
 
@@ -528,6 +533,8 @@ export default function EventEmailTab({ eventoId }) {
     setLogoUrl(def.logo_url || '')
     setHeaderColore(def.header_colore || BLU)
     setHeaderTitolo(def.header_titolo || '')
+    setLogoAltezza(def.logo_altezza || 48)
+    setTitoloSize(def.titolo_size || 13)
     setSelectedBlock(null)
     await supabase.from('email_templates')
       .update({ oggetto:def.oggetto, corpo_html:def.corpo_html, blocchi_json:null, logo_url:def.logo_url||null, header_colore:def.header_colore||null, header_titolo:def.header_titolo||null, personalizzato:false, updated_at:new Date().toISOString() })
@@ -536,8 +543,10 @@ export default function EventEmailTab({ eventoId }) {
   }
 
   function getPreviewHtml() {
+    try {
     const bodyHtml = currBlocchi.length ? blocchiToHtml(currBlocchi) : (current.corpo_html||'')
     return replacePreview(buildFullHtml(true, true, bodyHtml, logoUrl, headerColore, headerTitolo, logoAltezza, titoloSize))
+    } catch(e) { console.error('preview error', e); return '<html><body><p style="padding:20px;color:#9CA3AF">Errore anteprima</p></body></html>' }
   }
 
   const selectedBl = selectedBlock !== null ? currBlocchi[selectedBlock] : null
@@ -731,6 +740,7 @@ export default function EventEmailTab({ eventoId }) {
                           {b.tipo==='qr'&&'▦ QR Code accesso'}
                           {b.tipo==='separatore'&&'— Separatore'}
                           {b.tipo==='spazio'&&`↕ ${b.altezza||32}px`}
+                          {b.tipo==='mappa'&&`📍 ${b.indirizzo||'Indirizzo mappa'}`}
                         </div>
                       )}
                     </div>

@@ -126,6 +126,7 @@ function blockDefaults(tipo) {
 // ─── Blocchi → HTML email (identico al sistema dell'EmailEditorPage) ──────────
 function blocchiToHtml(blocchi) {
   return blocchi.map(b => {
+    try {
     switch (b.tipo) {
       case 'titolo':
         const tag = b.livello||'h2'; const sz = b.size||24
@@ -155,25 +156,23 @@ function blocchiToHtml(blocchi) {
         const addrEnc = encodeURIComponent(addr)
         const h       = b.altezza||200
         const mapUrl  = `https://www.google.com/maps/search/?api=1&query=${addrEnc}`
-        // Immagine mappa via OpenStreetMap staticmap (no API key, no billing)
-        const imgUrl  = `https://staticmap.openstreetmap.de/staticmap.php?center=&zoom=${b.zoom||15}&size=560x${h}&maptype=mapnik&markers=${addrEnc},lightblue,`
-        return `<div style="margin:0 0 20px;border-radius:10px;overflow:hidden;border:1.5px solid #E5E7EB">` +
-          `<a href="${mapUrl}" target="_blank" rel="noopener" style="display:block;text-decoration:none">` +
-          `<div style="background:linear-gradient(135deg,#EFF6FF 0%,#DBEAFE 100%);height:${h}px;display:flex;align-items:center;justify-content:center;flex-direction:column;gap:8px">` +
-          `<span style="font-size:40px">🗺️</span>` +
-          `<p style="margin:0;font-size:13px;color:#1D4ED8;font-weight:600;font-family:Inter,Arial,sans-serif">Clicca per aprire la mappa</p>` +
-          `</div>` +
-          `<div style="padding:14px 18px;background:#fff;border-top:1.5px solid #DBEAFE;display:flex;align-items:center;gap:12px">` +
-          `<span style="font-size:22px;flex-shrink:0">📍</span>` +
-          `<div style="flex:1;min-width:0">` +
-          `<p style="margin:0 0 2px;font-size:14px;font-weight:700;color:#0A0A0A;font-family:Inter,Arial,sans-serif">${b.testo||'Come raggiungerci'}</p>` +
-          `<p style="margin:0;font-size:12px;color:#374151;font-family:Inter,Arial,sans-serif">${addr}</p>` +
-          `</div>` +
-          `<span style="font-size:11px;font-weight:700;color:#003DA5;font-family:Inter,Arial,sans-serif;white-space:nowrap;border:1.5px solid #BFDBFE;padding:5px 10px;border-radius:6px;flex-shrink:0">Apri Maps →</span>` +
-          `</div></a></div>`
+        return `<table role="presentation" width="100%" cellpadding="0" cellspacing="0" border="0" style="margin:0 0 20px;border-radius:10px;overflow:hidden;border:1.5px solid #E5E7EB">` +
+          `<tr><td><a href="${mapUrl}" target="_blank" rel="noopener" style="display:block;text-decoration:none">` +
+          `<table role="presentation" width="100%" cellpadding="0" cellspacing="0" border="0">` +
+          `<tr><td align="center" valign="middle" height="${h}" style="background:#EFF6FF;padding:20px;text-align:center">` +
+          `<div>&#x1F5FA;&#xFE0F;</div>` +
+          `<p style="margin:8px 0 0;font-size:14px;color:#1D4ED8;font-weight:700;font-family:Inter,Arial,sans-serif">Clicca per aprire la mappa</p>` +
+          `</td></tr>` +
+          `<tr><td style="padding:14px 18px;background:#ffffff;border-top:2px solid #DBEAFE">` +
+          `<table role="presentation" width="100%" cellpadding="0" cellspacing="0" border="0"><tr>` +
+          `<td width="30" valign="middle" style="font-size:22px;padding-right:12px">&#x1F4CD;</td>` +
+          `<td valign="middle"><p style="margin:0 0 2px;font-size:14px;font-weight:700;color:#0A0A0A;font-family:Inter,Arial,sans-serif">${b.testo||'Come raggiungerci'}</p><p style="margin:0;font-size:12px;color:#374151;font-family:Inter,Arial,sans-serif">${addr}</p></td>` +
+          `<td width="100" align="right" valign="middle"><span style="font-size:11px;font-weight:700;color:#003DA5;font-family:Inter,Arial,sans-serif;border:1.5px solid #BFDBFE;padding:5px 10px;border-radius:6px;white-space:nowrap">Apri Maps &#8594;</span></td>` +
+          `</tr></table></td></tr></table></a></td></tr></table>`
       }
       default: return ''
     }
+    } catch(e) { console.error('blocco error', b.tipo, e); return '' }
   }).join('\n')
 }
 
@@ -483,9 +482,8 @@ export default function EmailPage() {
     setSaving(false); setSaved(true); setTimeout(()=>setSaved(false), 2500)
   }
 
-  const previewHtml = replacePreview(
-    buildFullHtml(currBlocchi.length ? blocchiToHtml(currBlocchi) : (current.corpo_html||''), logoUrl, headerColore, headerTitolo, logoAltezza, titoloSize)
-  )
+  let previewHtml = ''
+  try { previewHtml = replacePreview(buildFullHtml(currBlocchi.length ? blocchiToHtml(currBlocchi) : (current.corpo_html||''), logoUrl, headerColore, headerTitolo, logoAltezza, titoloSize)) } catch(e) { console.error('previewHtml error', e); previewHtml = '<html><body><p style="padding:20px;color:#9CA3AF">Errore anteprima</p></body></html>' }
 
   const selectedBl = selectedBlock !== null ? currBlocchi[selectedBlock] : null
 
@@ -663,6 +661,7 @@ export default function EmailPage() {
                           {b.tipo==='qr'&&'▦ QR Code'}
                           {b.tipo==='separatore'&&'— Separatore'}
                           {b.tipo==='spazio'&&`↕ ${b.altezza||32}px`}
+                          {b.tipo==='mappa'&&`📍 ${b.indirizzo||'Indirizzo mappa'}`}
                         </div>
                       )}
                     </div>

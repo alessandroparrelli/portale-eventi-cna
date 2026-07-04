@@ -15,7 +15,7 @@ export default function EmbedWidget({ url, titolo }) {
   const [customH, setCustomH] = useState(520)
   const [showPreview, setShowPreview] = useState(false)
 
-  const cur = PRESETS.find(p => p.id === preset)
+  const cur = PRESETS.find(p => p.id === preset) || PRESETS[0]
   const w = preset === 'custom' ? customW : cur.w
   const h = preset === 'custom' ? customH : cur.h
 
@@ -192,10 +192,12 @@ export default function EmbedWidget({ url, titolo }) {
                 display: 'block', maxWidth: '100%' }}
               title={titolo || 'Preview'}
               loading="lazy"
+              sandbox="allow-scripts allow-same-origin allow-forms allow-popups"
+              onError={() => {}}
             />
           </div>
           <p style={{ fontSize: '11px', color: '#9CA3AF', margin: '8px 0 0' }}>
-            La preview mostra la pagina così come apparirà nel sito di destinazione.
+            Se la preview non carica, usa il pulsante "Apri ↗" per vedere la pagina nel browser.
           </p>
         </div>
       )}
