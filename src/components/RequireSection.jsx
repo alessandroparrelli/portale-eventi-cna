@@ -3,15 +3,18 @@ import { useRole } from '../hooks/useRole'
 
 const LIVELLI = { nessuno: 0, visualizza: 1, gestisci: 2 }
 
-/**
- * Blocca l'accesso a una route admin in base al permesso dell'utente sulla
- * sezione indicata. min='visualizza' (default) basta per le pagine di sola
- * lettura, min='gestisci' va usato sugli editor a schermo intero.
- */
 export default function RequireSection({ sezione, min = 'visualizza', children }) {
   const { loading, permessi } = useRole()
-  if (loading) return null
+
+  // Se sta ancora caricando MA abbiamo già i permessi, mostra il children
+  // invece di tornare null (che causerebbe il remount del children)
   const livello = LIVELLI[permessi?.[sezione]] ?? 0
-  if (livello < LIVELLI[min]) return <Navigate to="/admin" replace />
+  const hasAccess = livello >= LIVELLI[min]
+
+  // Solo durante il PRIMO caricamento (permessi vuoti) mostriamo null
+  const isFirstLoad = loading && Object.keys(permessi).length === 0
+
+  if (isFirstLoad) return null
+  if (!hasAccess && !loading) return <Navigate to="/admin" replace />
   return children
 }
