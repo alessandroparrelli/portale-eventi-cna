@@ -1,5 +1,4 @@
 import { useState } from 'react'
-import IframePreview from '../IframePreview'
 
 const BASE = typeof window !== 'undefined' ? window.location.origin : 'https://portale-eventi-cna.vercel.app'
 
@@ -8,7 +7,6 @@ const PRESETS = [
   { id: 'banner', label: 'Banner orizzontale', w: 800, h: 320,  desc: 'Per header o sezioni larghe' },
   { id: 'full',   label: 'Pagina completa',   w: '100%', h: 700, desc: 'Pagina intera responsive' },
 ]
-
 
 export default function EmbedWidget({ url, titolo }) {
   const [preset, setPreset] = useState('card')
@@ -179,26 +177,25 @@ export default function EmbedWidget({ url, titolo }) {
         </pre>
       </div>
 
-      {/* Preview live con iframe isolato */}
+      {/* Preview live */}
       {showPreview && (
-        <div style={{ marginBottom:'16px' }}>
-          <p style={{ fontSize:'12px', fontWeight:'700', color:'#6B7280', textTransform:'uppercase',
-            letterSpacing:'0.06em', margin:'0 0 10px' }}>Anteprima embed</p>
-          <div style={{ border:'1px solid #E5E7EB', borderRadius:'10px', overflow:'hidden',
-            backgroundColor:'#F9FAFB', padding:'16px' }}>
-            <IframePreview
-          src={url}
-          iframeKey={url}
-          style={{ border:'none', borderRadius:'8px', boxShadow:'0 4px 24px rgba(0,0,0,0.12)',
-            display:'block', maxWidth:'100%',
-            width: typeof w === 'string' ? '100%' : Math.min(w, 700) + 'px',
-            height: h + 'px' }}
-          title={titolo || 'Preview'}
-          fallbackUrl={url}
-        />
+        <div>
+          <p style={{ fontSize: '12px', fontWeight: '700', color: '#6B7280', textTransform: 'uppercase',
+            letterSpacing: '0.06em', margin: '0 0 10px' }}>Anteprima embed</p>
+          <div style={{ border: '1px solid #E5E7EB', borderRadius: '10px', overflow: 'hidden',
+            backgroundColor: '#F9FAFB', padding: '16px' }}>
+            <iframe
+              src={url}
+              width={typeof w === 'string' ? '100%' : Math.min(w, 700)}
+              height={h}
+              style={{ border: 'none', borderRadius: '8px', boxShadow: '0 4px 24px rgba(0,0,0,0.12)',
+                display: 'block', maxWidth: '100%' }}
+              title={titolo || 'Preview'}
+              loading="lazy"
+            />
           </div>
-          <p style={{ fontSize:'11px', color:'#9CA3AF', margin:'8px 0 0' }}>
-            Se non carica, usa il pulsante "Apri ↗" per vedere la pagina nel browser.
+          <p style={{ fontSize: '11px', color: '#9CA3AF', margin: '8px 0 0' }}>
+            La preview mostra la pagina così come apparirà nel sito di destinazione.
           </p>
         </div>
       )}
