@@ -183,42 +183,38 @@ function ColorPicker({ onSelect, onCustom, label = 'A', title = 'Colore testo' }
         <svg width="8" height="5" viewBox="0 0 8 5"><path d="M0 0l4 5 4-5z" fill="#9CA3AF"/></svg>
       </button>
       {open && (
-        <div style={{ position:'absolute', top:'34px', right:0, left:'auto', zIndex:400, background:'#fff', border:'1px solid #E5E7EB',
-          borderRadius:'12px', padding:'14px', boxShadow:'0 12px 40px rgba(0,0,0,.14)', width:'260px' }}>
-          {Object.entries(COLOR_PALETTE).map(([name, colors]) => (
-            <div key={name} style={{ marginBottom:'8px' }}>
-              <p style={{ fontSize:'10px', fontWeight:'700', color:'#9CA3AF', textTransform:'uppercase', letterSpacing:'.06em', margin:'0 0 5px' }}>{name}</p>
-              <div style={{ display:'flex', gap:'4px', flexWrap:'wrap' }}>
-                {colors.map(c => (
-                  <button key={c} type="button"
-                    onMouseDown={e => {
-                      e.preventDefault()
-                      e.stopPropagation()
-                      onSelect(c)
-                      setOpen(false)
-                    }}
-                    style={{ width:'24px', height:'24px', borderRadius:'4px', background:c,
-                      border:'1.5px solid rgba(0,0,0,.12)', cursor:'pointer', flexShrink:0,
-                      transition:'transform .1s, box-shadow .1s' }}
-                    onMouseEnter={e => { e.currentTarget.style.transform='scale(1.25)'; e.currentTarget.style.boxShadow='0 2px 6px rgba(0,0,0,.2)' }}
-                    onMouseLeave={e => { e.currentTarget.style.transform='scale(1)'; e.currentTarget.style.boxShadow='none' }}
-                    title={c}/>
-                ))}
+        <div style={{
+          position:'fixed', zIndex:9999,
+          background:'#fff', border:'1px solid #E5E7EB',
+          borderRadius:'12px', padding:'16px',
+          boxShadow:'0 8px 40px rgba(0,0,0,.18)',
+          width:'320px',
+          top: (() => { try { return ref.current?.getBoundingClientRect().bottom + 6 } catch { return 100 } })() + 'px',
+          left: (() => { try { const r = ref.current?.getBoundingClientRect(); return Math.max(8, Math.min(r.left, window.innerWidth - 336)) } catch { return 8 } })() + 'px',
+        }}>
+          <div style={{ display:'grid', gap:'10px' }}>
+            {Object.entries(COLOR_PALETTE).map(([name, colors]) => (
+              <div key={name}>
+                <p style={{ fontSize:'10px', fontWeight:'700', color:'#9CA3AF', textTransform:'uppercase', letterSpacing:'.06em', margin:'0 0 6px' }}>{name}</p>
+                <div style={{ display:'flex', gap:'5px', flexWrap:'wrap' }}>
+                  {colors.map(col => (
+                    <button key={col} type="button"
+                      onMouseDown={e => { e.preventDefault(); e.stopPropagation(); onSelect(col); setOpen(false) }}
+                      style={{ width:'26px', height:'26px', borderRadius:'5px', background:col,
+                        border:'1.5px solid rgba(0,0,0,.12)', cursor:'pointer', flexShrink:0 }}
+                      title={col}/>
+                  ))}
+                </div>
               </div>
-            </div>
-          ))}
-          <div style={{ borderTop:'1px solid #E5E7EB', paddingTop:'10px', display:'flex', alignItems:'center', gap:'8px' }}>
-            <span style={{ fontSize:'11px', color:'#6B7280' }}>Personalizzato:</span>
+            ))}
+          </div>
+          <div style={{ borderTop:'1px solid #F3F4F6', marginTop:'12px', paddingTop:'12px', display:'flex', alignItems:'center', gap:'8px' }}>
             <input type="color" value={custom} onChange={e => setCustom(e.target.value)}
-              style={{ width:'36px', height:'28px', border:'1px solid #D1D5DB', borderRadius:'5px', cursor:'pointer', padding:'2px' }}/>
+              style={{ width:'40px', height:'32px', border:'1px solid #E5E7EB', borderRadius:'6px', cursor:'pointer', padding:'2px', flexShrink:0 }}/>
+            <span style={{ fontSize:'11px', color:'#6B7280', flex:1 }}>{custom}</span>
             <button type="button"
-              onMouseDown={e => {
-                e.preventDefault()
-                e.stopPropagation()
-                onSelect(custom)
-                setOpen(false)
-              }}
-              style={{ padding:'4px 10px', borderRadius:'5px', border:'1px solid #003DA5', background:'#003DA5', color:'#fff', fontSize:'11px', fontWeight:'700', cursor:'pointer', fontFamily:"'Inter',sans-serif" }}>
+              onMouseDown={e => { e.preventDefault(); e.stopPropagation(); onSelect(custom); setOpen(false) }}
+              style={{ padding:'6px 14px', borderRadius:'6px', border:'none', background:'#003DA5', color:'#fff', fontSize:'12px', fontWeight:'700', cursor:'pointer', fontFamily:"'Inter',sans-serif", flexShrink:0 }}>
               Applica
             </button>
           </div>
@@ -243,7 +239,13 @@ export default function RichEditor({ value, onChange, placeholder = 'Scrivi quiâ
 
   const editor = useEditor({
     extensions: [
-      StarterKit.configure({ heading:{ levels:[1,2,3,4,5,6] } }),
+      StarterKit.configure({
+        heading: { levels:[1,2,3,4,5,6] },
+        bold: {
+          // Non escludere TextStyle: mantiene colore e font quando si mette in grassetto
+          HTMLAttributes: {},
+        },
+      }),
       Underline,
       TextStyle,
       FontSize,
