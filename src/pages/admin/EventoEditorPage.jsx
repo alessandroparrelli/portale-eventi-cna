@@ -370,16 +370,7 @@ export default function EventoEditorPage() {
   useEffect(() => { eventRef.current = event }, [event])
   const [saving, setSaving] = useState(false)
   const [saved, setSaved] = useState(false)
-  const [activeTab, setActiveTab] = useState(() => {
-    // Recupera il tab attivo da sessionStorage per sopravvivere ai remount
-    try { return sessionStorage.getItem('eventoEditorTab') || 'info' } catch { return 'info' }
-  })
-
-  // Salva il tab attivo in sessionStorage
-  const handleTabChange = (tab) => {
-    try { sessionStorage.setItem('eventoEditorTab', tab) } catch {}
-    setActiveTab(tab)
-  }
+  const [activeTab, setActiveTab] = useState('info')
   const { canManage } = useRole()
   const canWrite = canManage('eventi')
 
@@ -599,7 +590,7 @@ export default function EventoEditorPage() {
 
       {/* TAB BAR — glow pill */}
       <div style={{ padding:'8px 16px 0', backgroundColor:'#FFFFFF', flexShrink:0, overflowX:'auto' }} className="editor-tabbar">
-        <GlowTabBar active={activeTab} onChange={handleTabChange} tabs={TABS} />
+        <GlowTabBar active={activeTab} onChange={setActiveTab} tabs={TABS} />
       </div>
 
       {/* CONTENT */}
