@@ -1,4 +1,5 @@
 import { BrowserRouter, Routes, Route, Navigate } from 'react-router-dom'
+import ErrorBoundary from './components/ErrorBoundary'
 import { AuthProvider } from './hooks/useAuth'
 import ProtectedRoute from './components/ProtectedRoute'
 import RequireSection from './components/RequireSection'
@@ -30,6 +31,7 @@ import CalendarioPage from './pages/public/CalendarioPage'
 
 export default function App() {
   return (
+    <ErrorBoundary>
     <BrowserRouter>
       <AuthProvider>
         <Routes>
@@ -82,5 +84,6 @@ export default function App() {
         </Routes>
       </AuthProvider>
     </BrowserRouter>
+  </ErrorBoundary>
   )
 }
