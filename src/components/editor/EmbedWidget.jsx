@@ -203,13 +203,14 @@ export default function EmbedWidget({ url, titolo }) {
             <div style={{ border: '1px solid #E5E7EB', borderRadius: '10px', overflow: 'hidden',
               backgroundColor: '#F9FAFB', padding: '16px' }}>
               <iframe
-                src={url}
+                src={url + '?embed=1'}
                 width={typeof w === 'string' ? '100%' : Math.min(w, 700)}
                 height={h}
                 style={{ border: 'none', borderRadius: '8px', boxShadow: '0 4px 24px rgba(0,0,0,0.12)',
                   display: 'block', maxWidth: '100%' }}
                 title={titolo || 'Preview'}
                 loading="lazy"
+                sandbox="allow-scripts allow-same-origin allow-forms"
               />
             </div>
           )}
