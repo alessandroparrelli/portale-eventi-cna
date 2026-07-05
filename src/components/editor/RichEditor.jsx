@@ -171,7 +171,9 @@ function ColorPicker({ onSelect, onCustom, label = 'A', title = 'Colore testo' }
 
   return (
     <div ref={ref} style={{ position:'relative', flexShrink:0 }}>
-      <button type="button" title={title} onClick={() => setOpen(v=>!v)}
+      <button type="button" title={title}
+        onMouseDown={e => e.preventDefault()}
+        onClick={() => setOpen(v=>!v)}
         style={{ height:'30px', minWidth:'34px', padding:'0 5px', border:'1px solid #E5E7EB', borderRadius:'5px',
           background:'#fff', cursor:'pointer', fontSize:'12px', fontWeight:'700', color:'#374151',
           display:'flex', alignItems:'center', justifyContent:'center', gap:'3px', fontFamily:"'Inter',sans-serif" }}>
@@ -186,7 +188,9 @@ function ColorPicker({ onSelect, onCustom, label = 'A', title = 'Colore testo' }
               <p style={{ fontSize:'10px', fontWeight:'700', color:'#9CA3AF', textTransform:'uppercase', letterSpacing:'.06em', margin:'0 0 5px' }}>{name}</p>
               <div style={{ display:'flex', gap:'4px', flexWrap:'wrap' }}>
                 {colors.map(c => (
-                  <button key={c} type="button" onClick={() => { onSelect(c); setOpen(false) }}
+                  <button key={c} type="button"
+                    onMouseDown={e => e.preventDefault()}
+                    onClick={() => { onSelect(c); setOpen(false) }}
                     style={{ width:'24px', height:'24px', borderRadius:'4px', background:c,
                       border:'1.5px solid rgba(0,0,0,.12)', cursor:'pointer', flexShrink:0,
                       transition:'transform .1s, box-shadow .1s' }}
@@ -201,7 +205,9 @@ function ColorPicker({ onSelect, onCustom, label = 'A', title = 'Colore testo' }
             <span style={{ fontSize:'11px', color:'#6B7280' }}>Personalizzato:</span>
             <input type="color" value={custom} onChange={e => setCustom(e.target.value)}
               style={{ width:'36px', height:'28px', border:'1px solid #D1D5DB', borderRadius:'5px', cursor:'pointer', padding:'2px' }}/>
-            <button type="button" onClick={() => { onSelect(custom); setOpen(false) }}
+            <button type="button"
+              onMouseDown={e => e.preventDefault()}
+              onClick={() => { onSelect(custom); setOpen(false) }}
               style={{ padding:'4px 10px', borderRadius:'5px', border:'1px solid #003DA5', background:'#003DA5', color:'#fff', fontSize:'11px', fontWeight:'700', cursor:'pointer', fontFamily:"'Inter',sans-serif" }}>
               Applica
             </button>

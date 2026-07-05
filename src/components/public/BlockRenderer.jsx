@@ -160,7 +160,6 @@ export default function BlockRenderer({ block, cp = '#003DA5', formTarget = '#lp
       <div className="lp-blocco-titolo" style={{ textAlign: block.allineamento || 'center', marginBottom: '32px', marginTop: '8px' }}>
         <h2 className="lp-section-title" style={{ fontSize: 'clamp(22px,4vw,38px)', fontWeight: '900', color: '#0A0A0A', letterSpacing: '-.03em', margin: '0 0 8px', lineHeight: 1.1 }}>{block.testo}</h2>
         {block.sottotitolo && <p className="lp-section-sub" style={{ fontSize: 'clamp(13px,2vw,17px)', color: '#6B7280', margin: 0, lineHeight: 1.6 }}>{block.sottotitolo}</p>}
-        <div style={{ width: '48px', height: '4px', background: cp, borderRadius: '2px', marginTop: '14px', marginLeft: block.allineamento === 'left' ? 0 : block.allineamento === 'right' ? 'auto' : 'auto', marginRight: block.allineamento === 'right' ? 0 : block.allineamento === 'left' ? 'auto' : 'auto' }} />
       </div>
     </Animate>
   )
