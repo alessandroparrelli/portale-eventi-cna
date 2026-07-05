@@ -1,5 +1,4 @@
 import React, { useEffect, useRef, useState } from 'react'
-import ErrorBoundary from '../../components/ErrorBoundary'
 const DIM_MAP={'clamp(13px,1.5vw,16px)':'16px','clamp(15px,2vw,20px)':'22px','clamp(18px,2.5vw,26px)':'30px','clamp(22px,3vw,34px)':'40px'}
 function normDim(v){return DIM_MAP[v]||v||'22px'}
 
@@ -989,7 +988,6 @@ export default function EventoEditorPage() {
 
         {/* ── EMBED ── */}
         {activeTab==='embed' && (
-          <ErrorBoundary>
           <div style={p.panel}>
             <h2 style={p.panelTitle}>Codice embed</h2>
             {!event.slug || event.stato !== 'pubblicato' ? (
@@ -1005,7 +1003,6 @@ export default function EventoEditorPage() {
               />
             )}
           </div>
-          </ErrorBoundary>
         )}
 
         {/* ── CERTIFICATO ── */}
@@ -1017,12 +1014,10 @@ export default function EventoEditorPage() {
 
         {/* ── EMAIL ── */}
         {activeTab==='email' && (
-          <ErrorBoundary>
           <div style={{ ...p.panel, maxWidth:'none' }}>
             <h2 style={p.panelTitle}>Email per questo evento</h2>
             <EventEmailTab eventoId={id} />
           </div>
-          </ErrorBoundary>
         )}
 
         {/* ── PREVIEW ── */}

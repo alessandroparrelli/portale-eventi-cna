@@ -8,10 +8,6 @@ const PRESETS = [
   { id: 'full',   label: 'Pagina completa',   w: '100%', h: 700, desc: 'Pagina intera responsive' },
 ]
 
-const isIOS = typeof navigator !== 'undefined' &&
-  (/iPad|iPhone|iPod/.test(navigator.userAgent) ||
-   (navigator.platform === 'MacIntel' && navigator.maxTouchPoints > 1))
-
 export default function EmbedWidget({ url, titolo }) {
   const [preset, setPreset] = useState('card')
   const [copied, setCopied] = useState(false)
@@ -186,24 +182,10 @@ export default function EmbedWidget({ url, titolo }) {
         <div>
           <p style={{ fontSize: '12px', fontWeight: '700', color: '#6B7280', textTransform: 'uppercase',
             letterSpacing: '0.06em', margin: '0 0 10px' }}>Anteprima embed</p>
-          {isIOS ? (
-            <div style={{ border: '1px solid #E5E7EB', borderRadius: '10px', backgroundColor: '#F9FAFB',
-              padding: '24px', textAlign: 'center' }}>
-              <p style={{ fontSize: '13px', color: '#6B7280', margin: '0 0 14px' }}>
-                L'anteprima è disponibile aprendo la pagina nel browser.
-              </p>
-              <a href={url} target="_blank" rel="noopener noreferrer"
-                style={{ display: 'inline-flex', alignItems: 'center', gap: '6px',
-                  padding: '10px 20px', backgroundColor: '#003DA5', color: '#fff',
-                  borderRadius: '8px', textDecoration: 'none', fontSize: '13px', fontWeight: '700' }}>
-                Apri anteprima ↗
-              </a>
-            </div>
-          ) : (
-            <div style={{ border: '1px solid #E5E7EB', borderRadius: '10px', overflow: 'hidden',
-              backgroundColor: '#F9FAFB', padding: '16px' }}>
+          <div style={{ border: '1px solid #E5E7EB', borderRadius: '10px', overflow: 'hidden',
+            backgroundColor: '#F9FAFB', padding: '16px' }}>
               <iframe
-                src={url + '?embed=1'}
+                src={url}
                 width={typeof w === 'string' ? '100%' : Math.min(w, 700)}
                 height={h}
                 style={{ border: 'none', borderRadius: '8px', boxShadow: '0 4px 24px rgba(0,0,0,0.12)',
@@ -213,7 +195,6 @@ export default function EmbedWidget({ url, titolo }) {
                 sandbox="allow-scripts allow-same-origin allow-forms"
               />
             </div>
-          )}
           <p style={{ fontSize: '11px', color: '#9CA3AF', margin: '8px 0 0' }}>
             La preview mostra la pagina così come apparirà nel sito di destinazione.
           </p>
