@@ -158,11 +158,10 @@ const SPECIAL_BLOCKS = [
 ]
 
 /* ─── Componente ColorPicker ──────────────────────────────── */
-function ColorPicker({ onSelect, onCustom, label = 'A', title = 'Colore testo', editor: editorInstance }) {
+function ColorPicker({ onSelect, onCustom, label = 'A', title = 'Colore testo' }) {
   const [open, setOpen] = useState(false)
   const [custom, setCustom] = useState('#003DA5')
   const ref = useRef()
-  const savedSelectionRef = useRef(null)
 
   useEffect(() => {
     function onDown(e) { if (ref.current && !ref.current.contains(e.target)) setOpen(false) }
@@ -173,12 +172,8 @@ function ColorPicker({ onSelect, onCustom, label = 'A', title = 'Colore testo', 
   return (
     <div ref={ref} style={{ position:'relative', flexShrink:0 }}>
       <button type="button" title={title}
-        onMouseDown={e => e.preventDefault()}
-        onClick={() => {
-          // Salva la selezione corrente prima di aprire il picker
-          if (editorInstance && !open) {
-            savedSelectionRef.current = editorInstance.state.selection
-          }
+        onMouseDown={e => {
+          e.preventDefault()
           setOpen(v=>!v)
         }}
         style={{ height:'30px', minWidth:'34px', padding:'0 5px', border:'1px solid #E5E7EB', borderRadius:'5px',
@@ -196,12 +191,9 @@ function ColorPicker({ onSelect, onCustom, label = 'A', title = 'Colore testo', 
               <div style={{ display:'flex', gap:'4px', flexWrap:'wrap' }}>
                 {colors.map(c => (
                   <button key={c} type="button"
-                    onMouseDown={e => e.preventDefault()}
-                    onClick={() => {
-                      // Ripristina la selezione salvata prima di applicare il colore
-                      if (editorInstance && savedSelectionRef.current) {
-                        editorInstance.commands.setTextSelection(savedSelectionRef.current)
-                      }
+                    onMouseDown={e => {
+                      e.preventDefault()
+                      e.stopPropagation()
                       onSelect(c)
                       setOpen(false)
                     }}
@@ -220,11 +212,9 @@ function ColorPicker({ onSelect, onCustom, label = 'A', title = 'Colore testo', 
             <input type="color" value={custom} onChange={e => setCustom(e.target.value)}
               style={{ width:'36px', height:'28px', border:'1px solid #D1D5DB', borderRadius:'5px', cursor:'pointer', padding:'2px' }}/>
             <button type="button"
-              onMouseDown={e => e.preventDefault()}
-              onClick={() => {
-                if (editorInstance && savedSelectionRef.current) {
-                  editorInstance.commands.setTextSelection(savedSelectionRef.current)
-                }
+              onMouseDown={e => {
+                e.preventDefault()
+                e.stopPropagation()
                 onSelect(custom)
                 setOpen(false)
               }}
@@ -471,8 +461,8 @@ export default function RichEditor({ value, onChange, placeholder = 'Scrivi qui�
 
         <Sep/>
         <RowLabel>Colore</RowLabel>
-        <ColorPicker label="A" title="Colore testo" editor={editor} onSelect={c => editor.chain().focus().setColor(c).run()} />
-        <ColorPicker label="■" title="Sfondo / evidenziazione" editor={editor} onSelect={c => editor.chain().focus().setHighlight({color:c}).run()} />
+        <ColorPicker label="A" title="Colore testo" onSelect={c => editor.chain().focus().setColor(c).run()} />
+        <ColorPicker label="■" title="Sfondo / evidenziazione" onSelect={c => editor.chain().focus().setHighlight({color:c}).run()} />
         <Btn title="Rimuovi colori" onClick={() => editor.chain().focus().unsetColor().unsetHighlight().run()}>
           <span style={{fontSize:'10px',color:'#DC2626'}}>✕col</span>
         </Btn>
