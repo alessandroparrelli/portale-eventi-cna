@@ -27,6 +27,7 @@ import ImageUploader from '../../components/editor/ImageUploader'
 import LogoManager from '../../components/editor/LogoManager'
 import AddressSearch from '../../components/editor/AddressSearch'
 import HeroDragPreview from '../../components/editor/HeroDragPreview'
+import IframePreview from '../../components/IframePreview'
 import {
   Save, ArrowLeft, Eye, Plus, Trash2, GripVertical,
   Type, Image, Grid3x3,
@@ -1045,11 +1046,12 @@ export default function EventoEditorPage() {
                     Apri in nuova tab ↗
                   </a>
                 </div>
-                <iframe
-                  key={event.slug}
+                <IframePreview
+                  iframeKey={event.slug}
                   src={`/eventi/${event.slug}`}
                   style={{ flex:1, border:'none', borderRadius:'10px', minHeight:'600px', boxShadow:'0 1px 8px rgba(0,0,0,0.08)' }}
                   title="Anteprima landing page"
+                  fallbackUrl={`/eventi/${event.slug}`}
                 />
               </>
             )}
