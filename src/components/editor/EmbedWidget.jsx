@@ -1,4 +1,4 @@
-import { useState } from 'react'
+import { useState, Component } from 'react'
 
 const BASE = typeof window !== 'undefined' ? window.location.origin : 'https://portale-eventi-cna.vercel.app'
 
@@ -7,6 +7,59 @@ const PRESETS = [
   { id: 'banner', label: 'Banner orizzontale', w: 800, h: 320,  desc: 'Per header o sezioni larghe' },
   { id: 'full',   label: 'Pagina completa',   w: '100%', h: 700, desc: 'Pagina intera responsive' },
 ]
+
+// Componente isolato con ErrorBoundary per l'iframe - evita crash dell'app padre
+class IframePreview extends Component {
+  constructor(props) {
+    super(props)
+    this.state = { errored: false }
+  }
+  static getDerivedStateFromError() { return { errored: true } }
+  componentDidCatch(err) { console.warn('IframePreview error (isolato):', err) }
+  render() {
+    const { url, w, h, titolo } = this.props
+    if (this.state.errored) {
+      return (
+        <div style={{ marginBottom:'16px', border:'1px solid #E5E7EB', borderRadius:'10px',
+          backgroundColor:'#F9FAFB', padding:'24px', textAlign:'center' }}>
+          <p style={{ fontSize:'13px', color:'#6B7280', margin:'0 0 12px' }}>
+            L'anteprima non è disponibile in questo browser.
+          </p>
+          <a href={url} target="_blank" rel="noopener noreferrer"
+            style={{ display:'inline-flex', alignItems:'center', gap:'6px', padding:'8px 16px',
+              backgroundColor:'#003DA5', color:'#fff', borderRadius:'6px', textDecoration:'none',
+              fontSize:'12px', fontWeight:'700', fontFamily:"'Inter',sans-serif" }}>
+            Apri in nuova scheda ↗
+          </a>
+        </div>
+      )
+    }
+    return (
+      <div style={{ marginBottom:'16px' }}>
+        <p style={{ fontSize:'12px', fontWeight:'700', color:'#6B7280', textTransform:'uppercase',
+          letterSpacing:'0.06em', margin:'0 0 10px' }}>Anteprima embed</p>
+        <div style={{ border:'1px solid #E5E7EB', borderRadius:'10px', overflow:'hidden',
+          backgroundColor:'#F9FAFB', padding:'16px' }}>
+          <iframe
+            src={url}
+            width={typeof w === 'string' ? '100%' : Math.min(w, 700)}
+            height={h}
+            style={{ border:'none', borderRadius:'8px', boxShadow:'0 4px 24px rgba(0,0,0,0.12)',
+              display:'block', maxWidth:'100%' }}
+            title={titolo || 'Preview'}
+            loading="lazy"
+          />
+        </div>
+        <p style={{ fontSize:'11px', color:'#9CA3AF', margin:'8px 0 0' }}>
+          Se non carica, usa{' '}
+          <a href={url} target="_blank" rel="noopener noreferrer"
+            style={{ color:'#003DA5' }}>Apri ↗</a>
+        </p>
+      </div>
+    )
+  }
+}
+
 
 export default function EmbedWidget({ url, titolo }) {
   const [preset, setPreset] = useState('card')
@@ -177,29 +230,9 @@ export default function EmbedWidget({ url, titolo }) {
         </pre>
       </div>
 
-      {/* Preview: link invece di iframe (l'iframe crasha su Safari/iOS) */}
+      {/* Preview live con iframe isolato */}
       {showPreview && (
-        <div style={{ marginBottom: '16px' }}>
-          <p style={{ fontSize: '12px', fontWeight: '700', color: '#6B7280', textTransform: 'uppercase',
-            letterSpacing: '0.06em', margin: '0 0 10px' }}>Anteprima pagina</p>
-          <div style={{ border: '1px solid #E5E7EB', borderRadius: '10px', backgroundColor: '#F9FAFB',
-            padding: '24px', textAlign: 'center' }}>
-            <p style={{ fontSize: '13px', color: '#6B7280', margin: '0 0 14px', lineHeight: '1.5' }}>
-              L'anteprima si apre in una nuova scheda del browser.
-            </p>
-            <a href={url} target="_blank" rel="noopener noreferrer"
-              style={{ display: 'inline-flex', alignItems: 'center', gap: '8px',
-                padding: '10px 20px', backgroundColor: '#003DA5', color: '#fff',
-                borderRadius: '8px', textDecoration: 'none', fontSize: '13px', fontWeight: '700',
-                fontFamily: "'Inter',sans-serif" }}>
-              <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5">
-                <path d="M18 13v6a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2V8a2 2 0 0 1 2-2h6"/>
-                <polyline points="15 3 21 3 21 9"/><line x1="10" y1="14" x2="21" y2="3"/>
-              </svg>
-              Apri anteprima ↗
-            </a>
-          </div>
-        </div>
+        <IframePreview url={url} w={w} h={h} titolo={titolo} />
       )}
 
       {/* Istruzioni piattaforme */}
