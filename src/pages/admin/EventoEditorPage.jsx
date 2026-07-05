@@ -1026,7 +1026,6 @@ export default function EventoEditorPage() {
 
         {/* ── PREVIEW ── */}
         {activeTab==='preview' && (
-          <ErrorBoundary>
           <div style={{ display:'flex', flexDirection:'column', height:'100%' }}>
             {!event.slug ? (
               <div style={{ padding:'48px', textAlign:'center', color:'#9CA3AF' }}>
@@ -1055,7 +1054,6 @@ export default function EventoEditorPage() {
               </>
             )}
           </div>
-          </ErrorBoundary>
         )}
       </div>
 
