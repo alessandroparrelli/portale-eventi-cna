@@ -21,7 +21,12 @@ export default class IframePreview extends Component {
   render() {
     const { src, style, title, iframeKey, fallbackUrl } = this.props
 
-    if (this.state.errored) {
+    // iOS Safari crasha con iframe in SPA - usa link diretto
+    const isIOS = typeof navigator !== 'undefined' &&
+      (/iPad|iPhone|iPod/.test(navigator.userAgent) ||
+       (navigator.platform === 'MacIntel' && navigator.maxTouchPoints > 1))
+
+    if (isIOS || this.state.errored) {
       return (
         <div style={{ display:'flex', flexDirection:'column', alignItems:'center',
           justifyContent:'center', flex:1, minHeight:'300px', gap:'12px',
