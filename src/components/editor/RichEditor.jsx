@@ -463,8 +463,8 @@ export default function RichEditor({ value, onChange, placeholder = 'Scrivi qui�
 
         <Sep/>
         <RowLabel>Colore</RowLabel>
-        <ColorPicker label="A" title="Colore testo" onSelect={c => editor.chain().focus().setColor(c).run()} />
-        <ColorPicker label="■" title="Sfondo / evidenziazione" onSelect={c => editor.chain().focus().setHighlight({color:c}).run()} />
+        <ColorPicker label="A" title="Colore testo" onSelect={c => editor.chain().setColor(c).run()} />
+        <ColorPicker label="■" title="Sfondo / evidenziazione" onSelect={c => editor.chain().setHighlight({color:c}).run()} />
         <Btn title="Rimuovi colori" onClick={() => editor.chain().focus().unsetColor().unsetHighlight().run()}>
           <span style={{fontSize:'10px',color:'#DC2626'}}>✕col</span>
         </Btn>
