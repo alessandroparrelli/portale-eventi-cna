@@ -48,7 +48,9 @@ export default function HeroDragPreview({ event, setH }) {
     setH('bg_position')('50% 50%')
   }
 
-  const overlay = `rgba(0,0,0,${(lh.overlay_opacita || 55) / 100})`
+  const overlayHex = lh.overlay_colore || '#000000'
+  const r = parseInt(overlayHex.slice(1,3),16), g = parseInt(overlayHex.slice(3,5),16), b = parseInt(overlayHex.slice(5,7),16)
+  const overlay = `rgba(${r},${g},${b},${(lh.overlay_opacita || 55) / 100})`
 
   return (
     <div>

@@ -227,6 +227,8 @@ export default function LandingPagePublic() {
   const lh = lp.layout_hero || {}
   const altezzaHero = parseInt(lh.altezza||'420')
   const overlayOpacita = parseFloat(lh.overlay_opacita||'50') / 100
+  const overlayHexPub = lh.overlay_colore || '#000000'
+  const overlayR = parseInt(overlayHexPub.slice(1,3),16), overlayG = parseInt(overlayHexPub.slice(3,5),16), overlayB = parseInt(overlayHexPub.slice(5,7),16)
   const allineamento = lh.allineamento || 'centro'
   const textAlign = allineamento === 'sinistra' ? 'left' : 'center'
   const alignItems = allineamento === 'sinistra' ? 'flex-start' : 'center'
@@ -304,7 +306,7 @@ export default function LandingPagePublic() {
         alignItems, justifyContent:'center', padding:'60px 24px',
         background: lp.hero_immagine_url?`url(${lp.hero_immagine_url}) ${bgPosition}/cover no-repeat`:cp,
       }}>
-        <div style={{position:'absolute',inset:0,background:`rgba(0,0,0,${overlayOpacita})`}} />
+        <div style={{position:'absolute',inset:0,background:`rgba(${overlayR},${overlayG},${overlayB},${overlayOpacita})`}} />
         <div className="lp-hero-logo" style={{position:'relative',zIndex:1,textAlign:'center',width:'100%',marginBottom:'36px'}}>
           <div style={{
             background: lh.logo_sfondo==='bianco' ? '#FFFFFF'

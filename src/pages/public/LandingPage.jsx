@@ -311,7 +311,7 @@ export default function LandingPage() {
         ...heroStyle,
       }}>
         {/* Overlay scuro */}
-        <div style={{ position:'absolute', inset:0, backgroundColor:`rgba(0,0,0,${(lh.overlay_opacita||55)/100})`, zIndex:1 }} />
+        <div style={{ position:'absolute', inset:0, backgroundColor:(() => { const h=lh.overlay_colore||'#000000'; const r=parseInt(h.slice(1,3),16),g=parseInt(h.slice(3,5),16),b=parseInt(h.slice(5,7),16); return `rgba(${r},${g},${b},${(lh.overlay_opacita||55)/100})` })(), zIndex:1 }} />
 
         {/* Contenuto — logo + titoli in colonna, sopra l'overlay */}
         <div className="ev-hero-content" style={{

@@ -52,7 +52,7 @@ const STD_FIELDS = [
 
 const LAYOUT_HERO_DEFAULT = {
   altezza: '420',
-  overlay_opacita: '50',
+  overlay_opacita: '50', overlay_colore: '#000000',
   allineamento: 'centro',
   titolo_colore: '#FFFFFF',
   titolo_dimensione: 'clamp(26px,5vw,54px)',

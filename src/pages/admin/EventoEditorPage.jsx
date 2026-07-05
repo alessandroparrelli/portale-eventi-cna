@@ -362,7 +362,7 @@ export default function EventoEditorPage() {
       certificato_colore:'#003DA5', certificato_logo_url:null, certificato_firma_nome:null, certificato_firma_ruolo:null,
       certificato_template:'laterale', certificato_config:{},
     colore_primario:'#003DA5', colore_sfondo:'#F4F5F7', tema:{},
-    layout_hero:{ altezza:'380', overlay_opacita:'55', allineamento:'sinistra', titolo_colore:'#FFFFFF', titolo_dimensione:'clamp(26px,5vw,54px)', titolo_grassetto:true, titolo_maiuscolo:false },
+    layout_hero:{ altezza:'380', overlay_opacita:'55', overlay_colore:'#000000', allineamento:'sinistra', titolo_colore:'#FFFFFF', titolo_dimensione:'clamp(26px,5vw,54px)', titolo_grassetto:true, titolo_maiuscolo:false },
     sezioni:[], email_organizzatore:'', email_mittente:'', email_cc:'', nome_mittente:'',
   })
   const eventRef = useRef(null)   // sempre aggiornato — evita race condition nel save
@@ -830,6 +830,24 @@ export default function EventoEditorPage() {
                 <input type="range" min="0" max="90" step="5"
                   value={event.layout_hero?.overlay_opacita||'55'} onChange={e=>setH('overlay_opacita')(e.target.value)}
                   style={{ width:'100%' }}/>
+              </Field>
+              <Field label="Colore overlay">
+                <div style={{ display:'flex', alignItems:'center', gap:'10px' }}>
+                  <input type="color" value={event.layout_hero?.overlay_colore||'#000000'}
+                    onChange={e=>setH('overlay_colore')(e.target.value)}
+                    style={{ width:'44px', height:'34px', border:'1px solid #E5E7EB', borderRadius:'6px', cursor:'pointer', padding:'2px' }}/>
+                  <input value={event.layout_hero?.overlay_colore||'#000000'}
+                    onChange={e=>setH('overlay_colore')(e.target.value)}
+                    style={{ flex:1, padding:'7px 10px', border:'1px solid #E5E7EB', borderRadius:'6px', fontSize:'13px', fontFamily:'monospace' }}/>
+                  <button type="button" onClick={()=>setH('overlay_colore')('#000000')}
+                    style={{ padding:'6px 10px', border:'1px solid #E5E7EB', borderRadius:'6px', fontSize:'11px', cursor:'pointer', background:'#fff', color:'#6B7280', fontFamily:"'Inter',sans-serif" }}>
+                    ⬛ Nero
+                  </button>
+                  <button type="button" onClick={()=>setH('overlay_colore')('#003DA5')}
+                    style={{ padding:'6px 10px', border:'1px solid #E5E7EB', borderRadius:'6px', fontSize:'11px', cursor:'pointer', background:'#EEF3FF', color:'#003DA5', fontFamily:"'Inter',sans-serif" }}>
+                    🔵 BLU CNA
+                  </button>
+                </div>
               </Field>
               <Field label="Allineamento testo">
                 <div style={{ display:'flex', gap:'8px' }}>
