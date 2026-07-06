@@ -42,8 +42,7 @@ export default function AdminLayout() {
             title="Ricarica pagina"
           />
           <div style={s.titleBlock}>
-            <span style={s.pageTitle}>Eventi</span>
-            <span style={s.pageSubtitle}>Portale CNA Roma</span>
+            <span style={s.pageTitle}>EVENTI</span>
           </div>
         </div>
 
@@ -90,8 +89,7 @@ const s = {
   },
   titleBlock: {
     display: 'flex',
-    flexDirection: 'column',
-    justifyContent: 'center',
+    alignItems: 'center',
     paddingLeft: '14px',
   },
   pageTitle: {
@@ -100,18 +98,8 @@ const s = {
     color: '#FFFFFF',
     letterSpacing: '-0.04em',
     fontFamily: "'Inter', sans-serif",
-    lineHeight: 1.1,
-    whiteSpace: 'nowrap',
-  },
-  pageSubtitle: {
-    fontSize: '11px',
-    fontWeight: '500',
-    color: 'rgba(255,255,255,0.6)',
-    letterSpacing: '0.01em',
-    fontFamily: "'Inter', sans-serif",
     lineHeight: 1,
     whiteSpace: 'nowrap',
-    marginTop: '2px',
   },
   body: {
     flex: 1,
