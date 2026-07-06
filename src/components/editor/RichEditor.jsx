@@ -190,14 +190,22 @@ function ColorPicker({ onSelect, label = 'A', title = 'Colore testo', editor: ed
     selRef.current = null
 
     if (isHighlight) {
-      ed.chain().setTextSelection(sel).setHighlight({ color }).run()
+      ed.chain().focus().setTextSelection(sel).setHighlight({ color }).run()
       return
     }
 
-    // Ripristina selezione nell'editor e usa execCommand nativo del browser
-    // execCommand funziona su QUALSIASI formattazione (bold, italic, heading, ecc)
-    ed.chain().focus().setTextSelection(sel).run()
-    document.execCommand('foreColor', false, color)
+    // Applica con chain TipTap: focus + selezione + colore
+    ed.chain().focus().setTextSelection(sel).setColor(color).run()
+
+    // Secondo passaggio: forza il colore anche su nodi bold/italic con ProseMirror diretto
+    try {
+      const { state, view } = ed
+      const mark = state.schema.marks.textStyle
+      if (mark) {
+        const tr = state.tr.addMark(sel.from, sel.to, mark.create({ color }))
+        view.dispatch(tr)
+      }
+    } catch (e) { /* ignora */ }
   }
 
   return (
