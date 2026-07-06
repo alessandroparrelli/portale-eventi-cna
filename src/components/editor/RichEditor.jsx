@@ -194,21 +194,10 @@ function ColorPicker({ onSelect, label = 'A', title = 'Colore testo', editor: ed
       return
     }
 
-    // Usa transazione ProseMirror diretta per applicare il colore
-    // anche su nodi Bold/Italic/ecc — setColor da solo non lo fa
-    const { state, view } = ed
-    const { tr, schema } = state
-    const textStyleMark = schema.marks.textStyle
-
-    if (!textStyleMark) {
-      // Fallback se textStyle non esiste
-      ed.chain().setTextSelection(sel).setColor(color).run()
-      return
-    }
-
-    // Aggiunge il mark textStyle con color su tutto il range
-    tr.addMark(sel.from, sel.to, textStyleMark.create({ color }))
-    view.dispatch(tr)
+    // Ripristina selezione nell'editor e usa execCommand nativo del browser
+    // execCommand funziona su QUALSIASI formattazione (bold, italic, heading, ecc)
+    ed.chain().focus().setTextSelection(sel).run()
+    document.execCommand('foreColor', false, color)
   }
 
   return (
