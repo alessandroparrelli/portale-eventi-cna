@@ -162,11 +162,23 @@ function ColorPicker({ onSelect, label = 'A', title = 'Colore testo', editor: ed
   const inputRef = useRef()
   const selRef = useRef(null)
 
+  // Salva la selezione ogni volta che l'editor perde il focus
+  useEffect(() => {
+    if (!ed) return
+    const save = () => {
+      const { from, to } = ed.state.selection
+      if (from !== to) selRef.current = { from, to }
+    }
+    ed.on('blur', save)
+    return () => ed.off('blur', save)
+  }, [ed])
+
   function openPicker(e) {
     e.preventDefault()
+    // Salva anche al click nel caso l'editor sia ancora focalizzato
     if (ed) {
       const { from, to } = ed.state.selection
-      selRef.current = { from, to }
+      if (from !== to) selRef.current = { from, to }
     }
     inputRef.current?.click()
   }
@@ -175,14 +187,12 @@ function ColorPicker({ onSelect, label = 'A', title = 'Colore testo', editor: ed
     if (!ed) return
     const sel = selRef.current
     if (sel && sel.from !== sel.to) {
-      // Selezione salvata: ripristinala e applica
       if (isHighlight) {
         ed.chain().setTextSelection(sel).setHighlight({ color }).run()
       } else {
         ed.chain().setTextSelection(sel).setColor(color).run()
       }
     } else {
-      // Nessuna selezione: applica su tutta la parola corrente
       if (isHighlight) {
         ed.chain().focus().extendMarkRange('highlight').setHighlight({ color }).run()
       } else {
