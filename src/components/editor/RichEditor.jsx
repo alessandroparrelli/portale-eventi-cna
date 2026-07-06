@@ -189,23 +189,26 @@ function ColorPicker({ onSelect, label = 'A', title = 'Colore testo', editor: ed
     if (!sel || sel.from === sel.to) return
     selRef.current = null
 
+    const { from, to } = sel
+
     if (isHighlight) {
-      ed.chain().focus().setTextSelection(sel).setHighlight({ color }).run()
+      ed.chain().focus().setTextSelection({ from, to }).setHighlight({ color }).run()
       return
     }
 
-    // Applica con chain TipTap: focus + selezione + colore
-    ed.chain().focus().setTextSelection(sel).setColor(color).run()
+    // Approccio: usa addMark di ProseMirror direttamente
+    // addMark funziona a livello di document e sovrascrive/aggiunge il mark
+    // su tutti i nodi di testo nel range, inclusi quelli già marcati bold/italic
+    const { state, view } = ed
+    const mark = state.schema.marks.textStyle
+    if (!mark) return
 
-    // Secondo passaggio: forza il colore anche su nodi bold/italic con ProseMirror diretto
-    try {
-      const { state, view } = ed
-      const mark = state.schema.marks.textStyle
-      if (mark) {
-        const tr = state.tr.addMark(sel.from, sel.to, mark.create({ color }))
-        view.dispatch(tr)
-      }
-    } catch (e) { /* ignora */ }
+    const tr = state.tr
+    // Rimuovi prima il colore esistente nel range, poi aggiungilo nuovo
+    tr.removeMark(from, to, mark)
+    tr.addMark(from, to, mark.create({ color }))
+    // Importante: non usare step merge per preservare altri marks
+    view.dispatch(tr)
   }
 
   return (
