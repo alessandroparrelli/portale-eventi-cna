@@ -438,7 +438,21 @@ export default function RichEditor({ value, onChange, placeholder = 'Scrivi quiâ
       <div style={st.row}>
         <RowLabel>Format</RowLabel>
         <Btn title="Grassetto (Ctrl+B)" active={editor.isActive('bold')}
-          onClick={() => editor.chain().focus().toggleBold().run()}><strong style={{fontSize:'14px'}}>B</strong></Btn>
+          onClick={() => {
+            // Salva il colore attivo PRIMA di toggleBold
+            const activeColor = editor.getAttributes('textStyle').color
+            const { from, to } = editor.state.selection
+            editor.chain().focus().toggleBold().run()
+            // Se c'era un colore, riapplicalo dopo il toggle
+            if (activeColor && from !== to) {
+              const { state, view } = editor
+              const mark = state.schema.marks.textStyle
+              if (mark) {
+                const tr = state.tr.removeMark(from, to, mark).addMark(from, to, mark.create({ color: activeColor }))
+                view.dispatch(tr)
+              }
+            }
+          }}><strong style={{fontSize:'14px'}}>B</strong></Btn>
         <Btn title="Corsivo (Ctrl+I)" active={editor.isActive('italic')}
           onClick={() => editor.chain().focus().toggleItalic().run()}><em style={{fontStyle:'italic',fontSize:'14px'}}>I</em></Btn>
         <Btn title="Sottolineato (Ctrl+U)" active={editor.isActive('underline')}
