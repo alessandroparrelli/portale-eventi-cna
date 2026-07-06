@@ -42,7 +42,7 @@ export default function AdminLayout() {
             title="Ricarica pagina"
           />
           <div style={s.titleBlock}>
-            <span style={s.pageTitle}>EVENTI</span>
+            <span style={s.pageTitle}>Eventi</span>
           </div>
         </div>
 
@@ -96,7 +96,7 @@ const s = {
     fontSize: '22px',
     fontWeight: '800',
     color: '#FFFFFF',
-    letterSpacing: '-0.04em',
+    letterSpacing: '-0.02em',
     fontFamily: "'Inter', sans-serif",
     lineHeight: 1,
     whiteSpace: 'nowrap',
