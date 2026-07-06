@@ -186,17 +186,29 @@ function ColorPicker({ onSelect, label = 'A', title = 'Colore testo', editor: ed
   function applyColor(color) {
     if (!ed) return
     const sel = selRef.current
-    if (sel && sel.from !== sel.to) {
-      // Ripristina la selezione salvata e applica il colore
-      if (isHighlight) {
-        ed.chain().setTextSelection(sel).setHighlight({ color }).run()
-      } else {
-        ed.chain().setTextSelection(sel).setColor(color).run()
-      }
-      // Reset: non riapplicare alla prossima apertura senza nuova selezione
-      selRef.current = null
+    if (!sel || sel.from === sel.to) return
+    selRef.current = null
+
+    if (isHighlight) {
+      ed.chain().setTextSelection(sel).setHighlight({ color }).run()
+      return
     }
-    // Se non c'è selezione non fare nulla
+
+    // Usa transazione ProseMirror diretta per applicare il colore
+    // anche su nodi Bold/Italic/ecc — setColor da solo non lo fa
+    const { state, view } = ed
+    const { tr, schema } = state
+    const textStyleMark = schema.marks.textStyle
+
+    if (!textStyleMark) {
+      // Fallback se textStyle non esiste
+      ed.chain().setTextSelection(sel).setColor(color).run()
+      return
+    }
+
+    // Aggiunge il mark textStyle con color su tutto il range
+    tr.addMark(sel.from, sel.to, textStyleMark.create({ color }))
+    view.dispatch(tr)
   }
 
   return (
