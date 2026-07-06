@@ -187,18 +187,16 @@ function ColorPicker({ onSelect, label = 'A', title = 'Colore testo', editor: ed
     if (!ed) return
     const sel = selRef.current
     if (sel && sel.from !== sel.to) {
+      // Ripristina la selezione salvata e applica il colore
       if (isHighlight) {
         ed.chain().setTextSelection(sel).setHighlight({ color }).run()
       } else {
         ed.chain().setTextSelection(sel).setColor(color).run()
       }
-    } else {
-      if (isHighlight) {
-        ed.chain().focus().extendMarkRange('highlight').setHighlight({ color }).run()
-      } else {
-        ed.chain().focus().extendMarkRange('textStyle').setColor(color).run()
-      }
+      // Reset: non riapplicare alla prossima apertura senza nuova selezione
+      selRef.current = null
     }
+    // Se non c'è selezione non fare nulla
   }
 
   return (
