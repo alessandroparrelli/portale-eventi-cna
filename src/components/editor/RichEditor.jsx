@@ -158,20 +158,47 @@ const SPECIAL_BLOCKS = [
 ]
 
 /* ─── Componente ColorPicker ──────────────────────────────── */
-function ColorPicker({ onSelect, label = 'A', title = 'Colore testo' }) {
-  const ref = useRef()
+function ColorPicker({ onSelect, label = 'A', title = 'Colore testo', editor: ed, isHighlight = false }) {
+  const inputRef = useRef()
+  const selRef = useRef(null)
+
+  function openPicker(e) {
+    e.preventDefault()
+    // Salva la selezione PRIMA che il color picker apra e tolga il focus
+    if (ed) {
+      const { from, to } = ed.state.selection
+      selRef.current = { from, to }
+    }
+    inputRef.current?.click()
+  }
+
+  function applyColor(color) {
+    if (!ed) return
+    // Ripristina la selezione salvata e applica il colore
+    if (selRef.current) {
+      const { from, to } = selRef.current
+      if (isHighlight) {
+        ed.chain().setTextSelection({ from, to }).setHighlight({ color }).run()
+      } else {
+        ed.chain().setTextSelection({ from, to }).setColor(color).run()
+      }
+    } else {
+      if (isHighlight) { ed.chain().setHighlight({ color }).run() } else { ed.chain().setColor(color).run() }
+    }
+  }
+
   return (
     <div style={{ position:'relative', flexShrink:0 }}>
       <button type="button" title={title}
-        onMouseDown={e => { e.preventDefault(); ref.current?.click() }}
+        onMouseDown={openPicker}
         style={{ height:'30px', minWidth:'34px', padding:'0 5px', border:'1px solid #E5E7EB', borderRadius:'5px',
           background:'#fff', cursor:'pointer', fontSize:'12px', fontWeight:'700', color:'#374151',
           display:'flex', alignItems:'center', justifyContent:'center', gap:'3px', fontFamily:"'Inter',sans-serif" }}>
         <span style={{ fontSize:'14px' }}>{label}</span>
         <svg width="8" height="5" viewBox="0 0 8 5"><path d="M0 0l4 5 4-5z" fill="#9CA3AF"/></svg>
       </button>
-      <input ref={ref} type="color" defaultValue="#000000"
-        onChange={e => onSelect(e.target.value)}
+      <input ref={inputRef} type="color" defaultValue="#000000"
+        onChange={e => applyColor(e.target.value)}
         style={{ position:'absolute', width:'1px', height:'1px', opacity:0, pointerEvents:'none' }}/>
     </div>
   )
@@ -417,8 +444,8 @@ export default function RichEditor({ value, onChange, placeholder = 'Scrivi qui�
 
         <Sep/>
         <RowLabel>Colore</RowLabel>
-        <ColorPicker label="A" title="Colore testo" onSelect={c => { editor.commands.focus(); editor.chain().setColor(c).run() }} />
-        <ColorPicker label="■" title="Sfondo / evidenziazione" onSelect={c => { editor.commands.focus(); editor.chain().setHighlight({color:c}).run() }} />
+        <ColorPicker label="A" title="Colore testo" editor={editor} onSelect={() => {}} />
+        <ColorPicker label="■" title="Sfondo / evidenziazione" editor={editor} onSelect={() => {}} isHighlight={true} />
         <Btn title="Rimuovi colori" onClick={() => editor.chain().focus().unsetColor().unsetHighlight().run()}>
           <span style={{fontSize:'10px',color:'#DC2626'}}>✕col</span>
         </Btn>
