@@ -159,66 +159,24 @@ const SPECIAL_BLOCKS = [
 
 /* ─── Componente ColorPicker ──────────────────────────────── */
 function ColorPicker({ onSelect, label = 'A', title = 'Colore testo' }) {
-  const [open, setOpen] = useState(false)
-  const btnRef = useRef()
-  const popupRef = useRef()
-
-  // Chiude se si clicca fuori da ENTRAMBI bottone e popup
-  useEffect(() => {
-    if (!open) return
-    function onDown(e) {
-      if (btnRef.current?.contains(e.target)) return    // clic sul bottone: gestito da onMouseDown
-      if (popupRef.current?.contains(e.target)) return  // clic dentro il popup: ok
-      setOpen(false)
-    }
-    document.addEventListener('mousedown', onDown, true)
-    return () => document.removeEventListener('mousedown', onDown, true)
-  }, [open])
-
+  const ref = useRef()
   return (
     <div style={{ position:'relative', flexShrink:0 }}>
-      <button ref={btnRef} type="button" title={title}
-        onMouseDown={e => { e.preventDefault(); setOpen(v => !v) }}
+      <button type="button" title={title}
+        onMouseDown={e => { e.preventDefault(); ref.current?.click() }}
         style={{ height:'30px', minWidth:'34px', padding:'0 5px', border:'1px solid #E5E7EB', borderRadius:'5px',
           background:'#fff', cursor:'pointer', fontSize:'12px', fontWeight:'700', color:'#374151',
           display:'flex', alignItems:'center', justifyContent:'center', gap:'3px', fontFamily:"'Inter',sans-serif" }}>
         <span style={{ fontSize:'14px' }}>{label}</span>
         <svg width="8" height="5" viewBox="0 0 8 5"><path d="M0 0l4 5 4-5z" fill="#9CA3AF"/></svg>
       </button>
-      {open && (
-        <div ref={popupRef} style={{
-          position:'absolute', top:'36px', left:'auto', right:0, zIndex:9999,
-          background:'#fff', border:'1px solid #E5E7EB',
-          borderRadius:'10px', padding:'14px',
-          boxShadow:'0 8px 32px rgba(0,0,0,.15)',
-          width:'272px',
-          // Sposta a destra se c'è spazio, altrimenti a sinistra
-        }}>
-          {Object.entries(COLOR_PALETTE).map(([name, colors]) => (
-            <div key={name} style={{ marginBottom:'8px' }}>
-              <p style={{ fontSize:'9px', fontWeight:'800', color:'#9CA3AF', textTransform:'uppercase', letterSpacing:'.08em', margin:'0 0 5px' }}>{name}</p>
-              <div style={{ display:'flex', gap:'4px', flexWrap:'wrap' }}>
-                {colors.map(col => (
-                  <button key={col} type="button"
-                    onMouseDown={e => { e.preventDefault(); e.stopPropagation(); onSelect(col); setOpen(false) }}
-                    style={{ width:'24px', height:'24px', borderRadius:'4px', background:col,
-                      border:'1.5px solid rgba(0,0,0,.12)', cursor:'pointer', flexShrink:0 }}
-                    title={col}/>
-                ))}
-              </div>
-            </div>
-          ))}
-          <div style={{ borderTop:'1px solid #F3F4F6', paddingTop:'10px', marginTop:'4px', display:'flex', alignItems:'center', gap:'8px' }}>
-            <input type="color" defaultValue="#003DA5"
-              onInput={e => { e.preventDefault(); e.stopPropagation(); onSelect(e.target.value) }}
-              style={{ width:'36px', height:'28px', border:'1px solid #E5E7EB', borderRadius:'5px', cursor:'pointer', padding:'2px', flexShrink:0 }}/>
-            <span style={{ fontSize:'11px', color:'#6B7280', flex:1 }}>Colore personalizzato</span>
-          </div>
-        </div>
-      )}
+      <input ref={ref} type="color" defaultValue="#000000"
+        onChange={e => onSelect(e.target.value)}
+        style={{ position:'absolute', width:'1px', height:'1px', opacity:0, pointerEvents:'none' }}/>
     </div>
   )
 }
+
 
 /* ─── Componente principale ──────────────────────────────────── */
 export default function RichEditor({ value, onChange, placeholder = 'Scrivi qui…', minHeight = '300px', variables = [] }) {
@@ -459,8 +417,8 @@ export default function RichEditor({ value, onChange, placeholder = 'Scrivi qui�
 
         <Sep/>
         <RowLabel>Colore</RowLabel>
-        <ColorPicker label="A" title="Colore testo" onSelect={c => editor.chain().setColor(c).run()} />
-        <ColorPicker label="■" title="Sfondo / evidenziazione" onSelect={c => editor.chain().setHighlight({color:c}).run()} />
+        <ColorPicker label="A" title="Colore testo" onSelect={c => { editor.commands.focus(); editor.chain().setColor(c).run() }} />
+        <ColorPicker label="■" title="Sfondo / evidenziazione" onSelect={c => { editor.commands.focus(); editor.chain().setHighlight({color:c}).run() }} />
         <Btn title="Rimuovi colori" onClick={() => editor.chain().focus().unsetColor().unsetHighlight().run()}>
           <span style={{fontSize:'10px',color:'#DC2626'}}>✕col</span>
         </Btn>
