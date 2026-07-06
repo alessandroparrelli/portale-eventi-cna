@@ -164,7 +164,6 @@ function ColorPicker({ onSelect, label = 'A', title = 'Colore testo', editor: ed
 
   function openPicker(e) {
     e.preventDefault()
-    // Salva la selezione PRIMA che il color picker apra e tolga il focus
     if (ed) {
       const { from, to } = ed.state.selection
       selRef.current = { from, to }
@@ -174,16 +173,21 @@ function ColorPicker({ onSelect, label = 'A', title = 'Colore testo', editor: ed
 
   function applyColor(color) {
     if (!ed) return
-    // Ripristina la selezione salvata e applica il colore
-    if (selRef.current) {
-      const { from, to } = selRef.current
+    const sel = selRef.current
+    if (sel && sel.from !== sel.to) {
+      // Selezione salvata: ripristinala e applica
       if (isHighlight) {
-        ed.chain().setTextSelection({ from, to }).setHighlight({ color }).run()
+        ed.chain().setTextSelection(sel).setHighlight({ color }).run()
       } else {
-        ed.chain().setTextSelection({ from, to }).setColor(color).run()
+        ed.chain().setTextSelection(sel).setColor(color).run()
       }
     } else {
-      if (isHighlight) { ed.chain().setHighlight({ color }).run() } else { ed.chain().setColor(color).run() }
+      // Nessuna selezione: applica su tutta la parola corrente
+      if (isHighlight) {
+        ed.chain().focus().extendMarkRange('highlight').setHighlight({ color }).run()
+      } else {
+        ed.chain().focus().extendMarkRange('textStyle').setColor(color).run()
+      }
     }
   }
 
