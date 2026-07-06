@@ -158,24 +158,27 @@ const SPECIAL_BLOCKS = [
 ]
 
 /* ─── Componente ColorPicker ──────────────────────────────── */
-function ColorPicker({ onSelect, onCustom, label = 'A', title = 'Colore testo' }) {
+function ColorPicker({ onSelect, label = 'A', title = 'Colore testo' }) {
   const [open, setOpen] = useState(false)
-  const [custom, setCustom] = useState('#003DA5')
-  const ref = useRef()
+  const btnRef = useRef()
+  const popupRef = useRef()
 
+  // Chiude se si clicca fuori da ENTRAMBI bottone e popup
   useEffect(() => {
-    function onDown(e) { if (ref.current && !ref.current.contains(e.target)) setOpen(false) }
-    document.addEventListener('mousedown', onDown)
-    return () => document.removeEventListener('mousedown', onDown)
-  }, [])
+    if (!open) return
+    function onDown(e) {
+      if (btnRef.current?.contains(e.target)) return    // clic sul bottone: gestito da onMouseDown
+      if (popupRef.current?.contains(e.target)) return  // clic dentro il popup: ok
+      setOpen(false)
+    }
+    document.addEventListener('mousedown', onDown, true)
+    return () => document.removeEventListener('mousedown', onDown, true)
+  }, [open])
 
   return (
-    <div ref={ref} style={{ position:'relative', flexShrink:0 }}>
-      <button type="button" title={title}
-        onMouseDown={e => {
-          e.preventDefault()
-          setOpen(v=>!v)
-        }}
+    <div style={{ position:'relative', flexShrink:0 }}>
+      <button ref={btnRef} type="button" title={title}
+        onMouseDown={e => { e.preventDefault(); setOpen(v => !v) }}
         style={{ height:'30px', minWidth:'34px', padding:'0 5px', border:'1px solid #E5E7EB', borderRadius:'5px',
           background:'#fff', cursor:'pointer', fontSize:'12px', fontWeight:'700', color:'#374151',
           display:'flex', alignItems:'center', justifyContent:'center', gap:'3px', fontFamily:"'Inter',sans-serif" }}>
@@ -183,40 +186,33 @@ function ColorPicker({ onSelect, onCustom, label = 'A', title = 'Colore testo' }
         <svg width="8" height="5" viewBox="0 0 8 5"><path d="M0 0l4 5 4-5z" fill="#9CA3AF"/></svg>
       </button>
       {open && (
-        <div style={{
-          position:'fixed', zIndex:9999,
+        <div ref={popupRef} style={{
+          position:'absolute', top:'36px', left:'auto', right:0, zIndex:9999,
           background:'#fff', border:'1px solid #E5E7EB',
-          borderRadius:'12px', padding:'16px',
-          boxShadow:'0 8px 40px rgba(0,0,0,.18)',
-          width:'320px',
-          top: (() => { try { return ref.current?.getBoundingClientRect().bottom + 6 } catch { return 100 } })() + 'px',
-          left: (() => { try { const r = ref.current?.getBoundingClientRect(); return Math.max(8, Math.min(r.left, window.innerWidth - 336)) } catch { return 8 } })() + 'px',
+          borderRadius:'10px', padding:'14px',
+          boxShadow:'0 8px 32px rgba(0,0,0,.15)',
+          width:'272px',
+          // Sposta a destra se c'è spazio, altrimenti a sinistra
         }}>
-          <div style={{ display:'grid', gap:'10px' }}>
-            {Object.entries(COLOR_PALETTE).map(([name, colors]) => (
-              <div key={name}>
-                <p style={{ fontSize:'10px', fontWeight:'700', color:'#9CA3AF', textTransform:'uppercase', letterSpacing:'.06em', margin:'0 0 6px' }}>{name}</p>
-                <div style={{ display:'flex', gap:'5px', flexWrap:'wrap' }}>
-                  {colors.map(col => (
-                    <button key={col} type="button"
-                      onMouseDown={e => { e.preventDefault(); e.stopPropagation(); onSelect(col); setOpen(false) }}
-                      style={{ width:'26px', height:'26px', borderRadius:'5px', background:col,
-                        border:'1.5px solid rgba(0,0,0,.12)', cursor:'pointer', flexShrink:0 }}
-                      title={col}/>
-                  ))}
-                </div>
+          {Object.entries(COLOR_PALETTE).map(([name, colors]) => (
+            <div key={name} style={{ marginBottom:'8px' }}>
+              <p style={{ fontSize:'9px', fontWeight:'800', color:'#9CA3AF', textTransform:'uppercase', letterSpacing:'.08em', margin:'0 0 5px' }}>{name}</p>
+              <div style={{ display:'flex', gap:'4px', flexWrap:'wrap' }}>
+                {colors.map(col => (
+                  <button key={col} type="button"
+                    onMouseDown={e => { e.preventDefault(); e.stopPropagation(); onSelect(col); setOpen(false) }}
+                    style={{ width:'24px', height:'24px', borderRadius:'4px', background:col,
+                      border:'1.5px solid rgba(0,0,0,.12)', cursor:'pointer', flexShrink:0 }}
+                    title={col}/>
+                ))}
               </div>
-            ))}
-          </div>
-          <div style={{ borderTop:'1px solid #F3F4F6', marginTop:'12px', paddingTop:'12px', display:'flex', alignItems:'center', gap:'8px' }}>
-            <input type="color" value={custom} onChange={e => setCustom(e.target.value)}
-              style={{ width:'40px', height:'32px', border:'1px solid #E5E7EB', borderRadius:'6px', cursor:'pointer', padding:'2px', flexShrink:0 }}/>
-            <span style={{ fontSize:'11px', color:'#6B7280', flex:1 }}>{custom}</span>
-            <button type="button"
-              onMouseDown={e => { e.preventDefault(); e.stopPropagation(); onSelect(custom); setOpen(false) }}
-              style={{ padding:'6px 14px', borderRadius:'6px', border:'none', background:'#003DA5', color:'#fff', fontSize:'12px', fontWeight:'700', cursor:'pointer', fontFamily:"'Inter',sans-serif", flexShrink:0 }}>
-              Applica
-            </button>
+            </div>
+          ))}
+          <div style={{ borderTop:'1px solid #F3F4F6', paddingTop:'10px', marginTop:'4px', display:'flex', alignItems:'center', gap:'8px' }}>
+            <input type="color" defaultValue="#003DA5"
+              onInput={e => { e.preventDefault(); e.stopPropagation(); onSelect(e.target.value) }}
+              style={{ width:'36px', height:'28px', border:'1px solid #E5E7EB', borderRadius:'5px', cursor:'pointer', padding:'2px', flexShrink:0 }}/>
+            <span style={{ fontSize:'11px', color:'#6B7280', flex:1 }}>Colore personalizzato</span>
           </div>
         </div>
       )}
@@ -663,8 +659,8 @@ const TableIcon        = () => <svg width="13" height="13" viewBox="0 0 24 24" f
 const ClearIcon        = () => <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2"><path d="M8 3h11l-4 9"/><path d="M3 21l18-18"/><line x1="6" y1="15" x2="6" y2="21"/><line x1="9" y1="21" x2="3" y2="21"/></svg>
 
 const st = {
-  wrap:       { border:'1px solid #D1D5DB', borderRadius:'10px', overflow:'hidden', background:'#FFF', fontFamily:"'Inter',sans-serif" },
-  row:        { display:'flex', flexWrap:'wrap', gap:'2px', padding:'5px 8px', borderBottom:'1px solid #E5E7EB', background:'#FAFAFA', alignItems:'center' },
+  wrap:       { border:'1px solid #D1D5DB', borderRadius:'10px', overflow:'visible', background:'#FFF', fontFamily:"'Inter',sans-serif", position:'relative', zIndex:1 },
+  row:        { display:'flex', flexWrap:'wrap', gap:'2px', padding:'5px 8px', borderBottom:'1px solid #E5E7EB', background:'#FAFAFA', alignItems:'center', overflow:'visible', position:'relative' },
   sel:        { height:'30px', padding:'0 6px', border:'1px solid #E5E7EB', borderRadius:'5px', fontSize:'12px', fontFamily:"'Inter',sans-serif", background:'#FFF', cursor:'pointer', color:'#374151' },
   smallBtn:   { width:'24px', height:'30px', border:'1px solid #E5E7EB', borderRadius:'5px', background:'#FFF', cursor:'pointer', fontSize:'16px', fontWeight:'700', fontFamily:"'Inter',sans-serif", display:'flex', alignItems:'center', justifyContent:'center', flexShrink:0, color:'#374151' },
   picker:     { position:'absolute', top:'34px', left:0, background:'#FFF', border:'1px solid #E5E7EB', borderRadius:'10px', padding:'12px', zIndex:400, boxShadow:'0 8px 32px rgba(0,0,0,.12)', minWidth:'180px' },
