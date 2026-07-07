@@ -31,56 +31,72 @@ function esc(str) {
 function richToEmail(html, cp) {
   if (!html) return ''
   let h = html
+
   // 1. Rimuovi classi (mantieni style)
   h = h.replace(/\s+class="[^"]*"/g, '')
-  // 2. Inline marks — convertiti PRIMA dei paragrafi così i valori rimangono
+
+  // 2. Inline marks PRIMA — così i valori rimangono dentro i paragrafi
   h = h.replace(/<strong[^>]*>([\s\S]*?)<\/strong>/gi, '<b style="font-weight:bold;">$1</b>')
   h = h.replace(/<em[^>]*>([\s\S]*?)<\/em>/gi, '<i style="font-style:italic;">$1</i>')
   h = h.replace(/<u[^>]*>([\s\S]*?)<\/u>/gi, '<u style="text-decoration:underline;">$1</u>')
-  // 3. Span con colore/size da TipTap — preserva lo style inline
+
+  // 3. Span con colore/size da TipTap
   h = h.replace(/<span style="([^"]*)">([\s\S]*?)<\/span>/gi, (_, st, inner) => {
     const col = (st.match(/color:\s*([^;]+)/i)||[])[1]
     const sz  = (st.match(/font-size:\s*([^;]+)/i)||[])[1]
     const parts = []
-    if (col) parts.push(`color:${col.trim()}`)
-    if (sz)  parts.push(`font-size:${sz.trim()}`)
-    return parts.length ? `<span style="${parts.join(';')}">${inner}</span>` : inner
+    if (col) parts.push('color:' + col.trim())
+    if (sz)  parts.push('font-size:' + sz.trim())
+    return parts.length ? '<span style="' + parts.join(';') + '">' + inner + '</span>' : inner
   })
   h = h.replace(/<span>/gi, '').replace(/<\/span>/gi, '')
+
   // 4. Link
   h = h.replace(/<a\s+href="([^"]*)"[^>]*>([\s\S]*?)<\/a>/gi,
-    `<a href="$1" style="color:${cp};text-decoration:underline;">$2</a>`)
+    '<a href="$1" style="color:' + cp + ';text-decoration:underline;">$2</a>')
+
   // 5. Immagini
   h = h.replace(/<img[^>]*src="([^"]*)"[^>]*alt="([^"]*)"[^>]*/gi,
-    `<img src="$1" alt="$2" width="100%" border="0" style="display:block;max-width:100%;border:0;"`)
-  // 6. Titoli → paragrafi bold con size
-  h = h.replace(/<h([1-6])[^>]*>([\s\S]*?)<\/h>/gi, (_, lv, inner) => {
-    const sz = lv === '1' ? '24px' : lv === '2' ? '20px' : lv === '3' ? '17px' : '15px'
-    return `<p style="margin:0 0 10px 0;padding:0;font-size:${sz};font-weight:bold;color:#0A0A0A;line-height:1.3;font-family:${F};">${inner}</p>`
-  })
+    '<img src="$1" alt="$2" width="100%" border="0" style="display:block;max-width:100%;border:0;"')
+
+  // 6. Titoli H1-H6 — regex corretta con backreference
+  h = h.replace(/<h1[^>]*>([\s\S]*?)<\/h1>/gi, (_, inner) =>
+    '<p style="margin:0 0 12px 0;padding:0;font-size:26px;font-weight:bold;color:#0A0A0A;line-height:1.2;font-family:' + F + ';">' + inner + '</p>')
+  h = h.replace(/<h2[^>]*>([\s\S]*?)<\/h2>/gi, (_, inner) =>
+    '<p style="margin:0 0 12px 0;padding:0;font-size:22px;font-weight:bold;color:#0A0A0A;line-height:1.2;font-family:' + F + ';">' + inner + '</p>')
+  h = h.replace(/<h3[^>]*>([\s\S]*?)<\/h3>/gi, (_, inner) =>
+    '<p style="margin:0 0 10px 0;padding:0;font-size:18px;font-weight:bold;color:#0A0A0A;line-height:1.3;font-family:' + F + ';">' + inner + '</p>')
+  h = h.replace(/<h[456][^>]*>([\s\S]*?)<\/h[456]>/gi, (_, inner) =>
+    '<p style="margin:0 0 10px 0;padding:0;font-size:15px;font-weight:bold;color:#0A0A0A;line-height:1.3;font-family:' + F + ';">' + inner + '</p>')
+
   // 7. Liste
   h = h.replace(/<ul[^>]*>([\s\S]*?)<\/ul>/gi, (_, items) =>
     items.replace(/<li[^>]*>([\s\S]*?)<\/li>/gi, (__, li) =>
-      `<p style="margin:0 0 5px 0;padding:0 0 0 16px;font-size:15px;color:#374151;line-height:1.6;font-family:${F};">&#8226;&nbsp;${li.trim()}</p>`))
+      '<p style="margin:0 0 5px 0;padding:0 0 0 16px;font-size:15px;color:#374151;line-height:1.6;font-family:' + F + ';">&#8226;&nbsp;' + li.trim() + '</p>'))
   h = h.replace(/<ol[^>]*>([\s\S]*?)<\/ol>/gi, (_, items) => {
     let n = 0
     return items.replace(/<li[^>]*>([\s\S]*?)<\/li>/gi, (__, li) => {
-      n++; return `<p style="margin:0 0 5px 0;padding:0 0 0 16px;font-size:15px;color:#374151;line-height:1.6;font-family:${F};">${n}.&nbsp;${li.trim()}</p>`
+      n++
+      return '<p style="margin:0 0 5px 0;padding:0 0 0 16px;font-size:15px;color:#374151;line-height:1.6;font-family:' + F + ';">' + n + '.&nbsp;' + li.trim() + '</p>'
     })
   })
-  // 8. Paragrafi — con text-align se presente nello style
+
+  // 8. Paragrafi con text-align inline (es. centrato)
   h = h.replace(/<p\s+style="([^"]*)">([\s\S]*?)<\/p>/gi, (_, st, inner) => {
-    const al = (st.match(/text-align:\s*(left|center|right)/i)||[])[1]
-    const alStyle = al ? `text-align:${al};` : ''
-    return `<p style="margin:0 0 10px 0;padding:0;font-size:15px;color:#374151;line-height:1.75;font-family:${F};${alStyle}">${inner}</p>`
+    const alMatch = st.match(/text-align:\s*(left|center|right)/i)
+    const alStyle = alMatch ? 'text-align:' + alMatch[1] + ';' : ''
+    return '<p style="margin:0 0 10px 0;padding:0;font-size:15px;color:#374151;line-height:1.75;font-family:' + F + ';' + alStyle + '">' + inner + '</p>'
   })
   h = h.replace(/<p[^>]*>([\s\S]*?)<\/p>/gi, (_, inner) =>
-    `<p style="margin:0 0 10px 0;padding:0;font-size:15px;color:#374151;line-height:1.75;font-family:${F};">${inner}</p>`)
+    '<p style="margin:0 0 10px 0;padding:0;font-size:15px;color:#374151;line-height:1.75;font-family:' + F + ';">' + inner + '</p>')
+
   // 9. BR
   h = h.replace(/<br\s*\/?>/gi, '<br />')
-  // 10. Rimuovi wrapper non-email rimasti
+
+  // 10. Rimuovi wrapper non-email
   h = h.replace(/<(div|section|article|figure|blockquote|nav|aside|header|footer)[^>]*>/gi, '')
   h = h.replace(/<\/(div|section|article|figure|blockquote|nav|aside|header|footer)>/gi, '')
+
   return h
 }
 
@@ -516,25 +532,32 @@ export default function MailUpExportTab({ event, setEvent }) {
 
   // Al mount: snapshot + auto-import se vuoto
   useEffect(() => {
+    // Prima imposta lo snapshot (così l'autosave sa da dove partire)
     initialBlocchi.current = JSON.stringify(event?.mailup_blocchi || [])
     if ((event?.mailup_blocchi || []).length === 0 && sezioni.length > 0) {
+      // Auto-import: aggiorna snapshot dopo il setState
+      setTimeout(() => {
+        initialBlocchi.current = JSON.stringify(sezioni)
+      }, 100)
       importaDaContenuto()
     }
   }, []) // eslint-disable-line
 
-  // Autosave leggero con debounce — solo se blocchi sono cambiati dal mount
+  // Autosave al cambio blocchi — salva sempre dopo 2 secondi di inattività
+  const blocchiRef = useRef(blocchi)
+  useEffect(() => { blocchiRef.current = blocchi }, [blocchi])
+
   useEffect(() => {
     if (!event?.id) return
-    if (initialBlocchi.current === null) return  // mount non ancora avvenuto
+    if (initialBlocchi.current === null) return  // skip mount iniziale
     clearTimeout(saveTimerRef.current)
     saveTimerRef.current = setTimeout(async () => {
-      const current = JSON.stringify(blocchi)
-      if (current === initialBlocchi.current) return  // niente di cambiato, skip
-      await supabase.from('events').update({ mailup_blocchi: blocchi }).eq('id', event.id)
-      initialBlocchi.current = current
-    }, 1500)
+      const toSave = blocchiRef.current
+      const { error } = await supabase.from('events').update({ mailup_blocchi: toSave }).eq('id', event.id)
+      if (!error) initialBlocchi.current = JSON.stringify(toSave)
+    }, 2000)
     return () => clearTimeout(saveTimerRef.current)
-  }, [blocchi]) // eslint-disable-line
+  }, [blocchi, event?.id]) // eslint-disable-line
 
   const html = useMemo(() => {
     if (!event?.titolo) return ''
