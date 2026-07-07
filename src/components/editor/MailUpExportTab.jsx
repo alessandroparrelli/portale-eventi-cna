@@ -96,28 +96,58 @@ function buildHtml(ev, url, blocchi, opts, socialLinks) {
       (ev.data_fine && fmtOra(ev.data_fine) ? ` &mdash; ${fmtOra(ev.data_fine)}` : '')
     : null
 
-  // ── HERO ── struttura: immagine piena (se presente) + riga testo separata
-  const heroImgRow = heroImg ? `
-    <tr>
-      <td align="center" bgcolor="${heroBg}" style="padding:0;font-size:0;line-height:0;">
-        <img src="${esc(heroImg)}" width="${W}" alt="${esc(ev.titolo)}"
-          style="display:block;width:100%;max-width:${W}px;height:auto;border:0;" />
-      </td>
-    </tr>` : ''
+  // ── HERO ── tecnica universale: background="" + VML Outlook
+  // background="" su <td> è supportato da Gmail (web/app), Apple Mail, Yahoo, Outlook.com
+  // Outlook desktop (2007-2021): VML con v:rect + v:fill
+  // Calcola altezza hero proporzionale alla larghezza
+  const heroH = heroImg ? Math.round(W * 0.45) : Math.round(W * 0.35)
+  const vPad  = Math.round(heroH * 0.12)
 
-  const heroTextRow = `
-    <tr>
-      <td align="${align}" bgcolor="${heroBg}"
-        style="padding:32px ${PAD}px 28px;text-align:${align};background-color:${heroBg};">
-        <a href="${esc(url)}" style="text-decoration:none;">
-          <img src="${esc(logoUrl)}" height="${logoH}" alt="CNA Roma"
-            style="height:${logoH}px;display:${align==='center'?'block':'inline-block'};border:0;${align==='center'?'margin:0 auto 18px;':'margin-bottom:18px;'}" />
-        </a>
-        <p style="margin:0 0 8px 0;padding:0;font-size:${titoloSize};font-weight:${titoloW};color:${titoloColore};font-family:${F};text-align:${align};line-height:1.1;${lh.titolo_maiuscolo?'text-transform:uppercase;':''}">${esc(ev.titolo)}</p>
-        ${lh.titolo2?`<p style="margin:0 0 8px 0;padding:0;font-size:17px;color:rgba(255,255,255,0.9);font-family:${F};text-align:${align};">${esc(lh.titolo2)}</p>`:''}
-        ${ev.sottotitolo?`<p style="margin:0;padding:0;font-size:15px;color:rgba(255,255,255,0.85);font-family:${F};text-align:${align};">${esc(ev.sottotitolo)}</p>`:''}
-      </td>
-    </tr>`
+  // Testo interno al hero — identico per VML e non-VML
+  const heroInnerContent = `
+    <a href="${esc(url)}" style="text-decoration:none;display:block;text-align:${align};">
+      <img src="${esc(logoUrl)}" height="${logoH}" alt="CNA Roma" border="0"
+        style="height:${logoH}px;display:inline-block;border:0;${align==='center'?'margin:0 auto 16px;':'margin-bottom:16px;'}" />
+    </a>
+    <p style="margin:0 0 8px 0;padding:0;font-size:${titoloSize};font-weight:bold;color:${titoloColore};font-family:${F};text-align:${align};line-height:1.1;${lh.titolo_maiuscolo?'text-transform:uppercase;':''}">${esc(ev.titolo)}</p>
+    ${lh.titolo2?`<p style="margin:0 0 8px 0;padding:0;font-size:17px;color:#FFFFFF;font-family:${F};text-align:${align};">${esc(lh.titolo2)}</p>`:''}
+    ${ev.sottotitolo?`<p style="margin:0;padding:0;font-size:15px;color:#FFFFFF;font-family:${F};text-align:${align};">${esc(ev.sottotitolo)}</p>`:''}`
+
+  const heroRow = heroImg ? `
+  <!--[if gte mso 9]>
+  <tr><td bgcolor="${heroBg}" valign="middle" align="${align}" style="padding:0;">
+    <v:rect xmlns:v="urn:schemas-microsoft-com:vml" fill="true" stroke="false"
+      style="mso-width-percent:1000;height:${heroH}px;v-text-anchor:middle;">
+      <v:fill type="frame" src="${esc(heroImg)}" color="${heroBg}" />
+      <v:textbox inset="0,0,0,0">
+        <table width="100%" cellpadding="0" cellspacing="0" border="0">
+          <tr><td align="${align}" valign="middle" style="padding:${vPad}px ${PAD}px;text-align:${align};">
+            ${heroInnerContent}
+          </td></tr>
+        </table>
+      </v:textbox>
+    </v:rect>
+  </td></tr>
+  <![endif]-->
+  <!--[if !mso]><!-->
+  <tr>
+    <td background="${esc(heroImg)}" bgcolor="${heroBg}" valign="middle" align="${align}"
+      height="${heroH}"
+      style="background-image:url('${esc(heroImg)}');background-size:cover;background-position:center center;background-color:${heroBg};padding:${vPad}px ${PAD}px;text-align:${align};height:${heroH}px;">
+      ${heroInnerContent}
+    </td>
+  </tr>
+  <!--<![endif]-->` :
+  `<tr>
+    <td bgcolor="${heroBg}" valign="middle" align="${align}"
+      style="background-color:${heroBg};padding:${vPad}px ${PAD}px;text-align:${align};">
+      ${heroInnerContent}
+    </td>
+  </tr>`
+
+  // Riga immagine non più necessaria — immagine è sfondo del td
+  const heroImgRow = ''
+  const heroTextRow = heroRow
 
   // ── Blocchi ────────────────────────────────────────────────────────
   function row(content, bg) {
@@ -334,11 +364,15 @@ function buildHtml(ev, url, blocchi, opts, socialLinks) {
   const blocchiHtml = renderBlocchi()
 
   return `<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
-<html xmlns="http://www.w3.org/1999/xhtml">
+<html xmlns="http://www.w3.org/1999/xhtml" xmlns:v="urn:schemas-microsoft-com:vml" xmlns:o="urn:schemas-microsoft-com:office:office">
 <head>
 <meta http-equiv="Content-Type" content="text/html; charset=UTF-8" />
 <meta name="viewport" content="width=device-width, initial-scale=1.0" />
 <title>${esc(ev.titolo)}</title>
+<!--[if mso]>
+<style>body,table,td,p,a{font-family:Arial,Helvetica,sans-serif!important;}</style>
+<xml><o:OfficeDocumentSettings><o:AllowPNG/><o:PixelsPerInch>96</o:PixelsPerInch></o:OfficeDocumentSettings></xml>
+<![endif]-->
 <style type="text/css">
 body,table,td,a{-webkit-text-size-adjust:100%;-ms-text-size-adjust:100%;}
 table,td{mso-table-lspace:0pt;mso-table-rspace:0pt;border-collapse:collapse;}
@@ -353,8 +387,7 @@ a[x-apple-data-detectors]{color:inherit!important;text-decoration:none!important
 <table width="${W}" cellpadding="0" cellspacing="0" border="0" bgcolor="#FFFFFF"
   style="width:${W}px;max-width:${W}px;background-color:#FFFFFF;">
 
-  ${heroImgRow}
-  ${heroTextRow}
+  ${heroRow}
 
   ${(dataTesto || ev.luogo) && opts.mostraDataLuogo ? `
   <tr><td bgcolor="#FFFFFF" style="padding:12px ${PAD}px;border-bottom:1px solid #E5E7EB;background-color:#FFFFFF;">
