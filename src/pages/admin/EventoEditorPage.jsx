@@ -39,6 +39,7 @@ import IscrizioniTab from '../../components/editor/IscrizioniTab'
 import AspettoTab from '../../components/editor/AspettoTab'
 import SessioniTab from '../../components/editor/SessioniTab'
 import QuestionarioTab from '../../components/editor/QuestionarioTab'
+import MailUpExportTab from '../../components/editor/MailUpExportTab'
 import TagInput from '../../components/editor/TagInput'
 import EmbedWidget from '../../components/editor/EmbedWidget'
 import GlowTabBar from '../../components/GlowTabBar'
@@ -553,6 +554,7 @@ export default function EventoEditorPage() {
     { id:'questionario', label:'Questionario',   icon:'⭐', color:'amber'  },
     { id:'certificato',  label:'Certificato',    icon:'🏆', color:'blue'   },
     { id:'email',        label:'Email',          icon:'✉️', color:'rose'   },
+    { id:'mailup',       label:'MailUp',         icon:'📧', color:'teal'   },
     { id:'embed',        label:'Embed',          icon:'🔗', color:'indigo' },
     { id:'preview',      label:'Preview',        icon:'👁',  color:'amber'  },
   ]
@@ -1001,6 +1003,13 @@ export default function EventoEditorPage() {
           <div style={p.panel}>
             <h2 style={p.panelTitle}>Questionario post-evento</h2>
             <QuestionarioTab eventoId={id} />
+          </div>
+        )}
+
+        {/* ── MAILUP ── */}
+        {activeTab==='mailup' && (
+          <div style={{ ...p.panel, maxWidth: '960px' }}>
+            <MailUpExportTab event={event} />
           </div>
         )}
 
