@@ -18,6 +18,7 @@ export default function ImageUploader({ value, onChange }) {
   // Upload
   const [uploading,  setUploading]  = useState(false)
   const [dragOver,   setDragOver]   = useState(false)
+  const [changing,   setChanging]   = useState(false)  // mostra dropzone per sostituzione
 
   // AI Search
   const [prompt,     setPrompt]     = useState('')
@@ -34,14 +35,15 @@ export default function ImageUploader({ value, onChange }) {
     setUploading(true)
     const ext  = file.name.split('.').pop()
     const path = `hero/${Date.now()}-${Math.random().toString(36).slice(2)}.${ext}`
-    const { error, data: uploadData } = await supabase.storage
+    const { error } = await supabase.storage
       .from('eventi-immagini').upload(path, file, { upsert: true })
     if (error) {
       console.error('Upload immagine:', error)
-      alert('Errore upload immagine. Riprova o effettua il login.')
+      alert(`Errore upload: ${error.message}`)
     } else {
       const { data } = supabase.storage.from('eventi-immagini').getPublicUrl(path)
       onChange(data.publicUrl)
+      setChanging(false)
     }
     setUploading(false)
   }
@@ -129,7 +131,8 @@ export default function ImageUploader({ value, onChange }) {
     <div style={{ display:'flex', flexDirection:'column', gap:'12px' }}>
 
       {/* Preview o dropzone */}
-      {value ? (
+      {/* Preview immagine attuale */}
+      {value && !changing && (
         <div style={{ position:'relative', borderRadius:'10px', overflow:'hidden', border:'1px solid #E5E7EB' }}>
           <img src={value} alt="hero" style={{ width:'100%', height:'220px', objectFit:'cover', display:'block' }} />
           <button onClick={() => onChange(null)} style={{
@@ -141,7 +144,7 @@ export default function ImageUploader({ value, onChange }) {
             <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5"><path d="M18 6L6 18M6 6l12 12"/></svg>
             Rimuovi
           </button>
-          <button onClick={() => { setImages([]); setPrompt('') }} style={{
+          <button onClick={() => setChanging(true)} style={{
             position:'absolute', top:'10px', left:'10px',
             background:'rgba(0,0,0,.65)', color:'#fff', border:'none',
             borderRadius:'6px', padding:'6px 8px', cursor:'pointer',
@@ -151,35 +154,45 @@ export default function ImageUploader({ value, onChange }) {
             Cambia
           </button>
         </div>
-      ) : (
-        <div
-          onClick={() => ref.current?.click()}
-          onDragOver={e => { e.preventDefault(); setDragOver(true) }}
-          onDragLeave={() => setDragOver(false)}
-          onDrop={e => { e.preventDefault(); setDragOver(false); handleFile(e.dataTransfer.files[0]) }}
-          style={{
-            border: `2px dashed ${dragOver ? '#003DA5' : '#D1D5DB'}`,
-            background: dragOver ? '#EEF3FF' : '#FAFAFA',
-            borderRadius:'10px', padding:'32px 24px', textAlign:'center',
-            cursor:'pointer', transition:'all .15s',
-            display:'flex', flexDirection:'column', alignItems:'center',
-          }}
-        >
-          {uploading ? (
-            <div style={{ display:'flex', alignItems:'center', gap:'8px', color:'#6B7280' }}>
-              <Spinner />
-              <span style={{ fontSize:'14px' }}>Caricamento…</span>
-            </div>
-          ) : (
-            <>
-              <svg width="32" height="32" viewBox="0 0 24 24" fill="none" stroke="#9CA3AF" strokeWidth="1.5" style={{ marginBottom:'10px' }}><rect x="3" y="3" width="18" height="18" rx="2"/><circle cx="8.5" cy="8.5" r="1.5"/><polyline points="21 15 16 10 5 21"/></svg>
-              <p style={{ fontSize:'14px', color:'#6B7280', margin:0 }}>
-                Trascina qui oppure <span style={{ color:'#003DA5', fontWeight:'600' }}>sfoglia</span>
-              </p>
-              <p style={{ fontSize:'12px', color:'#9CA3AF', margin:'4px 0 0' }}>JPG, PNG, WebP · consigliato 1600×900px</p>
-            </>
+      )}
+
+      {/* Dropzone — visibile se no immagine O se si sta cambiando */}
+      {(!value || changing) && (
+        <>
+          <div
+            onClick={() => ref.current?.click()}
+            onDragOver={e => { e.preventDefault(); setDragOver(true) }}
+            onDragLeave={() => setDragOver(false)}
+            onDrop={e => { e.preventDefault(); setDragOver(false); handleFile(e.dataTransfer.files[0]) }}
+            style={{
+              border: `2px dashed ${dragOver ? '#003DA5' : '#D1D5DB'}`,
+              background: dragOver ? '#EEF3FF' : '#FAFAFA',
+              borderRadius:'10px', padding:'32px 24px', textAlign:'center',
+              cursor:'pointer', transition:'all .15s',
+              display:'flex', flexDirection:'column', alignItems:'center',
+            }}
+          >
+            {uploading ? (
+              <div style={{ display:'flex', alignItems:'center', gap:'8px', color:'#6B7280' }}>
+                <Spinner />
+                <span style={{ fontSize:'14px' }}>Caricamento…</span>
+              </div>
+            ) : (
+              <>
+                <svg width="32" height="32" viewBox="0 0 24 24" fill="none" stroke="#9CA3AF" strokeWidth="1.5" style={{ marginBottom:'10px' }}><rect x="3" y="3" width="18" height="18" rx="2"/><circle cx="8.5" cy="8.5" r="1.5"/><polyline points="21 15 16 10 5 21"/></svg>
+                <p style={{ fontSize:'14px', color:'#6B7280', margin:0 }}>
+                  {changing ? 'Carica la nuova immagine' : 'Trascina qui oppure'} <span style={{ color:'#003DA5', fontWeight:'600' }}>sfoglia</span>
+                </p>
+                <p style={{ fontSize:'12px', color:'#9CA3AF', margin:'4px 0 0' }}>JPG, PNG, WebP · consigliato 1600×900px</p>
+              </>
+            )}
+          </div>
+          {changing && (
+            <button onClick={() => setChanging(false)} style={{ alignSelf:'center', background:'none', border:'1px solid #E5E7EB', borderRadius:'6px', padding:'4px 12px', cursor:'pointer', fontSize:'12px', color:'#6B7280', fontFamily:'Inter,sans-serif' }}>
+              ✕ Annulla cambio
+            </button>
           )}
-        </div>
+        </>
       )}
 
       <input ref={ref} type="file" accept="image/*" style={{ display:'none' }} onChange={e => handleFile(e.target.files[0])} />
