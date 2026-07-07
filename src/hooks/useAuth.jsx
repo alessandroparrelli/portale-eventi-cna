@@ -5,8 +5,9 @@ import { logAttivita, resetActivityLogCache } from '../lib/activityLog'
 const AuthContext = createContext(null)
 
 export function AuthProvider({ children }) {
-  const [user, setUser]       = useState(null)
-  const [loading, setLoading] = useState(true)
+  const [user,           setUser]           = useState(null)
+  const [loading,        setLoading]        = useState(true)
+  const [sessionExpired, setSessionExpired] = useState(false)
 
   useEffect(() => {
     supabase.auth.getSession().then(({ data: { session } }) => {
@@ -14,8 +15,16 @@ export function AuthProvider({ children }) {
       setLoading(false)
     })
 
-    const { data: { subscription } } = supabase.auth.onAuthStateChange((_event, session) => {
-      setUser(session?.user ?? null)
+    const { data: { subscription } } = supabase.auth.onAuthStateChange((event, session) => {
+      if (event === 'SIGNED_OUT' || event === 'USER_DELETED') {
+        setUser(null)
+        setSessionExpired(true)
+      } else if (event === 'TOKEN_REFRESHED' || event === 'SIGNED_IN') {
+        setUser(session?.user ?? null)
+        setSessionExpired(false)
+      } else {
+        setUser(session?.user ?? null)
+      }
     })
 
     return () => subscription.unsubscribe()
@@ -59,7 +68,23 @@ export function AuthProvider({ children }) {
   }
 
   return (
-    <AuthContext.Provider value={{ user, loading, signIn, signOut }}>
+    <AuthContext.Provider value={{ user, loading, signIn, signOut, sessionExpired }}>
+      {sessionExpired && (
+        <div style={{
+          position: 'fixed', top: 0, left: 0, right: 0, zIndex: 99999,
+          backgroundColor: '#DC2626', color: '#fff',
+          padding: '12px 20px', display: 'flex', alignItems: 'center',
+          justifyContent: 'space-between', fontFamily: "'Inter',sans-serif",
+          fontSize: '14px', fontWeight: '600', boxShadow: '0 2px 8px rgba(0,0,0,.3)',
+        }}>
+          <span>⚠️ Sessione scaduta — le modifiche non vengono salvate. Fai login di nuovo.</span>
+          <button
+            onClick={() => { window.location.href = '/login' }}
+            style={{ padding: '6px 16px', backgroundColor: '#fff', color: '#DC2626', border: 'none', borderRadius: '6px', fontWeight: '700', cursor: 'pointer', fontFamily: "'Inter',sans-serif", fontSize: '13px' }}>
+            Login →
+          </button>
+        </div>
+      )}
       {children}
     </AuthContext.Provider>
   )

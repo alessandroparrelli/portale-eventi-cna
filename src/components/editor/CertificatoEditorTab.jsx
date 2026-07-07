@@ -7,7 +7,7 @@ import {
 } from 'lucide-react'
 import { Field, Input } from '../ui'
 import LogoManager from './LogoManager'
-import { supabase } from '../../lib/supabase'
+import { supabase, getFreshJwt } from '../../lib/supabase'
 
 const CERT_FN = 'https://hnkhckcclgabunkqfmrz.supabase.co/functions/v1/genera-certificato'
 const PAGE_W = 842, PAGE_H = 595
@@ -583,8 +583,7 @@ export default function CertificatoEditorTab({ event, setEvent }) {
         r.onerror = rej
         r.readAsDataURL(file)
       })
-      const { data: { session } } = await supabase.auth.getSession()
-      const jwt = session?.access_token
+      const jwt = await getFreshJwt()
       if (!jwt) throw new Error('Non autenticato')
       const res = await fetch(`${import.meta.env.VITE_SUPABASE_URL}/functions/v1/github-upload-logo`, {
         method: 'POST',

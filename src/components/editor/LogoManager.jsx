@@ -1,5 +1,5 @@
 import { useEffect, useRef, useState } from 'react'
-import { supabase } from '../../lib/supabase'
+import { supabase, getFreshJwt } from '../../lib/supabase'
 import { Upload, Check, X, Loader2, ImageOff, Trash2, CheckSquare, Square } from 'lucide-react'
 
 const LOGO_DEFAULT = {
@@ -44,10 +44,7 @@ export default function LogoManager({
   async function fetchLoghi() {
     setLoading(true)
     try {
-      // Refresh token prima di usarlo — evita 401 da sessione scaduta
-      await supabase.auth.refreshSession().catch(() => {})
-      const { data: { session } } = await supabase.auth.getSession()
-      const jwt = session?.access_token
+      const jwt = await getFreshJwt()
       if (!jwt) throw new Error('Non autenticato')
 
       const res = await fetch(
@@ -90,8 +87,7 @@ export default function LogoManager({
         r.onerror = rej
         r.readAsDataURL(file)
       })
-      const { data: { session } } = await supabase.auth.getSession()
-      const jwt = session?.access_token
+      const jwt = await getFreshJwt()
       if (!jwt) throw new Error('Non autenticato')
 
       const res = await fetch(
@@ -129,8 +125,7 @@ export default function LogoManager({
     if (!confirm(`Eliminare ${selezionati.size} immagine${selezionati.size > 1 ? 'i' : ''}? Irreversibile.`)) return
     setDeleting(true); setDeleteErr('')
     try {
-      const { data: { session } } = await supabase.auth.getSession()
-      const jwt = session?.access_token
+      const jwt = await getFreshJwt()
       if (!jwt) throw new Error('Non autenticato')
       const res = await fetch(
         `${import.meta.env.VITE_SUPABASE_URL}/functions/v1/github-delete-logo`,

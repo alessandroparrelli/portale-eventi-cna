@@ -8,7 +8,7 @@ import { createPortal } from 'react-dom'
 import RichEditor from './RichEditor'
 import ImageUploader from './ImageUploader'
 import { BLOCK_ICONS, IconPicker, IconDisplay } from './BlockIcons'
-import { supabase } from '../../lib/supabase'
+import { supabase, getFreshJwt } from '../../lib/supabase'
 
 const uid = () => Math.random().toString(36).slice(2, 9)
 
@@ -328,8 +328,7 @@ function CaroselloEditor({ block, onChange }) {
         r.onerror = rej
         r.readAsDataURL(file)
       })
-      const { data: { session } } = await supabase.auth.getSession()
-      const jwt = session?.access_token
+      const jwt = await getFreshJwt()
       if (!jwt) throw new Error('Non autenticato')
       const res = await fetch(
         `${import.meta.env.VITE_SUPABASE_URL}/functions/v1/upload-carosello-image`,

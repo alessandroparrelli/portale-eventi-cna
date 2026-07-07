@@ -3,7 +3,7 @@
  * Drag & drop blocchi, image upload, live preview mobile/desktop
  */
 import { useState, useEffect, useRef } from 'react'
-import { supabase } from '../../lib/supabase'
+import { supabase, getFreshJwt } from '../../lib/supabase'
 import {
   Save, RotateCcw, CheckCircle, Code, Eye as EyeIcon, AlertTriangle,
   Layers, Image as ImageIcon, Type, AlignLeft, Square, Star, Zap, Minus,

@@ -444,8 +444,6 @@ export default function EventoEditorPage() {
   async function save() {
     const ev = eventRef.current || event   // usa sempre il valore più recente
     if (!ev.titolo.trim()) return alert('Il titolo è obbligatorio')
-    // Refresh sessione prima di salvare per evitare 401 da token scaduto
-    try { await supabase.auth.refreshSession() } catch(e) { console.warn('refresh sessione:', e) }
     // Salva la posizione di scroll prima del salvataggio
     const scrollTop = contentRef.current?.scrollTop || 0
     setSaving(true)

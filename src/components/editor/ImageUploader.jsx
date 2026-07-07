@@ -34,9 +34,12 @@ export default function ImageUploader({ value, onChange }) {
     setUploading(true)
     const ext  = file.name.split('.').pop()
     const path = `hero/${Date.now()}-${Math.random().toString(36).slice(2)}.${ext}`
-    const { error } = await supabase.storage
+    const { error, data: uploadData } = await supabase.storage
       .from('eventi-immagini').upload(path, file, { upsert: true })
-    if (!error) {
+    if (error) {
+      console.error('Upload immagine:', error)
+      alert('Errore upload immagine. Riprova o effettua il login.')
+    } else {
       const { data } = supabase.storage.from('eventi-immagini').getPublicUrl(path)
       onChange(data.publicUrl)
     }
