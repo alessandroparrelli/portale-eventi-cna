@@ -68,14 +68,15 @@ export default function SocialLinks({ links = [], size = 24, gap = 12, color = '
 }
 
 // Versione email HTML (no SVG — usa emoji + testo)
-export function socialLinksEmailHtml(links, cp, F) {
+export function socialLinksEmailHtml(links, cp, F, color) {
+  const linkColor = color || cp
   const attivi = (links || []).filter(l => l.attivo && l.valore && l.valore.trim())
   if (!attivi.length) return ''
   const EMOJI = { facebook:'📘', instagram:'📸', x:'𝕏', linkedin:'💼', whatsapp:'💬', youtube:'▶️', tiktok:'🎵', website:'🌐' }
   const items = attivi.map(({ chiave, valore }) => {
     const meta = SOCIAL_META[chiave]; if (!meta) return ''
     const url = normalizeUrl(valore, chiave)
-    return `<a href="${url}" style="display:inline-block;margin:0 6px;font-size:13px;color:${cp};text-decoration:none;font-family:${F};" target="_blank">${EMOJI[chiave] || '🔗'} ${meta.label}</a>`
+    return `<a href="${url}" style="display:inline-block;margin:0 8px;font-size:13px;color:${linkColor};text-decoration:none;font-family:${F};" target="_blank">${EMOJI[chiave] || '🔗'} ${meta.label}</a>`
   }).filter(Boolean)
   if (!items.length) return ''
   return `<p style="margin:12px 0 0;text-align:center;font-family:${F};">${items.join('')}</p>`

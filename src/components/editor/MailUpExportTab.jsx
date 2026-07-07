@@ -301,18 +301,22 @@ function buildHtml(ev, url, blocchi, opts, socialLinks) {
     return out
   }
 
-  // Footer
+  // Footer — colore testo sempre bianco (footer email ha sfondo scuro)
+  const footerBg   = tema.sfondo_footer || '#003DA5'
+  const footerText = '#FFFFFF'
+  const footerMuted = 'rgba(255,255,255,0.65)'
+
   const footerBlock = ev.footer_html
-    ? `<tr><td bgcolor="${tema.sfondo_footer || '#F4F5F7'}" style="padding:${PAD}px;text-align:center;border-top:1px solid #E5E7EB;">
-        ${richToEmail(ev.footer_html, cp, F)}
-        ${socialLinksEmailHtml(socialLinks, cp, F)}
-        <p style="margin:8px 0 0;font-size:11px;color:#9CA3AF;font-family:${F};"><a href="${esc(url)}" style="color:${cp};text-decoration:none;">Visualizza la pagina dell&apos;evento</a></p>
+    ? `<tr><td bgcolor="${footerBg}" style="padding:${PAD}px;text-align:center;border-top:none;">
+        ${richToEmail(ev.footer_html, footerText, F)}
+        ${socialLinksEmailHtml(socialLinks, cp, F, footerText)}
+        <p style="margin:8px 0 0;font-size:11px;color:${footerMuted};font-family:${F};"><a href="${esc(url)}" style="color:${footerText};text-decoration:underline;font-family:${F};">Visualizza la pagina dell&apos;evento</a></p>
       </td></tr>`
-    : `<tr><td bgcolor="${tema.sfondo_footer || '#F4F5F7'}" style="padding:20px ${PAD}px;text-align:center;border-top:1px solid #E5E7EB;">
-        <a href="${esc(url)}" style="display:inline-block;margin-bottom:10px;"><img src="${esc(logoUrl)}" alt="CNA Roma" height="36" style="height:36px;border:0;" /></a>
-        <p style="margin:0;font-size:12px;color:${tema.testo_footer || '#9CA3AF'};line-height:1.6;font-family:${F};">${esc(ev.footer_testo || `© ${new Date().getFullYear()} CNA di Roma — Artigiani Imprenditori d'Italia`)}</p>
-        ${socialLinksEmailHtml(socialLinks, cp, F)}
-        <p style="margin:8px 0 0;font-size:11px;color:#9CA3AF;font-family:${F};"><a href="${esc(url)}" style="color:${cp};text-decoration:none;">Visualizza la pagina dell&apos;evento</a></p>
+    : `<tr><td bgcolor="${footerBg}" style="padding:20px ${PAD}px;text-align:center;border-top:none;">
+        <a href="${esc(url)}" style="display:inline-block;margin-bottom:12px;"><img src="${esc(logoUrl)}" alt="CNA Roma" height="36" style="height:36px;border:0;" /></a>
+        <p style="margin:0;font-size:12px;color:${footerMuted};line-height:1.6;font-family:${F};">${esc(ev.footer_testo || `© ${new Date().getFullYear()} CNA di Roma — Artigiani Imprenditori d'Italia`)}</p>
+        ${socialLinksEmailHtml(socialLinks, cp, F, footerText)}
+        <p style="margin:8px 0 0;font-size:11px;color:${footerMuted};font-family:${F};"><a href="${esc(url)}" style="color:${footerText};text-decoration:underline;font-family:${F};">Visualizza la pagina dell&apos;evento</a></p>
       </td></tr>`
 
   const blocchiHtml = renderBlocchi()
