@@ -490,7 +490,7 @@ export default function EventoEditorPage() {
     } else {
       const { error: saveError } = await supabase.from('events').update(payload).eq('id', id)
       if (saveError) {
-        console.error('SAVE ERROR:', saveError)
+        console.error('SAVE ERROR:', JSON.stringify(saveError))
         alert(`Errore salvataggio: ${saveError.message}`)
         setSaving(false)
         return
