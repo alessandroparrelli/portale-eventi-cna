@@ -227,13 +227,14 @@ function ColorPicker({ label = 'A', title = 'Colore testo', editor: ed, isHighli
         <span style={{ fontSize:'14px' }}>{label}</span>
         <svg width="8" height="5" viewBox="0 0 8 5"><path d="M0 0l4 5 4-5z" fill="#9CA3AF"/></svg>
       </button>
-      {/* input invisibile — aperto programmaticamente, onChange applica in tempo reale */}
+      {/* input colore fuori schermo — garantisce picker nativo Mac (NSColorPanel) e Windows */}
       <input
         ref={inputRef}
         type="color"
         defaultValue="#000000"
+        onInput={e => applyColor(e.target.value)}
         onChange={e => applyColor(e.target.value)}
-        style={{ position:'absolute', width:'1px', height:'1px', opacity:0, pointerEvents:'none', top:0, left:0 }}
+        style={{ position:'fixed', width:'40px', height:'30px', opacity:0, pointerEvents:'none', top:'-9999px', left:'-9999px', border:'none', padding:0 }}
       />
     </div>
   )
