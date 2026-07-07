@@ -3,7 +3,7 @@
  * I blocchi (mailup_blocchi) sono separati da quelli dell'evento (sezioni).
  * L'HTML generato è table-based, email-client safe, con Inter via Google Fonts.
  */
-import { useState, useMemo } from 'react'
+import { useState, useMemo, useEffect } from 'react'
 import { Copy, Check, AlertTriangle, ExternalLink, Mail, Settings, ChevronDown, ChevronUp } from 'lucide-react'
 import BlockEditor from './BlockEditor'
 import { socialLinksEmailHtml } from '../SocialLinks'
@@ -443,6 +443,13 @@ export default function MailUpExportTab({ event, setEvent }) {
     setEvent(p => ({ ...p, mailup_blocchi: copia }))
   }
 
+  // Import automatico al primo accesso se mailup_blocchi è vuoto
+  useEffect(() => {
+    if (blocchi.length === 0 && sezioni.length > 0) {
+      importaDaContenuto()
+    }
+  }, []) // eslint-disable-line react-hooks/exhaustive-deps
+
   const html = useMemo(() => {
     if (!event?.titolo) return ''
     return buildHtml(event, eventUrl, blocchi, opts, socialLinks)
@@ -482,24 +489,6 @@ export default function MailUpExportTab({ event, setEvent }) {
 
       {/* ── EDITOR BLOCCHI ── */}
       <div style={{ marginBottom:'24px' }}>
-
-        {/* Banner import automatico — solo se mailup_blocchi è vuoto */}
-        {blocchi.length === 0 && sezioni.length > 0 && (
-          <div style={{ display:'flex', alignItems:'center', justifyContent:'space-between', gap:'16px', padding:'14px 18px', backgroundColor:'#EEF3FF', border:'1px solid #C7D9F8', borderRadius:'10px', marginBottom:'16px' }}>
-            <div>
-              <p style={{ ...sF, margin:'0 0 2px', fontSize:'13px', fontWeight:'800', color:'#003DA5' }}>📋 Importa da Contenuto</p>
-              <p style={{ ...sF, margin:0, fontSize:'12px', color:'#374151' }}>
-                L'evento ha {sezioni.length} blocc{sezioni.length === 1 ? 'o' : 'hi'} nel Contenuto. Importali come punto di partenza per la versione email.
-              </p>
-            </div>
-            <button
-              type="button"
-              onClick={importaDaContenuto}
-              style={{ ...sF, flexShrink:0, padding:'9px 18px', backgroundColor:'#003DA5', color:'#fff', border:'none', borderRadius:'8px', fontSize:'13px', fontWeight:'700', cursor:'pointer', whiteSpace:'nowrap' }}>
-              Importa blocchi →
-            </button>
-          </div>
-        )}
 
         {/* Barra superiore con contatore e reimport */}
         <div style={{ display:'flex', alignItems:'center', justifyContent:'space-between', marginBottom:'10px' }}>
