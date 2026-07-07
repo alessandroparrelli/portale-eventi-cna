@@ -11,7 +11,7 @@ import { temaConDefault } from './AspettoTab'
 import { useSocial } from '../../hooks/useSocial'
 
 /* ── helpers ─────────────────────────────────────────────────────── */
-const F = "Arial,Helvetica,sans-serif"
+const F = "'Inter','Inter UI',Arial,Helvetica,sans-serif"
 
 function fmtData(ts) {
   if (!ts) return null
@@ -59,15 +59,16 @@ function richToEmail(html, cp) {
   h = h.replace(/<img[^>]*src="([^"]*)"[^>]*alt="([^"]*)"[^>]*/gi,
     '<img src="$1" alt="$2" width="100%" border="0" style="display:block;max-width:100%;border:0;"')
 
-  // 6. Titoli H1-H6 — regex corretta con backreference
-  h = h.replace(/<h1[^>]*>([\s\S]*?)<\/h1>/gi, (_, inner) =>
-    '<p style="margin:0 0 12px 0;padding:0;font-size:26px;font-weight:bold;color:#0A0A0A;line-height:1.2;font-family:' + F + ';">' + inner + '</p>')
-  h = h.replace(/<h2[^>]*>([\s\S]*?)<\/h2>/gi, (_, inner) =>
-    '<p style="margin:0 0 12px 0;padding:0;font-size:22px;font-weight:bold;color:#0A0A0A;line-height:1.2;font-family:' + F + ';">' + inner + '</p>')
-  h = h.replace(/<h3[^>]*>([\s\S]*?)<\/h3>/gi, (_, inner) =>
-    '<p style="margin:0 0 10px 0;padding:0;font-size:18px;font-weight:bold;color:#0A0A0A;line-height:1.3;font-family:' + F + ';">' + inner + '</p>')
-  h = h.replace(/<h[456][^>]*>([\s\S]*?)<\/h[456]>/gi, (_, inner) =>
-    '<p style="margin:0 0 10px 0;padding:0;font-size:15px;font-weight:bold;color:#0A0A0A;line-height:1.3;font-family:' + F + ';">' + inner + '</p>')
+  // 6. Titoli H1-H6 — preserva text-align dal tag heading
+  function convertHeading(attrs, inner, size) {
+    const alMatch = attrs.match(/text-align:\s*(left|center|right|justify)/i)
+    const alStyle = alMatch ? 'text-align:' + alMatch[1] + ';' : ''
+    return '<p style="margin:0 0 12px 0;padding:0;font-size:' + size + ';font-weight:bold;color:#0A0A0A;line-height:1.2;font-family:' + F + ';' + alStyle + '">' + inner + '</p>'
+  }
+  h = h.replace(/<h1([^>]*)>([\s\S]*?)<\/h1>/gi, (_, attrs, inner) => convertHeading(attrs, inner, '26px'))
+  h = h.replace(/<h2([^>]*)>([\s\S]*?)<\/h2>/gi, (_, attrs, inner) => convertHeading(attrs, inner, '22px'))
+  h = h.replace(/<h3([^>]*)>([\s\S]*?)<\/h3>/gi, (_, attrs, inner) => convertHeading(attrs, inner, '18px'))
+  h = h.replace(/<h([456])([^>]*)>([\s\S]*?)<\/h\1>/gi, (_, lv, attrs, inner) => convertHeading(attrs, inner, '15px'))
 
   // 7. Liste
   h = h.replace(/<ul[^>]*>([\s\S]*?)<\/ul>/gi, (_, items) =>
@@ -81,9 +82,9 @@ function richToEmail(html, cp) {
     })
   })
 
-  // 8. Paragrafi con text-align inline (es. centrato)
+  // 8. Paragrafi con text-align inline (es. centrato, giustificato)
   h = h.replace(/<p\s+style="([^"]*)">([\s\S]*?)<\/p>/gi, (_, st, inner) => {
-    const alMatch = st.match(/text-align:\s*(left|center|right)/i)
+    const alMatch = st.match(/text-align:\s*(left|center|right|justify)/i)
     const alStyle = alMatch ? 'text-align:' + alMatch[1] + ';' : ''
     return '<p style="margin:0 0 10px 0;padding:0;font-size:15px;color:#374151;line-height:1.75;font-family:' + F + ';' + alStyle + '">' + inner + '</p>'
   })
@@ -401,6 +402,10 @@ function buildHtml(ev, url, blocchi, opts, socialLinks) {
 <meta http-equiv="Content-Type" content="text/html; charset=UTF-8" />
 <meta name="viewport" content="width=device-width, initial-scale=1.0" />
 <title>${esc(ev.titolo)}</title>
+<!--[if !mso]><!-->
+<link rel="preconnect" href="https://fonts.googleapis.com" />
+<link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;600;700;800;900&display=swap" rel="stylesheet" type="text/css" />
+<!--<![endif]-->
 <!--[if mso]>
 <style>body,table,td,p,a{font-family:Arial,Helvetica,sans-serif!important;}</style>
 <xml><o:OfficeDocumentSettings><o:AllowPNG/><o:PixelsPerInch>96</o:PixelsPerInch></o:OfficeDocumentSettings></xml>
