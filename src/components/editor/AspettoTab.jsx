@@ -1,4 +1,5 @@
 import { useState } from 'react'
+import RichEditor from './RichEditor'
 import { ChevronDown, ChevronUp, RotateCcw } from 'lucide-react'
 
 /* ─── Defaults tema ────────────────────────────────────────────── */
@@ -324,15 +325,44 @@ export default function AspettoTab({ event, setEvent }) {
             <ColorPicker label="Sfondo footer" value={tema.sfondo_footer} onChange={v => setT('sfondo_footer', v)} />
             <ColorPicker label="Colore testo footer" value={tema.testo_footer} onChange={v => setT('testo_footer', v)} />
           </div>
+
+          {/* Modalità footer */}
           <div>
-            <label style={sLabel}>Testo footer</label>
-            <input
-              value={event.footer_testo || ''}
-              onChange={e => setEvent(p => ({ ...p, footer_testo: e.target.value }))}
-              placeholder={`© ${new Date().getFullYear()} CNA di Roma — Artigiani Imprenditori d'Italia`}
-              style={{ ...sInput, marginTop: '4px' }}
-            />
-            <p style={sHint}>Lascia vuoto per usare il testo di default.</p>
+            <label style={sLabel}>Contenuto footer</label>
+            <div style={{ display: 'flex', gap: '8px', marginTop: '6px', marginBottom: '12px' }}>
+              {[['semplice', '✏️ Testo semplice'], ['ricco', '🖊 Editor ricco']].map(([v, l]) => (
+                <button key={v} type="button"
+                  onClick={() => setEvent(p => ({ ...p, footer_modalita: v }))}
+                  style={{ flex: 1, padding: '9px 8px', border: `1.5px solid ${(event.footer_modalita || 'semplice') === v ? '#003DA5' : '#E5E7EB'}`, borderRadius: '8px', background: (event.footer_modalita || 'semplice') === v ? '#EEF3FF' : '#fff', fontSize: '12px', fontWeight: '700', color: (event.footer_modalita || 'semplice') === v ? '#003DA5' : '#374151', cursor: 'pointer', fontFamily: "'Inter',sans-serif" }}>
+                  {l}
+                </button>
+              ))}
+            </div>
+
+            {(event.footer_modalita || 'semplice') === 'semplice' ? (
+              <div>
+                <input
+                  value={event.footer_testo || ''}
+                  onChange={e => setEvent(p => ({ ...p, footer_testo: e.target.value }))}
+                  placeholder={`© ${new Date().getFullYear()} CNA di Roma — Artigiani Imprenditori d'Italia`}
+                  style={{ ...sInput }}
+                />
+                <p style={sHint}>Testo semplice accanto al logo. Lascia vuoto per il default.</p>
+              </div>
+            ) : (
+              <div>
+                <p style={sHint}>Editor ricco — puoi inserire testo formattato, loghi, link, immagini. Il logo dell'evento viene comunque mostrato in cima al footer.</p>
+                <div style={{ marginTop: '8px', border: '1px solid #E5E7EB', borderRadius: '8px', overflow: 'hidden' }}>
+                  <RichEditor
+                    value={event.footer_html || ''}
+                    onChange={v => setEvent(p => ({ ...p, footer_html: v }))}
+                    placeholder="Contenuto footer: testo, loghi, recapiti, social…"
+                    minHeight="140px"
+                  />
+                </div>
+                <p style={sHint}>Il contenuto viene usato anche nell'export HTML per MailUp.</p>
+              </div>
+            )}
           </div>
         </Sezione>
 

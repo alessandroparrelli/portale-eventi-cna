@@ -357,7 +357,7 @@ export default function EventoEditorPage() {
 
   const [event, setEvent] = useState({
     titolo:'', slug:'', stato:'bozza', data_inizio:'', data_fine:'',
-    luogo:'', sottotitolo:'', footer_testo:'', descrizione_html:'', immagine_hero:null, logo_url:null,
+    luogo:'', sottotitolo:'', footer_testo:'', footer_html:'', footer_modalita:'semplice', descrizione_html:'', immagine_hero:null, logo_url:null,
       modalita:'presenza', link_riunione:null,
       certificato_abilitato:false, certificato_titolo:null, certificato_invio_auto:true,
       certificato_colore:'#003DA5', certificato_logo_url:null, certificato_firma_nome:null, certificato_firma_ruolo:null,
@@ -407,6 +407,8 @@ export default function EventoEditorPage() {
           email_organizzatore: data.email_organizzatore || '',
           email_mittente: data.email_mittente || '',
           email_cc: data.email_cc || '',
+          footer_html: data.footer_html || '',
+          footer_modalita: data.footer_modalita || 'semplice',
         tags: data.tags || [],
           nome_mittente: data.nome_mittente || '',
         }
@@ -466,6 +468,8 @@ export default function EventoEditorPage() {
       sottotitolo_bold:ev.sottotitolo_bold||false,
       sottotitolo_size:ev.sottotitolo_size||null,
       footer_testo:ev.footer_testo||null,
+        footer_html:ev.footer_html||null,
+        footer_modalita:ev.footer_modalita||'semplice',
       tags:ev.tags||[],
       tema:ev.tema||{},
       email_organizzatore:ev.email_organizzatore||null,

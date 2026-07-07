@@ -1,573 +1,411 @@
 /**
- * MailUpExportTab — genera HTML table-based pronto per MailUp
- * Ogni link punta alla pagina pubblica dell'evento.
- * Nessuna animazione, nessun JS, CSS inline, immagini hosted externally.
- * Rispetta il limite Gmail di ~80 KB HTML.
+ * MailUpExportTab — HTML table-based per MailUp
+ * - Hero: background-image CSS + overlay rgba sovrapposto ai titoli
+ * - Font: Inter via Google Fonts (fallback Arial per Outlook)
+ * - VML Outlook per immagine hero
+ * - Pannello opzioni: larghezza, padding, testo CTA, sezioni visibili
  */
-
 import { useState, useMemo } from 'react'
-import { Copy, Check, AlertTriangle, ExternalLink, Mail } from 'lucide-react'
+import { Copy, Check, AlertTriangle, ExternalLink, Mail, Settings, ChevronDown, ChevronUp } from 'lucide-react'
 import { temaConDefault } from './AspettoTab'
 
 /* ── helpers ─────────────────────────────────────────────────────── */
 function fmtData(ts) {
   if (!ts) return null
-  return new Date(ts).toLocaleDateString('it-IT', {
-    weekday: 'long', day: 'numeric', month: 'long', year: 'numeric',
-  })
+  return new Date(ts).toLocaleDateString('it-IT', { weekday:'long', day:'numeric', month:'long', year:'numeric' })
 }
 function fmtOra(ts) {
   if (!ts) return null
-  return new Date(ts).toLocaleTimeString('it-IT', { hour: '2-digit', minute: '2-digit' })
+  return new Date(ts).toLocaleTimeString('it-IT', { hour:'2-digit', minute:'2-digit' })
 }
 function esc(str) {
   if (!str) return ''
-  return String(str)
-    .replace(/&/g, '&amp;')
-    .replace(/</g, '&lt;')
-    .replace(/>/g, '&gt;')
-    .replace(/"/g, '&quot;')
+  return String(str).replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;').replace(/"/g,'&quot;')
 }
-// Rimuovi tag HTML mantenendo il testo
-function stripHtml(html) {
+function richToEmail(html, cp, F) {
   if (!html) return ''
-  return html.replace(/<[^>]*>/g, ' ').replace(/\s+/g, ' ').trim()
-}
-// Converti HTML ricco in celle-safe per email (supporto basilare)
-function richToEmailHtml(html, cp) {
-  if (!html) return ''
-  // Rimuovi classi e stili complessi, lascia struttura semantica
   return html
-    .replace(/class="[^"]*"/g, '')
-    .replace(/style="[^"]*"/g, '')
-    .replace(/<h([1-6])[^>]*>(.*?)<\/h\1>/gi, (_, lv, content) => {
-      const sz = lv <= 2 ? '22px' : lv === 3 ? '18px' : '16px'
-      const fw = lv <= 3 ? '800' : '700'
-      return `<p style="margin:0 0 12px;font-size:${sz};font-weight:${fw};color:#0A0A0A;letter-spacing:-.02em;line-height:1.2;">${content}</p>`
+    .replace(/class="[^"]*"/g,'').replace(/style="[^"]*"/g,'')
+    .replace(/<h([1-6])[^>]*>(.*?)<\/h\1>/gi,(_,lv,c)=>{
+      const sz=lv<=2?'22px':lv===3?'18px':'16px';const fw=lv<=3?'800':'700'
+      return `<p style="margin:0 0 12px;font-size:${sz};font-weight:${fw};color:#0A0A0A;letter-spacing:-.02em;line-height:1.2;font-family:${F};">${c}</p>`
     })
-    .replace(/<ul[^>]*>(.*?)<\/ul>/gis, (_, items) => {
-      const lis = items.replace(/<li[^>]*>(.*?)<\/li>/gis, (__, li) =>
-        `<p style="margin:0 0 6px;font-size:15px;color:#374151;line-height:1.6;">&#8226; ${li.trim()}</p>`)
-      return lis
-    })
-    .replace(/<ol[^>]*>(.*?)<\/ol>/gis, (_, items) => {
-      let n = 0
-      return items.replace(/<li[^>]*>(.*?)<\/li>/gis, (__, li) => {
-        n++
-        return `<p style="margin:0 0 6px;font-size:15px;color:#374151;line-height:1.6;">${n}. ${li.trim()}</p>`
-      })
-    })
-    .replace(/<p([^>]*)>(.*?)<\/p>/gis, (_, attrs, content) =>
-      `<p style="margin:0 0 12px;font-size:15px;color:#374151;line-height:1.75;">${content}</p>`)
-    .replace(/<strong[^>]*>(.*?)<\/strong>/gi, '<strong>$1</strong>')
-    .replace(/<em[^>]*>(.*?)<\/em>/gi, '<em>$1</em>')
-    .replace(/<a\s+href="([^"]*)"[^>]*>(.*?)<\/a>/gi,
-      `<a href="$1" style="color:${cp};text-decoration:underline;">$2</a>`)
-    .replace(/<img[^>]*src="([^"]*)"[^>]*alt="([^"]*)"[^>]*>/gi,
-      `<img src="$1" alt="$2" style="max-width:100%;display:block;margin:0 auto 12px;" />`)
-    .replace(/<br\s*\/?>/gi, '<br />')
-    .replace(/<(?!\/?(strong|em|a|br|img|p)\b)[^>]+>/g, '')
+    .replace(/<ul[^>]*>(.*?)<\/ul>/gis,(_,it)=>it.replace(/<li[^>]*>(.*?)<\/li>/gis,(__,li)=>`<p style="margin:0 0 6px;font-size:15px;color:#374151;line-height:1.6;font-family:${F};">&#8226; ${li.trim()}</p>`))
+    .replace(/<ol[^>]*>(.*?)<\/ol>/gis,(_,it)=>{let n=0;return it.replace(/<li[^>]*>(.*?)<\/li>/gis,(__,li)=>{n++;return `<p style="margin:0 0 6px;font-size:15px;color:#374151;line-height:1.6;font-family:${F};">${n}. ${li.trim()}</p>`})})
+    .replace(/<p([^>]*)>(.*?)<\/p>/gis,(_,__,c)=>`<p style="margin:0 0 12px;font-size:15px;color:#374151;line-height:1.75;font-family:${F};">${c}</p>`)
+    .replace(/<strong[^>]*>(.*?)<\/strong>/gi,'<strong>$1</strong>')
+    .replace(/<em[^>]*>(.*?)<\/em>/gi,'<em>$1</em>')
+    .replace(/<a\s+href="([^"]*)"[^>]*>(.*?)<\/a>/gi,`<a href="$1" style="color:${cp};text-decoration:underline;">$2</a>`)
+    .replace(/<img[^>]*src="([^"]*)"[^>]*alt="([^"]*)"[^>]*>/gi,`<img src="$1" alt="$2" style="max-width:100%;display:block;margin:0 auto 12px;" />`)
+    .replace(/<br\s*\/?>/gi,'<br />')
+    .replace(/<(?:div|span|section|article|header|footer|nav|aside|figure|figcaption|blockquote)[^>]*>/gi,'')
+    .replace(/<\/(?:div|span|section|article|header|footer|nav|aside|figure|figcaption|blockquote)>/gi,'')
 }
 
-/* ── Generatore HTML principale ───────────────────────────────────── */
-function buildMailUpHtml(event, eventUrl) {
-  const tema = temaConDefault(event?.tema)
-  const cp   = tema.colore_primario || '#003DA5'
-  const lh   = event.layout_hero || {}
+/* ── Builder HTML ─────────────────────────────────────────────────── */
+function buildHtml(ev, url, opts) {
+  const tema  = temaConDefault(ev?.tema)
+  const cp    = tema.colore_primario || '#003DA5'
+  const lh    = ev.layout_hero || {}
+  const W     = opts.larghezza || 600
+  const PAD   = opts.padding   || 32
+  const F     = `'Inter','Inter UI',Arial,Helvetica,sans-serif`
 
-  const logoUrl = event?.logo_url ||
-    'https://raw.githubusercontent.com/alessandroparrelli/fileappoggio/main/NUOVO-LOGO-CNA-ROMA-SOLO-ROMA.png'
-  const logoAltezza = lh.logo_altezza || tema.logo_altezza || 48
-  const heroImg = event.immagine_hero || null
+  const logoUrl = ev?.logo_url || 'https://raw.githubusercontent.com/alessandroparrelli/fileappoggio/main/NUOVO-LOGO-CNA-ROMA-SOLO-ROMA.png'
+  const logoH   = Number(lh.logo_altezza || tema.logo_altezza || 48)
+  const heroImg = ev.immagine_hero || null
+  const heroH   = Number(lh.altezza || 380)
+  const align   = lh.allineamento === 'sinistra' ? 'left' : 'center'
 
-  const dataTesto = event.data_inizio
-    ? fmtData(event.data_inizio) +
-      (fmtOra(event.data_inizio) ? ' · ' + fmtOra(event.data_inizio) : '') +
-      (event.data_fine && fmtOra(event.data_fine) ? ' — ' + fmtOra(event.data_fine) : '')
+  const ohex = lh.overlay_colore || '#000000'
+  const oop  = ((lh.overlay_opacita ?? 55) / 100).toFixed(2)
+  const [or,og,ob] = [1,3,5].map(i=>parseInt(ohex.slice(i,i+2),16))
+
+  const titoloSize   = (() => { const r=lh.titolo_dimensione||''; if(r.startsWith('clamp'))return '36px'; return r||'36px' })()
+  const titoloColore = lh.titolo_colore || '#FFFFFF'
+  const titoloW      = lh.titolo_grassetto!==false ? '900' : '400'
+
+  const btnBg     = tema.btn_stile==='contorno' ? 'transparent' : (tema.colore_pulsanti||cp)
+  const btnColor  = tema.btn_stile==='contorno' ? (tema.colore_pulsanti||cp) : (tema.colore_testo_btn||'#FFFFFF')
+  const btnBorder = `2px solid ${tema.colore_pulsanti||cp}`
+  const btnRadius = tema.btn_stile==='pill' ? '50px' : `${tema.btn_raggio||8}px`
+
+  const dataTesto = ev.data_inizio
+    ? fmtData(ev.data_inizio)+(fmtOra(ev.data_inizio)?` · ${fmtOra(ev.data_inizio)}`:'')+
+      (ev.data_fine&&fmtOra(ev.data_fine)?` — ${fmtOra(ev.data_fine)}`:'')
     : null
 
-  // ── Calcola colore overlay ──
-  const overlayHex  = lh.overlay_colore || '#000000'
-  const overlayOpac = ((lh.overlay_opacita ?? 55) / 100).toFixed(2)
-  const [r, g, b]   = [1, 3, 5].map(i => parseInt(overlayHex.slice(i, i + 2), 16))
+  // ── HERO: usa background-image CSS + VML per Outlook ──────────────
+  // Struttura: td esterno con bg-image → tabella interna 100% → td con overlay rgba → contenuto
+  const heroBgColor = heroImg ? '#001030' : cp
+  const heroCssStyle = heroImg
+    ? `background-image:url('${heroImg}');background-size:cover;background-position:${lh.bg_position||'center top'};background-color:${heroBgColor};`
+    : `background:linear-gradient(135deg,${cp} 0%,#001a50 100%);background-color:${cp};`
 
-  // ── Sezioni/blocchi → HTML ──
+  // VML per Outlook (non capisce background-image su td)
+  const vmlOpen = heroImg
+    ? `<!--[if gte mso 9]><v:rect xmlns:v="urn:schemas-microsoft-com:vml" fill="true" stroke="false" style="mso-width-percent:1000;height:${heroH}px;"><v:fill type="frame" src="${esc(heroImg)}" color="${heroBgColor}" /><v:textbox style="mso-fit-shape-to-text:false" inset="0,0,0,0"><![endif]-->`
+    : `<!--[if gte mso 9]><v:rect xmlns:v="urn:schemas-microsoft-com:vml" fill="true" stroke="false" style="mso-width-percent:1000;height:${heroH}px;"><v:fill type="solid" color="${cp}" /><v:textbox style="mso-fit-shape-to-text:false" inset="0,0,0,0"><![endif]-->`
+  const vmlClose = `<!--[if gte mso 9]></v:textbox></v:rect><![endif]-->`
+
+  // Contenuto hero: logo + titolo + sottotitolo sovrapposti
+  const heroContent = `
+      ${vmlOpen}
+      <table width="100%" cellpadding="0" cellspacing="0" border="0">
+        <tr>
+          <td align="${align}" valign="middle"
+            style="padding:${Math.round(heroH*0.1)}px ${PAD}px;min-height:${heroH}px;background-color:rgba(${or},${og},${ob},${oop});text-align:${align};">
+            <!--[if gte mso 9]><table width="100%" cellpadding="0" cellspacing="0"><tr><td style="padding:${Math.round(heroH*0.1)}px ${PAD}px;"><![endif]-->
+            <!-- Logo -->
+            <a href="${esc(url)}" style="display:inline-block;margin-bottom:20px;text-decoration:none;">
+              <img src="${esc(logoUrl)}" alt="CNA Roma" height="${logoH}"
+                style="height:${logoH}px;display:block;border:0;${align==='center'?'margin:0 auto;':''}" />
+            </a>
+            <!-- H1 -->
+            <p style="margin:0 0 10px;font-size:${titoloSize};font-weight:${titoloW};color:${titoloColore};letter-spacing:-.04em;line-height:1.05;font-family:${F};text-align:${align};${lh.titolo_maiuscolo?'text-transform:uppercase;':''}">${esc(ev.titolo)}</p>
+            ${lh.titolo2?`<p style="margin:0 0 8px;font-size:18px;font-weight:${lh.titolo2_grassetto?'700':'400'};color:${lh.titolo2_colore||'rgba(255,255,255,0.9)'};letter-spacing:-.02em;line-height:1.3;font-family:${F};text-align:${align};">${esc(lh.titolo2)}</p>`:''}
+            ${ev.sottotitolo?`<p style="margin:0;font-size:${ev.sottotitolo_size?ev.sottotitolo_size+'px':'17px'};font-weight:${ev.sottotitolo_bold?'700':'400'};color:rgba(255,255,255,.92);line-height:1.5;font-family:${F};text-align:${align};">${esc(ev.sottotitolo)}</p>`:''}
+            <!--[if gte mso 9]></td></tr></table><![endif]-->
+          </td>
+        </tr>
+      </table>
+      ${vmlClose}`
+
+  // ── Blocchi ────────────────────────────────────────────────────────
   function renderBlocks() {
-    const sezioni = event.sezioni || []
-    if (!sezioni.length && !event.descrizione_html) return ''
-
+    const ss = ev.sezioni || []
+    if (!ss.length && !ev.descrizione_html) return ''
+    if (!ss.length) return `<tr><td style="padding:0 0 24px;">${richToEmail(ev.descrizione_html,cp,F)}</td></tr>`
     let out = ''
-
-    // Testo libero legacy
-    if (!sezioni.length && event.descrizione_html) {
-      out += `
-        <tr><td style="padding:0 0 24px;">
-          <div style="font-size:15px;color:#374151;line-height:1.75;font-family:Arial,sans-serif;">
-            ${richToEmailHtml(event.descrizione_html, cp)}
-          </div>
-        </td></tr>`
-      return out
-    }
-
-    for (const block of sezioni) {
-      if (block.tipo === 'testo') {
-        out += `
-        <tr><td style="padding:0 0 24px;">
-          <div style="font-size:15px;color:#374151;line-height:1.75;font-family:Arial,sans-serif;">
-            ${richToEmailHtml(block.html, cp)}
-          </div>
-        </td></tr>`
-      } else if (block.tipo === 'titolo') {
-        out += `
-        <tr><td style="padding:0 0 24px;text-align:${block.allineamento || 'center'};">
-          <p style="margin:0 0 6px;font-size:28px;font-weight:900;color:#0A0A0A;letter-spacing:-.03em;line-height:1.1;font-family:Arial,sans-serif;">${esc(block.testo)}</p>
-          ${block.sottotitolo ? `<p style="margin:0;font-size:16px;color:#6B7280;line-height:1.6;font-family:Arial,sans-serif;">${esc(block.sottotitolo)}</p>` : ''}
-        </td></tr>`
-      } else if (block.tipo === 'stats') {
-        const items = block.items || []
-        const colW  = Math.floor(100 / Math.max(items.length, 1))
-        out += `
-        <tr><td style="padding:0 0 32px;">
-          <table width="100%" cellpadding="0" cellspacing="0" border="0"><tr>
-            ${items.map(it => `
-              <td width="${colW}%" style="text-align:center;padding:8px;">
-                <p style="margin:0 0 4px;font-size:40px;font-weight:900;color:${block.colore || cp};letter-spacing:-.04em;line-height:1;font-family:Arial,sans-serif;">${esc(it.num || it.numero)}</p>
-                <p style="margin:0;font-size:11px;color:#6B7280;font-weight:700;text-transform:uppercase;letter-spacing:.05em;font-family:Arial,sans-serif;">${esc(it.label)}</p>
-              </td>`).join('')}
-          </tr></table>
-        </td></tr>`
-      } else if (block.tipo === 'griglia') {
-        const cols = block.cols || block.colonne || []
-        out += `
-        <tr><td style="padding:0 0 24px;">
-          <table width="100%" cellpadding="0" cellspacing="0" border="0"><tr>
-            ${cols.map(col => `
-              <td style="width:${Math.floor(100 / cols.length)}%;vertical-align:top;padding:6px;">
-                <table width="100%" cellpadding="16" cellspacing="0" border="0" style="border:1px solid #E5E7EB;border-radius:12px;">
-                  <tr><td>
-                    ${col.titolo ? `<p style="margin:0 0 6px;font-size:15px;font-weight:800;color:#0A0A0A;letter-spacing:-.02em;font-family:Arial,sans-serif;">${esc(col.titolo)}</p>` : ''}
-                    ${col.testo ? `<p style="margin:0;font-size:13px;color:#6B7280;line-height:1.65;font-family:Arial,sans-serif;">${esc(col.testo)}</p>` : ''}
-                  </td></tr>
-                </table>
-              </td>`).join('')}
-          </tr></table>
-        </td></tr>`
-      } else if (block.tipo === 'cta') {
-        const btnBg    = block.stile === 'contorno' ? 'transparent' : (block.colore || cp)
-        const btnColor = block.stile === 'contorno' ? (block.colore || cp) : '#FFFFFF'
-        const btnBorder= block.stile === 'contorno' ? `2px solid ${block.colore || cp}` : 'none'
-        out += `
-        <tr><td style="padding:0 0 24px;">
-          <table width="100%" cellpadding="0" cellspacing="0" border="0" style="background:${cp}10;border:1px solid ${cp}25;border-radius:16px;">
-            <tr><td style="padding:32px 24px;text-align:center;">
-              ${block.titolo ? `<p style="margin:0 0 20px;font-size:22px;font-weight:900;color:#0A0A0A;letter-spacing:-.03em;font-family:Arial,sans-serif;">${esc(block.titolo)}</p>` : ''}
-              <a href="${esc(eventUrl)}" style="display:inline-block;background:${btnBg};color:${btnColor};border:${btnBorder};border-radius:8px;padding:14px 36px;font-size:15px;font-weight:800;text-decoration:none;font-family:Arial,sans-serif;">
-                ${esc(block.testo_btn || block.testo || 'Iscriviti →')}
-              </a>
-            </td></tr>
-          </table>
-        </td></tr>`
-      } else if (block.tipo === 'banner') {
-        const cfgs = {
-          info:    { bg:'#EFF6FF', color:'#1E40AF', border:'#BFDBFE' },
-          success: { bg:'#D1FAE5', color:'#065F46', border:'#6EE7B7' },
-          warning: { bg:'#FFFBEB', color:'#92400E', border:'#FDE68A' },
-          error:   { bg:'#FEF2F2', color:'#991B1B', border:'#FECACA' },
-        }
-        const c = cfgs[block.stile || 'info'] || cfgs.info
-        out += `
-        <tr><td style="padding:0 0 16px;">
-          <table width="100%" cellpadding="0" cellspacing="0" border="0" style="background:${c.bg};border:1px solid ${c.border};border-radius:10px;">
-            <tr><td style="padding:16px 20px;font-size:14px;color:${c.color};line-height:1.6;font-weight:500;font-family:Arial,sans-serif;">
-              ${block.icona ? `${esc(block.icona)} ` : ''}${esc(block.testo)}
-            </td></tr>
-          </table>
-        </td></tr>`
-      } else if (block.tipo === 'immagine' && block.src) {
-        const align = block.align || 'center'
-        const maxW  = block.size === 'small' ? '33%' : block.size === 'medium' ? '60%' : '100%'
-        out += `
-        <tr><td style="padding:0 0 16px;text-align:${align};">
-          <img src="${esc(block.src)}" alt="${esc(block.didascalia || '')}" style="max-width:${maxW};width:100%;display:inline-block;border-radius:8px;" />
-          ${block.didascalia ? `<p style="margin:6px 0 0;font-size:13px;color:#9CA3AF;font-style:italic;font-family:Arial,sans-serif;">${esc(block.didascalia)}</p>` : ''}
-        </td></tr>`
-      } else if (block.tipo === 'separatore') {
-        out += `<tr><td style="padding:0 0 32px;"><hr style="border:none;border-top:1px solid #E5E7EB;margin:0;" /></td></tr>`
-      } else if (block.tipo === 'timeline') {
-        const items = block.items || []
-        out += `
-        <tr><td style="padding:0 0 32px;">
-          ${items.map((item, i) => `
-            <table width="100%" cellpadding="0" cellspacing="0" border="0" style="margin-bottom:20px;">
-              <tr>
-                <td width="44" valign="top" style="padding-right:16px;">
-                  <div style="width:36px;height:36px;border-radius:50%;background:${cp};text-align:center;line-height:36px;font-size:12px;font-weight:800;color:#FFFFFF;font-family:Arial,sans-serif;">${item.anno || i + 1}</div>
-                </td>
-                <td valign="top" style="padding-top:4px;">
-                  <p style="margin:0 0 4px;font-size:15px;font-weight:800;color:#0A0A0A;letter-spacing:-.02em;font-family:Arial,sans-serif;">${esc(item.titolo)}</p>
-                  <p style="margin:0;font-size:13px;color:#6B7280;line-height:1.65;font-family:Arial,sans-serif;">${esc(item.testo)}</p>
-                </td>
-              </tr>
-            </table>`).join('')}
-        </td></tr>`
-      } else if (block.tipo === 'testimonial') {
-        const items = block.items || []
-        out += `
-        <tr><td style="padding:0 0 24px;">
-          <table width="100%" cellpadding="0" cellspacing="0" border="0"><tr>
-            ${items.map(item => `
-              <td style="width:${Math.floor(100 / items.length)}%;vertical-align:top;padding:6px;">
-                <table width="100%" cellpadding="20" cellspacing="0" border="0" style="border:1px solid #E5E7EB;border-radius:12px;">
-                  <tr><td>
-                    <p style="margin:0 0 12px;font-size:13px;color:#374151;line-height:1.7;font-style:italic;font-family:Arial,sans-serif;">&ldquo;${esc(item.testo)}&rdquo;</p>
-                    <p style="margin:0;font-size:13px;font-weight:700;color:#0A0A0A;font-family:Arial,sans-serif;">${esc(item.nome)}</p>
-                    ${item.ruolo ? `<p style="margin:2px 0 0;font-size:12px;color:#9CA3AF;font-family:Arial,sans-serif;">${esc(item.ruolo)}</p>` : ''}
-                  </td></tr>
-                </table>
-              </td>`).join('')}
-          </tr></table>
-        </td></tr>`
-      } else if (block.tipo === 'video' && block.url) {
-        const ytMatch = block.url.match(/(?:youtube\.com\/watch\?v=|youtu\.be\/)([^&\s]+)/)
-        if (ytMatch) {
-          const thumb = `https://img.youtube.com/vi/${ytMatch[1]}/hqdefault.jpg`
-          out += `
-          <tr><td style="padding:0 0 24px;text-align:center;">
-            <a href="${esc(block.url)}" style="display:inline-block;position:relative;">
-              <img src="${thumb}" alt="${esc(block.didascalia || 'Video')}" style="width:100%;max-width:560px;display:block;border-radius:8px;" />
-              <p style="margin:6px 0 0;font-size:13px;color:${cp};font-weight:600;font-family:Arial,sans-serif;">▶ Guarda il video</p>
-            </a>
-            ${block.didascalia ? `<p style="margin:6px 0 0;font-size:13px;color:#9CA3AF;font-style:italic;font-family:Arial,sans-serif;">${esc(block.didascalia)}</p>` : ''}
-          </td></tr>`
-        }
-      } else if (block.tipo === 'accordion') {
-        // Accordion → lista espansa (email non supporta interattività)
-        const items = block.items || []
-        out += `
-        <tr><td style="padding:0 0 24px;">
-          ${items.map(item => `
-            <table width="100%" cellpadding="0" cellspacing="0" border="0" style="margin-bottom:8px;border:1px solid #E5E7EB;border-radius:10px;">
-              <tr><td style="padding:14px 18px;background:#F9FAFB;border-radius:10px;">
-                <p style="margin:0 0 8px;font-size:15px;font-weight:700;color:${cp};font-family:Arial,sans-serif;">${esc(item.domanda)}</p>
-                <p style="margin:0;font-size:14px;color:#374151;line-height:1.6;font-family:Arial,sans-serif;">${esc(item.risposta)}</p>
-              </td></tr>
-            </table>`).join('')}
-        </td></tr>`
-      } else if (block.tipo === 'badge_list') {
-        const items = block.items || []
-        out += `
-        <tr><td style="padding:0 0 24px;">
-          <table width="100%" cellpadding="0" cellspacing="0" border="0"><tr>
-            ${items.map(item => `
-              <td style="width:50%;vertical-align:top;padding:4px;">
-                <table width="100%" cellpadding="10" cellspacing="0" border="0" style="border:1px solid #E5E7EB;border-radius:8px;">
-                  <tr><td>
-                    <p style="margin:0;font-size:13px;color:#374151;font-weight:500;font-family:Arial,sans-serif;">&#10003; ${esc(item.testo)}</p>
-                  </td></tr>
-                </table>
-              </td>`).join('')}
-          </tr></table>
-        </td></tr>`
-      } else if (block.tipo === 'carosello') {
-        const imgs = (block.immagini || []).filter(i => i.src)
-        if (imgs.length > 0) {
-          // Mostra la prima immagine del carosello come immagine statica
-          out += `
-          <tr><td style="padding:0 0 24px;text-align:center;">
-            <a href="${esc(eventUrl)}">
-              <img src="${esc(imgs[0].src)}" alt="${esc(imgs[0].didascalia || '')}" style="max-width:100%;display:inline-block;border-radius:8px;" />
-            </a>
-            ${imgs.length > 1 ? `<p style="margin:6px 0 0;font-size:12px;color:#9CA3AF;font-family:Arial,sans-serif;">+${imgs.length - 1} immagini sul sito</p>` : ''}
-          </td></tr>`
-        }
+    for (const b of ss) {
+      if (b.tipo==='testo') {
+        out+=`<tr><td style="padding:0 0 24px;">${richToEmail(b.html,cp,F)}</td></tr>`
+      } else if (b.tipo==='titolo') {
+        out+=`<tr><td style="padding:0 0 24px;text-align:${b.allineamento||'center'};"><p style="margin:0 0 6px;font-size:28px;font-weight:900;color:#0A0A0A;letter-spacing:-.03em;font-family:${F};">${esc(b.testo)}</p>${b.sottotitolo?`<p style="margin:0;font-size:16px;color:#6B7280;font-family:${F};">${esc(b.sottotitolo)}</p>`:''}</td></tr>`
+      } else if (b.tipo==='stats') {
+        const its=b.items||[];const cw=Math.floor(100/Math.max(its.length,1))
+        out+=`<tr><td style="padding:0 0 32px;"><table width="100%" cellpadding="0" cellspacing="0" border="0"><tr>${its.map(it=>`<td width="${cw}%" style="text-align:center;padding:8px;"><p style="margin:0 0 4px;font-size:40px;font-weight:900;color:${b.colore||cp};letter-spacing:-.04em;font-family:${F};">${esc(it.num||it.numero)}</p><p style="margin:0;font-size:11px;color:#6B7280;font-weight:700;text-transform:uppercase;letter-spacing:.05em;font-family:${F};">${esc(it.label)}</p></td>`).join('')}</tr></table></td></tr>`
+      } else if (b.tipo==='griglia') {
+        const cols=b.cols||b.colonne||[]
+        out+=`<tr><td style="padding:0 0 24px;"><table width="100%" cellpadding="0" cellspacing="0" border="0"><tr>${cols.map(c=>`<td style="width:${Math.floor(100/cols.length)}%;vertical-align:top;padding:6px;"><table width="100%" cellpadding="16" cellspacing="0" border="0" style="border:1px solid #E5E7EB;border-radius:12px;"><tr><td>${c.titolo?`<p style="margin:0 0 6px;font-size:15px;font-weight:800;color:#0A0A0A;font-family:${F};">${esc(c.titolo)}</p>`:''} ${c.testo?`<p style="margin:0;font-size:13px;color:#6B7280;line-height:1.65;font-family:${F};">${esc(c.testo)}</p>`:''}</td></tr></table></td>`).join('')}</tr></table></td></tr>`
+      } else if (b.tipo==='cta') {
+        const bb=b.stile==='contorno'?'transparent':(b.colore||cp);const bc=b.stile==='contorno'?(b.colore||cp):'#fff'
+        out+=`<tr><td style="padding:0 0 24px;"><table width="100%" cellpadding="0" cellspacing="0" border="0" style="background:${cp}12;border:1px solid ${cp}30;border-radius:16px;"><tr><td style="padding:32px 24px;text-align:center;">${b.titolo?`<p style="margin:0 0 20px;font-size:22px;font-weight:900;color:#0A0A0A;font-family:${F};">${esc(b.titolo)}</p>`:''}<a href="${esc(url)}" style="display:inline-block;background:${bb};color:${bc};border:2px solid ${b.colore||cp};border-radius:8px;padding:14px 36px;font-size:15px;font-weight:800;text-decoration:none;font-family:${F};">${esc(b.testo_btn||b.testo||'Iscriviti →')}</a></td></tr></table></td></tr>`
+      } else if (b.tipo==='banner') {
+        const cfgs={info:{bg:'#EFF6FF',color:'#1E40AF',border:'#BFDBFE'},success:{bg:'#D1FAE5',color:'#065F46',border:'#6EE7B7'},warning:{bg:'#FFFBEB',color:'#92400E',border:'#FDE68A'},error:{bg:'#FEF2F2',color:'#991B1B',border:'#FECACA'}};const c=cfgs[b.stile||'info']||cfgs.info
+        out+=`<tr><td style="padding:0 0 16px;"><table width="100%" cellpadding="16" cellspacing="0" border="0" style="background:${c.bg};border:1px solid ${c.border};border-radius:10px;"><tr><td style="font-size:14px;color:${c.color};line-height:1.6;font-weight:500;font-family:${F};">${b.icona?`${esc(b.icona)} `:''}${esc(b.testo)}</td></tr></table></td></tr>`
+      } else if (b.tipo==='immagine'&&b.src) {
+        const mw=b.size==='small'?'33%':b.size==='medium'?'60%':'100%'
+        out+=`<tr><td style="padding:0 0 16px;text-align:${b.align||'center'};"><a href="${esc(url)}"><img src="${esc(b.src)}" alt="${esc(b.didascalia||'')}" style="max-width:${mw};width:100%;display:inline-block;border-radius:8px;" /></a>${b.didascalia?`<p style="margin:6px 0 0;font-size:13px;color:#9CA3AF;font-style:italic;font-family:${F};">${esc(b.didascalia)}</p>`:''}</td></tr>`
+      } else if (b.tipo==='separatore') {
+        out+=`<tr><td style="padding:0 0 32px;"><hr style="border:none;border-top:1px solid #E5E7EB;margin:0;" /></td></tr>`
+      } else if (b.tipo==='timeline') {
+        const its=b.items||[]
+        out+=`<tr><td style="padding:0 0 32px;">${its.map((it,i)=>`<table width="100%" cellpadding="0" cellspacing="0" border="0" style="margin-bottom:20px;"><tr><td width="44" valign="top" style="padding-right:14px;"><p style="margin:0;width:36px;height:36px;border-radius:50%;background:${cp};text-align:center;line-height:36px;font-size:12px;font-weight:800;color:#fff;font-family:${F};">${it.anno||i+1}</p></td><td valign="top" style="padding-top:4px;"><p style="margin:0 0 4px;font-size:15px;font-weight:800;color:#0A0A0A;font-family:${F};">${esc(it.titolo)}</p><p style="margin:0;font-size:13px;color:#6B7280;line-height:1.65;font-family:${F};">${esc(it.testo)}</p></td></tr></table>`).join('')}</td></tr>`
+      } else if (b.tipo==='testimonial') {
+        const its=b.items||[]
+        out+=`<tr><td style="padding:0 0 24px;"><table width="100%" cellpadding="0" cellspacing="0" border="0"><tr>${its.map(it=>`<td style="width:${Math.floor(100/its.length)}%;vertical-align:top;padding:6px;"><table width="100%" cellpadding="20" cellspacing="0" border="0" style="border:1px solid #E5E7EB;border-radius:12px;"><tr><td><p style="margin:0 0 12px;font-size:13px;color:#374151;line-height:1.7;font-style:italic;font-family:${F};">&ldquo;${esc(it.testo)}&rdquo;</p><p style="margin:0;font-size:13px;font-weight:700;color:#0A0A0A;font-family:${F};">${esc(it.nome)}</p>${it.ruolo?`<p style="margin:2px 0 0;font-size:12px;color:#9CA3AF;font-family:${F};">${esc(it.ruolo)}</p>`:''}</td></tr></table></td>`).join('')}</tr></table></td></tr>`
+      } else if (b.tipo==='video'&&b.url) {
+        const yt=b.url.match(/(?:youtube\.com\/watch\?v=|youtu\.be\/)([^&\s]+)/)
+        if(yt) out+=`<tr><td style="padding:0 0 24px;text-align:center;"><a href="${esc(b.url)}"><img src="https://img.youtube.com/vi/${yt[1]}/hqdefault.jpg" alt="${esc(b.didascalia||'Video')}" style="width:100%;max-width:560px;display:block;border-radius:8px;" /></a><p style="margin:6px 0 0;font-size:13px;color:${cp};font-weight:600;font-family:${F};">&#9654; Guarda il video</p></td></tr>`
+      } else if (b.tipo==='accordion') {
+        const its=b.items||[]
+        out+=`<tr><td style="padding:0 0 24px;">${its.map(it=>`<table width="100%" cellpadding="0" cellspacing="0" border="0" style="margin-bottom:8px;border:1px solid #E5E7EB;border-radius:10px;"><tr><td style="padding:14px 18px;background:#F9FAFB;border-radius:10px;"><p style="margin:0 0 8px;font-size:15px;font-weight:700;color:${cp};font-family:${F};">${esc(it.domanda)}</p><p style="margin:0;font-size:14px;color:#374151;line-height:1.6;font-family:${F};">${esc(it.risposta)}</p></td></tr></table>`).join('')}</td></tr>`
+      } else if (b.tipo==='badge_list') {
+        const its=b.items||[]
+        out+=`<tr><td style="padding:0 0 24px;"><table width="100%" cellpadding="0" cellspacing="0" border="0"><tr>${its.map(it=>`<td style="width:50%;vertical-align:top;padding:4px;"><table width="100%" cellpadding="10" cellspacing="0" border="0" style="border:1px solid #E5E7EB;border-radius:8px;"><tr><td style="font-size:13px;color:#374151;font-weight:500;font-family:${F};">&#10003; ${esc(it.testo)}</td></tr></table></td>`).join('')}</tr></table></td></tr>`
+      } else if (b.tipo==='carosello') {
+        const imgs=(b.immagini||[]).filter(i=>i.src)
+        if(imgs.length) out+=`<tr><td style="padding:0 0 24px;text-align:center;"><a href="${esc(url)}"><img src="${esc(imgs[0].src)}" alt="${esc(imgs[0].didascalia||'')}" style="max-width:100%;display:inline-block;border-radius:8px;" /></a>${imgs.length>1?`<p style="margin:6px 0 0;font-size:12px;color:#9CA3AF;font-family:${F};">+${imgs.length-1} immagini sul sito</p>`:''}</td></tr>`
       }
     }
     return out
   }
 
-  // ── Sessioni ──
   function renderSessioni() {
-    const sessioni = event.sessioni || []
-    if (!sessioni.length) return ''
-    return `
-      <tr><td style="padding:0 0 8px;">
-        <p style="margin:0 0 20px;font-size:22px;font-weight:900;color:#0A0A0A;letter-spacing:-.03em;font-family:Arial,sans-serif;">Programma</p>
-        ${sessioni.map((sess, idx) => `
-          <table width="100%" cellpadding="0" cellspacing="0" border="0" style="margin-bottom:20px;">
-            <tr>
-              <td width="44" valign="top" style="padding-right:14px;">
-                <div style="width:36px;height:36px;border-radius:50%;background:${cp}20;border:2px solid ${cp};text-align:center;line-height:32px;font-size:12px;font-weight:800;color:${cp};font-family:Arial,sans-serif;">${idx + 1}</div>
-              </td>
-              <td valign="top" style="padding-top:4px;">
-                <p style="margin:0 0 3px;font-size:15px;font-weight:800;color:#0A0A0A;letter-spacing:-.02em;font-family:Arial,sans-serif;">${esc(sess.titolo || `Sessione ${idx + 1}`)}</p>
-                ${(sess.ora_inizio || sess.data) ? `<span style="display:inline-block;font-size:11px;font-weight:600;color:${cp};background:${cp}18;padding:2px 8px;border-radius:20px;font-family:Arial,sans-serif;">${sess.data ? new Date(sess.data + 'T00:00').toLocaleDateString('it-IT', { weekday: 'short', day: '2-digit', month: 'short' }) : ''}${sess.ora_inizio ? (sess.data ? ' · ' : '') + sess.ora_inizio : ''}${sess.ora_fine ? '–' + sess.ora_fine : ''}</span>` : ''}
-                ${sess.relatore ? `<p style="margin:4px 0 0;font-size:13px;color:#6B7280;font-family:Arial,sans-serif;">&#127908; ${esc(sess.relatore)}</p>` : ''}
-                ${sess.luogo ? `<p style="margin:2px 0 0;font-size:12px;color:#9CA3AF;font-family:Arial,sans-serif;">&#128205; ${esc(sess.luogo)}</p>` : ''}
-                ${sess.descrizione ? `<p style="margin:6px 0 0;font-size:13px;color:#374151;line-height:1.6;font-family:Arial,sans-serif;">${esc(sess.descrizione)}</p>` : ''}
-              </td>
-            </tr>
-          </table>`).join('')}
-      </td></tr>`
+    const ss=ev.sessioni||[]; if(!ss.length) return ''
+    return `<tr><td style="padding:0 0 8px;"><p style="margin:0 0 20px;font-size:22px;font-weight:900;color:#0A0A0A;letter-spacing:-.03em;font-family:${F};">Programma</p>${ss.map((s,i)=>`<table width="100%" cellpadding="0" cellspacing="0" border="0" style="margin-bottom:20px;"><tr><td width="44" valign="top" style="padding-right:14px;"><p style="margin:0;width:36px;height:36px;border-radius:50%;background:${cp}22;border:2px solid ${cp};text-align:center;line-height:32px;font-size:12px;font-weight:800;color:${cp};font-family:${F};">${i+1}</p></td><td valign="top" style="padding-top:4px;"><p style="margin:0 0 3px;font-size:15px;font-weight:800;color:#0A0A0A;font-family:${F};">${esc(s.titolo||`Sessione ${i+1}`)}</p>${s.ora_inizio||s.data?`<span style="display:inline-block;font-size:11px;font-weight:600;color:${cp};background:${cp}18;padding:2px 8px;border-radius:20px;font-family:${F};">${s.data?new Date(s.data+'T00:00').toLocaleDateString('it-IT',{weekday:'short',day:'2-digit',month:'short'}):''}${s.ora_inizio?(s.data?' · ':'')+s.ora_inizio:''}${s.ora_fine?'–'+s.ora_fine:''}</span>`:''} ${s.relatore?`<p style="margin:4px 0 0;font-size:13px;color:#6B7280;font-family:${F};">&#127908; ${esc(s.relatore)}</p>`:''} ${s.luogo?`<p style="margin:2px 0 0;font-size:12px;color:#9CA3AF;font-family:${F};">&#128205; ${esc(s.luogo)}</p>`:''} ${s.descrizione?`<p style="margin:6px 0 0;font-size:13px;color:#374151;line-height:1.6;font-family:${F};">${esc(s.descrizione)}</p>`:''}</td></tr></table>`).join('')}</td></tr>`
   }
 
-  // ── Hero background ──
-  const heroBgStyle = heroImg
-    ? `background:#003DA5;` // fallback colore per email (le bg-image non sono supportate ovunque)
-    : `background:linear-gradient(135deg,${cp} 0%,#001a50 100%);`
-
-  const titoloColore  = lh.titolo_colore || '#FFFFFF'
-  const titoloSize    = (() => {
-    const raw = lh.titolo_dimensione || 'clamp(24px,5vw,52px)'
-    // Risolvi clamp → valore fisso per email
-    if (raw.startsWith('clamp')) return '36px'
-    return raw
+  // ── Render footer ricco ────────────────────────────────────────────
+  const footerHtml = (() => {
+    if (ev.footer_html) {
+      // footer ricco: usa l'HTML direttamente
+      return `<tr><td bgcolor="${tema.sfondo_footer||'#F4F5F7'}" style="padding:${PAD}px;text-align:center;border-top:1px solid #E5E7EB;">
+        ${richToEmail(ev.footer_html, cp, F)}
+        <p style="margin:8px 0 0;font-size:11px;color:#9CA3AF;font-family:${F};"><a href="${esc(url)}" style="color:${cp};text-decoration:none;font-family:${F};">Visualizza la pagina dell&apos;evento</a></p>
+      </td></tr>`
+    }
+    // footer semplice legacy
+    return `<tr><td bgcolor="${tema.sfondo_footer||'#F4F5F7'}" style="padding:20px ${PAD}px;text-align:center;border-top:1px solid #E5E7EB;">
+      <a href="${esc(url)}" style="display:inline-block;margin-bottom:10px;"><img src="${esc(logoUrl)}" alt="CNA Roma" height="36" style="height:36px;border:0;" /></a>
+      <p style="margin:0;font-size:12px;color:${tema.testo_footer||'#9CA3AF'};line-height:1.6;font-family:${F};">${esc(ev.footer_testo||`© ${new Date().getFullYear()} CNA di Roma — Artigiani Imprenditori d'Italia`)}</p>
+      <p style="margin:8px 0 0;font-size:11px;color:#9CA3AF;font-family:${F};"><a href="${esc(url)}" style="color:${cp};text-decoration:none;">Visualizza la pagina dell&apos;evento</a></p>
+    </td></tr>`
   })()
 
-  const btnBg     = tema.btn_stile === 'contorno' ? 'transparent' : (tema.colore_pulsanti || cp)
-  const btnColor  = tema.btn_stile === 'contorno' ? (tema.colore_pulsanti || cp) : (tema.colore_testo_btn || '#FFFFFF')
-  const btnBorder = tema.btn_stile === 'contorno' ? `2px solid ${tema.colore_pulsanti || cp}` : 'none'
-  const btnRadius = tema.btn_stile === 'pill' ? '50px' : `${tema.btn_raggio || 8}px`
-
   return `<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
-<html xmlns="http://www.w3.org/1999/xhtml">
+<html xmlns="http://www.w3.org/1999/xhtml" xmlns:v="urn:schemas-microsoft-com:vml" xmlns:o="urn:schemas-microsoft-com:office:office">
 <head>
 <meta http-equiv="Content-Type" content="text/html; charset=UTF-8" />
 <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-<title>${esc(event.titolo)}</title>
+<!--[if !mso]><!-->
+<link rel="preconnect" href="https://fonts.googleapis.com" />
+<link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800;900&display=swap" rel="stylesheet" />
+<!--<![endif]-->
+<title>${esc(ev.titolo)}</title>
+<style type="text/css">
+  body,table,td,a{-webkit-text-size-adjust:100%;-ms-text-size-adjust:100%;}
+  table,td{mso-table-lspace:0pt;mso-table-rspace:0pt;}
+  img{-ms-interpolation-mode:bicubic;border:0;outline:none;text-decoration:none;}
+  body{margin:0!important;padding:0!important;background-color:#F4F5F7;}
+  a[x-apple-data-detectors]{color:inherit!important;text-decoration:none!important;}
+</style>
+<!--[if mso]>
+<style>body,table,td,p,a,li{font-family:Arial,Helvetica,sans-serif!important;}</style>
+<xml><o:OfficeDocumentSettings><o:AllowPNG/><o:PixelsPerInch>96</o:PixelsPerInch></o:OfficeDocumentSettings></xml>
+<![endif]-->
 </head>
-<body style="margin:0;padding:0;background-color:#F4F5F7;font-family:Arial,Helvetica,sans-serif;">
+<body style="margin:0;padding:0;background-color:#F4F5F7;">
 
-<!-- Wrapper esterno -->
 <table width="100%" cellpadding="0" cellspacing="0" border="0" bgcolor="#F4F5F7">
-<tr><td align="center" style="padding:0;">
+<tr><td align="center">
 
-  <!-- Container 600px -->
-  <table width="600" cellpadding="0" cellspacing="0" border="0" style="max-width:600px;width:100%;margin:0 auto;">
+  <table width="${W}" cellpadding="0" cellspacing="0" border="0" style="max-width:${W}px;width:100%;">
 
-    <!-- ── HERO ── -->
-    <tr><td style="${heroBgStyle}padding:0;">
-      ${heroImg
-        ? `<a href="${esc(eventUrl)}" style="display:block;"><img src="${esc(heroImg)}" alt="${esc(event.titolo)}" width="600" style="width:100%;max-width:600px;display:block;border:0;" /></a>`
-        : ''}
-      <table width="100%" cellpadding="0" cellspacing="0" border="0">
-        <tr><td style="padding:clamp(32px,5vw,56px) 32px 32px;text-align:${lh.allineamento === 'sinistra' ? 'left' : 'center'};">
-          <!-- Logo -->
-          <a href="${esc(eventUrl)}" style="display:inline-block;margin-bottom:24px;">
-            <img src="${esc(logoUrl)}" alt="CNA Roma" height="${logoAltezza}" style="height:${logoAltezza}px;display:inline-block;border:0;" />
-          </a>
-          <!-- Titolo -->
-          <p style="margin:0 0 10px;font-size:${titoloSize};font-weight:900;color:${titoloColore};letter-spacing:-.04em;line-height:1.05;font-family:Arial,sans-serif;">${esc(event.titolo)}</p>
-          ${lh.titolo2 ? `<p style="margin:0 0 8px;font-size:18px;font-weight:${lh.titolo2_grassetto ? '700' : '400'};color:${lh.titolo2_colore || 'rgba(255,255,255,0.9)'};letter-spacing:-.02em;line-height:1.3;font-family:Arial,sans-serif;">${esc(lh.titolo2)}</p>` : ''}
-          ${event.sottotitolo ? `<p style="margin:0;font-size:${event.sottotitolo_size ? event.sottotitolo_size + 'px' : '17px'};font-weight:${event.sottotitolo_bold ? '700' : '400'};color:rgba(255,255,255,.92);line-height:1.5;font-family:Arial,sans-serif;">${esc(event.sottotitolo)}</p>` : ''}
-        </td></tr>
-      </table>
-    </td></tr>
+    <!-- HERO -->
+    <tr>
+      <td style="${heroCssStyle}min-height:${heroH}px;padding:0;" height="${heroH}">
+        ${heroContent}
+      </td>
+    </tr>
 
-    <!-- ── DATA E LUOGO ── -->
-    ${dataTesto || event.luogo ? `
-    <tr><td bgcolor="#FFFFFF" style="padding:14px 24px;border-bottom:1px solid #E5E7EB;">
+    ${(dataTesto||ev.luogo)&&opts.mostraDataLuogo?`
+    <!-- DATA E LUOGO -->
+    <tr><td bgcolor="#FFFFFF" style="padding:14px ${PAD}px;border-bottom:1px solid #E5E7EB;">
       <table width="100%" cellpadding="0" cellspacing="0" border="0"><tr>
-        ${dataTesto ? `
-        <td style="padding:4px 8px;font-size:14px;font-weight:700;color:#0A0A0A;font-family:Arial,sans-serif;">
-          &#128197; ${esc(dataTesto)}
-        </td>` : ''}
-        ${event.luogo ? `
-        <td style="padding:4px 8px;font-size:14px;font-weight:700;font-family:Arial,sans-serif;">
-          <a href="https://maps.google.com/?q=${encodeURIComponent(event.luogo)}" style="color:${cp};text-decoration:none;">
-            &#128205; ${esc(event.luogo)}
-          </a>
-        </td>` : ''}
+        ${dataTesto?`<td style="padding:4px 8px 4px 0;font-size:14px;font-weight:700;color:#0A0A0A;font-family:${F};">&#128197; ${esc(dataTesto)}</td>`:''}
+        ${ev.luogo?`<td style="padding:4px 0;font-size:14px;font-weight:700;font-family:${F};"><a href="https://maps.google.com/?q=${encodeURIComponent(ev.luogo)}" style="color:${cp};text-decoration:none;font-family:${F};">&#128205; ${esc(ev.luogo)}</a></td>`:''}
       </tr></table>
-    </td></tr>` : ''}
+    </td></tr>`:''}
 
-    <!-- ── CTA PRINCIPALE ── -->
-    <tr><td bgcolor="#FFFFFF" style="padding:24px 32px;text-align:center;border-bottom:1px solid #F3F4F6;">
-      <a href="${esc(eventUrl)}" style="display:inline-block;background:${btnBg};color:${btnColor};border:${btnBorder};border-radius:${btnRadius};padding:14px 36px;font-size:15px;font-weight:800;text-decoration:none;font-family:Arial,sans-serif;">
-        Scopri l'evento e iscriviti &rarr;
+    ${opts.mostraCta?`
+    <!-- CTA PRINCIPALE -->
+    <tr><td bgcolor="#FFFFFF" style="padding:24px ${PAD}px;text-align:center;border-bottom:1px solid #F3F4F6;">
+      <a href="${esc(url)}" style="display:inline-block;background:${btnBg};color:${btnColor};border:${btnBorder};border-radius:${btnRadius};padding:14px 36px;font-size:15px;font-weight:800;text-decoration:none;font-family:${F};">
+        ${esc(opts.testoCta||"Scopri l'evento e iscriviti")} &rarr;
       </a>
-    </td></tr>
+    </td></tr>`:''}
 
-    <!-- ── CORPO ── -->
-    <tr><td bgcolor="#FFFFFF" style="padding:32px 32px 8px;">
+    <!-- CORPO -->
+    <tr><td bgcolor="#FFFFFF" style="padding:${PAD}px ${PAD}px ${Math.round(PAD/4)}px;">
       <table width="100%" cellpadding="0" cellspacing="0" border="0">
         ${renderBlocks()}
-        ${renderSessioni()}
+        ${opts.mostraSessioni?renderSessioni():''}
       </table>
     </td></tr>
 
-    <!-- ── CTA ISCRIZIONE ── -->
-    <tr><td bgcolor="${tema.cta_bg || '#EEF3FF'}" style="padding:28px 32px;border-top:1px solid ${cp}25;">
+    ${opts.mostraCtaFondo?`
+    <!-- CTA ISCRIZIONE -->
+    <tr><td bgcolor="${tema.cta_bg||'#EEF3FF'}" style="padding:${PAD}px;border-top:1px solid ${cp}25;">
       <table width="100%" cellpadding="0" cellspacing="0" border="0"><tr>
         <td valign="middle" style="padding-right:16px;">
-          <p style="margin:0 0 4px;font-size:17px;font-weight:900;color:#0A0A0A;letter-spacing:-.02em;font-family:Arial,sans-serif;">Partecipa all'evento</p>
-          <p style="margin:0;font-size:13px;color:#4B5563;line-height:1.5;font-family:Arial,sans-serif;">Registrazione gratuita. Ricevi il QR Code per l'ingresso.</p>
+          <p style="margin:0 0 4px;font-size:17px;font-weight:900;color:#0A0A0A;letter-spacing:-.02em;font-family:${F};">Partecipa all&apos;evento</p>
+          <p style="margin:0;font-size:13px;color:#4B5563;line-height:1.5;font-family:${F};">Registrazione gratuita. Ricevi il QR Code per l&apos;ingresso.</p>
         </td>
-        <td valign="middle" align="right" width="160" style="white-space:nowrap;">
-          <a href="${esc(eventUrl)}" style="display:inline-block;background:${btnBg};color:${btnColor};border:${btnBorder};border-radius:${btnRadius};padding:12px 22px;font-size:13px;font-weight:800;text-decoration:none;font-family:Arial,sans-serif;white-space:nowrap;">
+        <td valign="middle" align="right" width="160">
+          <a href="${esc(url)}" style="display:inline-block;background:${btnBg};color:${btnColor};border:${btnBorder};border-radius:${btnRadius};padding:12px 22px;font-size:13px;font-weight:800;text-decoration:none;font-family:${F};white-space:nowrap;">
             Iscriviti ora &rsaquo;
           </a>
         </td>
       </tr></table>
-    </td></tr>
+    </td></tr>`:''}
 
-    <!-- ── FOOTER ── -->
-    <tr><td bgcolor="${tema.sfondo_footer || '#F4F5F7'}" style="padding:20px 32px;text-align:center;border-top:1px solid #E5E7EB;">
-      <a href="${esc(eventUrl)}" style="display:inline-block;margin-bottom:10px;">
-        <img src="${esc(logoUrl)}" alt="CNA Roma" height="36" style="height:36px;display:inline-block;border:0;" />
-      </a>
-      <p style="margin:0;font-size:12px;color:${tema.testo_footer || '#9CA3AF'};line-height:1.6;font-family:Arial,sans-serif;">
-        ${esc(event.footer_testo || `© ${new Date().getFullYear()} CNA di Roma — Artigiani Imprenditori d'Italia`)}
-      </p>
-      <p style="margin:8px 0 0;font-size:11px;color:#9CA3AF;font-family:Arial,sans-serif;">
-        <a href="${esc(eventUrl)}" style="color:${cp};text-decoration:none;">Visualizza la pagina dell'evento</a>
-      </p>
-    </td></tr>
+    ${opts.mostraFooter?footerHtml:''}
 
   </table>
 </td></tr>
 </table>
-
 </body>
 </html>`
 }
 
-/* ── Componente React ─────────────────────────────────────────────── */
+/* ── UI helpers ───────────────────────────────────────────────────── */
+const sF = { fontFamily:"'Inter',sans-serif" }
+const sInput = { ...sF, fontSize:'13px', padding:'7px 10px', border:'1px solid #D1D5DB', borderRadius:'6px', outline:'none', backgroundColor:'#FFFFFF', color:'#0A0A0A', width:'100%', boxSizing:'border-box' }
+function Lbl({ children }) { return <span style={{ ...sF, fontSize:'11px', fontWeight:'700', color:'#6B7280', display:'block', marginBottom:'4px', textTransform:'uppercase', letterSpacing:'.05em' }}>{children}</span> }
+function Fld({ label, width, children }) { return <div style={{ display:'flex', flexDirection:'column', width:width||'auto', flex:width?'none':'1', minWidth:'120px' }}><Lbl>{label}</Lbl>{children}</div> }
+function Row({ children }) { return <div style={{ display:'flex', gap:'12px', flexWrap:'wrap', alignItems:'flex-end' }}>{children}</div> }
+function Toggle({ label, value, onChange }) {
+  return (
+    <label style={{ display:'flex', alignItems:'center', gap:'8px', cursor:'pointer', userSelect:'none' }}>
+      <div onClick={()=>onChange(!value)} style={{ width:'36px', height:'20px', borderRadius:'10px', flexShrink:0, backgroundColor:value?'#003DA5':'#D1D5DB', position:'relative', cursor:'pointer', transition:'background .2s' }}>
+        <div style={{ position:'absolute', top:'2px', left:value?'18px':'2px', width:'16px', height:'16px', borderRadius:'50%', backgroundColor:'#fff', transition:'left .2s' }} />
+      </div>
+      <span style={{ ...sF, fontSize:'13px', color:'#374151' }}>{label}</span>
+    </label>
+  )
+}
+
+/* ── Defaults opzioni ─────────────────────────────────────────────── */
+const DEF = { larghezza:600, padding:32, testoCta:"Scopri l'evento e iscriviti", mostraDataLuogo:true, mostraCta:true, mostraCtaFondo:true, mostraSessioni:true, mostraFooter:true }
+
 export default function MailUpExportTab({ event }) {
-  const [copied, setCopied] = useState(false)
+  const [copied,   setCopied]   = useState(false)
+  const [showOpts, setShowOpts] = useState(true)
+  const [opts,     setOpts]     = useState(DEF)
+  const upd = (k,v) => setOpts(o=>({...o,[k]:v}))
 
-  const eventUrl = useMemo(() => {
-    if (!event?.slug) return ''
-    return `${window.location.origin}/eventi/${event.slug}`
-  }, [event?.slug])
+  const eventUrl = useMemo(()=>event?.slug?`${window.location.origin}/eventi/${event.slug}`:'', [event?.slug])
 
-  const html = useMemo(() => {
-    if (!event?.titolo) return ''
-    return buildMailUpHtml(event, eventUrl)
-  }, [event, eventUrl])
+  const html = useMemo(()=>{
+    if(!event?.titolo) return ''
+    return buildHtml(event, eventUrl, opts)
+  }, [event, eventUrl, opts])
 
-  const sizeKb = useMemo(() => {
-    if (!html) return 0
-    return (new TextEncoder().encode(html).length / 1024).toFixed(1)
-  }, [html])
-
-  const sizeOk    = parseFloat(sizeKb) < 80
-  const sizeWarn  = parseFloat(sizeKb) >= 80 && parseFloat(sizeKb) < 102
-  const sizeError = parseFloat(sizeKb) >= 102
+  const sizeKb    = useMemo(()=>(new TextEncoder().encode(html).length/1024).toFixed(1),[html])
+  const sizeOk    = parseFloat(sizeKb)<80
+  const sizeWarn  = parseFloat(sizeKb)>=80&&parseFloat(sizeKb)<102
+  const sizeError = parseFloat(sizeKb)>=102
 
   async function copyHtml() {
-    try {
-      await navigator.clipboard.writeText(html)
-      setCopied(true)
-      setTimeout(() => setCopied(false), 2500)
-    } catch {
-      // fallback
-      const ta = document.createElement('textarea')
-      ta.value = html
-      document.body.appendChild(ta)
-      ta.select()
-      document.execCommand('copy')
-      document.body.removeChild(ta)
-      setCopied(true)
-      setTimeout(() => setCopied(false), 2500)
-    }
+    try { await navigator.clipboard.writeText(html) }
+    catch { const ta=document.createElement('textarea');ta.value=html;document.body.appendChild(ta);ta.select();document.execCommand('copy');document.body.removeChild(ta) }
+    setCopied(true); setTimeout(()=>setCopied(false),2500)
   }
 
-  if (!event?.titolo) {
-    return (
-      <div style={{ padding: '48px', textAlign: 'center', color: '#9CA3AF' }}>
-        <p style={{ fontSize: '15px', fontWeight: '600', color: '#374151' }}>Nessun evento caricato</p>
-        <p style={{ fontSize: '13px' }}>Salva l'evento prima di generare l'HTML.</p>
-      </div>
-    )
-  }
-
-  if (!event.slug) {
-    return (
-      <div style={{ padding: '48px', textAlign: 'center', color: '#9CA3AF' }}>
-        <Mail size={40} style={{ color: '#D1D5DB', marginBottom: '12px' }} />
-        <p style={{ fontSize: '15px', fontWeight: '600', color: '#374151' }}>Slug mancante</p>
-        <p style={{ fontSize: '13px' }}>L'evento deve avere uno slug per generare l'URL corretto.</p>
-      </div>
-    )
-  }
+  if (!event?.titolo) return <div style={{padding:'48px',textAlign:'center'}}><p style={{...sF,fontSize:'15px',fontWeight:'600',color:'#374151'}}>Nessun evento caricato</p></div>
+  if (!event.slug)    return <div style={{padding:'48px',textAlign:'center'}}><Mail size={40} style={{color:'#D1D5DB',marginBottom:'12px'}}/><p style={{...sF,fontSize:'15px',fontWeight:'600',color:'#374151'}}>Slug mancante — salva prima l'evento</p></div>
 
   return (
-    <div style={{ maxWidth: '900px', margin: '0 auto', padding: '0 0 48px' }}>
+    <div style={{ maxWidth:'960px', margin:'0 auto', paddingBottom:'48px' }}>
 
-      {/* Header */}
-      <div style={{ marginBottom: '24px' }}>
-        <h2 style={{ margin: '0 0 6px', fontSize: '20px', fontWeight: '900', color: '#0A0A0A', letterSpacing: '-.03em', fontFamily: "'Inter',sans-serif" }}>
-          Esporta HTML per MailUp
-        </h2>
-        <p style={{ margin: 0, fontSize: '14px', color: '#6B7280', fontFamily: "'Inter',sans-serif" }}>
-          Copia il codice HTML e incollalo nell'editor HTML di MailUp (<em>Messaggi → Nuovo → Da editor HTML</em>).
-          Tutti i link rimandano alla pagina pubblica dell'evento.
-        </p>
+      {/* Intestazione */}
+      <div style={{ marginBottom:'20px' }}>
+        <h2 style={{ ...sF, margin:'0 0 4px', fontSize:'20px', fontWeight:'900', color:'#0A0A0A', letterSpacing:'-.03em' }}>Esporta HTML per MailUp</h2>
+        <p style={{ ...sF, margin:0, fontSize:'13px', color:'#6B7280' }}>Incolla il codice nell'editor HTML di MailUp (<em>Messaggi → Email → Nuovo → Da editor HTML</em>).</p>
       </div>
 
-      {/* Info URL */}
-      <div style={{ display: 'flex', alignItems: 'center', gap: '10px', padding: '10px 14px', backgroundColor: '#F4F5F7', borderRadius: '8px', marginBottom: '16px', border: '1px solid #E5E7EB' }}>
-        <ExternalLink size={14} style={{ color: '#6B7280', flexShrink: 0 }} />
-        <span style={{ fontSize: '12px', color: '#374151', fontFamily: "'Inter',sans-serif", fontWeight: '600' }}>URL evento:</span>
-        <a href={eventUrl} target="_blank" rel="noopener noreferrer"
-          style={{ fontSize: '12px', color: '#003DA5', fontFamily: 'monospace', textDecoration: 'none', overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap' }}>
-          {eventUrl}
-        </a>
+      {/* URL evento */}
+      <div style={{ display:'flex', alignItems:'center', gap:'8px', padding:'9px 12px', backgroundColor:'#F4F5F7', borderRadius:'8px', marginBottom:'16px', border:'1px solid #E5E7EB' }}>
+        <ExternalLink size={13} style={{ color:'#9CA3AF', flexShrink:0 }}/>
+        <a href={eventUrl} target="_blank" rel="noopener noreferrer" style={{ ...sF, fontSize:'12px', color:'#003DA5', textDecoration:'none', overflow:'hidden', textOverflow:'ellipsis', whiteSpace:'nowrap' }}>{eventUrl}</a>
       </div>
 
-      {/* Dimensione + warning */}
-      <div style={{
-        display: 'flex', alignItems: 'center', gap: '10px',
-        padding: '10px 14px', borderRadius: '8px', marginBottom: '16px',
-        backgroundColor: sizeError ? '#FEF2F2' : sizeWarn ? '#FFFBEB' : '#F0FDF4',
-        border: `1px solid ${sizeError ? '#FECACA' : sizeWarn ? '#FDE68A' : '#BBF7D0'}`,
-      }}>
-        {(sizeWarn || sizeError) && <AlertTriangle size={14} style={{ color: sizeError ? '#DC2626' : '#D97706', flexShrink: 0 }} />}
-        <span style={{
-          fontSize: '13px', fontWeight: '700', fontFamily: "'Inter',sans-serif",
-          color: sizeError ? '#DC2626' : sizeWarn ? '#92400E' : '#15803D',
-        }}>
-          Peso HTML: {sizeKb} KB
-          {sizeOk    && ' — ✓ ottimale (< 80 KB)'}
-          {sizeWarn  && ' — attenzione: vicino al limite Gmail di 102 KB'}
-          {sizeError && ' — ⚠ supera 102 KB: Gmail clipperà il contenuto'}
+      {/* ── PANNELLO OPZIONI ── */}
+      <div style={{ border:'1px solid #E5E7EB', borderRadius:'10px', marginBottom:'16px', overflow:'hidden' }}>
+        <button type="button" onClick={()=>setShowOpts(o=>!o)}
+          style={{ width:'100%', display:'flex', alignItems:'center', justifyContent:'space-between', padding:'12px 16px', backgroundColor:'#F9FAFB', border:'none', cursor:'pointer', borderBottom:showOpts?'1px solid #E5E7EB':'none' }}>
+          <span style={{ ...sF, fontSize:'13px', fontWeight:'800', color:'#374151', display:'flex', alignItems:'center', gap:'7px' }}>
+            <Settings size={14}/> Opzioni email
+          </span>
+          {showOpts?<ChevronUp size={15} color="#9CA3AF"/>:<ChevronDown size={15} color="#9CA3AF"/>}
+        </button>
+
+        {showOpts && (
+          <div style={{ padding:'16px', backgroundColor:'#FFFFFF', display:'flex', flexDirection:'column', gap:'16px' }}>
+
+            <Row>
+              <Fld label="Larghezza (px)" width="170px">
+                <select value={opts.larghezza} onChange={e=>upd('larghezza',Number(e.target.value))} style={sInput}>
+                  <option value={500}>500 px</option>
+                  <option value={560}>560 px</option>
+                  <option value={600}>600 px — standard</option>
+                  <option value={640}>640 px</option>
+                  <option value={680}>680 px</option>
+                </select>
+              </Fld>
+              <Fld label="Padding laterale" width="170px">
+                <select value={opts.padding} onChange={e=>upd('padding',Number(e.target.value))} style={sInput}>
+                  <option value={16}>16 px — compatto</option>
+                  <option value={24}>24 px</option>
+                  <option value={32}>32 px — standard</option>
+                  <option value={48}>48 px — arioso</option>
+                </select>
+              </Fld>
+              <Fld label="Testo pulsante CTA">
+                <input type="text" value={opts.testoCta} onChange={e=>upd('testoCta',e.target.value)} style={sInput} placeholder="Scopri l'evento e iscriviti"/>
+              </Fld>
+            </Row>
+
+            <div>
+              <Lbl>Sezioni visibili</Lbl>
+              <div style={{ display:'flex', flexWrap:'wrap', gap:'12px 28px', paddingTop:'6px' }}>
+                <Toggle label="Data e luogo"   value={opts.mostraDataLuogo} onChange={v=>upd('mostraDataLuogo',v)}/>
+                <Toggle label="CTA in alto"    value={opts.mostraCta}       onChange={v=>upd('mostraCta',v)}/>
+                <Toggle label="Sessioni"       value={opts.mostraSessioni}  onChange={v=>upd('mostraSessioni',v)}/>
+                <Toggle label="CTA iscrizione" value={opts.mostraCtaFondo}  onChange={v=>upd('mostraCtaFondo',v)}/>
+                <Toggle label="Footer"         value={opts.mostraFooter}    onChange={v=>upd('mostraFooter',v)}/>
+              </div>
+            </div>
+
+          </div>
+        )}
+      </div>
+
+      {/* Peso */}
+      <div style={{ display:'flex', alignItems:'center', gap:'8px', padding:'9px 12px', borderRadius:'8px', marginBottom:'14px', backgroundColor:sizeError?'#FEF2F2':sizeWarn?'#FFFBEB':'#F0FDF4', border:`1px solid ${sizeError?'#FECACA':sizeWarn?'#FDE68A':'#BBF7D0'}` }}>
+        {(sizeWarn||sizeError)&&<AlertTriangle size={13} style={{ color:sizeError?'#DC2626':'#D97706', flexShrink:0 }}/>}
+        <span style={{ ...sF, fontSize:'13px', fontWeight:'700', color:sizeError?'#DC2626':sizeWarn?'#92400E':'#15803D' }}>
+          Peso HTML: {sizeKb} KB{sizeOk?' — ✓ ottimale':sizeWarn?' — vicino al limite Gmail 102 KB':' — ⚠ supera 102 KB: Gmail clipperà'}
         </span>
       </div>
 
-      {/* Bottone copia */}
-      <div style={{ display: 'flex', gap: '10px', marginBottom: '16px', flexWrap: 'wrap' }}>
-        <button
-          onClick={copyHtml}
-          style={{
-            display: 'flex', alignItems: 'center', gap: '8px',
-            padding: '10px 20px', borderRadius: '8px', border: 'none',
-            backgroundColor: copied ? '#16A34A' : '#003DA5',
-            color: '#FFFFFF', fontSize: '14px', fontWeight: '700',
-            fontFamily: "'Inter',sans-serif", cursor: 'pointer',
-            transition: 'background-color .2s',
-          }}>
-          {copied ? <Check size={16} /> : <Copy size={16} />}
-          {copied ? 'Copiato!' : 'Copia HTML'}
+      {/* Azioni */}
+      <div style={{ display:'flex', gap:'10px', marginBottom:'20px', flexWrap:'wrap' }}>
+        <button onClick={copyHtml} style={{ ...sF, display:'flex', alignItems:'center', gap:'7px', padding:'10px 20px', borderRadius:'8px', border:'none', backgroundColor:copied?'#16A34A':'#003DA5', color:'#fff', fontSize:'14px', fontWeight:'700', cursor:'pointer' }}>
+          {copied?<Check size={15}/>:<Copy size={15}/>} {copied?'Copiato!':'Copia HTML'}
         </button>
-        <a
-          href={`data:text/html;charset=utf-8,${encodeURIComponent(html)}`}
-          download={`email-${event.slug || 'evento'}.html`}
-          style={{
-            display: 'flex', alignItems: 'center', gap: '8px',
-            padding: '10px 20px', borderRadius: '8px',
-            border: '1px solid #D1D5DB',
-            color: '#374151', fontSize: '14px', fontWeight: '600',
-            fontFamily: "'Inter',sans-serif", textDecoration: 'none',
-            backgroundColor: '#FFFFFF',
-          }}>
+        <a href={`data:text/html;charset=utf-8,${encodeURIComponent(html)}`} download={`email-${event.slug}.html`}
+          style={{ ...sF, display:'flex', alignItems:'center', gap:'7px', padding:'10px 20px', borderRadius:'8px', border:'1px solid #D1D5DB', color:'#374151', fontSize:'14px', fontWeight:'600', textDecoration:'none', backgroundColor:'#fff' }}>
           ↓ Scarica .html
         </a>
       </div>
 
-      {/* Istruzioni MailUp */}
-      <div style={{ backgroundColor: '#EEF3FF', border: '1px solid #C7D9F8', borderRadius: '10px', padding: '16px 20px', marginBottom: '20px' }}>
-        <p style={{ margin: '0 0 8px', fontSize: '13px', fontWeight: '800', color: '#003DA5', fontFamily: "'Inter',sans-serif" }}>Come importare in MailUp</p>
-        <ol style={{ margin: 0, paddingLeft: '18px', fontSize: '13px', color: '#374151', lineHeight: '2', fontFamily: "'Inter',sans-serif" }}>
+      {/* Istruzioni */}
+      <div style={{ backgroundColor:'#EEF3FF', border:'1px solid #C7D9F8', borderRadius:'10px', padding:'14px 18px', marginBottom:'20px' }}>
+        <p style={{ ...sF, margin:'0 0 6px', fontSize:'13px', fontWeight:'800', color:'#003DA5' }}>Come importare in MailUp</p>
+        <ol style={{ ...sF, margin:0, paddingLeft:'16px', fontSize:'13px', color:'#374151', lineHeight:'1.9' }}>
           <li>Vai su <strong>Messaggi → Email → Nuovo messaggio</strong></li>
           <li>Scegli <strong>Da editor HTML</strong></li>
           <li>Incolla il codice copiato nell'area HTML</li>
@@ -576,45 +414,28 @@ export default function MailUpExportTab({ event }) {
         </ol>
       </div>
 
-      {/* Anteprima HTML */}
-      <div style={{ border: '1px solid #E5E7EB', borderRadius: '10px', overflow: 'hidden' }}>
-        <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', padding: '10px 14px', backgroundColor: '#F9FAFB', borderBottom: '1px solid #E5E7EB' }}>
-          <span style={{ fontSize: '12px', fontWeight: '700', color: '#6B7280', fontFamily: "'Inter',sans-serif", textTransform: 'uppercase', letterSpacing: '.06em' }}>
-            Anteprima email (600px)
-          </span>
+      {/* Anteprima */}
+      <div style={{ border:'1px solid #E5E7EB', borderRadius:'10px', overflow:'hidden', marginBottom:'20px' }}>
+        <div style={{ padding:'9px 14px', backgroundColor:'#F9FAFB', borderBottom:'1px solid #E5E7EB' }}>
+          <span style={{ ...sF, fontSize:'11px', fontWeight:'700', color:'#9CA3AF', textTransform:'uppercase', letterSpacing:'.07em' }}>Anteprima — {opts.larghezza}px</span>
         </div>
-        <div style={{ overflowX: 'auto', backgroundColor: '#F4F5F7', padding: '24px', display: 'flex', justifyContent: 'center' }}>
-          <iframe
-            srcDoc={html}
-            title="Anteprima email MailUp"
-            style={{ width: '600px', minHeight: '600px', border: '1px solid #E5E7EB', borderRadius: '4px', display: 'block', backgroundColor: '#FFFFFF' }}
-            sandbox="allow-same-origin"
-          />
+        <div style={{ overflowX:'auto', backgroundColor:'#F4F5F7', padding:'24px', display:'flex', justifyContent:'center' }}>
+          <iframe srcDoc={html} title="Anteprima email MailUp"
+            style={{ width:`${opts.larghezza}px`, minHeight:'500px', border:'1px solid #E5E7EB', borderRadius:'4px', display:'block', backgroundColor:'#fff' }}
+            sandbox="allow-same-origin"/>
         </div>
       </div>
 
-      {/* Codice sorgente */}
-      <div style={{ marginTop: '20px', border: '1px solid #E5E7EB', borderRadius: '10px', overflow: 'hidden' }}>
-        <div style={{ padding: '10px 14px', backgroundColor: '#F9FAFB', borderBottom: '1px solid #E5E7EB', display: 'flex', alignItems: 'center', justifyContent: 'space-between' }}>
-          <span style={{ fontSize: '12px', fontWeight: '700', color: '#6B7280', fontFamily: "'Inter',sans-serif", textTransform: 'uppercase', letterSpacing: '.06em' }}>
-            Codice sorgente
-          </span>
-          <button onClick={copyHtml} style={{ display: 'flex', alignItems: 'center', gap: '5px', padding: '4px 10px', border: '1px solid #D1D5DB', borderRadius: '5px', backgroundColor: '#FFFFFF', cursor: 'pointer', fontSize: '12px', fontWeight: '600', color: '#374151', fontFamily: "'Inter',sans-serif" }}>
-            {copied ? <Check size={12} /> : <Copy size={12} />} Copia
+      {/* Sorgente */}
+      <div style={{ border:'1px solid #E5E7EB', borderRadius:'10px', overflow:'hidden' }}>
+        <div style={{ padding:'9px 14px', backgroundColor:'#F9FAFB', borderBottom:'1px solid #E5E7EB', display:'flex', alignItems:'center', justifyContent:'space-between' }}>
+          <span style={{ ...sF, fontSize:'11px', fontWeight:'700', color:'#9CA3AF', textTransform:'uppercase', letterSpacing:'.07em' }}>Codice sorgente</span>
+          <button onClick={copyHtml} style={{ ...sF, display:'flex', alignItems:'center', gap:'5px', padding:'4px 10px', border:'1px solid #D1D5DB', borderRadius:'5px', backgroundColor:'#fff', cursor:'pointer', fontSize:'12px', fontWeight:'600', color:'#374151' }}>
+            {copied?<Check size={11}/>:<Copy size={11}/>} Copia
           </button>
         </div>
-        <textarea
-          readOnly
-          value={html}
-          onClick={e => e.target.select()}
-          style={{
-            width: '100%', height: '280px', padding: '16px',
-            fontFamily: 'monospace', fontSize: '11px', lineHeight: '1.6',
-            border: 'none', resize: 'vertical', outline: 'none',
-            backgroundColor: '#1E1E1E', color: '#D4D4D4',
-            boxSizing: 'border-box',
-          }}
-        />
+        <textarea readOnly value={html} onClick={e=>e.target.select()}
+          style={{ width:'100%', height:'240px', padding:'14px', fontFamily:'monospace', fontSize:'11px', lineHeight:'1.6', border:'none', resize:'vertical', outline:'none', backgroundColor:'#1E1E1E', color:'#D4D4D4', boxSizing:'border-box' }}/>
       </div>
     </div>
   )

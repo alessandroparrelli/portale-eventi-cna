@@ -157,84 +157,70 @@ const SPECIAL_BLOCKS = [
   { label:'⬆️ Slide Up',    html:'<p class="animate-slide">Testo con animazione slide.</p>' },
 ]
 
-/* ─── ColorPicker — picker nativo del sistema operativo ──────── */
+/* ─── ColorPicker — identico ad AspettoTab, input visibile con label ──────── */
 function ColorPicker({ label = 'A', title = 'Colore testo', editor: ed, isHighlight = false }) {
-  const inputRef = useRef()
   const savedSel = useRef(null)
+
+  function saveSel() {
+    if (!ed) return
+    const { from, to } = ed.state.selection
+    savedSel.current = from !== to ? { from, to } : null
+  }
 
   function applyColor(color) {
     if (!ed) return
     const sel = savedSel.current
-    savedSel.current = null
 
-    if (!sel) {
+    const applyTo = (from, to) => {
       if (isHighlight) {
-        ed.chain().focus().setHighlight({ color }).run()
-      } else {
-        ed.chain().focus().setColor(color).run()
+        ed.chain().focus().setTextSelection({ from, to }).setHighlight({ color }).run()
+        return
       }
-      return
+      const { state, view } = ed
+      const tsm = state.schema.marks.textStyle
+      if (!tsm) { ed.chain().focus().setTextSelection({ from, to }).setColor(color).run(); return }
+      const tr = state.tr
+      state.doc.nodesBetween(from, to, (node, pos) => {
+        if (!node.isText) return
+        const nf = Math.max(from, pos), nt = Math.min(to, pos + node.nodeSize)
+        const ex = node.marks.find(m => m.type === tsm)
+        tr.removeMark(nf, nt, tsm)
+        tr.addMark(nf, nt, tsm.create({ ...(ex ? ex.attrs : {}), color }))
+      })
+      view.dispatch(tr)
+      ed.commands.setTextSelection({ from, to })
     }
 
-    const { from, to } = sel
-
-    if (isHighlight) {
-      ed.chain().focus().setTextSelection({ from, to }).setHighlight({ color }).run()
-      return
+    if (sel) {
+      applyTo(sel.from, sel.to)
+    } else {
+      if (isHighlight) ed.chain().focus().setHighlight({ color }).run()
+      else ed.chain().focus().setColor(color).run()
     }
-
-    const { state, view } = ed
-    const textStyleMark = state.schema.marks.textStyle
-    if (!textStyleMark) {
-      ed.chain().focus().setTextSelection({ from, to }).setColor(color).run()
-      return
-    }
-
-    const tr = state.tr
-    state.doc.nodesBetween(from, to, (node, pos) => {
-      if (!node.isText) return
-      const nodeFrom = Math.max(from, pos)
-      const nodeTo   = Math.min(to, pos + node.nodeSize)
-      const existingMark = node.marks.find(m => m.type === textStyleMark)
-      const existingAttrs = existingMark ? existingMark.attrs : {}
-      tr.removeMark(nodeFrom, nodeTo, textStyleMark)
-      tr.addMark(nodeFrom, nodeTo, textStyleMark.create({ ...existingAttrs, color }))
-    })
-    view.dispatch(tr)
-    ed.commands.setTextSelection({ from, to })
   }
 
-  function handleBtnMouseDown(e) {
-    e.preventDefault() // non far perdere il focus all'editor
-    // Salva la selezione prima che il picker del SO prenda il controllo
-    if (ed) {
-      const { from, to } = ed.state.selection
-      savedSel.current = from !== to ? { from, to } : null
-    }
-    inputRef.current?.click()
-  }
+  // Colore corrente per mostrarlo nel quadratino
+  const currentColor = ed
+    ? (isHighlight
+        ? (ed.getAttributes('highlight').color || '#FFFF00')
+        : (ed.getAttributes('textStyle').color || '#000000'))
+    : '#000000'
 
   return (
-    <div style={{ position:'relative', flexShrink:0 }}>
-      <button
-        type="button"
-        title={title}
-        onMouseDown={handleBtnMouseDown}
-        style={{ height:'30px', minWidth:'34px', padding:'0 5px', border:'1px solid #E5E7EB', borderRadius:'5px',
-          background:'#fff', cursor:'pointer', fontSize:'13px', fontWeight:'700', color:'#374151',
-          display:'flex', alignItems:'center', justifyContent:'center', gap:'3px', fontFamily:"'Inter',sans-serif" }}
-      >
-        <span style={{ fontSize:'14px' }}>{label}</span>
-        <svg width="8" height="5" viewBox="0 0 8 5"><path d="M0 0l4 5 4-5z" fill="#9CA3AF"/></svg>
-      </button>
-      {/* input colore fuori schermo — garantisce picker nativo Mac (NSColorPanel) e Windows */}
+    <div style={{ position:'relative', flexShrink:0 }} title={title}>
+      {/* Label visibile sopra */}
+      <label style={{ display:'block', fontSize:'10px', fontWeight:'700', color:'#9CA3AF', textAlign:'center', marginBottom:'2px', fontFamily:"'Inter',sans-serif", lineHeight:1 }}>
+        {label}
+      </label>
+      {/* Input colore nativo — visibile come in AspettoTab */}
       <input
-        ref={inputRef}
         type="color"
-        defaultValue="#000000"
-        onInput={e => applyColor(e.target.value)}
+        value={currentColor}
+        onFocus={saveSel}
+        onMouseDown={saveSel}
         onChange={e => applyColor(e.target.value)}
-        style={{ position:'fixed', width:'40px', height:'30px', opacity:0, pointerEvents:'none', top:'-9999px', left:'-9999px', border:'none', padding:0 }}
+        onInput={e => applyColor(e.target.value)}
+        style={{ width:'32px', height:'28px', border:'1px solid #D1D5DB', borderRadius:'5px', cursor:'pointer', padding:'2px', display:'block', backgroundColor:'#fff' }}
       />
     </div>
   )

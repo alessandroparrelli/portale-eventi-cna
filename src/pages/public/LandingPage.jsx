@@ -655,7 +655,10 @@ export default function LandingPage() {
           alt="CNA Roma"
           style={{ height: `clamp(32px, ${Math.round((tema.logo_altezza || 44) * 0.08)}vw, ${Math.round((tema.logo_altezza || 44) * 0.7)}px)`, maxWidth: '200px', objectFit: 'contain', display: 'block', margin: '0 auto 10px' }}
         />
-        <span>{event.footer_testo || `© ${new Date().getFullYear()} CNA di Roma — Artigiani Imprenditori d'Italia`}</span>
+        {(event.footer_modalita || 'semplice') === 'ricco' && event.footer_html
+          ? <div className="rich-content" style={{ textAlign:'center', fontSize:'13px', color: tema.testo_footer || '#9CA3AF' }} dangerouslySetInnerHTML={{ __html: event.footer_html }} />
+          : <span>{event.footer_testo || `© ${new Date().getFullYear()} CNA di Roma — Artigiani Imprenditori d'Italia`}</span>
+        }
       </footer>
 
       {conferma && (
