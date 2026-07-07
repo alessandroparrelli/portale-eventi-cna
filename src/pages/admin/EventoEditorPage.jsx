@@ -364,7 +364,7 @@ export default function EventoEditorPage() {
       certificato_template:'laterale', certificato_config:{},
     colore_primario:'#003DA5', colore_sfondo:'#F4F5F7', tema:{},
     layout_hero:{ altezza:'380', overlay_opacita:'55', overlay_colore:'#000000', allineamento:'sinistra', titolo_colore:'#FFFFFF', titolo_dimensione:'clamp(26px,5vw,54px)', titolo_grassetto:true, titolo_maiuscolo:false },
-    sezioni:[], email_organizzatore:'', email_mittente:'', email_cc:'', nome_mittente:'',
+    sezioni:[], mailup_blocchi:[], email_organizzatore:'', email_mittente:'', email_cc:'', nome_mittente:'',
   })
   const eventRef = useRef(null)   // sempre aggiornato — evita race condition nel save
   useEffect(() => { eventRef.current = event }, [event])
@@ -409,6 +409,7 @@ export default function EventoEditorPage() {
           email_cc: data.email_cc || '',
           footer_html: data.footer_html || '',
           footer_modalita: data.footer_modalita || 'semplice',
+          mailup_blocchi: data.mailup_blocchi || [],
         tags: data.tags || [],
           nome_mittente: data.nome_mittente || '',
         }
@@ -470,6 +471,7 @@ export default function EventoEditorPage() {
       footer_testo:ev.footer_testo||null,
         footer_html:ev.footer_html||null,
         footer_modalita:ev.footer_modalita||'semplice',
+        mailup_blocchi:ev.mailup_blocchi||[],
       tags:ev.tags||[],
       tema:ev.tema||{},
       email_organizzatore:ev.email_organizzatore||null,
@@ -1013,7 +1015,7 @@ export default function EventoEditorPage() {
         {/* ── MAILUP ── */}
         {activeTab==='mailup' && (
           <div style={{ ...p.panel, maxWidth: '960px' }}>
-            <MailUpExportTab event={event} />
+            <MailUpExportTab event={event} setEvent={updEvent} />
           </div>
         )}
 
