@@ -157,148 +157,84 @@ const SPECIAL_BLOCKS = [
   { label:'⬆️ Slide Up',    html:'<p class="animate-slide">Testo con animazione slide.</p>' },
 ]
 
-/* ─── ColorPicker con palette custom ─────────────────────────── */
+/* ─── ColorPicker — picker nativo del sistema operativo ──────── */
 function ColorPicker({ label = 'A', title = 'Colore testo', editor: ed, isHighlight = false }) {
-  const [open, setOpen] = useState(false)
-  const [customHex, setCustomHex] = useState('#000000')
-  const btnRef = useRef()
-  const panelRef = useRef()
-  // Salva la selezione al mousedown sul bottone (prima che il focus si sposti)
+  const inputRef = useRef()
   const savedSel = useRef(null)
-
-  // Chiudi cliccando fuori
-  useEffect(() => {
-    if (!open) return
-    function onDown(e) {
-      if (!panelRef.current?.contains(e.target) && !btnRef.current?.contains(e.target)) {
-        setOpen(false)
-      }
-    }
-    document.addEventListener('mousedown', onDown)
-    return () => document.removeEventListener('mousedown', onDown)
-  }, [open])
-
-  function handleBtnMouseDown(e) {
-    e.preventDefault() // non far perdere il focus all'editor
-    if (ed) {
-      const { from, to } = ed.state.selection
-      savedSel.current = from !== to ? { from, to } : null
-    }
-    setOpen(v => !v)
-  }
 
   function applyColor(color) {
     if (!ed) return
     const sel = savedSel.current
+    savedSel.current = null
+
     if (!sel) {
-      // nessuna selezione salvata: applica al cursore (futuro testo)
       if (isHighlight) {
         ed.chain().focus().setHighlight({ color }).run()
       } else {
         ed.chain().focus().setColor(color).run()
       }
-      setOpen(false)
       return
     }
+
     const { from, to } = sel
-    savedSel.current = null
 
     if (isHighlight) {
       ed.chain().focus().setTextSelection({ from, to }).setHighlight({ color }).run()
-      setOpen(false)
       return
     }
 
-    // Applica colore via ProseMirror direttamente — preserva tutti gli altri mark (bold, italic, ecc.)
     const { state, view } = ed
     const textStyleMark = state.schema.marks.textStyle
     if (!textStyleMark) {
       ed.chain().focus().setTextSelection({ from, to }).setColor(color).run()
-      setOpen(false)
       return
     }
 
-    // Itera ogni nodo nel range e applica il mark mantenendo gli altri attributi textStyle esistenti
     const tr = state.tr
     state.doc.nodesBetween(from, to, (node, pos) => {
       if (!node.isText) return
       const nodeFrom = Math.max(from, pos)
       const nodeTo   = Math.min(to, pos + node.nodeSize)
-      // Leggi attributi textStyle esistenti sul nodo
       const existingMark = node.marks.find(m => m.type === textStyleMark)
       const existingAttrs = existingMark ? existingMark.attrs : {}
-      // Rimuovi il mark textStyle esistente
       tr.removeMark(nodeFrom, nodeTo, textStyleMark)
-      // Riapplica con il nuovo colore + tutti gli altri attributi esistenti
       tr.addMark(nodeFrom, nodeTo, textStyleMark.create({ ...existingAttrs, color }))
     })
     view.dispatch(tr)
-    // Ripristina la selezione
     ed.commands.setTextSelection({ from, to })
-    setOpen(false)
+  }
+
+  function handleBtnMouseDown(e) {
+    e.preventDefault() // non far perdere il focus all'editor
+    // Salva la selezione prima che il picker del SO prenda il controllo
+    if (ed) {
+      const { from, to } = ed.state.selection
+      savedSel.current = from !== to ? { from, to } : null
+    }
+    inputRef.current?.click()
   }
 
   return (
-    <div style={{ position:'relative', flexShrink:0 }} ref={panelRef}>
+    <div style={{ position:'relative', flexShrink:0 }}>
       <button
-        ref={btnRef}
         type="button"
         title={title}
         onMouseDown={handleBtnMouseDown}
         style={{ height:'30px', minWidth:'34px', padding:'0 5px', border:'1px solid #E5E7EB', borderRadius:'5px',
-          background: open ? '#EEF3FF' : '#fff', cursor:'pointer', fontSize:'13px', fontWeight:'700', color:'#374151',
+          background:'#fff', cursor:'pointer', fontSize:'13px', fontWeight:'700', color:'#374151',
           display:'flex', alignItems:'center', justifyContent:'center', gap:'3px', fontFamily:"'Inter',sans-serif" }}
       >
         <span style={{ fontSize:'14px' }}>{label}</span>
         <svg width="8" height="5" viewBox="0 0 8 5"><path d="M0 0l4 5 4-5z" fill="#9CA3AF"/></svg>
       </button>
-
-      {open && (
-        <div
-          onMouseDown={e => e.preventDefault()} // blocca perdita focus editor
-          style={{ position:'absolute', top:'34px', left:0, zIndex:500, background:'#fff',
-            border:'1px solid #E5E7EB', borderRadius:'10px', padding:'12px',
-            boxShadow:'0 12px 40px rgba(0,0,0,.15)', width:'230px' }}
-        >
-          {Object.entries(COLOR_PALETTE).map(([group, colors]) => (
-            <div key={group} style={{ marginBottom:'8px' }}>
-              <div style={{ fontSize:'9px', fontWeight:'700', color:'#9CA3AF', textTransform:'uppercase', letterSpacing:'.06em', marginBottom:'4px' }}>{group}</div>
-              <div style={{ display:'flex', gap:'4px', flexWrap:'wrap' }}>
-                {colors.map(c => (
-                  <button
-                    key={c}
-                    type="button"
-                    title={c}
-                    onMouseDown={e => { e.preventDefault(); applyColor(c) }}
-                    style={{ width:'22px', height:'22px', borderRadius:'4px', background:c, cursor:'pointer', flexShrink:0,
-                      border: c === '#FFFFFF' ? '1px solid #D1D5DB' : '1px solid transparent',
-                      boxShadow:'0 1px 3px rgba(0,0,0,.15)', transition:'transform .1s' }}
-                    onMouseEnter={e => e.currentTarget.style.transform='scale(1.2)'}
-                    onMouseLeave={e => e.currentTarget.style.transform='scale(1)'}
-                  />
-                ))}
-              </div>
-            </div>
-          ))}
-          {/* Colore personalizzato */}
-          <div style={{ borderTop:'1px solid #E5E7EB', paddingTop:'10px', marginTop:'4px', display:'flex', alignItems:'center', gap:'8px' }}>
-            <span style={{ fontSize:'11px', color:'#6B7280', fontWeight:'600' }}>Personalizzato:</span>
-            <input
-              type="color"
-              value={customHex}
-              onChange={e => setCustomHex(e.target.value)}
-              onBlur={e => applyColor(e.target.value)}
-              style={{ width:'32px', height:'28px', padding:'1px', border:'1px solid #E5E7EB', borderRadius:'5px', cursor:'pointer', background:'#fff' }}
-            />
-            <button
-              type="button"
-              onMouseDown={e => { e.preventDefault(); applyColor(customHex) }}
-              style={{ flex:1, height:'28px', background:'#003DA5', color:'#fff', border:'none', borderRadius:'5px',
-                fontSize:'11px', fontWeight:'700', cursor:'pointer', fontFamily:"'Inter',sans-serif" }}
-            >Applica</button>
-          </div>
-        </div>
-      )}
+      {/* input invisibile — aperto programmaticamente, onChange applica in tempo reale */}
+      <input
+        ref={inputRef}
+        type="color"
+        defaultValue="#000000"
+        onChange={e => applyColor(e.target.value)}
+        style={{ position:'absolute', width:'1px', height:'1px', opacity:0, pointerEvents:'none', top:0, left:0 }}
+      />
     </div>
   )
 }
