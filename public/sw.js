@@ -1,4 +1,4 @@
-const CACHE = 'cna-portale-v3'
+const CACHE = 'cna-portale-v4'
 
 self.addEventListener('install', () => {
   self.skipWaiting()

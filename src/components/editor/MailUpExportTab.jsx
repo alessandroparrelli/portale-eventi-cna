@@ -486,36 +486,53 @@ export default function MailUpExportTab({ event, setEvent }) {
   const sezioni  = event?.sezioni || []
   const eventUrl = useMemo(() => event?.slug ? `${window.location.origin}/eventi/${event.slug}` : '', [event?.slug])
 
-  const saveTimerRef   = useRef(null)
-  const skipNextSave   = useRef(true)  // evita salvataggio al mount iniziale
+  const saveTimerRef    = useRef(null)
+  const initialBlocchi  = useRef(null)   // snapshot dei blocchi al mount
+  const [saving,  setSaving]  = useState(false)
+  const [saveOk,  setSaveOk]  = useState(false)
 
   function importaDaContenuto() {
     const copia = JSON.parse(JSON.stringify(sezioni))
     setEvent(p => ({ ...p, mailup_blocchi: copia }))
   }
 
-  // Al mount: auto-import se mailup_blocchi vuoto, poi abilita autosave
+  // Salvataggio esplicito su DB
+  async function salvaMailup() {
+    if (!event?.id) return
+    setSaving(true)
+    try {
+      const { error } = await supabase
+        .from('events')
+        .update({ mailup_blocchi: blocchi })
+        .eq('id', event.id)
+      if (!error) {
+        setSaveOk(true)
+        initialBlocchi.current = JSON.stringify(blocchi) // aggiorna snapshot
+        setTimeout(() => setSaveOk(false), 2500)
+      }
+    } catch(e) { console.error('salvaMailup:', e) }
+    setSaving(false)
+  }
+
+  // Al mount: snapshot + auto-import se vuoto
   useEffect(() => {
-    const hadBlocks = (event?.mailup_blocchi || []).length > 0
-    if (!hadBlocks && sezioni.length > 0) {
+    initialBlocchi.current = JSON.stringify(event?.mailup_blocchi || [])
+    if ((event?.mailup_blocchi || []).length === 0 && sezioni.length > 0) {
       importaDaContenuto()
-      // Anche dopo l'import, il primo salvataggio va eseguito
-      // quindi NON skippiamo il prossimo save
-      skipNextSave.current = false
-    } else {
-      // Aveva già blocchi: il primo useEffect del salvataggio è il mount, skip
-      setTimeout(() => { skipNextSave.current = false }, 100)
     }
   }, []) // eslint-disable-line
 
-  // Autosave mailup_blocchi su DB ogni volta che cambiano
+  // Autosave leggero con debounce — solo se blocchi sono cambiati dal mount
   useEffect(() => {
-    if (skipNextSave.current) return
     if (!event?.id) return
+    if (initialBlocchi.current === null) return  // mount non ancora avvenuto
     clearTimeout(saveTimerRef.current)
     saveTimerRef.current = setTimeout(async () => {
+      const current = JSON.stringify(blocchi)
+      if (current === initialBlocchi.current) return  // niente di cambiato, skip
       await supabase.from('events').update({ mailup_blocchi: blocchi }).eq('id', event.id)
-    }, 800)
+      initialBlocchi.current = current
+    }, 1500)
     return () => clearTimeout(saveTimerRef.current)
   }, [blocchi]) // eslint-disable-line
 
@@ -638,6 +655,21 @@ export default function MailUpExportTab({ event, setEvent }) {
             </div>
           </div>
         )}
+      </div>
+
+      {/* Tasto Salva dedicato MailUp */}
+      <div style={{ display:'flex', alignItems:'center', gap:'12px', padding:'14px 18px', backgroundColor: saveOk ? '#F0FDF4' : '#EEF3FF', border:`1px solid ${saveOk?'#86EFAC':'#C7D9F8'}`, borderRadius:'10px', marginBottom:'16px' }}>
+        <button
+          onClick={salvaMailup}
+          disabled={saving}
+          style={{ ...sF, display:'flex', alignItems:'center', gap:'8px', padding:'11px 24px', borderRadius:'8px', border:'none', backgroundColor: saveOk ? '#16A34A' : '#003DA5', color:'#fff', fontSize:'14px', fontWeight:'800', cursor: saving ? 'not-allowed' : 'pointer', opacity: saving ? .7 : 1, flexShrink:0 }}>
+          {saving ? '⏳ Salvataggio…' : saveOk ? '✓ Salvato!' : '💾 Salva blocchi MailUp'}
+        </button>
+        <span style={{ ...sF, fontSize:'12px', color: saveOk ? '#15803D' : '#6B7280', lineHeight:'1.4' }}>
+          {saveOk
+            ? 'Blocchi salvati — le modifiche sono permanenti.'
+            : "Salva i blocchi email separatamente dall'evento. Usa questo tasto per sicurezza."}
+        </span>
       </div>
 
       {/* Peso */}
