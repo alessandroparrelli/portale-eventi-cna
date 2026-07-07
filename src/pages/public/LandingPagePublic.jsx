@@ -206,6 +206,8 @@ export default function LandingPagePublic() {
       })
   }, [slug])
 
+  const { links: socialLinks } = useSocial()
+
   if (loading) return (
     <div style={{minHeight:'100vh',display:'flex',alignItems:'center',justifyContent:'center',background:'#fff',fontFamily:'Inter,sans-serif'}}>
       <div style={{textAlign:'center'}}>

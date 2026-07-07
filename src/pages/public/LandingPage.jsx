@@ -236,6 +236,8 @@ export default function LandingPage() {
       })
   }, [slug])
 
+  const { links: socialLinks } = useSocial()
+
   if (loading) return (
     <div style={s.center}>
       <img src="https://raw.githubusercontent.com/alessandroparrelli/fileappoggio/main/NUOVO-LOGO-CNA-ROMA-SOLO-ROMA.png"
@@ -256,7 +258,6 @@ export default function LandingPage() {
   const esaurito = false // capienza rimossa
   const lh = event.layout_hero || {}
   const tema = temaConDefault(event?.tema)
-  const { links: socialLinks } = useSocial()
 
   const heroStyle = event.immagine_hero
     ? { backgroundImage:`url(${event.immagine_hero})`,backgroundSize:'cover',backgroundPosition: lh.bg_position || 'center top' }
