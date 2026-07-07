@@ -1012,12 +1012,10 @@ export default function EventoEditorPage() {
           </div>
         )}
 
-        {/* ── MAILUP ── */}
-        {activeTab==='mailup' && (
-          <div style={{ ...p.panel, maxWidth: '960px' }}>
-            <MailUpExportTab event={event} setEvent={updEvent} />
-          </div>
-        )}
+        {/* ── MAILUP ── sempre montato, nascosto quando non attivo — preserva stato blocchi */}
+        <div style={{ ...p.panel, maxWidth: '960px', display: activeTab==='mailup' ? 'block' : 'none' }}>
+          <MailUpExportTab event={event} setEvent={updEvent} />
+        </div>
 
         {/* ── EMBED ── */}
         {activeTab==='embed' && (
