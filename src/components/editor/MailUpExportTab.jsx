@@ -6,7 +6,9 @@
 import { useState, useMemo } from 'react'
 import { Copy, Check, AlertTriangle, ExternalLink, Mail, Settings, ChevronDown, ChevronUp } from 'lucide-react'
 import BlockEditor from './BlockEditor'
+import { socialLinksEmailHtml } from '../SocialLinks'
 import { temaConDefault } from './AspettoTab'
+import { useSocial } from '../../hooks/useSocial'
 
 /* ── helpers ─────────────────────────────────────────────────────── */
 function fmtData(ts) {
@@ -83,7 +85,7 @@ function richToEmail(html, cp, F) {
 }
 
 /* ── Builder HTML ─────────────────────────────────────────────────── */
-function buildHtml(ev, url, blocchi, opts) {
+function buildHtml(ev, url, blocchi, opts, socialLinks) {
   const tema  = temaConDefault(ev?.tema)
   const cp    = tema.colore_primario || '#003DA5'
   const lh    = ev.layout_hero || {}
@@ -303,11 +305,13 @@ function buildHtml(ev, url, blocchi, opts) {
   const footerBlock = ev.footer_html
     ? `<tr><td bgcolor="${tema.sfondo_footer || '#F4F5F7'}" style="padding:${PAD}px;text-align:center;border-top:1px solid #E5E7EB;">
         ${richToEmail(ev.footer_html, cp, F)}
+        ${socialLinksEmailHtml(socialLinks, cp, F)}
         <p style="margin:8px 0 0;font-size:11px;color:#9CA3AF;font-family:${F};"><a href="${esc(url)}" style="color:${cp};text-decoration:none;">Visualizza la pagina dell&apos;evento</a></p>
       </td></tr>`
     : `<tr><td bgcolor="${tema.sfondo_footer || '#F4F5F7'}" style="padding:20px ${PAD}px;text-align:center;border-top:1px solid #E5E7EB;">
         <a href="${esc(url)}" style="display:inline-block;margin-bottom:10px;"><img src="${esc(logoUrl)}" alt="CNA Roma" height="36" style="height:36px;border:0;" /></a>
         <p style="margin:0;font-size:12px;color:${tema.testo_footer || '#9CA3AF'};line-height:1.6;font-family:${F};">${esc(ev.footer_testo || `© ${new Date().getFullYear()} CNA di Roma — Artigiani Imprenditori d'Italia`)}</p>
+        ${socialLinksEmailHtml(socialLinks, cp, F)}
         <p style="margin:8px 0 0;font-size:11px;color:#9CA3AF;font-family:${F};"><a href="${esc(url)}" style="color:${cp};text-decoration:none;">Visualizza la pagina dell&apos;evento</a></p>
       </td></tr>`
 
@@ -424,6 +428,7 @@ export default function MailUpExportTab({ event, setEvent }) {
   const [opts,     setOpts]     = useState(DEF)
   const upd = (k, v) => setOpts(o => ({ ...o, [k]: v }))
 
+  const { links: socialLinks } = useSocial()
   const blocchi  = event?.mailup_blocchi || []
   const sezioni  = event?.sezioni || []
   const eventUrl = useMemo(() => event?.slug ? `${window.location.origin}/eventi/${event.slug}` : '', [event?.slug])
@@ -436,7 +441,7 @@ export default function MailUpExportTab({ event, setEvent }) {
 
   const html = useMemo(() => {
     if (!event?.titolo) return ''
-    return buildHtml(event, eventUrl, blocchi, opts)
+    return buildHtml(event, eventUrl, blocchi, opts, socialLinks)
   }, [event, eventUrl, blocchi, opts])
 
   const sizeKb    = useMemo(() => (new TextEncoder().encode(html).length / 1024).toFixed(1), [html])

@@ -3,6 +3,8 @@ import { useParams } from 'react-router-dom'
 import { supabase } from '../../lib/supabase'
 import { RICH_CSS } from '../../components/editor/RichEditor'
 import { temaConDefault } from '../../components/editor/AspettoTab'
+import SocialLinks from '../../components/SocialLinks'
+import { useSocial } from '../../hooks/useSocial'
 import BlockRenderer, { Animate } from '../../components/public/BlockRenderer'
 
 const LOGO_URL = 'https://raw.githubusercontent.com/alessandroparrelli/fileappoggio/main/NUOVO-LOGO-CNA-ROMA-SOLO-ROMA.png'
@@ -365,6 +367,7 @@ export default function LandingPagePublic() {
         <img src={logoSrc} alt="CNA Roma" style={{height:'36px',objectFit:'contain',display:'block',margin:'0 auto 12px'}} />
         {lp.footer_testo&&<p style={{fontSize:'13px',color:tema.testo_footer||'rgba(255,255,255,0.5)',margin:'0 0 4px'}}>{lp.footer_testo}</p>}
         <p style={{fontSize:'12px',color:'rgba(255,255,255,0.3)',margin:0}}>© {new Date().getFullYear()} CNA Roma</p>
+        <SocialLinks links={socialLinks} size={20} gap={14} color={tema.testo_footer||'rgba(255,255,255,0.5)'} style={{ marginTop:'14px', justifyContent:'center' }} />
       </footer>
     </div>
   )

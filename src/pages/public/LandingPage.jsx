@@ -8,6 +8,8 @@ import { temaConDefault } from '../../components/editor/AspettoTab'
 import { MapPin, Calendar, ChevronRight, AlertCircle, Download, Share2 } from 'lucide-react'
 import { RICH_CSS } from '../../components/editor/RichEditor'
 import FormIscrizione from './FormIscrizione'
+import SocialLinks from '../../components/SocialLinks'
+import { useSocial } from '../../hooks/useSocial'
 import PushButton from '../../components/PushButton'
 import BlockRenderer from '../../components/public/BlockRenderer'
 
@@ -254,6 +256,7 @@ export default function LandingPage() {
   const esaurito = false // capienza rimossa
   const lh = event.layout_hero || {}
   const tema = temaConDefault(event?.tema)
+  const { links: socialLinks } = useSocial()
 
   const heroStyle = event.immagine_hero
     ? { backgroundImage:`url(${event.immagine_hero})`,backgroundSize:'cover',backgroundPosition: lh.bg_position || 'center top' }
@@ -659,6 +662,7 @@ export default function LandingPage() {
           ? <div className="rich-content" style={{ textAlign:'center', fontSize:'13px', color: tema.testo_footer || '#9CA3AF' }} dangerouslySetInnerHTML={{ __html: event.footer_html }} />
           : <span>{event.footer_testo || `© ${new Date().getFullYear()} CNA di Roma — Artigiani Imprenditori d'Italia`}</span>
         }
+        <SocialLinks links={socialLinks} size={20} gap={14} color={tema.testo_footer || '#9CA3AF'} style={{ marginTop:'14px', justifyContent:'center' }} />
       </footer>
 
       {conferma && (

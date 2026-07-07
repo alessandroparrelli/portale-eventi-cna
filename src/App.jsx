@@ -20,6 +20,7 @@ import RuoliPage from './pages/admin/RuoliPage'
 import ProfiloPage from './pages/admin/ProfiloPage'
 import ActivityLogPage from './pages/admin/ActivityLogPage'
 import LandingPageListPage from './pages/admin/LandingPageListPage'
+import SocialPage from './pages/admin/SocialPage'
 import LandingEditorPage from './pages/admin/LandingEditorPage'
 import LandingContactsPage from './pages/admin/LandingContactsPage'
 import CalendarioAdminPage from './pages/admin/CalendarioAdminPage'
@@ -58,6 +59,7 @@ export default function App() {
             <Route path="profilo" element={<ProfiloPage />} />
             <Route path="log" element={<RequireSection sezione="log"><ActivityLogPage /></RequireSection>} />
             <Route path="landing" element={<RequireSection sezione="landing"><LandingPageListPage /></RequireSection>} />
+            <Route path="social" element={<RequireSection sezione="social"><SocialPage /></RequireSection>} />
             <Route path="landing/:id/contatti" element={<RequireSection sezione="landing"><LandingContactsPage /></RequireSection>} />
             <Route path="calendario" element={<RequireSection sezione="calendario"><CalendarioAdminPage /></RequireSection>} />
             <Route path="analytics" element={<RequireSection sezione="analytics"><AnaliticsPage /></RequireSection>} />
