@@ -3,7 +3,8 @@
  * I blocchi (mailup_blocchi) sono separati da quelli dell'evento (sezioni).
  * L'HTML generato è table-based, email-client safe, con Inter via Google Fonts.
  */
-import { useState, useMemo, useEffect } from 'react'
+import { useState, useMemo, useEffect, useRef } from 'react'
+import { supabase } from '../../lib/supabase'
 import { Copy, Check, AlertTriangle, ExternalLink, Mail, Settings, ChevronDown, ChevronUp } from 'lucide-react'
 import BlockEditor from './BlockEditor'
 import { socialLinksEmailHtml } from '../SocialLinks'
@@ -443,12 +444,30 @@ export default function MailUpExportTab({ event, setEvent }) {
     setEvent(p => ({ ...p, mailup_blocchi: copia }))
   }
 
+  const saveTimerRef = useRef(null)
+  const isFirstMount  = useRef(true)
+
   // Import automatico al primo accesso se mailup_blocchi è vuoto
   useEffect(() => {
     if (blocchi.length === 0 && sezioni.length > 0) {
       importaDaContenuto()
     }
+    isFirstMount.current = false
   }, []) // eslint-disable-line react-hooks/exhaustive-deps
+
+  // Salva mailup_blocchi su DB ogni volta che cambiano (debounce 800ms)
+  useEffect(() => {
+    if (isFirstMount.current) return   // ignora il mount iniziale
+    if (!event?.id) return
+    clearTimeout(saveTimerRef.current)
+    saveTimerRef.current = setTimeout(async () => {
+      await supabase
+        .from('events')
+        .update({ mailup_blocchi: blocchi })
+        .eq('id', event.id)
+    }, 800)
+    return () => clearTimeout(saveTimerRef.current)
+  }, [blocchi]) // eslint-disable-line react-hooks/exhaustive-deps
 
   const html = useMemo(() => {
     if (!event?.titolo) return ''
