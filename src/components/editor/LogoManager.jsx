@@ -44,6 +44,8 @@ export default function LogoManager({
   async function fetchLoghi() {
     setLoading(true)
     try {
+      // Refresh token prima di usarlo — evita 401 da sessione scaduta
+      await supabase.auth.refreshSession().catch(() => {})
       const { data: { session } } = await supabase.auth.getSession()
       const jwt = session?.access_token
       if (!jwt) throw new Error('Non autenticato')
