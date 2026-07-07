@@ -425,7 +425,14 @@ export default function MailUpExportTab({ event, setEvent }) {
   const upd = (k, v) => setOpts(o => ({ ...o, [k]: v }))
 
   const blocchi  = event?.mailup_blocchi || []
+  const sezioni  = event?.sezioni || []
   const eventUrl = useMemo(() => event?.slug ? `${window.location.origin}/eventi/${event.slug}` : '', [event?.slug])
+
+  function importaDaContenuto() {
+    // Deep clone dei blocchi dell'evento per non condividere riferimenti
+    const copia = JSON.parse(JSON.stringify(sezioni))
+    setEvent(p => ({ ...p, mailup_blocchi: copia }))
+  }
 
   const html = useMemo(() => {
     if (!event?.titolo) return ''
@@ -466,18 +473,49 @@ export default function MailUpExportTab({ event, setEvent }) {
 
       {/* ── EDITOR BLOCCHI ── */}
       <div style={{ marginBottom:'24px' }}>
+
+        {/* Banner import automatico — solo se mailup_blocchi è vuoto */}
+        {blocchi.length === 0 && sezioni.length > 0 && (
+          <div style={{ display:'flex', alignItems:'center', justifyContent:'space-between', gap:'16px', padding:'14px 18px', backgroundColor:'#EEF3FF', border:'1px solid #C7D9F8', borderRadius:'10px', marginBottom:'16px' }}>
+            <div>
+              <p style={{ ...sF, margin:'0 0 2px', fontSize:'13px', fontWeight:'800', color:'#003DA5' }}>📋 Importa da Contenuto</p>
+              <p style={{ ...sF, margin:0, fontSize:'12px', color:'#374151' }}>
+                L'evento ha {sezioni.length} blocc{sezioni.length === 1 ? 'o' : 'hi'} nel Contenuto. Importali come punto di partenza per la versione email.
+              </p>
+            </div>
+            <button
+              type="button"
+              onClick={importaDaContenuto}
+              style={{ ...sF, flexShrink:0, padding:'9px 18px', backgroundColor:'#003DA5', color:'#fff', border:'none', borderRadius:'8px', fontSize:'13px', fontWeight:'700', cursor:'pointer', whiteSpace:'nowrap' }}>
+              Importa blocchi →
+            </button>
+          </div>
+        )}
+
+        {/* Barra superiore con contatore e reimport */}
         <div style={{ display:'flex', alignItems:'center', justifyContent:'space-between', marginBottom:'10px' }}>
           <div>
             <p style={{ ...sF, margin:0, fontSize:'13px', fontWeight:'700', color:'#374151' }}>Blocchi email</p>
             <p style={{ ...sF, margin:'2px 0 0', fontSize:'12px', color:'#9CA3AF' }}>
-              Aggiungi blocchi con il pulsante <strong>+</strong>. Usa <strong>↑ ↓</strong> per riordinare.
-              Nota: countdown, social e carosello non sono supportati nelle email.
+              Aggiungi blocchi con <strong>+</strong>, riordina con <strong>↑ ↓</strong>. Modifiche qui non toccano la landing page.
             </p>
           </div>
-          {blocchi.length > 0 && (
-            <span style={{ ...sF, fontSize:'12px', color:'#9CA3AF', flexShrink:0, marginLeft:'12px' }}>{blocchi.length} blocc{blocchi.length === 1 ? 'o' : 'hi'}</span>
-          )}
+          <div style={{ display:'flex', alignItems:'center', gap:'8px', flexShrink:0, marginLeft:'12px' }}>
+            {blocchi.length > 0 && (
+              <span style={{ ...sF, fontSize:'12px', color:'#9CA3AF' }}>{blocchi.length} blocc{blocchi.length === 1 ? 'o' : 'hi'}</span>
+            )}
+            {sezioni.length > 0 && blocchi.length > 0 && (
+              <button
+                type="button"
+                onClick={() => { if (window.confirm(`Sovrascrivere i ${blocchi.length} blocchi email con i ${sezioni.length} blocchi del Contenuto? L'operazione non è reversibile.`)) importaDaContenuto() }}
+                style={{ ...sF, padding:'5px 10px', backgroundColor:'#fff', color:'#6B7280', border:'1px solid #E5E7EB', borderRadius:'6px', fontSize:'12px', fontWeight:'600', cursor:'pointer' }}
+                title="Reimporta da Contenuto evento">
+                ↺ Reimporta
+              </button>
+            )}
+          </div>
         </div>
+
         <BlockEditor
           blocks={blocchi}
           onChange={blocks => setEvent(p => ({ ...p, mailup_blocchi: blocks }))}
