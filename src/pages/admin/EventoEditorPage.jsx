@@ -488,7 +488,13 @@ export default function EventoEditorPage() {
         navigate(`/admin/eventi/${data.id}/editor`, { replace:true })
       }
     } else {
-      await supabase.from('events').update(payload).eq('id', id)
+      const { error: saveError } = await supabase.from('events').update(payload).eq('id', id)
+      if (saveError) {
+        console.error('SAVE ERROR:', saveError)
+        alert(`Errore salvataggio: ${saveError.message}`)
+        setSaving(false)
+        return
+      }
       logAttivita('evento_modificato', { eventoId: id, eventoTitolo: payload.titolo })
     }
     setSaving(false); setSaved(true); setTimeout(()=>setSaved(false),2500)

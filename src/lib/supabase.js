@@ -40,16 +40,13 @@ if (typeof window !== 'undefined') {
 // Usa questo invece di getSession() direttamente nei componenti
 // che passano il Bearer token alle Edge Functions.
 export async function getFreshJwt() {
-  // Prima prova la sessione corrente
-  let { data: { session } } = await supabase.auth.getSession()
-  if (!session) return null
-
-  // Se il token scade entro 60 secondi, forza il refresh
-  const expiresAt = session.expires_at * 1000
-  if (expiresAt - Date.now() < 60000) {
-    const { data } = await supabase.auth.refreshSession()
-    session = data.session
+  // Forza sempre un refresh — garantisce token fresco per le Edge Functions
+  // refreshSession() usa il refresh token (valido 7gg) per ottenere un nuovo access token
+  const { data: refreshed, error: refreshError } = await supabase.auth.refreshSession()
+  if (!refreshError && refreshed?.session?.access_token) {
+    return refreshed.session.access_token
   }
-
+  // Fallback: usa sessione corrente se il refresh fallisce (es. già aggiornato di recente)
+  const { data: { session } } = await supabase.auth.getSession()
   return session?.access_token ?? null
 }
