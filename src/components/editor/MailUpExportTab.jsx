@@ -26,47 +26,62 @@ function esc(str) {
   return String(str).replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;').replace(/"/g,'&quot;')
 }
 
-// Converte HTML TipTap → testo email inline-styled, solo elementi supportati
+// Converte HTML TipTap → email HTML inline-styled universale
+// Ordine: prima inline marks (bold/color/link), poi blocchi (p/h/ul)
 function richToEmail(html, cp) {
   if (!html) return ''
-  return html
-    .replace(/\s*class="[^"]*"/g, '')
-    .replace(/<h([1-6])[^>]*>([\s\S]*?)<\/h\1>/gi, (_, lv, c) => {
-      const sz = lv <= 2 ? '20px' : lv === 3 ? '17px' : '15px'
-      const fw = lv <= 3 ? 'bold' : 'bold'
-      return `<p style="margin:0 0 10px 0;padding:0;font-size:${sz};font-weight:${fw};color:#0A0A0A;font-family:${F};">${c}</p>`
+  let h = html
+  // 1. Rimuovi classi (mantieni style)
+  h = h.replace(/\s+class="[^"]*"/g, '')
+  // 2. Inline marks — convertiti PRIMA dei paragrafi così i valori rimangono
+  h = h.replace(/<strong[^>]*>([\s\S]*?)<\/strong>/gi, '<b style="font-weight:bold;">$1</b>')
+  h = h.replace(/<em[^>]*>([\s\S]*?)<\/em>/gi, '<i style="font-style:italic;">$1</i>')
+  h = h.replace(/<u[^>]*>([\s\S]*?)<\/u>/gi, '<u style="text-decoration:underline;">$1</u>')
+  // 3. Span con colore/size da TipTap — preserva lo style inline
+  h = h.replace(/<span style="([^"]*)">([\s\S]*?)<\/span>/gi, (_, st, inner) => {
+    const col = (st.match(/color:\s*([^;]+)/i)||[])[1]
+    const sz  = (st.match(/font-size:\s*([^;]+)/i)||[])[1]
+    const parts = []
+    if (col) parts.push(`color:${col.trim()}`)
+    if (sz)  parts.push(`font-size:${sz.trim()}`)
+    return parts.length ? `<span style="${parts.join(';')}">${inner}</span>` : inner
+  })
+  h = h.replace(/<span>/gi, '').replace(/<\/span>/gi, '')
+  // 4. Link
+  h = h.replace(/<a\s+href="([^"]*)"[^>]*>([\s\S]*?)<\/a>/gi,
+    `<a href="$1" style="color:${cp};text-decoration:underline;">$2</a>`)
+  // 5. Immagini
+  h = h.replace(/<img[^>]*src="([^"]*)"[^>]*alt="([^"]*)"[^>]*/gi,
+    `<img src="$1" alt="$2" width="100%" border="0" style="display:block;max-width:100%;border:0;"`)
+  // 6. Titoli → paragrafi bold con size
+  h = h.replace(/<h([1-6])[^>]*>([\s\S]*?)<\/h>/gi, (_, lv, inner) => {
+    const sz = lv === '1' ? '24px' : lv === '2' ? '20px' : lv === '3' ? '17px' : '15px'
+    return `<p style="margin:0 0 10px 0;padding:0;font-size:${sz};font-weight:bold;color:#0A0A0A;line-height:1.3;font-family:${F};">${inner}</p>`
+  })
+  // 7. Liste
+  h = h.replace(/<ul[^>]*>([\s\S]*?)<\/ul>/gi, (_, items) =>
+    items.replace(/<li[^>]*>([\s\S]*?)<\/li>/gi, (__, li) =>
+      `<p style="margin:0 0 5px 0;padding:0 0 0 16px;font-size:15px;color:#374151;line-height:1.6;font-family:${F};">&#8226;&nbsp;${li.trim()}</p>`))
+  h = h.replace(/<ol[^>]*>([\s\S]*?)<\/ol>/gi, (_, items) => {
+    let n = 0
+    return items.replace(/<li[^>]*>([\s\S]*?)<\/li>/gi, (__, li) => {
+      n++; return `<p style="margin:0 0 5px 0;padding:0 0 0 16px;font-size:15px;color:#374151;line-height:1.6;font-family:${F};">${n}.&nbsp;${li.trim()}</p>`
     })
-    .replace(/<ul[^>]*>([\s\S]*?)<\/ul>/gi, (_, it) =>
-      it.replace(/<li[^>]*>([\s\S]*?)<\/li>/gi, (__, li) =>
-        `<p style="margin:0 0 5px 0;padding:0;font-size:15px;color:#374151;font-family:${F};">&#8226;&nbsp;${li.trim()}</p>`))
-    .replace(/<ol[^>]*>([\s\S]*?)<\/ol>/gi, (_, it) => {
-      let n = 0
-      return it.replace(/<li[^>]*>([\s\S]*?)<\/li>/gi, (__, li) => {
-        n++; return `<p style="margin:0 0 5px 0;padding:0;font-size:15px;color:#374151;font-family:${F};">${n}.&nbsp;${li.trim()}</p>`
-      })
-    })
-    .replace(/<p\s+style="([^"]*)">([\s\S]*?)<\/p>/gi, (_, st, c) => {
-      const al = (st.match(/text-align:\s*(left|center|right)/i)||[])[1]
-      return `<p style="margin:0 0 10px 0;padding:0;font-size:15px;color:#374151;line-height:1.6;font-family:${F};${al?`text-align:${al};`:''}">${c}</p>`
-    })
-    .replace(/<p[^>]*>([\s\S]*?)<\/p>/gi, (_, c) =>
-      `<p style="margin:0 0 10px 0;padding:0;font-size:15px;color:#374151;line-height:1.6;font-family:${F};">${c}</p>`)
-    .replace(/<span\s+style="([^"]*)">([\s\S]*?)<\/span>/gi, (_, st, c) => {
-      const col = (st.match(/color:\s*([^;]+)/i)||[])[1]
-      const sz  = (st.match(/font-size:\s*([^;]+)/i)||[])[1]
-      const s = [col&&`color:${col.trim()}`, sz&&`font-size:${sz.trim()}`].filter(Boolean).join(';')
-      return s ? `<span style="${s}">${c}</span>` : c
-    })
-    .replace(/<strong[^>]*>([\s\S]*?)<\/strong>/gi, '<b>$1</b>')
-    .replace(/<em[^>]*>([\s\S]*?)<\/em>/gi, '<i>$1</i>')
-    .replace(/<u[^>]*>([\s\S]*?)<\/u>/gi, '<u>$1</u>')
-    .replace(/<a\s+href="([^"]*)"[^>]*>([\s\S]*?)<\/a>/gi,
-      `<a href="$1" style="color:${cp};text-decoration:underline;">$2</a>`)
-    .replace(/<img[^>]*src="([^"]*)"[^>]*alt="([^"]*)"[^>]*>/gi,
-      `<img src="$1" alt="$2" width="100%" style="display:block;max-width:100%;border:0;" />`)
-    .replace(/<br\s*\/?>/gi, '<br />')
-    .replace(/<(div|section|article|figure|nav|aside|header|footer|span)[^>]*>/gi, '')
-    .replace(/<\/(div|section|article|figure|nav|aside|header|footer|span)>/gi, '')
+  })
+  // 8. Paragrafi — con text-align se presente nello style
+  h = h.replace(/<p\s+style="([^"]*)">([\s\S]*?)<\/p>/gi, (_, st, inner) => {
+    const al = (st.match(/text-align:\s*(left|center|right)/i)||[])[1]
+    const alStyle = al ? `text-align:${al};` : ''
+    return `<p style="margin:0 0 10px 0;padding:0;font-size:15px;color:#374151;line-height:1.75;font-family:${F};${alStyle}">${inner}</p>`
+  })
+  h = h.replace(/<p[^>]*>([\s\S]*?)<\/p>/gi, (_, inner) =>
+    `<p style="margin:0 0 10px 0;padding:0;font-size:15px;color:#374151;line-height:1.75;font-family:${F};">${inner}</p>`)
+  // 9. BR
+  h = h.replace(/<br\s*\/?>/gi, '<br />')
+  // 10. Rimuovi wrapper non-email rimasti
+  h = h.replace(/<(div|section|article|figure|blockquote|nav|aside|header|footer)[^>]*>/gi, '')
+  h = h.replace(/<\/(div|section|article|figure|blockquote|nav|aside|header|footer)>/gi, '')
+  return h
 }
 
 /* ── Builder HTML ─────────────────────────────────────────────────── */
@@ -151,10 +166,11 @@ function buildHtml(ev, url, blocchi, opts, socialLinks) {
 
   // ── Blocchi ────────────────────────────────────────────────────────
   function row(content, bg) {
-    return `<tr><td bgcolor="${bg||'#FFFFFF'}" style="padding:20px ${PAD}px;background-color:${bg||'#FFFFFF'};">${content}</td></tr>`
+    const bgc = bg || '#FFFFFF'
+    return `<tr><td bgcolor="${bgc}" style="padding:20px ${PAD}px 20px ${PAD}px;background-color:${bgc};mso-padding-alt:20px ${PAD}px 20px ${PAD}px;">${content}</td></tr>`
   }
   function spacer() {
-    return `<tr><td height="1" bgcolor="#E5E7EB" style="font-size:0;line-height:0;border-bottom:1px solid #E5E7EB;"></td></tr>`
+    return `<tr><td height="1" bgcolor="#E5E7EB" style="font-size:1px;line-height:1px;border-bottom:1px solid #E5E7EB;">&nbsp;</td></tr>`
   }
 
   function renderBlocchi() {
@@ -378,7 +394,10 @@ body,table,td,a{-webkit-text-size-adjust:100%;-ms-text-size-adjust:100%;}
 table,td{mso-table-lspace:0pt;mso-table-rspace:0pt;border-collapse:collapse;}
 img{-ms-interpolation-mode:bicubic;border:0;outline:none;text-decoration:none;display:block;}
 body{margin:0;padding:0;background-color:#F0F0F0;}
-a[x-apple-data-detectors]{color:inherit!important;text-decoration:none!important;}
+a[x-apple-data-detectors]{color:inherit!important;text-decoration:none!important;font-size:inherit!important;font-family:inherit!important;font-weight:inherit!important;line-height:inherit!important;}
+p{margin:0 0 10px 0;padding:0;mso-line-height-rule:exactly;}
+b,strong{font-weight:bold;}
+i,em{font-style:italic;}
 </style>
 </head>
 <body style="margin:0;padding:0;background-color:#F0F0F0;">
@@ -467,21 +486,31 @@ export default function MailUpExportTab({ event, setEvent }) {
   const sezioni  = event?.sezioni || []
   const eventUrl = useMemo(() => event?.slug ? `${window.location.origin}/eventi/${event.slug}` : '', [event?.slug])
 
-  const saveTimerRef  = useRef(null)
-  const isFirstMount  = useRef(true)
+  const saveTimerRef   = useRef(null)
+  const skipNextSave   = useRef(true)  // evita salvataggio al mount iniziale
 
   function importaDaContenuto() {
     const copia = JSON.parse(JSON.stringify(sezioni))
     setEvent(p => ({ ...p, mailup_blocchi: copia }))
   }
 
+  // Al mount: auto-import se mailup_blocchi vuoto, poi abilita autosave
   useEffect(() => {
-    if (blocchi.length === 0 && sezioni.length > 0) importaDaContenuto()
-    isFirstMount.current = false
+    const hadBlocks = (event?.mailup_blocchi || []).length > 0
+    if (!hadBlocks && sezioni.length > 0) {
+      importaDaContenuto()
+      // Anche dopo l'import, il primo salvataggio va eseguito
+      // quindi NON skippiamo il prossimo save
+      skipNextSave.current = false
+    } else {
+      // Aveva già blocchi: il primo useEffect del salvataggio è il mount, skip
+      setTimeout(() => { skipNextSave.current = false }, 100)
+    }
   }, []) // eslint-disable-line
 
+  // Autosave mailup_blocchi su DB ogni volta che cambiano
   useEffect(() => {
-    if (isFirstMount.current) return
+    if (skipNextSave.current) return
     if (!event?.id) return
     clearTimeout(saveTimerRef.current)
     saveTimerRef.current = setTimeout(async () => {
