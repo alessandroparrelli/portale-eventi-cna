@@ -288,7 +288,7 @@ function Toggle({ label, value, onChange }) {
 }
 
 /* ── Defaults opzioni ─────────────────────────────────────────────── */
-const DEF = { larghezza:600, padding:32, testoCta:"Scopri l'evento e iscriviti", mostraDataLuogo:true, mostraCta:true, mostraCtaFondo:true, mostraSessioni:true, mostraFooter:true }
+const DEF = { larghezza:600, larghezzaCustom:'', padding:32, testoCta:"Scopri l'evento e iscriviti", mostraDataLuogo:true, mostraCta:true, mostraCtaFondo:true, mostraSessioni:true, mostraFooter:true }
 
 export default function MailUpExportTab({ event }) {
   const [copied,   setCopied]   = useState(false)
@@ -346,14 +346,44 @@ export default function MailUpExportTab({ event }) {
           <div style={{ padding:'16px', backgroundColor:'#FFFFFF', display:'flex', flexDirection:'column', gap:'16px' }}>
 
             <Row>
-              <Fld label="Larghezza (px)" width="170px">
-                <select value={opts.larghezza} onChange={e=>upd('larghezza',Number(e.target.value))} style={sInput}>
-                  <option value={500}>500 px</option>
-                  <option value={560}>560 px</option>
-                  <option value={600}>600 px — standard</option>
-                  <option value={640}>640 px</option>
-                  <option value={680}>680 px</option>
-                </select>
+              <Fld label="Larghezza (px)" width="210px">
+                <div style={{ display:'flex', gap:'6px' }}>
+                  <select
+                    value={opts.larghezzaCustom ? 'custom' : String(opts.larghezza)}
+                    onChange={e => {
+                      if (e.target.value === 'custom') {
+                        upd('larghezzaCustom', String(opts.larghezza))
+                      } else {
+                        upd('larghezza', Number(e.target.value))
+                        upd('larghezzaCustom', '')
+                      }
+                    }}
+                    style={{ ...sInput, flex:1 }}>
+                    <option value="500">500 px</option>
+                    <option value="560">560 px</option>
+                    <option value="600">600 px — standard</option>
+                    <option value="640">640 px</option>
+                    <option value="680">680 px</option>
+                    <option value="800">800 px</option>
+                    <option value="900">900 px</option>
+                    <option value="1024">1024 px</option>
+                    <option value="1280">1280 px</option>
+                    <option value="custom">Personalizzato…</option>
+                  </select>
+                  {opts.larghezzaCustom !== '' && (
+                    <input
+                      type="number" min="320" max="1600" step="10"
+                      value={opts.larghezzaCustom}
+                      onChange={e => {
+                        upd('larghezzaCustom', e.target.value)
+                        const n = Number(e.target.value)
+                        if (n >= 320 && n <= 1600) upd('larghezza', n)
+                      }}
+                      style={{ ...sInput, width:'80px', flexShrink:0 }}
+                      placeholder="px"
+                    />
+                  )}
+                </div>
               </Fld>
               <Fld label="Padding laterale" width="170px">
                 <select value={opts.padding} onChange={e=>upd('padding',Number(e.target.value))} style={sInput}>

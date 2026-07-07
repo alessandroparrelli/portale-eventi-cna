@@ -983,7 +983,7 @@ export default function EventoEditorPage() {
         {/* ── ASPETTO ── */}
         {activeTab==='aspetto' && (
           <div style={p.panel}>
-            <AspettoTab event={event} setEvent={setEvent} />
+            <AspettoTab event={event} setEvent={updEvent} />
           </div>
         )}
 
