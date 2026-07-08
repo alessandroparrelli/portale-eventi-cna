@@ -160,7 +160,7 @@ const s = {
   },
   header: {
     flexShrink: 0,
-    background: 'linear-gradient(120deg, #001B4D 0%, #003DA5 60%, #2E7BE0 100%)',
+    background: 'linear-gradient(135deg, #0A1628 0%, #0D2247 40%, #0A3366 100%)',
     borderBottom: 'none',
     display: 'flex',
     alignItems: 'center',
