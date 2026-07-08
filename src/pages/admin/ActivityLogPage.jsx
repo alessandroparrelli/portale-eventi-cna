@@ -66,7 +66,7 @@ export default function ActivityLogPage() {
   const [search, setSearch] = useState('')
   const [filterAzione, setFilterAzione] = useState('tutti')
   const [total, setTotal] = useState(0)
-  const PAGE = 50
+  const PAGE = 200 // aumentato per vedere tutti gli accessi
 
   useEffect(() => { loadLogs() }, [filterAzione])
 
@@ -218,9 +218,9 @@ export default function ActivityLogPage() {
         )}
       </div>
 
-      {filtered.length >= PAGE && (
+      {total > PAGE && (
         <p style={{ fontSize:'12px', color:'#9CA3AF', textAlign:'center', marginTop:'12px' }}>
-          Visualizzati i primi {PAGE} risultati. Usa i filtri per affinare la ricerca.
+          Visualizzati {filtered.length} di {total} risultati. Usa i filtri per affinare la ricerca.
         </p>
       )}
 
