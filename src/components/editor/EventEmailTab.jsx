@@ -42,9 +42,9 @@ const VARIABILI = [
   '{{qr_code}}','{{link_landing}}','{{link_questionario}}','{{data_iscrizione}}'
 ]
 
-const PREVIEW_DATA = {
+const PREVIEW_DATA_BASE = {
   '{{nome}}':'Marco','{{cognome}}':'Bianchi','{{ragione_sociale}}':'Bianchi Srl',
-  '{{email}}':'marco@esempio.it','{{nome_evento}}':'Forum Artigiani Roma 2026',
+  '{{email}}':'marco@esempio.it',
   '{{data_evento}}':'Venerdì 25 settembre 2026, ore 09:30',
   '{{luogo_evento}}':'Palazzo dei Congressi, Roma',
   '{{qr_code}}':'QR-MARCO2026','{{link_landing}}':'#','{{link_questionario}}':'#',
@@ -175,9 +175,10 @@ function buildFullHtml(mostraHeader, mostraFooter, bodyHtml, logoSrc, hColore, h
   return `<!DOCTYPE html><html><head><meta charset="UTF-8"><meta name="viewport" content="width=device-width,initial-scale=1"></head><body style="margin:0;padding:0;background:#F0F2F5;font-family:Inter,Arial,sans-serif"><table style="width:100%;border-collapse:collapse"><tr><td style="padding:24px 16px"><div style="max-width:600px;margin:0 auto;background:#fff;border-radius:12px;overflow:hidden;box-shadow:0 2px 20px rgba(0,0,0,0.1)">${header}<div style="padding:32px">${bodyHtml}</div>${footer}</div></td></tr></table></body></html>`
 }
 
-function replacePreview(html) {
+function replacePreview(html, nomeEvento) {
   let h = html
-  Object.entries(PREVIEW_DATA).forEach(([k,v]) => { h = h.replaceAll(k,v) })
+  const data = { ...PREVIEW_DATA_BASE, '{{nome_evento}}': nomeEvento || 'Nome Evento' }
+  Object.entries(data).forEach(([k,v]) => { h = h.replaceAll(k,v) })
   return h
 }
 
@@ -395,6 +396,7 @@ export default function EventEmailTab({ eventoId }) {
   const [viewMode,        setViewMode]        = useState('blocchi') // 'blocchi'|'html'|'preview'
   const [previewDevice,   setPreviewDevice]   = useState('desktop')
   const [loading,         setLoading]         = useState(true)
+  const [eventoTitolo,    setEventoTitolo]    = useState('')
   const [showResetModal,  setShowResetModal]  = useState(false)
   const [resetting,       setResetting]       = useState(false)
   const [selectedBlock,   setSelectedBlock]   = useState(null)
@@ -404,9 +406,14 @@ export default function EventEmailTab({ eventoId }) {
 
   useEffect(() => {
     if (eventoId) {
-      Promise.all([fetchEventTemplates(), fetchDefaultTemplates()]).finally(() => setLoading(false))
+      Promise.all([fetchEventTemplates(), fetchDefaultTemplates(), fetchEventoTitolo()]).finally(() => setLoading(false))
     }
   }, [eventoId])
+
+  async function fetchEventoTitolo() {
+    const { data } = await supabase.from('eventi').select('titolo').eq('id', eventoId).single()
+    if (data?.titolo) setEventoTitolo(data.titolo)
+  }
 
   // Reset selectedBlock quando cambia il tipo selezionato
   useEffect(() => { setSelectedBlock(null) }, [selected])
@@ -524,7 +531,7 @@ export default function EventEmailTab({ eventoId }) {
   function getPreviewHtml() {
     try {
     const bodyHtml = currBlocchi.length ? blocchiToHtml(currBlocchi) : (current.corpo_html||'')
-    return replacePreview(buildFullHtml(true, true, bodyHtml, logoUrl, headerColore, headerTitolo, logoAltezza, titoloSize))
+    return replacePreview(buildFullHtml(true, true, bodyHtml, logoUrl, headerColore, headerTitolo, logoAltezza, titoloSize), eventoTitolo)
     } catch(e) { console.error('preview error', e); return '<html><body><p style="padding:20px;color:#9CA3AF">Errore anteprima</p></body></html>' }
   }
 
@@ -802,7 +809,7 @@ export default function EventEmailTab({ eventoId }) {
           {viewMode === 'preview' && (
             <div style={{ background:'#fff', border:'1px solid #E5E7EB', borderRadius:'10px', padding:'14px' }}>
               <div style={{ marginBottom:'10px', padding:'8px 12px', background:'#F8F9FF', borderRadius:'7px', fontSize:'12px', fontFamily:"'Inter',sans-serif" }}>
-                <strong>Oggetto:</strong> {replacePreview(current.oggetto||'—')}
+                <strong>Oggetto:</strong> {replacePreview(current.oggetto||'—', eventoTitolo)}
               </div>
               <div style={{ maxWidth:previewDevice==='mobile'?'375px':'100%', margin:'0 auto', border:'1px solid #E5E7EB', borderRadius:'8px', overflow:'hidden' }}>
                 <iframe srcDoc={getPreviewHtml()} style={{ width:'100%', height:'680px', border:'none', display:'block' }} title="Anteprima email" sandbox="allow-same-origin"/>
