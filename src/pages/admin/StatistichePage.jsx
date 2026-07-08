@@ -76,6 +76,7 @@ export default function StatistichePage() {
   const [survey, setSurvey] = useState([])
   const [mestieri, setMestieri] = useState([])
   const [loading, setLoading] = useState(false)
+  const [pageViews, setPageViews] = useState(null) // { total, byDay }
 
   // Sezione utenti
   const [utenti, setUtenti] = useState([])
@@ -96,19 +97,25 @@ export default function StatistichePage() {
   }, [tab])
 
   useEffect(() => {
-    if (!selectedEvento) { setStats(null); setSurvey([]); return }
+    if (!selectedEvento) { setStats(null); setSurvey([]); setPageViews(null); return }
     loadStats()
   }, [selectedEvento])
 
   async function loadStats() {
     setLoading(true)
-    const [{ data: regs }, { data: surveyData }] = await Promise.all([
+    const [{ data: regs }, { data: surveyData }, { data: views }] = await Promise.all([
       supabase.from('registrations').select('*').eq('event_id', selectedEvento),
       supabase.from('survey_answers').select('*')
         .in('registration_id',
           (await supabase.from('registrations').select('id').eq('event_id', selectedEvento)).data?.map(r=>r.id) || []
         ),
+      supabase.from('page_views').select('visited_at').eq('event_id', selectedEvento),
     ])
+    // Visite
+    const vList = views || []
+    const vByDay = {}
+    vList.forEach(v => { const d = v.visited_at?.slice(0,10); if (d) vByDay[d] = (vByDay[d]||0)+1 })
+    setPageViews({ total: vList.length, byDay: vByDay })
     setSurvey(surveyData || [])
     const r = regs || []
     const total = r.length
@@ -303,6 +310,10 @@ export default function StatistichePage() {
                   sub={stats.capienza ? `Capienza: ${stats.capienza}` : undefined}/>
                 <GlowStatCard icon="check"     label="Presenti"        value={stats.presenti}   palette="green"
                   sub={stats.total ? `${Math.round((stats.presenti/stats.total)*100)}% di presenza` : undefined}/>
+                {pageViews !== null && (
+                  <GlowStatCard icon="trending" label="Visite landing" value={pageViews.total} palette="cyan"
+                    sub={stats.total > 0 ? `Conv. ${Math.round((stats.total/Math.max(pageViews.total,1))*100)}%` : 'visitatori unici per sessione'}/>
+                )}
                 <GlowStatCard icon="usercheck" label="Walk-in"         value={stats.walkin}     palette="violet"/>
                 <GlowStatCard icon="userx"     label="Assenti"         value={stats.assenti}    palette="red"/>
                 <GlowStatCard icon="trending"  label="Confermati"      value={stats.confermati} palette="cyan"
@@ -369,6 +380,34 @@ export default function StatistichePage() {
                   </div>
                 )}
               </div>
+
+              {/* Visite per giorno */}
+              {pageViews && pageViews.total > 0 && (() => {
+                const days = Object.keys(pageViews.byDay).sort()
+                const maxV = Math.max(...Object.values(pageViews.byDay), 1)
+                return (
+                  <div style={s.section}>
+                    <h2 style={s.sectionTitle}>Visite alla landing page</h2>
+                    <p style={{ fontSize:'12px', color:'#9CA3AF', margin:'-4px 0 12px' }}>Visitatori unici per sessione · totale: <strong style={{color:'#003DA5'}}>{pageViews.total}</strong></p>
+                    {days.length > 0 ? (
+                      <div style={{ display:'flex', alignItems:'flex-end', gap:'4px', height:'80px', overflowX:'auto', paddingBottom:'4px' }}>
+                        {days.map(d => {
+                          const v = pageViews.byDay[d]
+                          const h = Math.max(Math.round((v/maxV)*72), 4)
+                          const label = new Date(d+'T12:00:00').toLocaleDateString('it-IT',{day:'2-digit',month:'short'})
+                          return (
+                            <div key={d} style={{ display:'flex', flexDirection:'column', alignItems:'center', gap:'2px', flex:'0 0 auto', minWidth:'32px' }} title={`${label}: ${v} visit${v===1?'a':'e'}`}>
+                              <span style={{ fontSize:'9px', color:'#003DA5', fontWeight:'700' }}>{v}</span>
+                              <div style={{ width:'24px', height:`${h}px`, background:'linear-gradient(180deg,#3B82F6,#003DA5)', borderRadius:'3px 3px 0 0' }}/>
+                              <span style={{ fontSize:'9px', color:'#9CA3AF', whiteSpace:'nowrap', transform:'rotate(-35deg)', transformOrigin:'top center', marginTop:'6px', display:'block' }}>{label}</span>
+                            </div>
+                          )
+                        })}
+                      </div>
+                    ) : <p style={{ fontSize:'14px', color:'#9CA3AF' }}>Nessuna visita registrata</p>}
+                  </div>
+                )
+              })()}
 
               {/* Survey */}
               {survey.length > 0 && (
