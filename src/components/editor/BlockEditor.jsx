@@ -31,6 +31,12 @@ export function newBlock(tipo) {
     case 'badge_list':  return { ...base, items: [{ icona: 'check', icona_colore:'#003DA5', testo: 'Vantaggio uno' }, { icona: 'check', icona_colore:'#003DA5', testo: 'Vantaggio due' }, { icona: 'check', icona_colore:'#003DA5', testo: 'Vantaggio tre' }], colore: '#003DA5', colonne: 2 }
     case 'carosello':   return { ...base, immagini: [], didascalia: '', rapporto: '1:1' }
     case 'social':      return { ...base, tipo_social: 'condivisione', url_post: '', mostra_condivisione: true }
+    case 'programma':   return { ...base, titolo: 'Programma', colore_titoli: '#E91E8C', colore_orari: '#003DA5', voci: [
+      { tipo: 'orario', orario: 'ORE 10.30', testo: 'Registrazione dei partecipanti' },
+      { tipo: 'orario', orario: 'ORE 11.00', testo: 'Avvio dei lavori' },
+      { tipo: 'sessione', titolo: 'Titolo intervento', relatori: [{ nome: 'Nome Cognome', ruolo: 'Ruolo / Ente' }] },
+      { tipo: 'orario', orario: 'ORE 13.30', testo: 'Chiusura dei lavori' },
+    ]}
     default:            return base
   }
 }
@@ -52,6 +58,7 @@ const BLOCK_TYPES = [
   { tipo: 'banner',      label: 'Banner avviso',   group: 'Interattivo' },
   { tipo: 'carosello',   label: 'Carosello foto',  group: 'Social' },
   { tipo: 'social',      label: 'Social & Condividi', group: 'Social' },
+  { tipo: 'programma',   label: 'Programma evento', group: 'Contenuto' },
 ]
 
 // ── Editors singoli blocchi ─────────────────────────────────────────
@@ -312,6 +319,114 @@ function BadgeListEditor({ block, onChange }) {
   )
 }
 
+function ProgrammaEditor({ block, onChange }) {
+  const uid2 = () => Math.random().toString(36).slice(2, 8)
+
+  function addVoce(tipo) {
+    const defaults = {
+      orario:    { id: uid2(), tipo: 'orario', orario: 'ORE 00.00', testo: 'Descrizione' },
+      sessione:  { id: uid2(), tipo: 'sessione', titolo: 'Titolo sessione', relatori: [{ nome: '', ruolo: '' }] },
+      intermezzo:{ id: uid2(), tipo: 'intermezzo', titolo: 'Intermezzi di imprese', relatori: [{ nome: '', ruolo: '' }] },
+      modera:    { id: uid2(), tipo: 'modera', nome: '', ruolo: '' },
+    }
+    onChange({ ...block, voci: [...(block.voci || []), defaults[tipo]] })
+  }
+
+  function updateVoce(i, voce) {
+    const voci = [...(block.voci || [])]; voci[i] = voce; onChange({ ...block, voci })
+  }
+
+  function removeVoce(i) {
+    onChange({ ...block, voci: (block.voci || []).filter((_, j) => j !== i) })
+  }
+
+  function moveVoce(i, dir) {
+    const voci = [...(block.voci || [])]; const j = i + dir
+    if (j < 0 || j >= voci.length) return
+    ;[voci[i], voci[j]] = [voci[j], voci[i]]
+    onChange({ ...block, voci })
+  }
+
+  const tipoLabel = { orario: '⏰ Orario', sessione: '▶ Sessione', intermezzo: '🔖 Intermezzo', modera: '🎙 Modera' }
+
+  return (
+    <div style={{ padding: '16px', display: 'flex', flexDirection: 'column', gap: '14px' }}>
+      {/* Impostazioni generali */}
+      <div style={{ display: 'flex', gap: '12px', flexWrap: 'wrap', padding: '12px', background: '#F9FAFB', borderRadius: '8px', border: '1px solid #E5E7EB' }}>
+        <div>
+          <label style={lb}>Titolo sezione</label>
+          <input value={block.titolo || 'Programma'} onChange={e => onChange({ ...block, titolo: e.target.value })} style={{ ...inp, width: '160px' }} />
+        </div>
+        <div style={{ display: 'flex', gap: '8px', alignItems: 'flex-end' }}>
+          <div>
+            <label style={lb}>Colore sessioni</label>
+            <input type="color" value={block.colore_titoli || '#E91E8C'} onChange={e => onChange({ ...block, colore_titoli: e.target.value })} style={{ width: '36px', height: '36px', border: 'none', cursor: 'pointer', borderRadius: '4px' }} />
+          </div>
+          <div>
+            <label style={lb}>Colore orari</label>
+            <input type="color" value={block.colore_orari || '#003DA5'} onChange={e => onChange({ ...block, colore_orari: e.target.value })} style={{ width: '36px', height: '36px', border: 'none', cursor: 'pointer', borderRadius: '4px' }} />
+          </div>
+        </div>
+      </div>
+
+      {/* Lista voci */}
+      <div style={{ display: 'flex', flexDirection: 'column', gap: '8px' }}>
+        {(block.voci || []).map((voce, i) => (
+          <div key={voce.id || i} style={{ border: '1px solid #E5E7EB', borderRadius: '8px', background: '#fff', overflow: 'hidden' }}>
+            {/* Header voce */}
+            <div style={{ display: 'flex', alignItems: 'center', gap: '8px', padding: '8px 12px', background: '#F9FAFB', borderBottom: '1px solid #E5E7EB' }}>
+              <span style={{ fontSize: '12px', fontWeight: '700', color: '#6B7280', flex: 1 }}>{tipoLabel[voce.tipo] || voce.tipo}</span>
+              <button onClick={() => moveVoce(i, -1)} disabled={i === 0} style={{ ...btnIcon, opacity: i === 0 ? .3 : 1 }}>↑</button>
+              <button onClick={() => moveVoce(i, 1)} disabled={i === (block.voci || []).length - 1} style={{ ...btnIcon, opacity: i === (block.voci || []).length - 1 ? .3 : 1 }}>↓</button>
+              <button onClick={() => removeVoce(i)} style={{ ...btnIcon, color: '#DC2626', borderColor: '#FECACA' }}>✕</button>
+            </div>
+
+            {/* Corpo voce */}
+            <div style={{ padding: '10px 12px', display: 'flex', flexDirection: 'column', gap: '8px' }}>
+              {voce.tipo === 'orario' && (
+                <div style={{ display: 'flex', gap: '8px' }}>
+                  <input value={voce.orario || ''} onChange={e => updateVoce(i, { ...voce, orario: e.target.value })} placeholder="ORE 10.30" style={{ ...inp, width: '120px', fontWeight: '700', fontSize: '13px' }} />
+                  <input value={voce.testo || ''} onChange={e => updateVoce(i, { ...voce, testo: e.target.value })} placeholder="Descrizione" style={{ ...inp, flex: 1 }} />
+                </div>
+              )}
+
+              {(voce.tipo === 'sessione' || voce.tipo === 'intermezzo') && (
+                <>
+                  <input value={voce.titolo || ''} onChange={e => updateVoce(i, { ...voce, titolo: e.target.value })} placeholder="Titolo sessione" style={{ ...inp, fontWeight: '700', fontSize: '13px' }} />
+                  <div style={{ display: 'flex', flexDirection: 'column', gap: '6px' }}>
+                    {(voce.relatori || []).map((rel, ri) => (
+                      <div key={ri} style={{ display: 'flex', gap: '6px', alignItems: 'center' }}>
+                        <input value={rel.nome || ''} onChange={e => { const r = [...voce.relatori]; r[ri] = { ...r[ri], nome: e.target.value }; updateVoce(i, { ...voce, relatori: r }) }} placeholder="Nome Cognome" style={{ ...inp, flex: '0 0 170px', fontWeight: '600', fontSize: '13px' }} />
+                        <input value={rel.ruolo || ''} onChange={e => { const r = [...voce.relatori]; r[ri] = { ...r[ri], ruolo: e.target.value }; updateVoce(i, { ...voce, relatori: r }) }} placeholder="Ruolo / Ente" style={{ ...inp, flex: 1, fontSize: '13px' }} />
+                        <button onClick={() => updateVoce(i, { ...voce, relatori: voce.relatori.filter((_, j) => j !== ri) })} style={btnDel}>✕</button>
+                      </div>
+                    ))}
+                    <button onClick={() => updateVoce(i, { ...voce, relatori: [...(voce.relatori || []), { nome: '', ruolo: '' }] })} style={{ ...btnAdd, fontSize: '12px', padding: '5px 10px' }}>+ Relatore</button>
+                  </div>
+                </>
+              )}
+
+              {voce.tipo === 'modera' && (
+                <div style={{ display: 'flex', gap: '6px' }}>
+                  <input value={voce.nome || ''} onChange={e => updateVoce(i, { ...voce, nome: e.target.value })} placeholder="Nome moderatore" style={{ ...inp, flex: '0 0 170px', fontWeight: '600', fontSize: '13px' }} />
+                  <input value={voce.ruolo || ''} onChange={e => updateVoce(i, { ...voce, ruolo: e.target.value })} placeholder="Ruolo / Ente" style={{ ...inp, flex: 1, fontSize: '13px' }} />
+                </div>
+              )}
+            </div>
+          </div>
+        ))}
+      </div>
+
+      {/* Aggiungi voce */}
+      <div style={{ display: 'flex', gap: '6px', flexWrap: 'wrap' }}>
+        {[['orario', '⏰ Orario'], ['sessione', '▶ Sessione'], ['intermezzo', '🔖 Intermezzo'], ['modera', '🎙 Modera']].map(([tipo, label]) => (
+          <button key={tipo} onClick={() => addVoce(tipo)} style={{ ...btnAdd, fontSize: '12px', padding: '6px 12px' }}>{label}</button>
+        ))}
+      </div>
+    </div>
+  )
+}
+
 // ── Wrapper blocco ──────────────────────────────────────────────────
 function CaroselloEditor({ block, onChange }) {
   const [uploading, setUploading] = useState({}) // { [index]: true }
@@ -499,6 +614,7 @@ function Block({ block, index, total, onChange, onDelete, onMoveUp, onMoveDown }
           {block.tipo==='badge_list'  && <BadgeListEditor block={block} onChange={onChange} />}
           {block.tipo==='carosello'   && <CaroselloEditor block={block} onChange={onChange} />}
           {block.tipo==='social'      && <SocialEditor block={block} onChange={onChange} />}
+          {block.tipo==='programma'   && <ProgrammaEditor block={block} onChange={onChange} />}
           {block.tipo==='separatore'  && <div style={{padding:'16px',color:'#9CA3AF',fontSize:'13px',textAlign:'center'}}>— Linea separatrice —</div>}
         </>
       )}

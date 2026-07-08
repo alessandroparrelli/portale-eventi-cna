@@ -348,11 +348,179 @@ export default function BlockRenderer({ block, cp = '#003DA5', formTarget = '#lp
 
   if (block.tipo === 'separatore') return <hr style={{ border: 'none', borderTop: '1px solid #E5E7EB', margin: '32px 0' }} />
 
+  if (block.tipo === 'programma') return <ProgrammaBlock block={block} cp={cp} />
+
   if (block.tipo === 'carosello') return <CaroselloBlock block={block} />
 
   if (block.tipo === 'social') return <SocialBlock block={block} cp={cp} />
 
   return null
+}
+
+// ── Programma evento ──────────────────────────────────────────────
+function ProgrammaBlock({ block, cp }) {
+  const cTitoli = block.colore_titoli || '#E91E8C'
+  const cOrari  = block.colore_orari  || cp || '#003DA5'
+  const voci    = block.voci || []
+
+  // Icone inline per i tipi di voce
+  const IconRegistrazione = () => (
+    <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke={cOrari} strokeWidth="2" strokeLinecap="round">
+      <path d="M17 21v-2a4 4 0 0 0-4-4H5a4 4 0 0 0-4 4v2"/>
+      <circle cx="9" cy="7" r="4"/>
+      <path d="M23 21v-2a4 4 0 0 0-3-3.87M16 3.13a4 4 0 0 1 0 7.75"/>
+    </svg>
+  )
+  const IconPlay = () => (
+    <svg width="16" height="16" viewBox="0 0 24 24" fill={cOrari} stroke="none">
+      <polygon points="5 3 19 12 5 21 5 3"/>
+    </svg>
+  )
+  const IconClose = () => (
+    <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke={cOrari} strokeWidth="2" strokeLinecap="round">
+      <rect x="3" y="4" width="18" height="18" rx="2"/>
+      <line x1="16" y1="2" x2="16" y2="6"/>
+      <line x1="8" y1="2" x2="8" y2="6"/>
+      <line x1="3" y1="10" x2="21" y2="10"/>
+      <line x1="9" y1="16" x2="15" y2="16"/>
+    </svg>
+  )
+  const IconSession = () => (
+    <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke={cTitoli} strokeWidth="2.5" strokeLinecap="round">
+      <circle cx="12" cy="12" r="10"/>
+      <polyline points="12 8 16 12 12 16"/>
+      <line x1="8" y1="12" x2="16" y2="12"/>
+    </svg>
+  )
+  const IconBookmark = () => (
+    <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke={cTitoli} strokeWidth="2" strokeLinecap="round">
+      <path d="M19 21l-7-5-7 5V5a2 2 0 0 1 2-2h10a2 2 0 0 1 2 2z"/>
+    </svg>
+  )
+  const IconMic = () => (
+    <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke={cTitoli} strokeWidth="2" strokeLinecap="round">
+      <path d="M12 1a3 3 0 0 0-3 3v8a3 3 0 0 0 6 0V4a3 3 0 0 0-3-3z"/>
+      <path d="M19 10v2a7 7 0 0 1-14 0v-2M12 19v4M8 23h8"/>
+    </svg>
+  )
+
+  // Determina icona orario in base al contenuto
+  function getOrarioIcon(voce) {
+    const t = (voce.testo || '').toLowerCase()
+    if (t.includes('registr') || t.includes('accredit')) return <IconRegistrazione />
+    if (t.includes('chiusura') || t.includes('conclus')) return <IconClose />
+    return <IconPlay />
+  }
+
+  return (
+    <Animate animation="fadeup">
+      <div style={{
+        border: '1.5px dashed #D1D5DB',
+        borderRadius: '16px',
+        padding: '28px 24px',
+        marginBottom: '24px',
+        background: '#fff',
+        fontFamily: 'Inter, sans-serif',
+      }}>
+        {/* Titolo sezione */}
+        {block.titolo && (
+          <h2 style={{
+            textAlign: 'center',
+            fontSize: 'clamp(20px,3.5vw,26px)',
+            fontWeight: '900',
+            color: cOrari,
+            letterSpacing: '-.02em',
+            margin: '0 0 24px',
+          }}>
+            {block.titolo}
+          </h2>
+        )}
+
+        {/* Lista voci */}
+        <div style={{ display: 'flex', flexDirection: 'column', gap: '0' }}>
+          {voci.map((voce, i) => {
+            if (voce.tipo === 'orario') return (
+              <div key={i} style={{ display: 'flex', alignItems: 'flex-start', gap: '14px', padding: '10px 0', borderBottom: i < voci.length - 1 ? '1px solid #F3F4F6' : 'none' }}>
+                <span style={{ flexShrink: 0, width: '22px', height: '22px', display: 'flex', alignItems: 'center', justifyContent: 'center', marginTop: '2px' }}>
+                  {getOrarioIcon(voce)}
+                </span>
+                <div>
+                  <span style={{ fontSize: '14px', fontWeight: '800', color: cOrari, textTransform: 'uppercase', letterSpacing: '.04em' }}>
+                    {voce.orario}
+                  </span>
+                  {voce.testo && (
+                    <span style={{ fontSize: '14px', fontWeight: '700', color: cOrari, marginLeft: '6px' }}>
+                      - {voce.testo.toUpperCase()}
+                    </span>
+                  )}
+                </div>
+              </div>
+            )
+
+            if (voce.tipo === 'sessione') return (
+              <div key={i} style={{ display: 'flex', alignItems: 'flex-start', gap: '14px', padding: '14px 0', borderBottom: i < voci.length - 1 ? '1px solid #F3F4F6' : 'none' }}>
+                <span style={{ flexShrink: 0, width: '22px', height: '22px', display: 'flex', alignItems: 'center', justifyContent: 'center', marginTop: '2px' }}>
+                  <IconSession />
+                </span>
+                <div style={{ flex: 1 }}>
+                  <p style={{ margin: '0 0 6px', fontSize: '14px', fontWeight: '800', color: cTitoli, textTransform: 'uppercase', letterSpacing: '.04em', lineHeight: 1.3 }}>
+                    {voce.titolo}
+                  </p>
+                  {(voce.relatori || []).map((rel, ri) => (
+                    <p key={ri} style={{ margin: '0 0 3px', fontSize: '14px', color: '#374151', lineHeight: 1.5 }}>
+                      {rel.nome && <strong style={{ fontWeight: '700', color: '#0A0A0A' }}>{rel.nome}</strong>}
+                      {rel.nome && rel.ruolo && <span style={{ color: '#9CA3AF', margin: '0 4px' }}>–</span>}
+                      {rel.ruolo && <span style={{ color: '#6B7280' }}>{rel.ruolo}</span>}
+                    </p>
+                  ))}
+                </div>
+              </div>
+            )
+
+            if (voce.tipo === 'intermezzo') return (
+              <div key={i} style={{ display: 'flex', alignItems: 'flex-start', gap: '14px', padding: '14px 0', borderBottom: i < voci.length - 1 ? '1px solid #F3F4F6' : 'none' }}>
+                <span style={{ flexShrink: 0, width: '22px', height: '22px', display: 'flex', alignItems: 'center', justifyContent: 'center', marginTop: '2px' }}>
+                  <IconBookmark />
+                </span>
+                <div style={{ flex: 1 }}>
+                  <p style={{ margin: '0 0 6px', fontSize: '14px', fontWeight: '800', color: cTitoli, textTransform: 'uppercase', letterSpacing: '.04em', lineHeight: 1.3 }}>
+                    {voce.titolo}
+                  </p>
+                  {(voce.relatori || []).map((rel, ri) => (
+                    <p key={ri} style={{ margin: '0 0 3px', fontSize: '14px', color: '#374151', lineHeight: 1.5 }}>
+                      {rel.nome && <strong style={{ fontWeight: '700', color: '#0A0A0A' }}>{rel.nome}</strong>}
+                      {rel.nome && rel.ruolo && <span style={{ color: '#9CA3AF', margin: '0 4px' }}>–</span>}
+                      {rel.ruolo && <span style={{ color: '#6B7280' }}>{rel.ruolo}</span>}
+                    </p>
+                  ))}
+                </div>
+              </div>
+            )
+
+            if (voce.tipo === 'modera') return (
+              <div key={i} style={{ display: 'flex', alignItems: 'flex-start', gap: '14px', padding: '14px 0', borderBottom: i < voci.length - 1 ? '1px solid #F3F4F6' : 'none' }}>
+                <span style={{ flexShrink: 0, width: '22px', height: '22px', display: 'flex', alignItems: 'center', justifyContent: 'center', marginTop: '2px' }}>
+                  <IconMic />
+                </span>
+                <div style={{ flex: 1 }}>
+                  <p style={{ margin: '0 0 4px', fontSize: '14px', fontWeight: '800', color: cTitoli, textTransform: 'uppercase', letterSpacing: '.04em' }}>
+                    Modera
+                  </p>
+                  <p style={{ margin: 0, fontSize: '14px', color: '#374151', lineHeight: 1.5 }}>
+                    {voce.nome && <strong style={{ fontWeight: '700', color: '#0A0A0A' }}>{voce.nome}</strong>}
+                    {voce.nome && voce.ruolo && <span style={{ color: '#9CA3AF', margin: '0 4px' }}>–</span>}
+                    {voce.ruolo && <span style={{ color: '#6B7280' }}>{voce.ruolo}</span>}
+                  </p>
+                </div>
+              </div>
+            )
+
+            return null
+          })}
+        </div>
+      </div>
+    </Animate>
+  )
 }
 
 // ── Carosello ─────────────────────────────────────────────────────
