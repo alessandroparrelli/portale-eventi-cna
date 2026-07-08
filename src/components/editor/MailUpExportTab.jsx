@@ -59,16 +59,54 @@ function richToEmail(html, cp) {
   h = h.replace(/<img[^>]*src="([^"]*)"[^>]*alt="([^"]*)"[^>]*/gi,
     '<img src="$1" alt="$2" width="100%" border="0" style="display:block;max-width:100%;border:0;"')
 
-  // 6. Titoli H1-H6 — preserva text-align dal tag heading
-  function convertHeading(attrs, inner, size) {
-    const alMatch = attrs.match(/text-align:\s*(left|center|right|justify)/i)
-    const alStyle = alMatch ? 'text-align:' + alMatch[1] + ';' : ''
-    return '<p style="margin:0 0 12px 0;padding:0;font-size:' + size + ';font-weight:bold;color:#0A0A0A;line-height:1.2;font-family:' + F + ';' + alStyle + '">' + inner + '</p>'
+  // 6. Titoli H1-H6 — estrae colore/size/align dal tag e dagli span interni
+  function convertHeading(tagAttrs, inner, defaultSize) {
+    // Allineamento dal tag heading
+    const alMatch = tagAttrs.match(/text-align:\s*(left|center|right|justify)/i)
+    const align = alMatch ? alMatch[1] : null
+
+    // Colore: cerca prima nello span interno, poi usa default
+    let color = '#0A0A0A'
+    const spanColMatch = inner.match(/style="[^"]*color:\s*([^;'"]+)/i)
+    if (spanColMatch) {
+      // Converte rgb(r,g,b) in hex se necessario
+      const raw = spanColMatch[1].trim()
+      if (raw.startsWith('rgb')) {
+        const nums = raw.match(/\d+/g)
+        if (nums && nums.length >= 3) {
+          color = '#' + nums.slice(0,3).map(n => parseInt(n).toString(16).padStart(2,'0')).join('')
+        }
+      } else {
+        color = raw
+      }
+    }
+
+    // Font-size: cerca nello span interno, poi usa default
+    let size = defaultSize
+    const spanSzMatch = inner.match(/style="[^"]*font-size:\s*([^;'"]+)/i)
+    if (spanSzMatch) size = spanSzMatch[1].trim()
+
+    // Pulisci span wrapper mantenendo il testo (i <b> dentro rimangono)
+    const cleanInner = inner
+      .replace(/<span[^>]*>/gi, '')
+      .replace(/<\/span>/gi, '')
+
+    const styles = [
+      'margin:0 0 12px 0', 'padding:0',
+      'font-size:' + size, 'font-weight:bold',
+      'color:' + color, 'line-height:1.2',
+      'font-family:' + F,
+    ]
+    if (align) styles.push('text-align:' + align)
+
+    return '<p style="' + styles.join(';') + ';">' + cleanInner + '</p>'
   }
-  h = h.replace(/<h1([^>]*)>([\s\S]*?)<\/h1>/gi, (_, attrs, inner) => convertHeading(attrs, inner, '26px'))
-  h = h.replace(/<h2([^>]*)>([\s\S]*?)<\/h2>/gi, (_, attrs, inner) => convertHeading(attrs, inner, '22px'))
-  h = h.replace(/<h3([^>]*)>([\s\S]*?)<\/h3>/gi, (_, attrs, inner) => convertHeading(attrs, inner, '18px'))
-  h = h.replace(/<h([456])([^>]*)>([\s\S]*?)<\/h\1>/gi, (_, lv, attrs, inner) => convertHeading(attrs, inner, '15px'))
+  h = h.replace(/<h1([^>]*)>([\s\S]*?)<\/h1>/gi, (_, a, i) => convertHeading(a, i, '26px'))
+  h = h.replace(/<h2([^>]*)>([\s\S]*?)<\/h2>/gi, (_, a, i) => convertHeading(a, i, '22px'))
+  h = h.replace(/<h3([^>]*)>([\s\S]*?)<\/h3>/gi, (_, a, i) => convertHeading(a, i, '18px'))
+  h = h.replace(/<h4([^>]*)>([\s\S]*?)<\/h4>/gi, (_, a, i) => convertHeading(a, i, '15px'))
+  h = h.replace(/<h5([^>]*)>([\s\S]*?)<\/h5>/gi, (_, a, i) => convertHeading(a, i, '15px'))
+  h = h.replace(/<h6([^>]*)>([\s\S]*?)<\/h6>/gi, (_, a, i) => convertHeading(a, i, '15px'))
 
   // 7. Liste
   h = h.replace(/<ul[^>]*>([\s\S]*?)<\/ul>/gi, (_, items) =>
@@ -82,14 +120,15 @@ function richToEmail(html, cp) {
     })
   })
 
-  // 8. Paragrafi con text-align inline (es. centrato, giustificato)
-  h = h.replace(/<p\s+style="([^"]*)">([\s\S]*?)<\/p>/gi, (_, st, inner) => {
+  // 8. Paragrafi — preserva text-align, poi pulisci span lasciando stili inline
+  function convertPara(st, inner) {
     const alMatch = st.match(/text-align:\s*(left|center|right|justify)/i)
     const alStyle = alMatch ? 'text-align:' + alMatch[1] + ';' : ''
+    // Preserva span con colore/size già convertiti al passo 3
     return '<p style="margin:0 0 10px 0;padding:0;font-size:15px;color:#374151;line-height:1.75;font-family:' + F + ';' + alStyle + '">' + inner + '</p>'
-  })
-  h = h.replace(/<p[^>]*>([\s\S]*?)<\/p>/gi, (_, inner) =>
-    '<p style="margin:0 0 10px 0;padding:0;font-size:15px;color:#374151;line-height:1.75;font-family:' + F + ';">' + inner + '</p>')
+  }
+  h = h.replace(/<p\s+style="([^"]*)">([\s\S]*?)<\/p>/gi, (_, st, inner) => convertPara(st, inner))
+  h = h.replace(/<p[^>]*>([\s\S]*?)<\/p>/gi, (_, inner) => convertPara('', inner))
 
   // 9. BR
   h = h.replace(/<br\s*\/?>/gi, '<br />')
