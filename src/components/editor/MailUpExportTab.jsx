@@ -417,11 +417,15 @@ function buildHtml(ev, url, blocchi, opts, socialLinks) {
   const footerMuted = '#C7D9F8'
 
   // Contenuto footer: se c'è footer_html lo converto, altrimenti uso il default email-safe
-  const footerContent = ev.footer_html
+  // Dopo la conversione, forzo tutti i color inline a bianco (il footer ha sempre sfondo scuro)
+  const footerContentRaw = ev.footer_html
     ? richToEmail(ev.footer_html, footerText)
     : `<p style="margin:0 0 12px;padding:0;font-size:14px;font-weight:bold;color:${footerText};font-family:${F};text-align:center;">&#x1F449; Insieme &egrave; meglio &#x1F448;</p>` +
       `<p style="margin:0;padding:0;font-size:13px;color:${footerText};font-family:${F};text-align:center;line-height:1.7;">` +
       `<strong>CNA di Roma</strong><br/>Via Cristoforo Colombo, 283/A, 00147 Roma<br/>Tel. 06570151 &bull; Email info@cnaroma.it</p>`
+  const footerContent = footerContentRaw
+    .replace(/color\s*:\s*#[0-9a-fA-F]{3,6}/g, 'color:#ffffff')
+    .replace(/color\s*:\s*rgb\([^)]+\)/g, 'color:#ffffff')
 
   const footerBlock = `
     <tr>
