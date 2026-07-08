@@ -109,13 +109,22 @@ export default function StatistichePage() {
         .in('registration_id',
           (await supabase.from('registrations').select('id').eq('event_id', selectedEvento)).data?.map(r=>r.id) || []
         ),
-      supabase.from('page_views').select('visited_at').eq('event_id', selectedEvento),
+      supabase.from('page_views').select('visited_at,country,city').eq('event_id', selectedEvento),
     ])
     // Visite
     const vList = views || []
     const vByDay = {}
     vList.forEach(v => { const d = v.visited_at?.slice(0,10); if (d) vByDay[d] = (vByDay[d]||0)+1 })
-    setPageViews({ total: vList.length, byDay: vByDay })
+    // Geo
+    const cityDist = {}
+    const countryDist = {}
+    vList.forEach(v => {
+      if (v.city)    cityDist[v.city]       = (cityDist[v.city]||0)+1
+      if (v.country) countryDist[v.country] = (countryDist[v.country]||0)+1
+    })
+    const topCities    = Object.entries(cityDist).sort((a,b)=>b[1]-a[1]).slice(0,8)
+    const topCountries = Object.entries(countryDist).sort((a,b)=>b[1]-a[1]).slice(0,5)
+    setPageViews({ total: vList.length, byDay: vByDay, topCities, topCountries })
     setSurvey(surveyData || [])
     const r = regs || []
     const total = r.length
@@ -311,7 +320,7 @@ export default function StatistichePage() {
                 <GlowStatCard icon="check"     label="Presenti"        value={stats.presenti}   palette="green"
                   sub={stats.total ? `${Math.round((stats.presenti/stats.total)*100)}% di presenza` : undefined}/>
                 {pageViews !== null && (
-                  <GlowStatCard icon="trending" label="Visite landing" value={pageViews.total} palette="cyan"
+                  <GlowStatCard icon="eye" label="Visite landing" value={pageViews.total} palette="cyan"
                     sub={stats.total > 0 ? `Conv. ${Math.round((stats.total/Math.max(pageViews.total,1))*100)}%` : 'visitatori unici per sessione'}/>
                 )}
                 <GlowStatCard icon="usercheck" label="Walk-in"         value={stats.walkin}     palette="violet"/>
@@ -408,6 +417,30 @@ export default function StatistichePage() {
                   </div>
                 )
               })()}
+
+              {/* Provenienza geografica */}
+              {pageViews && pageViews.total > 0 && pageViews.topCities && pageViews.topCities.length > 0 && (
+                <div style={s.section}>
+                  <h2 style={s.sectionTitle}>Provenienza visitatori</h2>
+                  <p style={{ fontSize:'12px', color:'#9CA3AF', margin:'-4px 0 12px' }}>Area geografica rilevata dall'IP (solo visitatori con dati disponibili)</p>
+                  <div style={{ display:'grid', gridTemplateColumns:'1fr 1fr', gap:'16px' }}>
+                    <div>
+                      <p style={{ fontSize:'11px', fontWeight:'700', color:'#374151', textTransform:'uppercase', letterSpacing:'.05em', marginBottom:'8px' }}>Città</p>
+                      {pageViews.topCities.map(([city, count]) => (
+                        <BarMini key={city} label={city} value={count} max={pageViews.total} color='#0891b2'/>
+                      ))}
+                    </div>
+                    {pageViews.topCountries && pageViews.topCountries.length > 0 && (
+                      <div>
+                        <p style={{ fontSize:'11px', fontWeight:'700', color:'#374151', textTransform:'uppercase', letterSpacing:'.05em', marginBottom:'8px' }}>Paese</p>
+                        {pageViews.topCountries.map(([country, count]) => (
+                          <BarMini key={country} label={country} value={count} max={pageViews.total} color='#0f766e'/>
+                        ))}
+                      </div>
+                    )}
+                  </div>
+                </div>
+              )}
 
               {/* Survey */}
               {survey.length > 0 && (
