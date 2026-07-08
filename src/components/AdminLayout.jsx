@@ -48,15 +48,15 @@ function UserBox() {
         gap: '9px',
         padding: '5px 12px 5px 5px',
         borderRadius: '40px',
-        backgroundColor: isActive ? 'rgba(255,255,255,0.20)' : 'rgba(255,255,255,0.10)',
-        border: '1px solid rgba(255,255,255,0.18)',
+        backgroundColor: isActive ? '#EEF3FF' : '#F4F5F7',
+        border: '1px solid ' + (isActive ? '#C7D9F8' : '#E5E7EB'),
         textDecoration: 'none',
         cursor: 'pointer',
         transition: 'background .15s',
         flexShrink: 0,
       })}
-      onMouseEnter={e => e.currentTarget.style.backgroundColor = 'rgba(255,255,255,0.20)'}
-      onMouseLeave={e => e.currentTarget.style.backgroundColor = 'rgba(255,255,255,0.10)'}
+      onMouseEnter={e => e.currentTarget.style.backgroundColor = '#EEF3FF'}
+      onMouseLeave={e => e.currentTarget.style.backgroundColor = '#F4F5F7'}
     >
       {/* Avatar */}
       <div style={{
@@ -80,7 +80,7 @@ function UserBox() {
           {isVerified && <VerifiedBadge />}
         </div>
         <span style={{
-          fontSize: '10px', fontWeight: '600', color: 'rgba(255,255,255,0.70)',
+          fontSize: '10px', fontWeight: '600', color: '#6B7280',
           lineHeight: 1, fontFamily:"'Inter',sans-serif", whiteSpace:'nowrap',
         }}>
           {roleLabel}
@@ -160,7 +160,7 @@ const s = {
   },
   header: {
     flexShrink: 0,
-    background: 'linear-gradient(120deg, #001B4D 0%, #003DA5 60%, #2E7BE0 100%)',
+    background: '#FFFFFF',
     borderBottom: 'none',
     display: 'flex',
     alignItems: 'center',
@@ -169,12 +169,12 @@ const s = {
     paddingTop: 'calc(env(safe-area-inset-top, 0px) + 10px)',
     paddingBottom: '10px',
     gap: '12px',
-    boxShadow: '0 3px 14px rgba(0,20,60,0.22)',
+    boxShadow: '0 1px 0 #E5E7EB, 0 2px 8px rgba(0,0,0,0.06)',
     boxSizing: 'border-box',
   },
   hamburger: {
     background: 'none', border: 'none', cursor: 'pointer',
-    color: '#FFFFFF', display: 'flex', alignItems: 'center',
+    color: '#0A0A0A', display: 'flex', alignItems: 'center',
     padding: '6px', borderRadius: '6px', flexShrink: 0,
   },
   titleBlock: {
@@ -185,7 +185,7 @@ const s = {
   pageTitle: {
     fontSize: '22px',
     fontWeight: '800',
-    color: '#FFFFFF',
+    color: '#0A0A0A',
     letterSpacing: '-0.02em',
     fontFamily: "'Inter', sans-serif",
     lineHeight: 1,
