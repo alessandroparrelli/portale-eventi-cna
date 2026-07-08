@@ -661,7 +661,14 @@ export default function LandingPage() {
         />
         {(event.footer_modalita || 'semplice') === 'ricco' && event.footer_html
           ? <div className="rich-content" style={{ textAlign:'center', fontSize:'13px', color: tema.testo_footer || '#9CA3AF' }} dangerouslySetInnerHTML={{ __html: event.footer_html }} />
-          : <span>{event.footer_testo || `© ${new Date().getFullYear()} CNA di Roma — Artigiani Imprenditori d'Italia`}</span>
+          : <div style={{ textAlign:'center', fontFamily:"'Inter',sans-serif", color: tema.testo_footer || '#9CA3AF', fontSize:'13px', lineHeight:'1.7' }}>
+              <p style={{ margin:'0 0 12px', fontWeight:'700', fontSize:'14px' }}>👉 Insieme è meglio 👈</p>
+              <p style={{ margin:0 }}>
+                <strong style={{ fontWeight:'700', display:'block' }}>CNA di Roma</strong>
+                Via Cristoforo Colombo, 283/A, 00147 Roma<br/>
+                Tel. 06570151 • Email info@cnaroma.it
+              </p>
+            </div>
         }
         <SocialLinks links={socialLinks} size={20} gap={14} color={tema.testo_footer || '#9CA3AF'} style={{ marginTop:'14px', justifyContent:'center' }} />
       </footer>
