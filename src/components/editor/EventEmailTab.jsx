@@ -411,7 +411,7 @@ export default function EventEmailTab({ eventoId }) {
   }, [eventoId])
 
   async function fetchEventoTitolo() {
-    const { data } = await supabase.from('eventi').select('titolo').eq('id', eventoId).single()
+    const { data } = await supabase.from('events').select('titolo').eq('id', eventoId).single()
     if (data?.titolo) setEventoTitolo(data.titolo)
   }
 
