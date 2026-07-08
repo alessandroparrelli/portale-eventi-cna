@@ -409,13 +409,19 @@ function buildHtml(ev, url, blocchi, opts, socialLinks) {
   }
 
   // Footer
-  const footerBg    = tema.sfondo_footer || '#003DA5'
-  const footerText  = '#FFFFFF'
+  // sfondo_footer può contenere un gradiente CSS (non supportato dai client email) — estraggo il primo colore hex
+  const rawFooterBg = tema.sfondo_footer || 'linear-gradient(160deg, #003DA5 0%, #001F5C 100%)'
+  const footerBgMatch = rawFooterBg.match(/#[0-9A-Fa-f]{6}/)
+  const footerBg    = footerBgMatch ? footerBgMatch[0] : '#003DA5'
+  const footerText  = tema.testo_footer || '#FFFFFF'
   const footerMuted = '#C7D9F8'
 
+  // Contenuto footer: se c'è footer_html lo converto, altrimenti uso il default email-safe
   const footerContent = ev.footer_html
     ? richToEmail(ev.footer_html, footerText)
-    : `<p style="margin:0 0 6px;padding:0;font-size:12px;color:${footerMuted};font-family:${F};">${esc(ev.footer_testo || `&copy; ${new Date().getFullYear()} CNA di Roma &mdash; Artigiani Imprenditori d&apos;Italia`)}</p>`
+    : `<p style="margin:0 0 12px;padding:0;font-size:14px;font-weight:bold;color:${footerText};font-family:${F};text-align:center;">&#x1F449; Insieme &egrave; meglio &#x1F448;</p>` +
+      `<p style="margin:0;padding:0;font-size:13px;color:${footerText};font-family:${F};text-align:center;line-height:1.7;">` +
+      `<strong>CNA di Roma</strong><br/>Via Cristoforo Colombo, 283/A, 00147 Roma<br/>Tel. 06570151 &bull; Email info@cnaroma.it</p>`
 
   const footerBlock = `
     <tr>
