@@ -74,26 +74,29 @@ const TIPI = [
   { key:'notifica_admin', label:'Notifica Admin',           icon:'🔔', desc:"Ad ogni nuova iscrizione" },
   { key:'reminder',       label:'Reminder Evento',          icon:'⏰', desc:"Prima dell'evento (configurabile)" },
   { key:'questionario',   label:'Questionario Post Evento', icon:'⭐', desc:"Ai presenti dopo la chiusura" },
+  { key:'posto_teatro',   label:'Assegnazione Posto Teatro',icon:'🎭', desc:"Inviata con numero posto e QR code" },
 ]
 
 const BLOCK_TYPES = [
-  { tipo:'titolo',    label:'Titolo',      icon:<Type size={13}/>,           cat:'contenuto' },
-  { tipo:'testo',     label:'Testo',       icon:<AlignLeft size={13}/>,      cat:'contenuto' },
-  { tipo:'bottone',   label:'Bottone CTA', icon:<Square size={13}/>,         cat:'contenuto' },
-  { tipo:'immagine',  label:'Immagine',    icon:<ImageIcon size={13}/>,      cat:'media' },
-  { tipo:'hero',      label:'Hero banner', icon:<LayoutTemplate size={13}/>, cat:'layout' },
-  { tipo:'colonne',   label:'2 colonne',   icon:<Columns size={13}/>,        cat:'layout' },
-  { tipo:'info_box',  label:'Info evento', icon:<Star size={13}/>,           cat:'evento' },
-  { tipo:'qr',        label:'QR Code',     icon:<Zap size={13}/>,            cat:'evento' },
-  { tipo:'separatore',label:'Separatore',  icon:<Minus size={13}/>,          cat:'layout' },
-  { tipo:'spazio',    label:'Spazio',      icon:<span style={{fontSize:'11px'}}>↕</span>, cat:'layout' },
-  { tipo:'mappa',     label:'Mappa',       icon:<MapPin size={13}/>,         cat:'evento' },
+  { tipo:'titolo',        label:'Titolo',              icon:<Type size={13}/>,           cat:'contenuto' },
+  { tipo:'testo',         label:'Testo',               icon:<AlignLeft size={13}/>,      cat:'contenuto' },
+  { tipo:'bottone',       label:'Bottone CTA',         icon:<Square size={13}/>,         cat:'contenuto' },
+  { tipo:'immagine',      label:'Immagine',            icon:<ImageIcon size={13}/>,      cat:'media' },
+  { tipo:'hero',          label:'Hero banner',         icon:<LayoutTemplate size={13}/>, cat:'layout' },
+  { tipo:'colonne',       label:'2 colonne',           icon:<Columns size={13}/>,        cat:'layout' },
+  { tipo:'info_box',      label:'Info evento',         icon:<Star size={13}/>,           cat:'evento' },
+  { tipo:'qr',            label:'QR Code',             icon:<Zap size={13}/>,            cat:'evento' },
+  { tipo:'posto_display', label:'Numero posto',        icon:<span style={{fontSize:'11px'}}>🎭</span>, cat:'evento' },
+  { tipo:'separatore',    label:'Separatore',          icon:<Minus size={13}/>,          cat:'layout' },
+  { tipo:'spazio',        label:'Spazio',              icon:<span style={{fontSize:'11px'}}>↕</span>, cat:'layout' },
+  { tipo:'mappa',         label:'Mappa',               icon:<MapPin size={13}/>,         cat:'evento' },
 ]
 
 const VARIABILI = [
   '{{nome}}','{{cognome}}','{{ragione_sociale}}','{{email}}',
   '{{nome_evento}}','{{data_evento}}','{{luogo_evento}}',
-  '{{qr_code}}','{{link_landing}}','{{link_questionario}}','{{data_iscrizione}}'
+  '{{qr_code}}','{{link_landing}}','{{link_questionario}}','{{data_iscrizione}}',
+  '{{numero_posto}}','{{link_conferma}}',
 ]
 
 const PREVIEW_DATA = {
@@ -103,6 +106,7 @@ const PREVIEW_DATA = {
   '{{luogo_evento}}':'Sala Congressi CNA Roma, Via della Scrofa 22',
   '{{qr_code}}':'QR-MARIO2026','{{link_landing}}':'#','{{link_questionario}}':'#',
   '{{data_iscrizione}}':new Date().toLocaleDateString('it-IT'),
+  '{{numero_posto}}':'Platea 12A','{{link_conferma}}':'#',
 }
 
 // ─── Block defaults ───────────────────────────────────────────────────────────
@@ -116,6 +120,7 @@ function blockDefaults(tipo) {
     colonne:    { sinistra:'<p>Colonna sinistra</p>', destra:'<p>Colonna destra</p>', gap:24 },
     info_box:   { bg:'#F0F7FF', bordo:'#BFDBFE', radius:10 },
     qr:         { testo:'Il tuo QR code di accesso', size:160 },
+    posto_display: { testo:'Il tuo posto' },
     separatore: { colore:'#E5E7EB', spessore:1, spazio:24 },
     spazio:     { altezza:32 },
     mappa:      { indirizzo:'{{luogo_evento}}', testo:'Come raggiungerci', zoom:15, altezza:200 },
@@ -147,6 +152,11 @@ function blocchiToHtml(blocchi) {
       if (b.tipo === 'colonne') return `<table style="width:100%;border-collapse:collapse;margin:0 0 20px"><tr><td style="width:50%;vertical-align:top;padding-right:${(b.gap||24)/2}px;font-family:Inter,Arial,sans-serif;font-size:14px;color:#374151;line-height:1.6">${b.sinistra||''}</td><td style="width:50%;vertical-align:top;padding-left:${(b.gap||24)/2}px;font-family:Inter,Arial,sans-serif;font-size:14px;color:#374151;line-height:1.6">${b.destra||''}</td></tr></table>`
       if (b.tipo === 'info_box') return `<div style="background:${b.bg||'#F0F7FF'};border:1.5px solid ${b.bordo||'#BFDBFE'};border-radius:${b.radius||10}px;padding:20px 24px;margin:0 0 20px"><table style="width:100%;border-collapse:collapse"><tr><td style="width:32px;vertical-align:top;font-size:20px;padding:6px 0">&#x1F4C5;</td><td style="padding:6px 0 6px 12px;vertical-align:top"><p style="margin:0;font-size:11px;color:#6B7280;text-transform:uppercase;letter-spacing:.06em;font-family:Inter,Arial,sans-serif">Data e ora</p><p style="margin:4px 0 0;font-size:15px;font-weight:700;color:${NERO};font-family:Inter,Arial,sans-serif">{{data_evento}}</p></td></tr><tr><td style="vertical-align:top;font-size:20px;padding:6px 0">&#x1F4CD;</td><td style="padding:6px 0 0 12px;vertical-align:top"><p style="margin:0;font-size:11px;color:#6B7280;text-transform:uppercase;letter-spacing:.06em;font-family:Inter,Arial,sans-serif">Luogo</p><p style="margin:4px 0 0;font-size:15px;font-weight:700;color:${NERO};font-family:Inter,Arial,sans-serif">{{luogo_evento}}</p></td></tr></table></div>`
       if (b.tipo === 'qr') return `<div style="text-align:center;padding:28px 0;margin:0 0 20px"><p style="font-size:13px;color:#6B7280;margin:0 0 16px;font-family:Inter,Arial,sans-serif">${b.testo||'Il tuo QR code di accesso'}</p>{{QR_BLOCK_${b.size||160}}}<p style="font-size:12px;color:#9CA3AF;margin:12px 0 0;font-family:monospace">{{qr_code}}</p></div>`
+      if (b.tipo === 'posto_display') {
+        const posto = PREVIEW_DATA['{{numero_posto}}'] || 'Platea 12A'
+        const sz = posto.length > 6 ? '36px' : posto.length > 3 ? '48px' : '64px'
+        return `<div style="text-align:center;background:linear-gradient(135deg,#003DA5,#1a56db);border-radius:12px;padding:28px 24px;margin-bottom:24px"><p style="margin:0 0 8px;font-size:12px;font-weight:700;color:rgba(255,255,255,0.75);text-transform:uppercase;letter-spacing:.08em;font-family:Inter,Arial,sans-serif">${b.testo||'Il tuo posto'}</p><p style="margin:0;font-size:${sz};font-weight:900;color:#ffffff;font-family:Inter,Arial,sans-serif;line-height:1;letter-spacing:-0.02em">{{numero_posto}}</p></div>`
+      }
       if (b.tipo === 'separatore') return `<div style="padding:${b.spazio||24}px 0"><hr style="border:none;border-top:${b.spessore||1}px solid ${b.colore||'#E5E7EB'};margin:0"/></div>`
       if (b.tipo === 'spazio') return `<div style="height:${b.altezza||32}px"></div>`
       if (b.tipo === 'mappa') {
@@ -341,6 +351,10 @@ function BlockProps({ block, onChange }) {
     case 'qr': return <>
       <div style={{ marginBottom:'8px' }}><label style={lbl}>Testo sopra</label><input value={block.testo||''} onChange={e=>set('testo',e.target.value)} style={inp}/></div>
       {numField('Dimensione QR','size',160,'px',80,240)}
+    </>
+    case 'posto_display': return <>
+      <p style={{ fontSize:'11px', color:'#6B7280', margin:'0 0 10px', fontStyle:'italic' }}>Mostra il numero/codice posto assegnato (<code>{'{{numero_posto}}'}</code>) in una card blu evidenziata.</p>
+      <div style={{ marginBottom:'8px' }}><label style={lbl}>Etichetta sopra il posto</label><input value={block.testo||''} onChange={e=>set('testo',e.target.value)} style={inp} placeholder="Il tuo posto"/></div>
     </>
     case 'separatore': return <>
       {colorField('Colore linea','colore','#E5E7EB')}
@@ -645,6 +659,7 @@ export default function EmailPage() {
                           {b.tipo==='colonne'&&'░░ 2 colonne'}
                           {b.tipo==='info_box'&&'📅 Data e luogo'}
                           {b.tipo==='qr'&&'▦ QR Code'}
+                          {b.tipo==='posto_display'&&`🎭 ${b.testo||'Il tuo posto'}`}
                           {b.tipo==='separatore'&&'— Separatore'}
                           {b.tipo==='spazio'&&`↕ ${b.altezza||32}px`}
                           {b.tipo==='mappa'&&`📍 ${b.indirizzo||'Indirizzo mappa'}`}
