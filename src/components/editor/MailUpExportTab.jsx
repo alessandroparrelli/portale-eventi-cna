@@ -40,13 +40,24 @@ function richToEmail(html, cp) {
   h = h.replace(/<em[^>]*>([\s\S]*?)<\/em>/gi, '<i style="font-style:italic;">$1</i>')
   h = h.replace(/<u[^>]*>([\s\S]*?)<\/u>/gi, '<u style="text-decoration:underline;">$1</u>')
 
-  // 3. Span con colore/size da TipTap
-  h = h.replace(/<span style="([^"]*)">([\s\S]*?)<\/span>/gi, (_, st, inner) => {
-    const col = (st.match(/color:\s*([^;]+)/i)||[])[1]
-    const sz  = (st.match(/font-size:\s*([^;]+)/i)||[])[1]
-    const parts = []
-    if (col) parts.push('color:' + col.trim())
-    if (sz)  parts.push('font-size:' + sz.trim())
+  // Helper: converte rgb(r,g,b) in hex
+  function rgbToHex(raw) {
+    raw = (raw||'').trim()
+    if (raw.startsWith('rgb')) {
+      const nums = raw.match(/\d+/g)
+      if (nums && nums.length >= 3)
+        return '#' + nums.slice(0,3).map(n => parseInt(n).toString(16).padStart(2,'0')).join('')
+    }
+    return raw
+  }
+
+  // 3. Span con colore/size da TipTap — converte rgb→hex
+  h = h.replace(/<span style="([^"]*)">((?:[^<]|<(?!\/span>))*)<\/span>/gi, (_, st, inner) => {
+    const colRaw = (st.match(/color:\s*([^;]+)/i)||[])[1]
+    const sz     = (st.match(/font-size:\s*([^;]+)/i)||[])[1]
+    const parts  = []
+    if (colRaw) parts.push('color:' + rgbToHex(colRaw))
+    if (sz)     parts.push('font-size:' + sz.trim())
     return parts.length ? '<span style="' + parts.join(';') + '">' + inner + '</span>' : inner
   })
   h = h.replace(/<span>/gi, '').replace(/<\/span>/gi, '')
