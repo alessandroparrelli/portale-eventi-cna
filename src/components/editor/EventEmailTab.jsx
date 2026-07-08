@@ -4,6 +4,7 @@
  */
 import { useState, useEffect, useRef } from 'react'
 import { supabase, getFreshJwt } from '../../lib/supabase'
+import RichEditor from './RichEditor'
 import {
   Save, RotateCcw, CheckCircle, Code, Eye as EyeIcon, AlertTriangle,
   Layers, Image as ImageIcon, Type, AlignLeft, Square, Star, Zap, Minus,
