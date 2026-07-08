@@ -233,18 +233,15 @@ export default function LandingPage() {
         supabase.from('registrations').select('id',{count:'exact'}).eq('event_id',data.id)
           .then(({ count }) => setIscrizioniN(count||0))
         setLoading(false)
-        // Traccia visita (deduplicata per sessione)
+        // Traccia visita — deduplicazione e geo gestiti server-side
         try {
-          const SK = `pv_${data.id}`
-          if (!sessionStorage.getItem(SK)) {
-            let sid = localStorage.getItem('cna_sid')
-            if (!sid) { sid = crypto.randomUUID(); localStorage.setItem('cna_sid', sid) }
-            fetch(`${import.meta.env.VITE_SUPABASE_URL}/functions/v1/track-view`, {
-              method: 'POST',
-              headers: { 'Content-Type': 'application/json' },
-              body: JSON.stringify({ event_id: data.id, session_id: sid })
-            }).then(() => sessionStorage.setItem(SK, '1')).catch(() => {})
-          }
+          let sid = localStorage.getItem('cna_sid')
+          if (!sid) { sid = crypto.randomUUID(); localStorage.setItem('cna_sid', sid) }
+          fetch(`${import.meta.env.VITE_SUPABASE_URL}/functions/v1/track-view`, {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify({ event_id: data.id, session_id: sid })
+          }).catch(() => {})
         } catch(_) {}
       })
   }, [slug])
