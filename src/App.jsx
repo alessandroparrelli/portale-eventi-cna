@@ -28,6 +28,7 @@ import AnaliticsPage from './pages/admin/AnaliticsPage'
 import CertificatoPage from './pages/public/CertificatoPage'
 import LandingPagePublic from './pages/public/LandingPagePublic'
 import CalendarioPage from './pages/public/CalendarioPage'
+import ConfermaPresenzaPage from './pages/public/ConfermaPresenzaPage'
 
 export default function App() {
   return (
@@ -44,6 +45,7 @@ export default function App() {
           <Route path="/questionario" element={<QuestionarioPage />} />
           <Route path="/iscrizione/:codice" element={<Iscrizione />} />
           <Route path="/iscrizione" element={<Iscrizione />} />
+          <Route path="/conferma/:token" element={<ConfermaPresenzaPage />} />
 
           {/* Admin — layout sidebar (ogni sezione protetta dal proprio permesso) */}
           <Route path="/admin" element={<ProtectedRoute><AdminLayout /></ProtectedRoute>}>

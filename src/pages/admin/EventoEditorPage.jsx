@@ -359,6 +359,7 @@ export default function EventoEditorPage() {
     titolo:'', slug:'', stato:'bozza', data_inizio:'', data_fine:'',
     luogo:'', sottotitolo:'', footer_testo:'', footer_html:'', footer_modalita:'semplice', descrizione_html:'', immagine_hero:null, logo_url:null,
       modalita:'presenza', link_riunione:null,
+      teatro_abilitato:false, teatro_capienza:null, teatro_note:null,
       certificato_abilitato:false, certificato_titolo:null, certificato_invio_auto:true,
       certificato_colore:'#003DA5', certificato_logo_url:null, certificato_firma_nome:null, certificato_firma_ruolo:null,
       certificato_template:'laterale', certificato_config:{},
@@ -452,6 +453,7 @@ export default function EventoEditorPage() {
       stato:ev.stato, data_inizio: toUTCISOStr(ev.data_inizio),
       data_fine: toUTCISOStr(ev.data_fine), luogo:ev.luogo||null,
         modalita:ev.modalita||'presenza', link_riunione:ev.link_riunione||null,
+        teatro_abilitato:ev.teatro_abilitato||false, teatro_capienza:ev.teatro_capienza||null, teatro_note:ev.teatro_note||null,
         certificato_abilitato:ev.certificato_abilitato||false, certificato_titolo:ev.certificato_titolo||null,
         certificato_invio_auto:ev.certificato_invio_auto!==false, certificato_colore:ev.certificato_colore||'#003DA5',
         certificato_logo_url:ev.certificato_logo_url||null, certificato_firma_nome:ev.certificato_firma_nome||null, certificato_firma_ruolo:ev.certificato_firma_ruolo||null,
@@ -478,6 +480,9 @@ export default function EventoEditorPage() {
       email_mittente:ev.email_mittente||null,
       email_cc:ev.email_cc||null,
       nome_mittente:ev.nome_mittente||null,
+      teatro_abilitato:ev.teatro_abilitato||false,
+      teatro_capienza:ev.teatro_capienza||null,
+      teatro_note:ev.teatro_note||null,
     }
     if (isNew) {
       const { data } = await supabase.from('events').insert(payload).select().single()
@@ -712,6 +717,44 @@ export default function EventoEditorPage() {
                   </div>
                   <span style={{ fontSize:'13px', fontWeight:'700', color:'#003DA5', whiteSpace:'nowrap' }}>Apri editor →</span>
                 </button>
+              </div>
+
+              {/* ── Modalità teatro ── */}
+              <div style={{ gridColumn:'1/-1' }}>
+                <div style={{ background: event.teatro_abilitato ? '#EFF6FF' : '#F9FAFB', border:`1px solid ${event.teatro_abilitato ? '#BFDBFE' : '#E5E7EB'}`, borderRadius:'10px', padding:'16px' }}>
+                  <div style={{ display:'flex', alignItems:'center', justifyContent:'space-between', gap:'16px', flexWrap:'wrap' }}>
+                    <div>
+                      <p style={{ margin:'0 0 2px', fontSize:'14px', fontWeight:'700', color:'#0A0A0A' }}>🎭 Modalità teatro</p>
+                      <p style={{ margin:0, fontSize:'12px', color:'#6B7280' }}>
+                        Attiva la gestione manuale dei posti a sedere con assegnazione numerica e conferma presenza via email.
+                      </p>
+                    </div>
+                    <button type="button"
+                      onClick={() => updEvent(p => ({ ...p, teatro_abilitato: !p.teatro_abilitato }))}
+                      style={{ flexShrink:0, padding:'8px 18px', borderRadius:'8px', border:'none', cursor:'pointer', fontSize:'13px', fontWeight:'700', fontFamily:"'Inter',sans-serif",
+                        background: event.teatro_abilitato ? '#003DA5' : '#E5E7EB',
+                        color: event.teatro_abilitato ? '#fff' : '#374151' }}>
+                      {event.teatro_abilitato ? '✓ Abilitato' : 'Abilita'}
+                    </button>
+                  </div>
+                  {event.teatro_abilitato && (
+                    <div style={{ marginTop:'12px', display:'grid', gridTemplateColumns:'1fr 2fr', gap:'12px' }}>
+                      <Field label="Capienza teatro">
+                        <Input type="number" min="1"
+                          value={event.teatro_capienza||''}
+                          onChange={e => updEvent(p => ({ ...p, teatro_capienza: e.target.value ? parseInt(e.target.value) : null }))}
+                          placeholder="es. 1200"
+                        />
+                      </Field>
+                      <Field label="Note interne (opzionale)">
+                        <Input value={event.teatro_note||''}
+                          onChange={e => updEvent(p => ({ ...p, teatro_note: e.target.value }))}
+                          placeholder="Es. Platea A posti 1-600, Platea B 601-1200"
+                        />
+                      </Field>
+                    </div>
+                  )}
+                </div>
               </div>
 
               {/* ── Impostazioni email ── */}
