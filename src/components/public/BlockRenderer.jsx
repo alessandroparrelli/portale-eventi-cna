@@ -412,17 +412,45 @@ function ProgrammaBlock({ block, cp }) {
     return <IconPlay />
   }
 
+  const useSvgBorder = (block.cornice_stile === 'dotted' || block.cornice_stile === 'dashed')
+  const spessore  = block.cornice_spessore ?? 1.5
+  const radius    = block.cornice_radius   ?? 16
+  const colore    = block.cornice_colore   || '#D1D5DB'
+  const gap       = block.cornice_gap      ?? 6
+  const dashLen   = block.cornice_stile === 'dotted' ? spessore : 8
+  const dashArray = `${dashLen} ${gap}`
+
+  // SVG border overlay: disegna un rettangolo arrotondato con stroke-dasharray
+  const SvgBorder = () => (
+    <svg style={{ position: 'absolute', inset: 0, width: '100%', height: '100%', overflow: 'visible', pointerEvents: 'none', borderRadius: `${radius}px` }}
+      preserveAspectRatio="none">
+      <rect
+        x={spessore / 2} y={spessore / 2}
+        width={`calc(100% - ${spessore}px)`} height={`calc(100% - ${spessore}px)`}
+        rx={radius - spessore / 2} ry={radius - spessore / 2}
+        fill="none"
+        stroke={colore}
+        strokeWidth={spessore}
+        strokeDasharray={dashArray}
+        strokeLinecap={block.cornice_stile === 'dotted' ? 'round' : 'square'}
+        vectorEffect="non-scaling-stroke"
+      />
+    </svg>
+  )
+
   return (
     <Animate animation="fadeup">
       <div style={{
-        border: block.cornice_stile === 'none' ? 'none' : `${block.cornice_spessore ?? 1.5}px ${block.cornice_stile || 'dotted'} ${block.cornice_colore || '#D1D5DB'}`,
-        borderRadius: `${block.cornice_radius ?? 16}px`,
+        position: 'relative',
+        border: useSvgBorder ? 'none' : (block.cornice_stile === 'none' ? 'none' : `${spessore}px ${block.cornice_stile} ${colore}`),
+        borderRadius: `${radius}px`,
         padding: '28px 24px',
         marginBottom: '24px',
         background: block.sfondo || '#ffffff',
         fontFamily: 'Inter, sans-serif',
         boxShadow: block.cornice_stile === 'none' ? '0 2px 12px rgba(0,0,0,0.08)' : 'none',
       }}>
+        {useSvgBorder && <SvgBorder />}
         {/* Titolo sezione */}
         {block.titolo && (
           <h2 style={{

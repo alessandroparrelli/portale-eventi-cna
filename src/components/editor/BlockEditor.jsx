@@ -31,7 +31,7 @@ export function newBlock(tipo) {
     case 'badge_list':  return { ...base, items: [{ icona: 'check', icona_colore:'#003DA5', testo: 'Vantaggio uno' }, { icona: 'check', icona_colore:'#003DA5', testo: 'Vantaggio due' }, { icona: 'check', icona_colore:'#003DA5', testo: 'Vantaggio tre' }], colore: '#003DA5', colonne: 2 }
     case 'carosello':   return { ...base, immagini: [], didascalia: '', rapporto: '1:1' }
     case 'social':      return { ...base, tipo_social: 'condivisione', url_post: '', mostra_condivisione: true }
-    case 'programma':   return { ...base, titolo: 'Programma', colore_titoli: '#E91E8C', colore_orari: '#003DA5', cornice_stile: 'dotted', cornice_colore: '#D1D5DB', cornice_spessore: 1.5, cornice_radius: 16, sfondo: '#ffffff', voci: [
+    case 'programma':   return { ...base, titolo: 'Programma', colore_titoli: '#E91E8C', colore_orari: '#003DA5', cornice_stile: 'dotted', cornice_colore: '#D1D5DB', cornice_spessore: 1.5, cornice_radius: 16, cornice_gap: 6, sfondo: '#ffffff', voci: [
       { tipo: 'orario', orario: 'ORE 10.30', testo: 'Registrazione dei partecipanti' },
       { tipo: 'orario', orario: 'ORE 11.00', testo: 'Avvio dei lavori' },
       { tipo: 'sessione', titolo: 'Titolo intervento', relatori: [{ nome: 'Nome Cognome', ruolo: 'Ruolo / Ente' }] },
@@ -396,6 +396,12 @@ function ProgrammaEditor({ block, onChange }) {
               <input type="range" min="0" max="28" step="2" value={block.cornice_radius ?? 16} onChange={e => onChange({ ...block, cornice_radius: parseInt(e.target.value) })} style={{ width: '100%' }} />
             </div>
           </div>
+          {(block.cornice_stile === 'dotted' || block.cornice_stile === 'dashed' || !block.cornice_stile) && (
+            <div>
+              <label style={lb}>Gap tra simboli: <strong>{block.cornice_gap ?? 6}px</strong></label>
+              <input type="range" min="1" max="24" step="1" value={block.cornice_gap ?? 6} onChange={e => onChange({ ...block, cornice_gap: parseInt(e.target.value) })} style={{ width: '100%' }} />
+            </div>
+          )}
         </div>
 
         {/* ── Sfondo ── */}
