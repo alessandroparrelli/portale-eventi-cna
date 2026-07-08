@@ -203,37 +203,7 @@ export default function Sidebar({ mobileOpen, onMobileClose, isMobile }) {
           </div>
         )}
 
-        {/* USER CARD */}
-        <NavLink to="/admin/profilo" onClick={handleNavClick} style={({ isActive }) => ({
-          ...st.userCard,
-          borderColor: isActive ? '#BFDBFE' : 'transparent',
-          backgroundColor: isActive ? '#EFF6FF' : '#F8FAFD',
-        })}>
-          <div style={{
-            ...st.avatar,
-            background:`linear-gradient(135deg,${RUOLO_COLORS[ruolo]||'#003DA5'},#1a56db)`,
-          }}>
-            {avatarUrl
-              ? <img src={avatarUrl} alt="" style={{ width:'100%', height:'100%', objectFit:'cover', borderRadius:'50%' }}/>
-              : <span style={{ fontSize:'13px', fontWeight:'800', color:'#fff', letterSpacing:'-0.02em' }}>{initials}</span>
-            }
-          </div>
-          <div style={{ flex:1, minWidth:0 }}>
-            <div style={{ display:'flex', alignItems:'center', gap:'5px' }}>
-              <p style={{ ...st.userName, margin:0 }}>{displayName}</p>
-              {isVerified && (
-                <svg width="15" height="15" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg">
-                  <path fill="#1D9BF0" d="M22.25 12c0-1.43-.88-2.67-2.19-3.34.46-1.39.2-2.9-.81-3.91s-2.52-1.27-3.91-.81c-.66-1.31-1.91-2.19-3.34-2.19s-2.67.88-3.34 2.19c-1.39-.46-2.9-.2-3.91.81s-1.27 2.52-.81 3.91C2.63 9.33 1.75 10.57 1.75 12s.88 2.67 2.19 3.34c-.46 1.39-.2 2.9.81 3.91s2.52 1.27 3.91.81c.66 1.31 1.91 2.19 3.34 2.19s2.67-.88 3.34-2.19c1.39.46 2.9.2 3.91-.81s1.27-2.52.81-3.91c1.31-.67 2.19-1.91 2.19-3.34z"/>
-                  <path fill="#fff" d="M9.5 16.5L5.5 12.5l1.41-1.41L9.5 13.67l7.59-7.59L18.5 7.5z"/>
-                </svg>
-              )}
-            </div>
-            <span style={{ ...st.roleBadge, backgroundColor:(RUOLO_COLORS[ruolo]||'#6B7280')+'18', color:RUOLO_COLORS[ruolo]||'#6B7280' }}>
-              {RUOLO_LABELS[ruolo]||ruolo}
-            </span>
-          </div>
-          {icons.chevron()}
-        </NavLink>
+
 
         {/* NAVIGAZIONE */}
         <nav style={st.nav}>

@@ -1,6 +1,94 @@
 import { useState, useEffect, useCallback } from 'react'
-import { Outlet } from 'react-router-dom'
+import { Outlet, NavLink } from 'react-router-dom'
 import Sidebar from './Sidebar'
+import { useAuth } from '../hooks/useAuth'
+import { useRole } from '../hooks/useRole'
+import { supabase } from '../lib/supabase'
+
+const RUOLO_COLORS = { superadmin:'#7C3AED', admin:'#003DA5', supervisore:'#059669', utente:'#6B7280' }
+const RUOLO_LABELS = { superadmin:'Super Admin', admin:'Admin', supervisore:'Supervisore', utente:'Utente' }
+
+function VerifiedBadge() {
+  return (
+    <svg width="14" height="14" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg" style={{ flexShrink:0 }}>
+      <path fill="#1D9BF0" d="M22.25 12c0-1.43-.88-2.67-2.19-3.34.46-1.39.2-2.9-.81-3.91s-2.52-1.27-3.91-.81c-.66-1.31-1.91-2.19-3.34-2.19s-2.67.88-3.34 2.19c-1.39-.46-2.9-.2-3.91.81s-1.27 2.52-.81 3.91C2.63 9.33 1.75 10.57 1.75 12s.88 2.67 2.19 3.34c-.46 1.39-.2 2.9.81 3.91s2.52 1.27 3.91.81c.66 1.31 1.91 2.19 3.34 2.19s2.67-.88 3.34-2.19c1.39.46 2.9.2 3.91-.81s1.27-2.52.81-3.91c1.31-.67 2.19-1.91 2.19-3.34z"/>
+      <path fill="#fff" d="M9.5 16.5L5.5 12.5l1.41-1.41L9.5 13.67l7.59-7.59L18.5 7.5z"/>
+    </svg>
+  )
+}
+
+function UserBox() {
+  const { user } = useAuth()
+  const { ruolo } = useRole()
+  const [avatarUrl,    setAvatarUrl]    = useState(null)
+  const [displayName,  setDisplayName]  = useState('')
+
+  useEffect(() => {
+    if (!user?.id) return
+    supabase.from('admin_profiles')
+      .select('avatar_url, nome, username')
+      .eq('id', user.id).single()
+      .then(({ data }) => {
+        if (data?.avatar_url) setAvatarUrl(data.avatar_url)
+        setDisplayName(data?.nome || data?.username || user?.email?.split('@')[0] || 'Admin')
+      })
+  }, [user])
+
+  const initial    = displayName ? displayName[0].toUpperCase() : '?'
+  const isVerified = ruolo === 'admin' || ruolo === 'superadmin' || ruolo === 'supervisore'
+  const roleColor  = RUOLO_COLORS[ruolo] || '#6B7280'
+  const roleLabel  = RUOLO_LABELS[ruolo] || ruolo
+
+  return (
+    <NavLink
+      to="/admin/profilo"
+      style={({ isActive }) => ({
+        display: 'flex',
+        alignItems: 'center',
+        gap: '9px',
+        padding: '5px 12px 5px 5px',
+        borderRadius: '40px',
+        backgroundColor: isActive ? 'rgba(255,255,255,0.20)' : 'rgba(255,255,255,0.10)',
+        border: '1px solid rgba(255,255,255,0.18)',
+        textDecoration: 'none',
+        cursor: 'pointer',
+        transition: 'background .15s',
+        flexShrink: 0,
+      })}
+      onMouseEnter={e => e.currentTarget.style.backgroundColor = 'rgba(255,255,255,0.20)'}
+      onMouseLeave={e => e.currentTarget.style.backgroundColor = 'rgba(255,255,255,0.10)'}
+    >
+      {/* Avatar */}
+      <div style={{
+        width: '32px', height: '32px', borderRadius: '50%', flexShrink: 0,
+        background: `linear-gradient(135deg,${roleColor},#1a56db)`,
+        display: 'flex', alignItems: 'center', justifyContent: 'center',
+        overflow: 'hidden',
+      }}>
+        {avatarUrl
+          ? <img src={avatarUrl} alt="" style={{ width:'100%', height:'100%', objectFit:'cover' }}/>
+          : <span style={{ fontSize:'12px', fontWeight:'800', color:'#fff' }}>{initial}</span>
+        }
+      </div>
+
+      {/* Nome + badge */}
+      <div style={{ display:'flex', flexDirection:'column', gap:'1px', minWidth:0 }}>
+        <div style={{ display:'flex', alignItems:'center', gap:'4px' }}>
+          <span style={{ fontSize:'13px', fontWeight:'700', color:'#fff', whiteSpace:'nowrap', lineHeight:1, fontFamily:"'Inter',sans-serif" }}>
+            {displayName}
+          </span>
+          {isVerified && <VerifiedBadge />}
+        </div>
+        <span style={{
+          fontSize: '10px', fontWeight: '600', color: 'rgba(255,255,255,0.70)',
+          lineHeight: 1, fontFamily:"'Inter',sans-serif", whiteSpace:'nowrap',
+        }}>
+          {roleLabel}
+        </span>
+      </div>
+    </NavLink>
+  )
+}
 
 export default function AdminLayout() {
   const [mobileOpen, setMobileOpen] = useState(false)
@@ -31,7 +119,7 @@ export default function AdminLayout() {
           </button>
         )}
 
-        {/* Centro: logo + titolo affiancato */}
+        {/* Centro: logo + titolo */}
         <div className="admin-header-center">
           <img
             src="https://customer31551.img.musvc2.net/static/31551/images/1/CNARoma%20NEGATIVO%20COLORE%20SOLO%20ROMA.png"
@@ -46,8 +134,10 @@ export default function AdminLayout() {
           </div>
         </div>
 
-        {/* Destra: placeholder per bilanciamento (desktop) */}
-        <div className="admin-header-right" />
+        {/* Destra: box utente */}
+        <div className="admin-header-right" style={{ display:'flex', alignItems:'center', justifyContent:'flex-end' }}>
+          <UserBox />
+        </div>
       </header>
 
       <div style={s.body}>
