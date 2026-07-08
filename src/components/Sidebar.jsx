@@ -259,9 +259,9 @@ export default function Sidebar({ mobileOpen, onMobileClose, isMobile }) {
                     <>
                       <div style={{
                         ...st.iconWrap,
-                        backgroundColor: isActive ? activeColor : 'transparent',
+                        backgroundColor: isActive ? activeColor : activeColor + '18',
                       }}>
-                        {icons[iconKey]?.(isActive ? '#fff' : '#9CA3AF')}
+                        {icons[iconKey]?.(isActive ? '#fff' : activeColor)}
                       </div>
                       <span className="nav-label" style={{ fontSize:'13px', fontWeight: isActive ? '700' : '500', letterSpacing:'-0.01em', flex:1 }}>{label}</span>
                       {isActive && <div style={{ ...st.activeDot, backgroundColor: activeColor }}/>}
