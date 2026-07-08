@@ -413,7 +413,7 @@ function buildHtml(ev, url, blocchi, opts, socialLinks) {
   const rawFooterBg = tema.sfondo_footer || 'linear-gradient(160deg, #003DA5 0%, #001F5C 100%)'
   const footerBgMatch = rawFooterBg.match(/#[0-9A-Fa-f]{6}/)
   const footerBg    = footerBgMatch ? footerBgMatch[0] : '#003DA5'
-  const footerText  = tema.testo_footer || '#FFFFFF'
+  const footerText  = '#ffffff'
   const footerMuted = '#C7D9F8'
 
   // Contenuto footer: se c'è footer_html lo converto, altrimenti uso il default email-safe
