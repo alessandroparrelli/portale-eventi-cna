@@ -653,15 +653,15 @@ export default function LandingPage() {
       {/* ── Barra condivisione ── */}
       <ShareBar event={event} />
 
-      <footer style={{ ...s.footer, backgroundColor: tema.sfondo_footer || '#F4F5F7', borderTop: `1px solid ${tema.sfondo_footer || '#F4F5F7'}`, color: tema.testo_footer || '#9CA3AF' }}>
+      <footer style={{ ...s.footer, background: tema.sfondo_footer || 'linear-gradient(160deg, #003DA5 0%, #001F5C 100%)', borderTop: 'none', color: tema.testo_footer || '#ffffff' }}>
         <img
           src={event?.logo_url || "https://raw.githubusercontent.com/alessandroparrelli/fileappoggio/main/NUOVO-LOGO-CNA-ROMA-SOLO-ROMA.png"}
           alt="CNA Roma"
           style={{ height: `clamp(32px, ${Math.round((tema.logo_altezza || 44) * 0.08)}vw, ${Math.round((tema.logo_altezza || 44) * 0.7)}px)`, maxWidth: '200px', objectFit: 'contain', display: 'block', margin: '0 auto 10px' }}
         />
         {(event.footer_modalita || 'semplice') === 'ricco' && event.footer_html
-          ? <div className="rich-content" style={{ textAlign:'center', fontSize:'13px', color: tema.testo_footer || '#9CA3AF' }} dangerouslySetInnerHTML={{ __html: event.footer_html }} />
-          : <div style={{ textAlign:'center', fontFamily:"'Inter',sans-serif", color: tema.testo_footer || '#9CA3AF', fontSize:'13px', lineHeight:'1.7' }}>
+          ? <div className="rich-content" style={{ textAlign:'center', fontSize:'13px', color: tema.testo_footer || '#ffffff' }} dangerouslySetInnerHTML={{ __html: event.footer_html }} />
+          : <div style={{ textAlign:'center', fontFamily:"'Inter',sans-serif", color: tema.testo_footer || '#ffffff', fontSize:'13px', lineHeight:'1.7' }}>
               <p style={{ margin:'0 0 12px', fontWeight:'700', fontSize:'14px' }}>👉 Insieme è meglio 👈</p>
               <p style={{ margin:0 }}>
                 <strong style={{ fontWeight:'700', display:'block' }}>CNA di Roma</strong>
