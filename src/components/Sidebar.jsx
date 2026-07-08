@@ -157,14 +157,13 @@ export default function Sidebar({ mobileOpen, onMobileClose, isMobile }) {
       .eq('id', user.id).single()
       .then(({ data }) => {
         if (data?.avatar_url) setAvatarUrl(data.avatar_url)
-        const n = [data?.nome, data?.cognome].filter(Boolean).join(' ')
-        setDisplayName(n || data?.username || user?.email?.split('@')[0] || 'Admin')
+        const n = data?.nome || data?.username || user?.email?.split('@')[0] || 'Admin'
+        setDisplayName(n)
       })
   }, [user])
 
-  const initials = displayName
-    ? displayName.split(' ').map(w => w[0]).slice(0,2).join('').toUpperCase()
-    : '?'
+  const initials = displayName ? displayName[0].toUpperCase() : '?'
+  const isVerified = ruolo === 'admin' || ruolo === 'superadmin' || ruolo === 'supervisore'
 
   const allGroups = NAV_GROUPS
     .map(group => ({ ...group, items: group.items.filter(it => canView(it.sezione)) }))
@@ -220,7 +219,15 @@ export default function Sidebar({ mobileOpen, onMobileClose, isMobile }) {
             }
           </div>
           <div style={{ flex:1, minWidth:0 }}>
-            <p style={st.userName}>{displayName}</p>
+            <div style={{ display:'flex', alignItems:'center', gap:'5px' }}>
+              <p style={{ ...st.userName, margin:0 }}>{displayName}</p>
+              {isVerified && (
+                <svg width="15" height="15" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg">
+                  <path fill="#1D9BF0" d="M22.25 12c0-1.43-.88-2.67-2.19-3.34.46-1.39.2-2.9-.81-3.91s-2.52-1.27-3.91-.81c-.66-1.31-1.91-2.19-3.34-2.19s-2.67.88-3.34 2.19c-1.39-.46-2.9-.2-3.91.81s-1.27 2.52-.81 3.91C2.63 9.33 1.75 10.57 1.75 12s.88 2.67 2.19 3.34c-.46 1.39-.2 2.9.81 3.91s2.52 1.27 3.91.81c.66 1.31 1.91 2.19 3.34 2.19s2.67-.88 3.34-2.19c1.39.46 2.9.2 3.91-.81s1.27-2.52.81-3.91c1.31-.67 2.19-1.91 2.19-3.34z"/>
+                  <path fill="#fff" d="M9.5 16.5L5.5 12.5l1.41-1.41L9.5 13.67l7.59-7.59L18.5 7.5z"/>
+                </svg>
+              )}
+            </div>
             <span style={{ ...st.roleBadge, backgroundColor:(RUOLO_COLORS[ruolo]||'#6B7280')+'18', color:RUOLO_COLORS[ruolo]||'#6B7280' }}>
               {RUOLO_LABELS[ruolo]||ruolo}
             </span>
