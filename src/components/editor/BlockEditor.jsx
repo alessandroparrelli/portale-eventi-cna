@@ -31,7 +31,7 @@ export function newBlock(tipo) {
     case 'badge_list':  return { ...base, items: [{ icona: 'check', icona_colore:'#003DA5', testo: 'Vantaggio uno' }, { icona: 'check', icona_colore:'#003DA5', testo: 'Vantaggio due' }, { icona: 'check', icona_colore:'#003DA5', testo: 'Vantaggio tre' }], colore: '#003DA5', colonne: 2 }
     case 'carosello':   return { ...base, immagini: [], didascalia: '', rapporto: '1:1' }
     case 'social':      return { ...base, tipo_social: 'condivisione', url_post: '', mostra_condivisione: true }
-    case 'programma':   return { ...base, titolo: 'Programma', colore_titoli: '#E91E8C', colore_orari: '#003DA5', voci: [
+    case 'programma':   return { ...base, titolo: 'Programma', colore_titoli: '#E91E8C', colore_orari: '#003DA5', cornice_stile: 'dotted', cornice_colore: '#D1D5DB', cornice_spessore: 1.5, cornice_radius: 16, sfondo: '#ffffff', voci: [
       { tipo: 'orario', orario: 'ORE 10.30', testo: 'Registrazione dei partecipanti' },
       { tipo: 'orario', orario: 'ORE 11.00', testo: 'Avvio dei lavori' },
       { tipo: 'sessione', titolo: 'Titolo intervento', relatori: [{ nome: 'Nome Cognome', ruolo: 'Ruolo / Ente' }] },
@@ -357,17 +357,64 @@ function ProgrammaEditor({ block, onChange }) {
           <label style={lb}>Titolo sezione</label>
           <input value={block.titolo || 'Programma'} onChange={e => onChange({ ...block, titolo: e.target.value })} style={{ ...inp, width: '160px' }} />
         </div>
-        <div style={{ display: 'flex', gap: '8px', alignItems: 'flex-end' }}>
-          <div>
-            <label style={lb}>Colore sessioni</label>
-            <input type="color" value={block.colore_titoli || '#E91E8C'} onChange={e => onChange({ ...block, colore_titoli: e.target.value })} style={{ width: '36px', height: '36px', border: 'none', cursor: 'pointer', borderRadius: '4px' }} />
-          </div>
-          <div>
-            <label style={lb}>Colore orari</label>
-            <input type="color" value={block.colore_orari || '#003DA5'} onChange={e => onChange({ ...block, colore_orari: e.target.value })} style={{ width: '36px', height: '36px', border: 'none', cursor: 'pointer', borderRadius: '4px' }} />
+            <div style={{ display: 'flex', gap: '8px', alignItems: 'flex-end' }}>
+            <div>
+              <label style={lb}>Colore sessioni</label>
+              <input type="color" value={block.colore_titoli || '#E91E8C'} onChange={e => onChange({ ...block, colore_titoli: e.target.value })} style={{ width: '36px', height: '36px', border: 'none', cursor: 'pointer', borderRadius: '4px' }} />
+            </div>
+            <div>
+              <label style={lb}>Colore orari</label>
+              <input type="color" value={block.colore_orari || '#003DA5'} onChange={e => onChange({ ...block, colore_orari: e.target.value })} style={{ width: '36px', height: '36px', border: 'none', cursor: 'pointer', borderRadius: '4px' }} />
+            </div>
           </div>
         </div>
-      </div>
+
+        {/* ── Cornice ── */}
+        <div style={{ padding: '12px', background: '#F9FAFB', borderRadius: '8px', border: '1px solid #E5E7EB', display: 'flex', flexDirection: 'column', gap: '10px' }}>
+          <label style={{ ...lb, marginBottom: 0 }}>Cornice</label>
+          <div style={{ display: 'flex', gap: '8px', flexWrap: 'wrap', alignItems: 'flex-end' }}>
+            <div style={{ flex: '1 1 120px' }}>
+              <label style={lb}>Stile</label>
+              <select value={block.cornice_stile || 'dotted'} onChange={e => onChange({ ...block, cornice_stile: e.target.value })} style={inp}>
+                <option value="dotted">Puntini (dotted)</option>
+                <option value="dashed">Trattini (dashed)</option>
+                <option value="solid">Solida (solid)</option>
+                <option value="double">Doppia (double)</option>
+                <option value="none">Nessuna</option>
+              </select>
+            </div>
+            <div>
+              <label style={lb}>Colore</label>
+              <input type="color" value={block.cornice_colore || '#D1D5DB'} onChange={e => onChange({ ...block, cornice_colore: e.target.value })} style={{ width: '36px', height: '36px', border: 'none', cursor: 'pointer', borderRadius: '4px' }} />
+            </div>
+            <div style={{ flex: '1 1 100px' }}>
+              <label style={lb}>Spessore: <strong>{block.cornice_spessore || 1.5}px</strong></label>
+              <input type="range" min="1" max="6" step="0.5" value={block.cornice_spessore || 1.5} onChange={e => onChange({ ...block, cornice_spessore: parseFloat(e.target.value) })} style={{ width: '100%' }} />
+            </div>
+            <div style={{ flex: '1 1 100px' }}>
+              <label style={lb}>Arrotondamento: <strong>{block.cornice_radius ?? 16}px</strong></label>
+              <input type="range" min="0" max="28" step="2" value={block.cornice_radius ?? 16} onChange={e => onChange({ ...block, cornice_radius: parseInt(e.target.value) })} style={{ width: '100%' }} />
+            </div>
+          </div>
+        </div>
+
+        {/* ── Sfondo ── */}
+        <div style={{ padding: '12px', background: '#F9FAFB', borderRadius: '8px', border: '1px solid #E5E7EB', display: 'flex', flexDirection: 'column', gap: '10px' }}>
+          <label style={{ ...lb, marginBottom: 0 }}>Sfondo box</label>
+          <div style={{ display: 'flex', gap: '8px', alignItems: 'center', flexWrap: 'wrap' }}>
+            {['#ffffff','#EEF3FF','#FFF0F7','#F9FAFB','#FFF8E6','#E8F5E9','#003DA5','#0A0A0A'].map(c => (
+              <button key={c} type="button" onClick={() => onChange({ ...block, sfondo: c })} style={{
+                width: '28px', height: '28px', borderRadius: '6px', border: `2px solid ${(block.sfondo || '#ffffff') === c ? '#003DA5' : '#E5E7EB'}`,
+                background: c, cursor: 'pointer', padding: 0, flexShrink: 0,
+              }} title={c} />
+            ))}
+            <div style={{ display: 'flex', alignItems: 'center', gap: '6px', marginLeft: '4px' }}>
+              <label style={{ ...lb, marginBottom: 0 }}>Custom</label>
+              <input type="color" value={block.sfondo || '#ffffff'} onChange={e => onChange({ ...block, sfondo: e.target.value })} style={{ width: '36px', height: '28px', border: 'none', cursor: 'pointer', borderRadius: '4px' }} />
+              <span style={{ fontSize: '11px', color: '#9CA3AF' }}>{block.sfondo || '#ffffff'}</span>
+            </div>
+          </div>
+        </div>
 
       {/* Lista voci */}
       <div style={{ display: 'flex', flexDirection: 'column', gap: '8px' }}>

@@ -415,12 +415,13 @@ function ProgrammaBlock({ block, cp }) {
   return (
     <Animate animation="fadeup">
       <div style={{
-        border: '1.5px dashed #D1D5DB',
-        borderRadius: '16px',
+        border: block.cornice_stile === 'none' ? 'none' : `${block.cornice_spessore ?? 1.5}px ${block.cornice_stile || 'dotted'} ${block.cornice_colore || '#D1D5DB'}`,
+        borderRadius: `${block.cornice_radius ?? 16}px`,
         padding: '28px 24px',
         marginBottom: '24px',
-        background: '#fff',
+        background: block.sfondo || '#ffffff',
         fontFamily: 'Inter, sans-serif',
+        boxShadow: block.cornice_stile === 'none' ? '0 2px 12px rgba(0,0,0,0.08)' : 'none',
       }}>
         {/* Titolo sezione */}
         {block.titolo && (
