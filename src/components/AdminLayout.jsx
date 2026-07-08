@@ -160,7 +160,7 @@ const s = {
   },
   header: {
     flexShrink: 0,
-    background: '#FFFFFF',
+    background: 'linear-gradient(120deg, #001B4D 0%, #003DA5 60%, #2E7BE0 100%)',
     borderBottom: 'none',
     display: 'flex',
     alignItems: 'center',
@@ -169,12 +169,12 @@ const s = {
     paddingTop: 'calc(env(safe-area-inset-top, 0px) + 10px)',
     paddingBottom: '10px',
     gap: '12px',
-    boxShadow: '0 1px 0 #E5E7EB, 0 2px 8px rgba(0,0,0,0.06)',
+    boxShadow: '0 3px 14px rgba(0,20,60,0.22)',
     boxSizing: 'border-box',
   },
   hamburger: {
     background: 'none', border: 'none', cursor: 'pointer',
-    color: '#0A0A0A', display: 'flex', alignItems: 'center',
+    color: '#FFFFFF', display: 'flex', alignItems: 'center',
     padding: '6px', borderRadius: '6px', flexShrink: 0,
   },
   titleBlock: {
@@ -185,7 +185,7 @@ const s = {
   pageTitle: {
     fontSize: '22px',
     fontWeight: '800',
-    color: '#0A0A0A',
+    color: '#FFFFFF',
     letterSpacing: '-0.02em',
     fontFamily: "'Inter', sans-serif",
     lineHeight: 1,
