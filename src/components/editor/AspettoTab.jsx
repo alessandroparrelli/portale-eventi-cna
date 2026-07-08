@@ -325,6 +325,17 @@ export default function AspettoTab({ event, setEvent }) {
             <ColorPicker label="Sfondo footer" value={tema.sfondo_footer} onChange={v => setT('sfondo_footer', v)} />
             <ColorPicker label="Colore testo footer" value={tema.testo_footer} onChange={v => setT('testo_footer', v)} />
           </div>
+          <button type="button" onClick={() => {
+            setT('sfondo_footer', 'linear-gradient(160deg, #003DA5 0%, #001F5C 100%)')
+            setT('testo_footer', '#ffffff')
+            setEvent(p => ({
+              ...p,
+              footer_modalita: 'ricco',
+              footer_html: '<p style="text-align:center;font-family:Inter,sans-serif;font-weight:700;font-size:14px;margin:0 0 12px">👉 Insieme è meglio 👈</p><p style="text-align:center;font-family:Inter,sans-serif;font-size:13px;line-height:1.7;margin:0"><strong>CNA di Roma</strong><br/>Via Cristoforo Colombo, 283/A, 00147 Roma<br/>Tel. 06570151 • Email info@cnaroma.it</p>',
+            }))
+          }} style={{ width: '100%', padding: '9px 14px', border: '1.5px solid #003DA5', borderRadius: '8px', background: '#EEF3FF', color: '#003DA5', fontSize: '12px', fontWeight: '700', cursor: 'pointer', fontFamily: "'Inter',sans-serif", display: 'flex', alignItems: 'center', justifyContent: 'center', gap: '6px' }}>
+            ↩ Ripristina footer di default
+          </button>
 
           {/* Modalità footer */}
           <div>
