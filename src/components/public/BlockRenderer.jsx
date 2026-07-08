@@ -422,12 +422,14 @@ function ProgrammaBlock({ block, cp }) {
 
   // SVG border overlay: disegna un rettangolo arrotondato con stroke-dasharray
   const SvgBorder = () => (
-    <svg style={{ position: 'absolute', inset: 0, width: '100%', height: '100%', overflow: 'visible', pointerEvents: 'none', borderRadius: `${radius}px` }}
-      preserveAspectRatio="none">
+    <svg
+      style={{ position: 'absolute', inset: 0, width: '100%', height: '100%', pointerEvents: 'none', display: 'block' }}
+      xmlns="http://www.w3.org/2000/svg"
+    >
       <rect
         x={spessore / 2} y={spessore / 2}
-        width={`calc(100% - ${spessore}px)`} height={`calc(100% - ${spessore}px)`}
-        rx={radius - spessore / 2} ry={radius - spessore / 2}
+        width="99%" height="99%"
+        rx={Math.max(0, radius - spessore / 2)} ry={Math.max(0, radius - spessore / 2)}
         fill="none"
         stroke={colore}
         strokeWidth={spessore}
