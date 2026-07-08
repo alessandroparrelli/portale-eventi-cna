@@ -360,6 +360,7 @@ export default function EventoEditorPage() {
     luogo:'', sottotitolo:'', footer_testo:'', footer_html:'', footer_modalita:'semplice', descrizione_html:'', immagine_hero:null, logo_url:null,
       modalita:'presenza', link_riunione:null,
       teatro_abilitato:false, teatro_capienza:null, teatro_note:null,
+      form_note:null,
       certificato_abilitato:false, certificato_titolo:null, certificato_invio_auto:true,
       certificato_colore:'#003DA5', certificato_logo_url:null, certificato_firma_nome:null, certificato_firma_ruolo:null,
       certificato_template:'laterale', certificato_config:{},
@@ -454,6 +455,7 @@ export default function EventoEditorPage() {
       data_fine: toUTCISOStr(ev.data_fine), luogo:ev.luogo||null,
         modalita:ev.modalita||'presenza', link_riunione:ev.link_riunione||null,
         teatro_abilitato:ev.teatro_abilitato||false, teatro_capienza:ev.teatro_capienza||null, teatro_note:ev.teatro_note||null,
+        form_note:ev.form_note||null,
         certificato_abilitato:ev.certificato_abilitato||false, certificato_titolo:ev.certificato_titolo||null,
         certificato_invio_auto:ev.certificato_invio_auto!==false, certificato_colore:ev.certificato_colore||'#003DA5',
         certificato_logo_url:ev.certificato_logo_url||null, certificato_firma_nome:ev.certificato_firma_nome||null, certificato_firma_ruolo:ev.certificato_firma_ruolo||null,
@@ -483,6 +485,7 @@ export default function EventoEditorPage() {
       teatro_abilitato:ev.teatro_abilitato||false,
       teatro_capienza:ev.teatro_capienza||null,
       teatro_note:ev.teatro_note||null,
+      form_note:ev.form_note||null,
     }
     if (isNew) {
       const { data } = await supabase.from('events').insert(payload).select().single()
@@ -755,6 +758,19 @@ export default function EventoEditorPage() {
                     </div>
                   )}
                 </div>
+              </div>
+
+              {/* ── Note nel form di iscrizione ── */}
+              <div style={{ gridColumn:'1/-1', background:'#FFFBEB', border:'1px solid #FDE68A', borderRadius:'10px', padding:'16px', display:'flex', flexDirection:'column', gap:'8px' }}>
+                <p style={{ margin:0, fontSize:'12px', fontWeight:'700', color:'#92400E', textTransform:'uppercase', letterSpacing:'.06em' }}>⚠️ Avvisi nel modulo di iscrizione</p>
+                <p style={{ margin:0, fontSize:'12px', color:'#78350F', lineHeight:'1.5' }}>Testo mostrato nella box di registrazione, sopra i campi. Usa "a capo" per separare più avvisi.</p>
+                <textarea
+                  value={event.form_note||''}
+                  onChange={e => updEvent(p => ({ ...p, form_note: e.target.value }))}
+                  placeholder={"Es.\nInserite un indirizzo email corretto: riceverete il QR code all'indirizzo indicato.\nInserite un numero di cellulare valido.\nVerificate i vostri dati prima di confermare."}
+                  rows={4}
+                  style={{ width:'100%', padding:'10px 12px', border:'1px solid #FCD34D', borderRadius:'6px', fontSize:'13px', fontFamily:"'Inter',sans-serif", resize:'vertical', background:'#FFFFF5', color:'#0A0A0A', outline:'none', boxSizing:'border-box', lineHeight:'1.6' }}
+                />
               </div>
 
               {/* ── Impostazioni email ── */}

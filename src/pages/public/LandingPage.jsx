@@ -629,6 +629,21 @@ export default function LandingPage() {
             </div>
           )}
 
+          {/* Avvisi / raccomandazioni configurabili dall'admin */}
+          {event?.form_note && (
+            <div style={{ marginBottom:'20px', background:'#FFFBEB', border:'1px solid #FDE68A', borderRadius:'10px', padding:'14px 16px' }}>
+              <p style={{ margin:'0 0 8px', fontSize:'12px', fontWeight:'700', color:'#92400E', textTransform:'uppercase', letterSpacing:'.06em' }}>⚠️ Informazioni importanti</p>
+              <div style={{ display:'flex', flexDirection:'column', gap:'6px' }}>
+                {event.form_note.split('\n').map((riga, i) => riga.trim() && (
+                  <div key={i} style={{ display:'flex', gap:'8px', alignItems:'flex-start' }}>
+                    <span style={{ color:'#D97706', fontSize:'13px', flexShrink:0, marginTop:'1px' }}>•</span>
+                    <p style={{ margin:0, fontSize:'13px', color:'#78350F', lineHeight:'1.5', fontWeight:'500' }}>{riga.trim()}</p>
+                  </div>
+                ))}
+              </div>
+            </div>
+          )}
+
           <FormIscrizione event={event} onSuccess={dati => {
               setFormVisible(false)
               setConferma(dati)
