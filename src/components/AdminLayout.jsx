@@ -74,7 +74,7 @@ function UserBox() {
       {/* Nome + badge */}
       <div style={{ display:'flex', flexDirection:'column', gap:'1px', minWidth:0 }}>
         <div style={{ display:'flex', alignItems:'center', gap:'4px' }}>
-          <span style={{ fontSize:'13px', fontWeight:'700', color:'#fff', whiteSpace:'nowrap', lineHeight:1, fontFamily:"'Inter',sans-serif" }}>
+          <span style={{ fontSize:'13px', fontWeight:'700', color:'#0A0A0A', whiteSpace:'nowrap', lineHeight:1, fontFamily:"'Inter',sans-serif" }}>
             {displayName}
           </span>
           {isVerified && <VerifiedBadge />}
