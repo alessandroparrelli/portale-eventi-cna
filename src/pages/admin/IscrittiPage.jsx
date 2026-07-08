@@ -95,12 +95,13 @@ export default function IscrittiPage() {
   // Teatro
   const [teatroAbilitato, setTeatroAbilitato] = useState(false)
   const [tabAttivo, setTabAttivo] = useState('iscritti') // 'iscritti' | 'teatro'
-  const [postoEdit, setPostoEdit] = useState({}) // { [reg_id]: number|string }
+  const [postoEdit, setPostoEdit] = useState({}) // { [reg_id]: string }
   const [postoSaving, setPostoSaving] = useState({}) // { [reg_id]: bool }
   const [postoError, setPostoError] = useState({}) // { [reg_id]: string }
   const [invioPostoInCorso, setInvioPostoInCorso] = useState(false)
   const [invioPostoRis, setInvioPostoRis] = useState(null)
   const [dryRunRis, setDryRunRis] = useState(null)
+  const [teatroSelezione, setTeatroSelezione] = useState(new Set()) // Set di reg_id selezionati
 
   function toggleSort(col) {
     if (sortCol === col) setSortDir(d => d === 'asc' ? 'desc' : 'asc')
@@ -153,20 +154,12 @@ export default function IscrittiPage() {
   }
 
   async function salvaPosto(regId, valore) {
-    const num = parseInt(valore, 10)
-    if (!valore && valore !== 0) {
-      // Cancella posto
-      setPostoSaving(p => ({ ...p, [regId]: true }))
-      const { error } = await supabase.from('registrations').update({ numero_posto: null }).eq('id', regId)
-      setPostoSaving(p => ({ ...p, [regId]: false }))
-      if (error) setPostoError(p => ({ ...p, [regId]: error.message }))
-      else { setPostoError(p => ({ ...p, [regId]: null })); loadRegs() }
-      return
-    }
-    if (isNaN(num) || num < 1) { setPostoError(p => ({ ...p, [regId]: 'Numero non valido' })); return }
+    const val = (valore || '').trim()
     setPostoSaving(p => ({ ...p, [regId]: true }))
     setPostoError(p => ({ ...p, [regId]: null }))
-    const { error } = await supabase.from('registrations').update({ numero_posto: num }).eq('id', regId)
+    const { error } = await supabase.from('registrations')
+      .update({ numero_posto: val || null })
+      .eq('id', regId)
     setPostoSaving(p => ({ ...p, [regId]: false }))
     if (error) {
       setPostoError(p => ({ ...p, [regId]: error.code === '23505' ? 'Posto già assegnato ad altro iscritto' : error.message }))
@@ -176,14 +169,18 @@ export default function IscrittiPage() {
     }
   }
 
-  async function inviaMailPosti(dry = false) {
+  async function inviaMailPosti(dry = false, ids = null) {
+    // ids: null = tutti, [] = nessuno (non chiamare), [id1,...] = selezionati
     if (!selectedEvento) return
-    if (dry) { setDryRunRis(null) } else { setInvioPostoInCorso(true); setInvioPostoRis(null) }
+    if (dry) setDryRunRis(null)
+    else { setInvioPostoInCorso(true); setInvioPostoRis(null) }
     try {
+      const body = { event_id: selectedEvento, dry_run: dry }
+      if (ids !== null) body.registration_ids = ids
       const res = await fetch('https://hnkhckcclgabunkqfmrz.supabase.co/functions/v1/assegna-posto', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ event_id: selectedEvento, dry_run: dry }),
+        body: JSON.stringify(body),
       })
       const data = await res.json()
       if (dry) setDryRunRis(data)
@@ -193,6 +190,23 @@ export default function IscrittiPage() {
       else setInvioPostoRis({ error: String(e) })
     }
     if (!dry) setInvioPostoInCorso(false)
+  }
+
+  function toggleSelezioneTeatroReg(id) {
+    setTeatroSelezione(prev => {
+      const next = new Set(prev)
+      next.has(id) ? next.delete(id) : next.add(id)
+      return next
+    })
+  }
+
+  function toggleSelezioneTeatroTutti(regs) {
+    const conPosto = regs.filter(r => r.numero_posto && r.email).map(r => r.id)
+    setTeatroSelezione(prev => {
+      const tuttiSelezionati = conPosto.every(id => prev.has(id))
+      if (tuttiSelezionati) return new Set()
+      return new Set(conPosto)
+    })
   }
 
   useEffect(() => {
@@ -741,12 +755,13 @@ export default function IscrittiPage() {
       {/* TAB TEATRO */}
       {selectedEvento && teatroAbilitato && tabAttivo === 'teatro' && (
         <div>
+          {/* Stats */}
           <div style={{ display:'flex', gap:'12px', flexWrap:'wrap', marginBottom:'16px' }}>
             {[
-              { label:'Con posto', value: registrations.filter(r => r.numero_posto != null).length, color:'#003DA5' },
-              { label:'Senza posto', value: registrations.filter(r => r.numero_posto == null).length, color:'#DC2626' },
+              { label:'Con posto', value: registrations.filter(r => r.numero_posto).length, color:'#003DA5' },
+              { label:'Senza posto', value: registrations.filter(r => !r.numero_posto).length, color:'#DC2626' },
               { label:'Presenza confermata', value: registrations.filter(r => r.presenza_confermata).length, color:'#059669' },
-              { label:'In attesa conferma', value: registrations.filter(r => r.numero_posto != null && !r.presenza_confermata).length, color:'#D97706' },
+              { label:'In attesa conferma', value: registrations.filter(r => r.numero_posto && !r.presenza_confermata).length, color:'#D97706' },
             ].map(st => (
               <div key={st.label} style={{ background:'#fff', border:'1px solid #E5E7EB', borderRadius:'8px', padding:'14px 20px', flex:1, minWidth:'140px' }}>
                 <p style={{ margin:'0 0 4px', fontSize:'24px', fontWeight:'900', color:st.color, letterSpacing:'-0.02em' }}>{st.value}</p>
@@ -754,39 +769,88 @@ export default function IscrittiPage() {
               </div>
             ))}
           </div>
-          <div style={{ display:'flex', gap:'10px', flexWrap:'wrap', marginBottom:'16px', alignItems:'center' }}>
-            <Btn variant="secondary" onClick={() => inviaMailPosti(true)} size="md">🔍 Anteprima invio</Btn>
-            <Btn variant="primary" onClick={() => inviaMailPosti(false)} disabled={invioPostoInCorso} size="md">
-              {invioPostoInCorso ? '📨 Invio in corso…' : '📨 Invia mail posto + QR a tutti'}
-            </Btn>
+
+          {/* Barra azioni invio */}
+          <div style={{ background:'#F9FAFB', border:'1px solid #E5E7EB', borderRadius:'10px', padding:'14px 16px', marginBottom:'16px' }}>
+            <div style={{ display:'flex', gap:'10px', flexWrap:'wrap', alignItems:'center' }}>
+              {/* Invio massivo a tutti */}
+              <Btn variant="primary" onClick={() => inviaMailPosti(false, null)} disabled={invioPostoInCorso} size="md">
+                {invioPostoInCorso ? '📨 Invio…' : '📨 Invia a tutti'}
+              </Btn>
+
+              {/* Invio ai selezionati */}
+              {teatroSelezione.size > 0 && (
+                <Btn variant="secondary" onClick={() => inviaMailPosti(false, [...teatroSelezione])} disabled={invioPostoInCorso} size="md">
+                  📨 Invia ai selezionati ({teatroSelezione.size})
+                </Btn>
+              )}
+
+              <div style={{ flex:1 }} />
+
+              {/* Dry run */}
+              <Btn variant="ghost" onClick={() => inviaMailPosti(true, teatroSelezione.size > 0 ? [...teatroSelezione] : null)} size="md">
+                🔍 {teatroSelezione.size > 0 ? `Anteprima selezionati (${teatroSelezione.size})` : 'Anteprima tutti'}
+              </Btn>
+            </div>
+
+            {/* Info selezione */}
+            {teatroSelezione.size > 0 && (
+              <div style={{ marginTop:'10px', display:'flex', alignItems:'center', gap:'10px' }}>
+                <span style={{ fontSize:'12px', color:'#374151', fontWeight:'600' }}>
+                  {teatroSelezione.size} selezionati
+                </span>
+                <button onClick={() => setTeatroSelezione(new Set())}
+                  style={{ fontSize:'12px', color:'#DC2626', background:'none', border:'none', cursor:'pointer', padding:0, fontWeight:'600' }}>
+                  Deseleziona tutto
+                </button>
+              </div>
+            )}
           </div>
+
+          {/* Risultato dry run */}
           {dryRunRis && (
             <div style={{ marginBottom:'14px', padding:'12px 18px', borderRadius:'8px', background: dryRunRis.error ? '#FEF2F2' : '#EFF6FF', border:`1px solid ${dryRunRis.error ? '#FECACA' : '#BFDBFE'}` }}>
               <div style={{ display:'flex', justifyContent:'space-between', alignItems:'center' }}>
                 <p style={{ margin:0, fontSize:'13px', fontWeight:'700', color: dryRunRis.error ? '#DC2626' : '#1D4ED8' }}>
-                  {dryRunRis.error ? `❌ ${dryRunRis.error}` : `📋 Dry run: ${dryRunRis.count} iscritti riceverebbero la mail.`}
+                  {dryRunRis.error ? `❌ ${dryRunRis.error}` : `📋 ${dryRunRis.count} iscritti riceverebbero la mail.`}
                 </p>
                 <button onClick={() => setDryRunRis(null)} style={{ background:'none', border:'none', cursor:'pointer', color:'#9CA3AF', fontSize:'18px', padding:0 }}>×</button>
               </div>
-              {dryRunRis.sample?.length > 0 && <p style={{ margin:'6px 0 0', fontSize:'12px', color:'#374151' }}>Es: {dryRunRis.sample.map(r => `${r.nome} (posto ${r.numero_posto})`).join(' · ')}</p>}
+              {dryRunRis.sample?.length > 0 && <p style={{ margin:'6px 0 0', fontSize:'12px', color:'#374151' }}>Es: {dryRunRis.sample.map(r => `${r.nome} (${r.numero_posto})`).join(' · ')}</p>}
             </div>
           )}
+
+          {/* Risultato invio */}
           {invioPostoRis && (
             <div style={{ marginBottom:'14px', padding:'12px 18px', borderRadius:'8px', background: invioPostoRis.error ? '#FEF2F2' : '#F0FDF4', border:`1px solid ${invioPostoRis.error ? '#FECACA' : '#BBF7D0'}` }}>
               <div style={{ display:'flex', justifyContent:'space-between', alignItems:'center' }}>
                 <p style={{ margin:0, fontSize:'13px', fontWeight:'700', color: invioPostoRis.error ? '#DC2626' : '#059669' }}>
-                  {invioPostoRis.error ? `❌ ${invioPostoRis.error}` : `✅ ${invioPostoRis.sent} mail inviate su ${invioPostoRis.total} iscritti con posto${invioPostoRis.failed > 0 ? ` · ${invioPostoRis.failed} fallite` : ''}`}
+                  {invioPostoRis.error ? `❌ ${invioPostoRis.error}` : `✅ ${invioPostoRis.sent} mail inviate su ${invioPostoRis.total}${invioPostoRis.failed > 0 ? ` · ${invioPostoRis.failed} fallite` : ''}`}
                 </p>
                 <button onClick={() => setInvioPostoRis(null)} style={{ background:'none', border:'none', cursor:'pointer', color:'#9CA3AF', fontSize:'18px', padding:0 }}>×</button>
               </div>
+              {invioPostoRis.errors?.length > 0 && (
+                <p style={{ margin:'6px 0 0', fontSize:'11px', color:'#DC2626' }}>{invioPostoRis.errors.join(' · ')}</p>
+              )}
             </div>
           )}
+
+          {/* Tabella */}
           <div style={s.card}>
             <div style={{ overflowX:'auto' }}>
               <table style={s.table}>
                 <thead>
                   <tr>
-                    {['Iscritto','Email','Posto n.','Conferma presenza','Confermato il'].map((h,i) => (
+                    <th style={{ padding:'10px 12px', background:'linear-gradient(135deg,#003DA5,#1a56db)', color:'#fff', width:'40px' }}>
+                      <input type="checkbox"
+                        checked={registrations.filter(r => r.numero_posto && r.email).length > 0 &&
+                          registrations.filter(r => r.numero_posto && r.email).every(r => teatroSelezione.has(r.id))}
+                        onChange={() => toggleSelezioneTeatroTutti(registrations)}
+                        style={{ cursor:'pointer', width:'16px', height:'16px', accentColor:'#fff' }}
+                        title="Seleziona/deseleziona tutti (con posto e email)"
+                      />
+                    </th>
+                    {['Iscritto','Email','Posto','Conferma presenza','Confermato il','Azioni'].map((h,i) => (
                       <th key={i} style={{ padding:'10px 14px', background:'linear-gradient(135deg,#003DA5,#1a56db)', color:'#fff', fontSize:'11px', fontWeight:'700', letterSpacing:'.05em', textTransform:'uppercase', textAlign:'left', whiteSpace:'nowrap' }}>{h}</th>
                     ))}
                   </tr>
@@ -794,20 +858,37 @@ export default function IscrittiPage() {
                 <tbody>
                   {registrations.map((r, i) => {
                     const editVal = postoEdit[r.id]
-                    const confirmed = r.presenza_confermata
+                    const selezionato = teatroSelezione.has(r.id)
                     return (
-                      <tr key={r.id} style={{ backgroundColor: i % 2 === 0 ? '#fff' : '#F9FAFB', borderBottom:'1px solid #F3F4F6' }}>
+                      <tr key={r.id} style={{ backgroundColor: selezionato ? '#EFF6FF' : (i % 2 === 0 ? '#fff' : '#F9FAFB'), borderBottom:'1px solid #F3F4F6', transition:'background .1s' }}>
+                        {/* Checkbox */}
+                        <td style={{ ...s.td, textAlign:'center', paddingLeft:'12px', paddingRight:'12px' }}>
+                          {r.numero_posto && r.email ? (
+                            <input type="checkbox"
+                              checked={selezionato}
+                              onChange={() => toggleSelezioneTeatroReg(r.id)}
+                              style={{ cursor:'pointer', width:'16px', height:'16px', accentColor:'#003DA5' }}
+                            />
+                          ) : (
+                            <span title="Nessun posto o email mancante" style={{ color:'#D1D5DB', fontSize:'12px' }}>—</span>
+                          )}
+                        </td>
                         <td style={s.td}><p style={s.name}>{r.nome} {r.cognome}</p>{r.ragione_sociale && <p style={s.sub}>{r.ragione_sociale}</p>}</td>
-                        <td style={s.td}><span style={s.cell}>{r.email || '—'}</span></td>
+                        <td style={s.td}><span style={s.cell}>{r.email || <span style={{color:'#DC2626',fontSize:'12px'}}>⚠ Mancante</span>}</span></td>
+                        {/* Input posto — testo libero */}
                         <td style={s.td}>
                           <div style={{ display:'flex', alignItems:'center', gap:'6px' }}>
-                            <input type="number" min="1"
+                            <input
+                              type="text"
                               value={editVal !== undefined ? editVal : (r.numero_posto ?? '')}
                               onChange={e => setPostoEdit(p => ({ ...p, [r.id]: e.target.value }))}
                               onBlur={e => { if (editVal !== undefined) salvaPosto(r.id, e.target.value) }}
-                              onKeyDown={e => { if (e.key==='Enter') salvaPosto(r.id, e.target.value); if (e.key==='Escape') setPostoEdit(p=>({...p,[r.id]:undefined})) }}
-                              style={{ width:'80px', padding:'6px 10px', border:`1px solid ${postoError[r.id] ? '#DC2626' : '#D1D5DB'}`, borderRadius:'6px', fontSize:'14px', fontWeight:'700', color: r.numero_posto ? '#003DA5' : '#6B7280', fontFamily:"'Inter',sans-serif" }}
-                              placeholder="—"
+                              onKeyDown={e => {
+                                if (e.key === 'Enter') { e.target.blur(); salvaPosto(r.id, e.target.value) }
+                                if (e.key === 'Escape') setPostoEdit(p => ({ ...p, [r.id]: undefined }))
+                              }}
+                              style={{ width:'110px', padding:'6px 10px', border:`1px solid ${postoError[r.id] ? '#DC2626' : '#D1D5DB'}`, borderRadius:'6px', fontSize:'13px', fontWeight:'700', color: r.numero_posto ? '#003DA5' : '#6B7280', fontFamily:"'Inter',sans-serif" }}
+                              placeholder="es. Platea 1A"
                             />
                             {postoSaving[r.id] && <span style={{ fontSize:'12px', color:'#9CA3AF' }}>⏳</span>}
                             {r.numero_posto && !postoSaving[r.id] && <span style={{ fontSize:'12px', color:'#059669' }}>✓</span>}
@@ -815,11 +896,25 @@ export default function IscrittiPage() {
                           {postoError[r.id] && <p style={{ margin:'4px 0 0', fontSize:'11px', color:'#DC2626' }}>{postoError[r.id]}</p>}
                         </td>
                         <td style={s.td}>
-                          {confirmed
+                          {r.presenza_confermata
                             ? <span style={{ fontSize:'12px', fontWeight:'700', color:'#059669', background:'#F0FDF4', padding:'4px 10px', borderRadius:'999px' }}>✓ Confermata</span>
                             : <span style={{ fontSize:'12px', color:'#9CA3AF', background:'#F9FAFB', padding:'4px 10px', borderRadius:'999px' }}>In attesa</span>}
                         </td>
                         <td style={s.td}><span style={{ fontSize:'12px', color:'#374151' }}>{r.presenza_confermata_at ? formatDt(r.presenza_confermata_at) : '—'}</span></td>
+                        {/* Invio singolo */}
+                        <td style={s.td}>
+                          {r.numero_posto && r.email ? (
+                            <button
+                              onClick={() => inviaMailPosti(false, [r.id])}
+                              disabled={invioPostoInCorso}
+                              title="Invia mail posto a questo iscritto"
+                              style={{ background:'none', border:'1px solid #E5E7EB', borderRadius:'6px', padding:'5px 10px', cursor:'pointer', fontSize:'12px', color:'#374151', fontFamily:"'Inter',sans-serif", fontWeight:'600', whiteSpace:'nowrap' }}>
+                              📨 Invia
+                            </button>
+                          ) : (
+                            <span style={{ fontSize:'11px', color:'#D1D5DB' }}>—</span>
+                          )}
+                        </td>
                       </tr>
                     )
                   })}
