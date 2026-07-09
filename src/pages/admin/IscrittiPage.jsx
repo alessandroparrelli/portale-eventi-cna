@@ -14,7 +14,7 @@ import EventSelector from '../../components/EventSelector'
 
 function formatDt(ts) {
   if (!ts) return '—'
-  return new Date(ts).toLocaleString('it-IT', { day:'2-digit', month:'2-digit', year:'numeric', hour:'2-digit', minute:'2-digit' })
+  return new Date(ts).toLocaleString('it-IT', { day:'2-digit', month:'2-digit', year:'numeric', hour:'2-digit', minute:'2-digit', second:'2-digit', timeZone:'Europe/Rome' })
 }
 
 function SortableHead({ columns, sortCol, sortDir, onSort }) {
@@ -329,7 +329,7 @@ export default function IscrittiPage() {
         : { bg:C.disdBg, fg:C.disdFg, br:C.disdBr, label:'Non associato' }
     }
 
-    const cols = ['Nome','Cognome','Ragione Sociale','P.IVA','Email','Cellulare',
+    const cols = ['#','Nome','Cognome','Ragione Sociale','P.IVA','Email','Cellulare',
       'Mestiere','CAP','Stato iscrizione','Presente','Check-in','Iscritto il',
       'Ruolo gruppo','Registrato da',
       ...formFields.map(f => f.label),
@@ -360,7 +360,7 @@ export default function IscrittiPage() {
       width: col==='Ragione Sociale'?38 : col==='Email'?30 : col==='P.IVA'?15 :
              col==='Stato associazione'?20 : col==='Data stipula'?14 :
              col==='Nome'||col==='Cognome'?18 : col==='Mestiere'?22 :
-             col==='Ruolo gruppo'?14 : col==='Registrato da'?28 :
+             col==='#'?6 : col==='Ruolo gruppo'?14 : col==='Registrato da'?28 :
              extraLabels.has(col) ? 24 : 15
     }))
 
@@ -459,9 +459,9 @@ export default function IscrittiPage() {
       const br = stato ? stato.br : C.bordoCh
 
       const values = [
-        r.nome||'', r.cognome||'', r.ragione_sociale||'', r.partita_iva||'',
+        r.numero_iscrizione||'', r.nome||'', r.cognome||'', r.ragione_sociale||'', r.partita_iva||'',
         r.email||'', r.cellulare||'', getMestiere(r.mestiere_id), r.cap||'',
-        r.stato||'', r.presente?'Sì':'No', formatDt(r.checkin_at), formatDt(r.created_at),
+        r.stato||'', r.presente?'Sì':'No', formatDt(r.checkin_at), r.created_at ? new Date(r.created_at).toLocaleString('it-IT',{timeZone:'Europe/Rome',day:'2-digit',month:'2-digit',year:'numeric',hour:'2-digit',minute:'2-digit',second:'2-digit'}) : '',
         r.gruppo_id === r.id ? 'Capogruppo' : r.referente_id ? 'Accompagnatore' : '',
         r.referente_id && referentiMap[r.referente_id] ? referentiMap[r.referente_id] : '',
         ...formFields.map(f => r[f.colonna_db]||''),
@@ -1045,6 +1045,7 @@ export default function IscrittiPage() {
                     { label:'Nominativo',  color:'blue',    sortable:true },
                     { label:'Email',       color:'cyan',    sortable:true, hideOnMobile:true },
                     { label:'Mestiere',    color:'violet',  sortable:true, hideOnMobile:true },
+                    { label:'#', color:'gray', sortable:false, hideOnMobile:true },
                     { label:'Iscritto il', color:'amber',   sortable:true, hideOnMobile:true },
                     { label:'Stato',       color:'green',   sortable:true },
                     ...formFields.map(f => ({ label: f.label, color:'purple', sortable:true, hideOnMobile:true })),
@@ -1077,6 +1078,7 @@ export default function IscrittiPage() {
                         </td>
                         <td style={s.td} className="col-hide-mobile"><span style={s.cell}>{r.email||'—'}</span></td>
                         <td style={s.td} className="col-hide-mobile"><span style={s.cell}>{getMestiere(r.mestiere_id)}</span></td>
+                        <td style={s.td} className="col-hide-mobile"><span style={{ fontSize:'12px', fontWeight:'700', color:'#003DA5', fontFamily:'monospace' }}>#{r.numero_iscrizione||'—'}</span></td>
                         <td style={s.td} className="col-hide-mobile"><span style={s.cell}>{formatDt(r.created_at)}</span></td>
                         <td style={s.td}><PresenzaBadge stato={r.stato}/></td>
                         {formFields.map(f => (
