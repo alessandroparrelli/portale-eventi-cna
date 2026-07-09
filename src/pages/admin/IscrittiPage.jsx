@@ -736,13 +736,13 @@ export default function IscrittiPage() {
               })()}
             </span>
           )}
+          <Btn variant="secondary" onClick={loadRegs} size="md"><RefreshCw size={16}/> Aggiorna</Btn>
           <div style={{flex:1}}/>
           {eventi.find(e=>e.id===selectedEvento)?.certificato_abilitato && (
             <Btn variant="secondary" onClick={inviaCertificati} disabled={invioInCorso} size="md">
               🏆 {invioInCorso ? 'Invio…' : 'Invia certificati'}
             </Btn>
           )}
-          <Btn variant="secondary" onClick={loadRegs} size="md"><RefreshCw size={16}/> Aggiorna</Btn>
           <Btn variant="secondary" onClick={downloadTemplate} size="md"><Download size={16}/> Template</Btn>
           <Btn variant="secondary" onClick={() => { setImportModal(true); setImportDone(null); setImportPreview([]); setImportErrors([]) }} size="md"><Upload size={16}/> Importa</Btn>
           <Btn variant="secondary" onClick={exportExcel} size="md"><Download size={16}/> Esporta Excel</Btn>
