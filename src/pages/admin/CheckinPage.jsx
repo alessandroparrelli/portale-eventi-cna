@@ -29,6 +29,9 @@ function OfflineBanner() {
   )
 }
 
+const TICKET_BG   = 'linear-gradient(160deg, #4a0030 0%, #6b0042 50%, #3d0028 100%)'
+const TICKET_STUB = 'linear-gradient(160deg, #2d001e 0%, #450030 100%)'
+
 function ResultBanner({ result, onClose }) {
   if (!result) return null
   const ok      = result.ok
@@ -36,79 +39,73 @@ function ResultBanner({ result, onClose }) {
   const notFound= result.error === 'non_trovato'
 
   if (notFound) return (
-    <div style={{ borderRadius: '12px', marginBottom: '14px', background: '#1a1a2e', border: '1px solid rgba(220,38,38,.4)', overflow: 'hidden', boxShadow: '0 4px 24px rgba(220,38,38,.2)' }}>
-      <div style={{ padding: '16px 18px', display: 'flex', gap: '12px', alignItems: 'center' }}>
-        <div style={{ width: '40px', height: '40px', borderRadius: '50%', background: 'rgba(220,38,38,.2)', display: 'flex', alignItems: 'center', justifyContent: 'center', flexShrink: 0 }}>
-          <XCircle size={22} color="#ef4444" />
+    <div style={{ borderRadius: '14px', marginBottom: '14px', background: TICKET_BG, border: '1px solid rgba(220,38,38,.4)', overflow: 'hidden', boxShadow: '0 6px 28px rgba(0,0,0,.4)' }}>
+      <div style={{ padding: '20px 22px', display: 'flex', gap: '14px', alignItems: 'center' }}>
+        <div style={{ width: '48px', height: '48px', borderRadius: '50%', background: 'rgba(220,38,38,.2)', display: 'flex', alignItems: 'center', justifyContent: 'center', flexShrink: 0 }}>
+          <XCircle size={26} color="#ef4444" />
         </div>
         <div style={{ flex: 1 }}>
-          <p style={{ fontWeight: '800', fontSize: '15px', color: '#fff', margin: 0 }}>QR non trovato</p>
-          <p style={{ fontSize: '12px', color: 'rgba(255,255,255,.4)', margin: '2px 0 0' }}>Nessun iscritto trovato con questo QR.</p>
+          <p style={{ fontWeight: '900', fontSize: '18px', color: '#fff', margin: 0 }}>QR non trovato</p>
+          <p style={{ fontSize: '14px', color: 'rgba(255,255,255,.5)', margin: '3px 0 0' }}>Nessun iscritto trovato con questo QR.</p>
         </div>
-        <button onClick={onClose} style={{ background: 'rgba(255,255,255,.1)', border: 'none', borderRadius: '6px', cursor: 'pointer', color: 'rgba(255,255,255,.6)', width: '28px', height: '28px', display: 'flex', alignItems: 'center', justifyContent: 'center', fontSize: '18px', flexShrink: 0 }}>×</button>
+        <button onClick={onClose} style={{ background: 'rgba(255,255,255,.1)', border: 'none', borderRadius: '8px', cursor: 'pointer', color: 'rgba(255,255,255,.6)', width: '34px', height: '34px', display: 'flex', alignItems: 'center', justifyContent: 'center', fontSize: '20px', flexShrink: 0 }}>×</button>
       </div>
     </div>
   )
 
-  const accentColor = ok ? '#22c55e' : '#f59e0b'
-  const bgAccent    = ok ? 'rgba(22,163,74,.15)' : 'rgba(217,119,6,.15)'
+  const accentColor = ok ? '#4ade80' : '#fbbf24'
+  const bgAccent    = ok ? 'rgba(74,222,128,.15)' : 'rgba(251,191,36,.15)'
 
   return (
-    <div style={{
-      marginBottom: '14px',
-      filter: 'drop-shadow(0 8px 24px rgba(0,0,0,.4))',
-    }}>
-      <div style={{ display: 'flex', borderRadius: '14px', overflow: 'hidden', background: 'linear-gradient(160deg, #1a1a2e 0%, #16213e 60%, #0f3460 100%)' }}>
+    <div style={{ marginBottom: '14px', filter: 'drop-shadow(0 10px 30px rgba(0,0,0,.5))' }}>
+      <div style={{ display: 'flex', borderRadius: '16px', overflow: 'hidden', background: TICKET_BG }}>
 
         {/* Corpo principale */}
-        <div style={{ flex: 1, padding: '18px 18px 18px 20px' }}>
-          {/* Status */}
-          <div style={{ display: 'flex', alignItems: 'center', gap: '8px', marginBottom: '10px' }}>
-            <div style={{ width: '32px', height: '32px', borderRadius: '50%', background: bgAccent, display: 'flex', alignItems: 'center', justifyContent: 'center', flexShrink: 0 }}>
-              {ok ? <CheckCircle2 size={18} color={accentColor} /> : <AlertTriangle size={18} color={accentColor} />}
+        <div style={{ flex: 1, padding: '24px 22px 24px 26px' }}>
+          <div style={{ display: 'flex', alignItems: 'center', gap: '10px', marginBottom: '14px' }}>
+            <div style={{ width: '40px', height: '40px', borderRadius: '50%', background: bgAccent, display: 'flex', alignItems: 'center', justifyContent: 'center', flexShrink: 0 }}>
+              {ok ? <CheckCircle2 size={22} color={accentColor} /> : <AlertTriangle size={22} color={accentColor} />}
             </div>
-            <p style={{ fontWeight: '900', fontSize: '16px', color: '#fff', margin: 0, letterSpacing: '-.02em' }}>
+            <p style={{ fontWeight: '900', fontSize: '20px', color: '#fff', margin: 0, letterSpacing: '-.02em' }}>
               {ok ? '✓ Check-in confermato' : '⚠ Già registrato'}
             </p>
-            <button onClick={onClose} style={{ marginLeft: 'auto', background: 'rgba(255,255,255,.1)', border: 'none', borderRadius: '6px', cursor: 'pointer', color: 'rgba(255,255,255,.5)', width: '26px', height: '26px', display: 'flex', alignItems: 'center', justifyContent: 'center', fontSize: '16px', flexShrink: 0 }}>×</button>
+            <button onClick={onClose} style={{ marginLeft: 'auto', background: 'rgba(255,255,255,.12)', border: 'none', borderRadius: '8px', cursor: 'pointer', color: 'rgba(255,255,255,.6)', width: '32px', height: '32px', display: 'flex', alignItems: 'center', justifyContent: 'center', fontSize: '18px', flexShrink: 0 }}>×</button>
           </div>
 
-          <div style={{ borderTop: '1px dashed rgba(255,255,255,.12)', margin: '0 0 10px' }} />
+          <div style={{ borderTop: '1px dashed rgba(255,255,255,.15)', margin: '0 0 14px' }} />
 
+          <p style={{ fontSize: '11px', fontWeight: '700', color: 'rgba(255,255,255,.4)', textTransform: 'uppercase', letterSpacing: '.12em', margin: '0 0 4px' }}>Partecipante</p>
           {result.nome && (
-            <p style={{ fontSize: '10px', fontWeight: '700', color: 'rgba(255,255,255,.4)', textTransform: 'uppercase', letterSpacing: '.1em', margin: '0 0 2px' }}>Partecipante</p>
-          )}
-          {result.nome && (
-            <p style={{ fontSize: '17px', fontWeight: '900', color: '#fff', margin: '0 0 2px', letterSpacing: '-.02em' }}>{result.nome}</p>
+            <p style={{ fontSize: '22px', fontWeight: '900', color: '#fff', margin: '0 0 4px', letterSpacing: '-.03em' }}>{result.nome}</p>
           )}
           {result.ragione_sociale && (
-            <p style={{ fontSize: '12px', color: 'rgba(255,255,255,.45)', margin: '0 0 8px' }}>{result.ragione_sociale}</p>
+            <p style={{ fontSize: '14px', color: 'rgba(255,255,255,.5)', margin: '0 0 6px' }}>{result.ragione_sociale}</p>
           )}
           {double && result.checkin_at && (
-            <p style={{ fontSize: '11px', color: 'rgba(255,255,255,.35)', margin: '4px 0 0' }}>
+            <p style={{ fontSize: '13px', color: 'rgba(255,255,255,.35)', margin: '4px 0 0' }}>
               Registrato alle {new Date(result.checkin_at).toLocaleTimeString('it-IT', { hour: '2-digit', minute: '2-digit' })}
             </p>
           )}
         </div>
 
         {/* Separatore dentellato */}
-        <div style={{ width: '16px', display: 'flex', flexDirection: 'column', alignItems: 'center', justifyContent: 'space-between', background: 'linear-gradient(160deg, #1a1a2e 0%, #16213e 60%, #0f3460 100%)', flexShrink: 0, position: 'relative' }}>
-          <div style={{ width: '16px', height: '8px', background: 'rgba(0,0,0,0)', borderRadius: '0 0 8px 8px' }} />
-          <div style={{ flex: 1, borderLeft: '2px dashed rgba(255,255,255,.12)' }} />
-          <div style={{ width: '16px', height: '8px', background: 'rgba(0,0,0,0)', borderRadius: '8px 8px 0 0' }} />
+        <div style={{ width: '20px', display: 'flex', flexDirection: 'column', alignItems: 'center', background: TICKET_BG, flexShrink: 0 }}>
+          <div style={{ width: '20px', height: '10px', background: 'rgba(0,0,0,0)', borderRadius: '0 0 10px 10px' }} />
+          <div style={{ flex: 1, borderLeft: '2px dashed rgba(255,255,255,.15)' }} />
+          <div style={{ width: '20px', height: '10px', background: 'rgba(0,0,0,0)', borderRadius: '10px 10px 0 0' }} />
         </div>
 
         {/* Stub con posto */}
-        <div style={{ width: '80px', flexShrink: 0, padding: '16px 10px', background: 'linear-gradient(160deg, #0f3460 0%, #16213e 100%)', display: 'flex', flexDirection: 'column', alignItems: 'center', justifyContent: 'center', gap: '6px' }}>
-          <p style={{ fontSize: '8px', fontWeight: '700', color: 'rgba(255,255,255,.3)', textTransform: 'uppercase', letterSpacing: '.1em', writingMode: 'vertical-rl', transform: 'rotate(180deg)', margin: 0 }}>
+        <div style={{ width: '96px', flexShrink: 0, padding: '20px 14px', background: TICKET_STUB, display: 'flex', flexDirection: 'column', alignItems: 'center', justifyContent: 'center', gap: '8px' }}>
+          <p style={{ fontSize: '10px', fontWeight: '700', color: 'rgba(255,255,255,.35)', textTransform: 'uppercase', letterSpacing: '.1em', writingMode: 'vertical-rl', transform: 'rotate(180deg)', margin: 0 }}>
             Posto
           </p>
           {result.numero_posto ? (
-            <p style={{ fontSize: '14px', fontWeight: '900', color: '#FFD700', writingMode: 'vertical-rl', transform: 'rotate(180deg)', margin: 0, letterSpacing: '.03em', textAlign: 'center' }}>
+            <p style={{ fontSize: '16px', fontWeight: '900', color: '#FFD700', writingMode: 'vertical-rl', transform: 'rotate(180deg)', margin: 0, letterSpacing: '.04em' }}>
               {result.numero_posto}
             </p>
           ) : (
-            <p style={{ fontSize: '11px', color: 'rgba(255,255,255,.2)', writingMode: 'vertical-rl', transform: 'rotate(180deg)', margin: 0 }}>—</p>
+            <p style={{ fontSize: '13px', color: 'rgba(255,255,255,.2)', writingMode: 'vertical-rl', transform: 'rotate(180deg)', margin: 0 }}>—</p>
           )}
         </div>
 
@@ -642,127 +639,114 @@ export default function CheckinPage() {
       {/* ── Modal biglietto check-in manuale ── */}
       {ticketReg && (
         <div style={{
-          position: 'fixed', inset: 0, background: 'rgba(0,0,0,.75)',
+          position: 'fixed', inset: 0, background: 'rgba(0,0,0,.8)',
           display: 'flex', alignItems: 'center', justifyContent: 'center',
           zIndex: 9999, padding: '16px',
         }} onClick={() => setTicketReg(null)}>
           <div onClick={e => e.stopPropagation()} style={{
-            width: '100%', maxWidth: '480px',
+            width: '100%', maxWidth: '520px',
             fontFamily: "'Inter', sans-serif",
-            filter: 'drop-shadow(0 24px 48px rgba(0,0,0,.6))',
+            filter: 'drop-shadow(0 32px 64px rgba(0,0,0,.7))',
           }}>
-            {/* ── Biglietto teatro ── */}
-            <div style={{ display: 'flex', borderRadius: '16px', overflow: 'hidden', background: '#1a1a2e' }}>
+            <div style={{ display: 'flex', borderRadius: '20px', overflow: 'hidden', background: TICKET_BG }}>
 
               {/* CORPO PRINCIPALE */}
-              <div style={{ flex: 1, padding: '28px 24px 24px', position: 'relative', background: 'linear-gradient(160deg, #1a1a2e 0%, #16213e 60%, #0f3460 100%)' }}>
-                {/* Close */}
+              <div style={{ flex: 1, padding: '36px 30px 30px', position: 'relative', background: TICKET_BG }}>
                 <button onClick={() => setTicketReg(null)} style={{
-                  position: 'absolute', top: '12px', right: '12px',
-                  background: 'rgba(255,255,255,.1)', border: 'none', borderRadius: '6px',
-                  color: 'rgba(255,255,255,.7)', width: '28px', height: '28px', cursor: 'pointer',
-                  fontSize: '16px', display: 'flex', alignItems: 'center', justifyContent: 'center',
+                  position: 'absolute', top: '14px', right: '14px',
+                  background: 'rgba(255,255,255,.12)', border: 'none', borderRadius: '8px',
+                  color: 'rgba(255,255,255,.7)', width: '34px', height: '34px', cursor: 'pointer',
+                  fontSize: '20px', display: 'flex', alignItems: 'center', justifyContent: 'center',
                 }}>×</button>
 
-                {/* Logo */}
                 <img
                   src="https://raw.githubusercontent.com/alessandroparrelli/fileappoggio/main/NUOVO-LOGO-CNA-ROMA-SOLO-ROMA.png"
                   alt="CNA Roma"
-                  style={{ height: '24px', marginBottom: '18px', filter: 'brightness(0) invert(1)', opacity: .85 }}
+                  style={{ height: '28px', marginBottom: '24px', filter: 'brightness(0) invert(1)', opacity: .85 }}
                 />
 
-                {/* Label */}
-                <p style={{ fontSize: '10px', fontWeight: '700', color: 'rgba(255,255,255,.4)', textTransform: 'uppercase', letterSpacing: '.12em', margin: '0 0 5px' }}>
+                <p style={{ fontSize: '12px', fontWeight: '700', color: 'rgba(255,255,255,.4)', textTransform: 'uppercase', letterSpacing: '.14em', margin: '0 0 6px' }}>
                   Partecipante
                 </p>
-
-                {/* Nome */}
-                <p style={{ fontSize: '22px', fontWeight: '900', color: '#ffffff', margin: '0 0 3px', letterSpacing: '-.03em', lineHeight: 1.2, paddingRight: '30px' }}>
+                <p style={{ fontSize: '30px', fontWeight: '900', color: '#ffffff', margin: '0 0 6px', letterSpacing: '-.03em', lineHeight: 1.15, paddingRight: '36px' }}>
                   {ticketReg.cognome} {ticketReg.nome}
                 </p>
                 {ticketReg.ragione_sociale && (
-                  <p style={{ fontSize: '12px', color: 'rgba(255,255,255,.5)', margin: '0 0 20px', fontWeight: '500' }}>
+                  <p style={{ fontSize: '15px', color: 'rgba(255,255,255,.5)', margin: '0 0 26px', fontWeight: '500' }}>
                     {ticketReg.ragione_sociale}
                   </p>
                 )}
 
-                {/* Linea tratteggiata orizzontale */}
-                <div style={{ borderTop: '1px dashed rgba(255,255,255,.15)', margin: '0 0 18px' }} />
+                <div style={{ borderTop: '1px dashed rgba(255,255,255,.18)', margin: '0 0 22px' }} />
 
-                {/* Posto */}
                 {ticketReg.numero_posto ? (
-                  <div style={{ marginBottom: '20px' }}>
-                    <p style={{ fontSize: '10px', fontWeight: '700', color: 'rgba(255,255,255,.4)', textTransform: 'uppercase', letterSpacing: '.12em', margin: '0 0 4px' }}>
+                  <div style={{ marginBottom: '24px' }}>
+                    <p style={{ fontSize: '11px', fontWeight: '700', color: 'rgba(255,255,255,.4)', textTransform: 'uppercase', letterSpacing: '.14em', margin: '0 0 6px' }}>
                       Posto assegnato
                     </p>
-                    <p style={{ fontSize: '28px', fontWeight: '900', color: '#FFD700', margin: 0, letterSpacing: '-.02em' }}>
+                    <p style={{ fontSize: '38px', fontWeight: '900', color: '#FFD700', margin: 0, letterSpacing: '-.02em', lineHeight: 1 }}>
                       {ticketReg.numero_posto}
                     </p>
                   </div>
                 ) : (
-                  <p style={{ fontSize: '13px', color: 'rgba(255,255,255,.3)', margin: '0 0 20px', fontStyle: 'italic' }}>
+                  <p style={{ fontSize: '15px', color: 'rgba(255,255,255,.3)', margin: '0 0 24px', fontStyle: 'italic' }}>
                     Nessun posto assegnato
                   </p>
                 )}
 
-                {/* Email */}
                 {ticketReg.email && (
-                  <p style={{ fontSize: '11px', color: 'rgba(255,255,255,.35)', margin: '0 0 20px' }}>
+                  <p style={{ fontSize: '13px', color: 'rgba(255,255,255,.35)', margin: '0 0 24px' }}>
                     {ticketReg.email}
                   </p>
                 )}
 
-                {/* Bottone check-in */}
                 <button
                   onClick={confermaCheckinDaTicket}
                   disabled={!!checkingId}
                   style={{
-                    width: '100%', padding: '14px',
+                    width: '100%', padding: '18px',
                     background: checkingId ? 'rgba(255,255,255,.1)' : 'linear-gradient(135deg, #16A34A, #15803D)',
-                    color: '#fff', border: 'none', borderRadius: '10px',
-                    fontSize: '15px', fontWeight: '800', fontFamily: "'Inter', sans-serif",
+                    color: '#fff', border: 'none', borderRadius: '12px',
+                    fontSize: '18px', fontWeight: '800', fontFamily: "'Inter', sans-serif",
                     cursor: checkingId ? 'default' : 'pointer',
-                    display: 'flex', alignItems: 'center', justifyContent: 'center', gap: '8px',
+                    display: 'flex', alignItems: 'center', justifyContent: 'center', gap: '10px',
                     letterSpacing: '-.01em',
                   }}
                 >
                   {checkingId
-                    ? <><div style={{ width: '16px', height: '16px', border: '2px solid #fff', borderTopColor: 'transparent', borderRadius: '50%', animation: 'spin .6s linear infinite' }} /> Registrazione…</>
-                    : <><svg width="18" height="18" fill="none" stroke="#fff" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round" viewBox="0 0 24 24"><path d="M22 11.08V12a10 10 0 1 1-5.93-9.14"/><polyline points="22 4 12 14.01 9 11.01"/></svg> Conferma check-in</>
+                    ? <><div style={{ width: '20px', height: '20px', border: '2px solid #fff', borderTopColor: 'transparent', borderRadius: '50%', animation: 'spin .6s linear infinite' }} /> Registrazione…</>
+                    : <><svg width="22" height="22" fill="none" stroke="#fff" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round" viewBox="0 0 24 24"><path d="M22 11.08V12a10 10 0 1 1-5.93-9.14"/><polyline points="22 4 12 14.01 9 11.01"/></svg> Conferma check-in</>
                   }
                 </button>
               </div>
 
               {/* SEPARATORE dentellato verticale */}
-              <div style={{ width: '18px', display: 'flex', flexDirection: 'column', alignItems: 'center', justifyContent: 'space-between', background: 'linear-gradient(160deg, #1a1a2e 0%, #16213e 60%, #0f3460 100%)', position: 'relative', flexShrink: 0 }}>
-                <div style={{ width: '18px', height: '9px', background: 'rgba(0,0,0,.75)', borderRadius: '0 0 9px 9px', marginTop: 0 }} />
-                <div style={{ flex: 1, borderLeft: '2px dashed rgba(255,255,255,.15)' }} />
-                <div style={{ width: '18px', height: '9px', background: 'rgba(0,0,0,.75)', borderRadius: '9px 9px 0 0', marginBottom: 0 }} />
+              <div style={{ width: '22px', display: 'flex', flexDirection: 'column', alignItems: 'center', justifyContent: 'space-between', background: TICKET_BG, flexShrink: 0 }}>
+                <div style={{ width: '22px', height: '11px', background: 'rgba(0,0,0,.8)', borderRadius: '0 0 11px 11px' }} />
+                <div style={{ flex: 1, borderLeft: '2px dashed rgba(255,255,255,.18)' }} />
+                <div style={{ width: '22px', height: '11px', background: 'rgba(0,0,0,.8)', borderRadius: '11px 11px 0 0' }} />
               </div>
 
               {/* STUB (talloncino) */}
               <div style={{
-                width: '90px', flexShrink: 0, padding: '24px 12px',
-                background: 'linear-gradient(160deg, #0f3460 0%, #16213e 100%)',
+                width: '110px', flexShrink: 0, padding: '30px 16px',
+                background: TICKET_STUB,
                 display: 'flex', flexDirection: 'column', alignItems: 'center', justifyContent: 'space-between',
               }}>
-                {/* Numero stub ruotato */}
-                <div style={{ flex: 1, display: 'flex', flexDirection: 'column', alignItems: 'center', justifyContent: 'center', gap: '16px' }}>
-                  <p style={{ fontSize: '9px', fontWeight: '700', color: 'rgba(255,255,255,.35)', textTransform: 'uppercase', letterSpacing: '.1em', writingMode: 'vertical-rl', transform: 'rotate(180deg)', margin: 0 }}>
+                <div style={{ flex: 1, display: 'flex', flexDirection: 'column', alignItems: 'center', justifyContent: 'center', gap: '20px' }}>
+                  <p style={{ fontSize: '10px', fontWeight: '700', color: 'rgba(255,255,255,.35)', textTransform: 'uppercase', letterSpacing: '.1em', writingMode: 'vertical-rl', transform: 'rotate(180deg)', margin: 0 }}>
                     Teatro CNA Roma
                   </p>
-                  <div style={{ width: '2px', flex: 1, background: 'rgba(255,255,255,.1)', borderRadius: '1px', maxHeight: '60px' }} />
+                  <div style={{ width: '2px', height: '50px', background: 'rgba(255,255,255,.12)', borderRadius: '1px' }} />
                   {ticketReg.numero_posto ? (
-                    <p style={{ fontSize: '13px', fontWeight: '900', color: '#FFD700', writingMode: 'vertical-rl', transform: 'rotate(180deg)', margin: 0, letterSpacing: '.05em' }}>
+                    <p style={{ fontSize: '16px', fontWeight: '900', color: '#FFD700', writingMode: 'vertical-rl', transform: 'rotate(180deg)', margin: 0, letterSpacing: '.06em' }}>
                       {ticketReg.numero_posto}
                     </p>
                   ) : (
-                    <p style={{ fontSize: '9px', color: 'rgba(255,255,255,.2)', writingMode: 'vertical-rl', transform: 'rotate(180deg)', margin: 0 }}>
-                      —
-                    </p>
+                    <p style={{ fontSize: '12px', color: 'rgba(255,255,255,.2)', writingMode: 'vertical-rl', transform: 'rotate(180deg)', margin: 0 }}>—</p>
                   )}
-                  <div style={{ width: '2px', flex: 1, background: 'rgba(255,255,255,.1)', borderRadius: '1px', maxHeight: '60px' }} />
-                  <p style={{ fontSize: '9px', fontWeight: '700', color: 'rgba(255,255,255,.25)', writingMode: 'vertical-rl', transform: 'rotate(180deg)', margin: 0, letterSpacing: '.1em', textTransform: 'uppercase' }}>
+                  <div style={{ width: '2px', height: '50px', background: 'rgba(255,255,255,.12)', borderRadius: '1px' }} />
+                  <p style={{ fontSize: '10px', fontWeight: '700', color: 'rgba(255,255,255,.25)', writingMode: 'vertical-rl', transform: 'rotate(180deg)', margin: 0, letterSpacing: '.1em', textTransform: 'uppercase' }}>
                     Ingresso
                   </p>
                 </div>
