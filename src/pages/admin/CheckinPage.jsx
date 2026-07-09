@@ -29,12 +29,12 @@ function OfflineBanner() {
   )
 }
 
-const TICKET_BG   = 'linear-gradient(160deg, #f07820 0%, #f59030 40%, #e86810 100%)'
-const TICKET_STUB = 'linear-gradient(160deg, #c05800 0%, #d96810 100%)'
-const TICKET_TEXT = '#1a0800'
-const TICKET_MUTED= 'rgba(30,10,0,.55)'
-const TICKET_GOLD = '#7c2d00'
-const TICKET_DECO = 'rgba(255,255,255,.45)'
+const TICKET_BG   = '#FEF3A0'
+const TICKET_STUB = '#F5D800'
+const TICKET_TEXT = '#1a1200'
+const TICKET_MUTED= 'rgba(60,40,0,.55)'
+const TICKET_GOLD = '#7c4500'
+const TICKET_DECO = 'rgba(255,255,255,.7)'
 const LOGO_URL    = 'https://raw.githubusercontent.com/alessandroparrelli/fileappoggio/main/NUOVO-LOGO-CNA-ROMA-SOLO-ROMA.png'
 
 /* Bordo zigrinato bianco pieno */
@@ -100,9 +100,9 @@ function ResultBanner({ result, onClose, titoloEvento }) {
 
         {/* ── SEPARATORE dentellato ── */}
         <div style={{ width:18, display:'flex', flexDirection:'column', alignItems:'center', background:TICKET_BG, flexShrink:0 }}>
-          <div style={{ width:18, height:9, background:'rgba(255,255,255,.55)', borderRadius:'0 0 9px 9px' }} />
+          <div style={{ width:18, height:9, background:'rgba(255,255,255,.85)', borderRadius:'0 0 9px 9px' }} />
           <div style={{ flex:1, borderLeft:`2px dashed ${TICKET_DECO}` }} />
-          <div style={{ width:18, height:9, background:'rgba(255,255,255,.55)', borderRadius:'9px 9px 0 0' }} />
+          <div style={{ width:18, height:9, background:'rgba(255,255,255,.85)', borderRadius:'9px 9px 0 0' }} />
         </div>
 
         {/* ── STUB ── */}
@@ -658,7 +658,7 @@ export default function CheckinPage() {
                   <div style={{ display:'flex', alignItems:'center', gap:'10px', marginBottom:'6px' }}>
                     <img src={LOGO_URL}
                          alt="CNA Roma"
-                         style={{ height:32, flexShrink:0, filter:'brightness(0) invert(1) drop-shadow(0 1px 3px rgba(0,0,0,.3))' }} />
+                         style={{ height:30, flexShrink:0 }} />
                     {titoloEvento && <p style={{ fontSize:'12px', fontWeight:'700', color:TICKET_MUTED, margin:0, lineHeight:1.3 }}>{titoloEvento}</p>}
                   </div>
                   <div style={{ borderTop:`1px dashed ${TICKET_DECO}`, margin:'14px 0 18px' }} />
@@ -701,9 +701,9 @@ export default function CheckinPage() {
 
                 {/* ── SEPARATORE dentellato verticale ── */}
                 <div style={{ width:22, display:'flex', flexDirection:'column', alignItems:'center', background:TICKET_BG, flexShrink:0 }}>
-                  <div style={{ width:22, height:11, background:'rgba(255,255,255,.55)', borderRadius:'0 0 11px 11px' }} />
+                  <div style={{ width:22, height:11, background:'rgba(255,255,255,.85)', borderRadius:'0 0 11px 11px' }} />
                   <div style={{ flex:1, borderLeft:`2px dashed ${TICKET_DECO}` }} />
-                  <div style={{ width:22, height:11, background:'rgba(255,255,255,.55)', borderRadius:'11px 11px 0 0' }} />
+                  <div style={{ width:22, height:11, background:'rgba(255,255,255,.85)', borderRadius:'11px 11px 0 0' }} />
                 </div>
 
                 {/* ── STUB ── */}
