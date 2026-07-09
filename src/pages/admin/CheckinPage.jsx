@@ -576,10 +576,21 @@ export default function CheckinPage() {
       {ticketReg && (
         <div style={{ position:'fixed', inset:0, background:'rgba(0,0,0,.8)', display:'flex', alignItems:'center', justifyContent:'center', zIndex:9999, padding:'16px' }}
           onClick={() => setTicketReg(null)}>
-          <div style={{ position:'fixed', top:'16px', right:'16px', zIndex:10000 }}>
-            <CloseBtn onClick={() => setTicketReg(null)} />
-          </div>
           <div style={{ width:'100%', maxWidth:'520px' }} onClick={e => e.stopPropagation()}>
+            {/* Riga chiudi — sopra il biglietto, fuori da esso */}
+            <div style={{ display:'flex', justifyContent:'flex-end', alignItems:'center', marginBottom:'10px' }}>
+              <button onClick={() => setTicketReg(null)} style={{
+                display:'flex', alignItems:'center', gap:'8px',
+                background:'#0A0A0A', border:'none', borderRadius:'24px',
+                color:'#fff', padding:'10px 18px', fontSize:'15px', fontWeight:'700',
+                fontFamily:"'Inter',sans-serif", cursor:'pointer',
+                boxShadow:'0 2px 12px rgba(0,0,0,.4)',
+                letterSpacing:'-.01em',
+              }}>
+                <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round"><line x1="18" y1="6" x2="6" y2="18"/><line x1="6" y1="6" x2="18" y2="18"/></svg>
+                Chiudi
+              </button>
+            </div>
             <Biglietto
               onClose={null}
               titoloEvento={titoloEvento}
