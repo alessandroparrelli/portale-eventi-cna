@@ -331,6 +331,7 @@ export default function IscrittiPage() {
 
     const cols = ['Nome','Cognome','Ragione Sociale','P.IVA','Email','Cellulare',
       'Mestiere','CAP','Stato iscrizione','Presente','Check-in','Iscritto il',
+      'Ruolo gruppo','Registrato da',
       ...formFields.map(f => f.label),
       ...(verificaEseguita ? ['Stato associazione','Data stipula'] : [])]
     const nCols = cols.length
@@ -359,6 +360,7 @@ export default function IscrittiPage() {
       width: col==='Ragione Sociale'?38 : col==='Email'?30 : col==='P.IVA'?15 :
              col==='Stato associazione'?20 : col==='Data stipula'?14 :
              col==='Nome'||col==='Cognome'?18 : col==='Mestiere'?22 :
+             col==='Ruolo gruppo'?14 : col==='Registrato da'?28 :
              extraLabels.has(col) ? 24 : 15
     }))
 
@@ -460,6 +462,8 @@ export default function IscrittiPage() {
         r.nome||'', r.cognome||'', r.ragione_sociale||'', r.partita_iva||'',
         r.email||'', r.cellulare||'', getMestiere(r.mestiere_id), r.cap||'',
         r.stato||'', r.presente?'Sì':'No', formatDt(r.checkin_at), formatDt(r.created_at),
+        r.gruppo_id === r.id ? 'Capogruppo' : r.referente_id ? 'Accompagnatore' : '',
+        r.referente_id && referentiMap[r.referente_id] ? referentiMap[r.referente_id] : '',
         ...formFields.map(f => r[f.colonna_db]||''),
       ]
       if (verificaEseguita) {
