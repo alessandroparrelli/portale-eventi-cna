@@ -29,16 +29,17 @@ function OfflineBanner() {
   )
 }
 
-const TICKET_BG   = 'linear-gradient(160deg, #c45c00 0%, #e07010 40%, #b85000 100%)'
-const TICKET_STUB = 'linear-gradient(160deg, #8a3800 0%, #b04800 100%)'
-const TICKET_TEXT = '#fff8f0'
-const TICKET_MUTED= 'rgba(255,245,225,.55)'
-const TICKET_GOLD = '#FFE040'
-const TICKET_DECO = 'rgba(255,245,225,.28)'
+const TICKET_BG   = 'linear-gradient(160deg, #f07820 0%, #f59030 40%, #e86810 100%)'
+const TICKET_STUB = 'linear-gradient(160deg, #c05800 0%, #d96810 100%)'
+const TICKET_TEXT = '#1a0800'
+const TICKET_MUTED= 'rgba(30,10,0,.55)'
+const TICKET_GOLD = '#7c2d00'
+const TICKET_DECO = 'rgba(255,255,255,.45)'
+const LOGO_URL    = 'https://customer31551.img.musvc2.net/static/31551/images/1/CNARoma%20NEGATIVO%20COLORE%20SOLO%20ROMA.png'
 
-/* Bordo zigrinato bianco nitido */
-const ZIG_SVG = "url(\"data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='12' height='18'%3E%3Cpolygon points='0,0 12,9 0,18' fill='white' opacity='0.55'/%3E%3C/svg%3E\")"
-const ZigStyle = { position:'absolute', top:0, bottom:0, width:'12px', backgroundImage:ZIG_SVG, backgroundRepeat:'repeat-y', backgroundSize:'12px 18px', zIndex:3, pointerEvents:'none' }
+/* Bordo zigrinato bianco pieno */
+const ZIG_SVG = "url(\"data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='14' height='20'%3E%3Cpolygon points='0,0 14,10 0,20' fill='white'/%3E%3C/svg%3E\")"
+const ZigStyle = { position:'absolute', top:0, bottom:0, width:'14px', backgroundImage:ZIG_SVG, backgroundRepeat:'repeat-y', backgroundSize:'14px 20px', zIndex:3, pointerEvents:'none' }
 
 function TicketShell({ children, style={}, onClick, marginBottom }) {
   return (
@@ -79,7 +80,7 @@ function ResultBanner({ result, onClose, titoloEvento }) {
           </div>
           {/* Logo + titolo evento */}
           <div style={{ display:'flex', alignItems:'center', gap:'10px', marginBottom:'14px' }}>
-            <img src="https://raw.githubusercontent.com/alessandroparrelli/fileappoggio/main/NUOVO-LOGO-CNA-ROMA-SOLO-ROMA.png"
+            <img src={LOGO_URL}
                  alt="CNA Roma" style={{ height:'22px', filter:'brightness(0) invert(1)', opacity:.7, flexShrink:0 }} />
             {titoloEvento && <p style={{ fontSize:'12px', fontWeight:'700', color:TICKET_MUTED, margin:0, lineHeight:1.3 }}>{titoloEvento}</p>}
           </div>
@@ -99,9 +100,9 @@ function ResultBanner({ result, onClose, titoloEvento }) {
 
         {/* ── SEPARATORE dentellato ── */}
         <div style={{ width:18, display:'flex', flexDirection:'column', alignItems:'center', background:TICKET_BG, flexShrink:0 }}>
-          <div style={{ width:18, height:9, background:'rgba(0,0,0,.7)', borderRadius:'0 0 9px 9px' }} />
+          <div style={{ width:18, height:9, background:'rgba(255,255,255,.55)', borderRadius:'0 0 9px 9px' }} />
           <div style={{ flex:1, borderLeft:`2px dashed ${TICKET_DECO}` }} />
-          <div style={{ width:18, height:9, background:'rgba(0,0,0,.7)', borderRadius:'9px 9px 0 0' }} />
+          <div style={{ width:18, height:9, background:'rgba(255,255,255,.55)', borderRadius:'9px 9px 0 0' }} />
         </div>
 
         {/* ── STUB ── */}
@@ -655,9 +656,9 @@ export default function CheckinPage() {
                   <button onClick={() => setTicketReg(null)} style={{ position:'absolute', top:14, right:14, background:'rgba(255,240,210,.1)', border:'none', borderRadius:'8px', color:TICKET_MUTED, width:34, height:34, cursor:'pointer', fontSize:'20px', display:'flex', alignItems:'center', justifyContent:'center' }}>×</button>
 
                   <div style={{ display:'flex', alignItems:'center', gap:'10px', marginBottom:'6px' }}>
-                    <img src="https://raw.githubusercontent.com/alessandroparrelli/fileappoggio/main/NUOVO-LOGO-CNA-ROMA-SOLO-ROMA.png"
+                    <img src={LOGO_URL}
                          alt="CNA Roma"
-                         style={{ height:24, filter:'brightness(0) invert(1)', opacity:.7, flexShrink:0 }} />
+                         style={{ height:28, flexShrink:0 }} />
                     {titoloEvento && <p style={{ fontSize:'12px', fontWeight:'700', color:TICKET_MUTED, margin:0, lineHeight:1.3 }}>{titoloEvento}</p>}
                   </div>
                   <div style={{ borderTop:`1px dashed ${TICKET_DECO}`, margin:'14px 0 18px' }} />
@@ -700,9 +701,9 @@ export default function CheckinPage() {
 
                 {/* ── SEPARATORE dentellato verticale ── */}
                 <div style={{ width:22, display:'flex', flexDirection:'column', alignItems:'center', background:TICKET_BG, flexShrink:0 }}>
-                  <div style={{ width:22, height:11, background:'rgba(0,0,0,.8)', borderRadius:'0 0 11px 11px' }} />
+                  <div style={{ width:22, height:11, background:'rgba(255,255,255,.55)', borderRadius:'0 0 11px 11px' }} />
                   <div style={{ flex:1, borderLeft:`2px dashed ${TICKET_DECO}` }} />
-                  <div style={{ width:22, height:11, background:'rgba(0,0,0,.8)', borderRadius:'11px 11px 0 0' }} />
+                  <div style={{ width:22, height:11, background:'rgba(255,255,255,.55)', borderRadius:'11px 11px 0 0' }} />
                 </div>
 
                 {/* ── STUB ── */}
