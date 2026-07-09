@@ -116,7 +116,7 @@ function ModalConferma({ reg, event, onClose }) {
           </svg>
         </div>
         <h2 style={mc.title}>Iscrizione confermata!</h2>
-        <p style={mc.sub}>Benvenuto/a <strong>{reg.nome} {reg.cognome}</strong>. {event.teatro_abilitato ? 'Riceverai il tuo posto e il QR Code via email.' : 'Salva il QR Code — ti servirà all'ingresso.'}</p>
+        <p style={mc.sub}>Benvenuto/a <strong>{reg.nome} {reg.cognome}</strong>. {event.teatro_abilitato ? 'Riceverai il tuo posto e il QR Code via email.' : "Salva il QR Code — ti servirà all'ingresso."}</p>
 
         {/* Codice iscrizione */}
         {reg.codice_iscrizione && (
