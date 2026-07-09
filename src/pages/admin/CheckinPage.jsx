@@ -78,6 +78,11 @@ function ResultBanner({ result, onClose }) {
               {result.ragione_sociale}
             </p>
           )}
+          {result.numero_posto && (
+            <p style={{ fontSize: '13px', color: 'rgba(255,255,255,.95)', margin: '6px 0 0', fontWeight: '700', background: 'rgba(255,255,255,.2)', display: 'inline-block', padding: '2px 10px', borderRadius: '6px' }}>
+              🪑 Posto: {result.numero_posto}
+            </p>
+          )}
           {double && result.checkin_at && (
             <p style={{ fontSize: '12px', color: 'rgba(255,255,255,.75)', margin: '4px 0 0' }}>
               Già registrato alle {new Date(result.checkin_at).toLocaleTimeString('it-IT', { hour: '2-digit', minute: '2-digit' })}
@@ -172,7 +177,7 @@ export default function CheckinPage() {
     if (!selectedEvento) return
     setLoadingLista(true)
     const { data } = await supabase.from('registrations')
-      .select('id,nome,cognome,ragione_sociale,email,presente,checkin_at,stato')
+      .select('id,nome,cognome,ragione_sociale,email,presente,checkin_at,stato,numero_posto')
       .eq('event_id', selectedEvento)
       .order('cognome', { ascending: true })
     setIscritti(data || [])
@@ -578,6 +583,11 @@ export default function CheckinPage() {
                         {r.ragione_sociale && (
                           <p style={{ fontSize: '12px', color: '#6B7280', margin: '1px 0 0', overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap' }}>
                             {r.ragione_sociale}
+                          </p>
+                        )}
+                        {r.numero_posto && (
+                          <p style={{ fontSize: '11px', color: '#003DA5', margin: '2px 0 0', fontWeight: '700' }}>
+                            🪑 {r.numero_posto}
                           </p>
                         )}
                       </div>
