@@ -29,21 +29,21 @@ function OfflineBanner() {
   )
 }
 
-const TICKET_BG   = 'linear-gradient(160deg, #7c3a00 0%, #a34d00 40%, #6b2f00 100%)'
-const TICKET_STUB = 'linear-gradient(160deg, #4a1f00 0%, #6b2f00 100%)'
+const TICKET_BG   = 'linear-gradient(160deg, #c45c00 0%, #e07010 40%, #b85000 100%)'
+const TICKET_STUB = 'linear-gradient(160deg, #8a3800 0%, #b04800 100%)'
 const TICKET_TEXT = '#fff8f0'
-const TICKET_MUTED= 'rgba(255,240,210,.45)'
-const TICKET_GOLD = '#FFD700'
-const TICKET_DECO = 'rgba(255,240,210,.22)'
+const TICKET_MUTED= 'rgba(255,245,225,.55)'
+const TICKET_GOLD = '#FFE040'
+const TICKET_DECO = 'rgba(255,245,225,.28)'
 
-/* Bordo zigrinato bianco */
-const ZIG_SVG = "url(\"data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='10' height='16'%3E%3Cpolygon points='0,0 10,8 0,16' fill='%23fff8f0' opacity='0.18'/%3E%3C/svg%3E\")"
-const ZigStyle = { position:'absolute', top:0, bottom:0, width:'10px', backgroundImage:ZIG_SVG, backgroundRepeat:'repeat-y', backgroundSize:'10px 16px' }
+/* Bordo zigrinato bianco nitido */
+const ZIG_SVG = "url(\"data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='12' height='18'%3E%3Cpolygon points='0,0 12,9 0,18' fill='white' opacity='0.55'/%3E%3C/svg%3E\")"
+const ZigStyle = { position:'absolute', top:0, bottom:0, width:'12px', backgroundImage:ZIG_SVG, backgroundRepeat:'repeat-y', backgroundSize:'12px 18px', zIndex:3, pointerEvents:'none' }
 
 function TicketShell({ children, style={}, onClick, marginBottom }) {
   return (
     <div style={{ position:'relative', marginBottom: marginBottom || 0, filter:'drop-shadow(0 20px 50px rgba(0,0,0,.55))' }}>
-      <div onClick={onClick} style={{ position:'relative', borderRadius:'18px', overflow:'hidden', background:TICKET_BG, outline:'2px solid rgba(255,240,210,.15)', ...style }}>
+      <div onClick={onClick} style={{ position:'relative', borderRadius:'18px', overflow:'hidden', background:TICKET_BG, outline:'2px solid rgba(255,245,225,.2)', ...style }}>
         <div style={{ ...ZigStyle, left:0, transform:'scaleX(-1)' }} />
         <div style={{ ...ZigStyle, right:0 }} />
         {children}
@@ -52,7 +52,7 @@ function TicketShell({ children, style={}, onClick, marginBottom }) {
   )
 }
 
-function ResultBanner({ result, onClose }) {
+function ResultBanner({ result, onClose, titoloEvento }) {
   if (!result) return null
   const ok      = result.ok
   const double  = result.error === 'gia_presente'
@@ -76,6 +76,12 @@ function ResultBanner({ result, onClose }) {
             </div>
             <p style={{ fontWeight:'900', fontSize:'19px', color:TICKET_TEXT, margin:0, letterSpacing:'-.02em', flex:1 }}>{titolo}</p>
             <button onClick={onClose} style={{ background:'rgba(255,240,210,.1)', border:'none', borderRadius:'8px', cursor:'pointer', color:TICKET_MUTED, width:32, height:32, display:'flex', alignItems:'center', justifyContent:'center', fontSize:'18px', flexShrink:0 }}>×</button>
+          </div>
+          {/* Logo + titolo evento */}
+          <div style={{ display:'flex', alignItems:'center', gap:'10px', marginBottom:'14px' }}>
+            <img src="https://raw.githubusercontent.com/alessandroparrelli/fileappoggio/main/NUOVO-LOGO-CNA-ROMA-SOLO-ROMA.png"
+                 alt="CNA Roma" style={{ height:'22px', filter:'brightness(0) invert(1)', opacity:.7, flexShrink:0 }} />
+            {titoloEvento && <p style={{ fontSize:'12px', fontWeight:'700', color:TICKET_MUTED, margin:0, lineHeight:1.3 }}>{titoloEvento}</p>}
           </div>
           <div style={{ borderTop:`1px dashed ${TICKET_DECO}`, margin:'0 0 14px' }} />
           {result.nome && <>
@@ -306,6 +312,7 @@ export default function CheckinPage() {
     }
   }
 
+  const titoloEvento = eventi.find(e => e.id === selectedEvento)?.titolo || ''
   const pct        = totali > 0 ? Math.round((presenti.length / totali) * 100) : 0
   const nonPresenti= totali - presenti.length
 
@@ -370,7 +377,7 @@ export default function CheckinPage() {
           </div>
 
           {/* ── Banner risultato ── */}
-          <ResultBanner result={result} onClose={() => setResult(null)} />
+          <ResultBanner result={result} onClose={() => setResult(null)} titoloEvento={titoloEvento} />
 
           {/* ── Scanner ── */}
           <div style={s.scanCard}>
@@ -647,10 +654,13 @@ export default function CheckinPage() {
                 <div style={{ flex:1, padding:'36px 28px 30px 30px', position:'relative' }}>
                   <button onClick={() => setTicketReg(null)} style={{ position:'absolute', top:14, right:14, background:'rgba(255,240,210,.1)', border:'none', borderRadius:'8px', color:TICKET_MUTED, width:34, height:34, cursor:'pointer', fontSize:'20px', display:'flex', alignItems:'center', justifyContent:'center' }}>×</button>
 
-                  <img src="https://raw.githubusercontent.com/alessandroparrelli/fileappoggio/main/NUOVO-LOGO-CNA-ROMA-SOLO-ROMA.png"
-                       alt="CNA Roma"
-                       style={{ height:26, marginBottom:22, filter:'brightness(0) invert(1)', opacity:.7 }} />
-
+                  <div style={{ display:'flex', alignItems:'center', gap:'10px', marginBottom:'6px' }}>
+                    <img src="https://raw.githubusercontent.com/alessandroparrelli/fileappoggio/main/NUOVO-LOGO-CNA-ROMA-SOLO-ROMA.png"
+                         alt="CNA Roma"
+                         style={{ height:24, filter:'brightness(0) invert(1)', opacity:.7, flexShrink:0 }} />
+                    {titoloEvento && <p style={{ fontSize:'12px', fontWeight:'700', color:TICKET_MUTED, margin:0, lineHeight:1.3 }}>{titoloEvento}</p>}
+                  </div>
+                  <div style={{ borderTop:`1px dashed ${TICKET_DECO}`, margin:'14px 0 18px' }} />
                   <p style={{ fontSize:'11px', fontWeight:'700', color:TICKET_MUTED, textTransform:'uppercase', letterSpacing:'.14em', margin:'0 0 6px' }}>Partecipante</p>
                   <p style={{ fontSize:'30px', fontWeight:'900', color:TICKET_TEXT, margin:'0 0 5px', letterSpacing:'-.03em', lineHeight:1.15, paddingRight:36 }}>
                     {ticketReg.cognome} {ticketReg.nome}
