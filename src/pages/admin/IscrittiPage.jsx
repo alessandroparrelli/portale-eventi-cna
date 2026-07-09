@@ -6,7 +6,7 @@ import { useRole } from '../../hooks/useRole'
 import GlowTableHead from '../../components/GlowTableHead'
 import GlowStatCard from '../../components/GlowStatCard'
 import { Modal, PresenzaBadge, Field, Input, Select, Btn, EmptyState } from '../../components/ui'
-import { Users, Search, Download, Upload, Eye, Trash2, UserCheck, AlertCircle, CheckCircle2, X, MapPin, Ticket } from 'lucide-react'
+import { Users, Search, Download, Upload, Eye, Trash2, UserCheck, AlertCircle, CheckCircle2, X, MapPin, Ticket, RefreshCw } from 'lucide-react'
 import * as XLSX from 'xlsx'
 import ExcelJS from 'exceljs/dist/exceljs.min.js'
 import { logAttivita } from '../../lib/activityLog'
@@ -742,6 +742,7 @@ export default function IscrittiPage() {
               🏆 {invioInCorso ? 'Invio…' : 'Invia certificati'}
             </Btn>
           )}
+          <Btn variant="secondary" onClick={loadRegs} size="md"><RefreshCw size={16}/> Aggiorna</Btn>
           <Btn variant="secondary" onClick={downloadTemplate} size="md"><Download size={16}/> Template</Btn>
           <Btn variant="secondary" onClick={() => { setImportModal(true); setImportDone(null); setImportPreview([]); setImportErrors([]) }} size="md"><Upload size={16}/> Importa</Btn>
           <Btn variant="secondary" onClick={exportExcel} size="md"><Download size={16}/> Esporta Excel</Btn>
