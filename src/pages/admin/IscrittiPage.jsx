@@ -102,6 +102,8 @@ export default function IscrittiPage() {
   const [invioPostoRis, setInvioPostoRis] = useState(null)
   const [dryRunRis, setDryRunRis] = useState(null)
   const [teatroSelezione, setTeatroSelezione] = useState(new Set()) // Set di reg_id selezionati
+  const [filtroPostoAssegnato, setFiltroPostoAssegnato] = useState('tutti') // 'tutti' | 'con_posto' | 'senza_posto'
+  const [filtroMailPosto, setFiltroMailPosto] = useState('tutti') // 'tutti' | 'inviata' | 'non_inviata'
 
   function toggleSort(col) {
     if (sortCol === col) setSortDir(d => d === 'asc' ? 'desc' : 'asc')
@@ -770,6 +772,47 @@ export default function IscrittiPage() {
             ))}
           </div>
 
+          {/* Filtri teatro */}
+          <div style={{ display:'flex', gap:'10px', flexWrap:'wrap', marginBottom:'16px', alignItems:'center' }}>
+            <div style={{ display:'flex', alignItems:'center', gap:'6px' }}>
+              <span style={{ fontSize:'12px', color:'#6B7280', fontWeight:'600', whiteSpace:'nowrap' }}>Posto:</span>
+              {[
+                { v:'tutti', label:'Tutti' },
+                { v:'con_posto', label:'Con posto' },
+                { v:'senza_posto', label:'Senza posto' },
+              ].map(opt => (
+                <button key={opt.v} onClick={() => setFiltroPostoAssegnato(opt.v)}
+                  style={{ padding:'5px 12px', borderRadius:'6px', border:'1px solid', fontSize:'12px', fontWeight:'600', cursor:'pointer', fontFamily:"'Inter',sans-serif",
+                    background: filtroPostoAssegnato === opt.v ? '#003DA5' : '#fff',
+                    color: filtroPostoAssegnato === opt.v ? '#fff' : '#374151',
+                    borderColor: filtroPostoAssegnato === opt.v ? '#003DA5' : '#D1D5DB',
+                  }}>{opt.label}</button>
+              ))}
+            </div>
+            <div style={{ width:'1px', height:'24px', background:'#E5E7EB' }} />
+            <div style={{ display:'flex', alignItems:'center', gap:'6px' }}>
+              <span style={{ fontSize:'12px', color:'#6B7280', fontWeight:'600', whiteSpace:'nowrap' }}>Mail posto:</span>
+              {[
+                { v:'tutti', label:'Tutti' },
+                { v:'inviata', label:'Inviata' },
+                { v:'non_inviata', label:'Non inviata' },
+              ].map(opt => (
+                <button key={opt.v} onClick={() => setFiltroMailPosto(opt.v)}
+                  style={{ padding:'5px 12px', borderRadius:'6px', border:'1px solid', fontSize:'12px', fontWeight:'600', cursor:'pointer', fontFamily:"'Inter',sans-serif",
+                    background: filtroMailPosto === opt.v ? '#003DA5' : '#fff',
+                    color: filtroMailPosto === opt.v ? '#fff' : '#374151',
+                    borderColor: filtroMailPosto === opt.v ? '#003DA5' : '#D1D5DB',
+                  }}>{opt.label}</button>
+              ))}
+            </div>
+            {(filtroPostoAssegnato !== 'tutti' || filtroMailPosto !== 'tutti') && (
+              <button onClick={() => { setFiltroPostoAssegnato('tutti'); setFiltroMailPosto('tutti') }}
+                style={{ fontSize:'12px', color:'#DC2626', background:'none', border:'none', cursor:'pointer', padding:0, fontWeight:'600' }}>
+                × Azzera filtri
+              </button>
+            )}
+          </div>
+
           {/* Barra azioni invio */}
           <div style={{ background:'#F9FAFB', border:'1px solid #E5E7EB', borderRadius:'10px', padding:'14px 16px', marginBottom:'16px' }}>
             <div style={{ display:'flex', gap:'10px', flexWrap:'wrap', alignItems:'center' }}>
@@ -856,7 +899,15 @@ export default function IscrittiPage() {
                   </tr>
                 </thead>
                 <tbody>
-                  {registrations.map((r, i) => {
+                  {registrations
+                    .filter(r => {
+                      if (filtroPostoAssegnato === 'con_posto' && !r.numero_posto) return false
+                      if (filtroPostoAssegnato === 'senza_posto' && r.numero_posto) return false
+                      if (filtroMailPosto === 'inviata' && !r.posto_email_inviata) return false
+                      if (filtroMailPosto === 'non_inviata' && r.posto_email_inviata) return false
+                      return true
+                    })
+                    .map((r, i) => {
                     const editVal = postoEdit[r.id]
                     const selezionato = teatroSelezione.has(r.id)
                     return (
@@ -913,6 +964,9 @@ export default function IscrittiPage() {
                             </button>
                           ) : (
                             <span style={{ fontSize:'11px', color:'#D1D5DB' }}>—</span>
+                          )}
+                          {r.posto_email_inviata && (
+                            <span style={{ marginLeft:'6px', fontSize:'11px', color:'#059669', fontWeight:'600', background:'#F0FDF4', padding:'3px 7px', borderRadius:'999px', whiteSpace:'nowrap' }}>✓ Inviata</span>
                           )}
                         </td>
                       </tr>
