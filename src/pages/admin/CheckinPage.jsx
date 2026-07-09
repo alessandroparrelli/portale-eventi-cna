@@ -76,7 +76,7 @@ function ResultBanner({ result, onClose, titoloEvento }) {
               <Icon size={20} color={accentColor} />
             </div>
             <p style={{ fontWeight:'900', fontSize:'19px', color:TICKET_TEXT, margin:0, letterSpacing:'-.02em', flex:1 }}>{titolo}</p>
-            <button onClick={onClose} style={{ background:'rgba(255,240,210,.1)', border:'none', borderRadius:'8px', cursor:'pointer', color:TICKET_MUTED, width:32, height:32, display:'flex', alignItems:'center', justifyContent:'center', fontSize:'18px', flexShrink:0 }}>×</button>
+            <button onClick={onClose} style={{ background:'rgba(0,0,0,.55)', border:'none', borderRadius:'50%', cursor:'pointer', color:'#fff', width:42, height:42, display:'flex', alignItems:'center', justifyContent:'center', flexShrink:0, boxShadow:'0 2px 8px rgba(0,0,0,.3)', transition:'background .15s' }}><svg width='18' height='18' viewBox='0 0 24 24' fill='none' stroke='currentColor' strokeWidth='2.5' strokeLinecap='round' strokeLinejoin='round'><line x1='18' y1='6' x2='6' y2='18'/><line x1='6' y1='6' x2='18' y2='18'/></svg></button>
           </div>
           {/* Logo + titolo evento */}
           <div style={{ display:'flex', alignItems:'center', gap:'10px', marginBottom:'14px' }}>
@@ -653,7 +653,7 @@ export default function CheckinPage() {
 
                 {/* ── CORPO PRINCIPALE ── */}
                 <div style={{ flex:1, padding:'36px 28px 30px 30px', position:'relative' }}>
-                  <button onClick={() => setTicketReg(null)} style={{ position:'absolute', top:14, right:14, background:'rgba(255,240,210,.1)', border:'none', borderRadius:'8px', color:TICKET_MUTED, width:34, height:34, cursor:'pointer', fontSize:'20px', display:'flex', alignItems:'center', justifyContent:'center' }}>×</button>
+                  <button onClick={() => setTicketReg(null)} style={{ position:'absolute', top:14, right:14, background:'rgba(0,0,0,.55)', border:'none', borderRadius:'50%', cursor:'pointer', color:'#fff', width:42, height:42, display:'flex', alignItems:'center', justifyContent:'center', flexShrink:0, boxShadow:'0 2px 8px rgba(0,0,0,.3)', transition:'background .15s' }}><svg width='18' height='18' viewBox='0 0 24 24' fill='none' stroke='currentColor' strokeWidth='2.5' strokeLinecap='round' strokeLinejoin='round'><line x1='18' y1='6' x2='6' y2='18'/><line x1='6' y1='6' x2='18' y2='18'/></svg></button>
 
                   <div style={{ display:'flex', alignItems:'center', gap:'10px', marginBottom:'6px' }}>
                     <img src={LOGO_URL}
