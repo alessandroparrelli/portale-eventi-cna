@@ -66,14 +66,15 @@ function Biglietto({ onClose, titoloEvento, nome, cognome, ragioneSociale, email
             </div>
             <div style={{ borderTop:`1px dashed ${TICKET_DECO}`, margin:'0 0 14px' }} />
 
-            {/* Status */}
-            <div style={{ display:'flex', alignItems:'center', gap:'10px', marginBottom:'14px' }}>
-              <div style={{ width:36, height:36, borderRadius:'50%', background:statusBg, display:'flex', alignItems:'center', justifyContent:'center', flexShrink:0 }}>
-                {statusIcon}
+            {statusLabel && <>
+              <div style={{ display:'flex', alignItems:'center', gap:'10px', marginBottom:'14px' }}>
+                <div style={{ width:36, height:36, borderRadius:'50%', background:statusBg, display:'flex', alignItems:'center', justifyContent:'center', flexShrink:0 }}>
+                  {statusIcon}
+                </div>
+                <p style={{ fontWeight:'900', fontSize:'18px', color:TICKET_TEXT, margin:0, letterSpacing:'-.02em' }}>{statusLabel}</p>
               </div>
-              <p style={{ fontWeight:'900', fontSize:'18px', color:TICKET_TEXT, margin:0, letterSpacing:'-.02em' }}>{statusLabel}</p>
-            </div>
-            <div style={{ borderTop:`1px dashed ${TICKET_DECO}`, margin:'0 0 14px' }} />
+              <div style={{ borderTop:`1px dashed ${TICKET_DECO}`, margin:'0 0 14px' }} />
+            </>}
 
             {/* Dati partecipante */}
             {nome && <>
@@ -575,11 +576,10 @@ export default function CheckinPage() {
       {ticketReg && (
         <div style={{ position:'fixed', inset:0, background:'rgba(0,0,0,.8)', display:'flex', alignItems:'center', justifyContent:'center', zIndex:9999, padding:'16px' }}
           onClick={() => setTicketReg(null)}>
-          <div style={{ width:'100%', maxWidth:'520px', position:'relative' }}>
-            <div style={{ display:'flex', justifyContent:'flex-end', marginBottom:'10px' }} onClick={e => e.stopPropagation()}>
-              <CloseBtn onClick={() => setTicketReg(null)} />
-            </div>
-            <div onClick={e => e.stopPropagation()}>
+          <div style={{ position:'fixed', top:'16px', right:'16px', zIndex:10000 }}>
+            <CloseBtn onClick={() => setTicketReg(null)} />
+          </div>
+          <div style={{ width:'100%', maxWidth:'520px' }} onClick={e => e.stopPropagation()}>
             <Biglietto
               onClose={null}
               titoloEvento={titoloEvento}
@@ -588,10 +588,10 @@ export default function CheckinPage() {
               ragioneSociale={ticketReg.ragione_sociale}
               email={ticketReg.email}
               numeroPosto={ticketReg.numero_posto}
-              statusIcon={<CheckCircle2 size={20} color="#16A34A" />}
-              statusColor="#16A34A"
-              statusBg="rgba(22,163,74,.12)"
-              statusLabel="Conferma check-in"
+              statusIcon={null}
+              statusColor={null}
+              statusBg={null}
+              statusLabel={null}
               bottone={
                 <button onClick={confermaCheckinDaTicket} disabled={!!checkingId} style={{
                   width:'100%', padding:'16px',
@@ -608,7 +608,6 @@ export default function CheckinPage() {
                 </button>
               }
             />
-            </div>
           </div>
         </div>
       )}
