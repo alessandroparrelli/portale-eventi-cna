@@ -158,9 +158,12 @@ function ModalConferma({ reg, event, onClose }) {
         )}
         {event.teatro_abilitato && (
           <div style={{ background:'#FFF7ED', border:'1px solid #FED7AA', borderRadius:'10px', padding:'16px 20px', marginBottom:'14px', textAlign:'center' }}>
-            <p style={{ fontSize:'22px', margin:'0 0 6px' }}>🎭</p>
-            <p style={{ fontSize:'14px', fontWeight:'700', color:'#C2410C', margin:'0 0 4px' }}>Il tuo posto verrà assegnato a breve</p>
-            <p style={{ fontSize:'13px', color:'#92400E', margin:0, lineHeight:'1.5' }}>Riceverai una email con il numero del posto e il QR Code per l'ingresso.</p>
+            <svg width="28" height="28" viewBox="0 0 24 24" fill="none" style={{ margin:'0 0 8px' }} xmlns="http://www.w3.org/2000/svg">
+              <path d="M2 9a1 1 0 0 1 1-1h18a1 1 0 0 1 1 1v2a2 2 0 0 0 0 4v2a1 1 0 0 1-1 1H3a1 1 0 0 1-1-1v-2a2 2 0 0 0 0-4V9Z" stroke="#C2410C" strokeWidth="1.8" fill="#FED7AA"/>
+              <line x1="9" y1="8" x2="9" y2="16" stroke="#C2410C" strokeWidth="1.5" strokeDasharray="2 2"/>
+            </svg>
+            <p style={{ fontSize:'14px', fontWeight:'700', color:'#C2410C', margin:'0 0 4px' }}>Grazie per la tua manifestazione di interesse.</p>
+            <p style={{ fontSize:'13px', color:'#92400E', margin:0, lineHeight:'1.5' }}>Riceverai successivamente la conferma e l'assegnazione dei posti.</p>
           </div>
         )}
         {event.data_inizio && (
