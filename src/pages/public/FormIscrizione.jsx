@@ -267,6 +267,29 @@ export default function FormIscrizione({ event, onSuccess }) {
 
     setLoading(true)
     try {
+      // ── Controllo duplicati per ogni persona ──
+      for (let i = 0; i < persone.length; i++) {
+        const p = persone[i]
+        const { data: dup } = await supabase.rpc('check_duplicato_iscrizione', {
+          p_event_id:  event.id,
+          p_nome:      p.nome?.trim()      || null,
+          p_cognome:   p.cognome?.trim()   || null,
+          p_email:     p.email?.trim()     || null,
+          p_cellulare: p.cellulare?.trim() || null,
+        })
+        const d = dup?.[0]
+        if (d?.duplicato) {
+          const chi   = i === 0 ? 'Tu' : `La persona ${i + 1}`
+          const campo = d.campo === 'email'       ? 'email'
+                      : d.campo === 'nome_cognome' ? 'nome e cognome'
+                      :                             'numero di cellulare'
+          const msg = `${chi} result${i === 0 ? 'i' : 'a'} già iscritt${i === 0 ? 'o/a' : 'a'} a questo evento (stesso ${campo}).`
+          setErrGen(msg)
+          setLoading(false)
+          return
+        }
+      }
+
       const { data: codiceData } = await supabase.rpc('genera_codice_iscrizione', { p_event_id: event.id })
       const codiceBase = codiceData || ('EVT-' + Date.now().toString(36).toUpperCase())
       const suffissi   = ['', '-B', '-C', '-D', '-E', '-F', '-G', '-H', '-I', '-J']
