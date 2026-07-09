@@ -98,7 +98,7 @@ function PersonaForm({ idx, dati, onChange, errors, campi, mestieri, isAccompagn
       </div>
 
       <div style={s.grid}>
-        {campi.filter(c => c.visibile).map(c => {
+        {campi.filter(c => c.visibile && !(c.colonna_db === 'partita_iva' && !pIvaObbligatoria)).map(c => {
           const val = dati[c.colonna_db] || ''
           const err = errors[c.colonna_db] || ''
           const set = e => onChange(idx, c.colonna_db, e.target.value)
@@ -108,7 +108,7 @@ function PersonaForm({ idx, dati, onChange, errors, campi, mestieri, isAccompagn
             return (
               <div key={c.id} style={{ display: 'flex', flexDirection: 'column', gap: '4px' }}>
                 <label style={{ fontSize: '13px', fontWeight: '600', color: '#0A0A0A' }}>
-                  {c.label}{c.obbligatorio && <span style={{ color: '#DC2626' }}> *</span>}
+                  {c.label}{(c.colonna_db === 'partita_iva' ? pIvaObbligatoria : c.obbligatorio) && <span style={{ color: '#DC2626' }}> *</span>}
                 </label>
                 <select
                   value={val} onChange={set}
@@ -138,7 +138,7 @@ function PersonaForm({ idx, dati, onChange, errors, campi, mestieri, isAccompagn
                   style={{ width: '16px', height: '16px', cursor: 'pointer' }}
                 />
                 <label style={{ fontSize: '14px', color: '#0A0A0A', cursor: 'pointer' }}>
-                  {c.label}{c.obbligatorio && <span style={{ color: '#DC2626' }}> *</span>}
+                  {c.label}{(c.colonna_db === 'partita_iva' ? pIvaObbligatoria : c.obbligatorio) && <span style={{ color: '#DC2626' }}> *</span>}
                 </label>
                 {err && <span style={{ fontSize: '12px', color: '#DC2626' }}>{err}</span>}
               </div>
@@ -150,7 +150,7 @@ function PersonaForm({ idx, dati, onChange, errors, campi, mestieri, isAccompagn
             return (
               <div key={c.id} style={{ display: 'flex', flexDirection: 'column', gap: '4px' }}>
                 <label style={{ fontSize: '13px', fontWeight: '600', color: '#0A0A0A' }}>
-                  {c.label}{c.obbligatorio && <span style={{ color: '#DC2626' }}> *</span>}
+                  {c.label}{(c.colonna_db === 'partita_iva' ? pIvaObbligatoria : c.obbligatorio) && <span style={{ color: '#DC2626' }}> *</span>}
                 </label>
                 <select value={val} onChange={set} style={{
                   padding: '10px 12px', border: `1px solid ${err ? '#DC2626' : '#D1D5DB'}`,
@@ -170,7 +170,7 @@ function PersonaForm({ idx, dati, onChange, errors, campi, mestieri, isAccompagn
             return (
               <div key={c.id} style={{ display: 'flex', flexDirection: 'column', gap: '4px' }}>
                 <label style={{ fontSize: '13px', fontWeight: '600', color: '#0A0A0A' }}>
-                  {c.label}{c.obbligatorio && <span style={{ color: '#DC2626' }}> *</span>}
+                  {c.label}{(c.colonna_db === 'partita_iva' ? pIvaObbligatoria : c.obbligatorio) && <span style={{ color: '#DC2626' }}> *</span>}
                 </label>
                 <input type="date" value={val} onChange={set} style={{
                   padding: '10px 12px', border: `1px solid ${err ? '#DC2626' : '#D1D5DB'}`,
