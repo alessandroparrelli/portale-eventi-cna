@@ -134,6 +134,7 @@ export default function CheckinPage() {
   const [searchLista,    setSearchLista]   = useState('')
   const [loadingLista,   setLoadingLista]  = useState(false)
   const [checkingId,     setCheckingId]    = useState(null)
+  const [ticketReg,      setTicketReg]     = useState(null)
   const html5QrRef = useRef(null)
   const resultTimerRef = useRef(null)
   const { canManage } = useRole()
@@ -186,19 +187,24 @@ export default function CheckinPage() {
 
   async function checkinManuale(reg) {
     if (reg.presente) return
+    setTicketReg(reg)
+  }
+
+  async function confermaCheckinDaTicket() {
+    const reg = ticketReg
+    if (!reg) return
     setCheckingId(reg.id)
     const { error } = await supabase.from('registrations')
       .update({ presente: true, stato: 'presente', checkin_at: new Date().toISOString() })
       .eq('id', reg.id)
     if (!error) {
-      setIscritti(prev => prev.map(r => r.id === reg.id
-        ? { ...r, presente: true, stato: 'presente', checkin_at: new Date().toISOString() }
-        : r
-      ))
-      setResult({ ok: true, nome: `${reg.nome} ${reg.cognome}` })
+      const updated = { ...reg, presente: true, stato: 'presente', checkin_at: new Date().toISOString() }
+      setIscritti(prev => prev.map(r => r.id === reg.id ? updated : r))
+      setResult({ ok: true, nome: `${reg.nome} ${reg.cognome}`, numero_posto: reg.numero_posto })
       loadPresenti()
     }
     setCheckingId(null)
+    setTicketReg(null)
   }
 
   async function annullaCheckin(reg) {
@@ -553,10 +559,11 @@ export default function CheckinPage() {
                       borderBottom: '1px solid #F3F4F6',
                       background: r.presente ? '#F0FDF4' : '#fff',
                       transition: 'background .15s',
-                    }}>
+                      cursor: r.presente ? 'default' : 'pointer',
+                    }} onClick={() => !r.presente && checkinManuale(r)}>
                       {/* Toggle check-in */}
                       <button
-                        onClick={() => r.presente ? annullaCheckin(r) : checkinManuale(r)}
+                        onClick={e => { e.stopPropagation(); r.presente ? annullaCheckin(r) : checkinManuale(r) }}
                         disabled={isChecking}
                         title={r.presente ? 'Annulla check-in' : 'Effettua check-in'}
                         style={{
@@ -619,6 +626,120 @@ export default function CheckinPage() {
       )}
 
       <style>{`@keyframes spin{from{transform:rotate(0)}to{transform:rotate(360deg)}}`}</style>
+
+      {/* ── Modal biglietto check-in manuale ── */}
+      {ticketReg && (
+        <div style={{
+          position: 'fixed', inset: 0, background: 'rgba(0,0,0,.6)',
+          display: 'flex', alignItems: 'center', justifyContent: 'center',
+          zIndex: 9999, padding: '20px',
+        }} onClick={() => setTicketReg(null)}>
+          <div onClick={e => e.stopPropagation()} style={{
+            width: '100%', maxWidth: '400px',
+            background: '#fff', borderRadius: '20px',
+            boxShadow: '0 24px 64px rgba(0,0,0,.35)',
+            overflow: 'hidden',
+            fontFamily: "'Inter', sans-serif",
+          }}>
+            {/* Header blu */}
+            <div style={{
+              background: 'linear-gradient(135deg, #003DA5 0%, #0052CC 100%)',
+              padding: '28px 28px 22px',
+              textAlign: 'center',
+              position: 'relative',
+            }}>
+              <img
+                src="https://raw.githubusercontent.com/alessandroparrelli/fileappoggio/main/NUOVO-LOGO-CNA-ROMA-SOLO-ROMA.png"
+                alt="CNA Roma"
+                style={{ height: '32px', marginBottom: '16px', filter: 'brightness(0) invert(1)' }}
+              />
+              <p style={{ fontSize: '11px', fontWeight: '700', color: 'rgba(255,255,255,.6)', textTransform: 'uppercase', letterSpacing: '.1em', margin: '0 0 6px' }}>
+                Partecipante
+              </p>
+              <p style={{ fontSize: '26px', fontWeight: '900', color: '#fff', margin: 0, letterSpacing: '-.03em', lineHeight: 1.15 }}>
+                {ticketReg.cognome} {ticketReg.nome}
+              </p>
+              {ticketReg.ragione_sociale && (
+                <p style={{ fontSize: '13px', color: 'rgba(255,255,255,.7)', margin: '6px 0 0', fontWeight: '500' }}>
+                  {ticketReg.ragione_sociale}
+                </p>
+              )}
+              <button onClick={() => setTicketReg(null)} style={{
+                position: 'absolute', top: '14px', right: '14px',
+                background: 'rgba(255,255,255,.15)', border: 'none', borderRadius: '8px',
+                color: '#fff', width: '30px', height: '30px', cursor: 'pointer',
+                fontSize: '18px', display: 'flex', alignItems: 'center', justifyContent: 'center',
+              }}>×</button>
+            </div>
+
+            {/* Bordo dentellato */}
+            <div style={{ display: 'flex', alignItems: 'center', margin: '0 -1px' }}>
+              <div style={{ width: '20px', height: '20px', borderRadius: '50%', background: '#F3F4F6', flexShrink: 0, marginLeft: '-10px' }} />
+              <div style={{ flex: 1, borderTop: '2px dashed #E5E7EB' }} />
+              <div style={{ width: '20px', height: '20px', borderRadius: '50%', background: '#F3F4F6', flexShrink: 0, marginRight: '-10px' }} />
+            </div>
+
+            {/* Corpo biglietto */}
+            <div style={{ padding: '22px 28px 28px' }}>
+              {/* Posto */}
+              {ticketReg.numero_posto ? (
+                <div style={{
+                  background: 'linear-gradient(135deg, #EEF3FF, #E0EAFF)',
+                  border: '1px solid #C7D9F8',
+                  borderRadius: '12px',
+                  padding: '16px 20px',
+                  textAlign: 'center',
+                  marginBottom: '20px',
+                }}>
+                  <p style={{ fontSize: '11px', fontWeight: '700', color: '#6B7280', textTransform: 'uppercase', letterSpacing: '.08em', margin: '0 0 4px' }}>
+                    Posto assegnato
+                  </p>
+                  <p style={{ fontSize: '32px', fontWeight: '900', color: '#003DA5', margin: 0, letterSpacing: '-.03em' }}>
+                    🪑 {ticketReg.numero_posto}
+                  </p>
+                </div>
+              ) : (
+                <div style={{
+                  background: '#F9FAFB', border: '1px solid #E5E7EB',
+                  borderRadius: '12px', padding: '14px 20px',
+                  textAlign: 'center', marginBottom: '20px',
+                }}>
+                  <p style={{ fontSize: '13px', color: '#9CA3AF', margin: 0, fontWeight: '500' }}>
+                    Nessun posto assegnato
+                  </p>
+                </div>
+              )}
+
+              {/* Info email */}
+              {ticketReg.email && (
+                <p style={{ fontSize: '12px', color: '#9CA3AF', textAlign: 'center', margin: '0 0 18px' }}>
+                  {ticketReg.email}
+                </p>
+              )}
+
+              {/* Bottone check-in */}
+              <button
+                onClick={confermaCheckinDaTicket}
+                disabled={!!checkingId}
+                style={{
+                  width: '100%', padding: '16px',
+                  background: checkingId ? '#9CA3AF' : 'linear-gradient(135deg, #16A34A, #15803D)',
+                  color: '#fff', border: 'none', borderRadius: '12px',
+                  fontSize: '16px', fontWeight: '800', fontFamily: "'Inter', sans-serif",
+                  cursor: checkingId ? 'default' : 'pointer',
+                  display: 'flex', alignItems: 'center', justifyContent: 'center', gap: '10px',
+                  letterSpacing: '-.01em',
+                }}
+              >
+                {checkingId
+                  ? <><div style={{ width: '18px', height: '18px', border: '2px solid #fff', borderTopColor: 'transparent', borderRadius: '50%', animation: 'spin .6s linear infinite' }} /> Registrazione…</>
+                  : <><svg width="20" height="20" fill="none" stroke="#fff" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round" viewBox="0 0 24 24"><path d="M22 11.08V12a10 10 0 1 1-5.93-9.14"/><polyline points="22 4 12 14.01 9 11.01"/></svg> Conferma check-in</>
+                }
+              </button>
+            </div>
+          </div>
+        </div>
+      )}
 
       {/* ── Modal walk-in ── */}
       {walkinModal && (
