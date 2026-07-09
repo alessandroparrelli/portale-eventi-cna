@@ -232,6 +232,15 @@ export default function IscrizioniTab({ event, setEvent, eventId }) {
     setSaving(true); setSaved(false); setErrore('')
 
     try {
+      // 0. Salva capienza_max e posti_per_utente sull'evento
+      const { error: evErr } = await supabase.from('events')
+        .update({
+          capienza_max: event.capienza_max || null,
+          posti_per_utente: event.posti_per_utente || 1,
+        })
+        .eq('id', eventId)
+      if (evErr) throw evErr
+
       // 1. Aggiorna campi standard esistenti
       for (const c of campiStandard) {
         const { error } = await supabase.from('form_fields')
