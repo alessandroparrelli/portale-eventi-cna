@@ -50,10 +50,14 @@ function validateCAP(v) {
 
 function validatePersona(dati, campi) {
   const errors = {}
+  const pIvaObbligatoria = isImprenditore(dati, campi)
   campi.forEach(c => {
     if (!c.visibile) return
+    // P.IVA nascosta se non imprenditore: salta validazione
+    if (c.colonna_db === 'partita_iva' && !pIvaObbligatoria) return
     const val = (dati[c.colonna_db] || '').toString()
-    if (c.obbligatorio && !val.trim()) {
+    const obbligatorio = c.colonna_db === 'partita_iva' ? pIvaObbligatoria : c.obbligatorio
+    if (obbligatorio && !val.trim()) {
       errors[c.colonna_db] = 'Campo obbligatorio'
       return
     }
@@ -72,6 +76,15 @@ function validatePersona(dati, campi) {
     }
   })
   return errors
+}
+
+// Restituisce true se i dati richiedono P.IVA (partecipante Imprenditore)
+function isImprenditore(dati, campi) {
+  return campi.some(c =>
+    c.tipo === 'select' &&
+    c.opzioni?.choices?.some(o => /imprendit/i.test(o)) &&
+    /imprendit/i.test(dati[c.colonna_db] || '')
+  )
 }
 
 /* ─── Blocco dati singola persona ─── */
