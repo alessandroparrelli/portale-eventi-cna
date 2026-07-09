@@ -10,7 +10,6 @@ import { RICH_CSS } from '../../components/editor/RichEditor'
 import FormIscrizione from './FormIscrizione'
 import SocialLinks from '../../components/SocialLinks'
 import { useSocial } from '../../hooks/useSocial'
-import PushButton from '../../components/PushButton'
 import BlockRenderer from '../../components/public/BlockRenderer'
 
 function fmtData(ts) {
@@ -617,18 +616,6 @@ export default function LandingPage() {
         {formVisible && !esaurito && !conferma && (
           <div id="form-iscrizione" style={s.formWrap}>
             <h3 style={s.formTitle}>Modulo di iscrizione</h3>
-            {/* Notifiche per questo evento */}
-          {event?.id && (
-            <div style={{ marginBottom:'16px' }}>
-              <PushButton
-                eventId={event.id}
-                tipo="evento"
-                label="🔔 Ricevi aggiornamenti su questo evento"
-                labelOff="🔔 Aggiornamenti attivi"
-              />
-            </div>
-          )}
-
           {/* Avvisi / raccomandazioni configurabili dall'admin */}
           {event?.form_note && (
             <div style={{ marginBottom:'20px', background:'#FFFBEB', border:'1px solid #FDE68A', borderRadius:'10px', padding:'14px 16px' }}>
