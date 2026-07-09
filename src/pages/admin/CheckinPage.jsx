@@ -35,7 +35,7 @@ const TICKET_TEXT = '#1a0800'
 const TICKET_MUTED= 'rgba(30,10,0,.55)'
 const TICKET_GOLD = '#7c2d00'
 const TICKET_DECO = 'rgba(255,255,255,.45)'
-const LOGO_URL    = 'https://customer31551.img.musvc2.net/static/31551/images/1/CNARoma%20NEGATIVO%20COLORE%20SOLO%20ROMA.png'
+const LOGO_URL    = 'https://raw.githubusercontent.com/alessandroparrelli/fileappoggio/main/NUOVO-LOGO-CNA-ROMA-SOLO-ROMA.png'
 
 /* Bordo zigrinato bianco pieno */
 const ZIG_SVG = "url(\"data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='14' height='20'%3E%3Cpolygon points='0,0 14,10 0,20' fill='white'/%3E%3C/svg%3E\")"
@@ -658,7 +658,7 @@ export default function CheckinPage() {
                   <div style={{ display:'flex', alignItems:'center', gap:'10px', marginBottom:'6px' }}>
                     <img src={LOGO_URL}
                          alt="CNA Roma"
-                         style={{ height:28, flexShrink:0 }} />
+                         style={{ height:32, flexShrink:0, filter:'brightness(0) invert(1) drop-shadow(0 1px 3px rgba(0,0,0,.3))' }} />
                     {titoloEvento && <p style={{ fontSize:'12px', fontWeight:'700', color:TICKET_MUTED, margin:0, lineHeight:1.3 }}>{titoloEvento}</p>}
                   </div>
                   <div style={{ borderTop:`1px dashed ${TICKET_DECO}`, margin:'14px 0 18px' }} />
