@@ -361,33 +361,37 @@ export default function FormIscrizione({ event, onSuccess }) {
       {errGen && <div style={s.errBox}>{errGen}</div>}
 
       {postiPerUtente > 1 && (
-        <div style={{ background:'#F9FAFB', border:'1px solid #E5E7EB', borderRadius:'10px', padding:'14px 16px', marginBottom:'20px' }}>
+        <div style={{ background:'linear-gradient(135deg,#EEF3FF 0%,#E0EAFF 100%)', border:'2px solid #003DA5', borderRadius:'14px', padding:'18px 20px', marginBottom:'24px', boxShadow:'0 2px 12px rgba(0,61,165,0.10)' }}>
           <div style={{ display:'flex', alignItems:'center', justifyContent:'space-between', gap:'12px' }}>
-            <div style={{ display:'flex', alignItems:'center', gap:'8px' }}>
-              <Users size={18} style={{ color:'#003DA5', flexShrink:0 }} />
-              <p style={{ fontSize:'14px', color:'#374151', margin:0, fontWeight:'600' }}>
-                Quante persone?
-              </p>
-            </div>
             <div style={{ display:'flex', alignItems:'center', gap:'10px' }}>
+              <div style={{ background:'#003DA5', borderRadius:'10px', padding:'8px', display:'flex', alignItems:'center', justifyContent:'center', flexShrink:0 }}>
+                <Users size={20} style={{ color:'#fff' }} />
+              </div>
+              <div>
+                <p style={{ fontSize:'15px', color:'#003DA5', margin:0, fontWeight:'800', letterSpacing:'-.01em' }}>
+                  Vuoi registrare più persone?
+                </p>
+                <p style={{ fontSize:'12px', color:'#6B7280', margin:'2px 0 0' }}>
+                  Puoi aggiungere fino a <strong style={{color:'#003DA5'}}>{postiPerUtente} persone</strong> con questa iscrizione
+                </p>
+              </div>
+            </div>
+            <div style={{ display:'flex', alignItems:'center', gap:'12px', flexShrink:0 }}>
               <button type="button" onClick={() => removePersona(persone.length - 1)}
                 disabled={persone.length <= 1}
-                style={{ width:'32px', height:'32px', borderRadius:'50%', border:'1.5px solid #E5E7EB', background: persone.length <= 1 ? '#F9FAFB' : '#fff', cursor: persone.length <= 1 ? 'not-allowed' : 'pointer', fontSize:'18px', fontWeight:'700', color: persone.length <= 1 ? '#D1D5DB' : '#003DA5', display:'flex', alignItems:'center', justifyContent:'center', lineHeight:1 }}>
+                style={{ width:'36px', height:'36px', borderRadius:'50%', border:'2px solid', borderColor: persone.length <= 1 ? '#D1D5DB' : '#003DA5', background: persone.length <= 1 ? '#F3F4F6' : '#fff', cursor: persone.length <= 1 ? 'not-allowed' : 'pointer', fontSize:'20px', fontWeight:'700', color: persone.length <= 1 ? '#D1D5DB' : '#003DA5', display:'flex', alignItems:'center', justifyContent:'center', lineHeight:1, transition:'all .15s' }}>
                 −
               </button>
-              <span style={{ fontSize:'20px', fontWeight:'800', color:'#0A0A0A', minWidth:'20px', textAlign:'center' }}>
+              <span style={{ fontSize:'28px', fontWeight:'900', color:'#003DA5', minWidth:'28px', textAlign:'center', letterSpacing:'-.02em' }}>
                 {persone.length}
               </span>
               <button type="button" onClick={addPersona}
                 disabled={persone.length >= postiPerUtente}
-                style={{ width:'32px', height:'32px', borderRadius:'50%', border:'1.5px solid #E5E7EB', background: persone.length >= postiPerUtente ? '#F9FAFB' : '#003DA5', cursor: persone.length >= postiPerUtente ? 'not-allowed' : 'pointer', fontSize:'18px', fontWeight:'700', color: persone.length >= postiPerUtente ? '#D1D5DB' : '#fff', display:'flex', alignItems:'center', justifyContent:'center', lineHeight:1 }}>
+                style={{ width:'36px', height:'36px', borderRadius:'50%', border:'2px solid', borderColor: persone.length >= postiPerUtente ? '#D1D5DB' : '#003DA5', background: persone.length >= postiPerUtente ? '#F3F4F6' : '#003DA5', cursor: persone.length >= postiPerUtente ? 'not-allowed' : 'pointer', fontSize:'20px', fontWeight:'700', color: persone.length >= postiPerUtente ? '#D1D5DB' : '#fff', display:'flex', alignItems:'center', justifyContent:'center', lineHeight:1, transition:'all .15s' }}>
                 +
               </button>
             </div>
           </div>
-          <p style={{ fontSize:'12px', color:'#9CA3AF', margin:'8px 0 0' }}>
-            Puoi registrare da 1 a <strong>{postiPerUtente} persone</strong>
-          </p>
         </div>
       )}
 
