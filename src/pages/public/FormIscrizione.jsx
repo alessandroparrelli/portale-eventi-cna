@@ -76,6 +76,7 @@ function validatePersona(dati, campi) {
 
 /* ─── Blocco dati singola persona ─── */
 function PersonaForm({ idx, dati, onChange, errors, campi, mestieri, isAccompagnatore }) {
+  const pIvaObbligatoria = isImprenditore(dati, campi)
   return (
     <div style={{
       border: `1px solid ${isAccompagnatore ? '#E5E7EB' : '#003DA5'}`,
