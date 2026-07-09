@@ -116,7 +116,7 @@ function ModalConferma({ reg, event, onClose }) {
           </svg>
         </div>
         <h2 style={mc.title}>Iscrizione confermata!</h2>
-        <p style={mc.sub}>Benvenuto/a <strong>{reg.nome} {reg.cognome}</strong>. Salva il QR Code — ti servirà all'ingresso.</p>
+        <p style={mc.sub}>Benvenuto/a <strong>{reg.nome} {reg.cognome}</strong>. {event.teatro_abilitato ? 'Riceverai il tuo posto e il QR Code via email.' : 'Salva il QR Code — ti servirà all'ingresso.'}</p>
 
         {/* Codice iscrizione */}
         {reg.codice_iscrizione && (
@@ -133,27 +133,36 @@ function ModalConferma({ reg, event, onClose }) {
           </div>
         )}
 
-        <div style={mc.qrBox}>
-          <p style={mc.qrLabel}>Il tuo QR Code personale</p>
-          {qrDataUrl ? (
-            <>
-              <img src={qrDataUrl} alt="QR" style={mc.qrImg}/>
-              <p style={{ fontSize:'12px',color:'#6B7280',margin:0 }}>📸 Fai uno screenshot o scarica</p>
-              <code style={mc.qrCode}>{reg.qr_code}</code>
-              <button onClick={saveQR} style={{ ...mc.dlBtn, backgroundColor:'#003DA5', color:'#fff', border:'none' }}>
-                <Download size={13} style={{ display:'inline', marginRight:4, verticalAlign:'middle' }}/> {qrSaved ? '✓ Salvato!' : 'Salva QR Code'}
-              </button>
-              <button onClick={shareWhatsApp} style={{ ...mc.dlBtn, backgroundColor:'#25D366', color:'#fff', border:'none', marginLeft:6 }}>
-                <Share2 size={13} style={{ display:'inline', marginRight:4, verticalAlign:'middle' }}/> WhatsApp
-              </button>
-            </>
-          ) : (
-            <div style={{ display:'flex',alignItems:'center',gap:'10px',padding:'20px 0' }}>
-              <div style={{ width:'28px',height:'28px',border:'3px solid #E5E7EB',borderTopColor:'#003DA5',borderRadius:'50%',animation:'qrspin .8s linear infinite' }}/>
-              <span style={{ fontSize:'13px',color:'#6B7280' }}>Generazione QR…</span>
-            </div>
-          )}
-        </div>
+        {!event.teatro_abilitato && (
+          <div style={mc.qrBox}>
+            <p style={mc.qrLabel}>Il tuo QR Code personale</p>
+            {qrDataUrl ? (
+              <>
+                <img src={qrDataUrl} alt="QR" style={mc.qrImg}/>
+                <p style={{ fontSize:'12px',color:'#6B7280',margin:0 }}>📸 Fai uno screenshot o scarica</p>
+                <code style={mc.qrCode}>{reg.qr_code}</code>
+                <button onClick={saveQR} style={{ ...mc.dlBtn, backgroundColor:'#003DA5', color:'#fff', border:'none' }}>
+                  <Download size={13} style={{ display:'inline', marginRight:4, verticalAlign:'middle' }}/> {qrSaved ? '✓ Salvato!' : 'Salva QR Code'}
+                </button>
+                <button onClick={shareWhatsApp} style={{ ...mc.dlBtn, backgroundColor:'#25D366', color:'#fff', border:'none', marginLeft:6 }}>
+                  <Share2 size={13} style={{ display:'inline', marginRight:4, verticalAlign:'middle' }}/> WhatsApp
+                </button>
+              </>
+            ) : (
+              <div style={{ display:'flex',alignItems:'center',gap:'10px',padding:'20px 0' }}>
+                <div style={{ width:'28px',height:'28px',border:'3px solid #E5E7EB',borderTopColor:'#003DA5',borderRadius:'50%',animation:'qrspin .8s linear infinite' }}/>
+                <span style={{ fontSize:'13px',color:'#6B7280' }}>Generazione QR…</span>
+              </div>
+            )}
+          </div>
+        )}
+        {event.teatro_abilitato && (
+          <div style={{ background:'#FFF7ED', border:'1px solid #FED7AA', borderRadius:'10px', padding:'16px 20px', marginBottom:'14px', textAlign:'center' }}>
+            <p style={{ fontSize:'22px', margin:'0 0 6px' }}>🎭</p>
+            <p style={{ fontSize:'14px', fontWeight:'700', color:'#C2410C', margin:'0 0 4px' }}>Il tuo posto verrà assegnato a breve</p>
+            <p style={{ fontSize:'13px', color:'#92400E', margin:0, lineHeight:'1.5' }}>Riceverai una email con il numero del posto e il QR Code per l'ingresso.</p>
+          </div>
+        )}
         {event.data_inizio && (
           <div style={mc.infoBox}>
             <div style={mc.infoRow}><Calendar size={14} style={{ color:'#003DA5',flexShrink:0 }}/><span>{fmtData(event.data_inizio)}</span></div>
@@ -179,7 +188,7 @@ function ModalConferma({ reg, event, onClose }) {
           )}
           <button onClick={onClose} style={{ padding:'12px 18px',backgroundColor:'transparent',border:'1px solid #E5E7EB',borderRadius:'8px',fontSize:'14px',fontWeight:'600',fontFamily:"'Inter',sans-serif",cursor:'pointer',color:'#6B7280' }}>Chiudi</button>
         </div>
-        <p style={{ fontSize:'11px',color:'#9CA3AF',lineHeight:'1.5',margin:0 }}>Riceverai anche una email di conferma con il QR Code.</p>
+        <p style={{ fontSize:'11px',color:'#9CA3AF',lineHeight:'1.5',margin:0 }}>{event.teatro_abilitato ? 'Riceverai una email quando il tuo posto sarà assegnato.' : 'Riceverai anche una email di conferma con il QR Code.'}</p>
       </div>
       <style>{`@keyframes circ{to{stroke-dashoffset:0}}@keyframes tick{to{stroke-dashoffset:0}}@keyframes qrspin{to{transform:rotate(360deg)}}`}</style>
     </div>
