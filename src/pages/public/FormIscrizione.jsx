@@ -294,6 +294,7 @@ export default function FormIscrizione({ event, onSuccess }) {
         ...buildPayload(persone[0]),
         qr_code: reg0Qr,
         codice_iscrizione: codiceBase,
+        gruppo_id: persone.length > 1 ? reg0Id : null,
       })
 
       if (err0) throw new Error(err0.message)
@@ -306,6 +307,7 @@ export default function FormIscrizione({ event, onSuccess }) {
           qr_code: qrAcc || ('QR-' + Math.random().toString(36).slice(2,10).toUpperCase()),
           codice_iscrizione: codiceBase + suffissi[i],
           gruppo_id: reg0Id,
+          referente_id: reg0Id,
         })
       }
 

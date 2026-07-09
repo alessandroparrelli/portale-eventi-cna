@@ -92,6 +92,12 @@ export default function IscrittiPage() {
   const [pagina, setPagina] = useState(1)
   const PAGE_SIZE = 20
 
+  // Mappa id→nome per referenti di gruppo (calcolata dai registrations caricati)
+  const referentiMap = {}
+  registrations.forEach(r => {
+    if (r.gruppo_id === r.id) referentiMap[r.id] = `${r.nome||''} ${r.cognome||''}`.trim()
+  })
+
   // Teatro
   const [teatroAbilitato, setTeatroAbilitato] = useState(false)
   const [tabAttivo, setTabAttivo] = useState('iscritti') // 'iscritti' | 'teatro'
@@ -924,7 +930,16 @@ export default function IscrittiPage() {
                             <span title="Nessun posto o email mancante" style={{ color:'#D1D5DB', fontSize:'12px' }}>—</span>
                           )}
                         </td>
-                        <td style={s.td}><p style={s.name}>{r.nome} {r.cognome}</p>{r.ragione_sociale && <p style={s.sub}>{r.ragione_sociale}</p>}</td>
+                        <td style={s.td}>
+                          <p style={s.name}>{r.nome} {r.cognome}</p>
+                          {r.ragione_sociale && <p style={s.sub}>{r.ragione_sociale}</p>}
+                          {r.gruppo_id === r.id && (
+                            <span style={{ display:'inline-flex', alignItems:'center', gap:'3px', fontSize:'10px', fontWeight:'700', color:'#003DA5', background:'#EEF3FF', borderRadius:'999px', padding:'2px 7px', marginTop:'3px' }}>👥 Capogruppo</span>
+                          )}
+                          {r.referente_id && referentiMap[r.referente_id] && (
+                            <span style={{ display:'inline-flex', alignItems:'center', gap:'3px', fontSize:'10px', fontWeight:'700', color:'#6B7280', background:'#F3F4F6', borderRadius:'999px', padding:'2px 7px', marginTop:'3px' }}>↩ {referentiMap[r.referente_id]}</span>
+                          )}
+                        </td>
                         <td style={s.td}><span style={s.cell}>{r.email || <span style={{color:'#DC2626',fontSize:'12px'}}>⚠ Mancante</span>}</span></td>
                         {/* Input posto — testo libero */}
                         <td style={s.td}>
@@ -1048,6 +1063,12 @@ export default function IscrittiPage() {
                         <td style={s.td}>
                           <p style={s.name}>{r.nome} {r.cognome}</p>
                           {r.ragione_sociale && <p style={s.sub}>{r.ragione_sociale}</p>}
+                          {r.gruppo_id === r.id && (
+                            <span style={{ display:'inline-flex', alignItems:'center', gap:'3px', fontSize:'10px', fontWeight:'700', color:'#003DA5', background:'#EEF3FF', borderRadius:'999px', padding:'2px 7px', marginTop:'3px' }}>👥 Capogruppo</span>
+                          )}
+                          {r.referente_id && referentiMap[r.referente_id] && (
+                            <span style={{ display:'inline-flex', alignItems:'center', gap:'3px', fontSize:'10px', fontWeight:'700', color:'#6B7280', background:'#F3F4F6', borderRadius:'999px', padding:'2px 7px', marginTop:'3px' }}>↩ {referentiMap[r.referente_id]}</span>
+                          )}
                         </td>
                         <td style={s.td} className="col-hide-mobile"><span style={s.cell}>{r.email||'—'}</span></td>
                         <td style={s.td} className="col-hide-mobile"><span style={s.cell}>{getMestiere(r.mestiere_id)}</span></td>
