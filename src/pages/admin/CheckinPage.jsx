@@ -42,7 +42,7 @@ const ZigStyle = { position:'absolute', top:0, bottom:0, width:'14px', backgroun
 
 const CLOSE_SVG = <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round"><line x1="18" y1="6" x2="6" y2="18"/><line x1="6" y1="6" x2="18" y2="18"/></svg>
 const CloseBtn = ({ onClick }) => (
-  <button onClick={onClick} style={{ background:'#fff', border:'none', borderRadius:'50%', cursor:'pointer', color:'#0A0A0A', width:42, height:42, display:'flex', alignItems:'center', justifyContent:'center', flexShrink:0, boxShadow:'0 2px 12px rgba(0,0,0,.25)' }}>
+  <button onClick={onClick} style={{ background:'#0A0A0A', border:'none', borderRadius:'50%', cursor:'pointer', color:'#fff', width:44, height:44, display:'flex', alignItems:'center', justifyContent:'center', flexShrink:0, boxShadow:'0 2px 16px rgba(0,0,0,.5)' }}>
     {CLOSE_SVG}
   </button>
 )
@@ -52,11 +52,7 @@ function Biglietto({ onClose, titoloEvento, nome, cognome, ragioneSociale, email
                      statusIcon, statusColor, statusBg, statusLabel,
                      extraInfo, bottone }) {
   return (
-    <div>
-      <div style={{ display:'flex', justifyContent:'flex-end', marginBottom:'8px' }}>
-        <CloseBtn onClick={onClose} />
-      </div>
-      <div style={{ filter:'drop-shadow(0 16px 40px rgba(0,0,0,.45))' }}>
+    <div style={{ filter:'drop-shadow(0 16px 40px rgba(0,0,0,.45))' }}>
         <div style={{ position:'relative', borderRadius:'18px', overflow:'hidden', background:TICKET_BG, outline:'2px solid rgba(255,255,255,.5)', display:'flex' }}>
           <div style={{ ...ZigStyle, left:0, transform:'scaleX(-1)' }} />
           <div style={{ ...ZigStyle, right:0 }} />
@@ -119,7 +115,6 @@ function Biglietto({ onClose, titoloEvento, nome, cognome, ragioneSociale, email
           </div>
         </div>
       </div>
-    </div>
   )
 }
 
@@ -146,6 +141,9 @@ function ResultBanner({ result, onClose, titoloEvento }) {
 
   return (
     <div style={{ marginBottom:14 }}>
+      <div style={{ display:'flex', justifyContent:'flex-end', marginBottom:'10px' }}>
+        <CloseBtn onClick={onClose} />
+      </div>
       <Biglietto
         onClose={onClose}
         titoloEvento={titoloEvento}
@@ -577,9 +575,13 @@ export default function CheckinPage() {
       {ticketReg && (
         <div style={{ position:'fixed', inset:0, background:'rgba(0,0,0,.8)', display:'flex', alignItems:'center', justifyContent:'center', zIndex:9999, padding:'16px' }}
           onClick={() => setTicketReg(null)}>
-          <div style={{ width:'100%', maxWidth:'520px' }} onClick={e => e.stopPropagation()}>
+          <div style={{ width:'100%', maxWidth:'520px', position:'relative' }}>
+            <div style={{ display:'flex', justifyContent:'flex-end', marginBottom:'10px' }} onClick={e => e.stopPropagation()}>
+              <CloseBtn onClick={() => setTicketReg(null)} />
+            </div>
+            <div onClick={e => e.stopPropagation()}>
             <Biglietto
-              onClose={() => setTicketReg(null)}
+              onClose={null}
               titoloEvento={titoloEvento}
               nome={ticketReg.nome}
               cognome={ticketReg.cognome}
@@ -606,6 +608,7 @@ export default function CheckinPage() {
                 </button>
               }
             />
+            </div>
           </div>
         </div>
       )}
