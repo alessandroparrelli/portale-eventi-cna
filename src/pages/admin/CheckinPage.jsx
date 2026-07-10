@@ -359,10 +359,13 @@ export default function CheckinPage() {
   const pct          = totali > 0 ? Math.round((presenti.length / totali) * 100) : 0
   const nonPresenti  = totali - presenti.length
 
-  const filteredIscritti = iscritti.filter(r => {
+  const filteredIscritti = (() => {
     const q = searchLista.toLowerCase()
-    return !q || r.nome?.toLowerCase().includes(q) || r.cognome?.toLowerCase().includes(q) || r.ragione_sociale?.toLowerCase().includes(q)
-  })
+    if (!q) return iscritti
+    const match = r => r.nome?.toLowerCase().includes(q) || r.cognome?.toLowerCase().includes(q) || r.ragione_sociale?.toLowerCase().includes(q)
+    const gruppiMatch = new Set(iscritti.filter(r => match(r) && r.gruppo_id).map(r => r.gruppo_id))
+    return iscritti.filter(r => match(r) || (r.gruppo_id && gruppiMatch.has(r.gruppo_id)))
+  })()
 
   return (
     <div style={s.page}>
