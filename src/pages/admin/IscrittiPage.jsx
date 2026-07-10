@@ -273,12 +273,29 @@ export default function IscrittiPage() {
   // Reset pagina su cambio filtri
   useEffect(() => { setPagina(1) }, [selectedEvento, search, filterStato])
 
-  const filtered = registrations.filter(r => {
+  const filtered = (() => {
     const q = search.toLowerCase()
-    const matchSearch = !q || r.nome?.toLowerCase().includes(q) || r.cognome?.toLowerCase().includes(q) || r.email?.toLowerCase().includes(q)
-    const matchStato = filterStato==='tutti' || r.stato===filterStato
-    return matchSearch && matchStato
-  })
+    const matchStato = r => filterStato==='tutti' || r.stato===filterStato
+    const matchSearch = r => !q || r.nome?.toLowerCase().includes(q) || r.cognome?.toLowerCase().includes(q) || r.email?.toLowerCase().includes(q)
+
+    if (!q) return registrations.filter(r => matchStato(r))
+
+    // Trova tutti i gruppo_id dei record che matchano la ricerca
+    const gruppiMatched = new Set(
+      registrations
+        .filter(r => matchSearch(r) && r.gruppo_id)
+        .map(r => r.gruppo_id)
+    )
+
+    return registrations.filter(r => {
+      if (!matchStato(r)) return false
+      // Match diretto
+      if (matchSearch(r)) return true
+      // Match per gruppo: includi collegati se almeno uno del gruppo matcha
+      if (r.gruppo_id && gruppiMatched.has(r.gruppo_id)) return true
+      return false
+    })
+  })()
 
   async function deleteReg() {
     await supabase.from('registrations').delete().eq('id', delConfirm.id)
