@@ -109,6 +109,7 @@ export default function IscrittiPage() {
   const [dryRunRis, setDryRunRis] = useState(null)
   const [teatroSelezione, setTeatroSelezione] = useState(new Set()) // Set di reg_id selezionati
   const [filtroPostoAssegnato, setFiltroPostoAssegnato] = useState('tutti') // 'tutti' | 'con_posto' | 'senza_posto'
+  const [searchTeatro, setSearchTeatro] = useState('')
   const [filtroMailPosto, setFiltroMailPosto] = useState('tutti') // 'tutti' | 'inviata' | 'non_inviata'
 
   function toggleSort(col) {
@@ -294,6 +295,20 @@ export default function IscrittiPage() {
       // Match per gruppo: includi collegati se almeno uno del gruppo matcha
       if (r.gruppo_id && gruppiMatched.has(r.gruppo_id)) return true
       return false
+    })
+  })()
+
+  const filteredTeatro = (() => {
+    const qT = searchTeatro.toLowerCase()
+    const matchT = r => !qT || r.nome?.toLowerCase().includes(qT) || r.cognome?.toLowerCase().includes(qT) || r.email?.toLowerCase().includes(qT)
+    const gruppiT = qT ? new Set(registrations.filter(r => matchT(r) && r.gruppo_id).map(r => r.gruppo_id)) : new Set()
+    return registrations.filter(r => {
+      if (filtroPostoAssegnato === 'con_posto' && !r.numero_posto) return false
+      if (filtroPostoAssegnato === 'senza_posto' && r.numero_posto) return false
+      if (filtroMailPosto === 'inviata' && !r.posto_email_inviata) return false
+      if (filtroMailPosto === 'non_inviata' && r.posto_email_inviata) return false
+      if (qT && !matchT(r) && !(r.gruppo_id && gruppiT.has(r.gruppo_id))) return false
+      return true
     })
   })()
 
@@ -772,10 +787,18 @@ export default function IscrittiPage() {
 
       {/* TAB SWITCHER — visibile solo se teatro abilitato */}
       {selectedEvento && teatroAbilitato && (
-        <div style={{ display:'flex', gap:'4px', marginBottom:'20px', borderBottom:'2px solid #E5E7EB' }}>
-          {[{ id:'iscritti', label:'👥 Iscritti' }, { id:'teatro', label:'🎭 Gestione posti' }].map(tab => (
+        <div style={{ display:'flex', gap:'6px', marginBottom:'20px', background:'#F1F5F9', borderRadius:'12px', padding:'5px' }}>
+          {[{ id:'iscritti', label:'👥 Iscritti', emoji:'👥' }, { id:'teatro', label:'🎭 Gestione posti', emoji:'🎭' }].map(tab => (
             <button key={tab.id} onClick={() => setTabAttivo(tab.id)}
-              style={{ padding:'10px 20px', border:'none', background:'none', cursor:'pointer', fontSize:'14px', fontWeight:'700', fontFamily:"'Inter',sans-serif", color: tabAttivo === tab.id ? '#003DA5' : '#6B7280', borderBottom: tabAttivo === tab.id ? '2px solid #003DA5' : '2px solid transparent', marginBottom:'-2px' }}>
+              style={{
+                flex:1, padding:'11px 24px', border:'none', cursor:'pointer',
+                fontSize:'14px', fontWeight:'700', fontFamily:"'Inter',sans-serif",
+                borderRadius:'9px', transition:'all .18s',
+                background: tabAttivo === tab.id ? '#003DA5' : 'transparent',
+                color: tabAttivo === tab.id ? '#fff' : '#6B7280',
+                boxShadow: tabAttivo === tab.id ? '0 2px 8px rgba(0,61,165,.25)' : 'none',
+                letterSpacing: tabAttivo === tab.id ? '-.01em' : '0',
+              }}>
               {tab.label}
             </button>
           ))}
@@ -838,6 +861,21 @@ export default function IscrittiPage() {
                 style={{ fontSize:'12px', color:'#DC2626', background:'none', border:'none', cursor:'pointer', padding:0, fontWeight:'600' }}>
                 × Azzera filtri
               </button>
+            )}
+          </div>
+
+          {/* Ricerca nel tab teatro */}
+          <div style={{ position:'relative', marginBottom:'14px' }}>
+            <Search size={15} style={{ position:'absolute', left:'12px', top:'50%', transform:'translateY(-50%)', color:'#9CA3AF', pointerEvents:'none' }} />
+            <input
+              value={searchTeatro}
+              onChange={e => setSearchTeatro(e.target.value)}
+              placeholder="Cerca per nome, cognome o email… (mostra anche gli accompagnatori collegati)"
+              style={{ width:'100%', boxSizing:'border-box', paddingLeft:'36px', paddingRight: searchTeatro ? '36px' : '12px', paddingTop:'9px', paddingBottom:'9px', border:'1px solid #D1D5DB', borderRadius:'8px', fontSize:'13px', fontFamily:"'Inter',sans-serif", color:'#0A0A0A', outline:'none' }}
+            />
+            {searchTeatro && (
+              <button onClick={() => setSearchTeatro('')}
+                style={{ position:'absolute', right:'10px', top:'50%', transform:'translateY(-50%)', background:'none', border:'none', cursor:'pointer', color:'#9CA3AF', fontSize:'16px', padding:0, lineHeight:1 }}>×</button>
             )}
           </div>
 
@@ -927,15 +965,7 @@ export default function IscrittiPage() {
                   </tr>
                 </thead>
                 <tbody>
-                  {registrations
-                    .filter(r => {
-                      if (filtroPostoAssegnato === 'con_posto' && !r.numero_posto) return false
-                      if (filtroPostoAssegnato === 'senza_posto' && r.numero_posto) return false
-                      if (filtroMailPosto === 'inviata' && !r.posto_email_inviata) return false
-                      if (filtroMailPosto === 'non_inviata' && r.posto_email_inviata) return false
-                      return true
-                    })
-                    .map((r, i) => {
+                  {filteredTeatro.map((r, i) => {
                     const editVal = postoEdit[r.id]
                     const selezionato = teatroSelezione.has(r.id)
                     return (
