@@ -788,16 +788,16 @@ export default function IscrittiPage() {
       {/* TAB SWITCHER — visibile solo se teatro abilitato */}
       {selectedEvento && teatroAbilitato && (
         <div style={{ display:'flex', gap:'6px', marginBottom:'20px', background:'#F1F5F9', borderRadius:'12px', padding:'5px' }}>
-          {[{ id:'iscritti', label:'👥 Iscritti', emoji:'👥' }, { id:'teatro', label:'🎭 Gestione posti', emoji:'🎭' }].map(tab => (
+          {[{ id:'iscritti', label:'👥 Iscritti' }, { id:'teatro', label:'🎭 Gestione posti' }].map(tab => (
             <button key={tab.id} onClick={() => setTabAttivo(tab.id)}
               style={{
                 flex:1, padding:'11px 24px', border:'none', cursor:'pointer',
                 fontSize:'14px', fontWeight:'700', fontFamily:"'Inter',sans-serif",
                 borderRadius:'9px', transition:'all .18s',
-                background: tabAttivo === tab.id ? '#003DA5' : 'transparent',
-                color: tabAttivo === tab.id ? '#fff' : '#6B7280',
-                boxShadow: tabAttivo === tab.id ? '0 2px 8px rgba(0,61,165,.25)' : 'none',
-                letterSpacing: tabAttivo === tab.id ? '-.01em' : '0',
+                background: tabAttivo === tab.id ? '#C2185B' : '#003DA5',
+                color: '#fff',
+                boxShadow: tabAttivo === tab.id ? '0 2px 8px rgba(194,24,91,.30)' : '0 2px 8px rgba(0,61,165,.20)',
+                letterSpacing:'-.01em',
               }}>
               {tab.label}
             </button>
