@@ -725,20 +725,6 @@ export default function IscrittiPage() {
           onChange={e => setSelectedEvento(e.target.value)}
           label="Evento"
         />
-        {selectedEvento && <div style={{ display:'flex', gap:'10px', flexWrap:'wrap', marginTop:'-8px', marginBottom:'12px' }}>
-          <div style={s.searchWrap}>
-            <Search size={16} style={s.searchIcon}/>
-            <input value={search} onChange={e=>setSearch(e.target.value)}
-              placeholder="Cerca nome, cognome, email…" style={s.searchInput}/>
-          </div>
-          <Select value={filterStato} onChange={e=>setFilterStato(e.target.value)}>
-            <option value="tutti">Tutti gli stati</option>
-            <option value="confermato">Confermato</option>
-            <option value="presente">Presente</option>
-            <option value="assente">Assente</option>
-            <option value="walk-in">Walk-in</option>
-          </Select>
-        </div>}
       </div>
 
       {/* Stats cards */}
@@ -1049,13 +1035,36 @@ export default function IscrittiPage() {
 
       {/* STAT CARDS + TABELLA — solo tab iscritti */}
       {selectedEvento && (!teatroAbilitato || tabAttivo === 'iscritti') && (
-        <div style={{ display:'grid', gridTemplateColumns:'repeat(auto-fit,minmax(140px,1fr))', gap:'10px', marginBottom:'16px' }} className="stat-grid-auto">
-          <GlowStatCard icon="users"     label="Tot. iscritti" value={registrations.length}                                    palette="blue"/>
-          <GlowStatCard icon="check"     label="Presenti"      value={totPresenti}                                              palette="green"/>
-          <GlowStatCard icon="trending"  label="Confermati"    value={totConfermati}                                            palette="cyan"/>
-          <GlowStatCard icon="usercheck" label="Walk-in"       value={registrations.filter(r=>r.stato==='walk-in').length}     palette="violet"/>
-          <GlowStatCard icon="userx"     label="Assenti"       value={registrations.filter(r=>r.stato==='assente').length}     palette="red"/>
-        </div>
+        <>
+          {/* Ricerca + filtro stato */}
+          <div style={{ display:'flex', gap:'10px', flexWrap:'wrap', marginBottom:'14px', alignItems:'center' }}>
+            <div style={{ position:'relative', flex:1, minWidth:'220px' }}>
+              <Search size={15} style={{ position:'absolute', left:'12px', top:'50%', transform:'translateY(-50%)', color:'#9CA3AF', pointerEvents:'none' }} />
+              <input value={search} onChange={e => setSearch(e.target.value)}
+                placeholder="Cerca nome, cognome, email…"
+                style={{ width:'100%', boxSizing:'border-box', paddingLeft:'36px', paddingRight: search ? '36px' : '12px', paddingTop:'9px', paddingBottom:'9px', border:'1px solid #D1D5DB', borderRadius:'8px', fontSize:'13px', fontFamily:"'Inter',sans-serif", color:'#0A0A0A', outline:'none' }}
+              />
+              {search && (
+                <button onClick={() => setSearch('')}
+                  style={{ position:'absolute', right:'10px', top:'50%', transform:'translateY(-50%)', background:'none', border:'none', cursor:'pointer', color:'#9CA3AF', fontSize:'16px', padding:0, lineHeight:1 }}>×</button>
+              )}
+            </div>
+            <Select value={filterStato} onChange={e => setFilterStato(e.target.value)}>
+              <option value="tutti">Tutti gli stati</option>
+              <option value="confermato">Confermato</option>
+              <option value="presente">Presente</option>
+              <option value="assente">Assente</option>
+              <option value="walk-in">Walk-in</option>
+            </Select>
+          </div>
+          <div style={{ display:'grid', gridTemplateColumns:'repeat(auto-fit,minmax(140px,1fr))', gap:'10px', marginBottom:'16px' }} className="stat-grid-auto">
+            <GlowStatCard icon="users"     label="Tot. iscritti" value={registrations.length}                                    palette="blue"/>
+            <GlowStatCard icon="check"     label="Presenti"      value={totPresenti}                                              palette="green"/>
+            <GlowStatCard icon="trending"  label="Confermati"    value={totConfermati}                                            palette="cyan"/>
+            <GlowStatCard icon="usercheck" label="Walk-in"       value={registrations.filter(r=>r.stato==='walk-in').length}     palette="violet"/>
+            <GlowStatCard icon="userx"     label="Assenti"       value={registrations.filter(r=>r.stato==='assente').length}     palette="red"/>
+          </div>
+        </>
       )}
 
       {/* Tabella — nascosta nel tab teatro */}
