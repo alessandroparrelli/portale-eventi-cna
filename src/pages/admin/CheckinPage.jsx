@@ -233,7 +233,7 @@ export default function CheckinPage() {
     if (!selectedEvento) return
     setLoadingLista(true)
     const { data } = await supabase.from('registrations')
-      .select('id,nome,cognome,ragione_sociale,email,presente,checkin_at,stato,numero_posto')
+      .select('id,nome,cognome,ragione_sociale,email,presente,checkin_at,stato,numero_posto,gruppo_id,referente_id')
       .eq('event_id', selectedEvento)
       .order('cognome', { ascending: true })
     setIscritti(data || [])
