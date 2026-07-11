@@ -758,7 +758,7 @@ export default function IscrittiPage() {
               })()}
             </span>
           )}
-          <Btn variant="secondary" onClick={loadRegs} size="md"><RefreshCw size={16}/> Aggiorna</Btn>
+          <Btn variant="secondary" onClick={loadRegs} size="md" style={{ background:'#FACC15', color:'#0A0A0A', borderColor:'#FACC15', fontWeight:'700' }}><RefreshCw size={16}/> Aggiorna</Btn>
           <div style={{flex:1}}/>
           {eventi.find(e=>e.id===selectedEvento)?.certificato_abilitato && (
             <Btn variant="secondary" onClick={inviaCertificati} disabled={invioInCorso} size="md">
