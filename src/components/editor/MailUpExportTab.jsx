@@ -32,15 +32,7 @@ function richToEmail(html, cp) {
   if (!html) return ''
   let h = html
 
-  // 1. Rimuovi classi (mantieni style)
-  h = h.replace(/\s+class="[^"]*"/g, '')
-
-  // 2. Inline marks PRIMA — così i valori rimangono dentro i paragrafi
-  h = h.replace(/<strong[^>]*>([\s\S]*?)<\/strong>/gi, '<b style="font-weight:bold;">$1</b>')
-  h = h.replace(/<em[^>]*>([\s\S]*?)<\/em>/gi, '<i style="font-style:italic;">$1</i>')
-  h = h.replace(/<u[^>]*>([\s\S]*?)<\/u>/gi, '<u style="text-decoration:underline;">$1</u>')
-
-  // Helper: converte rgb(r,g,b) in hex
+  // Helper: converte rgb(r,g,b) / rgba(r,g,b,a) in hex
   function rgbToHex(raw) {
     raw = (raw||'').trim()
     if (raw.startsWith('rgb')) {
@@ -51,53 +43,89 @@ function richToEmail(html, cp) {
     return raw
   }
 
-  // 3. Span con colore/size da TipTap — converte rgb→hex
-  h = h.replace(/<span style="([^"]*)">((?:[^<]|<(?!\/span>))*)<\/span>/gi, (_, st, inner) => {
-    const colRaw = (st.match(/color:\s*([^;]+)/i)||[])[1]
-    const sz     = (st.match(/font-size:\s*([^;]+)/i)||[])[1]
-    const parts  = []
-    if (colRaw) parts.push('color:' + rgbToHex(colRaw))
-    if (sz)     parts.push('font-size:' + sz.trim())
-    return parts.length ? '<span style="' + parts.join(';') + '">' + inner + '</span>' : inner
-  })
-  h = h.replace(/<span>/gi, '').replace(/<\/span>/gi, '')
+  // Normalizza TUTTI i colori rgb()/rgba() in hex nell'intero HTML
+  h = h.replace(/rgba?\(\s*\d+\s*,\s*\d+\s*,\s*\d+\s*(?:,\s*[\d.]+\s*)?\)/gi, m => rgbToHex(m))
 
-  // 4. Link
+  // 1. Rimuovi classi (mantieni style)
+  h = h.replace(/\s+class="[^"]*"/g, '')
+
+  // 2. Inline marks — aggiungi font-family per Outlook/MailUp
+  h = h.replace(/<strong[^>]*>([\s\S]*?)<\/strong>/gi,
+    '<b style="font-weight:bold;font-family:' + F + ';">$1</b>')
+  h = h.replace(/<em[^>]*>([\s\S]*?)<\/em>/gi,
+    '<i style="font-style:italic;font-family:' + F + ';">$1</i>')
+  h = h.replace(/<u[^>]*>([\s\S]*?)<\/u>/gi,
+    '<u style="text-decoration:underline;font-family:' + F + ';">$1</u>')
+
+  // 3. Span con colore/size da TipTap — loop per gestire nesting
+  //    Itera finché ci sono match (span annidati: prima i più interni)
+  let prevH
+  do {
+    prevH = h
+    h = h.replace(/<span\s+style="([^"]*)">((?:[^<]|<(?!span[\s>]|\/span>))*)<\/span>/gi, (_, st, inner) => {
+      const colRaw  = (st.match(/color:\s*([^;]+)/i)||[])[1]
+      const sz      = (st.match(/font-size:\s*([^;]+)/i)||[])[1]
+      const bgRaw   = (st.match(/background-color:\s*([^;]+)/i)||[])[1]
+      const parts   = []
+      if (colRaw) parts.push('color:' + rgbToHex(colRaw))
+      if (sz)     parts.push('font-size:' + sz.trim())
+      if (bgRaw)  parts.push('background-color:' + rgbToHex(bgRaw))
+      parts.push('font-family:' + F)
+      return parts.length > 1
+        ? '<span style="' + parts.join(';') + ';">' + inner + '</span>'
+        : inner
+    })
+  } while (h !== prevH)
+
+  // Rimuovi solo <span> SENZA attributi (bare tag residui TipTap)
+  h = h.replace(/<span\s*>/gi, '')
+  // Rimuovi </span> orfani (senza un corrispondente <span style=) — conta aperti/chiusi
+  // Approccio sicuro: lascia i </span> che hanno un <span style= corrispondente
+  // e rimuovi solo quelli senza match
+  {
+    let result = '', depth = 0
+    const re = /(<span\s+style="[^"]*">|<\/span>)/gi
+    let last = 0, m
+    while ((m = re.exec(h)) !== null) {
+      result += h.slice(last, m.index)
+      if (m[0].startsWith('<span')) {
+        depth++
+        result += m[0]
+      } else {
+        // </span>
+        if (depth > 0) { depth--; result += m[0] }
+        // else: orphan </span>, skip it
+      }
+      last = re.lastIndex
+    }
+    result += h.slice(last)
+    h = result
+  }
+
+  // 4. Link — con font-family per MailUp
   h = h.replace(/<a\s+href="([^"]*)"[^>]*>([\s\S]*?)<\/a>/gi,
-    '<a href="$1" style="color:' + cp + ';text-decoration:underline;">$2</a>')
+    '<a href="$1" style="color:' + cp + ';text-decoration:underline;font-family:' + F + ';">$2</a>')
 
-  // 5. Immagini
+  // 5. Immagini — aggiungi width HTML attribute
   h = h.replace(/<img[^>]*src="([^"]*)"[^>]*alt="([^"]*)"[^>]*/gi,
     '<img src="$1" alt="$2" width="100%" border="0" style="display:block;max-width:100%;border:0;"')
 
-  // 6. Titoli H1-H6 — estrae colore/size/align dal tag e dagli span interni
+  // 6. Titoli H1-H6 — usa marker <!--MUH--> per evitare ri-processamento al passo 8
   function convertHeading(tagAttrs, inner, defaultSize) {
-    // Allineamento dal tag heading
     const alMatch = tagAttrs.match(/text-align:\s*(left|center|right|justify)/i)
     const align = alMatch ? alMatch[1] : null
 
-    // Colore: cerca prima nello span interno, poi usa default
+    // Colore: cerca nello span interno, poi default
     let color = '#0A0A0A'
     const spanColMatch = inner.match(/style="[^"]*color:\s*([^;'"]+)/i)
-    if (spanColMatch) {
-      // Converte rgb(r,g,b) in hex se necessario
-      const raw = spanColMatch[1].trim()
-      if (raw.startsWith('rgb')) {
-        const nums = raw.match(/\d+/g)
-        if (nums && nums.length >= 3) {
-          color = '#' + nums.slice(0,3).map(n => parseInt(n).toString(16).padStart(2,'0')).join('')
-        }
-      } else {
-        color = raw
-      }
-    }
+    if (spanColMatch) color = rgbToHex(spanColMatch[1].trim())
 
-    // Font-size: cerca nello span interno, poi usa default
+    // Font-size: cerca nello span interno, poi default
     let size = defaultSize
     const spanSzMatch = inner.match(/style="[^"]*font-size:\s*([^;'"]+)/i)
     if (spanSzMatch) size = spanSzMatch[1].trim()
 
-    // Pulisci span wrapper mantenendo il testo (i <b> dentro rimangono)
+    // Pulisci span wrapper mantenendo testo e bold
     const cleanInner = inner
       .replace(/<span[^>]*>/gi, '')
       .replace(/<\/span>/gi, '')
@@ -107,10 +135,12 @@ function richToEmail(html, cp) {
       'font-size:' + size, 'font-weight:bold',
       'color:' + color, 'line-height:1.2',
       'font-family:' + F,
+      'mso-line-height-rule:exactly',
     ]
     if (align) styles.push('text-align:' + align)
 
-    return '<p style="' + styles.join(';') + ';">' + cleanInner + '</p>'
+    // <!--MUH--> marker impedisce al regex dei paragrafi di ri-processare questo tag
+    return '<!--MUH--><p style="' + styles.join(';') + ';">' + cleanInner + '</p>'
   }
   h = h.replace(/<h1([^>]*)>([\s\S]*?)<\/h1>/gi, (_, a, i) => convertHeading(a, i, '26px'))
   h = h.replace(/<h2([^>]*)>([\s\S]*?)<\/h2>/gi, (_, a, i) => convertHeading(a, i, '22px'))
@@ -119,27 +149,31 @@ function richToEmail(html, cp) {
   h = h.replace(/<h5([^>]*)>([\s\S]*?)<\/h5>/gi, (_, a, i) => convertHeading(a, i, '15px'))
   h = h.replace(/<h6([^>]*)>([\s\S]*?)<\/h6>/gi, (_, a, i) => convertHeading(a, i, '15px'))
 
-  // 7. Liste
+  // 7. Liste — con font-family e mso-line-height-rule
   h = h.replace(/<ul[^>]*>([\s\S]*?)<\/ul>/gi, (_, items) =>
     items.replace(/<li[^>]*>([\s\S]*?)<\/li>/gi, (__, li) =>
-      '<p style="margin:0 0 5px 0;padding:0 0 0 16px;font-size:15px;color:#374151;line-height:1.6;font-family:' + F + ';">&#8226;&nbsp;' + li.trim() + '</p>'))
+      '<p style="margin:0 0 5px 0;padding:0 0 0 16px;font-size:15px;color:#374151;line-height:1.6;font-family:' + F + ';mso-line-height-rule:exactly;">&#8226;&nbsp;' + li.trim() + '</p>'))
   h = h.replace(/<ol[^>]*>([\s\S]*?)<\/ol>/gi, (_, items) => {
     let n = 0
     return items.replace(/<li[^>]*>([\s\S]*?)<\/li>/gi, (__, li) => {
       n++
-      return '<p style="margin:0 0 5px 0;padding:0 0 0 16px;font-size:15px;color:#374151;line-height:1.6;font-family:' + F + ';">' + n + '.&nbsp;' + li.trim() + '</p>'
+      return '<p style="margin:0 0 5px 0;padding:0 0 0 16px;font-size:15px;color:#374151;line-height:1.6;font-family:' + F + ';mso-line-height-rule:exactly;">' + n + '.&nbsp;' + li.trim() + '</p>'
     })
   })
 
-  // 8. Paragrafi — preserva text-align, poi pulisci span lasciando stili inline
+  // 8. Paragrafi — SKIP quelli marcati <!--MUH--> (heading già convertiti)
   function convertPara(st, inner) {
     const alMatch = st.match(/text-align:\s*(left|center|right|justify)/i)
     const alStyle = alMatch ? 'text-align:' + alMatch[1] + ';' : ''
-    // Preserva span con colore/size già convertiti al passo 3
-    return '<p style="margin:0 0 10px 0;padding:0;font-size:15px;color:#374151;line-height:1.75;font-family:' + F + ';' + alStyle + '">' + inner + '</p>'
+    return '<p style="margin:0 0 10px 0;padding:0;font-size:15px;color:#374151;line-height:1.75;font-family:' + F + ';mso-line-height-rule:exactly;' + alStyle + '">' + inner + '</p>'
   }
-  h = h.replace(/<p\s+style="([^"]*)">([\s\S]*?)<\/p>/gi, (_, st, inner) => convertPara(st, inner))
-  h = h.replace(/<p[^>]*>([\s\S]*?)<\/p>/gi, (_, inner) => convertPara('', inner))
+  // Paragrafi con style — ma NON quelli preceduti dal marker <!--MUH-->
+  h = h.replace(/(?<!<!--MUH-->)<p\s+style="([^"]*)">([\s\S]*?)<\/p>/gi, (_, st, inner) => convertPara(st, inner))
+  // Paragrafi senza style (solo <p> bare, NON <p style="..."> già convertiti sopra)
+  h = h.replace(/(?<!<!--MUH-->)<p\s*>([\s\S]*?)<\/p>/gi, (_, inner) => convertPara('', inner))
+
+  // Rimuovi i marker <!--MUH--> ora che i paragrafi sono stati processati
+  h = h.replace(/<!--MUH-->/g, '')
 
   // 9. BR
   h = h.replace(/<br\s*\/?>/gi, '<br />')
@@ -191,7 +225,7 @@ function buildHtml(ev, url, blocchi, opts, socialLinks) {
       <img src="${esc(logoUrl)}" height="${logoH}" alt="CNA Roma" border="0"
         style="height:${logoH}px;display:inline-block;border:0;${align==='center'?'margin:0 auto 16px;':'margin-bottom:16px;'}" />
     </a>
-    <p style="margin:0 0 8px 0;padding:0;font-size:${titoloSize};font-weight:bold;color:${titoloColore};font-family:${F};text-align:${align};line-height:1.1;${lh.titolo_maiuscolo?'text-transform:uppercase;':''}">${esc(ev.titolo)}</p>
+    <p style="margin:0 0 8px 0;padding:0;font-size:${titoloSize};font-weight:bold;color:${titoloColore};font-family:${F};text-align:${align};line-height:1.1;mso-line-height-rule:exactly;${lh.titolo_maiuscolo?'text-transform:uppercase;':''}">${esc(ev.titolo)}</p>
     ${lh.titolo2?`<p style="margin:0 0 8px 0;padding:0;font-size:17px;color:#FFFFFF;font-family:${F};text-align:${align};">${esc(lh.titolo2)}</p>`:''}
     ${ev.sottotitolo?`<p style="margin:0;padding:0;font-size:15px;color:#FFFFFF;font-family:${F};text-align:${align};">${esc(ev.sottotitolo)}</p>`:''}`
 
@@ -329,14 +363,25 @@ function buildHtml(ev, url, blocchi, opts, socialLinks) {
       } else if (b.tipo === 'cta') {
         const bb = b.stile==='contorno'?'transparent':(b.colore||cp)
         const bc = b.stile==='contorno'?(b.colore||cp):'#FFFFFF'
+        const bdr = b.stile==='contorno'?`border:2px solid ${b.colore||cp};`:''
         out += row(`
           <table width="100%" cellpadding="0" cellspacing="0" border="0">
             <tr><td align="center" style="padding:16px 0;text-align:center;">
-              ${b.titolo?`<p style="margin:0 0 14px;padding:0;font-size:20px;font-weight:bold;color:#0A0A0A;font-family:${F};">${esc(b.titolo)}</p>`:''}
-              <a href="${esc(url)}"
-                style="display:inline-block;padding:14px 32px;background-color:${bb};color:${bc};font-size:15px;font-weight:bold;text-decoration:none;font-family:${F};border:2px solid ${b.colore||cp};">
-                ${esc(b.testo_btn||b.testo||'Iscriviti')}
-              </a>
+              ${b.titolo?`<p style="margin:0 0 14px;padding:0;font-size:20px;font-weight:bold;color:#0A0A0A;font-family:${F};mso-line-height-rule:exactly;">${esc(b.titolo)}</p>`:''}
+              <!--[if mso]>
+              <v:roundrect xmlns:v="urn:schemas-microsoft-com:vml" href="${esc(url)}" style="height:46px;v-text-anchor:middle;width:220px;" arcsize="0%" fillcolor="${bb}" strokecolor="${b.colore||cp}" strokeweight="${b.stile==='contorno'?'2px':'0'}">
+                <w:anchorlock/><center style="color:${bc};font-family:Arial,sans-serif;font-size:15px;font-weight:bold;">${esc(b.testo_btn||b.testo||'Iscriviti')}</center>
+              </v:roundrect>
+              <![endif]-->
+              <!--[if !mso]><!-->
+              <table cellpadding="0" cellspacing="0" border="0" style="margin:0 auto;">
+                <tr>
+                  <td align="center" bgcolor="${bb}" style="background-color:${bb};padding:14px 32px;${bdr}">
+                    <a href="${esc(url)}" style="color:${bc};font-size:15px;font-weight:bold;text-decoration:none;font-family:${F};display:block;mso-line-height-rule:exactly;">${esc(b.testo_btn||b.testo||'Iscriviti')}</a>
+                  </td>
+                </tr>
+              </table>
+              <!--<![endif]-->
             </td></tr>
           </table>`, '#F4F5F7')
 
@@ -432,7 +477,7 @@ function buildHtml(ev, url, blocchi, opts, socialLinks) {
   const footerContentRaw = ev.footer_html
     ? richToEmail(ev.footer_html, footerText)
     : `<p style="margin:0 0 12px;padding:0;font-size:14px;font-weight:bold;color:${footerText};font-family:${F};text-align:center;">&#x1F449; Insieme &egrave; meglio &#x1F448;</p>` +
-      `<p style="margin:0;padding:0;font-size:13px;color:${footerText};font-family:${F};text-align:center;line-height:1.7;">` +
+      `<p style="margin:0;padding:0;font-size:13px;color:${footerText};font-family:${F};text-align:center;line-height:1.7;mso-line-height-rule:exactly;">` +
       `<strong>CNA di Roma</strong><br/>Via Cristoforo Colombo, 283/A, 00147 Roma<br/>Tel. 06570151 &bull; Email info@cnaroma.it</p>`
   const footerContent = footerContentRaw
     .replace(/color\s*:\s*#[0-9a-fA-F]{3,6}/g, 'color:#ffffff')
@@ -499,10 +544,20 @@ i,em{font-style:italic;}
 
   ${opts.mostraCta ? `
   <tr><td bgcolor="#FFFFFF" align="center" style="padding:20px ${PAD}px;text-align:center;background-color:#FFFFFF;border-bottom:1px solid #E5E7EB;">
-    <a href="${esc(url)}"
-      style="display:inline-block;padding:13px 32px;background-color:${ctaBg};color:${ctaColor};font-size:15px;font-weight:bold;text-decoration:none;font-family:${F};">
-      ${esc(opts.testoCta||"Scopri l'evento e iscriviti")} &rarr;
-    </a>
+    <!--[if mso]>
+    <v:roundrect xmlns:v="urn:schemas-microsoft-com:vml" href="${esc(url)}" style="height:46px;v-text-anchor:middle;width:280px;" arcsize="0%" fillcolor="${ctaBg}" stroke="false">
+      <w:anchorlock/><center style="color:${ctaColor};font-family:Arial,sans-serif;font-size:15px;font-weight:bold;">${esc(opts.testoCta||"Scopri l'evento e iscriviti")} &rarr;</center>
+    </v:roundrect>
+    <![endif]-->
+    <!--[if !mso]><!-->
+    <table cellpadding="0" cellspacing="0" border="0" style="margin:0 auto;">
+      <tr>
+        <td align="center" bgcolor="${ctaBg}" style="background-color:${ctaBg};padding:13px 32px;">
+          <a href="${esc(url)}" style="color:${ctaColor};font-size:15px;font-weight:bold;text-decoration:none;font-family:${F};display:block;">${esc(opts.testoCta||"Scopri l'evento e iscriviti")} &rarr;</a>
+        </td>
+      </tr>
+    </table>
+    <!--<![endif]-->
   </td></tr>` : ''}
 
   ${blocchiHtml}
@@ -515,10 +570,20 @@ i,em{font-style:italic;}
         <p style="margin:0;padding:0;font-size:13px;color:#374151;font-family:${F};">Registrazione gratuita &mdash; ricevi il QR Code per l&apos;ingresso.</p>
       </td>
       <td align="right" valign="middle" width="150" style="white-space:nowrap;">
-        <a href="${esc(url)}"
-          style="display:inline-block;padding:11px 20px;background-color:${ctaBg};color:${ctaColor};font-size:13px;font-weight:bold;text-decoration:none;font-family:${F};">
-          Iscriviti ora &rsaquo;
-        </a>
+        <!--[if mso]>
+        <v:roundrect xmlns:v="urn:schemas-microsoft-com:vml" href="${esc(url)}" style="height:40px;v-text-anchor:middle;width:140px;" arcsize="0%" fillcolor="${ctaBg}" stroke="false">
+          <w:anchorlock/><center style="color:${ctaColor};font-family:Arial,sans-serif;font-size:13px;font-weight:bold;">Iscriviti ora &rsaquo;</center>
+        </v:roundrect>
+        <![endif]-->
+        <!--[if !mso]><!-->
+        <table cellpadding="0" cellspacing="0" border="0">
+          <tr>
+            <td align="center" bgcolor="${ctaBg}" style="background-color:${ctaBg};padding:11px 20px;">
+              <a href="${esc(url)}" style="color:${ctaColor};font-size:13px;font-weight:bold;text-decoration:none;font-family:${F};display:block;">Iscriviti ora &rsaquo;</a>
+            </td>
+          </tr>
+        </table>
+        <!--<![endif]-->
       </td>
     </tr></table>
   </td></tr>` : ''}
