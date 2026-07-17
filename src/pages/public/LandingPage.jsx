@@ -474,17 +474,16 @@ export default function LandingPage() {
           const btnRadius = tema.btn_stile === 'pill' ? '50px' : `${tema.btn_raggio || 8}px`
           const aBtnPrimary = {
             display:'flex', alignItems:'center', justifyContent:'center',
-            gap:'10px', padding:'14px 24px', cursor:'pointer',
+            gap:'10px', padding:'14px 40px', cursor:'pointer',
             textDecoration:'none', textAlign:'center',
             fontSize:'15px', fontWeight:'700', fontFamily:"'Inter',sans-serif",
             backgroundColor: tema.btn_stile === 'contorno' ? 'transparent' : (tema.colore_pulsanti || tema.colore_primario || '#003DA5'),
             color: tema.btn_stile === 'contorno' ? (tema.colore_pulsanti || '#003DA5') : (tema.colore_testo_btn || '#FFFFFF'),
             border: `1.5px solid ${tema.colore_pulsanti || tema.colore_primario || '#003DA5'}`,
             borderRadius: btnRadius,
-            width: '100%',
           }
           return !esaurito && !conferma ? (
-            <div style={{ marginBottom:'24px', padding:'4px 0' }}>
+            <div style={{ marginBottom:'24px', padding:'4px 0', display:'flex', justifyContent:'center' }}>
               <button onClick={() => {
                 setFormVisible(true)
                 setTimeout(() => {
