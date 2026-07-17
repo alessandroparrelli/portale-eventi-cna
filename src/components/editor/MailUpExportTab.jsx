@@ -198,6 +198,7 @@ function buildHtml(ev, url, blocchi, opts, socialLinks) {
   const ctaRadius = opts.ctaRadius != null ? opts.ctaRadius : (tema.btn_raggio || 6)
 
   const logoUrl = ev?.logo_url || 'https://raw.githubusercontent.com/alessandroparrelli/fileappoggio/main/NUOVO-LOGO-CNA-ROMA-SOLO-ROMA.png'
+  const footerLogoUrl = (ev?.footer_logo_url && ev.footer_logo_url !== 'PENDING') ? ev.footer_logo_url : logoUrl
   const logoH   = Number(lh.logo_altezza || tema.logo_altezza || 48)
   const heroImg = ev.immagine_hero || null
   const align   = lh.allineamento === 'sinistra' ? 'left' : 'center'
@@ -205,7 +206,7 @@ function buildHtml(ev, url, blocchi, opts, socialLinks) {
   const titoloSize   = (() => { const r = lh.titolo_dimensione || ''; if (r.startsWith('clamp')) return '32px'; return r || '32px' })()
   const titoloColore = lh.titolo_colore || '#FFFFFF'
   const titoloW      = 'bold'
-  const heroBg       = cp
+  const heroBg       = lh.hero_sfondo || cp
 
   const dataTesto = ev.data_inizio
     ? fmtData(ev.data_inizio) + (fmtOra(ev.data_inizio) ? ` &middot; ${fmtOra(ev.data_inizio)}` : '') +
@@ -466,11 +467,11 @@ function buildHtml(ev, url, blocchi, opts, socialLinks) {
 
   // Footer
   // sfondo_footer può contenere un gradiente CSS (non supportato dai client email) — estraggo il primo colore hex
-  const rawFooterBg = tema.sfondo_footer || 'linear-gradient(160deg, #003DA5 0%, #001F5C 100%)'
+  const rawFooterBg = tema.sfondo_footer || ''
   const footerBgMatch = rawFooterBg.match(/#[0-9A-Fa-f]{6}/)
-  const footerBg    = footerBgMatch ? footerBgMatch[0] : '#003DA5'
-  const footerText  = '#ffffff'
-  const footerMuted = '#C7D9F8'
+  const footerBg    = footerBgMatch ? footerBgMatch[0] : '#FFFFFF'
+  const footerText  = tema.testo_footer || (tema.sfondo_footer ? '#ffffff' : '#6B7280')
+  const footerMuted = tema.sfondo_footer ? '#C7D9F8' : '#9CA3AF'
 
   // Contenuto footer: se c'è footer_html lo converto, altrimenti uso il default email-safe
   // Dopo la conversione, forzo tutti i color inline a bianco (il footer ha sempre sfondo scuro)
@@ -480,15 +481,15 @@ function buildHtml(ev, url, blocchi, opts, socialLinks) {
       `<p style="margin:0;padding:0;font-size:13px;color:${footerText};font-family:${F};text-align:center;line-height:1.7;mso-line-height-rule:exactly;">` +
       `<strong>CNA di Roma</strong><br/>Via Cristoforo Colombo, 283/A, 00147 Roma<br/>Tel. 06570151 &bull; Email info@cnaroma.it</p>`
   const footerContent = footerContentRaw
-    .replace(/color\s*:\s*#[0-9a-fA-F]{3,6}/g, 'color:#ffffff')
-    .replace(/color\s*:\s*rgb\([^)]+\)/g, 'color:#ffffff')
+    .replace(/color\s*:\s*#[0-9a-fA-F]{3,6}/g, `color:${footerText}`)
+    .replace(/color\s*:\s*rgb\([^)]+\)/g, `color:${footerText}`)
 
   const footerBlock = `
     <tr>
       <td align="center" bgcolor="${footerBg}"
-        style="padding:24px ${PAD}px;text-align:center;background-color:${footerBg};">
+        style="padding:24px ${PAD}px;text-align:center;background-color:${footerBg};${footerBg==='#FFFFFF'?'border-top:1px solid #E5E7EB;':''}">
         <a href="${esc(url)}" style="text-decoration:none;">
-          <img src="${esc(logoUrl)}" height="36" alt="CNA Roma"
+          <img src="${esc(footerLogoUrl)}" height="36" alt="CNA Roma"
             style="height:36px;display:block;margin:0 auto 14px;border:0;" />
         </a>
         ${footerContent}
@@ -534,26 +535,20 @@ i,em{font-style:italic;}
 
   ${heroRow}
 
-  ${(dataTesto || ev.luogo) && opts.mostraDataLuogo ? `
-  <tr><td bgcolor="#FFFFFF" style="padding:12px ${PAD}px;border-bottom:1px solid #E5E7EB;background-color:#FFFFFF;">
-    <table width="100%" cellpadding="0" cellspacing="0" border="0"><tr>
-      ${dataTesto?`<td style="font-size:13px;font-weight:bold;color:#0A0A0A;font-family:${F};padding-right:12px;">&#128197; ${dataTesto}</td>`:''}
-      ${ev.luogo?`<td style="font-size:13px;font-family:${F};"><a href="https://maps.google.com/?q=${encodeURIComponent(ev.luogo)}" style="color:${cp};text-decoration:none;">&#128205; ${esc(ev.luogo)}</a></td>`:''}
-    </tr></table>
-  </td></tr>` : ''}
+
 
   ${opts.mostraCta ? `
-  <tr><td bgcolor="#FFFFFF" align="center" style="padding:20px ${PAD}px;text-align:center;background-color:#FFFFFF;border-bottom:1px solid #E5E7EB;">
+  <tr><td bgcolor="#FFFFFF" align="center" style="padding:20px ${PAD}px;text-align:center;background-color:#FFFFFF;">
     <!--[if mso]>
-    <v:roundrect xmlns:v="urn:schemas-microsoft-com:vml" href="${esc(url)}" style="height:46px;v-text-anchor:middle;width:280px;" arcsize="0%" fillcolor="${ctaBg}" stroke="false">
-      <w:anchorlock/><center style="color:${ctaColor};font-family:Arial,sans-serif;font-size:15px;font-weight:bold;">${esc(opts.testoCta||"Scopri l'evento e iscriviti")} &rarr;</center>
+    <v:roundrect xmlns:v="urn:schemas-microsoft-com:vml" href="${esc(url)}" style="height:44px;v-text-anchor:middle;width:240px;" arcsize="15%" fillcolor="${ctaBg}" stroke="false">
+      <w:anchorlock/><center style="color:${ctaColor};font-family:Arial,sans-serif;font-size:15px;font-weight:bold;">Partecipa all&apos;evento &rsaquo;</center>
     </v:roundrect>
     <![endif]-->
     <!--[if !mso]><!-->
     <table cellpadding="0" cellspacing="0" border="0" style="margin:0 auto;">
       <tr>
-        <td align="center" bgcolor="${ctaBg}" style="background-color:${ctaBg};padding:13px 32px;">
-          <a href="${esc(url)}" style="color:${ctaColor};font-size:15px;font-weight:bold;text-decoration:none;font-family:${F};display:block;">${esc(opts.testoCta||"Scopri l'evento e iscriviti")} &rarr;</a>
+        <td align="center" bgcolor="${ctaBg}" style="background-color:${ctaBg};padding:12px 40px;border-radius:${ctaRadius}px;">
+          <a href="${esc(url)}" style="color:${ctaColor};font-size:14px;font-weight:bold;text-decoration:none;font-family:${F};display:block;">Partecipa all&apos;evento &rsaquo;</a>
         </td>
       </tr>
     </table>
@@ -561,6 +556,24 @@ i,em{font-style:italic;}
   </td></tr>` : ''}
 
   ${blocchiHtml}
+
+  ${(dataTesto || ev.luogo) && opts.mostraDataLuogo ? `
+  <tr><td bgcolor="#F4F5F7" style="padding:20px ${PAD}px;background-color:#F4F5F7;">
+    <table width="100%" cellpadding="0" cellspacing="0" border="0">
+      ${dataTesto?`<tr><td style="font-size:14px;font-weight:bold;color:#0A0A0A;font-family:${F};padding-bottom:8px;">&#128197; ${dataTesto}</td></tr>`:''}
+      ${ev.luogo?`<tr><td style="font-size:14px;font-weight:bold;color:#0A0A0A;font-family:${F};padding-bottom:14px;">&#128205; ${esc(ev.luogo)}</td></tr>`:''}
+      <tr><td>
+        <table cellpadding="0" cellspacing="0" border="0"><tr>
+          <td align="center" style="border:1.5px solid ${cp};border-radius:8px;padding:10px 18px;">
+            <a href="https://calendar.google.com/calendar/render?action=TEMPLATE&text=${encodeURIComponent(ev.titolo)}${ev.data_inizio?'&dates='+new Date(ev.data_inizio).toISOString().replace(/[-:]/g,'').replace(/\.\d{3}/,'')+'/'+(ev.data_fine?new Date(ev.data_fine).toISOString().replace(/[-:]/g,'').replace(/\.\d{3}/,''):new Date(ev.data_inizio).toISOString().replace(/[-:]/g,'').replace(/\.\d{3}/,'')):''}${ev.luogo?'&location='+encodeURIComponent(ev.luogo):''}" target="_blank" style="color:${cp};font-size:12px;font-weight:bold;text-decoration:none;font-family:${F};">&#128197; Aggiungi al calendario</a>
+          </td>
+          ${ev.luogo?`<td width="10"></td><td align="center" style="border:1.5px solid ${cp};border-radius:8px;padding:10px 18px;">
+            <a href="https://maps.google.com/?q=${encodeURIComponent(ev.luogo)}" target="_blank" style="color:${cp};font-size:12px;font-weight:bold;text-decoration:none;font-family:${F};">&#128205; Mappa dell&apos;evento</a>
+          </td>`:''}
+        </tr></table>
+      </td></tr>
+    </table>
+  </td></tr>` : ''}
 
   ${opts.mostraCtaFondo ? `
   <tr><td bgcolor="#EEF3FF" style="padding:20px ${PAD}px;background-color:#EEF3FF;">
@@ -616,7 +629,7 @@ function Toggle({ label, value, onChange }) {
 
 const DEF = {
   larghezza:600, larghezzaCustom:'', padding:32,
-  testoCta:"Scopri l'evento e iscriviti",
+  testoCta:"Partecipa all'evento",
   ctaBg:'', ctaColor:'', ctaRadius:null,
   mostraDataLuogo:true, mostraCta:true, mostraCtaFondo:true, mostraFooter:true,
 }
