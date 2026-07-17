@@ -406,7 +406,7 @@ export default function LandingPagePublic() {
       )}
 
       {/* FOOTER */}
-      <footer style={{background:tema.sfondo_footer||'#0A0A0A',padding:'36px 24px',textAlign:'center'}}>
+      <footer style={{background:tema.sfondo_footer||'transparent',borderTop:tema.sfondo_footer?'none':'1px solid #E5E7EB',padding:'36px 24px',textAlign:'center'}}>
         <img src={logoSrc} alt="CNA Roma" style={{height:'36px',objectFit:'contain',display:'block',margin:'0 auto 12px'}} />
         {lp.footer_testo&&<p style={{fontSize:'13px',color:tema.testo_footer||'rgba(255,255,255,0.5)',margin:'0 0 4px'}}>{lp.footer_testo}</p>}
         <p style={{fontSize:'12px',color:'rgba(255,255,255,0.3)',margin:0}}>© {new Date().getFullYear()} CNA Roma</p>

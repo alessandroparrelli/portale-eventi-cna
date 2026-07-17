@@ -357,7 +357,7 @@ export default function EventoEditorPage() {
 
   const [event, setEvent] = useState({
     titolo:'', slug:'', stato:'bozza', data_inizio:'', data_fine:'',
-    luogo:'', sottotitolo:'', footer_testo:'', footer_html:'', footer_modalita:'semplice', descrizione_html:'', immagine_hero:null, logo_url:null,
+    luogo:'', sottotitolo:'', footer_testo:'', footer_html:'', footer_modalita:'semplice', footer_logo_url:'', descrizione_html:'', immagine_hero:null, logo_url:null,
       modalita:'presenza', link_riunione:null,
       teatro_abilitato:false, teatro_capienza:null, teatro_note:null,
       form_note:null,
@@ -411,6 +411,7 @@ export default function EventoEditorPage() {
           email_cc: data.email_cc || '',
           footer_html: data.footer_html || '',
           footer_modalita: data.footer_modalita || 'semplice',
+          footer_logo_url: data.footer_logo_url || '',
           mailup_blocchi: data.mailup_blocchi || [],
         tags: data.tags || [],
           nome_mittente: data.nome_mittente || '',
@@ -475,6 +476,7 @@ export default function EventoEditorPage() {
       footer_testo:ev.footer_testo||null,
         footer_html:ev.footer_html||null,
         footer_modalita:ev.footer_modalita||'semplice',
+        footer_logo_url:ev.footer_logo_url||null,
         mailup_blocchi:ev.mailup_blocchi||[],
       tags:ev.tags||[],
       tema:ev.tema||{},

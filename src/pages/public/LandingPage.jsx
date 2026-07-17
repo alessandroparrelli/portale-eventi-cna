@@ -732,9 +732,9 @@ export default function LandingPage() {
       {/* ── Barra condivisione ── */}
       <ShareBar event={event} />
 
-      <footer style={{ ...s.footer, background: tema.sfondo_footer || 'linear-gradient(160deg, #003DA5 0%, #001F5C 100%)', borderTop: 'none', color: tema.testo_footer || '#ffffff' }}>
+      <footer style={{ ...s.footer, background: tema.sfondo_footer || 'transparent', borderTop: tema.sfondo_footer ? 'none' : '1px solid #E5E7EB', color: tema.testo_footer || (tema.sfondo_footer ? '#ffffff' : '#6B7280') }}>
         <img
-          src={event?.logo_url || "https://raw.githubusercontent.com/alessandroparrelli/fileappoggio/main/NUOVO-LOGO-CNA-ROMA-SOLO-ROMA.png"}
+          src={(event?.footer_logo_url && event.footer_logo_url !== 'PENDING' ? event.footer_logo_url : null) || event?.logo_url || "https://raw.githubusercontent.com/alessandroparrelli/fileappoggio/main/NUOVO-LOGO-CNA-ROMA-SOLO-ROMA.png"}
           alt="CNA Roma"
           style={{ height: `clamp(32px, ${Math.round((tema.logo_altezza || 44) * 0.08)}vw, ${Math.round((tema.logo_altezza || 44) * 0.7)}px)`, maxWidth: '200px', objectFit: 'contain', display: 'block', margin: '0 auto 10px' }}
         />

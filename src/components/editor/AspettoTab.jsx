@@ -1,5 +1,6 @@
 import { useState } from 'react'
 import RichEditor from './RichEditor'
+import ImageUploader from './ImageUploader'
 import { ChevronDown, ChevronUp, RotateCcw } from 'lucide-react'
 
 /* ─── Defaults tema ────────────────────────────────────────────── */
@@ -28,7 +29,7 @@ export const TEMA_DEFAULT = {
   // Footer/CTA
   cta_bg:              '#EEF3FF',
   // Footer
-  sfondo_footer:       '#F4F5F7',
+  sfondo_footer:       '',          // vuoto = eredita sfondo_pagina
   testo_footer:        '#9CA3AF',
   // Pattern sfondo
   sfondo_pattern:      'nessuno',  // nessuno | pallini | pallini_angolo
@@ -379,10 +380,64 @@ export default function AspettoTab({ event, setEvent }) {
           )}
 
           <ColorPicker label="Sfondo area CTA / registrazione" value={tema.cta_bg} onChange={v => setT('cta_bg', v)} />
-          <div style={sGrid}>
-            <ColorPicker label="Sfondo footer" value={tema.sfondo_footer} onChange={v => setT('sfondo_footer', v)} />
-            <ColorPicker label="Colore testo footer" value={tema.testo_footer} onChange={v => setT('testo_footer', v)} />
+        </Sezione>
+
+        <Sezione title="Footer" icon="🦶">
+          {/* Sfondo footer: eredita pagina o dedicato */}
+          <div>
+            <label style={sLabel}>Sfondo footer</label>
+            <div style={{ display: 'flex', gap: '8px', marginTop: '6px' }}>
+              {[['', '🖼 Sfondo pagina'], ['dedicato', '🎨 Colore dedicato']].map(([v, l]) => {
+                const isActive = v === '' ? !tema.sfondo_footer : !!tema.sfondo_footer
+                return (
+                  <button key={v} type="button" onClick={() => {
+                    if (v === '') { setT('sfondo_footer', ''); setT('testo_footer', '#6B7280') }
+                    else { setT('sfondo_footer', '#003DA5'); setT('testo_footer', '#ffffff') }
+                  }}
+                    style={{ flex: 1, padding: '9px 8px', border: `1.5px solid ${isActive ? '#003DA5' : '#E5E7EB'}`, borderRadius: '8px', background: isActive ? '#EEF3FF' : '#fff', fontSize: '12px', fontWeight: '700', color: isActive ? '#003DA5' : '#374151', cursor: 'pointer', fontFamily: "'Inter',sans-serif" }}>
+                    {l}
+                  </button>
+                )
+              })}
+            </div>
+            <p style={sHint}>Di default il footer eredita lo sfondo della pagina.</p>
           </div>
+          {tema.sfondo_footer && (
+            <div style={sGrid}>
+              <ColorPicker label="Sfondo footer" value={tema.sfondo_footer} onChange={v => setT('sfondo_footer', v)} />
+              <ColorPicker label="Colore testo footer" value={tema.testo_footer} onChange={v => setT('testo_footer', v)} />
+            </div>
+          )}
+          {!tema.sfondo_footer && (
+            <ColorPicker label="Colore testo footer" value={tema.testo_footer || '#6B7280'} onChange={v => setT('testo_footer', v)} />
+          )}
+
+          {/* Logo footer */}
+          <div>
+            <label style={sLabel}>Logo footer</label>
+            <div style={{ display: 'flex', gap: '8px', marginTop: '6px' }}>
+              {[['same', 'Stesso logo hero'], ['custom', 'Logo diverso']].map(([v, l]) => {
+                const isCustom = !!event.footer_logo_url
+                const isActive = v === 'same' ? !isCustom : isCustom
+                return (
+                  <button key={v} type="button" onClick={() => {
+                    if (v === 'same') setEvent(p => ({ ...p, footer_logo_url: '' }))
+                    else setEvent(p => ({ ...p, footer_logo_url: p.footer_logo_url || 'PENDING' }))
+                  }}
+                    style={{ flex: 1, padding: '9px 8px', border: `1.5px solid ${isActive ? '#003DA5' : '#E5E7EB'}`, borderRadius: '8px', background: isActive ? '#EEF3FF' : '#fff', fontSize: '12px', fontWeight: '700', color: isActive ? '#003DA5' : '#374151', cursor: 'pointer', fontFamily: "'Inter',sans-serif" }}>
+                    {l}
+                  </button>
+                )
+              })}
+            </div>
+            <p style={sHint}>Di default usa lo stesso logo dell'hero.</p>
+          </div>
+          {!!event.footer_logo_url && (
+            <div style={{ marginTop: '4px' }}>
+              <ImageUploader value={event.footer_logo_url === 'PENDING' ? null : event.footer_logo_url} onChange={url => setEvent(p => ({ ...p, footer_logo_url: url || '' }))} />
+            </div>
+          )}
+
           <button type="button" onClick={() => {
             setT('sfondo_footer', 'linear-gradient(160deg, #003DA5 0%, #001F5C 100%)')
             setT('testo_footer', '#ffffff')
