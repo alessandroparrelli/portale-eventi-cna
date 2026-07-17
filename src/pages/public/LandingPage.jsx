@@ -464,126 +464,39 @@ export default function LandingPage() {
           )}
         </div>
       </div>
-      {/* ── DATA E LUOGO sotto hero ── */}
-      {(event.data_inizio || event.luogo) && (
-        <div style={{
-          backgroundColor: 'transparent',
-          padding: '14px 24px',
-          display: 'flex', flexWrap: 'wrap', gap: '16px',
-          alignItems: 'center', justifyContent: 'center',
-        }}>
-          {event.data_inizio && (
-            <div style={{ display:'flex', alignItems:'center', gap:'7px' }}>
-              <Calendar size={15} style={{ color: tema.colore_primario || '#003DA5', flexShrink:0 }}/>
-              <span style={{ fontSize:'14px', fontWeight:'700', color:'#0A0A0A', fontFamily:"'Inter',sans-serif", letterSpacing:'-.01em' }}>
-                {fmtData(event.data_inizio)}
-                {fmtOra(event.data_inizio) && ` · ${fmtOra(event.data_inizio)}`}
-                {event.data_fine && fmtOra(event.data_fine) && ` — ${fmtOra(event.data_fine)}`}
-              </span>
-            </div>
-          )}
-          {event.luogo && (
-            <a
-              href={`https://maps.google.com/?q=${encodeURIComponent(event.luogo)}`}
-              target="_blank" rel="noopener noreferrer"
-              style={{ display:'flex', alignItems:'center', gap:'7px', textDecoration:'none' }}
-            >
-              <MapPin size={15} style={{ color: tema.colore_primario || '#003DA5', flexShrink:0 }}/>
-              <span style={{ fontSize:'14px', fontWeight:'700', color:'#0A0A0A', fontFamily:"'Inter',sans-serif", letterSpacing:'-.01em',
-                textDecorationLine:'underline', textDecorationStyle:'dotted', textDecorationColor:'#9CA3AF' }}>
-                {event.luogo}
-              </span>
-            </a>
-          )}
-        </div>
-      )}
+      {/* Data e luogo rimossi da sotto hero — spostati prima del form */}
 
       {/* ── BODY ── */}
       <div style={{ ...s.body, backgroundColor: tema.sfondo_pagina || '#FFFFFF' }}>
 
-        {/* 3 PULSANTI AZIONE */}
+        {/* PULSANTE PARTECIPA */}
         {(() => {
           const btnRadius = tema.btn_stile === 'pill' ? '50px' : `${tema.btn_raggio || 8}px`
-          const aBtn = {
-            display:'flex', flexDirection:'column', alignItems:'center', justifyContent:'center',
-            gap:'5px', padding:'12px 8px', minHeight:'60px', cursor:'pointer',
-            textDecoration:'none', textAlign:'center', lineHeight:'1.3',
-            fontSize:'12px', fontWeight:'700', fontFamily:"'Inter',sans-serif",
-            backgroundColor: '#FFFFFF',
-            border: `1.5px solid ${tema.colore_primario || '#003DA5'}`,
-            color: tema.colore_primario || '#003DA5',
-            borderRadius: btnRadius,
-          }
           const aBtnPrimary = {
-            ...aBtn,
+            display:'flex', alignItems:'center', justifyContent:'center',
+            gap:'10px', padding:'14px 24px', cursor:'pointer',
+            textDecoration:'none', textAlign:'center',
+            fontSize:'15px', fontWeight:'700', fontFamily:"'Inter',sans-serif",
             backgroundColor: tema.btn_stile === 'contorno' ? 'transparent' : (tema.colore_pulsanti || tema.colore_primario || '#003DA5'),
             color: tema.btn_stile === 'contorno' ? (tema.colore_pulsanti || '#003DA5') : (tema.colore_testo_btn || '#FFFFFF'),
             border: `1.5px solid ${tema.colore_pulsanti || tema.colore_primario || '#003DA5'}`,
+            borderRadius: btnRadius,
+            width: '100%',
           }
-          return (
-        <div style={s.actionRow}>
-          <button onClick={() => {
-            const fmtIcs  = ts => ts ? new Date(ts).toISOString().replace(/[-:]/g,'').replace(/\.\d{3}/,'') : null
-            const fmtGcal = ts => ts ? new Date(ts).toISOString().replace(/[-:]/g,'').replace(/\.\d{3}Z$/,'Z') : null
-            const isIOS   = /iPad|iPhone|iPod/.test(navigator.userAgent) ||
-                            (navigator.platform === 'MacIntel' && navigator.maxTouchPoints > 1)
-            const descrizione = event.sottotitolo || ''
-
-            if (isIOS) {
-              const dtStart = fmtIcs(event.data_inizio), dtEnd = fmtIcs(event.data_fine)||dtStart
-              const now = fmtIcs(new Date().toISOString())
-              const ics = ['BEGIN:VCALENDAR','VERSION:2.0','PRODID:-//CNA Roma//IT',
-                'CALSCALE:GREGORIAN','METHOD:PUBLISH','BEGIN:VEVENT',
-                `UID:${event.id}@cna-eventi`,`DTSTAMP:${now}Z`,`DTSTART:${dtStart}`,`DTEND:${dtEnd}`,
-                `SUMMARY:${event.titolo}`,
-                event.luogo ? `LOCATION:${event.luogo.replace(/,/g,'\\,')}` : '',
-                descrizione ? `DESCRIPTION:${descrizione.replace(/\n/g,'\\n')}` : '',
-                'END:VEVENT','END:VCALENDAR'].filter(Boolean).join('\r\n')
-              const url = URL.createObjectURL(new Blob([ics],{type:'text/calendar;charset=utf-8'}))
-              window.location.href = url
-              setTimeout(() => URL.revokeObjectURL(url), 3000)
-            } else {
-              const gcStart = fmtGcal(event.data_inizio)
-              const gcEnd   = fmtGcal(event.data_fine) || gcStart
-              const params  = new URLSearchParams({
-                action:  'TEMPLATE',
-                text:    event.titolo,
-                dates:   `${gcStart}/${gcEnd}`,
-                ...(descrizione ? { details: descrizione } : {}),
-                ...(event.luogo ? { location: event.luogo } : {}),
-              })
-              window.open(`https://calendar.google.com/calendar/render?${params}`, '_blank', 'noopener')
-            }
-          }} style={aBtn}>
-            <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round">
-              <rect x="3" y="4" width="18" height="18" rx="2"/><line x1="16" y1="2" x2="16" y2="6"/><line x1="8" y1="2" x2="8" y2="6"/><line x1="3" y1="10" x2="21" y2="10"/>
-            </svg>
-            <span>Aggiungi al<br/>calendario</span>
-          </button>
-
-          {event.luogo && (
-            <a href={`https://maps.google.com/?q=${encodeURIComponent(event.luogo)}`}
-              target="_blank" rel="noopener noreferrer" style={aBtn}>
-              <MapPin size={20}/>
-              <span>Mappa<br/>dell'evento</span>
-            </a>
-          )}
-
-          {!esaurito && !conferma && (
-            <button onClick={() => {
-              setFormVisible(true)
-              setTimeout(() => {
-                document.getElementById('form-iscrizione')?.scrollIntoView({ behavior:'smooth', block:'start' })
-              }, 50)
-            }} style={aBtnPrimary}>
-              <ChevronRight size={20}/>
-              <span>Partecipa<br/>all'evento</span>
-            </button>
-          )}
-        </div>
-          )
-        })()
-        }
+          return !esaurito && !conferma ? (
+            <div style={{ marginBottom:'24px', padding:'4px 0' }}>
+              <button onClick={() => {
+                setFormVisible(true)
+                setTimeout(() => {
+                  document.getElementById('form-iscrizione')?.scrollIntoView({ behavior:'smooth', block:'start' })
+                }, 50)
+              }} style={aBtnPrimary}>
+                <ChevronRight size={20}/>
+                <span>Partecipa all\u2019evento</span>
+              </button>
+            </div>
+          ) : null
+        })()}
 
         {/* CONDIVISIONE — sotto i 3 pulsanti */}
         <ShareBar event={event} compact />
@@ -658,6 +571,86 @@ export default function LandingPage() {
             </section>
           )
         })()}
+
+        {/* ── INFO EVENTO + PULSANTI CALENDARIO/MAPPA ── */}
+        {(event.data_inizio || event.luogo) && (
+          <div style={{ marginBottom:'24px', padding:'20px', backgroundColor: tema.sfondo_sezioni || '#F4F5F7', borderRadius:'12px' }}>
+            {event.data_inizio && (
+              <div style={{ display:'flex', alignItems:'center', gap:'10px', marginBottom: event.luogo ? '12px' : '0' }}>
+                <Calendar size={18} style={{ color: tema.colore_primario || '#003DA5', flexShrink:0 }}/>
+                <span style={{ fontSize:'15px', fontWeight:'700', color:'#0A0A0A', fontFamily:"'Inter',sans-serif", letterSpacing:'-.01em' }}>
+                  {fmtData(event.data_inizio)}
+                  {fmtOra(event.data_inizio) && ` \u00b7 ${fmtOra(event.data_inizio)}`}
+                  {event.data_fine && fmtOra(event.data_fine) && ` \u2014 ${fmtOra(event.data_fine)}`}
+                </span>
+              </div>
+            )}
+            {event.luogo && (
+              <div style={{ display:'flex', alignItems:'center', gap:'10px', marginBottom:'16px' }}>
+                <MapPin size={18} style={{ color: tema.colore_primario || '#003DA5', flexShrink:0 }}/>
+                <span style={{ fontSize:'15px', fontWeight:'700', color:'#0A0A0A', fontFamily:"'Inter',sans-serif", letterSpacing:'-.01em' }}>
+                  {event.luogo}
+                </span>
+              </div>
+            )}
+            <div style={{ display:'grid', gridTemplateColumns: event.luogo ? '1fr 1fr' : '1fr', gap:'10px' }}>
+              <button onClick={() => {
+                const fmtIcs  = ts => ts ? new Date(ts).toISOString().replace(/[-:]/g,'').replace(/\.\d{3}/,'') : null
+                const fmtGcal = ts => ts ? new Date(ts).toISOString().replace(/[-:]/g,'').replace(/\.\d{3}Z$/,'Z') : null
+                const isIOS   = /iPad|iPhone|iPod/.test(navigator.userAgent) ||
+                                (navigator.platform === 'MacIntel' && navigator.maxTouchPoints > 1)
+                const descrizione = event.sottotitolo || ''
+                if (isIOS) {
+                  const dtStart = fmtIcs(event.data_inizio), dtEnd = fmtIcs(event.data_fine)||dtStart
+                  const now = fmtIcs(new Date().toISOString())
+                  const ics = ['BEGIN:VCALENDAR','VERSION:2.0','PRODID:-//CNA Roma//IT',
+                    'CALSCALE:GREGORIAN','METHOD:PUBLISH','BEGIN:VEVENT',
+                    `UID:${event.id}@cna-eventi`,`DTSTAMP:${now}Z`,`DTSTART:${dtStart}`,`DTEND:${dtEnd}`,
+                    `SUMMARY:${event.titolo}`,
+                    event.luogo ? `LOCATION:${event.luogo.replace(/,/g,'\\\\,')}` : '',
+                    descrizione ? `DESCRIPTION:${descrizione.replace(/\n/g,'\\\\n')}` : '',
+                    'END:VEVENT','END:VCALENDAR'].filter(Boolean).join('\r\n')
+                  const url = URL.createObjectURL(new Blob([ics],{type:'text/calendar;charset=utf-8'}))
+                  window.location.href = url
+                  setTimeout(() => URL.revokeObjectURL(url), 3000)
+                } else {
+                  const gcStart = fmtGcal(event.data_inizio)
+                  const gcEnd   = fmtGcal(event.data_fine) || gcStart
+                  const params  = new URLSearchParams({
+                    action:'TEMPLATE', text:event.titolo, dates:`${gcStart}/${gcEnd}`,
+                    ...(descrizione ? { details: descrizione } : {}),
+                    ...(event.luogo ? { location: event.luogo } : {}),
+                  })
+                  window.open(`https://calendar.google.com/calendar/render?${params}`, '_blank', 'noopener')
+                }
+              }} style={{
+                display:'flex', alignItems:'center', justifyContent:'center', gap:'8px',
+                padding:'12px 16px', backgroundColor:'#FFFFFF',
+                border:`1.5px solid ${tema.colore_primario || '#003DA5'}`,
+                color: tema.colore_primario || '#003DA5',
+                borderRadius:'10px', fontSize:'13px', fontWeight:'700',
+                fontFamily:"'Inter',sans-serif", cursor:'pointer',
+              }}>
+                <Calendar size={16}/>
+                Aggiungi al calendario
+              </button>
+              {event.luogo && (
+                <a href={`https://maps.google.com/?q=${encodeURIComponent(event.luogo)}`}
+                  target="_blank" rel="noopener noreferrer" style={{
+                  display:'flex', alignItems:'center', justifyContent:'center', gap:'8px',
+                  padding:'12px 16px', backgroundColor:'#FFFFFF',
+                  border:`1.5px solid ${tema.colore_primario || '#003DA5'}`,
+                  color: tema.colore_primario || '#003DA5',
+                  borderRadius:'10px', fontSize:'13px', fontWeight:'700',
+                  fontFamily:"'Inter',sans-serif", cursor:'pointer', textDecoration:'none',
+                }}>
+                  <MapPin size={16}/>
+                  Mappa dell\u2019evento
+                </a>
+              )}
+            </div>
+          </div>
+        )}
 
         {/* CTA / FORM */}
         {!conferma && (
@@ -789,7 +782,7 @@ const s = {
   secTitle:    { fontSize:'20px', fontWeight:'900', color:'#0A0A0A', letterSpacing:'-.03em', margin:'0 0 16px' },
   descText:    { fontSize:'15px', color:'#374151', lineHeight:'1.75' },
   // 3 pulsanti
-  actionRow:       { display:'grid', gridTemplateColumns:'repeat(3, 1fr)', gap:'8px', marginBottom:'28px', padding:'4px 0' },
+  // actionRow: rimosso — layout semplificato con pulsante singolo
   // actionBtn / actionBtnPrimary: stili generati inline in base al tema
   // CTA box
   ctaSection:  { backgroundColor:'#EEF3FF', border:'1px solid #C7D9F8', borderRadius:'12px', padding:'24px', marginBottom:'24px' },
