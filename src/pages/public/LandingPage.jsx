@@ -12,6 +12,69 @@ import SocialLinks from '../../components/SocialLinks'
 import { useSocial } from '../../hooks/useSocial'
 import BlockRenderer from '../../components/public/BlockRenderer'
 
+/* ── PATTERN PALLINI DECORATIVI ──────────────────────── */
+function generaPalliniSVG(c1, c2, opacita, angolo) {
+  const o = (parseInt(opacita) || 25) / 100
+  // Genera pallini deterministici (seed-based positions)
+  const dots = []
+  const seed = [
+    // riga 1
+    {x:82,y:5,r:4,c:1},{x:88,y:3,r:3,c:2},{x:95,y:6,r:5,c:1},
+    {x:78,y:10,r:3,c:2},{x:85,y:12,r:6,c:1},{x:91,y:9,r:3,c:2},{x:97,y:11,r:4,c:1},
+    // riga 2
+    {x:72,y:16,r:3,c:1},{x:80,y:18,r:5,c:2},{x:87,y:15,r:3,c:1},{x:93,y:19,r:4,c:2},{x:98,y:17,r:3,c:1},
+    // riga 3
+    {x:68,y:23,r:4,c:2},{x:75,y:25,r:3,c:1},{x:83,y:22,r:5,c:2},{x:90,y:26,r:3,c:1},{x:96,y:24,r:4,c:2},
+    // riga 4
+    {x:63,y:30,r:3,c:1},{x:71,y:32,r:4,c:2},{x:78,y:29,r:3,c:1},{x:86,y:33,r:6,c:2},{x:93,y:31,r:3,c:1},
+    // riga 5
+    {x:58,y:37,r:5,c:2},{x:66,y:39,r:3,c:1},{x:74,y:36,r:4,c:2},{x:81,y:40,r:3,c:1},{x:89,y:38,r:5,c:2},{x:96,y:36,r:3,c:1},
+    // extra scatter
+    {x:55,y:44,r:3,c:1},{x:62,y:46,r:4,c:2},{x:70,y:43,r:3,c:1},{x:77,y:47,r:5,c:2},{x:84,y:45,r:3,c:1},{x:92,y:43,r:4,c:2},
+    {x:50,y:51,r:4,c:2},{x:58,y:53,r:3,c:1},{x:66,y:50,r:5,c:2},{x:73,y:54,r:3,c:1},{x:80,y:52,r:4,c:2},
+  ]
+  
+  if (angolo) {
+    // Solo angolo in alto a destra
+    for (const d of seed) {
+      dots.push(`<circle cx="${d.x}%" cy="${d.y}%" r="${d.r}" fill="${d.c===1?c1:c2}" opacity="${o}"/>`)
+    }
+  } else {
+    // Sparsi su tutta la pagina
+    const allDots = [
+      ...seed,
+      // angolo in basso a sinistra (riflesso)
+      ...seed.map(d => ({x: 100-d.x, y: 100-d.y, r: d.r, c: d.c})),
+      // centro sparso
+      {x:30,y:35,r:4,c:1},{x:45,y:60,r:3,c:2},{x:20,y:70,r:5,c:1},{x:55,y:20,r:3,c:2},
+      {x:35,y:80,r:4,c:2},{x:15,y:45,r:3,c:1},{x:40,y:15,r:4,c:2},{x:25,y:55,r:3,c:1},
+    ]
+    for (const d of allDots) {
+      dots.push(`<circle cx="${d.x}%" cy="${d.y}%" r="${d.r}" fill="${d.c===1?c1:c2}" opacity="${o}"/>`)
+    }
+  }
+  return `data:image/svg+xml,${encodeURIComponent(`<svg xmlns="http://www.w3.org/2000/svg" width="100%" height="100%" viewBox="0 0 1200 800">${dots.join('')}</svg>`)}`
+}
+
+function PatternOverlay({ tema }) {
+  const pattern = tema.sfondo_pattern
+  if (!pattern || pattern === 'nessuno') return null
+  const c1 = tema.pattern_colore1 || '#003DA5'
+  const c2 = tema.pattern_colore2 || '#E8792F'
+  const op = tema.pattern_opacita || '25'
+  const angolo = pattern === 'pallini_angolo'
+  const svg = generaPalliniSVG(c1, c2, op, angolo)
+  return (
+    <div style={{
+      position: 'fixed', inset: 0, pointerEvents: 'none', zIndex: 0,
+      backgroundImage: `url("${svg}")`,
+      backgroundSize: 'cover',
+      backgroundRepeat: 'no-repeat',
+      backgroundPosition: 'top right',
+    }} />
+  )
+}
+
 function fmtData(ts) {
   if (!ts) return null
   return new Date(ts).toLocaleDateString('it-IT', { weekday:'long', day:'numeric', month:'long', year:'numeric' })
@@ -285,7 +348,8 @@ export default function LandingPage() {
     : { background:'linear-gradient(135deg,#003DA5 0%,#001a50 100%)' }
 
   return (
-    <div style={s.root}>
+    <div style={{...s.root, backgroundColor: tema.sfondo_pagina || '#FFFFFF', position: 'relative'}}>
+      <PatternOverlay tema={tema} />
       <style>{`
         ${RICH_CSS}
         @keyframes heroIn{from{opacity:0;transform:translateY(20px)}to{opacity:1;transform:translateY(0)}}

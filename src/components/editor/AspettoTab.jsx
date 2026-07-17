@@ -30,6 +30,11 @@ export const TEMA_DEFAULT = {
   // Footer
   sfondo_footer:       '#F4F5F7',
   testo_footer:        '#9CA3AF',
+  // Pattern sfondo
+  sfondo_pattern:      'nessuno',  // nessuno | pallini | pallini_angolo
+  pattern_colore1:     '#003DA5',
+  pattern_colore2:     '#E8792F',
+  pattern_opacita:     '25',       // 0-100
 }
 
 export function temaConDefault(t) {
@@ -98,6 +103,7 @@ const PALETTE = [
   { nome: 'Teal',         primario: '#0D9488', pulsanti: '#0D9488', sfondo_header: '#FFFFFF', bordo_header: '#0D9488', sfondo_pagina: '#FFFFFF', sfondo_sezioni: '#F0FDFA', cta_bg: '#F0FDFA' },
   { nome: 'Nero élite',   primario: '#0A0A0A', pulsanti: '#0A0A0A', sfondo_header: '#0A0A0A', bordo_header: '#0A0A0A', sfondo_pagina: '#FFFFFF', sfondo_sezioni: '#F9FAFB', colore_testo_btn: '#FFFFFF' },
   { nome: 'Bianco puro',  primario: '#003DA5', pulsanti: '#003DA5', sfondo_header: '#FFFFFF', bordo_header: '#FFFFFF', sfondo_pagina: '#FFFFFF', sfondo_sezioni: '#FFFFFF', cta_bg: '#F4F5F7' },
+  { nome: 'CNA Pallini',  primario: '#003DA5', pulsanti: '#E8792F', sfondo_header: '#FFFFFF', bordo_header: '#003DA5', sfondo_pagina: '#FFFFFF', sfondo_sezioni: '#F8F9FF', cta_bg: '#EEF3FF', colore_testo_btn: '#FFFFFF', sfondo_pattern: 'pallini_angolo', pattern_colore1: '#003DA5', pattern_colore2: '#E8792F', pattern_opacita: '25' },
 ]
 
 /* ─── Anteprima mini ────────────────────────────────────────────── */
@@ -116,8 +122,25 @@ function Anteprima({ tema, logoUrl, titolo }) {
                : t.logo_bg === 'bianco' ? '#FFFFFF'
                : 'transparent'
 
+  // Pattern
+  const patternSvg = (() => {
+    const p = t.sfondo_pattern
+    if (!p || p === 'nessuno') return null
+    const c1 = t.pattern_colore1 || '#003DA5', c2 = t.pattern_colore2 || '#E8792F'
+    const o = (parseInt(t.pattern_opacita) || 25) / 100
+    const seed = [
+      {x:82,y:5,r:2,c:1},{x:88,y:3,r:1.5,c:2},{x:95,y:6,r:2.5,c:1},
+      {x:78,y:10,r:1.5,c:2},{x:85,y:12,r:3,c:1},{x:91,y:9,r:1.5,c:2},{x:97,y:11,r:2,c:1},
+      {x:72,y:16,r:1.5,c:1},{x:80,y:18,r:2.5,c:2},{x:87,y:15,r:1.5,c:1},{x:93,y:19,r:2,c:2},
+      {x:68,y:23,r:2,c:2},{x:75,y:25,r:1.5,c:1},{x:83,y:22,r:2.5,c:2},{x:90,y:26,r:1.5,c:1},
+    ]
+    const circles = seed.map(d => `<circle cx="${d.x}%" cy="${d.y}%" r="${d.r}" fill="${d.c===1?c1:c2}" opacity="${o}"/>`).join('')
+    return `url("data:image/svg+xml,${encodeURIComponent(`<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 300 200'>${circles}</svg>`)}")`
+  })()
+
   return (
-    <div style={{ border: '1px solid #E5E7EB', borderRadius: '12px', overflow: 'hidden', background: t.sfondo_pagina, boxShadow: '0 2px 12px rgba(0,0,0,.06)' }}>
+    <div style={{ border: '1px solid #E5E7EB', borderRadius: '12px', overflow: 'hidden', background: t.sfondo_pagina, boxShadow: '0 2px 12px rgba(0,0,0,.06)', position: 'relative' }}>
+      {patternSvg && <div style={{ position:'absolute', inset:0, backgroundImage:patternSvg, backgroundSize:'cover', backgroundPosition:'top right', pointerEvents:'none', zIndex:0 }} />}
       {/* Header */}
       <div style={{
         backgroundColor: t.sfondo_header,
@@ -189,6 +212,10 @@ export default function AspettoTab({ event, setEvent }) {
         sfondo_sezioni:   pl.sfondo_sezioni ?? '#F4F5F7',
         cta_bg:           pl.cta_bg        ?? '#EEF3FF',
         colore_testo_btn: pl.colore_testo_btn ?? '#FFFFFF',
+        sfondo_pattern:   pl.sfondo_pattern ?? 'nessuno',
+        pattern_colore1:  pl.pattern_colore1 ?? '#003DA5',
+        pattern_colore2:  pl.pattern_colore2 ?? '#E8792F',
+        pattern_opacita:  pl.pattern_opacita ?? '25',
       }
     }))
   }
@@ -320,6 +347,37 @@ export default function AspettoTab({ event, setEvent }) {
             <ColorPicker label="Sfondo pagina" value={tema.sfondo_pagina} onChange={v => { setT('sfondo_pagina', v); setEvent(p => ({ ...p, colore_sfondo: v })) }} hint="Colore di fondo della pagina intera" />
             <ColorPicker label="Sfondo sezioni" value={tema.sfondo_sezioni} onChange={v => setT('sfondo_sezioni', v)} hint="Sfondo delle sezioni di contenuto" />
           </div>
+
+          {/* Pattern decorativo */}
+          <div>
+            <label style={sLabel}>Pattern decorativo sfondo</label>
+            <div style={{ display: 'flex', gap: '8px', marginTop: '6px' }}>
+              {[['nessuno', '✕ Nessuno'], ['pallini', '● Pallini sparsi'], ['pallini_angolo', '◔ Pallini angolo']].map(([v, l]) => (
+                <button key={v} type="button" onClick={() => setT('sfondo_pattern', v)}
+                  style={{ flex: 1, padding: '9px 8px', border: `1.5px solid ${(tema.sfondo_pattern || 'nessuno') === v ? '#003DA5' : '#E5E7EB'}`, borderRadius: '8px', background: (tema.sfondo_pattern || 'nessuno') === v ? '#EEF3FF' : '#fff', fontSize: '12px', fontWeight: '700', color: (tema.sfondo_pattern || 'nessuno') === v ? '#003DA5' : '#374151', cursor: 'pointer', fontFamily: "'Inter',sans-serif" }}>
+                  {l}
+                </button>
+              ))}
+            </div>
+            <p style={sHint}>Aggiunge un pattern decorativo di pallini colorati sopra lo sfondo della pagina.</p>
+          </div>
+          {tema.sfondo_pattern && tema.sfondo_pattern !== 'nessuno' && (
+            <>
+              <div style={sGrid}>
+                <ColorPicker label="Colore pallini 1" value={tema.pattern_colore1 || '#003DA5'} onChange={v => setT('pattern_colore1', v)} />
+                <ColorPicker label="Colore pallini 2" value={tema.pattern_colore2 || '#E8792F'} onChange={v => setT('pattern_colore2', v)} />
+              </div>
+              <div>
+                <label style={sLabel}>Opacità pattern: {tema.pattern_opacita || 25}%</label>
+                <input type="range" min="5" max="80" step="5"
+                  value={tema.pattern_opacita || 25}
+                  onChange={e => setT('pattern_opacita', e.target.value)}
+                  style={{ width: '100%', marginTop: '6px' }}
+                />
+              </div>
+            </>
+          )}
+
           <ColorPicker label="Sfondo area CTA / registrazione" value={tema.cta_bg} onChange={v => setT('cta_bg', v)} />
           <div style={sGrid}>
             <ColorPicker label="Sfondo footer" value={tema.sfondo_footer} onChange={v => setT('sfondo_footer', v)} />
