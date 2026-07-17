@@ -74,10 +74,10 @@ export default function ShareBar({ event, compact = false }) {
   /* ─── Versione FOOTER (grande, centrata) ─── */
   return (
     <div style={{
-      borderTop: '1px solid #E5E7EB',
+      borderTop: 'none',
       padding: '20px 24px',
       textAlign: 'center',
-      background: '#FAFAFA',
+      background: 'transparent',
     }}>
       <p style={{
         fontSize: '12px', fontWeight: '700', color: '#9CA3AF',
