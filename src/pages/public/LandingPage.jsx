@@ -492,7 +492,7 @@ export default function LandingPage() {
                 }, 50)
               }} style={aBtnPrimary}>
                 <ChevronRight size={20}/>
-                <span>Partecipa all\u2019evento</span>
+                <span>Partecipa all'evento</span>
               </button>
             </div>
           ) : null
@@ -580,8 +580,8 @@ export default function LandingPage() {
                 <Calendar size={18} style={{ color: tema.colore_primario || '#003DA5', flexShrink:0 }}/>
                 <span style={{ fontSize:'15px', fontWeight:'700', color:'#0A0A0A', fontFamily:"'Inter',sans-serif", letterSpacing:'-.01em' }}>
                   {fmtData(event.data_inizio)}
-                  {fmtOra(event.data_inizio) && ` \u00b7 ${fmtOra(event.data_inizio)}`}
-                  {event.data_fine && fmtOra(event.data_fine) && ` \u2014 ${fmtOra(event.data_fine)}`}
+                  {fmtOra(event.data_inizio) && ` · ${fmtOra(event.data_inizio)}`}
+                  {event.data_fine && fmtOra(event.data_fine) && ` — ${fmtOra(event.data_fine)}`}
                 </span>
               </div>
             )}
@@ -645,7 +645,7 @@ export default function LandingPage() {
                   fontFamily:"'Inter',sans-serif", cursor:'pointer', textDecoration:'none',
                 }}>
                   <MapPin size={16}/>
-                  Mappa dell\u2019evento
+                  Mappa dell'evento
                 </a>
               )}
             </div>
