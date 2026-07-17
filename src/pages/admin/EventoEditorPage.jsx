@@ -892,6 +892,31 @@ export default function EventoEditorPage() {
               <ImageUploader value={event.immagine_hero} onChange={url=>updEvent(p=>({...p,immagine_hero:url}))}/>
             </div>
 
+            {/* Colore sfondo hero (visibile quando non c'è immagine) */}
+            <div style={{ marginBottom:'20px', padding:'14px 16px', background: event.immagine_hero ? '#F9FAFB' : '#EEF3FF', border:`1px solid ${event.immagine_hero ? '#E5E7EB' : '#C7D9F8'}`, borderRadius:'10px' }}>
+              <p style={{ fontSize:'12px', fontWeight:'700', color: event.immagine_hero ? '#9CA3AF' : '#003DA5', margin:'0 0 8px' }}>
+                🎨 Colore sfondo hero {!event.immagine_hero && <span style={{ fontWeight:'400', color:'#6B7280' }}>(nessuna immagine caricata — verrà usato questo colore)</span>}
+              </p>
+              <div style={{ display:'flex', alignItems:'center', gap:'10px' }}>
+                <input type="color" value={event.layout_hero?.hero_sfondo || '#003DA5'}
+                  onChange={e => setH('hero_sfondo')(e.target.value)}
+                  style={{ width:'44px', height:'34px', border:'1px solid #D1D5DB', borderRadius:'6px', cursor:'pointer', padding:'2px' }}/>
+                <input value={event.layout_hero?.hero_sfondo || '#003DA5'}
+                  onChange={e => { if (/^#[0-9A-Fa-f]{0,6}$/.test(e.target.value)) setH('hero_sfondo')(e.target.value) }}
+                  style={{ flex:1, padding:'7px 10px', border:'1px solid #E5E7EB', borderRadius:'6px', fontSize:'13px', fontFamily:'monospace' }}/>
+                <div style={{ display:'flex', gap:'4px' }}>
+                  {[['#003DA5','Blu CNA'],['#0A1628','Notte'],['#1F2937','Grafite'],['#7C3AED','Viola'],['#DC2626','Rosso'],['#16A34A','Verde']].map(([c,l]) => (
+                    <button key={c} type="button" onClick={() => setH('hero_sfondo')(c)}
+                      style={{ width:'28px', height:'28px', borderRadius:'6px', border: (event.layout_hero?.hero_sfondo||'#003DA5')===c ? '2px solid #003DA5' : '1px solid #D1D5DB', background:c, cursor:'pointer', padding:0, flexShrink:0 }}
+                      title={l} />
+                  ))}
+                </div>
+              </div>
+              <p style={{ fontSize:'11px', color:'#9CA3AF', margin:'6px 0 0' }}>
+                Colore di sfondo dell'hero quando non è caricata un'immagine.
+              </p>
+            </div>
+
             {/* Controlli layout */}
             <div style={p.grid3}>
               <Field label={`Altezza hero: ${event.layout_hero?.altezza||'380'}px`}>

@@ -349,7 +349,7 @@ export default function LandingPagePublic() {
       <div className="lp-hero-wrap" style={{
         position:'relative', minHeight:altezzaHero+'px', display:'flex', flexDirection:'column',
         alignItems, justifyContent:'center', padding:'60px 24px',
-        background: lp.hero_immagine_url?`url(${lp.hero_immagine_url}) ${bgPosition}/cover no-repeat`:cp,
+        background: lp.hero_immagine_url?`url(${lp.hero_immagine_url}) ${bgPosition}/cover no-repeat`:(lh.hero_sfondo||cp),
       }}>
         <div style={{position:'absolute',inset:0,background:`rgba(${overlayR},${overlayG},${overlayB},${overlayOpacita})`}} />
         <div className="lp-hero-logo" style={{position:'relative',zIndex:1,textAlign:'center',width:'100%',marginBottom:'36px'}}>

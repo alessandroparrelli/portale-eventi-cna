@@ -319,6 +319,23 @@ export default function LandingEditorPage() {
                 />
               </Field>
 
+              {/* Colore sfondo hero */}
+              <div style={{ marginBottom:'12px', padding:'12px 14px', background: data.hero_immagine_url ? '#F9FAFB' : '#EEF3FF', border:`1px solid ${data.hero_immagine_url ? '#E5E7EB' : '#C7D9F8'}`, borderRadius:'8px' }}>
+                <p style={{ fontSize:'12px', fontWeight:'700', color: data.hero_immagine_url ? '#9CA3AF' : '#003DA5', margin:'0 0 6px' }}>
+                  🎨 Colore sfondo hero {!data.hero_immagine_url && <span style={{ fontWeight:'400', color:'#6B7280' }}>(attivo)</span>}
+                </p>
+                <div style={{ display:'flex', alignItems:'center', gap:'8px' }}>
+                  <input type="color" value={lh.hero_sfondo || '#003DA5'}
+                    onChange={setH('hero_sfondo')}
+                    style={{ width:'38px', height:'32px', border:'1px solid #D1D5DB', borderRadius:'6px', cursor:'pointer', padding:'2px' }}/>
+                  {[['#003DA5','Blu'],['#0A1628','Notte'],['#1F2937','Grafite'],['#7C3AED','Viola'],['#DC2626','Rosso']].map(([c,l]) => (
+                    <button key={c} type="button" onClick={() => setH('hero_sfondo')(c)}
+                      style={{ width:'26px', height:'26px', borderRadius:'6px', border:(lh.hero_sfondo||'#003DA5')===c?'2px solid #003DA5':'1px solid #D1D5DB', background:c, cursor:'pointer', padding:0 }}
+                      title={l} />
+                  ))}
+                </div>
+              </div>
+
               {/* Controlli layout */}
               <div style={{ display:'grid', gridTemplateColumns:'1fr 1fr 1fr', gap:'16px' }}>
                 <Field label={`Altezza hero: ${lh.altezza||'420'}px`}>

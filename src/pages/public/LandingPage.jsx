@@ -345,7 +345,7 @@ export default function LandingPage() {
 
   const heroStyle = event.immagine_hero
     ? { backgroundImage:`url(${event.immagine_hero})`,backgroundSize:'cover',backgroundPosition: lh.bg_position || 'center top' }
-    : { background:'linear-gradient(135deg,#003DA5 0%,#001a50 100%)' }
+    : { background: lh.hero_sfondo || tema.colore_primario || '#003DA5' }
 
   return (
     <div style={{...s.root, backgroundColor: tema.sfondo_pagina || '#FFFFFF', position: 'relative'}}>
