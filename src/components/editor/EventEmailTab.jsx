@@ -1,6 +1,5 @@
 /**
- * EventEmailTab v2 — Editor email avanzato per singolo evento
- * Drag & drop blocchi, image upload, live preview mobile/desktop
+ * EventEmailTab v3 — Split-pane layout: editor + anteprima sempre visibile
  */
 import { useState, useEffect, useRef } from 'react'
 import { supabase, getFreshJwt } from '../../lib/supabase'
@@ -9,7 +8,8 @@ import {
   Save, RotateCcw, CheckCircle, Code, Eye as EyeIcon, AlertTriangle,
   Layers, Image as ImageIcon, Type, AlignLeft, Square, Star, Zap, Minus,
   Columns, LayoutTemplate, ChevronUp, ChevronDown, Trash2, GripVertical, MapPin,
-  AlignCenter, AlignRight, Upload, X, Loader2, Smartphone, Monitor, Plus
+  AlignCenter, AlignRight, Upload, X, Loader2, Smartphone, Monitor, Plus,
+  Settings2, ChevronRight, PanelRightClose, PanelRightOpen, Send
 } from 'lucide-react'
 
 // ─── Costanti ─────────────────────────────────────────────────────────────────
@@ -108,9 +108,7 @@ function blocchiToHtml(blocchi) {
   }).join('\n')
 }
 
-
-
-// ─── LogoPicker leggero (solo griglia selezione, senza upload/delete) ────────
+// ─── LogoPicker ────────────────────────────────────────────────────────────────
 function LogoPicker({ value, onChange }) {
   const [loghi, setLoghi] = useState([])
   const [loading, setLoading] = useState(true)
@@ -342,7 +340,7 @@ function BlockProps({ block, onChange }) {
       {numField('Gap','gap',24,'px',0,48)}
     </>
     case 'info_box': return <>
-      <p style={{ fontSize:'11px', color:'#6B7280', margin:'0 0 10px', fontStyle:'italic' }}>Mostra automaticamente data e luogo dall\u2019evento.</p>
+      <p style={{ fontSize:'11px', color:'#6B7280', margin:'0 0 10px', fontStyle:'italic' }}>Mostra automaticamente data e luogo dall{'\u2019'}evento.</p>
       {colorField('Sfondo','bg','#F0F7FF')}
       {colorField('Bordo','bordo','#BFDBFE')}
       {numField('Radius','radius',10,'px',0,24)}
@@ -362,7 +360,7 @@ function BlockProps({ block, onChange }) {
         <label style={lbl}>Indirizzo</label>
         <input value={block.indirizzo||''} onChange={e=>set('indirizzo',e.target.value)} style={inp}
           placeholder="Via Roma 1, Roma — oppure {{luogo_evento}}"/>
-        <p style={{ fontSize:'10px', color:'#9CA3AF', margin:'3px 0 0' }}>Puoi usare <code>{'{{luogo_evento}}'}</code> per usare il luogo dell'evento</p>
+        <p style={{ fontSize:'10px', color:'#9CA3AF', margin:'3px 0 0' }}>Puoi usare <code>{'{{luogo_evento}}'}</code> per usare il luogo dell{'\u2019'}evento</p>
       </div>
       <div style={{ marginBottom:'8px' }}>
         <label style={lbl}>Testo sotto mappa</label>
@@ -391,17 +389,22 @@ export default function EventEmailTab({ eventoId }) {
   const [logoAltezza,    setLogoAltezza]          = useState(48)
   const [titoloSize,     setTitoloSize]           = useState(13)
   const [formFields,     setFormFields]           = useState([])
-  const [blocchi,         setBlocchi]         = useState({}) // per tipo: { conferma: [...], ... }
+  const [blocchi,         setBlocchi]         = useState({})
   const [saving,          setSaving]          = useState(false)
   const [saved,           setSaved]           = useState(false)
-  const [viewMode,        setViewMode]        = useState('blocchi') // 'blocchi'|'html'|'preview'
+  const [editorMode,      setEditorMode]     = useState('blocchi') // 'blocchi'|'html'
   const [previewDevice,   setPreviewDevice]   = useState('desktop')
   const [loading,         setLoading]         = useState(true)
   const [eventoTitolo,    setEventoTitolo]    = useState('')
   const [showResetModal,  setShowResetModal]  = useState(false)
   const [resetting,       setResetting]       = useState(false)
   const [selectedBlock,   setSelectedBlock]   = useState(null)
+  const [showHeader,      setShowHeader]      = useState(false)
   const [showVars,        setShowVars]        = useState(false)
+  const [previewCollapsed,setPreviewCollapsed]= useState(false)
+  const [showTestBar,     setShowTestBar]     = useState(false)
+  const [testEmail,       setTestEmail]       = useState('')
+  const [sending,         setSending]         = useState(false)
   const dragIdx = useRef(null)
   const dragOverIdx = useRef(null)
 
@@ -416,7 +419,6 @@ export default function EventEmailTab({ eventoId }) {
     if (data?.titolo) setEventoTitolo(data.titolo)
   }
 
-  // Reset selectedBlock quando cambia il tipo selezionato
   useEffect(() => { setSelectedBlock(null) }, [selected])
 
   async function fetchEventTemplates() {
@@ -449,7 +451,6 @@ export default function EventEmailTab({ eventoId }) {
   }
 
   const current = templates[selected] || { oggetto:'', corpo_html:'' }
-  // Se l'evento non ha blocchi propri, usa i blocchi del template default come fallback (sola lettura finché non salva)
   const defaultBlocchi = (() => {
     const def = defaultTemplates[selected]
     if (!def) return []
@@ -501,7 +502,7 @@ export default function EventEmailTab({ eventoId }) {
 
   async function save() {
     setSaving(true)
-    const bodyHtml = viewMode==='html' ? current.corpo_html : blocchiToHtml(currBlocchi)
+    const bodyHtml = editorMode==='html' ? current.corpo_html : blocchiToHtml(currBlocchi)
     await supabase.from('email_templates')
       .update({ oggetto:current.oggetto, corpo_html:bodyHtml, blocchi_json:JSON.stringify(currBlocchi), logo_url:logoUrl||null, header_colore:headerColore||null, header_titolo:headerTitolo||null, logo_altezza:logoAltezza||null, titolo_size:titoloSize||null, personalizzato:true, updated_at:new Date().toISOString() })
       .eq('event_id', eventoId).eq('tipo', selected)
@@ -512,11 +513,8 @@ export default function EventEmailTab({ eventoId }) {
     const def = defaultTemplates[selected]
     if (!def) return
     setResetting(true)
-    // Resetta blocchi (rimuove chiave → currBlocchi cade su defaultBlocchi)
     setBlocchi(prev => { const n={...prev}; delete n[selected]; return n })
-    // Resetta oggetto e header
     setTemplates(prev => ({ ...prev, [selected]:{ ...prev[selected], oggetto:def.oggetto, corpo_html:def.corpo_html, personalizzato:false } }))
-    // Resetta header (usa quelli del default, o i valori base)
     setLogoUrl(def.logo_url || '')
     setHeaderColore(def.header_colore || BLU)
     setHeaderTitolo(def.header_titolo || '')
@@ -529,133 +527,179 @@ export default function EventEmailTab({ eventoId }) {
     setResetting(false); setShowResetModal(false)
   }
 
+  async function sendTest() {
+    if (!testEmail.trim()) return
+    setSending(true)
+    const html = getPreviewHtml()
+    const { data: { session } } = await supabase.auth.getSession()
+    try {
+      await fetch(`${import.meta.env.VITE_SUPABASE_URL}/functions/v1/send-test-email`, {
+        method:'POST',
+        headers:{ 'Authorization':`Bearer ${session?.access_token}`, 'Content-Type':'application/json' },
+        body: JSON.stringify({ to: testEmail, oggetto: current.oggetto||'(test)', html }),
+      })
+      alert(`Email di test inviata a ${testEmail}`)
+    } catch(e) { alert('Errore invio: ' + e.message) }
+    setSending(false); setShowTestBar(false)
+  }
+
   function getPreviewHtml() {
     try {
-    const bodyHtml = currBlocchi.length ? blocchiToHtml(currBlocchi) : (current.corpo_html||'')
-    return replacePreview(buildFullHtml(true, true, bodyHtml, logoUrl, headerColore, headerTitolo, logoAltezza, titoloSize), eventoTitolo)
+      const bodyHtml = currBlocchi.length ? blocchiToHtml(currBlocchi) : (current.corpo_html||'')
+      return replacePreview(buildFullHtml(true, true, bodyHtml, logoUrl, headerColore, headerTitolo, logoAltezza, titoloSize), eventoTitolo)
     } catch(e) { console.error('preview error', e); return '<html><body><p style="padding:20px;color:#9CA3AF">Errore anteprima</p></body></html>' }
   }
 
   const selectedBl = selectedBlock !== null ? currBlocchi[selectedBlock] : null
+  const tipoInfo = TIPI.find(t=>t.key===selected)
 
   if (loading) return (
     <div style={{ padding:'60px', textAlign:'center', color:'#9CA3AF', fontSize:'14px' }}>Caricamento…</div>
   )
 
   return (
-    <div style={{ display:'flex', gap:'16px', fontFamily:"'Inter',sans-serif" }}>
+    <div style={{ fontFamily:"'Inter',sans-serif" }}>
 
-      {/* ── Sidebar tipi ── */}
-      <div style={{ width:'170px', flexShrink:0 }}>
-        <div style={{ display:'flex', flexDirection:'column', gap:'5px' }}>
-          {TIPI.map(t=>(
-            <button key={t.key} type="button"
-              onClick={() => { setSelected(t.key); setViewMode('blocchi') }}
-              style={{ textAlign:'left', padding:'10px 12px', borderRadius:'8px', border:'none', cursor:'pointer', position:'relative', background:selected===t.key?BLU:'#F9FAFB', color:selected===t.key?'white':NERO, fontFamily:"'Inter',sans-serif" }}>
-              <div style={{ fontSize:'16px', marginBottom:'2px' }}>{t.icon}</div>
-              <div style={{ fontWeight:'700', fontSize:'11px' }}>{t.label}</div>
-              <div style={{ fontSize:'10px', opacity:.7, marginTop:'2px', lineHeight:1.3 }}>{t.desc}</div>
-              {templates[t.key]?.personalizzato && (
-                <div style={{ position:'absolute', top:'7px', right:'7px', width:'7px', height:'7px', borderRadius:'50%', background:selected===t.key?'rgba(255,255,255,0.8)':'#F59E0B' }}/>
-              )}
-            </button>
-          ))}
+      {/* ── Barra superiore: tipo email + azioni ── */}
+      <div style={{ display:'flex', alignItems:'center', gap:'8px', marginBottom:'12px', flexWrap:'wrap' }}>
+        {/* Tipo email tabs */}
+        <div style={{ display:'flex', gap:'4px', flex:1, flexWrap:'wrap' }}>
+          {TIPI.map(t => {
+            const isSel = selected===t.key
+            const isCustom = templates[t.key]?.personalizzato
+            return (
+              <button key={t.key} type="button"
+                onClick={() => { setSelected(t.key); setEditorMode('blocchi') }}
+                style={{
+                  display:'flex', alignItems:'center', gap:'6px',
+                  padding:'8px 14px', borderRadius:'8px', border:'none', cursor:'pointer',
+                  background: isSel ? BLU : '#F3F4F6',
+                  color: isSel ? '#fff' : '#374151',
+                  fontFamily:"'Inter',sans-serif", fontSize:'12px', fontWeight: isSel?'700':'500',
+                  transition:'all .15s', position:'relative',
+                }}>
+                <span style={{ fontSize:'14px' }}>{t.icon}</span>
+                <span>{t.label}</span>
+                {isCustom && (
+                  <span style={{ width:'6px', height:'6px', borderRadius:'50%', background: isSel?'rgba(255,255,255,0.7)':'#F59E0B', flexShrink:0 }}/>
+                )}
+              </button>
+            )
+          })}
         </div>
-        <div style={{ marginTop:'10px', padding:'8px 10px', background:'#FFFBEB', borderRadius:'7px', fontSize:'10px', color:'#92400E', lineHeight:1.4 }}>
-          🟡 = personalizzato per questo evento
+
+        {/* Azioni */}
+        <div style={{ display:'flex', gap:'6px', alignItems:'center', flexShrink:0 }}>
+          <button type="button" onClick={()=>setShowTestBar(!showTestBar)}
+            style={{ ...ghostBtn, gap:'4px' }}>
+            <Send size={12}/> Test
+          </button>
+          <button type="button" onClick={()=>setShowResetModal(true)}
+            style={{ ...ghostBtn, color:isPersonalizzato?'#DC2626':'#6B7280', fontWeight:isPersonalizzato?'700':'500' }}>
+            <RotateCcw size={11}/> Ripristina
+          </button>
+          <button type="button" onClick={save} disabled={saving}
+            style={{
+              display:'flex', alignItems:'center', gap:'5px',
+              padding:'7px 16px', borderRadius:'7px', border:'none', cursor:'pointer',
+              fontFamily:"'Inter',sans-serif",
+              background: saved ? '#16A34A' : BLU, color:'#fff',
+              fontWeight:'700', fontSize:'12px', transition:'background .2s',
+            }}>
+            {saved?<><CheckCircle size={13}/>Salvato</>:saving?<><Loader2 size={13} style={{animation:'spin 1s linear infinite'}}/>Salvo…</>:<><Save size={13}/>Salva</>}
+          </button>
         </div>
       </div>
 
-      {/* ── Area principale ── */}
-      <div style={{ flex:1, minWidth:0, display:'flex', gap:'12px' }}>
+      {/* ── Test email bar ── */}
+      {showTestBar && (
+        <div style={{ padding:'10px 14px', background:'#FFFBEB', border:'1px solid #FDE68A', borderRadius:'8px', marginBottom:'10px', display:'flex', alignItems:'center', gap:'10px' }}>
+          <Send size={13} style={{ color:'#D97706', flexShrink:0 }}/>
+          <span style={{ fontSize:'11px', fontWeight:'700', color:'#92400E', flexShrink:0 }}>Invia test a:</span>
+          <input value={testEmail} onChange={e=>setTestEmail(e.target.value)}
+            placeholder="email@esempio.it" type="email"
+            style={{ ...inp, width:'220px', padding:'6px 10px', fontSize:'12px' }}
+            onKeyDown={e=>e.key==='Enter'&&sendTest()}/>
+          <button type="button" onClick={sendTest} disabled={sending||!testEmail.trim()}
+            style={{ display:'flex', alignItems:'center', gap:'4px', padding:'6px 14px', borderRadius:'6px', border:'none', background:'#D97706', color:'#fff', cursor:'pointer', fontSize:'12px', fontWeight:'700', fontFamily:"'Inter',sans-serif" }}>
+            {sending?'Invio…':'Invia'}
+          </button>
+          <button type="button" onClick={()=>setShowTestBar(false)} style={{ background:'none', border:'none', cursor:'pointer', color:'#9CA3AF', fontSize:'16px', lineHeight:1 }}>×</button>
+        </div>
+      )}
 
-        {/* Editor */}
+      {/* ── Layout principale: editor | anteprima ── */}
+      <div style={{ display:'flex', gap:'12px', alignItems:'flex-start' }}>
+
+        {/* ═══ COLONNA EDITOR ═══ */}
         <div style={{ flex:1, minWidth:0, display:'flex', flexDirection:'column', gap:'8px' }}>
 
-          {/* Toolbar */}
-          <div style={{ background:'#fff', borderRadius:'10px', border:'1px solid #E5E7EB', padding:'10px 12px', display:'flex', gap:'5px', alignItems:'center', flexWrap:'wrap' }}>
-            {[['blocchi',<Layers size={12}/>, 'Blocchi'],['html',<Code size={12}/>,'HTML'],['preview',<EyeIcon size={12}/>,'Anteprima']].map(([m,ic,lb])=>(
-              <button key={m} type="button" onClick={()=>setViewMode(m)}
-                style={{ display:'flex', alignItems:'center', gap:'4px', padding:'5px 10px', borderRadius:'6px', border:'none', cursor:'pointer', background:viewMode===m?BLU:'#F5F5F5', color:viewMode===m?'#fff':'#555', fontSize:'11px', fontWeight:'600', fontFamily:"'Inter',sans-serif" }}>
-                {ic} {lb}
-              </button>
-            ))}
-            {viewMode==='preview' && (
-              <div style={{ display:'flex', border:'1px solid #E5E7EB', borderRadius:'6px', overflow:'hidden', marginLeft:'4px' }}>
-                {[['desktop',<Monitor size={12}/>],['mobile',<Smartphone size={12}/>]].map(([d,ic])=>(
-                  <button key={d} type="button" onClick={()=>setPreviewDevice(d)}
-                    style={{ padding:'5px 9px', border:'none', cursor:'pointer', background:previewDevice===d?'#F0F2F5':'#fff', color:previewDevice===d?NERO:'#9CA3AF', display:'flex', alignItems:'center' }}>
-                    {ic}
-                  </button>
-                ))}
-              </div>
-            )}
-            <div style={{ flex:1 }}/>
-            <button type="button" onClick={()=>setShowResetModal(true)}
-              style={{ display:'flex', alignItems:'center', gap:'4px', padding:'5px 10px', borderRadius:'6px', border:'1px solid #E5E7EB', cursor:'pointer', background:'white', fontSize:'11px', color:isPersonalizzato?'#DC2626':'#6B7280', fontFamily:"'Inter',sans-serif", fontWeight:isPersonalizzato?'700':'500' }}>
-              <RotateCcw size={11}/> Ripristina
-            </button>
-            <button type="button" onClick={save} disabled={saving}
-              style={{ display:'flex', alignItems:'center', gap:'4px', padding:'6px 14px', borderRadius:'6px', border:'none', cursor:'pointer', fontFamily:"'Inter',sans-serif", background:saved?'#16A34A':BLU, color:'white', fontWeight:'700', fontSize:'12px' }}>
-              {saved?<><CheckCircle size={12}/>Salvato</>:saving?'Salvo…':<><Save size={12}/>Salva</>}
-            </button>
+          {/* Oggetto email */}
+          <div style={{ background:'#fff', border:'1px solid #E5E7EB', borderRadius:'8px', padding:'10px 14px', display:'flex', alignItems:'center', gap:'10px' }}>
+            <span style={{ fontSize:'14px', flexShrink:0 }}>{tipoInfo?.icon}</span>
+            <span style={{ ...lbl, margin:0, flexShrink:0 }}>Oggetto</span>
+            <input value={current.oggetto||''} onChange={e=>update('oggetto',e.target.value)}
+              style={{ flex:1, border:'none', padding:'4px 0', fontSize:'13px', fontWeight:'600', background:'transparent', outline:'none', fontFamily:"'Inter',sans-serif", color:NERO, minWidth:0 }}
+              placeholder="Oggetto dell'email…"/>
           </div>
 
-          {/* Oggetto */}
-          {viewMode !== 'preview' && (
-            <div style={{ background:'#fff', border:'1px solid #E5E7EB', borderRadius:'8px', padding:'10px 12px', display:'flex', alignItems:'center', gap:'8px' }}>
-              <span style={{ fontSize:'10px', fontWeight:'800', color:'#9CA3AF', textTransform:'uppercase', letterSpacing:'.07em', flexShrink:0 }}>Oggetto</span>
-              <input value={current.oggetto||''} onChange={e=>update('oggetto',e.target.value)}
-                style={{ ...inp, border:'none', padding:'2px 0', fontSize:'13px', fontWeight:'500', background:'transparent', outline:'none' }}
-                placeholder="Oggetto dell'email…"/>
-            </div>
-          )}
-
-          {/* Header email configurabile */}
-          {viewMode !== 'preview' && (
-            <div style={{ background:'#fff', border:'1px solid #E5E7EB', borderRadius:'8px', overflow:'hidden' }}>
-              <div style={{ padding:'8px 12px', borderBottom:'1px solid #F3F4F6', display:'flex', alignItems:'center', gap:'8px' }}>
-                <span style={{ fontSize:'10px', fontWeight:'800', color:'#9CA3AF', textTransform:'uppercase', letterSpacing:'.07em' }}>Intestazione email</span>
+          {/* Intestazione email (collapsible) */}
+          <div style={{ background:'#fff', border:'1px solid #E5E7EB', borderRadius:'8px', overflow:'hidden' }}>
+            <button type="button" onClick={()=>setShowHeader(!showHeader)}
+              style={{ width:'100%', padding:'9px 14px', display:'flex', alignItems:'center', gap:'8px', background:'none', border:'none', cursor:'pointer', fontFamily:"'Inter',sans-serif" }}>
+              <Settings2 size={13} style={{ color:'#9CA3AF' }}/>
+              <span style={{ fontSize:'11px', fontWeight:'700', color:'#6B7280', flex:1, textAlign:'left' }}>Intestazione email</span>
+              {/* Mini preview */}
+              <div style={{ background:headerColore||BLU, borderRadius:'4px', padding:'3px 10px', display:'flex', alignItems:'center', gap:'6px' }}>
+                {logoUrl && <img src={logoUrl} style={{ height:'16px', objectFit:'contain' }} alt=""/>}
+                {headerTitolo && <span style={{ color:'rgba(255,255,255,0.9)', fontSize:'9px', fontWeight:'600' }}>{headerTitolo}</span>}
+                {!logoUrl && !headerTitolo && <span style={{ color:'rgba(255,255,255,0.4)', fontSize:'9px' }}>header</span>}
               </div>
-              <div style={{ padding:'10px 12px', display:'flex', flexDirection:'column', gap:'8px' }}>
+              <ChevronRight size={13} style={{ color:'#9CA3AF', transform:showHeader?'rotate(90deg)':'none', transition:'transform .15s' }}/>
+            </button>
+            {showHeader && (
+              <div style={{ padding:'10px 14px', borderTop:'1px solid #F3F4F6', display:'flex', flexDirection:'column', gap:'8px' }}>
                 {/* Preview live header */}
                 <div style={{ background:headerColore||BLU, borderRadius:'6px', padding:'10px 16px', display:'flex', alignItems:'center', gap:'10px' }}>
                   {logoUrl && <img src={logoUrl} style={{ height:`${logoAltezza}px`, objectFit:'contain', flexShrink:0, maxWidth:'60%' }} alt="logo"/>}
                   {headerTitolo && <span style={{ color:'rgba(255,255,255,0.9)', fontSize:`${titoloSize}px`, fontWeight:'700', fontFamily:'Inter,sans-serif' }}>{headerTitolo}</span>}
                   {!logoUrl && !headerTitolo && <span style={{ color:'rgba(255,255,255,0.4)', fontSize:'11px' }}>Anteprima header</span>}
                 </div>
-                {/* Dimensione logo */}
-                <div style={{ display:'flex', alignItems:'center', gap:'8px' }}>
-                  <label style={{ ...lbl, margin:0, flexShrink:0, minWidth:'80px' }}>Logo altezza</label>
-                  <input type="range" min={24} max={96} value={logoAltezza} onChange={e=>setLogoAltezza(+e.target.value)}
-                    style={{ flex:1 }}/>
-                  <span style={{ fontSize:'11px', color:'#6B7280', flexShrink:0, minWidth:'30px' }}>{logoAltezza}px</span>
+                <div style={{ display:'grid', gridTemplateColumns:'1fr 1fr', gap:'8px' }}>
+                  <div>
+                    <label style={lbl}>Logo altezza</label>
+                    <div style={{ display:'flex', alignItems:'center', gap:'6px' }}>
+                      <input type="range" min={24} max={96} value={logoAltezza} onChange={e=>setLogoAltezza(+e.target.value)} style={{ flex:1, accentColor:BLU }}/>
+                      <span style={{ fontSize:'11px', color:'#6B7280', minWidth:'30px' }}>{logoAltezza}px</span>
+                    </div>
+                  </div>
+                  <div>
+                    <label style={lbl}>Titolo size</label>
+                    <div style={{ display:'flex', alignItems:'center', gap:'6px' }}>
+                      <input type="range" min={10} max={28} value={titoloSize} onChange={e=>setTitoloSize(+e.target.value)} style={{ flex:1, accentColor:BLU }}/>
+                      <span style={{ fontSize:'11px', color:'#6B7280', minWidth:'30px' }}>{titoloSize}px</span>
+                    </div>
+                  </div>
                 </div>
-                {/* Dimensione titolo */}
-                <div style={{ display:'flex', alignItems:'center', gap:'8px' }}>
-                  <label style={{ ...lbl, margin:0, flexShrink:0, minWidth:'80px' }}>Titolo size</label>
-                  <input type="range" min={10} max={28} value={titoloSize} onChange={e=>setTitoloSize(+e.target.value)}
-                    style={{ flex:1 }}/>
-                  <span style={{ fontSize:'11px', color:'#6B7280', flexShrink:0, minWidth:'30px' }}>{titoloSize}px</span>
+                <div style={{ display:'flex', gap:'8px', alignItems:'flex-end' }}>
+                  <div style={{ flex:1 }}>
+                    <label style={lbl}>Colore sfondo</label>
+                    <div style={{ display:'flex', alignItems:'center', gap:'6px' }}>
+                      <input type="color" value={headerColore||BLU} onChange={e=>setHeaderColore(e.target.value)}
+                        style={{ width:'32px', height:'26px', border:'1px solid #E5E7EB', borderRadius:'4px', cursor:'pointer', padding:'1px', flexShrink:0 }}/>
+                      <input value={headerColore||BLU} onChange={e=>setHeaderColore(e.target.value)}
+                        style={{ ...inp, padding:'4px 8px', fontSize:'11px', fontFamily:'monospace', flex:1 }}/>
+                      <button type="button" onClick={()=>setHeaderColore(BLU)}
+                        style={{ background:'none', border:'none', cursor:'pointer', color:'#9CA3AF', fontSize:'10px', flexShrink:0 }}>reset</button>
+                    </div>
+                  </div>
+                  <div style={{ flex:1 }}>
+                    <label style={lbl}>Titolo header</label>
+                    <input value={headerTitolo||''} onChange={e=>setHeaderTitolo(e.target.value)}
+                      style={{ ...inp, padding:'5px 8px', fontSize:'12px' }}
+                      placeholder="es. {{nome_evento}}"/>
+                  </div>
                 </div>
-                {/* Colore sfondo */}
-                <div style={{ display:'flex', alignItems:'center', gap:'8px' }}>
-                  <label style={{ ...lbl, margin:0, flexShrink:0 }}>Colore</label>
-                  <input type="color" value={headerColore||BLU} onChange={e=>setHeaderColore(e.target.value)}
-                    style={{ width:'32px', height:'26px', border:'1px solid #E5E7EB', borderRadius:'4px', cursor:'pointer', padding:'1px', flexShrink:0 }}/>
-                  <input value={headerColore||BLU} onChange={e=>setHeaderColore(e.target.value)}
-                    style={{ ...inp, padding:'4px 8px', fontSize:'11px', fontFamily:'monospace', flex:1 }}/>
-                  <button type="button" onClick={()=>setHeaderColore(BLU)}
-                    style={{ background:'none', border:'none', cursor:'pointer', color:'#9CA3AF', fontSize:'10px', flexShrink:0 }}>reset</button>
-                </div>
-                {/* Titolo opzionale */}
-                <div style={{ display:'flex', alignItems:'center', gap:'8px' }}>
-                  <label style={{ ...lbl, margin:0, flexShrink:0 }}>Titolo</label>
-                  <input value={headerTitolo||''} onChange={e=>setHeaderTitolo(e.target.value)}
-                    style={{ ...inp, padding:'4px 8px', fontSize:'12px', flex:1 }}
-                    placeholder="es. {{nome_evento}} oppure Forum CNA 2026"/>
-                </div>
-                {/* Logo */}
                 <div>
                   <div style={{ display:'flex', alignItems:'center', gap:'6px', marginBottom:'6px' }}>
                     <label style={{ ...lbl, margin:0 }}>Logo</label>
@@ -669,31 +713,76 @@ export default function EventEmailTab({ eventoId }) {
                     </button>}
                   </div>
                   {showLogoPicker && (
-                    <div style={{ border:'1px solid #E5E7EB', borderRadius:'8px', overflow:'hidden', maxHeight:'260px', overflowY:'auto' }}>
+                    <div style={{ border:'1px solid #E5E7EB', borderRadius:'8px', overflow:'hidden', maxHeight:'200px', overflowY:'auto' }}>
                       <LogoPicker value={logoUrl} onChange={url=>{ setLogoUrl(url); setShowLogoPicker(false) }}/>
                     </div>
                   )}
                 </div>
               </div>
+            )}
+          </div>
+
+          {/* Toolbar: Blocchi/HTML + variabili */}
+          <div style={{ background:'#fff', borderRadius:'8px', border:'1px solid #E5E7EB', padding:'8px 12px', display:'flex', gap:'5px', alignItems:'center' }}>
+            {[['blocchi',<Layers size={12}/>, 'Blocchi'],['html',<Code size={12}/>,'HTML']].map(([m,ic,lb])=>(
+              <button key={m} type="button" onClick={()=>setEditorMode(m)}
+                style={{
+                  display:'flex', alignItems:'center', gap:'4px',
+                  padding:'5px 12px', borderRadius:'6px', border:'none', cursor:'pointer',
+                  background:editorMode===m?BLU:'#F5F5F5',
+                  color:editorMode===m?'#fff':'#555',
+                  fontSize:'11px', fontWeight:'600', fontFamily:"'Inter',sans-serif",
+                  transition:'all .15s',
+                }}>
+                {ic} {lb}
+              </button>
+            ))}
+            <div style={{ flex:1 }}/>
+            <button type="button" onClick={()=>setShowVars(!showVars)}
+              style={{ ...ghostBtn, fontSize:'10px', gap:'3px', color:showVars?BLU:'#6B7280', background:showVars?'#EEF3FF':'transparent' }}>
+              {'{ }'} Variabili
+            </button>
+          </div>
+
+          {/* Variabili dropdown */}
+          {showVars && (
+            <div style={{ background:'#EEF3FF', border:'1px solid #BFDBFE', borderRadius:'8px', padding:'10px 12px' }}>
+              <div style={{ display:'flex', flexWrap:'wrap', gap:'4px' }}>
+                {VARIABILI.map(v=>(
+                  <button key={v} type="button" onClick={()=>navigator.clipboard.writeText(v)} title="Copia"
+                    style={{ padding:'3px 8px', background:'#fff', border:'1px solid #BFDBFE', borderRadius:'4px', cursor:'pointer', fontSize:'10px', color:'#1d4ed8', fontFamily:'monospace' }}>
+                    {v}
+                  </button>
+                ))}
+                {formFields.length > 0 && formFields.map(f => {
+                  const v = `{{${f.colonna_db}}}`
+                  return (
+                    <button key={f.colonna_db} type="button" onClick={()=>navigator.clipboard.writeText(v)} title={f.label}
+                      style={{ padding:'3px 8px', background:'#FDF4FF', border:'1px solid #E9D5FF', borderRadius:'4px', cursor:'pointer', fontSize:'10px', color:'#7C3AED', fontFamily:'monospace' }}>
+                      {v}
+                    </button>
+                  )
+                })}
+              </div>
             </div>
           )}
 
-          {/* Blocchi canvas */}
-          {viewMode === 'blocchi' && (
-            <div style={{ display:'flex', gap:'10px' }}>
+          {/* ── EDITOR BLOCCHI ── */}
+          {editorMode === 'blocchi' && (
+            <div style={{ display:'flex', gap:'8px' }}>
               {/* Lista blocchi */}
-              <div style={{ width:'240px', flexShrink:0 }}>
+              <div style={{ flex:1, minWidth:0 }}>
                 {usaDefault && (
                   <div style={{ padding:'8px 12px', background:'#FFFBEB', border:'1px solid #FDE68A', borderRadius:'8px', marginBottom:'8px', fontSize:'11px', color:'#92400E', display:'flex', alignItems:'center', gap:'6px' }}>
                     <span>⚠️</span>
-                    <span>Stai visualizzando il <strong>template standard</strong>. Modifica e salva per personalizzare questa email per l’evento.</span>
+                    <span>Stai visualizzando il <strong>template standard</strong>. Modifica e salva per personalizzare.</span>
                   </div>
                 )}
                 {currBlocchi.length === 0 && (
                   <div style={{ textAlign:'center', padding:'40px 16px', color:'#9CA3AF', background:'#fff', border:'1px dashed #E5E7EB', borderRadius:'10px' }}>
                     <LayoutTemplate size={28} style={{ marginBottom:'8px', opacity:.3 }}/>
                     <p style={{ margin:0, fontSize:'13px', fontWeight:'600' }}>Canvas vuoto</p>
-                    <p style={{ margin:'3px 0 0', fontSize:'11px' }}>Usa la barra qui sopra per aggiungere blocchi</p>
+                    <p style={{ margin:'3px 0 0', fontSize:'11px' }}>Aggiungi blocchi con il pulsante qui sotto</p>
                   </div>
                 )}
                 {currBlocchi.map((b,i) => {
@@ -703,8 +792,8 @@ export default function EventEmailTab({ eventoId }) {
                     <div key={b.id||i} {...dragHandlers(i)}
                       onClick={()=>setSelectedBlock(isSel?null:i)}
                       style={{ border:`2px solid ${isSel?BLU:'transparent'}`, borderRadius:'8px', background:'#fff', marginBottom:'4px', cursor:'pointer', boxShadow:isSel?`0 0 0 3px rgba(0,61,165,0.08)`:'0 1px 3px rgba(0,0,0,0.05)', transition:'all .12s', overflow:'hidden' }}>
-                      <div style={{ display:'flex', alignItems:'center', gap:'5px', padding:'8px 10px' }}>
-                        <div {...{draggable:false, onMouseDown:e=>e.stopPropagation()}} style={{ cursor:'grab', color:'#D1D5DB', display:'flex' }}>
+                      <div style={{ display:'flex', alignItems:'center', gap:'5px', padding:'7px 10px' }}>
+                        <div style={{ cursor:'grab', color:'#D1D5DB', display:'flex' }}>
                           <GripVertical size={13}/>
                         </div>
                         <span style={{ color:BLU, display:'flex' }}>{info.icon}</span>
@@ -716,7 +805,7 @@ export default function EventEmailTab({ eventoId }) {
                         </div>
                       </div>
                       {!isSel && (
-                        <div style={{ padding:'2px 10px 7px 29px', fontSize:'10px', color:'#9CA3AF', overflow:'hidden', whiteSpace:'nowrap', textOverflow:'ellipsis' }}>
+                        <div style={{ padding:'2px 10px 6px 29px', fontSize:'10px', color:'#9CA3AF', overflow:'hidden', whiteSpace:'nowrap', textOverflow:'ellipsis' }}>
                           {b.tipo==='titolo'&&(b.testo||'(vuoto)')}
                           {b.tipo==='testo'&&((b.html||'').replace(/<[^>]+>/g,'').slice(0,55)||'(vuoto)')}
                           {b.tipo==='bottone'&&(b.testo||'Bottone')}
@@ -734,15 +823,15 @@ export default function EventEmailTab({ eventoId }) {
                   )
                 })}
 
-                {/* Aggiungi blocco */}
+                {/* Aggiungi blocco (compact grid) */}
                 <div style={{ background:'#F9FAFB', border:'1.5px dashed #E5E7EB', borderRadius:'8px', padding:'10px 12px', marginTop:'4px' }}>
-                  <p style={{ margin:'0 0 8px', fontSize:'9px', fontWeight:'800', color:'#9CA3AF', textTransform:'uppercase', letterSpacing:'.08em' }}>
+                  <p style={{ margin:'0 0 6px', fontSize:'9px', fontWeight:'800', color:'#9CA3AF', textTransform:'uppercase', letterSpacing:'.08em' }}>
                     + Aggiungi blocco
                   </p>
                   <div style={{ display:'flex', flexWrap:'wrap', gap:'4px' }}>
                     {BLOCK_TYPES.map(bt=>(
                       <button key={bt.tipo} type="button" onClick={()=>addBlock(bt.tipo)}
-                        style={{ display:'flex', alignItems:'center', gap:'4px', padding:'5px 9px', background:'#fff', border:'1px solid #E5E7EB', borderRadius:'6px', cursor:'pointer', fontSize:'11px', color:'#374151', fontFamily:"'Inter',sans-serif", fontWeight:'500' }}>
+                        style={{ display:'flex', alignItems:'center', gap:'4px', padding:'4px 8px', background:'#fff', border:'1px solid #E5E7EB', borderRadius:'5px', cursor:'pointer', fontSize:'10px', color:'#374151', fontFamily:"'Inter',sans-serif", fontWeight:'500' }}>
                         <span style={{ color:BLU }}>{bt.icon}</span> {bt.label}
                       </button>
                     ))}
@@ -750,73 +839,109 @@ export default function EventEmailTab({ eventoId }) {
                 </div>
               </div>
 
-              {/* Pannello proprietà blocco */}
+              {/* Pannello proprietà blocco selezionato */}
               {selectedBl && (
-                <div style={{ flex:1, minWidth:0, background:'#fff', border:'1px solid #E5E7EB', borderRadius:'10px', overflow:'hidden', alignSelf:'flex-start' }}>
-                  <div style={{ padding:'9px 12px', borderBottom:'1px solid #E5E7EB', display:'flex', alignItems:'center', justifyContent:'space-between', background:'#F9FAFB' }}>
+                <div style={{ width:'280px', flexShrink:0, background:'#fff', border:'1px solid #E5E7EB', borderRadius:'8px', overflow:'hidden', alignSelf:'flex-start', maxHeight:'70vh', display:'flex', flexDirection:'column' }}>
+                  <div style={{ padding:'9px 12px', borderBottom:'1px solid #E5E7EB', display:'flex', alignItems:'center', justifyContent:'space-between', background:'#F9FAFB', flexShrink:0 }}>
                     <div style={{ display:'flex', alignItems:'center', gap:'5px' }}>
                       <span style={{ color:BLU, display:'flex' }}>{BLOCK_TYPES.find(t=>t.tipo===selectedBl.tipo)?.icon}</span>
                       <span style={{ fontSize:'11px', fontWeight:'700', color:NERO }}>{BLOCK_TYPES.find(t=>t.tipo===selectedBl.tipo)?.label}</span>
                     </div>
                     <button type="button" onClick={()=>setSelectedBlock(null)} style={{ background:'none', border:'none', cursor:'pointer', color:'#9CA3AF' }}><X size={13}/></button>
                   </div>
-                  <div style={{ padding:'12px', maxHeight:'70vh', overflowY:'auto' }}>
+                  <div style={{ padding:'12px', overflowY:'auto', flex:1 }}>
                     <BlockProps block={selectedBl} onChange={nb=>updateBlock(selectedBlock,nb)}/>
                   </div>
                 </div>
               )}
-
-              {/* Variabili - sempre visibili */}
-              <div style={{ width:'150px', flexShrink:0, background:'#EEF3FF', border:'1px solid #BFDBFE', borderRadius:'10px', padding:'10px 12px', alignSelf:'flex-start', maxHeight:'70vh', overflowY:'auto' }}>
-                  <p style={{ margin:'0 0 8px', fontSize:'9px', fontWeight:'800', color:'#1d4ed8', textTransform:'uppercase', letterSpacing:'.07em' }}>Variabili</p>
-                  <div style={{ display:'flex', flexDirection:'column', gap:'3px' }}>
-                    {VARIABILI.map(v=>(
-                      <button key={v} type="button" onClick={()=>navigator.clipboard.writeText(v)} title="Copia"
-                        style={{ padding:'3px 7px', background:'#fff', border:'1px solid #BFDBFE', borderRadius:'4px', cursor:'pointer', fontSize:'10px', color:'#1d4ed8', fontFamily:'monospace', textAlign:'left' }}>
-                        {v}
-                      </button>
-                    ))}
-                    {formFields.length > 0 && (
-                      <>
-                        <div style={{ borderTop:'1px solid #BFDBFE', margin:'4px 0' }}/>
-                        <p style={{ margin:'0 0 2px', fontSize:'9px', fontWeight:'800', color:'#7C3AED', textTransform:'uppercase', letterSpacing:'.07em' }}>Campi extra</p>
-                        {formFields.map(f => {
-                          const v = `{{${f.colonna_db}}}`
-                          return (
-                            <button key={f.colonna_db} type="button" onClick={()=>navigator.clipboard.writeText(v)} title={f.label}
-                              style={{ padding:'3px 7px', background:'#FDF4FF', border:'1px solid #E9D5FF', borderRadius:'4px', cursor:'pointer', fontSize:'10px', color:'#7C3AED', fontFamily:'monospace', textAlign:'left' }}>
-                              {v}
-                              <span style={{ display:'block', fontSize:'9px', color:'#9CA3AF', fontFamily:'Inter,sans-serif', fontWeight:'400', overflow:'hidden', textOverflow:'ellipsis', whiteSpace:'nowrap' }}>{f.label}</span>
-                            </button>
-                          )
-                        })}
-                      </>
-                    )}
-                  </div>
-                </div>
             </div>
           )}
 
-          {/* HTML editor */}
-          {viewMode === 'html' && (
-            <div style={{ background:'#fff', border:'1px solid #E5E7EB', borderRadius:'10px', padding:'12px' }}>
+          {/* ── EDITOR HTML ── */}
+          {editorMode === 'html' && (
+            <div style={{ background:'#fff', border:'1px solid #E5E7EB', borderRadius:'8px', padding:'12px' }}>
               <label style={lbl}>Corpo email — HTML</label>
               <textarea value={current.corpo_html||''} onChange={e=>update('corpo_html',e.target.value)}
                 rows={20} style={{ ...inp, fontFamily:'monospace', fontSize:'11px', resize:'vertical', lineHeight:1.6 }}/>
             </div>
           )}
+        </div>
 
-          {/* Anteprima */}
-          {viewMode === 'preview' && (
-            <div style={{ background:'#fff', border:'1px solid #E5E7EB', borderRadius:'10px', padding:'14px' }}>
-              <div style={{ marginBottom:'10px', padding:'8px 12px', background:'#F8F9FF', borderRadius:'7px', fontSize:'12px', fontFamily:"'Inter',sans-serif" }}>
-                <strong>Oggetto:</strong> {replacePreview(current.oggetto||'—', eventoTitolo)}
+        {/* ═══ PANNELLO ANTEPRIMA (sempre visibile) ═══ */}
+        <div style={{
+          width: previewCollapsed ? '42px' : (previewDevice==='mobile' ? '400px' : '440px'),
+          flexShrink:0, display:'flex', flexDirection:'column',
+          background:'#fff', border:'1px solid #E5E7EB', borderRadius:'10px',
+          overflow:'hidden', transition:'width .25s ease',
+          alignSelf:'flex-start', position:'sticky', top:'12px',
+          maxHeight:'calc(100vh - 160px)',
+        }}>
+          {/* Header anteprima */}
+          <div style={{
+            padding: previewCollapsed ? '10px 0' : '8px 12px',
+            borderBottom: previewCollapsed ? 'none' : '1px solid #E5E7EB',
+            display:'flex', alignItems:'center', gap:'6px',
+            justifyContent: previewCollapsed ? 'center' : 'space-between',
+            background:'#FAFBFC', flexShrink:0,
+          }}>
+            {previewCollapsed ? (
+              <button type="button" onClick={()=>setPreviewCollapsed(false)}
+                style={{ background:'none', border:'none', cursor:'pointer', color:BLU, display:'flex', flexDirection:'column', alignItems:'center', gap:'4px' }}>
+                <PanelRightOpen size={16}/>
+                <span style={{ fontSize:'9px', fontWeight:'700', writingMode:'vertical-lr', letterSpacing:'.05em', color:'#6B7280' }}>ANTEPRIMA</span>
+              </button>
+            ) : (
+              <>
+                <div style={{ display:'flex', alignItems:'center', gap:'6px' }}>
+                  <EyeIcon size={13} style={{ color:BLU }}/>
+                  <span style={{ fontSize:'11px', fontWeight:'700', color:NERO }}>Anteprima</span>
+                  <span style={{ fontSize:'9px', color:'#9CA3AF', background:'#F3F4F6', padding:'2px 6px', borderRadius:'4px' }}>dati di esempio</span>
+                </div>
+                <div style={{ display:'flex', gap:'2px', alignItems:'center' }}>
+                  <div style={{ display:'flex', border:'1px solid #E5E7EB', borderRadius:'5px', overflow:'hidden', marginRight:'4px' }}>
+                    {[['desktop',<Monitor size={11}/>],['mobile',<Smartphone size={11}/>]].map(([d,ic])=>(
+                      <button key={d} type="button" onClick={()=>setPreviewDevice(d)}
+                        style={{ padding:'4px 8px', border:'none', cursor:'pointer', background:previewDevice===d?'#F0F2F5':'#fff', color:previewDevice===d?NERO:'#9CA3AF', display:'flex', alignItems:'center' }}>
+                        {ic}
+                      </button>
+                    ))}
+                  </div>
+                  <button type="button" onClick={()=>setPreviewCollapsed(true)}
+                    style={{ background:'none', border:'none', cursor:'pointer', color:'#9CA3AF', display:'flex', padding:'4px' }}>
+                    <PanelRightClose size={14}/>
+                  </button>
+                </div>
+              </>
+            )}
+          </div>
+
+          {/* Contenuto anteprima */}
+          {!previewCollapsed && (
+            <>
+              {/* Metadati email */}
+              <div style={{ padding:'8px 12px', borderBottom:'1px solid #F3F4F6', background:'#FAFBFC', fontSize:'11px', flexShrink:0 }}>
+                <div style={{ color:'#6B7280', marginBottom:'2px' }}>
+                  <span style={{ fontWeight:'700', color:'#374151' }}>Da:</span> CNA Roma &lt;marketing@cnaroma.it&gt;
+                </div>
+                <div style={{ color:'#374151', fontWeight:'500' }}>
+                  <span style={{ fontWeight:'700' }}>Oggetto:</span> {replacePreview(current.oggetto||'(nessun oggetto)', eventoTitolo)}
+                </div>
               </div>
-              <div style={{ maxWidth:previewDevice==='mobile'?'375px':'100%', margin:'0 auto', border:'1px solid #E5E7EB', borderRadius:'8px', overflow:'hidden' }}>
-                <iframe srcDoc={getPreviewHtml()} style={{ width:'100%', height:'680px', border:'none', display:'block' }} title="Anteprima email" sandbox="allow-same-origin"/>
+              {/* Iframe preview */}
+              <div style={{ flex:1, overflowY:'auto', padding:'10px', background:'#F0F2F5' }}>
+                <div style={{
+                  maxWidth: previewDevice==='mobile' ? '375px' : '100%',
+                  margin:'0 auto',
+                  background:'#fff', borderRadius:'8px', overflow:'hidden',
+                  boxShadow:'0 2px 12px rgba(0,0,0,0.08)',
+                }}>
+                  <iframe
+                    srcDoc={getPreviewHtml()}
+                    style={{ width:'100%', height:'600px', border:'none', display:'block' }}
+                    title="Anteprima email" sandbox="allow-same-origin"/>
+                </div>
               </div>
-              <p style={{ fontSize:'10px', color:'#9CA3AF', marginTop:'6px', fontFamily:"'Inter',sans-serif" }}>Anteprima con dati di esempio</p>
-            </div>
+            </>
           )}
         </div>
       </div>
@@ -855,6 +980,7 @@ export default function EventEmailTab({ eventoId }) {
   )
 }
 
-const inp    = { width:'100%', padding:'7px 10px', border:'1px solid #E5E7EB', borderRadius:'6px', fontSize:'12px', fontFamily:"'Inter',sans-serif", outline:'none', color:NERO, background:'#fff', boxSizing:'border-box' }
+const inp    = { width:'100%', padding:'7px 10px', border:'1px solid #E5E7EB', borderRadius:'6px', fontSize:'12px', fontFamily:"'Inter',sans-serif", outline:'none', color:'#0A0A0A', background:'#fff', boxSizing:'border-box' }
 const lbl    = { display:'block', fontSize:'10px', fontWeight:'800', color:'#9CA3AF', textTransform:'uppercase', letterSpacing:'.07em', marginBottom:'4px' }
 const btnTiny= { padding:'3px 4px', background:'#fff', border:'1px solid #E5E7EB', borderRadius:'4px', cursor:'pointer', display:'flex', alignItems:'center', justifyContent:'center', color:'#374151' }
+const ghostBtn = { display:'flex', alignItems:'center', gap:'3px', padding:'5px 10px', borderRadius:'6px', border:'1px solid #E5E7EB', cursor:'pointer', background:'#fff', fontSize:'11px', fontWeight:'600', fontFamily:"'Inter',sans-serif", color:'#6B7280' }
