@@ -429,7 +429,7 @@ export default function EmailPage() {
         </div>
 
         {/* COL 2: Editor blocchi */}
-        <div style={{ flex:1, minWidth:0, display:'flex', flexDirection:'column', overflow:'hidden' }}>
+        <div style={{ flex:1, minWidth:0, display:'flex', flexDirection:'column' }}>
           {/* Toolbar */}
           <div style={{ display:'flex', gap:'4px', alignItems:'center', marginBottom:'8px', flexShrink:0 }}>
             {[['blocchi',<Layers size={11}/>,'Blocchi'],['html',<Code2 size={11}/>,'HTML']].map(([m,ic,lb])=>(

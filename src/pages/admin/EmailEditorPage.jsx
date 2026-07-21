@@ -499,7 +499,7 @@ export default function EmailEditorPage() {
         </div>
 
         {/* COL 2: Editor blocchi */}
-        <div style={{flex:1,minWidth:0,display:'flex',flexDirection:'column',overflow:'hidden',borderRight:'none'}}>
+        <div style={{flex:1,minWidth:0,display:'flex',flexDirection:'column',borderRight:'none'}}>
 
           {/* Toolbar modo */}
           <div style={{display:'flex',gap:'4px',alignItems:'center',padding:'8px 12px',borderBottom:'1px solid #E5E7EB',flexShrink:0,background:'#FAFBFC'}}>
@@ -529,7 +529,7 @@ export default function EmailEditorPage() {
                 const dh2 = !isSel ? dragHandlers(i) : {}
                 return (
                   <div key={b.id||i} {...dh2}
-                    style={{border:`2px solid ${isSel?BLU:'#E5E7EB'}`,borderRadius:'8px',background:'#fff',boxShadow:isSel?'0 0 0 3px rgba(0,61,165,0.07)':'none',transition:'border-color .1s',overflow:'hidden'}}>
+                    style={{border:`2px solid ${isSel?BLU:'#E5E7EB'}`,borderRadius:'8px',background:'#fff',boxShadow:isSel?'0 0 0 3px rgba(0,61,165,0.07)':'none',transition:'border-color .1s',overflow:isSel?'visible':'hidden'}}>
                     <div onClick={()=>setSelectedBlock(isSel?null:i)}
                       style={{display:'flex',alignItems:'center',gap:'6px',padding:'8px 10px',cursor:'pointer'}}>
                       <GripVertical size={12} style={{color:'#D1D5DB',cursor:'grab',flexShrink:0}}/>
@@ -543,7 +543,7 @@ export default function EmailEditorPage() {
                     </div>
                     {isSel && selectedBl && (
                       <div onClick={e=>e.stopPropagation()} onMouseDown={e=>e.stopPropagation()} onPointerDown={e=>e.stopPropagation()}
-                        style={{padding:'0 10px 10px',borderTop:'1px solid #EEF3FF'}}>
+                        style={{padding:'10px 10px 14px',borderTop:'1px solid #EEF3FF',background:'#fff'}}>
                         <BlockProps block={selectedBl} onChange={nb=>updateBlock(i,nb)}/>
                       </div>
                     )}
