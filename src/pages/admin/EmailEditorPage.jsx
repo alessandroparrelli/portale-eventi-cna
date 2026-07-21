@@ -526,8 +526,9 @@ export default function EmailEditorPage() {
               {blocchi.map((b,i)=>{
                 const info = BLOCK_TYPES.find(t=>t.tipo===b.tipo)||{}
                 const isSel = selectedBlock===i
+                const dh2 = !isSel ? dragHandlers(i) : {}
                 return (
-                  <div key={b.id||i} {...dragHandlers(i)}
+                  <div key={b.id||i} {...dh2}
                     style={{border:`2px solid ${isSel?BLU:'#E5E7EB'}`,borderRadius:'8px',background:'#fff',boxShadow:isSel?'0 0 0 3px rgba(0,61,165,0.07)':'none',transition:'border-color .1s',overflow:'hidden'}}>
                     <div onClick={()=>setSelectedBlock(isSel?null:i)}
                       style={{display:'flex',alignItems:'center',gap:'6px',padding:'8px 10px',cursor:'pointer'}}>
@@ -541,7 +542,7 @@ export default function EmailEditorPage() {
                       </div>
                     </div>
                     {isSel && selectedBl && (
-                      <div onClick={e=>e.stopPropagation()} onMouseDown={e=>e.stopPropagation()}
+                      <div onClick={e=>e.stopPropagation()} onMouseDown={e=>e.stopPropagation()} onPointerDown={e=>e.stopPropagation()}
                         style={{padding:'0 10px 10px',borderTop:'1px solid #EEF3FF'}}>
                         <BlockProps block={selectedBl} onChange={nb=>updateBlock(i,nb)}/>
                       </div>
