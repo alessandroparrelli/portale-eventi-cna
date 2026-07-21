@@ -198,7 +198,7 @@ function BlockProps({ block, onChange }) {
       {numField('Dimensione','size',24,'px',12,60)}{colorField('Colore','colore',NERO)}{alignField()}
     </>
     case 'testo': return <>
-      <div style={{marginBottom:'8px'}}><label style={lbl}>Testo</label><RichEditor value={block.html||''} onChange={html=>set('html',html)} minHeight="120px"/></div>
+      <div style={{marginBottom:'8px'}}><label style={lbl}>Testo</label><RichEditor value={block.html||''} onChange={html=>set('html',html)} minHeight="200px"/></div>
       {numField('Dimensione','size',15,'px',11,22)}{colorField('Colore','colore','#374151')}
     </>
     case 'bottone': return <>
@@ -224,8 +224,8 @@ function BlockProps({ block, onChange }) {
       <div style={{marginTop:'8px'}}>{colorField('Colore sfondo','bg',BLU)}{colorField('Colore testo','coloreTesto','#ffffff')}{numField('Padding','padding',48,'px',16,96)}</div>
     </>
     case 'colonne': return <>
-      <div style={{marginBottom:'8px'}}><label style={lbl}>Colonna sinistra</label><RichEditor value={block.sinistra||''} onChange={v=>set('sinistra',v)} minHeight="80px"/></div>
-      <div style={{marginBottom:'8px'}}><label style={lbl}>Colonna destra</label><RichEditor value={block.destra||''} onChange={v=>set('destra',v)} minHeight="80px"/></div>
+      <div style={{marginBottom:'8px'}}><label style={lbl}>Colonna sinistra</label><RichEditor value={block.sinistra||''} onChange={v=>set('sinistra',v)} minHeight="120px"/></div>
+      <div style={{marginBottom:'8px'}}><label style={lbl}>Colonna destra</label><RichEditor value={block.destra||''} onChange={v=>set('destra',v)} minHeight="120px"/></div>
       {numField('Gap','gap',24,'px',0,48)}
     </>
     case 'info_box': return <>{colorField('Sfondo','bg','#F0F7FF')}{colorField('Bordo','bordo','#BFDBFE')}{numField('Radius','radius',10,'px',0,24)}</>
@@ -499,7 +499,7 @@ export default function EmailEditorPage() {
         </div>
 
         {/* COL 2: Editor blocchi */}
-        <div style={{flex:1,minWidth:0,display:'flex',flexDirection:'column',borderRight:'none'}}>
+        <div style={{flex:1,minWidth:0,display:'flex',flexDirection:'column',overflow:'hidden',borderRight:'none'}}>
 
           {/* Toolbar modo */}
           <div style={{display:'flex',gap:'4px',alignItems:'center',padding:'8px 12px',borderBottom:'1px solid #E5E7EB',flexShrink:0,background:'#FAFBFC'}}>
@@ -528,7 +528,7 @@ export default function EmailEditorPage() {
                 const isSel = selectedBlock===i
                 const dh2 = !isSel ? dragHandlers(i) : {}
                 return (
-                  <div key={b.id||i} {...dh2}
+                  <div key={b.id||i} {...dh2} ref={isSel ? (el => { if(el) setTimeout(()=>el.scrollIntoView({behavior:'smooth',block:'nearest'}),50) }) : null}
                     style={{border:`2px solid ${isSel?BLU:'#E5E7EB'}`,borderRadius:'8px',background:'#fff',boxShadow:isSel?'0 0 0 3px rgba(0,61,165,0.07)':'none',transition:'border-color .1s',overflow:'hidden'}}>
                     <div onClick={()=>setSelectedBlock(isSel?null:i)}
                       style={{display:'flex',alignItems:'center',gap:'6px',padding:'8px 10px',cursor:'pointer'}}>
