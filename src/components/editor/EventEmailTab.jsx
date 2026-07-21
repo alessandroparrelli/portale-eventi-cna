@@ -338,6 +338,7 @@ export default function EventEmailTab({ eventoId }) {
   const [previewDevice,   setPreviewDevice]   = useState('desktop')
   const [loading,         setLoading]         = useState(true)
   const [eventoTitolo,    setEventoTitolo]    = useState('')
+  const [teatroAbilitato, setTeatroAbilitato] = useState(false)
   const [showResetModal,  setShowResetModal]  = useState(false)
   const [resetting,       setResetting]       = useState(false)
   const [selectedBlock,   setSelectedBlock]   = useState(null)
@@ -372,8 +373,9 @@ export default function EventEmailTab({ eventoId }) {
   }, [eventoId])
 
   async function fetchEventoTitolo() {
-    const { data } = await supabase.from('events').select('titolo').eq('id', eventoId).single()
+    const { data } = await supabase.from('events').select('titolo, teatro_abilitato').eq('id', eventoId).single()
     if (data?.titolo) setEventoTitolo(data.titolo)
+    if (data?.teatro_abilitato) setTeatroAbilitato(true)
   }
 
   useEffect(() => { setSelectedBlock(null) }, [selected])
@@ -518,6 +520,12 @@ export default function EventEmailTab({ eventoId }) {
   const selectedBl = selectedBlock !== null ? currBlocchi[selectedBlock] : null
   const tipoInfo = TIPI.find(t=>t.key===selected)
 
+  // Lista tipi email: aggiunge posto_teatro se il teatro è abilitato
+  const tipiVisibili = [
+    ...TIPI,
+    ...(teatroAbilitato ? [{ key:'posto_teatro', label:'Posto Teatro', icon:'', desc:'Inviata con numero posto e QR' }] : []),
+  ]
+
   if (loading) return (
     <div style={{ padding:'60px', textAlign:'center', color:'#9CA3AF', fontSize:'14px' }}>Caricamento</div>
   )
@@ -531,7 +539,7 @@ export default function EventEmailTab({ eventoId }) {
       {/* TOPBAR */}
       <div style={{ display:'flex', alignItems:'center', gap:'8px', padding:'8px 0 10px', borderBottom:'1px solid #E5E7EB', flexShrink:0 }}>
         <div style={{ display:'flex', gap:'3px', flex:1 }}>
-          {TIPI.map(t => {
+          {tipiVisibili.map(t => {
             const isSel = selected === t.key
             const isCustom = templates[t.key]?.personalizzato
             return (
