@@ -409,6 +409,24 @@ export default function EmailPage() {
               <span style={{ fontSize:'12px', fontWeight:'600', color:selectedBlock==='header'?BLU:'#374151', flex:1 }}>Intestazione email</span>
               <div style={{ background:headerConfig.sfondo||BLU, borderRadius:'3px', width:'20px', height:'14px', flexShrink:0 }}/>
             </div>
+            {/* Variabili */}
+            <div style={{ marginTop:'6px' }}>
+              <button type="button" onClick={()=>setShowVars(!showVars)}
+                style={{ width:'100%', padding:'6px 8px', display:'flex', alignItems:'center', justifyContent:'space-between', background:'#F9FAFB', border:'1px solid #E5E7EB', borderRadius:'7px', cursor:'pointer', fontFamily:"'Inter',sans-serif" }}>
+                <span style={{ fontSize:'10px', fontWeight:'800', color:'#6B7280', textTransform:'uppercase', letterSpacing:'.07em' }}>{'{ } Variabili'}</span>
+                <ChevronRight size={11} style={{ color:'#9CA3AF', transform:showVars?'rotate(90deg)':'none', transition:'transform .15s' }}/>
+              </button>
+              {showVars && (
+                <div style={{ padding:'6px 0 2px', display:'flex', flexWrap:'wrap', gap:'3px' }}>
+                  {VARIABILI.map(v=>(
+                    <button key={v} type="button" onClick={()=>navigator.clipboard.writeText(v)} title="Copia"
+                      style={{ padding:'2px 6px', background:'#EEF3FF', border:'1px solid #BFDBFE', borderRadius:'4px', cursor:'pointer', fontSize:'9px', color:'#1d4ed8', fontFamily:'monospace' }}>
+                      {v}
+                    </button>
+                  ))}
+                </div>
+              )}
+            </div>
           </div>
           <div style={{ flex:1, overflowY:'auto', padding:'8px 12px', display:'flex', flexDirection:'column', gap:'3px' }}>
             {currBlocchi.length === 0 && (
