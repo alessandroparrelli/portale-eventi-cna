@@ -475,7 +475,7 @@ function buildHtml(ev, url, blocchi, opts, socialLinks) {
         const cOra  = b.colore_orari  || cp
         const bgBox = b.sfondo || '#ffffff'
         const cBord = b.cornice_colore || '#E5E7EB'
-        const bSpess = b.cornice_spessore ? Math.round(b.cornice_spessore) : 1
+        const bSpess = 1  // bordo sempre sottile (1px)
         const bRad  = b.cornice_radius || 0
         const bStyle = b.cornice_stile === 'dotted' ? 'dotted' : b.cornice_stile === 'dashed' ? 'dashed' : 'solid'
 
@@ -502,8 +502,8 @@ function buildHtml(ev, url, blocchi, opts, socialLinks) {
 
           } else if (v.tipo === 'sessione' || v.tipo === 'intermezzo' || v.tipo === 'modera') {
             const relatori = v.relatori || []
-            const bgSess = v.tipo === 'intermezzo' ? '#F9F0FF' : (v.tipo === 'modera' ? '#F0FFF4' : bgBox)
-            const colSess = v.tipo === 'intermezzo' ? '#7C3AED' : (v.tipo === 'modera' ? '#065F46' : cSess)
+            const bgSess = v.tipo === 'intermezzo' ? '#F9F0FF' : bgBox
+            const colSess = v.tipo === 'intermezzo' ? '#7C3AED' : cSess
 
             let relatoriHtml = ''
             if (relatori.length) {
