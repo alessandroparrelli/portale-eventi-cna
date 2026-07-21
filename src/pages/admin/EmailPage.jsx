@@ -184,7 +184,7 @@ function BlockProps({ block, onChange }) {
       {numField('Dimensione','size',24,'px',12,60)}{colorField('Colore','colore',NERO)}{alignField()}
     </>
     case 'testo': return <>
-      <div style={{marginBottom:'8px'}}><label style={lbl}>Testo</label><RichEditor value={block.html||''} onChange={html=>set('html',html)} minHeight="200px"/></div>
+      <div style={{marginBottom:'8px'}}><label style={lbl}>Testo</label><RichEditor value={block.html||''} onChange={html=>set('html',html)} minHeight="300px"/></div>
       {numField('Dimensione','size',15,'px',11,22)}{colorField('Colore','colore','#374151')}
     </>
     case 'bottone': return <>
@@ -210,8 +210,8 @@ function BlockProps({ block, onChange }) {
       <div style={{marginTop:'8px'}}>{colorField('Sfondo','bg',BLU)}{colorField('Testo','coloreTesto','#ffffff')}{numField('Padding','padding',48,'px',16,96)}</div>
     </>
     case 'colonne': return <>
-      <div style={{marginBottom:'8px'}}><label style={lbl}>Sinistra</label><RichEditor value={block.sinistra||''} onChange={v=>set('sinistra',v)} minHeight="120px"/></div>
-      <div style={{marginBottom:'8px'}}><label style={lbl}>Destra</label><RichEditor value={block.destra||''} onChange={v=>set('destra',v)} minHeight="120px"/></div>
+      <div style={{marginBottom:'8px'}}><label style={lbl}>Sinistra</label><RichEditor value={block.sinistra||''} onChange={v=>set('sinistra',v)} minHeight="300px"/></div>
+      <div style={{marginBottom:'8px'}}><label style={lbl}>Destra</label><RichEditor value={block.destra||''} onChange={v=>set('destra',v)} minHeight="300px"/></div>
       {numField('Gap','gap',24,'px',0,48)}
     </>
     case 'info_box': return <>{colorField('Sfondo','bg','#F0F7FF')}{colorField('Bordo','bordo','#BFDBFE')}{numField('Radius','radius',10,'px',0,24)}</>
@@ -477,7 +477,7 @@ export default function EmailPage() {
                     </div>
                     {isSel && selectedBl && (
                       <div onClick={e=>e.stopPropagation()} onMouseDown={e=>e.stopPropagation()} onPointerDown={e=>e.stopPropagation()}
-                        style={{ padding:'0 10px 10px', borderTop:'1px solid #EEF3FF' }}>
+                        style={{ padding:'10px 10px 14px', borderTop:'1px solid #EEF3FF', background:'#fff', overflowY:'auto', maxHeight:'70vh' }}>
                         <BlockProps block={selectedBl} onChange={nb=>updateBlock(i,nb)}/>
                       </div>
                     )}
