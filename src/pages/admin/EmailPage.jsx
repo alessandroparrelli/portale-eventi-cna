@@ -354,10 +354,18 @@ export default function EmailPage() {
   if (loading) return <div style={{padding:'80px',textAlign:'center',color:'#9CA3AF',fontSize:'14px',fontFamily:'Inter,sans-serif'}}>Caricamento...</div>
 
   return (
-    <div style={{ fontFamily:"'Inter',sans-serif", display:'flex', flexDirection:'column', height:'calc(100vh - 60px)', overflow:'hidden' }}>
+    <div style={{
+      fontFamily:"'Inter',sans-serif",
+      display:'flex', flexDirection:'column',
+      height:'calc(100vh - 50px)',  /* header adminlayout ~50px */
+      overflow:'hidden',
+      /* annulla il padding del main AdminLayout */
+      margin:'-24px -32px -40px',
+      padding:'0',
+    }}>
 
       {/* Titolo pagina */}
-      <div style={{ padding:'16px 0 12px', flexShrink:0 }}>
+      <div style={{ padding:'16px 32px 12px', flexShrink:0 }}>
         <div style={{ display:'flex', alignItems:'center', gap:'10px', marginBottom:'3px' }}>
           <Mail size={20} color={BLU}/>
           <h1 style={{ fontSize:'24px', fontWeight:'900', color:NERO, letterSpacing:'-0.03em', margin:0 }}>Template Email</h1>
@@ -368,7 +376,7 @@ export default function EmailPage() {
       </div>
 
       {/* Barra superiore: tipo email + Salva */}
-      <div style={{ display:'flex', alignItems:'center', gap:'6px', paddingBottom:'10px', borderBottom:'1px solid #E5E7EB', flexShrink:0 }}>
+      <div style={{ display:'flex', alignItems:'center', gap:'6px', paddingBottom:'10px', paddingLeft:'32px', paddingRight:'32px', borderBottom:'1px solid #E5E7EB', flexShrink:0 }}>
         <div style={{ display:'flex', gap:'3px', flex:1, flexWrap:'wrap' }}>
           {TIPI.map(t => {
             const isSel = selected===t.key
@@ -387,7 +395,7 @@ export default function EmailPage() {
       </div>
 
       {/* 3 colonne */}
-      <div style={{ display:'flex', flex:1, overflow:'hidden', marginTop:'10px' }}>
+      <div style={{ display:'flex', flex:1, overflow:'hidden', marginTop:'10px', paddingLeft:'32px', paddingRight:'0' }}>
 
         {/* COL 1: Config */}
         <div style={{ width:colWidths.left+'px', flexShrink:0, overflowY:'auto', paddingRight:'14px', display:'flex', flexDirection:'column', gap:'8px' }}>
