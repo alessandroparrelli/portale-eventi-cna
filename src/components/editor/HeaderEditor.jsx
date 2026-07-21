@@ -54,6 +54,7 @@ export const DEFAULT_HEADER_CONFIG = {
   titolo_align: 'left',
   // Header
   sfondo: BLU,
+  hero_bg_image: '',
   padding_v: 16,
   padding_h: 32,
   layout: 'left',
@@ -104,7 +105,11 @@ export function buildHeaderHtml(cfg) {
     }
   }
 
-  return `<div style="background:${c.sfondo}"><table style="width:100%;border-collapse:collapse"><tr>${innerHtml}</tr></table></div>`
+  const bgStyle = c.hero_bg_image
+    ? `background:linear-gradient(rgba(0,0,0,0.45),rgba(0,0,0,0.45)),url('${c.hero_bg_image}') center/cover no-repeat`
+    : `background:${c.sfondo}`
+
+  return `<div style="${bgStyle}"><table style="width:100%;border-collapse:collapse"><tr>${innerHtml}</tr></table></div>`
 }
 
 /**
@@ -224,7 +229,7 @@ function AlignPicker({ value, onChange }) {
 }
 
 // ─── Componente principale ────────────────────────────────────────────────────
-export default function HeaderEditor({ config, onChange, defaultExpanded = false }) {
+export default function HeaderEditor({ config, onChange, defaultExpanded = false, heroImageUrl = '' }) {
   const [expanded, setExpanded] = useState(defaultExpanded)
   const [activeTab, setActiveTab] = useState('layout') // 'layout' | 'logo' | 'titolo' | 'stile'
   const [showLogoPicker, setShowLogoPicker] = useState(false)
@@ -277,7 +282,10 @@ export default function HeaderEditor({ config, onChange, defaultExpanded = false
           {/* Live preview */}
           <div style={{ padding:'10px 14px', background:'#F9FAFB' }}>
             <div style={{
-              background: c.sfondo, borderRadius:'6px', overflow:'hidden',
+              background: c.hero_bg_image
+                ? `linear-gradient(rgba(0,0,0,0.45),rgba(0,0,0,0.45)),url('${c.hero_bg_image}') center/cover no-repeat`
+                : c.sfondo,
+              borderRadius:'6px', overflow:'hidden',
               padding: `${c.padding_v}px ${c.padding_h}px`,
               display:'flex', flexDirection: c.layout==='stacked'?'column':'row',
               alignItems: c.layout==='stacked'?'center': c.layout==='center'?'center':'flex-start',
@@ -416,9 +424,36 @@ export default function HeaderEditor({ config, onChange, defaultExpanded = false
               </div>
             </>}
 
-            {/* ── STILE ── */}
+            {/* -- STILE -- */}
             {activeTab === 'stile' && <>
               <ColorPicker label="Colore sfondo header" value={c.sfondo} onChange={v=>set('sfondo',v)} defaultValue={BLU}/>
+              {/* Immagine di sfondo */}
+              <div>
+                <label style={lbl}>Immagine di sfondo (opzionale)</label>
+                {c.hero_bg_image ? (
+                  <div style={{ position:'relative', borderRadius:'6px', overflow:'hidden', marginBottom:'4px', height:'60px' }}>
+                    <img src={c.hero_bg_image} style={{ width:'100%', height:'100%', objectFit:'cover', display:'block' }} alt="sfondo"/>
+                    <button onClick={()=>set('hero_bg_image','')}
+                      style={{ position:'absolute', top:'4px', right:'4px', background:'rgba(0,0,0,0.6)', border:'none', borderRadius:'50%', width:'20px', height:'20px', cursor:'pointer', display:'flex', alignItems:'center', justifyContent:'center', color:'#fff', fontSize:'12px' }}>
+                      x
+                    </button>
+                  </div>
+                ) : (
+                  <div style={{ display:'flex', gap:'4px', flexWrap:'wrap' }}>
+                    {heroImageUrl && (
+                      <button type="button" onClick={()=>set('hero_bg_image', heroImageUrl)}
+                        style={{ padding:'4px 10px', background:'#EEF3FF', border:'1px solid #BFDBFE', borderRadius:'5px', cursor:'pointer', fontSize:'10px', color:BLU, fontFamily:"'Inter',sans-serif", fontWeight:'600', display:'flex', alignItems:'center', gap:'4px' }}>
+                        Usa immagine evento
+                      </button>
+                    )}
+                  </div>
+                )}
+                <input value={c.hero_bg_image||''} onChange={e=>set('hero_bg_image',e.target.value)}
+                  style={{ ...inp, fontSize:'11px', marginTop:'4px' }} placeholder="Incolla URL immagine di sfondo..."/>
+                <p style={{ margin:'3px 0 0', fontSize:'10px', color:'#9CA3AF' }}>
+                  L'immagine viene scurita automaticamente per leggibilita del testo.
+                </p>
+              </div>
               <div>
                 <label style={lbl}>Preset rapidi</label>
                 <div style={{ display:'flex', flexWrap:'wrap', gap:'4px' }}>

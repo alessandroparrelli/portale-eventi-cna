@@ -339,6 +339,7 @@ export default function EventEmailTab({ eventoId }) {
   const [loading,         setLoading]         = useState(true)
   const [eventoTitolo,    setEventoTitolo]    = useState('')
   const [teatroAbilitato, setTeatroAbilitato] = useState(false)
+  const [heroImageUrl,    setHeroImageUrl]    = useState('')
   const [showResetModal,  setShowResetModal]  = useState(false)
   const [resetting,       setResetting]       = useState(false)
   const [selectedBlock,   setSelectedBlock]   = useState(null)
@@ -373,9 +374,10 @@ export default function EventEmailTab({ eventoId }) {
   }, [eventoId])
 
   async function fetchEventoTitolo() {
-    const { data } = await supabase.from('events').select('titolo, teatro_abilitato').eq('id', eventoId).single()
+    const { data } = await supabase.from('events').select('titolo, teatro_abilitato, immagine_hero').eq('id', eventoId).single()
     if (data?.titolo) setEventoTitolo(data.titolo)
     if (data?.teatro_abilitato) setTeatroAbilitato(true)
+    if (data?.immagine_hero) setHeroImageUrl(data.immagine_hero)
   }
 
   useEffect(() => { setSelectedBlock(null) }, [selected])
@@ -681,7 +683,7 @@ export default function EventEmailTab({ eventoId }) {
                 <h3 style={{ margin:'0 0 4px', fontSize:'16px', fontWeight:'800', color:NERO }}>Intestazione email</h3>
                 <p style={{ margin:0, fontSize:'12px', color:'#6B7280' }}>Logo, colore sfondo, titolo e layout dell'header</p>
               </div>
-              <HeaderEditor config={headerConfig} onChange={setHeaderConfig} defaultExpanded={true}/>
+              <HeaderEditor config={headerConfig} onChange={setHeaderConfig} defaultExpanded={true} heroImageUrl={heroImageUrl}/>
               <div style={{ marginTop:'16px' }}>
                 <label style={lbl}>Variabili disponibili</label>
                 <div style={{ display:'flex', flexWrap:'wrap', gap:'4px' }}>
