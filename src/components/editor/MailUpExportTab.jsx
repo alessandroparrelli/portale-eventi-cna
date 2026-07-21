@@ -502,33 +502,43 @@ function buildHtml(ev, url, blocchi, opts, socialLinks) {
 
           } else if (v.tipo === 'sessione' || v.tipo === 'intermezzo' || v.tipo === 'modera') {
             const relatori = v.relatori || []
-            const bgSess = v.tipo === 'intermezzo' ? '#F9F0FF' : bgBox
+            const bgSess = v.tipo === 'intermezzo' ? '#F9F0FF' : (v.tipo === 'modera' ? '#F8F9FA' : bgBox)
             const colSess = v.tipo === 'intermezzo' ? '#7C3AED' : cSess
 
-            let relatoriHtml = ''
-            if (relatori.length) {
-              relatoriHtml = relatori.map(r => {
-                if (!r.nome && !r.ruolo) return ''
-                return `<table width="100%" cellpadding="0" cellspacing="0" border="0" style="margin-top:6px;">
-                  <tr>
-                    <td valign="top">
-                      ${r.nome ? `<p style="margin:0;padding:0;font-size:13px;font-weight:bold;color:#0A0A0A;font-family:${F};">${esc(r.nome)}</p>` : ''}
-                      ${r.ruolo ? `<p style="margin:0;padding:0;font-size:12px;color:#6B7280;font-family:${F};">${esc(r.ruolo)}</p>` : ''}
-                    </td>
-                  </tr>
-                </table>`
-              }).filter(Boolean).join('')
+            let contenutoHtml = ''
+
+            if (v.tipo === 'modera') {
+              // modera ha nome/ruolo direttamente sulla voce, non in relatori[]
+              const labelModera = `<p style="margin:0 0 4px 0;padding:0;font-size:11px;font-weight:bold;color:#9CA3AF;font-family:${F};text-transform:uppercase;letter-spacing:0.05em;">Modera</p>`
+              const nomeModera = v.nome ? `<p style="margin:0;padding:0;font-size:13px;font-weight:bold;color:#0A0A0A;font-family:${F};">${esc(v.nome)}</p>` : ''
+              const ruoloModera = v.ruolo ? `<p style="margin:0;padding:0;font-size:12px;color:#6B7280;font-family:${F};">${esc(v.ruolo)}</p>` : ''
+              contenutoHtml = labelModera + nomeModera + ruoloModera
+            } else {
+              // sessione / intermezzo: titolo + lista relatori
+              let relatoriHtml = ''
+              if (relatori.length) {
+                relatoriHtml = relatori.map(r => {
+                  if (!r.nome && !r.ruolo) return ''
+                  return `<table width="100%" cellpadding="0" cellspacing="0" border="0" style="margin-top:6px;">
+                    <tr>
+                      <td valign="top">
+                        ${r.nome ? `<p style="margin:0;padding:0;font-size:13px;font-weight:bold;color:#0A0A0A;font-family:${F};">${esc(r.nome)}</p>` : ''}
+                        ${r.ruolo ? `<p style="margin:0;padding:0;font-size:12px;color:#6B7280;font-family:${F};">${esc(r.ruolo)}</p>` : ''}
+                      </td>
+                    </tr>
+                  </table>`
+                }).filter(Boolean).join('')
+              }
+              const titoloHtml = v.titolo ? `<p style="margin:0 0 ${relatori.length ? '6px' : '0'} 0;padding:0;font-size:14px;font-weight:bold;color:${colSess};font-family:${F};">${esc(v.titolo)}</p>` : ''
+              contenutoHtml = titoloHtml + relatoriHtml
             }
 
             progHtml += `
               <table width="100%" cellpadding="12" cellspacing="0" border="0"
                 bgcolor="${bgSess}"
-                style="margin-bottom:8px;background-color:${bgSess};border:${bSpess}px ${bStyle} ${cBord};border-radius:${bRad}px;">
+                style="margin-bottom:8px;background-color:${bgSess};border:1px ${bStyle} ${cBord};border-radius:${bRad}px;">
                 <tr>
-                  <td>
-                    ${v.titolo ? `<p style="margin:0 0 ${relatori.length?'6px':'0'} 0;padding:0;font-size:14px;font-weight:bold;color:${colSess};font-family:${F};">${esc(v.titolo)}</p>` : ''}
-                    ${relatoriHtml}
-                  </td>
+                  <td>${contenutoHtml}</td>
                 </tr>
               </table>`
           }
