@@ -1,9 +1,10 @@
 /**
- * EventEmailTab v3 — Split-pane layout: editor + anteprima sempre visibile
+ * EventEmailTab v4 — Split-pane + HeaderEditor avanzato
  */
 import { useState, useEffect, useRef } from 'react'
 import { supabase, getFreshJwt } from '../../lib/supabase'
 import RichEditor from './RichEditor'
+import HeaderEditor, { mergeHeaderConfig, buildFullEmailHtml, DEFAULT_HEADER_CONFIG } from './HeaderEditor'
 import {
   Save, RotateCcw, CheckCircle, Code, Eye as EyeIcon, AlertTriangle,
   Layers, Image as ImageIcon, Type, AlignLeft, Square, Star, Zap, Minus,
@@ -108,70 +109,16 @@ function blocchiToHtml(blocchi) {
   }).join('\n')
 }
 
-// ─── LogoPicker ────────────────────────────────────────────────────────────────
-function LogoPicker({ value, onChange }) {
-  const [loghi, setLoghi] = useState([])
-  const [loading, setLoading] = useState(true)
-  const DEFAULT_URL = 'https://raw.githubusercontent.com/alessandroparrelli/fileappoggio/main/NUOVO-LOGO-CNA-ROMA-SOLO-ROMA.png'
-
-  useEffect(() => {
-    async function fetch_() {
-      try {
-        const { data: { session } } = await supabase.auth.getSession()
-        const jwt = session?.access_token
-        if (!jwt) return
-        const res = await fetch(
-          `${import.meta.env.VITE_SUPABASE_URL}/functions/v1/github-list-loghi?folder=loghi`,
-          { headers: { 'Authorization': `Bearer ${jwt}` } }
-        )
-        if (!res.ok) return
-        const data = await res.json()
-        if (data.ok && Array.isArray(data.files)) {
-          setLoghi([
-            { name: 'CNA Roma (default)', url: DEFAULT_URL, isDefault: true },
-            ...data.files.map(f => ({ name: f.name.replace(/\.[^.]+$/, '').replace(/[-_]/g, ' '), url: f.url + '?v=' + Date.now() }))
-          ])
-        }
-      } catch {}
-      setLoading(false)
-    }
-    fetch_()
-  }, [])
-
-  if (loading) return <div style={{ padding:'12px', textAlign:'center', color:'#9CA3AF', fontSize:'12px' }}>Caricamento loghi…</div>
-
-  return (
-    <div style={{ padding:'10px', display:'grid', gridTemplateColumns:'repeat(auto-fill, minmax(72px, 1fr))', gap:'6px' }}>
-      {loghi.map((logo, i) => {
-        const sel = value === logo.url || (!value && logo.isDefault)
-        return (
-          <button key={i} type="button" onClick={() => onChange(logo.isDefault ? '' : logo.url)}
-            style={{ border:`2px solid ${sel ? BLU : '#E5E7EB'}`, borderRadius:'8px', background: sel ? '#EEF3FF' : '#fff', padding:'6px', cursor:'pointer', display:'flex', flexDirection:'column', alignItems:'center', gap:'4px' }}>
-            <img src={logo.url} alt={logo.name} style={{ height:'36px', width:'100%', objectFit:'contain' }}
-              onError={e => e.target.style.opacity = '0.3'}/>
-            <span style={{ fontSize:'9px', color: sel ? BLU : '#6B7280', textAlign:'center', lineHeight:1.2, fontWeight: sel ? '700' : '400', overflow:'hidden', textOverflow:'ellipsis', whiteSpace:'nowrap', maxWidth:'100%' }}>
-              {logo.name}
-            </span>
-          </button>
-        )
-      })}
-    </div>
-  )
-}
-
-const DEFAULT_LOGO = 'https://raw.githubusercontent.com/alessandroparrelli/fileappoggio/main/NUOVO-LOGO-CNA-ROMA-SOLO-ROMA.png'
-
-function buildFullHtml(mostraHeader, mostraFooter, bodyHtml, logoSrc, hColore, hTitolo, hLogoH, hTitoloSz) {
-  const logo = logoSrc || DEFAULT_LOGO
-  const bg = hColore || BLU
-  const lh = hLogoH || 48
-  const ts = hTitoloSz || 13
-  const titoloHtml = hTitolo ? `<p style="margin:6px 0 0;font-size:${ts}px;font-weight:700;color:rgba(255,255,255,0.9);font-family:Inter,Arial,sans-serif;letter-spacing:0.01em">${hTitolo}</p>` : ''
-  const header = mostraHeader !== false
-    ? `<div style="background:${bg};padding:0"><table style="width:100%;border-collapse:collapse"><tr><td style="padding:16px 32px">${logo ? `<img src="${logo}" alt="CNA Roma" style="height:${lh}px;display:block" />` : ''}${titoloHtml}</td></tr></table></div>` : ''
-  const footer = mostraFooter !== false
-    ? `<div style="background:#F9FAFB;border-top:1px solid #E5E7EB;padding:20px 32px"><p style="margin:0;font-size:11px;color:#9CA3AF;font-family:Inter,Arial,sans-serif">CNA di Roma — Confederazione Nazionale dell\u2019Artigianato · <a href="mailto:marketing@cnaroma.it" style="color:${BLU}">marketing@cnaroma.it</a></p></div>` : ''
-  return `<!DOCTYPE html><html><head><meta charset="UTF-8"><meta name="viewport" content="width=device-width,initial-scale=1"></head><body style="margin:0;padding:0;background:#F0F2F5;font-family:Inter,Arial,sans-serif"><table style="width:100%;border-collapse:collapse"><tr><td style="padding:24px 16px"><div style="max-width:600px;margin:0 auto;background:#fff;border-radius:12px;overflow:hidden;box-shadow:0 2px 20px rgba(0,0,0,0.1)">${header}<div style="padding:32px">${bodyHtml}</div>${footer}</div></td></tr></table></body></html>`
+/** Backward compat: costruisce header_config da vecchi campi separati */
+function legacyToHeaderConfig(tpl) {
+  if (tpl?.header_config && Object.keys(tpl.header_config).length > 0) return tpl.header_config
+  return {
+    logo_url: tpl?.logo_url || '',
+    logo_altezza: tpl?.logo_altezza || 48,
+    titolo: tpl?.header_titolo || '',
+    titolo_size: tpl?.titolo_size || 13,
+    sfondo: tpl?.header_colore || BLU,
+  }
 }
 
 function replacePreview(html, nomeEvento) {
@@ -382,24 +329,18 @@ export default function EventEmailTab({ eventoId }) {
   const [selected,        setSelected]        = useState('conferma')
   const [templates,       setTemplates]       = useState({})
   const [defaultTemplates,setDefaultTemplates]= useState({})
-  const [logoUrl, setLogoUrl]                    = useState('')
-  const [headerColore, setHeaderColore]          = useState(BLU)
-  const [headerTitolo, setHeaderTitolo]           = useState('')
-  const [showLogoPicker, setShowLogoPicker]       = useState(false)
-  const [logoAltezza,    setLogoAltezza]          = useState(48)
-  const [titoloSize,     setTitoloSize]           = useState(13)
-  const [formFields,     setFormFields]           = useState([])
+  const [headerConfig,    setHeaderConfig]    = useState({ ...DEFAULT_HEADER_CONFIG })
+  const [formFields,      setFormFields]      = useState([])
   const [blocchi,         setBlocchi]         = useState({})
   const [saving,          setSaving]          = useState(false)
   const [saved,           setSaved]           = useState(false)
-  const [editorMode,      setEditorMode]     = useState('blocchi') // 'blocchi'|'html'
+  const [editorMode,      setEditorMode]      = useState('blocchi')
   const [previewDevice,   setPreviewDevice]   = useState('desktop')
   const [loading,         setLoading]         = useState(true)
   const [eventoTitolo,    setEventoTitolo]    = useState('')
   const [showResetModal,  setShowResetModal]  = useState(false)
   const [resetting,       setResetting]       = useState(false)
   const [selectedBlock,   setSelectedBlock]   = useState(null)
-  const [showHeader,      setShowHeader]      = useState(false)
   const [showVars,        setShowVars]        = useState(false)
   const [previewCollapsed,setPreviewCollapsed]= useState(false)
   const [showTestBar,     setShowTestBar]     = useState(false)
@@ -425,10 +366,8 @@ export default function EventEmailTab({ eventoId }) {
     const { data } = await supabase.from('email_templates').select('*').eq('event_id', eventoId)
     if (data) {
       const tMap = {}, bMap = {}
-      let firstLogoUrl = ''
       data.forEach(t => {
         tMap[t.tipo] = t
-        if (t.logo_url && !firstLogoUrl) firstLogoUrl = t.logo_url
         try {
           const parsed = JSON.parse(t.blocchi_json||'[]')
           if (Array.isArray(parsed) && parsed.length) bMap[t.tipo] = parsed
@@ -436,12 +375,9 @@ export default function EventEmailTab({ eventoId }) {
       })
       setTemplates(tMap)
       setBlocchi(bMap)
-      if (firstLogoUrl) setLogoUrl(firstLogoUrl)
+      // Carica header config dal primo template (condiviso tra i tipi)
       const firstTpl = Object.values(tMap)[0]
-      if (firstTpl?.header_colore) setHeaderColore(firstTpl.header_colore)
-      if (firstTpl?.header_titolo !== undefined) setHeaderTitolo(firstTpl.header_titolo||'')
-      if (firstTpl?.logo_altezza) setLogoAltezza(firstTpl.logo_altezza)
-      if (firstTpl?.titolo_size) setTitoloSize(firstTpl.titolo_size)
+      if (firstTpl) setHeaderConfig(mergeHeaderConfig(legacyToHeaderConfig(firstTpl)))
     }
   }
 
@@ -503,8 +439,18 @@ export default function EventEmailTab({ eventoId }) {
   async function save() {
     setSaving(true)
     const bodyHtml = editorMode==='html' ? current.corpo_html : blocchiToHtml(currBlocchi)
+    const hc = mergeHeaderConfig(headerConfig)
     await supabase.from('email_templates')
-      .update({ oggetto:current.oggetto, corpo_html:bodyHtml, blocchi_json:JSON.stringify(currBlocchi), logo_url:logoUrl||null, header_colore:headerColore||null, header_titolo:headerTitolo||null, logo_altezza:logoAltezza||null, titolo_size:titoloSize||null, personalizzato:true, updated_at:new Date().toISOString() })
+      .update({
+        oggetto: current.oggetto, corpo_html: bodyHtml,
+        blocchi_json: JSON.stringify(currBlocchi),
+        header_config: hc,
+        // Backward compat: scrivi anche nei vecchi campi
+        logo_url: hc.logo_url||null, header_colore: hc.sfondo||null,
+        header_titolo: hc.titolo||null, logo_altezza: hc.logo_altezza||null,
+        titolo_size: hc.titolo_size||null,
+        personalizzato: true, updated_at: new Date().toISOString(),
+      })
       .eq('event_id', eventoId).eq('tipo', selected)
     setSaving(false); setSaved(true); setTimeout(()=>setSaved(false), 2500)
   }
@@ -515,14 +461,17 @@ export default function EventEmailTab({ eventoId }) {
     setResetting(true)
     setBlocchi(prev => { const n={...prev}; delete n[selected]; return n })
     setTemplates(prev => ({ ...prev, [selected]:{ ...prev[selected], oggetto:def.oggetto, corpo_html:def.corpo_html, personalizzato:false } }))
-    setLogoUrl(def.logo_url || '')
-    setHeaderColore(def.header_colore || BLU)
-    setHeaderTitolo(def.header_titolo || '')
-    setLogoAltezza(def.logo_altezza || 48)
-    setTitoloSize(def.titolo_size || 13)
+    const defConfig = mergeHeaderConfig(legacyToHeaderConfig(def))
+    setHeaderConfig(defConfig)
     setSelectedBlock(null)
     await supabase.from('email_templates')
-      .update({ oggetto:def.oggetto, corpo_html:def.corpo_html, blocchi_json:null, logo_url:def.logo_url||null, header_colore:def.header_colore||null, header_titolo:def.header_titolo||null, personalizzato:false, updated_at:new Date().toISOString() })
+      .update({
+        oggetto:def.oggetto, corpo_html:def.corpo_html, blocchi_json:null,
+        header_config: defConfig,
+        logo_url:defConfig.logo_url||null, header_colore:defConfig.sfondo||null,
+        header_titolo:defConfig.titolo||null,
+        personalizzato:false, updated_at:new Date().toISOString(),
+      })
       .eq('event_id', eventoId).eq('tipo', selected)
     setResetting(false); setShowResetModal(false)
   }
@@ -546,7 +495,7 @@ export default function EventEmailTab({ eventoId }) {
   function getPreviewHtml() {
     try {
       const bodyHtml = currBlocchi.length ? blocchiToHtml(currBlocchi) : (current.corpo_html||'')
-      return replacePreview(buildFullHtml(true, true, bodyHtml, logoUrl, headerColore, headerTitolo, logoAltezza, titoloSize), eventoTitolo)
+      return replacePreview(buildFullEmailHtml(bodyHtml, headerConfig), eventoTitolo)
     } catch(e) { console.error('preview error', e); return '<html><body><p style="padding:20px;color:#9CA3AF">Errore anteprima</p></body></html>' }
   }
 
@@ -643,84 +592,8 @@ export default function EventEmailTab({ eventoId }) {
               placeholder="Oggetto dell'email…"/>
           </div>
 
-          {/* Intestazione email (collapsible) */}
-          <div style={{ background:'#fff', border:'1px solid #E5E7EB', borderRadius:'8px', overflow:'hidden' }}>
-            <button type="button" onClick={()=>setShowHeader(!showHeader)}
-              style={{ width:'100%', padding:'9px 14px', display:'flex', alignItems:'center', gap:'8px', background:'none', border:'none', cursor:'pointer', fontFamily:"'Inter',sans-serif" }}>
-              <Settings2 size={13} style={{ color:'#9CA3AF' }}/>
-              <span style={{ fontSize:'11px', fontWeight:'700', color:'#6B7280', flex:1, textAlign:'left' }}>Intestazione email</span>
-              {/* Mini preview */}
-              <div style={{ background:headerColore||BLU, borderRadius:'4px', padding:'3px 10px', display:'flex', alignItems:'center', gap:'6px' }}>
-                {logoUrl && <img src={logoUrl} style={{ height:'16px', objectFit:'contain' }} alt=""/>}
-                {headerTitolo && <span style={{ color:'rgba(255,255,255,0.9)', fontSize:'9px', fontWeight:'600' }}>{headerTitolo}</span>}
-                {!logoUrl && !headerTitolo && <span style={{ color:'rgba(255,255,255,0.4)', fontSize:'9px' }}>header</span>}
-              </div>
-              <ChevronRight size={13} style={{ color:'#9CA3AF', transform:showHeader?'rotate(90deg)':'none', transition:'transform .15s' }}/>
-            </button>
-            {showHeader && (
-              <div style={{ padding:'10px 14px', borderTop:'1px solid #F3F4F6', display:'flex', flexDirection:'column', gap:'8px' }}>
-                {/* Preview live header */}
-                <div style={{ background:headerColore||BLU, borderRadius:'6px', padding:'10px 16px', display:'flex', alignItems:'center', gap:'10px' }}>
-                  {logoUrl && <img src={logoUrl} style={{ height:`${logoAltezza}px`, objectFit:'contain', flexShrink:0, maxWidth:'60%' }} alt="logo"/>}
-                  {headerTitolo && <span style={{ color:'rgba(255,255,255,0.9)', fontSize:`${titoloSize}px`, fontWeight:'700', fontFamily:'Inter,sans-serif' }}>{headerTitolo}</span>}
-                  {!logoUrl && !headerTitolo && <span style={{ color:'rgba(255,255,255,0.4)', fontSize:'11px' }}>Anteprima header</span>}
-                </div>
-                <div style={{ display:'grid', gridTemplateColumns:'1fr 1fr', gap:'8px' }}>
-                  <div>
-                    <label style={lbl}>Logo altezza</label>
-                    <div style={{ display:'flex', alignItems:'center', gap:'6px' }}>
-                      <input type="range" min={24} max={96} value={logoAltezza} onChange={e=>setLogoAltezza(+e.target.value)} style={{ flex:1, accentColor:BLU }}/>
-                      <span style={{ fontSize:'11px', color:'#6B7280', minWidth:'30px' }}>{logoAltezza}px</span>
-                    </div>
-                  </div>
-                  <div>
-                    <label style={lbl}>Titolo size</label>
-                    <div style={{ display:'flex', alignItems:'center', gap:'6px' }}>
-                      <input type="range" min={10} max={28} value={titoloSize} onChange={e=>setTitoloSize(+e.target.value)} style={{ flex:1, accentColor:BLU }}/>
-                      <span style={{ fontSize:'11px', color:'#6B7280', minWidth:'30px' }}>{titoloSize}px</span>
-                    </div>
-                  </div>
-                </div>
-                <div style={{ display:'flex', gap:'8px', alignItems:'flex-end' }}>
-                  <div style={{ flex:1 }}>
-                    <label style={lbl}>Colore sfondo</label>
-                    <div style={{ display:'flex', alignItems:'center', gap:'6px' }}>
-                      <input type="color" value={headerColore||BLU} onChange={e=>setHeaderColore(e.target.value)}
-                        style={{ width:'32px', height:'26px', border:'1px solid #E5E7EB', borderRadius:'4px', cursor:'pointer', padding:'1px', flexShrink:0 }}/>
-                      <input value={headerColore||BLU} onChange={e=>setHeaderColore(e.target.value)}
-                        style={{ ...inp, padding:'4px 8px', fontSize:'11px', fontFamily:'monospace', flex:1 }}/>
-                      <button type="button" onClick={()=>setHeaderColore(BLU)}
-                        style={{ background:'none', border:'none', cursor:'pointer', color:'#9CA3AF', fontSize:'10px', flexShrink:0 }}>reset</button>
-                    </div>
-                  </div>
-                  <div style={{ flex:1 }}>
-                    <label style={lbl}>Titolo header</label>
-                    <input value={headerTitolo||''} onChange={e=>setHeaderTitolo(e.target.value)}
-                      style={{ ...inp, padding:'5px 8px', fontSize:'12px' }}
-                      placeholder="es. {{nome_evento}}"/>
-                  </div>
-                </div>
-                <div>
-                  <div style={{ display:'flex', alignItems:'center', gap:'6px', marginBottom:'6px' }}>
-                    <label style={{ ...lbl, margin:0 }}>Logo</label>
-                    <button type="button" onClick={()=>setShowLogoPicker(v=>!v)}
-                      style={{ fontSize:'10px', padding:'2px 8px', border:'1px solid #E5E7EB', borderRadius:'4px', cursor:'pointer', background:showLogoPicker?BLU:'#fff', color:showLogoPicker?'#fff':'#374151', fontFamily:'Inter,sans-serif' }}>
-                      {showLogoPicker ? '✕ chiudi' : '📂 scegli logo'}
-                    </button>
-                    {logoUrl && <button type="button" onClick={()=>setLogoUrl('')}
-                      style={{ fontSize:'10px', padding:'2px 8px', border:'1px solid #FEE2E2', borderRadius:'4px', cursor:'pointer', background:'#FFF5F5', color:'#DC2626', fontFamily:'Inter,sans-serif' }}>
-                      ✕ rimuovi
-                    </button>}
-                  </div>
-                  {showLogoPicker && (
-                    <div style={{ border:'1px solid #E5E7EB', borderRadius:'8px', overflow:'hidden', maxHeight:'200px', overflowY:'auto' }}>
-                      <LogoPicker value={logoUrl} onChange={url=>{ setLogoUrl(url); setShowLogoPicker(false) }}/>
-                    </div>
-                  )}
-                </div>
-              </div>
-            )}
-          </div>
+          {/* Intestazione email (componente avanzato) */}
+          <HeaderEditor config={headerConfig} onChange={setHeaderConfig}/>
 
           {/* Toolbar: Blocchi/HTML + variabili */}
           <div style={{ background:'#fff', borderRadius:'8px', border:'1px solid #E5E7EB', padding:'8px 12px', display:'flex', gap:'5px', alignItems:'center' }}>

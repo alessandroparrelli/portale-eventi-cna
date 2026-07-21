@@ -15,6 +15,7 @@ import {
 } from 'lucide-react'
 import { Field, Input, Select, Btn } from '../../components/ui'
 import RichEditor from '../../components/editor/RichEditor'
+import HeaderEditor, { mergeHeaderConfig, buildFullEmailHtml, DEFAULT_HEADER_CONFIG } from '../../components/editor/HeaderEditor'
 
 // ─── Costanti ────────────────────────────────────────────────────────────────
 const BLU = '#003DA5'
@@ -162,37 +163,18 @@ function blocchiToHtml(blocchi, accentColor = BLU) {
   }).join('\n')
 }
 
-// ─── Wrapper HTML completo ────────────────────────────────────────────────────
-function buildFullHtml(template, blocchi) {
-  const ac = BLU
-  const bodyHtml = blocchi.length ? blocchiToHtml(blocchi, ac) : (template.corpo_html||'')
-  const header = template.mostra_header !== false
-    ? `<div style="background:${ac};padding:0">
-        <table style="width:100%;border-collapse:collapse">
-          <tr>
-            <td style="padding:20px 32px">
-              <img src="https://raw.githubusercontent.com/alessandroparrelli/fileappoggio/main/NUOVO-LOGO-CNA-ROMA-SOLO-ROMA.png" alt="CNA Roma" style="height:40px;display:block" />
-            </td>
-          </tr>
-        </table>
-       </div>` : ''
-  const footer = template.mostra_footer !== false
-    ? `<div style="background:#F9FAFB;border-top:1px solid #E5E7EB;padding:20px 32px">
-        <p style="margin:0;font-size:11px;color:#9CA3AF;font-family:Inter,Arial,sans-serif;line-height:1.6">
-          <strong style="color:#6B7280">CNA di Roma</strong> — Confederazione Nazionale dell\u2019Artigianato e della Piccola e Media Impresa<br/>
-          <a href="mailto:marketing@cnaroma.it" style="color:${ac}">marketing@cnaroma.it</a>
-        </p>
-       </div>` : ''
-  return `<!DOCTYPE html><html lang="it"><head><meta charset="UTF-8"><meta name="viewport" content="width=device-width,initial-scale=1"><title>Email</title></head>
-<body style="margin:0;padding:0;background:#F0F2F5;font-family:Inter,Arial,sans-serif">
-<table style="width:100%;border-collapse:collapse"><tr><td style="padding:32px 16px">
-<div style="max-width:600px;margin:0 auto;background:#ffffff;border-radius:12px;overflow:hidden;box-shadow:0 2px 20px rgba(0,0,0,0.1)">
-${header}
-<div style="padding:32px">${bodyHtml}</div>
-${footer}
-</div>
-</td></tr></table>
-</body></html>`
+/** Backward compat: costruisce header_config da vecchi campi separati */
+function legacyToHeaderConfig(tpl) {
+  if (tpl?.header_config && Object.keys(tpl.header_config).length > 0) return tpl.header_config
+  return {
+    logo_url: tpl?.logo_url || '',
+    logo_altezza: tpl?.logo_altezza || 48,
+    titolo: tpl?.header_titolo || '',
+    titolo_size: tpl?.titolo_size || 13,
+    sfondo: tpl?.header_colore || BLU,
+    mostra_header: tpl?.mostra_header !== false,
+    mostra_footer: tpl?.mostra_footer !== false,
+  }
 }
 
 function replacePreview(html) {
@@ -529,8 +511,9 @@ export default function EmailEditorPage() {
   const [sending,       setSending]       = useState(false)
   const [testEmail,     setTestEmail]     = useState('')
   const [showTest,      setShowTest]      = useState(false)
-  const [selectedBlock, setSelectedBlock] = useState(null) // idx blocco selezionato
+  const [selectedBlock, setSelectedBlock] = useState(null)
   const [showVars,      setShowVars]      = useState(false)
+  const [headerConfig,  setHeaderConfig]  = useState({ ...DEFAULT_HEADER_CONFIG })
 
   // Drag state
   const dragIdx = useRef(null)
@@ -546,6 +529,7 @@ export default function EmailEditorPage() {
     const { data } = await supabase.from('email_templates').select('*').eq('id', id).single()
     if (data) {
       setTemplate({ ...data, giorni_prima: data.giorni_prima||'' })
+      setHeaderConfig(mergeHeaderConfig(legacyToHeaderConfig(data)))
       try {
         const parsed = JSON.parse(data.blocchi_json || '[]')
         if (Array.isArray(parsed) && parsed.length) { setBlocchi(parsed); setMode('blocchi') }
@@ -601,16 +585,22 @@ export default function EmailEditorPage() {
   }
 
   async function save() {
-    if (!template.oggetto.trim()) return alert("L'oggetto è obbligatorio")
+    if (!template.oggetto.trim()) return alert("L'oggetto \u00e8 obbligatorio")
     if (!template.event_id) return alert('Seleziona un evento')
     setSaving(true)
     const corpoHtml = mode==='blocchi' && blocchi.length ? blocchiToHtml(blocchi) : template.corpo_html
+    const hc = mergeHeaderConfig(headerConfig)
     const payload = {
       event_id: template.event_id, tipo: template.tipo,
       oggetto: template.oggetto.trim(), corpo_html: corpoHtml,
       blocchi_json: mode==='blocchi' ? JSON.stringify(blocchi) : null,
       giorni_prima: template.tipo==='reminder' && template.giorni_prima ? parseInt(template.giorni_prima) : null,
       attivo: template.attivo,
+      header_config: hc,
+      // Backward compat
+      logo_url: hc.logo_url||null, header_colore: hc.sfondo||null,
+      header_titolo: hc.titolo||null, logo_altezza: hc.logo_altezza||null,
+      titolo_size: hc.titolo_size||null,
     }
     if (isNew) await supabase.from('email_templates').insert(payload)
     else       await supabase.from('email_templates').update(payload).eq('id', id)
@@ -621,7 +611,8 @@ export default function EmailEditorPage() {
   async function sendTest() {
     if (!testEmail.trim()) return
     setSending(true)
-    const html = replacePreview(buildFullHtml(template, blocchi))
+    const bodyHtml = mode==='blocchi' && blocchi.length ? blocchiToHtml(blocchi) : (template.corpo_html||'')
+    const html = replacePreview(buildFullEmailHtml(bodyHtml, headerConfig))
     const { data: { session } } = await supabase.auth.getSession()
     await fetch(`${import.meta.env.VITE_SUPABASE_URL}/functions/v1/send-test-email`, {
       method:'POST',
@@ -633,12 +624,8 @@ export default function EmailEditorPage() {
     alert(`Email di test inviata a ${testEmail}`)
   }
 
-  const previewHtml = replacePreview(
-    mode==='blocchi' && blocchi.length
-      ? buildFullHtml(template, blocchi)
-      : buildFullHtml(template, []).replace('<div style="padding:32px"></div>',
-          `<div style="padding:32px">${template.corpo_html||''}</div>`)
-  )
+  const bodyHtmlPreview = mode==='blocchi' && blocchi.length ? blocchiToHtml(blocchi) : (template.corpo_html||'')
+  const previewHtml = replacePreview(buildFullEmailHtml(bodyHtmlPreview, headerConfig))
 
   const tipoInfo = TIPO_LABELS[template.tipo] || {}
   const selectedBl = selectedBlock !== null ? blocchi[selectedBlock] : null
@@ -741,6 +728,11 @@ export default function EmailEditorPage() {
             </div>
           </div>
 
+          {/* Intestazione email */}
+          <div style={{ padding:'10px 12px', borderBottom:'1px solid #E5E7EB' }}>
+            <HeaderEditor config={headerConfig} onChange={setHeaderConfig}/>
+          </div>
+
           {/* Variabili */}
           <div style={{ padding:'10px 12px' }}>
             <button onClick={()=>setShowVars(!showVars)}
@@ -795,12 +787,10 @@ export default function EmailEditorPage() {
             )}
             <div style={{ flex:1 }}/>
             <div style={{ display:'flex', gap:'12px' }}>
-              {[['mostra_header','Header'],['mostra_footer','Footer'],['attivo','Attivo']].map(([k,lb])=>(
-                <label key={k} style={{ display:'flex', alignItems:'center', gap:'5px', fontSize:'12px', cursor:'pointer', color:'#374151' }}>
-                  <input type="checkbox" checked={template[k]!==false} onChange={e=>updT(k,e.target.checked)} style={{ accentColor:BLU }}/>
-                  {lb}
-                </label>
-              ))}
+              <label style={{ display:'flex', alignItems:'center', gap:'5px', fontSize:'12px', cursor:'pointer', color:'#374151' }}>
+                <input type="checkbox" checked={template.attivo!==false} onChange={e=>updT('attivo',e.target.checked)} style={{ accentColor:BLU }}/>
+                Attivo
+              </label>
             </div>
           </div>
 
