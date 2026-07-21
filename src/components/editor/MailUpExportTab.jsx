@@ -150,14 +150,21 @@ function richToEmail(html, cp) {
   h = h.replace(/<h6([^>]*)>([\s\S]*?)<\/h6>/gi, (_, a, i) => convertHeading(a, i, '15px'))
 
   // 7. Liste — con font-family e mso-line-height-rule
+  // Strip inner <p> tags that TipTap wraps li content in (would create invalid nested <p>)
+  function cleanLiContent(li) {
+    return li.trim()
+      .replace(/<p[^>]*>([\s\S]*?)<\/p>/gi, '$1')
+      .replace(/<br\s*\/?>/gi, ' ')
+      .trim()
+  }
   h = h.replace(/<ul[^>]*>([\s\S]*?)<\/ul>/gi, (_, items) =>
     items.replace(/<li[^>]*>([\s\S]*?)<\/li>/gi, (__, li) =>
-      '<p style="margin:0 0 5px 0;padding:0 0 0 16px;font-size:15px;color:#374151;line-height:1.6;font-family:' + F + ';mso-line-height-rule:exactly;">&#8226;&nbsp;' + li.trim() + '</p>'))
+      '<p style="margin:0 0 5px 0;padding:0 0 0 16px;font-size:15px;color:#374151;line-height:1.6;font-family:' + F + ';mso-line-height-rule:exactly;">&#8226;&nbsp;' + cleanLiContent(li) + '</p>'))
   h = h.replace(/<ol[^>]*>([\s\S]*?)<\/ol>/gi, (_, items) => {
     let n = 0
     return items.replace(/<li[^>]*>([\s\S]*?)<\/li>/gi, (__, li) => {
       n++
-      return '<p style="margin:0 0 5px 0;padding:0 0 0 16px;font-size:15px;color:#374151;line-height:1.6;font-family:' + F + ';mso-line-height-rule:exactly;">' + n + '.&nbsp;' + li.trim() + '</p>'
+      return '<p style="margin:0 0 5px 0;padding:0 0 0 16px;font-size:15px;color:#374151;line-height:1.6;font-family:' + F + ';mso-line-height-rule:exactly;">' + n + '.&nbsp;' + cleanLiContent(li) + '</p>'
     })
   })
 
@@ -460,6 +467,76 @@ function buildHtml(ev, url, blocchi, opts, socialLinks) {
               </td></tr>
             </table>`)
         }
+
+      } else if (b.tipo === 'programma') {
+        const voci = b.voci || []
+        if (!voci.length) continue
+        const cSess = b.colore_titoli || cp
+        const cOra  = b.colore_orari  || cp
+        const bgBox = b.sfondo || '#ffffff'
+        const cBord = b.cornice_colore || '#E5E7EB'
+        const bSpess = b.cornice_spessore ? Math.round(b.cornice_spessore) : 1
+        const bRad  = b.cornice_radius || 0
+        const bStyle = b.cornice_stile === 'dotted' ? 'dotted' : b.cornice_stile === 'dashed' ? 'dashed' : 'solid'
+
+        let progHtml = ''
+
+        // Titolo sezione programma
+        if (b.titolo) {
+          progHtml += `<p style="margin:0 0 16px 0;padding:0;font-size:18px;font-weight:bold;color:#0A0A0A;font-family:${F};mso-line-height-rule:exactly;">${esc(b.titolo)}</p>`
+        }
+
+        for (const v of voci) {
+          if (v.tipo === 'orario') {
+            progHtml += `
+              <table width="100%" cellpadding="0" cellspacing="0" border="0" style="margin-bottom:6px;">
+                <tr>
+                  <td width="90" valign="top" style="padding-right:12px;padding-top:2px;">
+                    <p style="margin:0;padding:0;font-size:13px;font-weight:bold;color:${cOra};font-family:${F};white-space:nowrap;">${esc(v.orario||'')}</p>
+                  </td>
+                  <td valign="top">
+                    <p style="margin:0;padding:0;font-size:14px;color:#374151;font-family:${F};">${esc(v.testo||'')}</p>
+                  </td>
+                </tr>
+              </table>`
+
+          } else if (v.tipo === 'sessione' || v.tipo === 'intermezzo' || v.tipo === 'modera') {
+            const relatori = v.relatori || []
+            const bgSess = v.tipo === 'intermezzo' ? '#F9F0FF' : (v.tipo === 'modera' ? '#F0FFF4' : bgBox)
+            const colSess = v.tipo === 'intermezzo' ? '#7C3AED' : (v.tipo === 'modera' ? '#065F46' : cSess)
+
+            let relatoriHtml = ''
+            if (relatori.length) {
+              relatoriHtml = relatori.map(r => {
+                if (!r.nome && !r.ruolo) return ''
+                return `<table width="100%" cellpadding="0" cellspacing="0" border="0" style="margin-top:6px;">
+                  <tr>
+                    <td valign="top">
+                      ${r.nome ? `<p style="margin:0;padding:0;font-size:13px;font-weight:bold;color:#0A0A0A;font-family:${F};">${esc(r.nome)}</p>` : ''}
+                      ${r.ruolo ? `<p style="margin:0;padding:0;font-size:12px;color:#6B7280;font-family:${F};">${esc(r.ruolo)}</p>` : ''}
+                    </td>
+                  </tr>
+                </table>`
+              }).filter(Boolean).join('')
+            }
+
+            progHtml += `
+              <table width="100%" cellpadding="12" cellspacing="0" border="0"
+                bgcolor="${bgSess}"
+                style="margin-bottom:8px;background-color:${bgSess};border:${bSpess}px ${bStyle} ${cBord};border-radius:${bRad}px;">
+                <tr>
+                  <td>
+                    ${v.titolo ? `<p style="margin:0 0 ${relatori.length?'6px':'0'} 0;padding:0;font-size:14px;font-weight:bold;color:${colSess};font-family:${F};">${esc(v.titolo)}</p>` : ''}
+                    ${relatoriHtml}
+                  </td>
+                </tr>
+              </table>`
+          }
+        }
+
+        out += `<tr><td bgcolor="#FFFFFF" style="padding:20px ${PAD}px;background-color:#FFFFFF;">
+          ${progHtml}
+        </td></tr>`
       }
     }
     return out
