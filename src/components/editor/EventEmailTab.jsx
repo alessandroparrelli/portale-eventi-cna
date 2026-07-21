@@ -685,8 +685,8 @@ export default function EventEmailTab({ eventoId }) {
                 // Drag handlers solo quando il blocco non è aperto
                 const dh = !isSel ? dragHandlers(i) : {}
                 return (
-                  <div key={b.id||i} {...dh}
-                    style={{ border:`2px solid ${isSel?BLU:'#E5E7EB'}`, borderRadius:'8px', background:'#fff', boxShadow:isSel?'0 0 0 3px rgba(0,61,165,0.07)':'none', transition:'border-color .1s', overflow: isSel ? 'visible' : 'hidden' }}>
+                  <div key={b.id||i} {...dh} ref={isSel ? (el => { if(el) setTimeout(()=>el.scrollIntoView({behavior:'smooth',block:'nearest'}),50) }) : null}
+                    style={{ border:`2px solid ${isSel?BLU:'#E5E7EB'}`, borderRadius:'8px', background:'#fff', boxShadow:isSel?'0 0 0 3px rgba(0,61,165,0.07)':'none', transition:'border-color .1s', overflow:'hidden' }}>
                     <div onClick={()=>setSelectedBlock(isSel?null:i)}
                       style={{ display:'flex', alignItems:'center', gap:'6px', padding:'8px 10px', cursor:'pointer' }}>
                       <GripVertical size={12} style={{ color:'#D1D5DB', cursor:'grab', flexShrink:0 }}/>

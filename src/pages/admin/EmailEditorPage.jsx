@@ -529,7 +529,7 @@ export default function EmailEditorPage() {
                 const dh2 = !isSel ? dragHandlers(i) : {}
                 return (
                   <div key={b.id||i} {...dh2}
-                    style={{border:`2px solid ${isSel?BLU:'#E5E7EB'}`,borderRadius:'8px',background:'#fff',boxShadow:isSel?'0 0 0 3px rgba(0,61,165,0.07)':'none',transition:'border-color .1s',overflow:isSel?'visible':'hidden'}}>
+                    style={{border:`2px solid ${isSel?BLU:'#E5E7EB'}`,borderRadius:'8px',background:'#fff',boxShadow:isSel?'0 0 0 3px rgba(0,61,165,0.07)':'none',transition:'border-color .1s',overflow:'hidden'}}>
                     <div onClick={()=>setSelectedBlock(isSel?null:i)}
                       style={{display:'flex',alignItems:'center',gap:'6px',padding:'8px 10px',cursor:'pointer'}}>
                       <GripVertical size={12} style={{color:'#D1D5DB',cursor:'grab',flexShrink:0}}/>
