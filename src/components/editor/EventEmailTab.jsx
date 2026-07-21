@@ -238,7 +238,7 @@ function BlockProps({ block, onChange }) {
     case 'testo': return <>
       <div style={{ marginBottom:'8px' }}>
         <label style={lbl}>Testo</label>
-        <RichEditor value={block.html||''} onChange={html=>set('html',html)} minHeight="120px"/>
+        <RichEditor value={block.html||''} onChange={html=>set('html',html)} minHeight="200px"/>
       </div>
       {numField('Dimensione','size',15,'px',11,22)}
       {colorField('Colore','colore','#374151')}
@@ -278,11 +278,11 @@ function BlockProps({ block, onChange }) {
     case 'colonne': return <>
       <div style={{ marginBottom:'8px' }}>
         <label style={lbl}>Colonna sinistra</label>
-        <RichEditor value={block.sinistra||''} onChange={v=>set('sinistra',v)} minHeight="80px"/>
+        <RichEditor value={block.sinistra||''} onChange={v=>set('sinistra',v)} minHeight="120px"/>
       </div>
       <div style={{ marginBottom:'8px' }}>
         <label style={lbl}>Colonna destra</label>
-        <RichEditor value={block.destra||''} onChange={v=>set('destra',v)} minHeight="80px"/>
+        <RichEditor value={block.destra||''} onChange={v=>set('destra',v)} minHeight="120px"/>
       </div>
       {numField('Gap','gap',24,'px',0,48)}
     </>
@@ -650,7 +650,7 @@ export default function EventEmailTab({ eventoId }) {
         </div>
 
         {/* COL 2: Editor blocchi/HTML */}
-        <div style={{ flex:1, minWidth:0, display:'flex', flexDirection:'column', padding:'0 14px' }}>
+        <div style={{ flex:1, minWidth:0, display:'flex', flexDirection:'column', overflow:'hidden', padding:'0 14px' }}>
 
           {/* Toolbar modo */}
           <div style={{ display:'flex', gap:'4px', alignItems:'center', marginBottom:'8px', flexShrink:0 }}>
