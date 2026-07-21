@@ -394,147 +394,124 @@ export default function EmailPage() {
         </button>
       </div>
 
-      {/* 3 colonne */}
-      <div style={{ display:'flex', flex:1, overflow:'hidden', marginTop:'10px', paddingLeft:'32px', paddingRight:'0' }}>
+      {/* CORPO 3 COLONNE */}
+      <div style={{ display:'flex', flex:1, overflow:'hidden', marginTop:'10px', paddingLeft:'32px' }}>
 
-        {/* COL 1: Config */}
-        <div style={{ width:colWidths.left+'px', flexShrink:0, overflowY:'auto', paddingRight:'14px', display:'flex', flexDirection:'column', gap:'8px' }}>
-          <div>
+        {/* COL 1: Lista blocchi */}
+        <div style={{ width:'240px', flexShrink:0, display:'flex', flexDirection:'column', overflow:'hidden', borderRight:'1px solid #E5E7EB' }}>
+          <div style={{ padding:'0 12px 8px', flexShrink:0, borderBottom:'1px solid #F3F4F6' }}>
             <label style={lbl}>Oggetto email</label>
             <input value={current.oggetto||''} onChange={e=>update('oggetto',e.target.value)}
-              style={{...inp, fontSize:'13px', fontWeight:'600'}} placeholder="Oggetto dell'email..."/>
+              style={{...inp, fontSize:'12px', fontWeight:'600', marginBottom:'6px'}} placeholder="Oggetto..."/>
+            <div onClick={()=>setSelectedBlock('header')}
+              style={{ display:'flex', alignItems:'center', gap:'6px', padding:'7px 10px', borderRadius:'8px', border:`2px solid ${selectedBlock==='header'?BLU:'#E5E7EB'}`, background:selectedBlock==='header'?'#EEF3FF':'#fff', cursor:'pointer' }}>
+              <span style={{ fontSize:'13px' }}>&#9881;</span>
+              <span style={{ fontSize:'12px', fontWeight:'600', color:selectedBlock==='header'?BLU:'#374151', flex:1 }}>Intestazione email</span>
+              <div style={{ background:headerConfig.sfondo||BLU, borderRadius:'3px', width:'20px', height:'14px', flexShrink:0 }}/>
+            </div>
           </div>
-          <HeaderEditor config={headerConfig} onChange={setHeaderConfig}/>
-          <div style={{ background:'#F9FAFB', borderRadius:'8px', border:'1px solid #E5E7EB', overflow:'hidden' }}>
-            <button type="button" onClick={()=>setShowVars(!showVars)}
-              style={{ width:'100%', padding:'8px 10px', display:'flex', alignItems:'center', justifyContent:'space-between', background:'none', border:'none', cursor:'pointer', fontFamily:"'Inter',sans-serif" }}>
-              <span style={{ fontSize:'10px', fontWeight:'800', color:'#6B7280', textTransform:'uppercase', letterSpacing:'.07em' }}>{'{ } Variabili'}</span>
-              <ChevronRight size={12} style={{ color:'#9CA3AF', transform:showVars?'rotate(90deg)':'none', transition:'transform .15s' }}/>
-            </button>
-            {showVars && (
-              <div style={{ padding:'6px 10px 10px', display:'flex', flexWrap:'wrap', gap:'4px', borderTop:'1px solid #E5E7EB' }}>
-                {VARIABILI.map(v=>(
-                  <button key={v} type="button" onClick={()=>navigator.clipboard.writeText(v)}
-                    style={{ padding:'3px 7px', background:'#fff', border:'1px solid #BFDBFE', borderRadius:'4px', cursor:'pointer', fontSize:'10px', color:'#1d4ed8', fontFamily:'monospace' }}>
-                    {v}
-                  </button>
-                ))}
+          <div style={{ flex:1, overflowY:'auto', padding:'8px 12px', display:'flex', flexDirection:'column', gap:'3px' }}>
+            {currBlocchi.length === 0 && (
+              <div style={{ textAlign:'center', padding:'24px 8px', color:'#9CA3AF' }}>
+                <p style={{ margin:0, fontSize:'11px' }}>Nessun blocco</p>
               </div>
             )}
+            {currBlocchi.map((b, i) => {
+              const info = BLOCK_TYPES.find(t=>t.tipo===b.tipo)||{}
+              const isSel = selectedBlock === i
+              const dh2 = !isSel ? dragHandlers(i) : {}
+              return (
+                <div key={b.id||i} {...dh2} onClick={()=>setSelectedBlock(isSel?null:i)}
+                  style={{ display:'flex', alignItems:'center', gap:'6px', padding:'7px 8px', borderRadius:'7px', border:`1.5px solid ${isSel?BLU:'#E5E7EB'}`, background:isSel?'#EEF3FF':'#fff', cursor:'pointer', transition:'all .1s', flexShrink:0 }}>
+                  <GripVertical size={11} style={{ color:'#D1D5DB', cursor:'grab', flexShrink:0 }}/>
+                  <span style={{ color:isSel?BLU:'#6B7280', display:'flex', flexShrink:0 }}>{info.icon}</span>
+                  <span style={{ fontSize:'11px', fontWeight:'600', color:isSel?BLU:'#374151', flex:1, overflow:'hidden', textOverflow:'ellipsis', whiteSpace:'nowrap' }}>{info.label}</span>
+                  <div style={{ display:'flex', gap:'1px' }} onClick={e=>e.stopPropagation()}>
+                    {i>0&&<button onClick={()=>moveBlock(i,-1)} style={btnTiny}><ChevronUp size={9}/></button>}
+                    {i<currBlocchi.length-1&&<button onClick={()=>moveBlock(i,1)} style={btnTiny}><ChevronDown size={9}/></button>}
+                    <button onClick={()=>deleteBlock(i)} style={{...btnTiny,color:'#EF4444'}}><Trash2 size={9}/></button>
+                  </div>
+                </div>
+              )
+            })}
           </div>
-          {/* Info */}
-          <div style={{ padding:'10px 12px', background:'#EFF6FF', borderRadius:'8px', fontSize:'11px', color:'#1D4ED8', lineHeight:1.5 }}>
-            <strong>Come funziona</strong><br/>
-            Ogni nuovo evento copia questi template. Puoi personalizzarli evento per evento dalla scheda Email.
+          <div style={{ padding:'8px 12px', borderTop:'1px solid #E5E7EB', flexShrink:0 }}>
+            <p style={{ margin:'0 0 5px', fontSize:'9px', fontWeight:'800', color:'#9CA3AF', textTransform:'uppercase', letterSpacing:'.07em' }}>+ Blocco</p>
+            <div style={{ display:'flex', flexWrap:'wrap', gap:'3px' }}>
+              {BLOCK_TYPES.map(bt=>(
+                <button key={bt.tipo} type="button" onClick={()=>addBlock(bt.tipo)}
+                  style={{ display:'flex', alignItems:'center', gap:'3px', padding:'3px 6px', background:'#F3F4F6', border:'none', borderRadius:'5px', cursor:'pointer', fontSize:'10px', color:'#374151', fontFamily:"'Inter',sans-serif" }}>
+                  <span style={{ color:BLU }}>{bt.icon}</span>{bt.label}
+                </button>
+              ))}
+            </div>
           </div>
         </div>
 
         {/* Resizer 1 */}
         <div onMouseDown={e=>startResize('left',e)}
-          style={{ width:'5px', flexShrink:0, cursor:'ew-resize', background:'transparent', position:'relative', zIndex:10, borderLeft:'1px solid #E5E7EB', borderRight:'1px solid #E5E7EB' }}
+          style={{ width:'5px', flexShrink:0, cursor:'ew-resize', background:'transparent', position:'relative', zIndex:10 }}
           onMouseEnter={e=>{e.currentTarget.style.background='#EEF3FF'}} onMouseLeave={e=>{e.currentTarget.style.background='transparent'}}>
           <div style={{ position:'absolute', top:'50%', left:'50%', transform:'translate(-50%,-50%)', width:'3px', height:'24px', borderRadius:'2px', background:'#D1D5DB' }}/>
         </div>
 
-        {/* COL 2: Editor blocchi */}
+        {/* COL 2: Editor blocco selezionato */}
         <div style={{ flex:1, minWidth:0, display:'flex', flexDirection:'column', overflow:'hidden' }}>
-          {/* Toolbar */}
-          <div style={{ display:'flex', gap:'4px', alignItems:'center', marginBottom:'8px', flexShrink:0 }}>
-            {[['blocchi',<Layers size={11}/>,'Blocchi'],['html',<Code2 size={11}/>,'HTML']].map(([m,ic,lb])=>(
-              <button key={m} type="button" onClick={()=>setViewMode(m)}
-                style={{ display:'flex', alignItems:'center', gap:'4px', padding:'5px 12px', borderRadius:'6px', border:'none', cursor:'pointer', background:viewMode===m?BLU:'#F3F4F6', color:viewMode===m?'#fff':'#555', fontSize:'11px', fontWeight:'600', fontFamily:"'Inter',sans-serif" }}>
-                {ic}{lb}
-              </button>
-            ))}
-          </div>
-
-          <div style={{ flex:1, overflowY:'auto', display:'flex', flexDirection:'column', gap:'4px' }}>
-            {viewMode==='blocchi' && <>
-              {currBlocchi.length===0 && (
-                <div style={{ textAlign:'center', padding:'40px 16px', color:'#9CA3AF', background:'#fff', border:'1px dashed #E5E7EB', borderRadius:'10px' }}>
-                  <LayoutTemplate size={24} style={{ marginBottom:'8px', opacity:.3 }}/>
-                  <p style={{ margin:0, fontSize:'13px', fontWeight:'600' }}>Canvas vuoto</p>
-                  <p style={{ margin:'3px 0 0', fontSize:'11px' }}>Aggiungi un blocco</p>
-                </div>
-              )}
-              {currBlocchi.map((b,i) => {
-                const info = BLOCK_TYPES.find(t=>t.tipo===b.tipo)||{}
-                const isSel = selectedBlock===i
-                const dh2 = !isSel ? dragHandlers(i) : {}
-                return (
-                  <div key={b.id||i} {...dh2} ref={isSel ? (el => { if(el) setTimeout(()=>el.scrollIntoView({behavior:'smooth',block:'nearest'}),50) }) : null}
-                    style={{ border:`2px solid ${isSel?BLU:'#E5E7EB'}`, borderRadius:'8px', background:'#fff', boxShadow:isSel?'0 0 0 3px rgba(0,61,165,0.07)':'none', transition:'border-color .1s', overflow:'hidden' }}>
-                    <div onClick={()=>setSelectedBlock(isSel?null:i)}
-                      style={{ display:'flex', alignItems:'center', gap:'6px', padding:'8px 10px', cursor:'pointer' }}>
-                      <GripVertical size={12} style={{ color:'#D1D5DB', cursor:'grab', flexShrink:0 }}/>
-                      <span style={{ color:BLU, display:'flex', flexShrink:0 }}>{info.icon}</span>
-                      <span style={{ fontSize:'12px', fontWeight:'600', color:'#374151', flex:1 }}>{info.label}</span>
-                      <div style={{ display:'flex', gap:'2px' }} onClick={e=>e.stopPropagation()}>
-                        {i>0 && <button onClick={()=>moveBlock(i,-1)} style={btnTiny}><ChevronUp size={10}/></button>}
-                        {i<currBlocchi.length-1 && <button onClick={()=>moveBlock(i,1)} style={btnTiny}><ChevronDown size={10}/></button>}
-                        <button onClick={()=>deleteBlock(i)} style={{...btnTiny,color:'#EF4444'}}><Trash2 size={10}/></button>
-                      </div>
-                    </div>
-                    {isSel && selectedBl && (
-                      <div onClick={e=>e.stopPropagation()} onMouseDown={e=>e.stopPropagation()} onPointerDown={e=>e.stopPropagation()}
-                        style={{ padding:'10px 10px 14px', borderTop:'1px solid #EEF3FF', background:'#fff', overflowY:'auto', maxHeight:'70vh' }}>
-                        <BlockProps block={selectedBl} onChange={nb=>updateBlock(i,nb)}/>
-                      </div>
-                    )}
-                    {!isSel && (
-                      <div onClick={()=>setSelectedBlock(i)}
-                        style={{ padding:'0 10px 7px 34px', fontSize:'10px', color:'#9CA3AF', overflow:'hidden', whiteSpace:'nowrap', textOverflow:'ellipsis', cursor:'pointer' }}>
-                        {b.tipo==='titolo'&&(b.testo||'(vuoto)')}
-                        {b.tipo==='testo'&&((b.html||'').replace(/<[^>]+>/g,'').slice(0,60)||'(vuoto)')}
-                        {b.tipo==='bottone'&&(b.testo||'Bottone')}
-                        {b.tipo==='immagine'&&(b.src?b.src.split('/').pop():'Nessuna immagine')}
-                        {b.tipo==='hero'&&(b.titolo||'Hero banner')}
-                        {b.tipo==='colonne'&&'Layout 2 colonne'}
-                        {b.tipo==='info_box'&&'Data e luogo evento'}
-                        {b.tipo==='qr'&&'QR Code accesso'}
-                        {b.tipo==='separatore'&&'Separatore'}
-                        {b.tipo==='spazio'&&(b.altezza||32)+'px'}
-                        {b.tipo==='mappa'&&(b.indirizzo||'Mappa')}
-                      </div>
-                    )}
-                  </div>
-                )
-              })}
-              <div style={{ background:'#F9FAFB', border:'1.5px dashed #E5E7EB', borderRadius:'8px', padding:'10px 12px', marginTop:'2px', flexShrink:0 }}>
-                <p style={{ margin:'0 0 6px', fontSize:'9px', fontWeight:'800', color:'#9CA3AF', textTransform:'uppercase', letterSpacing:'.08em' }}>+ Aggiungi blocco</p>
+          {selectedBlock === null ? (
+            <div style={{ flex:1, display:'flex', flexDirection:'column', alignItems:'center', justifyContent:'center', gap:'12px', color:'#9CA3AF', background:'#FAFBFC' }}>
+              <Layers size={32} style={{ opacity:.3 }}/>
+              <p style={{ margin:0, fontSize:'14px', fontWeight:'600' }}>Seleziona un blocco</p>
+              <p style={{ margin:0, fontSize:'12px' }}>Clicca un elemento nella lista per modificarlo</p>
+            </div>
+          ) : selectedBlock === 'header' ? (
+            <div style={{ flex:1, overflowY:'auto', padding:'16px 20px' }}>
+              <div style={{ marginBottom:'12px' }}>
+                <h3 style={{ margin:'0 0 4px', fontSize:'16px', fontWeight:'800', color:NERO }}>Intestazione email</h3>
+                <p style={{ margin:0, fontSize:'12px', color:'#6B7280' }}>Logo, colore sfondo, titolo e layout</p>
+              </div>
+              <HeaderEditor config={headerConfig} onChange={setHeaderConfig} defaultExpanded={true}/>
+              <div style={{ marginTop:'16px' }}>
+                <label style={lbl}>Variabili disponibili</label>
                 <div style={{ display:'flex', flexWrap:'wrap', gap:'4px' }}>
-                  {BLOCK_TYPES.map(bt=>(
-                    <button key={bt.tipo} type="button" onClick={()=>addBlock(bt.tipo)}
-                      style={{ display:'flex', alignItems:'center', gap:'4px', padding:'4px 8px', background:'#fff', border:'1px solid #E5E7EB', borderRadius:'5px', cursor:'pointer', fontSize:'10px', color:'#374151', fontFamily:"'Inter',sans-serif", fontWeight:'500' }}>
-                      <span style={{color:BLU}}>{bt.icon}</span>{bt.label}
+                  {VARIABILI.map(v=>(
+                    <button key={v} type="button" onClick={()=>navigator.clipboard.writeText(v)}
+                      style={{ padding:'3px 8px', background:'#EEF3FF', border:'1px solid #BFDBFE', borderRadius:'4px', cursor:'pointer', fontSize:'10px', color:'#1d4ed8', fontFamily:'monospace' }}>
+                      {v}
                     </button>
                   ))}
                 </div>
               </div>
-            </>}
-            {viewMode==='html' && (
-              <textarea value={current.corpo_html||''} onChange={e=>update('corpo_html',e.target.value)}
-                style={{...inp, flex:1, fontFamily:'monospace', fontSize:'11px', resize:'none', lineHeight:1.6, minHeight:'400px'}}/>
-            )}
-          </div>
+            </div>
+          ) : currBlocchi[selectedBlock] ? (
+            <div style={{ flex:1, overflowY:'auto', padding:'16px 20px' }}>
+              <div style={{ display:'flex', alignItems:'center', gap:'8px', marginBottom:'16px', paddingBottom:'12px', borderBottom:'1px solid #E5E7EB' }}>
+                <span style={{ color:BLU, fontSize:'16px' }}>{BLOCK_TYPES.find(t=>t.tipo===currBlocchi[selectedBlock].tipo)?.icon}</span>
+                <h3 style={{ margin:0, fontSize:'16px', fontWeight:'800', color:NERO }}>
+                  {BLOCK_TYPES.find(t=>t.tipo===currBlocchi[selectedBlock].tipo)?.label}
+                </h3>
+                <span style={{ marginLeft:'auto', fontSize:'10px', color:'#9CA3AF' }}>Blocco {selectedBlock+1} di {currBlocchi.length}</span>
+              </div>
+              <BlockProps block={currBlocchi[selectedBlock]} onChange={nb=>updateBlock(selectedBlock,nb)}/>
+            </div>
+          ) : null}
         </div>
 
         {/* Resizer 2 */}
         {!previewCollapsed && (
           <div onMouseDown={e=>startResize('right',e)}
-            style={{ width:'5px', flexShrink:0, cursor:'ew-resize', background:'transparent', position:'relative', zIndex:10, borderLeft:'1px solid #E5E7EB', borderRight:'1px solid #E5E7EB' }}
+            style={{ width:'5px', flexShrink:0, cursor:'ew-resize', background:'transparent', position:'relative', zIndex:10, borderLeft:'1px solid #E5E7EB' }}
             onMouseEnter={e=>{e.currentTarget.style.background='#EEF3FF'}} onMouseLeave={e=>{e.currentTarget.style.background='transparent'}}>
             <div style={{ position:'absolute', top:'50%', left:'50%', transform:'translate(-50%,-50%)', width:'3px', height:'24px', borderRadius:'2px', background:'#D1D5DB' }}/>
           </div>
         )}
 
         {/* COL 3: Anteprima */}
-        <div style={{ width:previewCollapsed?'40px':colWidths.right+'px', flexShrink:0, display:'flex', flexDirection:'column', overflow:'hidden' }}>
+        <div style={{ width:previewCollapsed?'40px':colWidths.right+'px', flexShrink:0, display:'flex', flexDirection:'column', borderLeft:'1px solid #E5E7EB', overflow:'hidden' }}>
           {previewCollapsed ? (
             <button type="button" onClick={()=>setPreviewCollapsed(false)}
               style={{ flex:1, background:'none', border:'none', cursor:'pointer', display:'flex', flexDirection:'column', alignItems:'center', justifyContent:'center', gap:'8px', color:BLU }}>
               <PanelRightOpen size={16}/>
-              <span style={{ fontSize:'9px', fontWeight:'700', writingMode:'vertical-rl', letterSpacing:'.06em', color:'#9CA3AF' }}>ANTEPRIMA</span>
+              <span style={{ fontSize:'9px', fontWeight:'700', writingMode:'vertical-rl', color:'#9CA3AF' }}>ANTEPRIMA</span>
             </button>
           ) : <>
             <div style={{ padding:'8px 12px', borderBottom:'1px solid #E5E7EB', display:'flex', alignItems:'center', gap:'8px', background:'#FAFBFC', flexShrink:0 }}>
@@ -546,14 +523,10 @@ export default function EmailPage() {
                     style={{ padding:'4px 8px', border:'none', cursor:'pointer', background:previewDevice===d?'#E5E7EB':'#fff', color:previewDevice===d?NERO:'#9CA3AF', display:'flex', alignItems:'center' }}>{ic}</button>
                 ))}
               </div>
-              <button type="button" onClick={()=>setPreviewCollapsed(true)} style={{ background:'none', border:'none', cursor:'pointer', color:'#9CA3AF', display:'flex' }}>
-                <PanelRightClose size={14}/>
-              </button>
+              <button type="button" onClick={()=>setPreviewCollapsed(true)} style={{ background:'none', border:'none', cursor:'pointer', color:'#9CA3AF', display:'flex' }}><PanelRightClose size={14}/></button>
             </div>
             <div style={{ padding:'7px 14px', background:'#FAFBFC', borderBottom:'1px solid #F3F4F6', flexShrink:0, fontSize:'11px' }}>
-              <div style={{ color:'#374151', fontWeight:'500', overflow:'hidden', textOverflow:'ellipsis', whiteSpace:'nowrap' }}>
-                <span style={{ fontWeight:'700' }}>Oggetto:</span> {replacePreview(current.oggetto||'(nessun oggetto)')}
-              </div>
+              <span style={{ fontWeight:'700' }}>Oggetto:</span> {replacePreview(current.oggetto||'(nessun oggetto)')}
             </div>
             <div style={{ flex:1, overflow:'hidden', background:'#F0F2F5', padding:'12px' }}>
               <div style={{ maxWidth:previewDevice==='mobile'?'375px':'100%', margin:'0 auto', height:'100%', background:'#fff', borderRadius:'8px', overflow:'hidden', boxShadow:'0 2px 12px rgba(0,0,0,0.08)' }}>
