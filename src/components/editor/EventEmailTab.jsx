@@ -1,7 +1,7 @@
 /**
  * EventEmailTab v4 — Split-pane + HeaderEditor avanzato
  */
-import { useState, useEffect, useRef } from 'react'
+import React, { useState, useEffect, useRef } from 'react'
 import { supabase, getFreshJwt } from '../../lib/supabase'
 import RichEditor from './RichEditor'
 import HeaderEditor, { mergeHeaderConfig, buildFullEmailHtml, DEFAULT_HEADER_CONFIG } from './HeaderEditor'
@@ -348,6 +348,22 @@ export default function EventEmailTab({ eventoId }) {
   const [sending,         setSending]         = useState(false)
   const dragIdx = useRef(null)
   const dragOverIdx = useRef(null)
+  const [colWidths, setColWidths] = React.useState({ left: 280, right: 480 })
+  const resizingRef = React.useRef(null)
+  function startResize(col, e) {
+    e.preventDefault()
+    const startX = e.clientX
+    const startW = col === 'left' ? colWidths.left : colWidths.right
+    const onMove = (ev) => {
+      const dx = ev.clientX - startX
+      setColWidths(prev => col === 'left'
+        ? { ...prev, left: Math.max(200, Math.min(480, startW + dx)) }
+        : { ...prev, right: Math.max(300, Math.min(700, startW - dx)) })
+    }
+    const onUp = () => { window.removeEventListener('mousemove', onMove); window.removeEventListener('mouseup', onUp) }
+    window.addEventListener('mousemove', onMove)
+    window.addEventListener('mouseup', onUp)
+  }
 
   useEffect(() => {
     if (eventoId) {
@@ -580,10 +596,10 @@ export default function EventEmailTab({ eventoId }) {
       ══════════════════════════════════════════════════════════ */}
       <div style={{ display:'flex', flex:1, gap:0, overflow:'hidden', marginTop:'10px' }}>
 
-        {/* ── COL 1: Configurazione (sinistra) ── */}
+        {/* COL 1: Config */}
         <div style={{
-          width:'280px', flexShrink:0, display:'flex', flexDirection:'column',
-          borderRight:'1px solid #E5E7EB', overflowY:'auto', paddingRight:'14px', gap:'8px',
+          width:colWidths.left+'px', flexShrink:0, display:'flex', flexDirection:'column',
+          borderRight:'none', overflowY:'auto', paddingRight:'14px', gap:'8px',
         }}>
           {/* Oggetto */}
           <div>
@@ -625,7 +641,15 @@ export default function EventEmailTab({ eventoId }) {
           </div>
         </div>
 
-        {/* ── COL 2: Editor blocchi/HTML (centro) ── */}
+        {/* Resizer 1 */}
+        <div onMouseDown={e=>startResize('left',e)}
+          style={{ width:'5px', flexShrink:0, cursor:'ew-resize', background:'transparent', position:'relative', zIndex:10,
+            borderLeft:'1px solid #E5E7EB', borderRight:'1px solid #E5E7EB' }}>
+          <div style={{ position:'absolute', top:'50%', left:'50%', transform:'translate(-50%,-50%)',
+            width:'3px', height:'24px', borderRadius:'2px', background:'#D1D5DB' }}/>
+        </div>
+
+        {/* COL 2: Editor blocchi/HTML */}
         <div style={{ flex:1, minWidth:0, display:'flex', flexDirection:'column', overflow:'hidden', padding:'0 14px' }}>
 
           {/* Toolbar modo */}
@@ -659,9 +683,10 @@ export default function EventEmailTab({ eventoId }) {
                 const info = BLOCK_TYPES.find(t=>t.tipo===b.tipo)||{}
                 const isSel = selectedBlock === i
                 return (
-                  <div key={b.id||i} {...dragHandlers(i)} onClick={()=>setSelectedBlock(isSel?null:i)}
-                    style={{ border:`2px solid ${isSel?BLU:'#E5E7EB'}`, borderRadius:'8px', background:'#fff', cursor:'pointer', boxShadow:isSel?`0 0 0 3px rgba(0,61,165,0.07)`:'none', transition:'all .1s', overflow:'hidden' }}>
-                    <div style={{ display:'flex', alignItems:'center', gap:'6px', padding:'8px 10px' }}>
+                  <div key={b.id||i} {...dragHandlers(i)}
+                    style={{ border:`2px solid ${isSel?BLU:'#E5E7EB'}`, borderRadius:'8px', background:'#fff', boxShadow:isSel?'0 0 0 3px rgba(0,61,165,0.07)':'none', transition:'border-color .1s', overflow:'hidden' }}>
+                    <div onClick={()=>setSelectedBlock(isSel?null:i)}
+                      style={{ display:'flex', alignItems:'center', gap:'6px', padding:'8px 10px', cursor:'pointer' }}>
                       <GripVertical size={12} style={{ color:'#D1D5DB', cursor:'grab', flexShrink:0 }}/>
                       <span style={{ color:BLU, display:'flex', flexShrink:0 }}>{info.icon}</span>
                       <span style={{ fontSize:'12px', fontWeight:'600', color:'#374151', flex:1 }}>{info.label}</span>
@@ -671,25 +696,26 @@ export default function EventEmailTab({ eventoId }) {
                         <button onClick={()=>deleteBlock(i)} style={{...btnTiny, color:'#EF4444'}}><Trash2 size={10}/></button>
                       </div>
                     </div>
-                    {/* Proprietà inline se selezionato */}
                     {isSel && selectedBl && (
-                      <div style={{ padding:'0 10px 10px', borderTop:'1px solid #EEF3FF' }}>
+                      <div onClick={e=>e.stopPropagation()} onMouseDown={e=>e.stopPropagation()}
+                        style={{ padding:'0 10px 10px', borderTop:'1px solid #EEF3FF' }}>
                         <BlockProps block={selectedBl} onChange={nb=>updateBlock(i,nb)}/>
                       </div>
                     )}
                     {!isSel && (
-                      <div style={{ padding:'0 10px 7px 34px', fontSize:'10px', color:'#9CA3AF', overflow:'hidden', whiteSpace:'nowrap', textOverflow:'ellipsis' }}>
+                      <div onClick={()=>setSelectedBlock(i)}
+                        style={{ padding:'0 10px 7px 34px', fontSize:'10px', color:'#9CA3AF', overflow:'hidden', whiteSpace:'nowrap', textOverflow:'ellipsis', cursor:'pointer' }}>
                         {b.tipo==='titolo'&&(b.testo||'(vuoto)')}
                         {b.tipo==='testo'&&((b.html||'').replace(/<[^>]+>/g,'').slice(0,60)||'(vuoto)')}
                         {b.tipo==='bottone'&&(b.testo||'Bottone')}
-                        {b.tipo==='immagine'&&(b.src?'🖼 '+b.src.split('/').pop():'📎 Nessuna immagine')}
+                        {b.tipo==='immagine'&&(b.src?'\u{1F5BC} '+b.src.split('/').pop():'\u{1F4CE} Nessuna immagine')}
                         {b.tipo==='hero'&&(b.titolo||'Hero banner')}
-                        {b.tipo==='colonne'&&'░░ Layout 2 colonne'}
-                        {b.tipo==='info_box'&&'📅 Data e luogo evento'}
-                        {b.tipo==='qr'&&'▦ QR Code accesso'}
-                        {b.tipo==='separatore'&&'— Separatore'}
-                        {b.tipo==='spazio'&&`↕ ${b.altezza||32}px`}
-                        {b.tipo==='mappa'&&`📍 ${b.indirizzo||'Indirizzo mappa'}`}
+                        {b.tipo==='colonne'&&'Layout 2 colonne'}
+                        {b.tipo==='info_box'&&'Data e luogo evento'}
+                        {b.tipo==='qr'&&'QR Code accesso'}
+                        {b.tipo==='separatore'&&'Separatore'}
+                        {b.tipo==='spazio'&&(b.altezza||32)+'px spazio'}
+                        {b.tipo==='mappa'&&(b.indirizzo||'Indirizzo mappa')}
                       </div>
                     )}
                   </div>
@@ -717,9 +743,19 @@ export default function EventEmailTab({ eventoId }) {
           </div>
         </div>
 
-        {/* ── COL 3: Anteprima (destra, fissa e larga) ── */}
+        {/* Resizer 2 */}
+        {!previewCollapsed && (
+          <div onMouseDown={e=>startResize('right',e)}
+            style={{ width:'5px', flexShrink:0, cursor:'ew-resize', background:'transparent', position:'relative', zIndex:10,
+              borderLeft:'1px solid #E5E7EB', borderRight:'1px solid #E5E7EB' }}>
+            <div style={{ position:'absolute', top:'50%', left:'50%', transform:'translate(-50%,-50%)',
+              width:'3px', height:'24px', borderRadius:'2px', background:'#D1D5DB' }}/>
+          </div>
+        )}
+
+        {/* COL 3: Anteprima */}
         <div style={{
-          width: previewCollapsed ? '40px' : '480px',
+          width: previewCollapsed ? '40px' : colWidths.right+'px',
           flexShrink:0, display:'flex', flexDirection:'column',
           borderLeft:'1px solid #E5E7EB', transition:'width .2s ease', overflow:'hidden',
         }}>
