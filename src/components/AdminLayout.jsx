@@ -120,7 +120,7 @@ export default function AdminLayout() {
         )}
 
         {/* Centro: logo + titolo */}
-        <div className="admin-header-center">
+        <div className="admin-header-center" style={{ display:'flex', alignItems:'center', gap:0 }}>
           <img
             src="https://customer31551.img.musvc2.net/static/31551/images/1/CNARoma%20NEGATIVO%20COLORE%20SOLO%20ROMA.png"
             alt="CNA Roma"
@@ -131,9 +131,9 @@ export default function AdminLayout() {
           />
           <div style={s.titleBlock}>
             <span style={s.pageTitle}>
-      <span style={{ color:'#fff' }}>evently</span>
-      <span style={{ color:'#E11D48' }}>pro</span>
-    </span>
+              <span style={{ color:'#fff' }}>evently</span>
+              <span style={{ color:'#E11D48' }}>pro</span>
+            </span>
           </div>
         </div>
 
@@ -183,8 +183,8 @@ const s = {
   titleBlock: {
     display: 'flex',
     alignItems: 'center',
-    paddingLeft: '12px',
-    transform: 'translateY(8px)',
+    paddingLeft: '14px',
+    alignSelf: 'center',
   },
   pageTitle: {
     fontSize: '22px',
