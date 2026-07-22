@@ -103,6 +103,8 @@ export default function IscrittiPage() {
   const [smsRisultato, setSmsRisultato] = useState(null)
   const [smsTarget, setSmsTarget] = useState('tutti') // 'tutti'|'selezione'|'singolo'|'prova'
   const [smsProvaNumero, setSmsProvaNumero] = useState('')
+  const [smsAnteprimaSearch, setSmsAnteprimaSearch] = useState('')
+  const [smsAnteprimaIscritto, setSmsAnteprimaIscritto] = useState(null)
   const [eventoDettagli, setEventoDettagli] = useState(null) // {titolo, data_inizio, luogo}
 
   // Mappa id→nome per referenti di gruppo (calcolata dai registrations caricati)
@@ -831,13 +833,16 @@ export default function IscrittiPage() {
     if (iscritto) {
       setSmsSelezione(new Set([iscritto.id]))
       setSmsTarget('singolo')
+      setSmsAnteprimaIscritto(iscritto)
     } else if (target === 'selezione' && smsSelezione.size === 0) {
-      // nessuna selezione attiva -> passa a tutti
       setSmsTarget('tutti')
+      setSmsAnteprimaIscritto(null)
     } else {
       setSmsSelezione(new Set())
       setSmsTarget(target)
+      setSmsAnteprimaIscritto(null)
     }
+    setSmsAnteprimaSearch('')
     setSmsRisultato(null)
     setSmsModal(true)
   }
@@ -850,8 +855,11 @@ export default function IscrittiPage() {
 
   function getAnteprimaSms() {
     if (smsTarget === 'prova') return interpolaSms(smsTesto, { nome: 'Mario', cognome: 'Rossi' })
+    // Se c'e' un iscritto selezionato dalla ricerca, usa quello
+    if (smsAnteprimaIscritto) return interpolaSms(smsTesto, smsAnteprimaIscritto)
+    // Altrimenti usa il primo della selezione o il primo della lista
     const primoId = [...smsSelezione][0]
-    const primo = primoId ? registrations.find(r => r.id === primoId) : registrations[0]
+    const primo = primoId ? registrations.find(r => r.id === primoId) : registrations.find(r => r.cellulare)
     return interpolaSms(smsTesto, primo)
   }
 
@@ -1469,13 +1477,19 @@ export default function IscrittiPage() {
 
               {/* Mittente */}
               <div style={{ marginBottom:14 }}>
-                <p style={{ fontSize:'11px', fontWeight:'700', color:'#6B7280', textTransform:'uppercase', letterSpacing:'.05em', margin:'0 0 6px' }}>Mittente (max 11 car.)</p>
+                <p style={{ fontSize:'11px', fontWeight:'700', color:'#6B7280', textTransform:'uppercase', letterSpacing:'.05em', margin:'0 0 6px' }}>
+                  Mittente
+                  <span style={{ fontWeight:400, textTransform:'none', color:'#9CA3AF', marginLeft:4 }}>(max 11 car., solo lettere e numeri)</span>
+                </p>
                 <input
-                  style={{ width:'100%', padding:'8px 10px', border:'1.5px solid #E5E7EB', borderRadius:7, fontSize:13, boxSizing:'border-box', fontFamily:'monospace', fontWeight:700 }}
+                  style={{ width:'100%', padding:'8px 10px', border:'1.5px solid #E5E7EB', borderRadius:7, fontSize:13, boxSizing:'border-box', fontFamily:'monospace', fontWeight:700, letterSpacing:'.05em' }}
                   value={smsMittente}
                   maxLength={11}
                   onChange={e => setSmsMittente(e.target.value.toUpperCase().replace(/[^A-Z0-9]/g,''))}
                 />
+                <p style={{ fontSize:11, color:'#9CA3AF', margin:'3px 0 0' }}>
+                  Nota: spazi e caratteri speciali non ammessi dagli operatori SMS. Usa <strong>CNAROMA</strong>.
+                </p>
               </div>
 
               {/* Variabili rapide */}
@@ -1519,43 +1533,83 @@ export default function IscrittiPage() {
               </div>
             </div>
 
-            {/* Colonna destra: anteprima */}
-            <div>
-              <p style={{ fontSize:'11px', fontWeight:'700', color:'#6B7280', textTransform:'uppercase', letterSpacing:'.05em', margin:'0 0 10px' }}>
-                Anteprima
-                {smsTarget !== 'prova' && registrations.length > 0 && (
-                  <span style={{ fontWeight:400, textTransform:'none', letterSpacing:0, color:'#9CA3AF', marginLeft:6 }}>
-                    (primo destinatario)
-                  </span>
-                )}
-              </p>
+            {/* Colonna destra: anteprima + ricerca */}
+            <div style={{ display:'flex', flexDirection:'column', gap:14 }}>
+
+              {/* Ricerca iscritto per anteprima */}
+              {smsTarget !== 'prova' && (
+                <div>
+                  <p style={{ fontSize:'11px', fontWeight:'700', color:'#6B7280', textTransform:'uppercase', letterSpacing:'.05em', margin:'0 0 6px' }}>
+                    Anteprima per
+                    {smsAnteprimaIscritto && (
+                      <span style={{ fontWeight:700, color:'#003DA5', textTransform:'none', letterSpacing:0, marginLeft:6 }}>
+                        {smsAnteprimaIscritto.nome} {smsAnteprimaIscritto.cognome}
+                      </span>
+                    )}
+                  </p>
+                  <div style={{ position:'relative' }}>
+                    <input
+                      value={smsAnteprimaSearch}
+                      onChange={e => { setSmsAnteprimaSearch(e.target.value); if (!e.target.value) setSmsAnteprimaIscritto(null) }}
+                      placeholder="Cerca iscritto per anteprima…"
+                      style={{ width:'100%', padding:'8px 10px', border:'1.5px solid #E5E7EB', borderRadius:8,
+                        fontSize:13, boxSizing:'border-box', outline:'none' }}
+                    />
+                    {smsAnteprimaSearch && (
+                      <div style={{ position:'absolute', top:'100%', left:0, right:0, zIndex:50,
+                        background:'#fff', border:'1px solid #E5E7EB', borderRadius:8,
+                        boxShadow:'0 4px 16px rgba(0,0,0,.10)', maxHeight:180, overflowY:'auto', marginTop:2 }}>
+                        {registrations
+                          .filter(r => r.cellulare && (r.nome + ' ' + r.cognome).toLowerCase().includes(smsAnteprimaSearch.toLowerCase()))
+                          .slice(0, 8)
+                          .map(r => (
+                            <div key={r.id}
+                              onClick={() => { setSmsAnteprimaIscritto(r); setSmsAnteprimaSearch('') }}
+                              style={{ padding:'9px 12px', cursor:'pointer', fontSize:13, borderBottom:'1px solid #F3F4F6',
+                                display:'flex', justifyContent:'space-between', alignItems:'center' }}
+                              onMouseEnter={e => e.currentTarget.style.background='#F0FDF4'}
+                              onMouseLeave={e => e.currentTarget.style.background='transparent'}>
+                              <span style={{ fontWeight:600 }}>{r.nome} {r.cognome}</span>
+                              <span style={{ fontSize:11, color:'#9CA3AF' }}>{r.cellulare}</span>
+                            </div>
+                          ))}
+                        {registrations.filter(r => r.cellulare && (r.nome + ' ' + r.cognome).toLowerCase().includes(smsAnteprimaSearch.toLowerCase())).length === 0 && (
+                          <div style={{ padding:'12px', fontSize:13, color:'#9CA3AF', textAlign:'center' }}>Nessun risultato</div>
+                        )}
+                      </div>
+                    )}
+                  </div>
+                </div>
+              )}
 
               {/* Bubble stile smartphone */}
-              <div style={{ background:'#F1F5F9', borderRadius:16, padding:16, minHeight:120, position:'relative' }}>
-                <div style={{ fontSize:10, fontWeight:700, color:'#9CA3AF', marginBottom:8, letterSpacing:'.05em' }}>
-                  {smsMittente || 'MITTENTE'}
-                </div>
-                <div style={{
-                  background:'#E8F5E9', borderRadius:'16px 16px 4px 16px',
-                  padding:'12px 14px', fontSize:14, lineHeight:1.5, color:'#0A0A0A',
-                  whiteSpace:'pre-wrap', wordBreak:'break-word',
-                  minHeight:60, border:'1px solid #C8E6C9'
-                }}>
-                  {smsTesto ? getAnteprimaSms() || '...' : <span style={{ color:'#D1D5DB' }}>Il messaggio apparirà qui...</span>}
-                </div>
-                <div style={{ fontSize:10, color:'#9CA3AF', textAlign:'right', marginTop:6 }}>
-                  {new Date().toLocaleTimeString('it-IT', { hour:'2-digit', minute:'2-digit' })}
+              <div>
+                <div style={{ background:'#F1F5F9', borderRadius:16, padding:16, minHeight:100 }}>
+                  <div style={{ fontSize:10, fontWeight:700, color:'#9CA3AF', marginBottom:8, letterSpacing:'.05em' }}>
+                    {smsMittente || 'MITTENTE'}
+                  </div>
+                  <div style={{
+                    background:'#E8F5E9', borderRadius:'16px 16px 4px 16px',
+                    padding:'12px 14px', fontSize:14, lineHeight:1.5, color:'#0A0A0A',
+                    whiteSpace:'pre-wrap', wordBreak:'break-word',
+                    minHeight:56, border:'1px solid #C8E6C9'
+                  }}>
+                    {smsTesto ? getAnteprimaSms() : <span style={{ color:'#D1D5DB' }}>Il messaggio apparirà qui...</span>}
+                  </div>
+                  <div style={{ fontSize:10, color:'#9CA3AF', textAlign:'right', marginTop:6 }}>
+                    {new Date().toLocaleTimeString('it-IT', { hour:'2-digit', minute:'2-digit' })}
+                  </div>
                 </div>
               </div>
 
               {/* Riepilogo invio */}
-              <div style={{ marginTop:16, background:'#F9FAFB', border:'1px solid #E5E7EB', borderRadius:10, padding:14 }}>
+              <div style={{ background:'#F9FAFB', border:'1px solid #E5E7EB', borderRadius:10, padding:14 }}>
                 <p style={{ fontSize:12, fontWeight:700, color:'#374151', margin:'0 0 8px' }}>Riepilogo</p>
                 <div style={{ display:'flex', flexDirection:'column', gap:4 }}>
                   {[
                     ['Destinatari', getDestinatariCount()],
-                    ['SMS per destinatario', Math.ceil((smsTesto.length || 1) / 160)],
-                    ['SMS totali', getDestinatariCount() * (Math.ceil((smsTesto.length || 1) / 160))],
+                    ['SMS per dest.', Math.ceil((smsTesto.length || 1) / 160)],
+                    ['SMS totali', getDestinatariCount() * Math.ceil((smsTesto.length || 1) / 160)],
                     ['Mittente', smsMittente || '—'],
                   ].map(([label, val]) => (
                     <div key={label} style={{ display:'flex', justifyContent:'space-between', fontSize:12 }}>
@@ -1566,9 +1620,9 @@ export default function IscrittiPage() {
                 </div>
               </div>
 
-              {/* Selezione iscritti (solo target=selezione) */}
+              {/* Lista selezionabili (solo target=selezione) */}
               {smsTarget === 'selezione' && (
-                <div style={{ marginTop:14 }}>
+                <div>
                   <div style={{ display:'flex', justifyContent:'space-between', alignItems:'center', marginBottom:6 }}>
                     <p style={{ fontSize:'11px', fontWeight:'700', color:'#6B7280', textTransform:'uppercase', letterSpacing:'.05em', margin:0 }}>
                       Iscritti selezionati
@@ -1578,15 +1632,15 @@ export default function IscrittiPage() {
                       {smsSelezione.size === filtered.filter(r => r.cellulare).length ? 'Deseleziona tutti' : 'Seleziona tutti'}
                     </button>
                   </div>
-                  <div style={{ maxHeight:140, overflowY:'auto', border:'1px solid #E5E7EB', borderRadius:8 }}>
+                  <div style={{ maxHeight:130, overflowY:'auto', border:'1px solid #E5E7EB', borderRadius:8 }}>
                     {filtered.filter(r => r.cellulare).map(r => (
                       <label key={r.id} style={{ display:'flex', alignItems:'center', gap:8, padding:'6px 10px',
                         borderBottom:'1px solid #F3F4F6', cursor:'pointer', fontSize:12,
                         background: smsSelezione.has(r.id) ? '#F0FDF4' : 'transparent' }}>
-                        <input type="checkbox" checked={smsSelezione.has(r.id)} onChange={() => toggleSmsSelezione(r.id)}
+                        <input type="checkbox" checked={smsSelezione.has(r.id)} onChange={() => { toggleSmsSelezione(r.id); setSmsAnteprimaIscritto(r); }}
                           style={{ accentColor:'#059669' }}/>
-                        <span style={{ fontWeight:600 }}>{r.nome} {r.cognome}</span>
-                        <span style={{ color:'#9CA3AF', marginLeft:'auto' }}>{r.cellulare}</span>
+                        <span style={{ fontWeight: smsSelezione.has(r.id) ? 700 : 400 }}>{r.nome} {r.cognome}</span>
+                        <span style={{ color:'#9CA3AF', marginLeft:'auto', fontSize:11 }}>{r.cellulare}</span>
                       </label>
                     ))}
                   </div>
