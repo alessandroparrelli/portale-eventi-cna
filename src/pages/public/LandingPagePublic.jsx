@@ -37,7 +37,7 @@ function generaPalliniSVG(c1, c2, opacita, angolo) {
 function PatternOverlay({ tema }) {
   const pattern = tema.sfondo_pattern
   if (!pattern || pattern === 'nessuno') return null
-  const c1 = tema.pattern_colore1 || '#003DA5'
+  const c1 = tema.pattern_colore1 || '#E11D48'
   const c2 = tema.pattern_colore2 || '#E8792F'
   const svg = generaPalliniSVG(c1, c2, tema.pattern_opacita || '25', pattern === 'pallini_angolo')
   return (
@@ -52,7 +52,7 @@ function PatternOverlay({ tema }) {
 
 // ── Form contatti (campi standard + custom) ───────────────────────
 function FormContatti({ lp, tema }) {
-  const cp = tema.colore_primario||'#003DA5'
+  const cp = tema.colore_primario||'#E11D48'
   const [values, setValues] = useState({})
   const [privacy, setPrivacy] = useState(false)
   const [newsletter, setNewsletter] = useState(false)
@@ -251,7 +251,7 @@ export default function LandingPagePublic() {
   if (loading) return (
     <div style={{minHeight:'100vh',display:'flex',alignItems:'center',justifyContent:'center',background:'#fff',fontFamily:'Inter,sans-serif'}}>
       <div style={{textAlign:'center'}}>
-        <div style={{width:'40px',height:'40px',border:'3px solid #E5E7EB',borderTop:'3px solid #003DA5',borderRadius:'50%',animation:'spin .8s linear infinite',margin:'0 auto 12px'}} />
+        <div style={{width:'40px',height:'40px',border:'3px solid #E5E7EB',borderTop:'3px solid #E11D48',borderRadius:'50%',animation:'spin .8s linear infinite',margin:'0 auto 12px'}} />
         <p style={{color:'#9CA3AF',fontSize:'14px',margin:0}}>Caricamento...</p>
       </div>
       <style>{`@keyframes spin{from{transform:rotate(0)}to{transform:rotate(360deg)}}`}</style>
@@ -266,7 +266,7 @@ export default function LandingPagePublic() {
   )
 
   const tema = temaConDefault(lp.tema)
-  const cp   = tema.colore_primario||'#003DA5'
+  const cp   = tema.colore_primario||'#E11D48'
   const logoSrc = lp.logo_url || LOGO_URL
   const lh = lp.layout_hero || {}
   const altezzaHero = parseInt(lh.altezza||'420')

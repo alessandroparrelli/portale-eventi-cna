@@ -219,7 +219,7 @@ const PRESETS = [
 
 /* ─── Font disponibili sul certificato ─────────────────────── */
 const CERT_FONTS = [
-  { label:'Inter (Sans)',            value:'inter',     stack:'"Inter", Helvetica, Arial, sans-serif' },
+  { label:'Inter (Sans)',            value:'inter',     stack:'"Outfit", Helvetica, Arial, sans-serif' },
   { label:'Helvetica (Sans)',        value:'helvetica', stack:'Helvetica, Arial, sans-serif' },
   { label:'Times New Roman (Serif)', value:'times',     stack:'"Times New Roman", Times, serif' },
   { label:'Palatino (Serif)',        value:'palatino',  stack:'"EB Garamond", "Palatino Linotype", Palatino, serif' },
@@ -240,7 +240,7 @@ function fontStack(family) {
 /* ─── Palette colori certificato (40 colori) ────────────────── */
 const CERT_COLORS = [
   '#000000','#0A0A0A','#1F2937','#374151','#6B7280','#9CA3AF','#D1D5DB','#FFFFFF',
-  '#001B4D','#002E7A','#003DA5','#1d4ed8','#3B82F6','#93C5FD','#BFDBFE','#EFF6FF',
+  '#001B4D','#002E7A','#E11D48','#1d4ed8','#3B82F6','#93C5FD','#BFDBFE','#EFF6FF',
   '#064E3B','#16A34A','#22C55E','#86EFAC','#991B1B','#DC2626','#FCA5A5','#FEF2F2',
   '#451A03','#78350F','#B45309','#D97706','#F59E0B','#FCD34D','#FEF3C7','#FFFBEB',
   '#4C1D95','#7C3AED','#EC4899','#0E7490','#F5F5DC','#FFF8E7','#F0EDE0','#E8E0D0',
@@ -249,14 +249,14 @@ const CERT_COLORS = [
 /* ─── Palette colori + picker custom ───────────────────────── */
 function ColorSwatchPicker({ value, onChange }) {
   const [showCustom, setShowCustom] = useState(false)
-  const [customVal, setCustomVal] = useState(value || '#003DA5')
+  const [customVal, setCustomVal] = useState(value || '#E11D48')
   return (
     <div>
       <div style={{ display:'flex', flexWrap:'wrap', gap:'4px', marginBottom: showCustom ? '6px' : 0 }}>
         {CERT_COLORS.map(c => (
           <button key={c} type="button" onClick={() => onChange(c)} title={c}
             style={{ width:'22px', height:'22px', borderRadius:'4px', background:c, flexShrink:0,
-              border: value===c ? '2.5px solid #003DA5' : c==='#FFFFFF' ? '1px solid #D1D5DB' : '1.5px solid rgba(0,0,0,.1)',
+              border: value===c ? '2.5px solid #E11D48' : c==='#FFFFFF' ? '1px solid #D1D5DB' : '1.5px solid rgba(0,0,0,.1)',
               cursor:'pointer', boxSizing:'border-box', transition:'transform .1s' }}
             onMouseEnter={e => e.currentTarget.style.transform='scale(1.3)'}
             onMouseLeave={e => e.currentTarget.style.transform='scale(1)'}
@@ -274,7 +274,7 @@ function ColorSwatchPicker({ value, onChange }) {
           <input type="text" value={customVal} onChange={e => setCustomVal(e.target.value)} placeholder="#000000"
             style={{ flex:1, padding:'5px 8px', border:'1px solid #D1D5DB', borderRadius:'5px', fontSize:'12px', fontFamily:'monospace' }} />
           <button type="button" onClick={() => { onChange(customVal); setShowCustom(false) }}
-            style={{ padding:'5px 12px', background:'#003DA5', color:'#fff', border:'none', borderRadius:'5px', fontSize:'12px', fontWeight:'700', cursor:'pointer' }}>Applica</button>
+            style={{ padding:'5px 12px', background:'#E11D48', color:'#fff', border:'none', borderRadius:'5px', fontSize:'12px', fontWeight:'700', cursor:'pointer' }}>Applica</button>
         </div>
       )}
     </div>
@@ -292,7 +292,7 @@ const SAMPLE = { nome: 'Mario Rossi', evento: 'Nome Evento di Esempio', data: '2
 function CanvasElement({ el, selected, onSelect, onDragStart, onResizeStart, logoUrl }) {
   const base = {
     position: 'absolute', left: el.x, top: el.y, width: el.w, height: el.h,
-    cursor: 'move', outline: selected ? '1.5px solid #003DA5' : 'none', outlineOffset: '2px',
+    cursor: 'move', outline: selected ? '1.5px solid #E11D48' : 'none', outlineOffset: '2px',
     boxSizing: 'border-box',
   }
   let content = null
@@ -345,7 +345,7 @@ function CanvasElement({ el, selected, onSelect, onDragStart, onResizeStart, log
           onPointerDown={e => { e.stopPropagation(); onResizeStart(e, el.id) }}
           style={{
             position: 'absolute', right: '-5px', bottom: '-5px', width: '10px', height: '10px',
-            background: '#003DA5', border: '1.5px solid #fff', borderRadius: '50%', cursor: 'nwse-resize', boxShadow: '0 1px 3px rgba(0,0,0,.3)',
+            background: '#E11D48', border: '1.5px solid #fff', borderRadius: '50%', cursor: 'nwse-resize', boxShadow: '0 1px 3px rgba(0,0,0,.3)',
           }}
         />
       )}
@@ -357,7 +357,7 @@ function CanvasElement({ el, selected, onSelect, onDragStart, onResizeStart, log
 export default function CertificatoEditorTab({ event, setEvent }) {
   const cfg = event.certificato_config || {}
   const elements = cfg.elements || []
-  const colore = cfg.colore_primario || '#003DA5'
+  const colore = cfg.colore_primario || '#E11D48'
   const logoUrl = cfg.logo_url || LOGO_RAW
 
   const [selectedId, setSelectedId] = useState(null)
@@ -718,19 +718,19 @@ export default function CertificatoEditorTab({ event, setEvent }) {
         <div style={{ display:'flex', flexWrap:'wrap', alignItems:'center', gap:'10px', padding:'12px 16px', background:'#EFF6FF', border:'1px solid #BFDBFE', borderRadius:'10px' }}>
           <span style={{ fontSize:'12px', fontWeight:'700', color:'#1E40AF', marginRight:'2px' }}>Modelli:</span>
           <button type="button" onClick={openSaveNew} disabled={elements.length === 0 || savingTpl}
-            style={{ display:'inline-flex', alignItems:'center', gap:'6px', padding:'7px 14px', borderRadius:'8px', border:'1px solid #003DA5', background:'#003DA5', color:'#fff', fontSize:'12px', fontWeight:'700', cursor: elements.length === 0 ? 'not-allowed' : 'pointer', opacity: elements.length === 0 ? 0.5 : 1 }}>
+            style={{ display:'inline-flex', alignItems:'center', gap:'6px', padding:'7px 14px', borderRadius:'8px', border:'1px solid #E11D48', background:'#E11D48', color:'#fff', fontSize:'12px', fontWeight:'700', cursor: elements.length === 0 ? 'not-allowed' : 'pointer', opacity: elements.length === 0 ? 0.5 : 1 }}>
             <Save size={13} /> Salva come nuovo modello
           </button>
           <button type="button" onClick={() => { setTplDrawerOpen(v => !v); setSearchOpen(false); setImgGalleryOpen(false) }}
-            style={{ display:'inline-flex', alignItems:'center', gap:'6px', padding:'7px 14px', borderRadius:'8px', border:`1px solid ${tplDrawerOpen ? '#003DA5' : '#D1D5DB'}`, background: tplDrawerOpen ? '#EFF6FF' : '#fff', color: tplDrawerOpen ? '#003DA5' : '#374151', fontSize:'12px', fontWeight:'700', cursor:'pointer' }}>
-            <BookOpen size={13} /> I miei modelli {tplList.length > 0 && <span style={{ background:'#003DA5', color:'#fff', borderRadius:'99px', padding:'1px 6px', fontSize:'10px' }}>{tplList.length}</span>}
+            style={{ display:'inline-flex', alignItems:'center', gap:'6px', padding:'7px 14px', borderRadius:'8px', border:`1px solid ${tplDrawerOpen ? '#E11D48' : '#D1D5DB'}`, background: tplDrawerOpen ? '#EFF6FF' : '#fff', color: tplDrawerOpen ? '#E11D48' : '#374151', fontSize:'12px', fontWeight:'700', cursor:'pointer' }}>
+            <BookOpen size={13} /> I miei modelli {tplList.length > 0 && <span style={{ background:'#E11D48', color:'#fff', borderRadius:'99px', padding:'1px 6px', fontSize:'10px' }}>{tplList.length}</span>}
           </button>
           <button type="button" onClick={() => { setImgGalleryOpen(v => !v); setSearchOpen(false); setTplDrawerOpen(false) }}
-            style={{ display:'inline-flex', alignItems:'center', gap:'6px', padding:'7px 14px', borderRadius:'8px', border:`1px solid ${imgGalleryOpen ? '#003DA5' : '#D1D5DB'}`, background: imgGalleryOpen ? '#EFF6FF' : '#fff', color: imgGalleryOpen ? '#003DA5' : '#374151', fontSize:'12px', fontWeight:'700', cursor:'pointer' }}>
+            style={{ display:'inline-flex', alignItems:'center', gap:'6px', padding:'7px 14px', borderRadius:'8px', border:`1px solid ${imgGalleryOpen ? '#E11D48' : '#D1D5DB'}`, background: imgGalleryOpen ? '#EFF6FF' : '#fff', color: imgGalleryOpen ? '#E11D48' : '#374151', fontSize:'12px', fontWeight:'700', cursor:'pointer' }}>
             <ImageIcon size={13} /> Galleria immagini
           </button>
           <button type="button" onClick={() => { searchOpen ? setSearchOpen(false) : openSearch() }}
-            style={{ display:'inline-flex', alignItems:'center', gap:'6px', padding:'7px 14px', borderRadius:'8px', border:`1px solid ${searchOpen ? '#003DA5' : '#D1D5DB'}`, background: searchOpen ? '#EFF6FF' : '#fff', color: searchOpen ? '#003DA5' : '#374151', fontSize:'12px', fontWeight:'700', cursor:'pointer' }}>
+            style={{ display:'inline-flex', alignItems:'center', gap:'6px', padding:'7px 14px', borderRadius:'8px', border:`1px solid ${searchOpen ? '#E11D48' : '#D1D5DB'}`, background: searchOpen ? '#EFF6FF' : '#fff', color: searchOpen ? '#E11D48' : '#374151', fontSize:'12px', fontWeight:'700', cursor:'pointer' }}>
             <Search size={13} /> Modelli grafici online
           </button>
           {tplMsg && <span style={{ fontSize:'12px', color:'#16A34A', fontWeight:'600', display:'flex', alignItems:'center', gap:'5px' }}><CheckCircle size={13} />{tplMsg}</span>}
@@ -763,7 +763,7 @@ export default function CertificatoEditorTab({ event, setEvent }) {
                       <p style={{ margin:0, fontSize:'11px', color:'#9CA3AF' }}>{tpl.elements?.length || 0} elementi · {new Date(tpl.updated_at).toLocaleDateString('it-IT')}</p>
                     </div>
                     <button type="button" onClick={() => loadTemplate(tpl)}
-                      style={{ padding:'7px 12px', borderRadius:'7px', border:'1px solid #003DA5', background:'#003DA5', color:'#fff', fontSize:'12px', fontWeight:'700', cursor:'pointer', flexShrink:0 }}>Carica</button>
+                      style={{ padding:'7px 12px', borderRadius:'7px', border:'1px solid #E11D48', background:'#E11D48', color:'#fff', fontSize:'12px', fontWeight:'700', cursor:'pointer', flexShrink:0 }}>Carica</button>
                     <button type="button" onClick={() => openSaveOverwrite(tpl)} title="Aggiorna con il disegno corrente"
                       style={{ padding:'7px 10px', borderRadius:'7px', border:'1px solid #E5E7EB', background:'#fff', color:'#374151', cursor:'pointer', flexShrink:0 }}><Pencil size={13}/></button>
                     <button type="button" onClick={() => deleteTemplate(tpl)}
@@ -797,8 +797,8 @@ export default function CertificatoEditorTab({ event, setEvent }) {
                 <button key={cat.id} type="button"
                   onClick={() => { setSearchCategory(cat.id); setSelectedImages([]); searchOnline(cat.query) }}
                   style={{ padding:'5px 12px', borderRadius:'20px', border:'1px solid', fontSize:'12px', fontWeight:'700', cursor:'pointer', whiteSpace:'nowrap', transition:'all .1s',
-                    borderColor: searchCategory === cat.id ? '#003DA5' : '#E5E7EB',
-                    background: searchCategory === cat.id ? '#003DA5' : '#F9FAFB',
+                    borderColor: searchCategory === cat.id ? '#E11D48' : '#E5E7EB',
+                    background: searchCategory === cat.id ? '#E11D48' : '#F9FAFB',
                     color: searchCategory === cat.id ? '#fff' : '#374151' }}>
                   {cat.label}
                 </button>
@@ -810,9 +810,9 @@ export default function CertificatoEditorTab({ event, setEvent }) {
               <input value={searchQuery} onChange={e => setSearchQuery(e.target.value)}
                 onKeyDown={e => { if (e.key === 'Enter') { setSelectedImages([]); searchOnline() } }}
                 placeholder="Es: gold border certificate, diploma parchment ornate, modern blue frame…"
-                style={{ flex:1, padding:'8px 12px', border:'1px solid #D1D5DB', borderRadius:'8px', fontSize:'13px', fontFamily:"'Inter',sans-serif" }} />
+                style={{ flex:1, padding:'8px 12px', border:'1px solid #D1D5DB', borderRadius:'8px', fontSize:'13px', fontFamily:"'Outfit',sans-serif" }} />
               <button type="button" onClick={() => { setSelectedImages([]); searchOnline() }} disabled={searchLoading}
-                style={{ padding:'8px 18px', borderRadius:'8px', background:'#003DA5', color:'#fff', border:'none', fontSize:'13px', fontWeight:'700', cursor:'pointer', display:'flex', alignItems:'center', gap:'6px', flexShrink:0 }}>
+                style={{ padding:'8px 18px', borderRadius:'8px', background:'#E11D48', color:'#fff', border:'none', fontSize:'13px', fontWeight:'700', cursor:'pointer', display:'flex', alignItems:'center', gap:'6px', flexShrink:0 }}>
                 {searchLoading ? <Loader2 size={14} style={{ animation:'spin .8s linear infinite' }}/> : <Search size={14}/>}
                 Cerca
               </button>
@@ -821,11 +821,11 @@ export default function CertificatoEditorTab({ event, setEvent }) {
             {/* Barra selezione multipla — appare quando ci sono immagini selezionate */}
             {selectedImages.length > 0 && (
               <div style={{ padding:'10px 16px', background:'#EFF6FF', borderBottom:'1px solid #BFDBFE', display:'flex', alignItems:'center', gap:'12px' }}>
-                <span style={{ fontSize:'13px', fontWeight:'700', color:'#003DA5' }}>
+                <span style={{ fontSize:'13px', fontWeight:'700', color:'#E11D48' }}>
                   {selectedImages.length} immagine{selectedImages.length > 1 ? 'i' : ''} selezionata{selectedImages.length > 1 ? 'e' : ''}
                 </span>
                 <button type="button" onClick={importSelected}
-                  style={{ padding:'7px 16px', borderRadius:'8px', background:'#003DA5', color:'#fff', border:'none', fontSize:'13px', fontWeight:'700', cursor:'pointer', display:'flex', alignItems:'center', gap:'6px' }}>
+                  style={{ padding:'7px 16px', borderRadius:'8px', background:'#E11D48', color:'#fff', border:'none', fontSize:'13px', fontWeight:'700', cursor:'pointer', display:'flex', alignItems:'center', gap:'6px' }}>
                   <Download size={13}/> Importa {selectedImages.length > 1 ? 'tutte' : ''} come sfondo
                 </button>
                 <button type="button" onClick={() => setSelectedImages([])}
@@ -854,7 +854,7 @@ export default function CertificatoEditorTab({ event, setEvent }) {
                     {searchResults.length > 1 && (
                       <button type="button"
                         onClick={() => setSelectedImages(selectedImages.length === searchResults.length ? [] : [...searchResults])}
-                        style={{ fontSize:'12px', fontWeight:'700', color:'#003DA5', background:'none', border:'none', cursor:'pointer' }}>
+                        style={{ fontSize:'12px', fontWeight:'700', color:'#E11D48', background:'none', border:'none', cursor:'pointer' }}>
                         {selectedImages.length === searchResults.length ? 'Deseleziona tutti' : 'Seleziona tutti'}
                       </button>
                     )}
@@ -866,14 +866,14 @@ export default function CertificatoEditorTab({ event, setEvent }) {
                         <div key={i}
                           onClick={() => toggleSelectImage(img)}
                           style={{ position:'relative', borderRadius:'10px', overflow:'hidden', cursor:'pointer', aspectRatio:'4/3', background:'#F3F4F6',
-                            border: isSel ? '3px solid #003DA5' : '2px solid transparent',
+                            border: isSel ? '3px solid #E11D48' : '2px solid transparent',
                             boxShadow: isSel ? '0 0 0 2px rgba(0,61,165,0.25)' : 'none',
                             transition:'border .1s, box-shadow .1s' }}>
                           <img src={img.thumb} alt="" style={{ width:'100%', height:'100%', objectFit:'cover', display:'block' }}
                             onError={e => { e.target.style.display='none' }} />
                           {/* Checkbox overlay */}
                           <div style={{ position:'absolute', top:'7px', right:'7px', width:'22px', height:'22px', borderRadius:'50%',
-                            background: isSel ? '#003DA5' : 'rgba(255,255,255,0.85)',
+                            background: isSel ? '#E11D48' : 'rgba(255,255,255,0.85)',
                             border: isSel ? 'none' : '2px solid rgba(0,0,0,0.2)',
                             display:'flex', alignItems:'center', justifyContent:'center', transition:'all .1s' }}>
                             {isSel && <svg width="12" height="12" viewBox="0 0 12 12"><polyline points="2,6 5,9 10,3" fill="none" stroke="#fff" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"/></svg>}
@@ -954,12 +954,12 @@ export default function CertificatoEditorTab({ event, setEvent }) {
               <input value={saveNameValue} onChange={e => setSaveNameValue(e.target.value)}
                 onKeyDown={e => e.key === 'Enter' && saveNameValue.trim() && saveTemplate(saveNameValue.trim(), saveNameTargetId)}
                 autoFocus placeholder="Es. Diploma elegante, Certificato CNA 2026…"
-                style={{ width:'100%', padding:'10px 12px', border:'1.5px solid #D1D5DB', borderRadius:'8px', fontSize:'14px', fontFamily:"'Inter',sans-serif", boxSizing:'border-box', marginBottom:'16px' }} />
+                style={{ width:'100%', padding:'10px 12px', border:'1.5px solid #D1D5DB', borderRadius:'8px', fontSize:'14px', fontFamily:"'Outfit',sans-serif", boxSizing:'border-box', marginBottom:'16px' }} />
               <div style={{ display:'flex', gap:'10px', justifyContent:'flex-end' }}>
                 <button type="button" onClick={() => setSaveNameModalOpen(false)}
                   style={{ padding:'9px 20px', borderRadius:'8px', border:'1px solid #E5E7EB', background:'#fff', color:'#374151', fontSize:'13px', fontWeight:'700', cursor:'pointer' }}>Annulla</button>
                 <button type="button" onClick={() => saveTemplate(saveNameValue.trim(), saveNameTargetId)} disabled={!saveNameValue.trim() || savingTpl}
-                  style={{ padding:'9px 20px', borderRadius:'8px', border:'none', background: saveNameValue.trim() ? '#003DA5' : '#D1D5DB', color:'#fff', fontSize:'13px', fontWeight:'700', cursor: saveNameValue.trim() ? 'pointer' : 'not-allowed', display:'flex', alignItems:'center', gap:'6px' }}>
+                  style={{ padding:'9px 20px', borderRadius:'8px', border:'none', background: saveNameValue.trim() ? '#E11D48' : '#D1D5DB', color:'#fff', fontSize:'13px', fontWeight:'700', cursor: saveNameValue.trim() ? 'pointer' : 'not-allowed', display:'flex', alignItems:'center', gap:'6px' }}>
                   {savingTpl ? <><Loader2 size={14} style={{ animation:'spin .8s linear infinite' }}/> Salvataggio…</> : <><Save size={14}/> Salva</>}
                 </button>
               </div>
@@ -1054,11 +1054,11 @@ export default function CertificatoEditorTab({ event, setEvent }) {
               <p style={{ fontSize: '11px', color: '#9CA3AF', margin: 0 }}>Formato A4 orizzontale — dati di esempio: Mario Rossi</p>
               <div style={{ display: 'flex', gap: '10px' }}>
                 <a href={realPdfUrl(false)} target="_blank" rel="noopener noreferrer" onClick={() => setPdfLoading(true)}
-                  style={{ display: 'inline-flex', alignItems: 'center', gap: '5px', fontSize: '12px', fontWeight: '700', color: '#003DA5', textDecoration: 'none' }}>
+                  style={{ display: 'inline-flex', alignItems: 'center', gap: '5px', fontSize: '12px', fontWeight: '700', color: '#E11D48', textDecoration: 'none' }}>
                   <Eye size={13} /> Anteprima PDF reale
                 </a>
                 <a href={realPdfUrl(true)} target="_blank" rel="noopener noreferrer"
-                  style={{ display: 'inline-flex', alignItems: 'center', gap: '5px', fontSize: '12px', fontWeight: '700', color: '#003DA5', textDecoration: 'none' }}>
+                  style={{ display: 'inline-flex', alignItems: 'center', gap: '5px', fontSize: '12px', fontWeight: '700', color: '#E11D48', textDecoration: 'none' }}>
                   <Download size={13} /> Scarica prova
                 </a>
               </div>
@@ -1080,12 +1080,12 @@ export default function CertificatoEditorTab({ event, setEvent }) {
                 <div>
                   <p style={{ margin:'0 0 5px', fontSize:'10px', fontWeight:'700', color:'#9CA3AF', textTransform:'uppercase', letterSpacing:'.06em' }}>Contenuto</p>
                   <select value={selected.field || 'custom'} onChange={e => updateElement(selected.id, { field: e.target.value })}
-                    style={{ width:'100%', padding:'7px 10px', border:'1px solid #D1D5DB', borderRadius:'6px', fontSize:'12px', fontFamily:"'Inter',sans-serif", marginBottom:'6px' }}>
+                    style={{ width:'100%', padding:'7px 10px', border:'1px solid #D1D5DB', borderRadius:'6px', fontSize:'12px', fontFamily:"'Outfit',sans-serif", marginBottom:'6px' }}>
                     {FIELD_OPTIONS.map(o => <option key={o.v} value={o.v}>{o.l}</option>)}
                   </select>
                   {(selected.field || 'custom') === 'custom' && (
                     <textarea value={selected.text || ''} onChange={e => updateElement(selected.id, { text: e.target.value })} rows={2}
-                      style={{ width:'100%', padding:'8px 10px', border:'1px solid #D1D5DB', borderRadius:'6px', fontSize:'13px', fontFamily:"'Inter',sans-serif", resize:'vertical', boxSizing:'border-box' }} />
+                      style={{ width:'100%', padding:'8px 10px', border:'1px solid #D1D5DB', borderRadius:'6px', fontSize:'13px', fontFamily:"'Outfit',sans-serif", resize:'vertical', boxSizing:'border-box' }} />
                   )}
                 </div>
 
@@ -1104,14 +1104,14 @@ export default function CertificatoEditorTab({ event, setEvent }) {
                 {/* Dimensione con slider */}
                 <div>
                   <p style={{ margin:'0 0 5px', fontSize:'10px', fontWeight:'700', color:'#9CA3AF', textTransform:'uppercase', letterSpacing:'.06em' }}>
-                    Dimensione — <span style={{ color:'#003DA5', fontWeight:'800' }}>{selected.fontSize || 14}px</span>
+                    Dimensione — <span style={{ color:'#E11D48', fontWeight:'800' }}>{selected.fontSize || 14}px</span>
                   </p>
                   <div style={{ display:'flex', alignItems:'center', gap:'6px' }}>
                     <button type="button" onClick={() => updateElement(selected.id, { fontSize: Math.max(6, (selected.fontSize||14) - 1) })}
                       style={btnSm}>−</button>
                     <input type="range" min="6" max="96" step="1" value={selected.fontSize || 14}
                       onChange={e => updateElement(selected.id, { fontSize: Number(e.target.value) })}
-                      style={{ flex:1, accentColor:'#003DA5' }} />
+                      style={{ flex:1, accentColor:'#E11D48' }} />
                     <button type="button" onClick={() => updateElement(selected.id, { fontSize: Math.min(120, (selected.fontSize||14) + 1) })}
                       style={btnSm}>+</button>
                     <input type="number" min="6" max="120" value={selected.fontSize || 14}
@@ -1133,9 +1133,9 @@ export default function CertificatoEditorTab({ event, setEvent }) {
                     ].map(({ key, node, title }) => (
                       <button key={key} type="button" title={title} onClick={() => updateElement(selected.id, { [key]: !selected[key] })}
                         style={{ minWidth:'34px', height:'34px', padding:'0 8px', borderRadius:'6px', border:'1px solid',
-                          borderColor: selected[key] ? '#003DA5' : '#D1D5DB',
+                          borderColor: selected[key] ? '#E11D48' : '#D1D5DB',
                           background: selected[key] ? '#EFF6FF' : '#fff',
-                          color: selected[key] ? '#003DA5' : '#374151',
+                          color: selected[key] ? '#E11D48' : '#374151',
                           cursor:'pointer', display:'flex', alignItems:'center', justifyContent:'center' }}>
                         {node}
                       </button>
@@ -1150,9 +1150,9 @@ export default function CertificatoEditorTab({ event, setEvent }) {
                     {[{ v:'left', I:AlignLeft, t:'Sinistra' }, { v:'center', I:AlignCenter, t:'Centro' }, { v:'right', I:AlignRight, t:'Destra' }].map(({ v, I, t }) => (
                       <button key={v} type="button" title={t} onClick={() => updateElement(selected.id, { align: v })}
                         style={{ flex:1, height:'34px', borderRadius:'6px', border:'1px solid',
-                          borderColor: (selected.align||'left') === v ? '#003DA5' : '#D1D5DB',
+                          borderColor: (selected.align||'left') === v ? '#E11D48' : '#D1D5DB',
                           background: (selected.align||'left') === v ? '#EFF6FF' : '#fff',
-                          color: (selected.align||'left') === v ? '#003DA5' : '#374151',
+                          color: (selected.align||'left') === v ? '#E11D48' : '#374151',
                           cursor:'pointer', display:'flex', alignItems:'center', justifyContent:'center' }}>
                         <I size={14} />
                       </button>
@@ -1205,7 +1205,7 @@ export default function CertificatoEditorTab({ event, setEvent }) {
                 {selected.shape !== 'line' && (
                   <Field label="Riempimento">
                     <div style={{ display: 'flex', gap: '6px', alignItems: 'center' }}>
-                      <input type="color" value={selected.fill || '#003DA5'} onChange={e => updateElement(selected.id, { fill: e.target.value })}
+                      <input type="color" value={selected.fill || '#E11D48'} onChange={e => updateElement(selected.id, { fill: e.target.value })}
                         style={{ width: '32px', height: '30px', border: '1px solid #D1D5DB', borderRadius: '6px', cursor: 'pointer', padding: '2px' }} />
                       <button type="button" onClick={() => updateElement(selected.id, { fill: null })}
                         style={{ fontSize: '11px', color: '#6B7280', background: 'none', border: '1px solid #D1D5DB', borderRadius: '6px', padding: '6px 8px', cursor: 'pointer' }}>Nessuno</button>
@@ -1214,7 +1214,7 @@ export default function CertificatoEditorTab({ event, setEvent }) {
                 )}
                 <Field label={selected.shape === 'line' ? 'Colore linea' : 'Bordo'}>
                   <div style={{ display: 'flex', gap: '6px', alignItems: 'center' }}>
-                    <input type="color" value={selected.stroke || '#003DA5'} onChange={e => updateElement(selected.id, { stroke: e.target.value })}
+                    <input type="color" value={selected.stroke || '#E11D48'} onChange={e => updateElement(selected.id, { stroke: e.target.value })}
                       style={{ width: '32px', height: '30px', border: '1px solid #D1D5DB', borderRadius: '6px', cursor: 'pointer', padding: '2px' }} />
                     <Input type="number" value={selected.strokeWidth || 1} onChange={e => updateElement(selected.id, { strokeWidth: Number(e.target.value) || 1 })} style={{ maxWidth: '70px' }} />
                     {selected.shape !== 'line' && (
@@ -1242,7 +1242,7 @@ export default function CertificatoEditorTab({ event, setEvent }) {
                   <input type="range" min="0.1" max="1" step="0.05" value={selected.opacity ?? 1} onChange={e => updateElement(selected.id, { opacity: Number(e.target.value) })} style={{ width: '100%' }} />
                 </Field>
                 <button type="button" onClick={() => { setReplaceTargetId(selected.id); imgFileRef.current?.click() }}
-                  style={{ display: 'inline-flex', alignItems: 'center', gap: '6px', fontSize: '12px', fontWeight: '700', color: '#003DA5', background: 'none', border: '1px solid #D1D5DB', borderRadius: '6px', padding: '7px 10px', cursor: 'pointer', alignSelf: 'flex-start' }}>
+                  style={{ display: 'inline-flex', alignItems: 'center', gap: '6px', fontSize: '12px', fontWeight: '700', color: '#E11D48', background: 'none', border: '1px solid #D1D5DB', borderRadius: '6px', padding: '7px 10px', cursor: 'pointer', alignSelf: 'flex-start' }}>
                   <Upload size={13} /> Sostituisci immagine
                 </button>
               </>)}

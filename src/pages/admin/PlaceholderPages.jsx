@@ -5,7 +5,7 @@ function Placeholder({ icon: Icon, title, description }) {
     <div style={styles.page}>
       <div style={styles.card}>
         <div style={styles.iconWrap}>
-          <Icon size={32} style={{ color: '#003DA5' }} />
+          <Icon size={32} style={{ color: '#E11D48' }} />
         </div>
         <h1 style={styles.title}>{title}</h1>
         <p style={styles.desc}>{description}</p>
@@ -41,7 +41,7 @@ const styles = {
     alignItems: 'center',
     justifyContent: 'center',
     minHeight: 'calc(100vh - 64px)',
-    fontFamily: "'Inter', sans-serif",
+    fontFamily: "'Outfit', sans-serif",
   },
   card: {
     backgroundColor: '#FFFFFF',
@@ -54,7 +54,7 @@ const styles = {
   iconWrap: {
     width: '64px',
     height: '64px',
-    backgroundColor: '#EEF3FF',
+    backgroundColor: '#FEE4E6',
     borderRadius: '12px',
     display: 'flex',
     alignItems: 'center',
@@ -76,8 +76,8 @@ const styles = {
   },
   badge: {
     display: 'inline-flex',
-    backgroundColor: '#EEF3FF',
-    color: '#003DA5',
+    backgroundColor: '#FEE4E6',
+    color: '#E11D48',
     padding: '4px 12px',
     borderRadius: '20px',
     fontSize: '12px',

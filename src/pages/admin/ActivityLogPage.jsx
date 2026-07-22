@@ -189,8 +189,8 @@ export default function ActivityLogPage() {
                     <td style={s.td} className="col-hide-mobile">
                       {l.utente_nome ? (
                         <div style={{ display:'flex', alignItems:'center', gap:'8px' }}>
-                          <div style={{ width:'28px', height:'28px', borderRadius:'50%', backgroundColor:'#EEF3FF', display:'flex', alignItems:'center', justifyContent:'center', flexShrink:0 }}>
-                            <User size={14} style={{ color:'#003DA5' }} />
+                          <div style={{ width:'28px', height:'28px', borderRadius:'50%', backgroundColor:'#FEE4E6', display:'flex', alignItems:'center', justifyContent:'center', flexShrink:0 }}>
+                            <User size={14} style={{ color:'#E11D48' }} />
                           </div>
                           <p style={{ fontSize:'13px', fontWeight:'600', color:'#0A0A0A', margin:0 }}>{l.utente_nome}</p>
                         </div>
@@ -200,7 +200,7 @@ export default function ActivityLogPage() {
                     </td>
                     <td style={s.td}>
                       {l.evento_titolo && (
-                        <p style={{ fontSize:'12px', fontWeight:'600', color:'#003DA5', margin:'0 0 2px' }}>{l.evento_titolo}</p>
+                        <p style={{ fontSize:'12px', fontWeight:'600', color:'#E11D48', margin:'0 0 2px' }}>{l.evento_titolo}</p>
                       )}
                       {l.dettaglio && (
                         <p style={{ fontSize:'13px', color:'#374151', margin:0 }}>{l.dettaglio}</p>
@@ -234,8 +234,8 @@ const s = {
   header: { display:'flex', justifyContent:'space-between', alignItems:'flex-start', marginBottom:'24px', gap:'12px', flexWrap:'wrap' },
   title: { fontSize:'32px', fontWeight:'900', color:'#0A0A0A', letterSpacing:'-0.03em', margin:0 },
   sub: { fontSize:'14px', color:'#6B7280', margin:'4px 0 0', fontWeight:'500' },
-  refreshBtn: { display:'flex', alignItems:'center', gap:'6px', border:'1px solid #E5E7EB', backgroundColor:'#fff', borderRadius:'6px', padding:'8px 14px', fontSize:'13px', fontWeight:'600', cursor:'pointer', fontFamily:"'Inter',sans-serif", color:'#374151' },
-  input: { border:'1px solid #D1D5DB', borderRadius:'6px', padding:'9px 12px', fontSize:'13px', fontFamily:"'Inter',sans-serif", color:'#0A0A0A', backgroundColor:'#fff', outline:'none' },
+  refreshBtn: { display:'flex', alignItems:'center', gap:'6px', border:'1px solid #E5E7EB', backgroundColor:'#fff', borderRadius:'6px', padding:'8px 14px', fontSize:'13px', fontWeight:'600', cursor:'pointer', fontFamily:"'Outfit',sans-serif", color:'#374151' },
+  input: { border:'1px solid #D1D5DB', borderRadius:'6px', padding:'9px 12px', fontSize:'13px', fontFamily:"'Outfit',sans-serif", color:'#0A0A0A', backgroundColor:'#fff', outline:'none' },
   tableCard: { backgroundColor:'#fff', borderRadius:'8px', border:'1px solid #E5E7EB', overflow:'hidden' },
   table: { width:'100%', borderCollapse:'collapse', fontSize:'13px' },
   th: { padding:'10px 16px', textAlign:'left', fontSize:'11px', fontWeight:'600', color:'#6B7280', textTransform:'uppercase', letterSpacing:'0.06em', borderBottom:'1px solid #E5E7EB', backgroundColor:'#FAFAFA', whiteSpace:'nowrap' },

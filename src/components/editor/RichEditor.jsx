@@ -23,7 +23,7 @@ import { supabase } from '../../lib/supabase'
 
 /* ─── CSS pubblico riutilizzabile ──────────────────────────────── */
 export const RICH_CSS = `
-  .rich-content { font-family:'Inter',sans-serif; font-size:15px; line-height:1.5; color:#374151; }
+  .rich-content { font-family:'Outfit',sans-serif; font-size:15px; line-height:1.5; color:#374151; }
   .rich-content p  { margin:0 0 8px; }
   .rich-content h1 { font-size:2.2em; font-weight:900; color:#0A0A0A; letter-spacing:-0.04em; margin:20px 0 10px; line-height:1.1; }
   .rich-content h2 { font-size:1.7em; font-weight:800; color:#0A0A0A; letter-spacing:-0.03em; margin:16px 0 8px; line-height:1.15; }
@@ -40,7 +40,7 @@ export const RICH_CSS = `
   .rich-content ul[data-type="taskList"] li { display:flex; align-items:flex-start; gap:8px; }
   .rich-content ul[data-type="taskList"] li > label { margin-top:2px; }
   .rich-content ul[data-type="taskList"] li > div { flex:1; }
-  .rich-content blockquote { border-left:4px solid #003DA5; padding:10px 18px; margin:12px 0; background:#EEF3FF; border-radius:0 8px 8px 0; color:#1d4ed8; font-style:italic; }
+  .rich-content blockquote { border-left:4px solid #E11D48; padding:10px 18px; margin:12px 0; background:#FEE4E6; border-radius:0 8px 8px 0; color:#1d4ed8; font-style:italic; }
   .rich-content code { background:#F3F4F6; padding:2px 7px; border-radius:4px; font-family:'Courier New',monospace; font-size:.88em; color:#DC2626; }
   .rich-content pre { background:#1F2937; color:#F9FAFB; padding:14px 18px; border-radius:8px; overflow-x:auto; margin:12px 0; font-family:'Courier New',monospace; font-size:.9em; line-height:1.5; }
   .rich-content pre code { background:none; color:inherit; padding:0; }
@@ -52,9 +52,9 @@ export const RICH_CSS = `
   .rich-content img[data-size=small]   { max-width:30%; }
   .rich-content img[data-size=medium]  { max-width:60%; }
   .rich-content img[data-size=large]   { max-width:100%; }
-  .rich-content a { color:#003DA5; text-decoration:underline; text-underline-offset:2px; font-weight:500; }
+  .rich-content a { color:#E11D48; text-decoration:underline; text-underline-offset:2px; font-weight:500; }
   .rich-content table { border-collapse:collapse; width:100%; margin:12px 0; border-radius:8px; overflow:hidden; }
-  .rich-content th { background:#003DA5; color:#FFF; border:1px solid #1d4ed8; padding:8px 14px; font-weight:700; font-size:14px; text-align:left; }
+  .rich-content th { background:#E11D48; color:#FFF; border:1px solid #1d4ed8; padding:8px 14px; font-weight:700; font-size:14px; text-align:left; }
   .rich-content td { border:1px solid #E5E7EB; padding:8px 14px; font-size:14px; }
   .rich-content tr:nth-child(even) td { background:#F9FAFB; }
   .rich-content sub { font-size:.75em; vertical-align:sub; }
@@ -68,17 +68,17 @@ export const RICH_CSS = `
   .rich-content .callout-warning { background:#FFFBEB; border:1px solid #FCD34D; border-radius:8px; padding:12px 16px; margin:12px 0; }
   .rich-content .callout-success { background:#F0FDF4; border:1px solid #86EFAC; border-radius:8px; padding:12px 16px; margin:12px 0; }
   .rich-content .callout-error   { background:#FEF2F2; border:1px solid #FECACA; border-radius:8px; padding:12px 16px; margin:12px 0; }
-  .rich-content .var-pill { display:inline-block; background:#EEF3FF; color:#003DA5; border:1px solid #C7D9F8; border-radius:12px; padding:1px 8px; font-family:monospace; font-size:.85em; font-weight:600; white-space:nowrap; }
+  .rich-content .var-pill { display:inline-block; background:#FEE4E6; color:#E11D48; border:1px solid #FDA4AF; border-radius:12px; padding:1px 8px; font-family:monospace; font-size:.85em; font-weight:600; white-space:nowrap; }
   .rich-content .block-stats { display:flex; flex-wrap:wrap; gap:20px; justify-content:center; padding:24px 0; }
   .rich-content .stat-item { text-align:center; flex:1 1 80px; }
-  .rich-content .stat-num { display:block; font-size:clamp(32px,5vw,48px); font-weight:900; color:#003DA5; letter-spacing:-.04em; line-height:1; }
+  .rich-content .stat-num { display:block; font-size:clamp(32px,5vw,48px); font-weight:900; color:#E11D48; letter-spacing:-.04em; line-height:1; }
   .rich-content .stat-label { display:block; font-size:12px; color:#6B7280; font-weight:700; text-transform:uppercase; letter-spacing:.06em; margin-top:3px; }
   .rich-content .block-grid2 { display:grid; grid-template-columns:1fr 1fr; gap:12px; margin:12px 0; }
   .rich-content .block-grid3 { display:grid; grid-template-columns:1fr 1fr 1fr; gap:12px; margin:12px 0; }
   .rich-content .grid-card { background:#FFF; border:1px solid #E5E7EB; border-radius:8px; padding:16px; }
-  .rich-content .block-cta { background:#EEF3FF; border:1px solid #C7D9F8; border-radius:10px; padding:24px; text-align:center; margin:16px 0; }
+  .rich-content .block-cta { background:#FEE4E6; border:1px solid #FDA4AF; border-radius:10px; padding:24px; text-align:center; margin:16px 0; }
   .rich-content .cta-title { font-size:1.3em; font-weight:900; color:#0A0A0A; margin:0 0 12px; letter-spacing:-.02em; }
-  .rich-content .cta-btn { display:inline-block; background:#003DA5; color:#FFF; border-radius:6px; padding:10px 28px; font-weight:800; font-size:14px; text-decoration:none; }
+  .rich-content .cta-btn { display:inline-block; background:#E11D48; color:#FFF; border-radius:6px; padding:10px 28px; font-weight:800; font-size:14px; text-decoration:none; }
   .rich-content .animate-fade  { animation:richFadeIn .6s ease both; }
   .rich-content .animate-slide { animation:richSlideUp .5s ease both; }
   .rich-content mark { border-radius:3px; padding:1px 3px; }
@@ -91,12 +91,12 @@ function Btn({ children, title, active, onClick, disabled, danger }) {
   return (
     <button type="button" title={title} onClick={onClick} disabled={disabled}
       style={{ minWidth:'28px', height:'30px', padding:'0 6px', border:'none',
-        background: active ? '#EEF3FF' : 'transparent',
-        color: active ? '#003DA5' : disabled ? '#D1D5DB' : danger ? '#DC2626' : '#374151',
+        background: active ? '#FEE4E6' : 'transparent',
+        color: active ? '#E11D48' : disabled ? '#D1D5DB' : danger ? '#DC2626' : '#374151',
         borderRadius:'5px', cursor: disabled ? 'not-allowed' : 'pointer',
         fontSize:'12px', fontWeight: active ? '700' : '500',
         display:'flex', alignItems:'center', justifyContent:'center', gap:'3px',
-        fontFamily:"'Inter',sans-serif", transition:'background .1s, color .1s', flexShrink:0,
+        fontFamily:"'Outfit',sans-serif", transition:'background .1s, color .1s', flexShrink:0,
         position:'relative',
       }}
       onMouseEnter={e => { if(!disabled && !active) e.currentTarget.style.background='#F3F4F6' }}
@@ -113,7 +113,7 @@ function RowLabel({ children }) {
 
 /* ─── Configurazioni ──────────────────────────────────────── */
 const FONTS = [
-  { label:'Inter',       value:'Inter, sans-serif' },
+  { label:'Outfit',       value:'Inter, sans-serif' },
   { label:'Georgia',     value:'Georgia, serif' },
   { label:'Times New Roman', value:'"Times New Roman", serif' },
   { label:'Arial',       value:'Arial, sans-serif' },
@@ -136,7 +136,7 @@ const LINE_HEIGHTS = [
 
 // Palette colori
 const COLOR_PALETTE = {
-  'Blu CNA': ['#001B4D','#002E7A','#003DA5','#1d4ed8','#3B82F6','#93C5FD','#BFDBFE','#EFF6FF'],
+  'Blu CNA': ['#001B4D','#002E7A','#E11D48','#1d4ed8','#3B82F6','#93C5FD','#BFDBFE','#EFF6FF'],
   'Verde':   ['#064E3B','#065F46','#16A34A','#22C55E','#4ADE80','#86EFAC','#BBF7D0','#F0FDF4'],
   'Rosso':   ['#7F1D1D','#991B1B','#B91C1C','#DC2626','#EF4444','#FCA5A5','#FECACA','#FEF2F2'],
   'Giallo':  ['#78350F','#92400E','#B45309','#D97706','#F59E0B','#FCD34D','#FDE68A','#FFFBEB'],
@@ -209,7 +209,7 @@ function ColorPicker({ label = 'A', title = 'Colore testo', editor: ed, isHighli
   return (
     <div style={{ position:'relative', flexShrink:0 }} title={title}>
       {/* Label visibile sopra */}
-      <label style={{ display:'block', fontSize:'10px', fontWeight:'700', color:'#9CA3AF', textAlign:'center', marginBottom:'2px', fontFamily:"'Inter',sans-serif", lineHeight:1 }}>
+      <label style={{ display:'block', fontSize:'10px', fontWeight:'700', color:'#9CA3AF', textAlign:'center', marginBottom:'2px', fontFamily:"'Outfit',sans-serif", lineHeight:1 }}>
         {label}
       </label>
       {/* Input colore nativo — visibile come in AspettoTab */}
@@ -377,7 +377,7 @@ export default function RichEditor({ value, onChange, placeholder = 'Scrivi qui�
 
   const curFontSize = editor.getAttributes('textStyle').fontSize?.replace('px','') || '15'
   const curFont = editor.getAttributes('textStyle').fontFamily || 'Inter, sans-serif'
-  const curFontLabel = FONTS.find(f => f.value === curFont)?.label || 'Inter'
+  const curFontLabel = FONTS.find(f => f.value === curFont)?.label || 'Outfit'
 
   return (
     <div style={st.wrap} onClick={closeAll} ref={editorRef}>
@@ -427,7 +427,7 @@ export default function RichEditor({ value, onChange, placeholder = 'Scrivi qui�
                 <button key={f.value} type="button" onClick={() => { editor.chain().focus().setFontFamily(f.value).run(); setShowFontPicker(false) }}
                   style={{ display:'block', width:'100%', textAlign:'left', padding:'7px 10px', border:'none', borderRadius:'6px', cursor:'pointer',
                     fontSize:'13px', fontFamily: f.value, background: curFont === f.value ? '#EFF6FF' : 'transparent',
-                    color: curFont === f.value ? '#003DA5' : '#374151', fontWeight: curFont === f.value ? '700' : '400' }}
+                    color: curFont === f.value ? '#E11D48' : '#374151', fontWeight: curFont === f.value ? '700' : '400' }}
                   onMouseEnter={e => { if(curFont !== f.value) e.currentTarget.style.background='#F3F4F6' }}
                   onMouseLeave={e => { if(curFont !== f.value) e.currentTarget.style.background='transparent' }}>
                   {f.label}
@@ -556,8 +556,8 @@ export default function RichEditor({ value, onChange, placeholder = 'Scrivi qui�
                   const sel = r<=tableHover.r && c<=tableHover.c
                   return <div key={i} onMouseEnter={() => setTableHover({r,c})}
                     onClick={() => { editor.chain().focus().insertTable({rows:r,cols:c,withHeaderRow:true}).run(); setShowTablePicker(false) }}
-                    style={{ width:'20px', height:'20px', border:`1.5px solid ${sel?'#003DA5':'#D1D5DB'}`,
-                      backgroundColor:sel?'#EEF3FF':'#FFF', borderRadius:'2px', cursor:'pointer', transition:'all .1s' }}/>
+                    style={{ width:'20px', height:'20px', border:`1.5px solid ${sel?'#E11D48':'#D1D5DB'}`,
+                      backgroundColor:sel?'#FEE4E6':'#FFF', borderRadius:'2px', cursor:'pointer', transition:'all .1s' }}/>
                 })}
               </div>
               {editor.isActive('table') && (
@@ -602,9 +602,9 @@ export default function RichEditor({ value, onChange, placeholder = 'Scrivi qui�
           <div style={{ position:'relative' }} onClick={e => e.stopPropagation()}>
             <button type="button"
               onClick={() => { setShowVarPicker(!showVarPicker); setShowTablePicker(false); setShowSpecial(false) }}
-              style={{ height:'30px', padding:'0 10px', border:'1px solid #C7D9F8', background: showVarPicker ? '#EEF3FF' : '#F8FAFF',
-                borderRadius:'5px', cursor:'pointer', fontSize:'12px', fontWeight:'700', color:'#003DA5',
-                fontFamily:"'Inter',sans-serif", display:'flex', alignItems:'center', gap:'4px', flexShrink:0 }}>
+              style={{ height:'30px', padding:'0 10px', border:'1px solid #FDA4AF', background: showVarPicker ? '#FEE4E6' : '#F8FAFF',
+                borderRadius:'5px', cursor:'pointer', fontSize:'12px', fontWeight:'700', color:'#E11D48',
+                fontFamily:"'Outfit',sans-serif", display:'flex', alignItems:'center', gap:'4px', flexShrink:0 }}>
               {'{ }'} Variabili
             </button>
             {showVarPicker && (
@@ -619,8 +619,8 @@ export default function RichEditor({ value, onChange, placeholder = 'Scrivi qui�
                 <div style={{ height:'1px', background:'#E5E7EB', margin:'4px 0 8px' }}/>
                 {variables.map(v =>
                   <button key={v} onClick={() => insertVariable(v)}
-                    style={{ ...st.specialBtn, fontFamily:'monospace', fontWeight:'600', color:'#003DA5' }}
-                    onMouseEnter={e => e.currentTarget.style.background='#EEF3FF'}
+                    style={{ ...st.specialBtn, fontFamily:'monospace', fontWeight:'600', color:'#E11D48' }}
+                    onMouseEnter={e => e.currentTarget.style.background='#FEE4E6'}
                     onMouseLeave={e => e.currentTarget.style.background='transparent'}>
                     {v}
                   </button>
@@ -641,10 +641,10 @@ export default function RichEditor({ value, onChange, placeholder = 'Scrivi qui�
           <span style={{ fontSize:'11px', color:'#6B7280' }}>Allinea:</span>
           {['left','center','right'].map(a =>
             <button key={a} type="button" onClick={() => updateImageAttr('data-align', a)}
-              style={{ padding:'3px 9px', border:`1px solid ${selectedImg.attrs?.['data-align']===a?'#003DA5':'#E5E7EB'}`,
-                borderRadius:'4px', background:selectedImg.attrs?.['data-align']===a?'#EEF3FF':'#FFF',
-                cursor:'pointer', fontSize:'12px', fontWeight:'600', color:selectedImg.attrs?.['data-align']===a?'#003DA5':'#6B7280',
-                fontFamily:"'Inter',sans-serif" }}>
+              style={{ padding:'3px 9px', border:`1px solid ${selectedImg.attrs?.['data-align']===a?'#E11D48':'#E5E7EB'}`,
+                borderRadius:'4px', background:selectedImg.attrs?.['data-align']===a?'#FEE4E6':'#FFF',
+                cursor:'pointer', fontSize:'12px', fontWeight:'600', color:selectedImg.attrs?.['data-align']===a?'#E11D48':'#6B7280',
+                fontFamily:"'Outfit',sans-serif" }}>
               {a==='left'?'◀':a==='center'?'■':'▶'}
             </button>
           )}
@@ -652,16 +652,16 @@ export default function RichEditor({ value, onChange, placeholder = 'Scrivi qui�
           <span style={{ fontSize:'11px', color:'#6B7280' }}>Dimensione:</span>
           {[['small','Piccola'],['medium','Media'],['large','Piena']].map(([sz,label]) =>
             <button key={sz} type="button" onClick={() => updateImageAttr('data-size', sz)}
-              style={{ padding:'3px 9px', border:`1px solid ${selectedImg.attrs?.['data-size']===sz?'#003DA5':'#E5E7EB'}`,
-                borderRadius:'4px', background:selectedImg.attrs?.['data-size']===sz?'#EEF3FF':'#FFF',
-                cursor:'pointer', fontSize:'12px', fontWeight:'600', color:selectedImg.attrs?.['data-size']===sz?'#003DA5':'#6B7280',
-                fontFamily:"'Inter',sans-serif" }}>
+              style={{ padding:'3px 9px', border:`1px solid ${selectedImg.attrs?.['data-size']===sz?'#E11D48':'#E5E7EB'}`,
+                borderRadius:'4px', background:selectedImg.attrs?.['data-size']===sz?'#FEE4E6':'#FFF',
+                cursor:'pointer', fontSize:'12px', fontWeight:'600', color:selectedImg.attrs?.['data-size']===sz?'#E11D48':'#6B7280',
+                fontFamily:"'Outfit',sans-serif" }}>
               {label}
             </button>
           )}
           <Sep/>
           <button onClick={() => { editor.chain().focus().deleteSelection().run(); setSelectedImg(null) }}
-            style={{ padding:'3px 8px', border:'1px solid #FECACA', borderRadius:'4px', background:'#FEF2F2', cursor:'pointer', fontSize:'12px', color:'#DC2626', fontFamily:"'Inter',sans-serif", fontWeight:'600' }}>
+            style={{ padding:'3px 8px', border:'1px solid #FECACA', borderRadius:'4px', background:'#FEF2F2', cursor:'pointer', fontSize:'12px', color:'#DC2626', fontFamily:"'Outfit',sans-serif", fontWeight:'600' }}>
             ✕ Elimina
           </button>
         </div>
@@ -674,12 +674,12 @@ export default function RichEditor({ value, onChange, placeholder = 'Scrivi qui�
         .ProseMirror { outline:none; }
         .ProseMirror p.is-editor-empty:first-child::before { content:attr(data-placeholder); float:left; color:#9CA3AF; pointer-events:none; height:0; }
         .ProseMirror .selectedCell:after { background:rgba(0,61,165,.07); content:""; position:absolute; inset:0; pointer-events:none; z-index:2; }
-        .ProseMirror .column-resize-handle { background:#003DA5; bottom:-2px; position:absolute; right:-2px; pointer-events:none; top:0; width:3px; }
+        .ProseMirror .column-resize-handle { background:#E11D48; bottom:-2px; position:absolute; right:-2px; pointer-events:none; top:0; width:3px; }
         .ProseMirror table { position:relative; }
         .ProseMirror ul[data-type="taskList"] { padding-left:0; }
         .ProseMirror ul[data-type="taskList"] li { display:flex; gap:8px; align-items:flex-start; list-style:none; }
         .ProseMirror ul[data-type="taskList"] li > label { display:flex; align-items:center; }
-        .ProseMirror ul[data-type="taskList"] li > label input { width:16px; height:16px; cursor:pointer; accent-color:#003DA5; }
+        .ProseMirror ul[data-type="taskList"] li > label input { width:16px; height:16px; cursor:pointer; accent-color:#E11D48; }
         .ProseMirror ul[data-type="taskList"] li > div { flex:1; }
         @keyframes spin { from{transform:rotate(0)} to{transform:rotate(360deg)} }
       `}</style>
@@ -706,12 +706,12 @@ const TableIcon        = () => <svg width="13" height="13" viewBox="0 0 24 24" f
 const ClearIcon        = () => <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2"><path d="M8 3h11l-4 9"/><path d="M3 21l18-18"/><line x1="6" y1="15" x2="6" y2="21"/><line x1="9" y1="21" x2="3" y2="21"/></svg>
 
 const st = {
-  wrap:       { border:'1px solid #D1D5DB', borderRadius:'10px', overflow:'visible', background:'#FFF', fontFamily:"'Inter',sans-serif", position:'relative', zIndex:1 },
+  wrap:       { border:'1px solid #D1D5DB', borderRadius:'10px', overflow:'visible', background:'#FFF', fontFamily:"'Outfit',sans-serif", position:'relative', zIndex:1 },
   row:        { display:'flex', flexWrap:'wrap', gap:'2px', padding:'5px 8px', borderBottom:'1px solid #E5E7EB', background:'#FAFAFA', alignItems:'center', overflow:'visible', position:'relative' },
-  sel:        { height:'30px', padding:'0 6px', border:'1px solid #E5E7EB', borderRadius:'5px', fontSize:'12px', fontFamily:"'Inter',sans-serif", background:'#FFF', cursor:'pointer', color:'#374151' },
-  smallBtn:   { width:'24px', height:'30px', border:'1px solid #E5E7EB', borderRadius:'5px', background:'#FFF', cursor:'pointer', fontSize:'16px', fontWeight:'700', fontFamily:"'Inter',sans-serif", display:'flex', alignItems:'center', justifyContent:'center', flexShrink:0, color:'#374151' },
+  sel:        { height:'30px', padding:'0 6px', border:'1px solid #E5E7EB', borderRadius:'5px', fontSize:'12px', fontFamily:"'Outfit',sans-serif", background:'#FFF', cursor:'pointer', color:'#374151' },
+  smallBtn:   { width:'24px', height:'30px', border:'1px solid #E5E7EB', borderRadius:'5px', background:'#FFF', cursor:'pointer', fontSize:'16px', fontWeight:'700', fontFamily:"'Outfit',sans-serif", display:'flex', alignItems:'center', justifyContent:'center', flexShrink:0, color:'#374151' },
   picker:     { position:'absolute', top:'34px', left:0, background:'#FFF', border:'1px solid #E5E7EB', borderRadius:'10px', padding:'12px', zIndex:400, boxShadow:'0 8px 32px rgba(0,0,0,.12)', minWidth:'180px' },
   pickerTitle:{ fontSize:'11px', fontWeight:'700', color:'#6B7280', textTransform:'uppercase', letterSpacing:'.05em', margin:'0 0 8px' },
-  tblBtn:     { fontSize:'11px', padding:'3px 7px', border:'1px solid #E5E7EB', borderRadius:'4px', cursor:'pointer', background:'#FFF', fontFamily:"'Inter',sans-serif", fontWeight:'600' },
-  specialBtn: { display:'block', width:'100%', textAlign:'left', padding:'6px 8px', border:'none', borderRadius:'5px', cursor:'pointer', fontSize:'12px', fontFamily:"'Inter',sans-serif", background:'transparent', color:'#374151', marginBottom:'1px' },
+  tblBtn:     { fontSize:'11px', padding:'3px 7px', border:'1px solid #E5E7EB', borderRadius:'4px', cursor:'pointer', background:'#FFF', fontFamily:"'Outfit',sans-serif", fontWeight:'600' },
+  specialBtn: { display:'block', width:'100%', textAlign:'left', padding:'6px 8px', border:'none', borderRadius:'5px', cursor:'pointer', fontSize:'12px', fontFamily:"'Outfit',sans-serif", background:'transparent', color:'#374151', marginBottom:'1px' },
 }

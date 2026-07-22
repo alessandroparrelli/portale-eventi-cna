@@ -12,7 +12,7 @@ export default function ProtectedRoute({ children }) {
         alignItems: 'center',
         justifyContent: 'center',
         backgroundColor: '#F4F5F7',
-        fontFamily: "'Inter', sans-serif",
+        fontFamily: "'Outfit', sans-serif",
       }}>
         <div style={{ textAlign: 'center' }}>
           <img

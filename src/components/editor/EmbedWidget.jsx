@@ -40,7 +40,7 @@ export default function EmbedWidget({ url, titolo }) {
   }
 
   return (
-    <div style={{ fontFamily: "'Inter',sans-serif" }}>
+    <div style={{ fontFamily: "'Outfit',sans-serif" }}>
       {/* Info banner */}
       <div style={{ backgroundColor: '#EFF6FF', border: '1px solid #BFDBFE', borderRadius: '8px',
         padding: '14px 18px', marginBottom: '24px', display: 'flex', gap: '12px' }}>
@@ -69,7 +69,7 @@ export default function EmbedWidget({ url, titolo }) {
           <a href={url} target="_blank" rel="noopener noreferrer"
             style={{ flexShrink: 0, padding: '9px 14px', backgroundColor: '#ffffff', border: '1px solid #E5E7EB',
               borderRadius: '6px', fontSize: '13px', fontWeight: '600', color: '#374151',
-              textDecoration: 'none', fontFamily: "'Inter',sans-serif", whiteSpace: 'nowrap' }}>
+              textDecoration: 'none', fontFamily: "'Outfit',sans-serif", whiteSpace: 'nowrap' }}>
             Apri ↗
           </a>
         </div>
@@ -83,11 +83,11 @@ export default function EmbedWidget({ url, titolo }) {
           {PRESETS.map(pr => (
             <button key={pr.id} onClick={() => setPreset(pr.id)}
               style={{ padding: '10px 16px', borderRadius: '8px', border: '1px solid',
-                borderColor: preset === pr.id ? '#003DA5' : '#E5E7EB',
+                borderColor: preset === pr.id ? '#E11D48' : '#E5E7EB',
                 backgroundColor: preset === pr.id ? '#EFF6FF' : '#ffffff',
-                color: preset === pr.id ? '#003DA5' : '#374151',
+                color: preset === pr.id ? '#E11D48' : '#374151',
                 fontSize: '13px', fontWeight: '600', cursor: 'pointer',
-                fontFamily: "'Inter',sans-serif", textAlign: 'left', transition: 'all 0.15s' }}>
+                fontFamily: "'Outfit',sans-serif", textAlign: 'left', transition: 'all 0.15s' }}>
               <div style={{ fontWeight: '700' }}>{pr.label}</div>
               <div style={{ fontSize: '11px', color: preset === pr.id ? '#3B82F6' : '#9CA3AF', marginTop: '2px' }}>
                 {typeof pr.w === 'string' ? pr.w : `${pr.w}×${pr.h}px`}
@@ -96,11 +96,11 @@ export default function EmbedWidget({ url, titolo }) {
           ))}
           <button onClick={() => setPreset('custom')}
             style={{ padding: '10px 16px', borderRadius: '8px', border: '1px solid',
-              borderColor: preset === 'custom' ? '#003DA5' : '#E5E7EB',
+              borderColor: preset === 'custom' ? '#E11D48' : '#E5E7EB',
               backgroundColor: preset === 'custom' ? '#EFF6FF' : '#ffffff',
-              color: preset === 'custom' ? '#003DA5' : '#374151',
+              color: preset === 'custom' ? '#E11D48' : '#374151',
               fontSize: '13px', fontWeight: '600', cursor: 'pointer',
-              fontFamily: "'Inter',sans-serif", textAlign: 'left', transition: 'all 0.15s' }}>
+              fontFamily: "'Outfit',sans-serif", textAlign: 'left', transition: 'all 0.15s' }}>
             <div style={{ fontWeight: '700' }}>Personalizzato</div>
             <div style={{ fontSize: '11px', color: preset === 'custom' ? '#3B82F6' : '#9CA3AF', marginTop: '2px' }}>
               Larghezza e altezza libere
@@ -115,13 +115,13 @@ export default function EmbedWidget({ url, titolo }) {
               <span style={{ fontSize: '12px', fontWeight: '600', color: '#6B7280' }}>Larghezza (px)</span>
               <input type="number" value={customW} onChange={e => setCustomW(Number(e.target.value))}
                 style={{ padding: '8px 12px', border: '1px solid #D1D5DB', borderRadius: '6px',
-                  fontSize: '14px', fontFamily: "'Inter',sans-serif", outline: 'none', width: '100%', boxSizing: 'border-box' }}/>
+                  fontSize: '14px', fontFamily: "'Outfit',sans-serif", outline: 'none', width: '100%', boxSizing: 'border-box' }}/>
             </label>
             <label style={{ display: 'flex', flexDirection: 'column', gap: '4px', flex: 1 }}>
               <span style={{ fontSize: '12px', fontWeight: '600', color: '#6B7280' }}>Altezza (px)</span>
               <input type="number" value={customH} onChange={e => setCustomH(Number(e.target.value))}
                 style={{ padding: '8px 12px', border: '1px solid #D1D5DB', borderRadius: '6px',
-                  fontSize: '14px', fontFamily: "'Inter',sans-serif", outline: 'none', width: '100%', boxSizing: 'border-box' }}/>
+                  fontSize: '14px', fontFamily: "'Outfit',sans-serif", outline: 'none', width: '100%', boxSizing: 'border-box' }}/>
             </label>
           </div>
         )}
@@ -141,14 +141,14 @@ export default function EmbedWidget({ url, titolo }) {
               style={{ padding: '6px 12px', border: '1px solid #E5E7EB', borderRadius: '6px',
                 backgroundColor: showPreview ? '#F3F4F6' : '#ffffff',
                 fontSize: '12px', fontWeight: '600', color: '#374151',
-                cursor: 'pointer', fontFamily: "'Inter',sans-serif" }}>
+                cursor: 'pointer', fontFamily: "'Outfit',sans-serif" }}>
               {showPreview ? 'Nascondi preview' : 'Mostra preview'}
             </button>
             <button onClick={copy}
               style={{ padding: '6px 16px', border: 'none', borderRadius: '6px',
-                backgroundColor: copied ? '#059669' : '#003DA5',
+                backgroundColor: copied ? '#059669' : '#E11D48',
                 fontSize: '12px', fontWeight: '700', color: '#ffffff',
-                cursor: 'pointer', fontFamily: "'Inter',sans-serif", transition: 'background 0.2s',
+                cursor: 'pointer', fontFamily: "'Outfit',sans-serif", transition: 'background 0.2s',
                 display: 'flex', alignItems: 'center', gap: '6px' }}>
               {copied ? (
                 <>

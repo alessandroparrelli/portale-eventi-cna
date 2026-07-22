@@ -9,12 +9,12 @@ import {
   Upload, Loader2, Settings2, Layout, Type, Palette, Image as ImageIcon
 } from 'lucide-react'
 
-const BLU = '#003DA5'
+const BLU = '#E11D48'
 const NERO = '#0A0A0A'
 const DEFAULT_LOGO = 'https://raw.githubusercontent.com/alessandroparrelli/fileappoggio/main/NUOVO-LOGO-CNA-ROMA-SOLO-ROMA.png'
 
 const FONTS = [
-  { value:'Inter,Arial,sans-serif',        label:'Inter' },
+  { value:'Inter,Arial,sans-serif',        label:'Outfit' },
   { value:'Georgia,serif',                  label:'Georgia' },
   { value:'Arial,Helvetica,sans-serif',     label:'Arial' },
   { value:"'Trebuchet MS',sans-serif",      label:'Trebuchet' },
@@ -167,7 +167,7 @@ function LogoPicker({ value, onChange }) {
         const sel = value === logo.url || (!value && logo.isDefault)
         return (
           <button key={i} type="button" onClick={() => onChange(logo.isDefault ? '' : logo.url)}
-            style={{ border:`2px solid ${sel ? BLU : '#E5E7EB'}`, borderRadius:'7px', background: sel ? '#EEF3FF' : '#fff', padding:'5px', cursor:'pointer', display:'flex', flexDirection:'column', alignItems:'center', gap:'3px' }}>
+            style={{ border:`2px solid ${sel ? BLU : '#E5E7EB'}`, borderRadius:'7px', background: sel ? '#FEE4E6' : '#fff', padding:'5px', cursor:'pointer', display:'flex', flexDirection:'column', alignItems:'center', gap:'3px' }}>
             <img src={logo.url} alt={logo.name} style={{ height:'32px', width:'100%', objectFit:'contain' }}
               onError={e => e.target.style.opacity = '0.3'}/>
             <span style={{ fontSize:'8px', color: sel ? BLU : '#6B7280', textAlign:'center', lineHeight:1.2, fontWeight: sel ? '700' : '400', overflow:'hidden', textOverflow:'ellipsis', whiteSpace:'nowrap', maxWidth:'100%' }}>
@@ -219,7 +219,7 @@ function AlignPicker({ value, onChange }) {
       <div style={{ display:'flex', gap:'3px' }}>
         {[['left',<AlignLeft size={12}/>],['center',<AlignCenter size={12}/>],['right',<AlignRight size={12}/>]].map(([v,ic])=>(
           <button key={v} type="button" onClick={()=>onChange(v)}
-            style={{ flex:1, padding:'5px', border:`1px solid ${value===v?BLU:'#E5E7EB'}`, borderRadius:'5px', cursor:'pointer', background:value===v?'#EEF3FF':'#fff', color:value===v?BLU:'#9CA3AF', display:'flex', alignItems:'center', justifyContent:'center' }}>
+            style={{ flex:1, padding:'5px', border:`1px solid ${value===v?BLU:'#E5E7EB'}`, borderRadius:'5px', cursor:'pointer', background:value===v?'#FEE4E6':'#fff', color:value===v?BLU:'#9CA3AF', display:'flex', alignItems:'center', justifyContent:'center' }}>
             {ic}
           </button>
         ))}
@@ -269,7 +269,7 @@ export default function HeaderEditor({ config, onChange, defaultExpanded = false
     <div style={{ background:'#fff', border:'1px solid #E5E7EB', borderRadius:'8px', overflow:'hidden' }}>
       {/* Header collapsible */}
       <button type="button" onClick={()=>setExpanded(!expanded)}
-        style={{ width:'100%', padding:'9px 14px', display:'flex', alignItems:'center', gap:'8px', background:'none', border:'none', cursor:'pointer', fontFamily:"'Inter',sans-serif" }}>
+        style={{ width:'100%', padding:'9px 14px', display:'flex', alignItems:'center', gap:'8px', background:'none', border:'none', cursor:'pointer', fontFamily:"'Outfit',sans-serif" }}>
         <Settings2 size={13} style={{ color:'#9CA3AF' }}/>
         <span style={{ fontSize:'11px', fontWeight:'700', color:'#6B7280', flex:1, textAlign:'left' }}>Intestazione email</span>
         {miniPreview}
@@ -319,7 +319,7 @@ export default function HeaderEditor({ config, onChange, defaultExpanded = false
                   padding:'6px 10px', borderRadius:'6px 6px 0 0', border:'none', cursor:'pointer',
                   background: activeTab===t.key ? '#fff' : 'transparent',
                   color: activeTab===t.key ? BLU : '#9CA3AF',
-                  fontSize:'10px', fontWeight:'700', fontFamily:"'Inter',sans-serif",
+                  fontSize:'10px', fontWeight:'700', fontFamily:"'Outfit',sans-serif",
                   borderBottom: activeTab===t.key ? `2px solid ${BLU}` : '2px solid transparent',
                 }}>
                 {t.icon} {t.label}
@@ -340,8 +340,8 @@ export default function HeaderEditor({ config, onChange, defaultExpanded = false
                       style={{
                         flex:1, padding:'8px 6px', border:`1.5px solid ${c.layout===l.value?BLU:'#E5E7EB'}`,
                         borderRadius:'6px', cursor:'pointer', textAlign:'center',
-                        background: c.layout===l.value ? '#EEF3FF' : '#fff',
-                        fontFamily:"'Inter',sans-serif",
+                        background: c.layout===l.value ? '#FEE4E6' : '#fff',
+                        fontFamily:"'Outfit',sans-serif",
                       }}>
                       <div style={{ fontSize:'10px', fontWeight:'700', color: c.layout===l.value ? BLU : '#374151', marginBottom:'2px' }}>{l.label}</div>
                       <div style={{ fontSize:'9px', color:'#9CA3AF', lineHeight:1.3 }}>{l.desc}</div>
@@ -442,7 +442,7 @@ export default function HeaderEditor({ config, onChange, defaultExpanded = false
                   <div style={{ display:'flex', gap:'4px', flexWrap:'wrap' }}>
                     {heroImageUrl && (
                       <button type="button" onClick={()=>set('hero_bg_image', heroImageUrl)}
-                        style={{ padding:'4px 10px', background:'#EEF3FF', border:'1px solid #BFDBFE', borderRadius:'5px', cursor:'pointer', fontSize:'10px', color:BLU, fontFamily:"'Inter',sans-serif", fontWeight:'600', display:'flex', alignItems:'center', gap:'4px' }}>
+                        style={{ padding:'4px 10px', background:'#FEE4E6', border:'1px solid #BFDBFE', borderRadius:'5px', cursor:'pointer', fontSize:'10px', color:BLU, fontFamily:"'Outfit',sans-serif", fontWeight:'600', display:'flex', alignItems:'center', gap:'4px' }}>
                         Usa immagine evento
                       </button>
                     )}
@@ -490,5 +490,5 @@ export default function HeaderEditor({ config, onChange, defaultExpanded = false
 }
 
 // ─── Stili condivisi ──────────────────────────────────────────────────────────
-const inp = { width:'100%', padding:'7px 10px', border:'1px solid #E5E7EB', borderRadius:'6px', fontSize:'12px', fontFamily:"'Inter',sans-serif", outline:'none', color:NERO, background:'#fff', boxSizing:'border-box' }
+const inp = { width:'100%', padding:'7px 10px', border:'1px solid #E5E7EB', borderRadius:'6px', fontSize:'12px', fontFamily:"'Outfit',sans-serif", outline:'none', color:NERO, background:'#fff', boxSizing:'border-box' }
 const lbl = { display:'block', fontSize:'10px', fontWeight:'800', color:'#9CA3AF', textTransform:'uppercase', letterSpacing:'.07em', marginBottom:'4px' }

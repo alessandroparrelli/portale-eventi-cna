@@ -48,7 +48,7 @@ export default function CalendarioAdminPage() {
 
   const iSt = {
     width: '100%', padding: '9px 12px', border: '1px solid #D1D5DB', borderRadius: '6px',
-    fontSize: '14px', fontFamily: "'Inter',sans-serif", outline: 'none', boxSizing: 'border-box', color: '#0A0A0A',
+    fontSize: '14px', fontFamily: "'Outfit',sans-serif", outline: 'none', boxSizing: 'border-box', color: '#0A0A0A',
   }
 
   if (loading) return (
@@ -71,7 +71,7 @@ export default function CalendarioAdminPage() {
           <a href="/calendario" target="_blank" rel="noopener noreferrer"
             style={{ display: 'flex', alignItems: 'center', gap: '6px', padding: '9px 16px',
               border: '1px solid #E5E7EB', borderRadius: '6px', fontSize: '13px', fontWeight: '600',
-              color: '#374151', textDecoration: 'none', fontFamily: "'Inter',sans-serif" }}>
+              color: '#374151', textDecoration: 'none', fontFamily: "'Outfit',sans-serif" }}>
             <Eye size={15}/> Anteprima
           </a>
           <Btn variant="primary" onClick={save} disabled={saving} size="md">
@@ -112,22 +112,22 @@ export default function CalendarioAdminPage() {
             {cfg.logo_url && (
               <button onClick={() => upd('logo_url', '')}
                 style={{ marginTop: '8px', fontSize: '12px', color: '#DC2626', background: 'none',
-                  border: 'none', cursor: 'pointer', fontFamily: "'Inter',sans-serif" }}>
+                  border: 'none', cursor: 'pointer', fontFamily: "'Outfit',sans-serif" }}>
                 × Ripristina logo default
               </button>
             )}
           </Field>
           <Field label="Colore primario">
             <div style={{ display: 'flex', alignItems: 'center', gap: '12px' }}>
-              <input type="color" value={cfg.colore_primario || '#003DA5'}
+              <input type="color" value={cfg.colore_primario || '#E11D48'}
                 onChange={e => upd('colore_primario', e.target.value)}
                 style={{ width: '48px', height: '38px', border: '1px solid #D1D5DB', borderRadius: '6px', cursor: 'pointer', padding: '2px' }}/>
-              <Input value={cfg.colore_primario || '#003DA5'}
+              <Input value={cfg.colore_primario || '#E11D48'}
                 onChange={e => upd('colore_primario', e.target.value)}
                 style={{ maxWidth: '140px' }}/>
-              <button onClick={() => upd('colore_primario', '#003DA5')}
+              <button onClick={() => upd('colore_primario', '#E11D48')}
                 style={{ fontSize: '12px', color: '#9CA3AF', background: 'none', border: 'none',
-                  cursor: 'pointer', fontFamily: "'Inter',sans-serif" }}>
+                  cursor: 'pointer', fontFamily: "'Outfit',sans-serif" }}>
                 Reset blu CNA
               </button>
             </div>
@@ -191,8 +191,8 @@ export default function CalendarioAdminPage() {
           </div>
           <a href="/calendario" target="_blank" rel="noopener noreferrer"
             style={{ display: 'flex', alignItems: 'center', gap: '6px', padding: '9px 16px',
-              backgroundColor: '#003DA5', color: '#ffffff', borderRadius: '6px',
-              fontSize: '13px', fontWeight: '700', textDecoration: 'none', fontFamily: "'Inter',sans-serif",
+              backgroundColor: '#E11D48', color: '#ffffff', borderRadius: '6px',
+              fontSize: '13px', fontWeight: '700', textDecoration: 'none', fontFamily: "'Outfit',sans-serif",
               whiteSpace: 'nowrap', flexShrink: 0 }}>
             <ExternalLink size={14}/> Apri pagina
           </a>
@@ -224,7 +224,7 @@ function Toggle({ label, hint, value, onChange }) {
       <div style={{ position: 'relative', width: '40px', height: '22px', flexShrink: 0, marginTop: '1px' }}
         onClick={() => onChange(!value)}>
         <div style={{ position: 'absolute', inset: 0, borderRadius: '999px', transition: 'background 0.2s',
-          backgroundColor: value ? '#003DA5' : '#D1D5DB' }}/>
+          backgroundColor: value ? '#E11D48' : '#D1D5DB' }}/>
         <div style={{ position: 'absolute', top: '3px', left: value ? '21px' : '3px', width: '16px', height: '16px',
           borderRadius: '50%', backgroundColor: '#ffffff', transition: 'left 0.2s',
           boxShadow: '0 1px 4px rgba(0,0,0,0.2)' }}/>

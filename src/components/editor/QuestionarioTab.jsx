@@ -213,7 +213,7 @@ export default function QuestionarioTab({ eventoId }) {
             <label style={{ display:'flex', alignItems:'center', gap:'10px', cursor:'pointer' }}>
               <input type="checkbox" checked={form.obbligatorio}
                 onChange={e => setForm(f=>({...f, obbligatorio:e.target.checked}))}
-                style={{ width:'16px', height:'16px', accentColor:'#003DA5' }}/>
+                style={{ width:'16px', height:'16px', accentColor:'#E11D48' }}/>
               <span style={{ fontSize:'14px', color:'#374151', fontWeight:'500' }}>Risposta obbligatoria</span>
             </label>
 

@@ -60,7 +60,7 @@ function generaPalliniSVG(c1, c2, opacita, angolo) {
 function PatternOverlay({ tema }) {
   const pattern = tema.sfondo_pattern
   if (!pattern || pattern === 'nessuno') return null
-  const c1 = tema.pattern_colore1 || '#003DA5'
+  const c1 = tema.pattern_colore1 || '#E11D48'
   const c2 = tema.pattern_colore2 || '#E8792F'
   const op = tema.pattern_opacita || '25'
   const angolo = pattern === 'pallini_angolo'
@@ -111,7 +111,7 @@ function ModalConferma({ reg, event, onClose }) {
     import('qrcode').then(QRCode => {
       QRCode.toDataURL(reg.qr_code, {
         width:240, margin:2,
-        color:{ dark:'#003DA5', light:'#FFFFFF' },
+        color:{ dark:'#E11D48', light:'#FFFFFF' },
         errorCorrectionLevel:'H',
       }).then(url => { if (!cancelled) setQrDataUrl(url) })
     })
@@ -184,9 +184,9 @@ function ModalConferma({ reg, event, onClose }) {
 
         {/* Codice iscrizione */}
         {reg.codice_iscrizione && (
-          <div style={{ background:'#EEF3FF', border:'1px solid #C7D9F8', borderRadius:'8px', padding:'10px 16px', marginBottom:'14px', textAlign:'center' }}>
+          <div style={{ background:'#FEE4E6', border:'1px solid #FDA4AF', borderRadius:'8px', padding:'10px 16px', marginBottom:'14px', textAlign:'center' }}>
             <p style={{ fontSize:'11px', color:'#6B7280', margin:'0 0 3px', fontWeight:'700', textTransform:'uppercase', letterSpacing:'.06em' }}>Codice iscrizione</p>
-            <code style={{ fontSize:'18px', fontWeight:'900', color:'#003DA5', letterSpacing:'.05em', fontFamily:'monospace' }}>
+            <code style={{ fontSize:'18px', fontWeight:'900', color:'#E11D48', letterSpacing:'.05em', fontFamily:'monospace' }}>
               {reg.codice_iscrizione}
             </code>
             {reg.accompagnatori > 0 && (
@@ -205,7 +205,7 @@ function ModalConferma({ reg, event, onClose }) {
                 <img src={qrDataUrl} alt="QR" style={mc.qrImg}/>
                 <p style={{ fontSize:'12px',color:'#6B7280',margin:0 }}>📸 Fai uno screenshot o scarica</p>
                 <code style={mc.qrCode}>{reg.qr_code}</code>
-                <button onClick={saveQR} style={{ ...mc.dlBtn, backgroundColor:'#003DA5', color:'#fff', border:'none' }}>
+                <button onClick={saveQR} style={{ ...mc.dlBtn, backgroundColor:'#E11D48', color:'#fff', border:'none' }}>
                   <Download size={13} style={{ display:'inline', marginRight:4, verticalAlign:'middle' }}/> {qrSaved ? '✓ Salvato!' : 'Salva QR Code'}
                 </button>
                 <button onClick={shareWhatsApp} style={{ ...mc.dlBtn, backgroundColor:'#25D366', color:'#fff', border:'none', marginLeft:6 }}>
@@ -214,7 +214,7 @@ function ModalConferma({ reg, event, onClose }) {
               </>
             ) : (
               <div style={{ display:'flex',alignItems:'center',gap:'10px',padding:'20px 0' }}>
-                <div style={{ width:'28px',height:'28px',border:'3px solid #E5E7EB',borderTopColor:'#003DA5',borderRadius:'50%',animation:'qrspin .8s linear infinite' }}/>
+                <div style={{ width:'28px',height:'28px',border:'3px solid #E5E7EB',borderTopColor:'#E11D48',borderRadius:'50%',animation:'qrspin .8s linear infinite' }}/>
                 <span style={{ fontSize:'13px',color:'#6B7280' }}>Generazione QR…</span>
               </div>
             )}
@@ -232,28 +232,28 @@ function ModalConferma({ reg, event, onClose }) {
         )}
         {event.data_inizio && (
           <div style={mc.infoBox}>
-            <div style={mc.infoRow}><Calendar size={14} style={{ color:'#003DA5',flexShrink:0 }}/><span>{fmtData(event.data_inizio)}</span></div>
+            <div style={mc.infoRow}><Calendar size={14} style={{ color:'#E11D48',flexShrink:0 }}/><span>{fmtData(event.data_inizio)}</span></div>
             {event.luogo && (
               <a href={`https://maps.google.com/?q=${encodeURIComponent(event.luogo)}`}
                 target="_blank" rel="noopener noreferrer" style={{ ...mc.infoRow,textDecoration:'none',color:'inherit' }}>
-                <MapPin size={14} style={{ color:'#003DA5',flexShrink:0 }}/>
-                <span style={{ color:'#003DA5',textDecorationLine:'underline',textDecorationStyle:'dotted' }}>{event.luogo}</span>
+                <MapPin size={14} style={{ color:'#E11D48',flexShrink:0 }}/>
+                <span style={{ color:'#E11D48',textDecorationLine:'underline',textDecorationStyle:'dotted' }}>{event.luogo}</span>
               </a>
             )}
           </div>
         )}
         <div style={{ display:'flex',gap:'10px',justifyContent:'center',marginBottom:'12px',flexWrap:'wrap' }}>
           <button onClick={addToCalendar}
-            style={{ display:'flex',alignItems:'center',gap:'8px',color:'#FFFFFF',backgroundColor:calAdded?'#16A34A':'#003DA5',border:'none',borderRadius:'8px',padding:'12px 18px',fontSize:'14px',fontWeight:'700',fontFamily:"'Inter',sans-serif",cursor:'pointer' }}>
+            style={{ display:'flex',alignItems:'center',gap:'8px',color:'#FFFFFF',backgroundColor:calAdded?'#16A34A':'#E11D48',border:'none',borderRadius:'8px',padding:'12px 18px',fontSize:'14px',fontWeight:'700',fontFamily:"'Outfit',sans-serif",cursor:'pointer' }}>
             📅 {calAdded ? '✓ Aggiunto' : 'Aggiungi al calendario'}
           </button>
           {reg.codice_iscrizione && (
             <a href={`/iscrizione/${reg.codice_iscrizione}`} target="_blank" rel="noopener noreferrer"
-              style={{ display:'flex',alignItems:'center',gap:'8px',color:'#003DA5',backgroundColor:'transparent',border:'1px solid #003DA5',borderRadius:'8px',padding:'12px 18px',fontSize:'14px',fontWeight:'700',fontFamily:"'Inter',sans-serif",cursor:'pointer',textDecoration:'none' }}>
+              style={{ display:'flex',alignItems:'center',gap:'8px',color:'#E11D48',backgroundColor:'transparent',border:'1px solid #E11D48',borderRadius:'8px',padding:'12px 18px',fontSize:'14px',fontWeight:'700',fontFamily:"'Outfit',sans-serif",cursor:'pointer',textDecoration:'none' }}>
               🔍 Verifica iscrizione
             </a>
           )}
-          <button onClick={onClose} style={{ padding:'12px 18px',backgroundColor:'transparent',border:'1px solid #E5E7EB',borderRadius:'8px',fontSize:'14px',fontWeight:'600',fontFamily:"'Inter',sans-serif",cursor:'pointer',color:'#6B7280' }}>Chiudi</button>
+          <button onClick={onClose} style={{ padding:'12px 18px',backgroundColor:'transparent',border:'1px solid #E5E7EB',borderRadius:'8px',fontSize:'14px',fontWeight:'600',fontFamily:"'Outfit',sans-serif",cursor:'pointer',color:'#6B7280' }}>Chiudi</button>
         </div>
         <p style={{ fontSize:'11px',color:'#9CA3AF',lineHeight:'1.5',margin:0 }}>{event.teatro_abilitato ? 'Riceverai una email quando il tuo posto sarà assegnato.' : 'Riceverai anche una email di conferma con il QR Code.'}</p>
       </div>
@@ -355,7 +355,7 @@ export default function LandingPage() {
 
   const heroStyle = event.immagine_hero
     ? { backgroundImage:`url(${event.immagine_hero})`,backgroundSize:'cover',backgroundPosition: lh.bg_position || 'center top' }
-    : { background: lh.hero_sfondo || tema.colore_primario || '#003DA5' }
+    : { background: lh.hero_sfondo || tema.colore_primario || '#E11D48' }
 
   return (
     <div style={{...s.root, backgroundColor: tema.sfondo_pagina || '#FFFFFF', position: 'relative'}}>
@@ -432,7 +432,7 @@ export default function LandingPage() {
           {/* Logo */}
           <div className="ev-hero-logo" style={{ marginBottom: 'clamp(20px,4vw,36px)' }}>
             <div style={{
-              background: (lh.logo_sfondo || tema.logo_bg) === 'colore_primario' ? (tema.colore_primario || '#003DA5')
+              background: (lh.logo_sfondo || tema.logo_bg) === 'colore_primario' ? (tema.colore_primario || '#E11D48')
                         : (lh.logo_sfondo || tema.logo_bg) === 'bianco' ? '#FFFFFF'
                         : 'transparent',
               padding: (lh.logo_sfondo || tema.logo_bg) && (lh.logo_sfondo || tema.logo_bg) !== 'trasparente' ? '6px 14px' : 0,
@@ -495,10 +495,10 @@ export default function LandingPage() {
             display:'flex', alignItems:'center', justifyContent:'center',
             gap:'10px', padding:'14px 40px', cursor:'pointer',
             textDecoration:'none', textAlign:'center',
-            fontSize:'15px', fontWeight:'700', fontFamily:"'Inter',sans-serif",
-            backgroundColor: tema.btn_stile === 'contorno' ? 'transparent' : (tema.colore_pulsanti || tema.colore_primario || '#003DA5'),
-            color: tema.btn_stile === 'contorno' ? (tema.colore_pulsanti || '#003DA5') : (tema.colore_testo_btn || '#FFFFFF'),
-            border: `1.5px solid ${tema.colore_pulsanti || tema.colore_primario || '#003DA5'}`,
+            fontSize:'15px', fontWeight:'700', fontFamily:"'Outfit',sans-serif",
+            backgroundColor: tema.btn_stile === 'contorno' ? 'transparent' : (tema.colore_pulsanti || tema.colore_primario || '#E11D48'),
+            color: tema.btn_stile === 'contorno' ? (tema.colore_pulsanti || '#E11D48') : (tema.colore_testo_btn || '#FFFFFF'),
+            border: `1.5px solid ${tema.colore_pulsanti || tema.colore_primario || '#E11D48'}`,
             borderRadius: btnRadius,
           }
           return !esaurito && !conferma ? (
@@ -531,14 +531,14 @@ export default function LandingPage() {
         {(event.sezioni||[]).length > 0 && (
           <div style={{ marginBottom:'16px' }}>
             {event.sezioni.map((block,i) => (
-              <BlockRenderer key={block.id||i} block={block} cp={event.colore_primario||'#003DA5'} formTarget="#form-iscrizione"/>
+              <BlockRenderer key={block.id||i} block={block} cp={event.colore_primario||'#E11D48'} formTarget="#form-iscrizione"/>
             ))}
           </div>
         )}
 
         {/* PROGRAMMA / SESSIONI */}
         {(event.sessioni||[]).length > 0 && (() => {
-          const primaryColor = tema.colore_primario || '#003DA5'
+          const primaryColor = tema.colore_primario || '#E11D48'
           return (
             <section style={{ ...s.section, marginBottom:'8px' }}>
               <h2 style={{ fontSize:'24px', fontWeight:'900', color:'#0A0A0A', letterSpacing:'-0.03em', margin:'0 0 24px' }}>
@@ -593,8 +593,8 @@ export default function LandingPage() {
           <div style={{ marginBottom:'24px', padding:'20px', backgroundColor: tema.sfondo_sezioni || '#F4F5F7', borderRadius:'12px' }}>
             {event.data_inizio && (
               <div style={{ display:'flex', alignItems:'center', gap:'10px', marginBottom: event.luogo ? '12px' : '0' }}>
-                <Calendar size={18} style={{ color: tema.colore_primario || '#003DA5', flexShrink:0 }}/>
-                <span style={{ fontSize:'15px', fontWeight:'700', color:'#0A0A0A', fontFamily:"'Inter',sans-serif", letterSpacing:'-.01em' }}>
+                <Calendar size={18} style={{ color: tema.colore_primario || '#E11D48', flexShrink:0 }}/>
+                <span style={{ fontSize:'15px', fontWeight:'700', color:'#0A0A0A', fontFamily:"'Outfit',sans-serif", letterSpacing:'-.01em' }}>
                   {fmtData(event.data_inizio)}
                   {fmtOra(event.data_inizio) && ` · ${fmtOra(event.data_inizio)}`}
                   {event.data_fine && fmtOra(event.data_fine) && ` — ${fmtOra(event.data_fine)}`}
@@ -603,8 +603,8 @@ export default function LandingPage() {
             )}
             {event.luogo && (
               <div style={{ display:'flex', alignItems:'center', gap:'10px', marginBottom:'16px' }}>
-                <MapPin size={18} style={{ color: tema.colore_primario || '#003DA5', flexShrink:0 }}/>
-                <span style={{ fontSize:'15px', fontWeight:'700', color:'#0A0A0A', fontFamily:"'Inter',sans-serif", letterSpacing:'-.01em' }}>
+                <MapPin size={18} style={{ color: tema.colore_primario || '#E11D48', flexShrink:0 }}/>
+                <span style={{ fontSize:'15px', fontWeight:'700', color:'#0A0A0A', fontFamily:"'Outfit',sans-serif", letterSpacing:'-.01em' }}>
                   {event.luogo}
                 </span>
               </div>
@@ -642,10 +642,10 @@ export default function LandingPage() {
               }} style={{
                 display:'flex', alignItems:'center', justifyContent:'center', gap:'8px',
                 padding:'12px 16px', backgroundColor:'#FFFFFF',
-                border:`1.5px solid ${tema.colore_primario || '#003DA5'}`,
-                color: tema.colore_primario || '#003DA5',
+                border:`1.5px solid ${tema.colore_primario || '#E11D48'}`,
+                color: tema.colore_primario || '#E11D48',
                 borderRadius:'10px', fontSize:'13px', fontWeight:'700',
-                fontFamily:"'Inter',sans-serif", cursor:'pointer',
+                fontFamily:"'Outfit',sans-serif", cursor:'pointer',
               }}>
                 <Calendar size={16}/>
                 Aggiungi al calendario
@@ -655,10 +655,10 @@ export default function LandingPage() {
                   target="_blank" rel="noopener noreferrer" style={{
                   display:'flex', alignItems:'center', justifyContent:'center', gap:'8px',
                   padding:'12px 16px', backgroundColor:'#FFFFFF',
-                  border:`1.5px solid ${tema.colore_primario || '#003DA5'}`,
-                  color: tema.colore_primario || '#003DA5',
+                  border:`1.5px solid ${tema.colore_primario || '#E11D48'}`,
+                  color: tema.colore_primario || '#E11D48',
                   borderRadius:'10px', fontSize:'13px', fontWeight:'700',
-                  fontFamily:"'Inter',sans-serif", cursor:'pointer', textDecoration:'none',
+                  fontFamily:"'Outfit',sans-serif", cursor:'pointer', textDecoration:'none',
                 }}>
                   <MapPin size={16}/>
                   Mappa dell'evento
@@ -670,7 +670,7 @@ export default function LandingPage() {
 
         {/* CTA / FORM */}
         {!conferma && (
-          <section style={{ ...s.ctaSection, backgroundColor: tema.cta_bg || '#EEF3FF' }}>
+          <section style={{ ...s.ctaSection, backgroundColor: tema.cta_bg || '#FEE4E6' }}>
             <div style={s.ctaRow}>
               <div style={{ flex:1 }}>
                 <h2 style={s.ctaTitle}>Partecipa all'evento</h2>
@@ -684,12 +684,12 @@ export default function LandingPage() {
                   setTimeout(()=>document.getElementById('form-iscrizione')?.scrollIntoView({behavior:'smooth',block:'start'}),50)
                 }} style={{
                   display:'flex', alignItems:'center', gap:'8px',
-                  backgroundColor: tema.btn_stile === 'contorno' ? 'transparent' : (tema.colore_pulsanti || tema.colore_primario || '#003DA5'),
-                  color: tema.btn_stile === 'contorno' ? (tema.colore_pulsanti || '#003DA5') : (tema.colore_testo_btn || '#FFFFFF'),
-                  border: tema.btn_stile === 'contorno' ? `2px solid ${tema.colore_pulsanti || '#003DA5'}` : 'none',
+                  backgroundColor: tema.btn_stile === 'contorno' ? 'transparent' : (tema.colore_pulsanti || tema.colore_primario || '#E11D48'),
+                  color: tema.btn_stile === 'contorno' ? (tema.colore_pulsanti || '#E11D48') : (tema.colore_testo_btn || '#FFFFFF'),
+                  border: tema.btn_stile === 'contorno' ? `2px solid ${tema.colore_pulsanti || '#E11D48'}` : 'none',
                   borderRadius: tema.btn_stile === 'pill' ? '50px' : `${tema.btn_raggio || 8}px`,
                   padding:'12px 24px', fontSize:'14px', fontWeight:'700',
-                  fontFamily:"'Inter',sans-serif", cursor:'pointer', whiteSpace:'nowrap', flexShrink:0,
+                  fontFamily:"'Outfit',sans-serif", cursor:'pointer', whiteSpace:'nowrap', flexShrink:0,
                 }}>
                   Iscriviti ora <ChevronRight size={18}/>
                 </button>
@@ -758,7 +758,7 @@ export default function LandingPage() {
         />
         {(event.footer_modalita || 'semplice') === 'ricco' && event.footer_html
           ? <div className="rich-content" style={{ textAlign:'center', fontSize:'13px', color: tema.testo_footer || '#ffffff' }} dangerouslySetInnerHTML={{ __html: event.footer_html }} />
-          : <div style={{ textAlign:'center', fontFamily:"'Inter',sans-serif", color: tema.testo_footer || '#ffffff', fontSize:'13px', lineHeight:'1.7' }}>
+          : <div style={{ textAlign:'center', fontFamily:"'Outfit',sans-serif", color: tema.testo_footer || '#ffffff', fontSize:'13px', lineHeight:'1.7' }}>
               <p style={{ margin:'0 0 12px', fontWeight:'700', fontSize:'14px' }}>👉 Insieme è meglio 👈</p>
               <p style={{ margin:0 }}>
                 <strong style={{ fontWeight:'700', display:'block' }}>CNA di Roma</strong>
@@ -779,7 +779,7 @@ export default function LandingPage() {
 
 /* ── STILI ─────────────────────────────────────────────── */
 const s = {
-  root:    { minHeight:'100vh', backgroundColor:'#FFFFFF', fontFamily:"'Inter',sans-serif", overflowX:'hidden', width:'100%' },
+  root:    { minHeight:'100vh', backgroundColor:'#FFFFFF', fontFamily:"'Outfit',sans-serif", overflowX:'hidden', width:'100%' },
   center:  { minHeight:'100vh', display:'flex', flexDirection:'column', alignItems:'center', justifyContent:'center', backgroundColor:'#F4F5F7', padding:'24px' },
   // Header
   // header: stile generato inline in base al tema dell'evento
@@ -801,7 +801,7 @@ const s = {
   // actionRow: rimosso — layout semplificato con pulsante singolo
   // actionBtn / actionBtnPrimary: stili generati inline in base al tema
   // CTA box
-  ctaSection:  { backgroundColor:'#EEF3FF', border:'1px solid #C7D9F8', borderRadius:'12px', padding:'24px', marginBottom:'24px' },
+  ctaSection:  { backgroundColor:'#FEE4E6', border:'1px solid #FDA4AF', borderRadius:'12px', padding:'24px', marginBottom:'24px' },
   ctaRow:      { display:'flex', alignItems:'center', justifyContent:'space-between', gap:'16px', flexWrap:'wrap' },
   ctaTitle:    { fontSize:'18px', fontWeight:'900', color:'#0A0A0A', letterSpacing:'-.02em', margin:'0 0 4px' },
   ctaSub:      { fontSize:'13px', color:'#4B5563', margin:0, lineHeight:'1.5' },
@@ -811,7 +811,7 @@ const s = {
   // Mappa
   mapSection:  { marginTop:'32px', paddingBottom:'8px' },
   mapWrap:     { height:'320px', borderRadius:'12px', overflow:'hidden', border:'1px solid #E5E7EB', marginBottom:'10px' },
-  mapLink:     { display:'inline-flex', alignItems:'center', gap:'6px', fontSize:'13px', color:'#003DA5', fontWeight:'600', textDecoration:'none' },
+  mapLink:     { display:'inline-flex', alignItems:'center', gap:'6px', fontSize:'13px', color:'#E11D48', fontWeight:'600', textDecoration:'none' },
   // Footer
   footer:      { borderTop:'1px solid #E5E7EB', padding:'20px 24px', textAlign:'center', fontSize:'12px', color:'#9CA3AF', marginTop:'40px' },
 }
@@ -825,8 +825,8 @@ const mc = {
   qrBox:    { backgroundColor:'#F4F5F7', borderRadius:'12px', padding:'16px', marginBottom:'14px', display:'flex', flexDirection:'column', alignItems:'center', gap:'8px' },
   qrLabel:  { fontSize:'11px', fontWeight:'700', color:'#6B7280', textTransform:'uppercase', letterSpacing:'.07em', margin:0 },
   qrImg:    { width:'180px', height:'180px', imageRendering:'pixelated', border:'none', background:'transparent' },
-  qrCode:   { fontSize:'11px', fontFamily:'monospace', color:'#003DA5', fontWeight:'700', letterSpacing:'.04em', backgroundColor:'#EEF3FF', padding:'3px 8px', borderRadius:'4px', margin:0 },
-  dlBtn:    { background:'none', border:'1px solid #003DA5', color:'#003DA5', borderRadius:'6px', padding:'6px 14px', fontSize:'12px', fontWeight:'700', fontFamily:"'Inter',sans-serif", cursor:'pointer' },
-  infoBox:  { backgroundColor:'#EEF3FF', borderRadius:'8px', padding:'10px 14px', marginBottom:'16px', display:'flex', flexDirection:'column', gap:'6px', textAlign:'left' },
+  qrCode:   { fontSize:'11px', fontFamily:'monospace', color:'#E11D48', fontWeight:'700', letterSpacing:'.04em', backgroundColor:'#FEE4E6', padding:'3px 8px', borderRadius:'4px', margin:0 },
+  dlBtn:    { background:'none', border:'1px solid #E11D48', color:'#E11D48', borderRadius:'6px', padding:'6px 14px', fontSize:'12px', fontWeight:'700', fontFamily:"'Outfit',sans-serif", cursor:'pointer' },
+  infoBox:  { backgroundColor:'#FEE4E6', borderRadius:'8px', padding:'10px 14px', marginBottom:'16px', display:'flex', flexDirection:'column', gap:'6px', textAlign:'left' },
   infoRow:  { display:'flex', alignItems:'center', gap:'8px', fontSize:'12px', color:'#374151', fontWeight:'500' },
 }

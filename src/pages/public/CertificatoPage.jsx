@@ -26,13 +26,13 @@ export default function CertificatoPage() {
   }, [codice])
 
   if (status === 'loading') return (
-    <div style={{ minHeight: '100vh', display: 'flex', alignItems: 'center', justifyContent: 'center', fontFamily: "'Inter',sans-serif" }}>
+    <div style={{ minHeight: '100vh', display: 'flex', alignItems: 'center', justifyContent: 'center', fontFamily: "'Outfit',sans-serif" }}>
       <p style={{ color: '#9CA3AF' }}>Verifica certificato…</p>
     </div>
   )
 
   if (status === 'error') return (
-    <div style={{ minHeight: '100vh', display: 'flex', flexDirection: 'column', alignItems: 'center', justifyContent: 'center', fontFamily: "'Inter',sans-serif", padding: '24px' }}>
+    <div style={{ minHeight: '100vh', display: 'flex', flexDirection: 'column', alignItems: 'center', justifyContent: 'center', fontFamily: "'Outfit',sans-serif", padding: '24px' }}>
       <p style={{ fontSize: '48px', marginBottom: '16px' }}>❌</p>
       <p style={{ fontSize: '18px', fontWeight: '700', color: '#0A0A0A' }}>Certificato non trovato</p>
       <p style={{ fontSize: '14px', color: '#6B7280' }}>{errMsg || 'Il codice di verifica non è valido o il certificato non esiste.'}</p>
@@ -48,8 +48,8 @@ export default function CertificatoPage() {
             <p style={{ margin: '2px 0 0', fontSize: '12px', color: '#9CA3AF' }}>Codice verifica: <strong style={{ fontFamily: 'monospace' }}>{codice}</strong></p>
           </div>
           <a href={downloadUrl} target="_blank" rel="noopener noreferrer"
-            style={{ padding: '10px 20px', backgroundColor: '#003DA5', color: '#fff', border: 'none', borderRadius: '8px',
-              fontSize: '14px', fontWeight: '700', cursor: 'pointer', fontFamily: "'Inter',sans-serif", textDecoration: 'none' }}>
+            style={{ padding: '10px 20px', backgroundColor: '#E11D48', color: '#fff', border: 'none', borderRadius: '8px',
+              fontSize: '14px', fontWeight: '700', cursor: 'pointer', fontFamily: "'Outfit',sans-serif", textDecoration: 'none' }}>
             ⬇ Scarica PDF
           </a>
         </div>

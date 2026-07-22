@@ -4,7 +4,7 @@ import { useRole } from '../hooks/useRole'
 import { supabase } from '../lib/supabase'
 import { useState, useEffect } from 'react'
 
-const RUOLO_COLORS = { superadmin:'#9F1239', admin:'#E11D48', supervisore:'#BE123C', utente:'#6B7280' }
+const RUOLO_COLORS = { superadmin:'#003DA5', admin:'#003DA5', supervisore:'#D97706', utente:'#6B7280' }
 const RUOLO_LABELS = { superadmin:'Super Admin', admin:'Admin', supervisore:'Supervisore', utente:'Utente' }
 
 // ── SVG icons inline colorate ──────────────────────────────────────
@@ -114,8 +114,8 @@ const NAV_GROUPS = [
   {
     label: 'Gestione',
     items: [
-      { to:'/admin',             label:'Dashboard',    iconKey:'dashboard', end:true,  activeColor:'#E11D48', sezione:'dashboard' },
-      { to:'/admin/eventi',      label:'Eventi',       iconKey:'calendar',             activeColor:'#E11D48', sezione:'eventi' },
+      { to:'/admin',             label:'Dashboard',    iconKey:'dashboard', end:true,  activeColor:'#003DA5', sezione:'dashboard' },
+      { to:'/admin/eventi',      label:'Eventi',       iconKey:'calendar',             activeColor:'#003DA5', sezione:'eventi' },
       { to:'/admin/iscritti',    label:'Iscritti',     iconKey:'users',                activeColor:'#059669', sezione:'iscritti' },
       { to:'/admin/checkin',     label:'Check-in',     iconKey:'qr',                   activeColor:'#7C3AED', sezione:'checkin' },
     ],
@@ -262,16 +262,16 @@ export default function Sidebar({ mobileOpen, onMobileClose, isMobile }) {
             <NavLink to="/admin/profilo" onClick={handleNavClick}
               style={({ isActive }) => ({
                 ...st.navLink,
-                backgroundColor: isActive ? '#E11D4812' : 'transparent',
-                color: isActive ? '#E11D48' : '#4B5563',
+                backgroundColor: isActive ? '#003DA512' : 'transparent',
+                color: isActive ? '#003DA5' : '#4B5563',
               })}>
               {({ isActive }) => (
                 <>
-                  <div style={{ ...st.iconWrap, backgroundColor: isActive ? '#E11D48' : 'transparent' }}>
+                  <div style={{ ...st.iconWrap, backgroundColor: isActive ? '#003DA5' : 'transparent' }}>
                     {icons.user2(isActive ? '#fff' : '#9CA3AF')}
                   </div>
                   <span style={{ fontSize:'13px', fontWeight: isActive ? '700' : '500', letterSpacing:'-0.01em', flex:1 }}>Profilo</span>
-                  {isActive && <div style={{ ...st.activeDot, backgroundColor:'#E11D48' }}/>}
+                  {isActive && <div style={{ ...st.activeDot, backgroundColor:'#003DA5' }}/>}
                 </>
               )}
             </NavLink>
@@ -362,7 +362,7 @@ const st = {
     padding:'9px 12px', width:'100%',
     background:'none', border:'1px solid #FECACA',
     borderRadius:'8px', cursor:'pointer',
-    fontSize:'13px', fontFamily:"'Outfit',sans-serif",
+    fontSize:'13px', fontFamily:"'Inter',sans-serif",
     color:'#DC2626', fontWeight:'700',
     transition:'background-color .12s',
   },

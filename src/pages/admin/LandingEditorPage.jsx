@@ -112,7 +112,7 @@ export default function LandingEditorPage() {
   // Adattatore AspettoTab (si aspetta { event, setEvent })
   const fakeEvent = data ? {
     ...data,
-    colore_primario: data.tema?.colore_primario || '#003DA5',
+    colore_primario: data.tema?.colore_primario || '#E11D48',
     colore_sfondo: data.tema?.sfondo_pagina || '#ffffff',
   } : null
   function setFakeEvent(updater) {
@@ -176,13 +176,13 @@ export default function LandingEditorPage() {
           {STATO_OPTS.map(o => <option key={o.value} value={o.value}>{o.label}</option>)}
         </select>
         {data.stato === 'pubblicata' && (
-          <a href={publicUrl} target="_blank" rel="noreferrer" style={{ fontSize:'12px', color:'#003DA5', textDecoration:'none', display:'flex', alignItems:'center', gap:'4px', background:'#EFF6FF', padding:'6px 10px', borderRadius:'6px', fontWeight:'600' }}>
+          <a href={publicUrl} target="_blank" rel="noreferrer" style={{ fontSize:'12px', color:'#E11D48', textDecoration:'none', display:'flex', alignItems:'center', gap:'4px', background:'#EFF6FF', padding:'6px 10px', borderRadius:'6px', fontWeight:'600' }}>
             <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2"><path d="M18 13v6a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2V8a2 2 0 0 1 2-2h6"/><polyline points="15 3 21 3 21 9"/><line x1="10" y1="14" x2="21" y2="3"/></svg>
             Vedi
           </a>
         )}
         <button onClick={save} disabled={saving} style={{
-          background: saved ? '#059669' : '#003DA5', color:'#fff', border:'none', borderRadius:'8px',
+          background: saved ? '#059669' : '#E11D48', color:'#fff', border:'none', borderRadius:'8px',
           padding:'8px 18px', fontFamily:'Inter,sans-serif', fontSize:'13px', fontWeight:'700',
           cursor:'pointer', minWidth:'80px', transition:'background .2s'
         }}>
@@ -195,8 +195,8 @@ export default function LandingEditorPage() {
         {TABS.map(t => (
           <button key={t.key} onClick={() => setTab(t.key)} style={{
             background:'none', border:'none',
-            borderBottom: tab === t.key ? '2px solid #003DA5' : '2px solid transparent',
-            color: tab === t.key ? '#003DA5' : '#6B7280',
+            borderBottom: tab === t.key ? '2px solid #E11D48' : '2px solid transparent',
+            color: tab === t.key ? '#E11D48' : '#6B7280',
             fontWeight: tab === t.key ? '700' : '500',
             fontSize:'13px', padding:'12px 16px', cursor:'pointer',
             fontFamily:'Inter,sans-serif', whiteSpace:'nowrap', marginBottom:'-1px'
@@ -271,7 +271,7 @@ export default function LandingEditorPage() {
                   <div style={{ marginTop:'10px', padding:'12px', background:'#1a1a2e', borderRadius:'8px', textAlign:'center' }}>
                     <div style={{
                       background: (lh.logo_sfondo||'trasparente')==='bianco' ? '#fff'
-                                : (lh.logo_sfondo||'trasparente')==='colore_primario' ? (data.tema?.colore_primario||'#003DA5')
+                                : (lh.logo_sfondo||'trasparente')==='colore_primario' ? (data.tema?.colore_primario||'#E11D48')
                                 : 'transparent',
                       padding: (lh.logo_sfondo && lh.logo_sfondo!=='trasparente') ? '5px 12px' : 0,
                       borderRadius:'6px', display:'inline-flex', alignItems:'center'
@@ -295,12 +295,12 @@ export default function LandingEditorPage() {
                       ].map(([v, l]) => (
                         <button key={v} onClick={() => setH('logo_sfondo')(v)} style={{
                           flex:1, padding:'8px 6px',
-                          border:`1px solid ${(lh.logo_sfondo||'trasparente')===v?'#003DA5':'#E5E7EB'}`,
+                          border:`1px solid ${(lh.logo_sfondo||'trasparente')===v?'#E11D48':'#E5E7EB'}`,
                           borderRadius:'6px',
-                          background:(lh.logo_sfondo||'trasparente')===v?'#EEF3FF':'#fff',
+                          background:(lh.logo_sfondo||'trasparente')===v?'#FEE4E6':'#fff',
                           cursor:'pointer', fontSize:'12px', fontWeight:'600',
                           fontFamily:'Inter,sans-serif',
-                          color:(lh.logo_sfondo||'trasparente')===v?'#003DA5':'#6B7280'
+                          color:(lh.logo_sfondo||'trasparente')===v?'#E11D48':'#6B7280'
                         }}>{l}</button>
                       ))}
                     </div>
@@ -320,17 +320,17 @@ export default function LandingEditorPage() {
               </Field>
 
               {/* Colore sfondo hero */}
-              <div style={{ marginBottom:'12px', padding:'12px 14px', background: data.hero_immagine_url ? '#F9FAFB' : '#EEF3FF', border:`1px solid ${data.hero_immagine_url ? '#E5E7EB' : '#C7D9F8'}`, borderRadius:'8px' }}>
-                <p style={{ fontSize:'12px', fontWeight:'700', color: data.hero_immagine_url ? '#9CA3AF' : '#003DA5', margin:'0 0 6px' }}>
+              <div style={{ marginBottom:'12px', padding:'12px 14px', background: data.hero_immagine_url ? '#F9FAFB' : '#FEE4E6', border:`1px solid ${data.hero_immagine_url ? '#E5E7EB' : '#FDA4AF'}`, borderRadius:'8px' }}>
+                <p style={{ fontSize:'12px', fontWeight:'700', color: data.hero_immagine_url ? '#9CA3AF' : '#E11D48', margin:'0 0 6px' }}>
                   🎨 Colore sfondo hero {!data.hero_immagine_url && <span style={{ fontWeight:'400', color:'#6B7280' }}>(attivo)</span>}
                 </p>
                 <div style={{ display:'flex', alignItems:'center', gap:'8px' }}>
-                  <input type="color" value={lh.hero_sfondo || '#003DA5'}
+                  <input type="color" value={lh.hero_sfondo || '#E11D48'}
                     onChange={setH('hero_sfondo')}
                     style={{ width:'38px', height:'32px', border:'1px solid #D1D5DB', borderRadius:'6px', cursor:'pointer', padding:'2px' }}/>
-                  {[['#003DA5','Blu'],['#0A1628','Notte'],['#1F2937','Grafite'],['#7C3AED','Viola'],['#DC2626','Rosso']].map(([c,l]) => (
+                  {[['#E11D48','Blu'],['#0A1628','Notte'],['#1F2937','Grafite'],['#7C3AED','Viola'],['#DC2626','Rosso']].map(([c,l]) => (
                     <button key={c} type="button" onClick={() => setH('hero_sfondo')(c)}
-                      style={{ width:'26px', height:'26px', borderRadius:'6px', border:(lh.hero_sfondo||'#003DA5')===c?'2px solid #003DA5':'1px solid #D1D5DB', background:c, cursor:'pointer', padding:0 }}
+                      style={{ width:'26px', height:'26px', borderRadius:'6px', border:(lh.hero_sfondo||'#E11D48')===c?'2px solid #E11D48':'1px solid #D1D5DB', background:c, cursor:'pointer', padding:0 }}
                       title={l} />
                   ))}
                 </div>
@@ -352,10 +352,10 @@ export default function LandingEditorPage() {
                   <div style={{ display:'flex', gap:'6px' }}>
                     {['sinistra','centro'].map(a => (
                       <button key={a} onClick={() => setH('allineamento')(a)} style={{
-                        flex:1, padding:'8px 6px', border:`1px solid ${lh.allineamento===a?'#003DA5':'#E5E7EB'}`,
-                        borderRadius:'6px', background:lh.allineamento===a?'#EEF3FF':'#fff',
+                        flex:1, padding:'8px 6px', border:`1px solid ${lh.allineamento===a?'#E11D48':'#E5E7EB'}`,
+                        borderRadius:'6px', background:lh.allineamento===a?'#FEE4E6':'#fff',
                         cursor:'pointer', fontSize:'12px', fontWeight:'600', fontFamily:'Inter,sans-serif',
-                        color:lh.allineamento===a?'#003DA5':'#6B7280'
+                        color:lh.allineamento===a?'#E11D48':'#6B7280'
                       }}>
                         {a === 'sinistra' ? '◀ Sin.' : '▶ Centro'}
                       </button>
@@ -402,16 +402,16 @@ export default function LandingEditorPage() {
                   <Field label="Stile">
                     <div style={{ display:'flex', gap:'6px' }}>
                       <button onClick={() => setH('titolo_grassetto')(lh.titolo_grassetto === false ? true : false)} style={{
-                        flex:1, padding:'7px', border:`1px solid ${lh.titolo_grassetto!==false?'#003DA5':'#E5E7EB'}`,
-                        borderRadius:'6px', background:lh.titolo_grassetto!==false?'#EEF3FF':'#fff',
+                        flex:1, padding:'7px', border:`1px solid ${lh.titolo_grassetto!==false?'#E11D48':'#E5E7EB'}`,
+                        borderRadius:'6px', background:lh.titolo_grassetto!==false?'#FEE4E6':'#fff',
                         cursor:'pointer', fontSize:'14px', fontWeight:'800', fontFamily:'Inter,sans-serif',
-                        color:lh.titolo_grassetto!==false?'#003DA5':'#6B7280'
+                        color:lh.titolo_grassetto!==false?'#E11D48':'#6B7280'
                       }}>B</button>
                       <button onClick={() => setH('titolo_maiuscolo')(lh.titolo_maiuscolo ? false : true)} style={{
-                        flex:1, padding:'7px', border:`1px solid ${lh.titolo_maiuscolo?'#003DA5':'#E5E7EB'}`,
-                        borderRadius:'6px', background:lh.titolo_maiuscolo?'#EEF3FF':'#fff',
+                        flex:1, padding:'7px', border:`1px solid ${lh.titolo_maiuscolo?'#E11D48':'#E5E7EB'}`,
+                        borderRadius:'6px', background:lh.titolo_maiuscolo?'#FEE4E6':'#fff',
                         cursor:'pointer', fontSize:'12px', fontWeight:'600', fontFamily:'Inter,sans-serif',
-                        color:lh.titolo_maiuscolo?'#003DA5':'#6B7280'
+                        color:lh.titolo_maiuscolo?'#E11D48':'#6B7280'
                       }}>AA</button>
                     </div>
                   </Field>
@@ -443,10 +443,10 @@ export default function LandingEditorPage() {
                     <Field label="Stile">
                       <div style={{ display:'flex', gap:'6px' }}>
                         <button onClick={() => setH('titolo2_grassetto')(lh.titolo2_grassetto ? false : true)} style={{
-                          flex:1, padding:'7px', border:`1px solid ${lh.titolo2_grassetto?'#003DA5':'#E5E7EB'}`,
-                          borderRadius:'6px', background:lh.titolo2_grassetto?'#EEF3FF':'#fff',
+                          flex:1, padding:'7px', border:`1px solid ${lh.titolo2_grassetto?'#E11D48':'#E5E7EB'}`,
+                          borderRadius:'6px', background:lh.titolo2_grassetto?'#FEE4E6':'#fff',
                           cursor:'pointer', fontSize:'14px', fontWeight:'800', fontFamily:'Inter,sans-serif',
-                          color:lh.titolo2_grassetto?'#003DA5':'#6B7280'
+                          color:lh.titolo2_grassetto?'#E11D48':'#6B7280'
                         }}>B</button>
                       </div>
                     </Field>
@@ -511,7 +511,7 @@ export default function LandingEditorPage() {
               <div style={{ display:'flex', alignItems:'center', justifyContent:'space-between', marginBottom:'12px' }}>
                 <p style={{ fontSize:'13px', color:'#6B7280', margin:0 }}>Salva prima di vedere le modifiche.</p>
                 <a href={`/lp/${data.slug}`} target="_blank" rel="noreferrer"
-                  style={{ fontSize:'13px', color:'#003DA5', fontWeight:'700', textDecoration:'none', display:'flex', alignItems:'center', gap:'4px' }}>
+                  style={{ fontSize:'13px', color:'#E11D48', fontWeight:'700', textDecoration:'none', display:'flex', alignItems:'center', gap:'4px' }}>
                   Apri in nuova scheda
                   <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2"><path d="M18 13v6a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2V8a2 2 0 0 1 2-2h6"/><polyline points="15 3 21 3 21 9"/><line x1="10" y1="14" x2="21" y2="3"/></svg>
                 </a>
@@ -575,7 +575,7 @@ function FormTab({ data, upd, editingField, setEditingField }) {
       {/* Toggle form abilitato */}
       <label style={{ display:'flex', alignItems:'center', gap:'10px', cursor:'pointer' }}>
         <input type="checkbox" checked={!!data.form_abilitato} onChange={e => upd('form_abilitato', e.target.checked)}
-          style={{ width:'16px', height:'16px', accentColor:'#003DA5', cursor:'pointer' }} />
+          style={{ width:'16px', height:'16px', accentColor:'#E11D48', cursor:'pointer' }} />
         <span style={{ fontSize:'14px', fontWeight:'700', color:'#0A0A0A' }}>Form contatti abilitato</span>
       </label>
 
@@ -605,7 +605,7 @@ function FormTab({ data, upd, editingField, setEditingField }) {
                 <div key={f.key} style={{ display:'flex', alignItems:'center', gap:'12px', padding:'11px 16px', borderBottom: i < STD_FIELDS.length-1 ? '1px solid #F3F4F6' : 'none', background: i%2===0?'#fff':'#FAFAFA' }}>
                   <input type="checkbox" checked={enabled || !!f.required} disabled={!!f.required}
                     onChange={() => toggleStd(f.key)}
-                    style={{ width:'15px', height:'15px', accentColor:'#003DA5', cursor:f.required?'default':'pointer', flexShrink:0 }} />
+                    style={{ width:'15px', height:'15px', accentColor:'#E11D48', cursor:f.required?'default':'pointer', flexShrink:0 }} />
                   <span style={{ fontSize:'14px', color:(enabled||f.required)?'#0A0A0A':'#9CA3AF', flex:1 }}>{f.label}</span>
                   <span style={{ fontSize:'11px', color:'#9CA3AF', background:'#F3F4F6', padding:'2px 7px', borderRadius:'4px' }}>{f.tipo}</span>
                   {f.required && <span style={{ fontSize:'11px', color:'#9CA3AF', fontStyle:'italic' }}>obbligatorio</span>}
@@ -631,7 +631,7 @@ function FormTab({ data, upd, editingField, setEditingField }) {
           <div style={{ display:'flex', alignItems:'center', justifyContent:'space-between', marginBottom:'10px' }}>
             <p style={{ fontSize:'13px', fontWeight:'700', color:'#374151', margin:0 }}>Campi personalizzati</p>
             <button onClick={addCustom} style={{
-              background:'#003DA5', color:'#fff', border:'none', borderRadius:'6px',
+              background:'#E11D48', color:'#fff', border:'none', borderRadius:'6px',
               padding:'7px 14px', fontFamily:'Inter,sans-serif', fontSize:'12px', fontWeight:'700', cursor:'pointer',
               display:'flex', alignItems:'center', gap:'5px'
             }}>
@@ -653,11 +653,11 @@ function FormTab({ data, upd, editingField, setEditingField }) {
                 if (f.std) return null
                 const isEditing = editingField?.index === idx
                 return (
-                  <div key={f.id||f.key} style={{ border:`1.5px solid ${isEditing?'#003DA5':'#E5E7EB'}`, borderRadius:'8px', overflow:'hidden' }}>
+                  <div key={f.id||f.key} style={{ border:`1.5px solid ${isEditing?'#E11D48':'#E5E7EB'}`, borderRadius:'8px', overflow:'hidden' }}>
                     {/* Header campo */}
                     <div style={{ display:'flex', alignItems:'center', gap:'8px', padding:'10px 14px', background:isEditing?'#EFF6FF':'#FAFAFA', cursor:'pointer' }}
                       onClick={() => setEditingField(isEditing ? null : { index: idx, field: f })}>
-                      <span style={{ flex:1, fontSize:'13px', fontWeight:'700', color: isEditing?'#003DA5':'#374151' }}>{f.label}</span>
+                      <span style={{ flex:1, fontSize:'13px', fontWeight:'700', color: isEditing?'#E11D48':'#374151' }}>{f.label}</span>
                       <span style={{ fontSize:'11px', background:'#E5E7EB', color:'#6B7280', padding:'2px 8px', borderRadius:'4px' }}>
                         {FIELD_TYPES.find(t=>t.value===f.tipo)?.label || f.tipo}
                       </span>
@@ -729,7 +729,7 @@ function FieldEditor({ field, onSave, onCancel }) {
 
       <label style={{ display:'flex', alignItems:'center', gap:'8px', cursor:'pointer' }}>
         <input type="checkbox" checked={!!f.required} onChange={e => updF('required', e.target.checked)}
-          style={{ width:'15px', height:'15px', accentColor:'#003DA5' }} />
+          style={{ width:'15px', height:'15px', accentColor:'#E11D48' }} />
         <span style={{ fontSize:'13px', fontWeight:'600', color:'#374151' }}>Campo obbligatorio</span>
       </label>
 
@@ -787,7 +787,7 @@ function FieldEditor({ field, onSave, onCancel }) {
         <button onClick={onCancel} style={{ padding:'8px 16px', border:'1px solid #E5E7EB', borderRadius:'6px', background:'#fff', fontSize:'13px', fontWeight:'600', color:'#374151', cursor:'pointer', fontFamily:'Inter,sans-serif' }}>
           Annulla
         </button>
-        <button onClick={() => onSave(f)} style={{ padding:'8px 16px', border:'none', borderRadius:'6px', background:'#003DA5', fontSize:'13px', fontWeight:'700', color:'#fff', cursor:'pointer', fontFamily:'Inter,sans-serif' }}>
+        <button onClick={() => onSave(f)} style={{ padding:'8px 16px', border:'none', borderRadius:'6px', background:'#E11D48', fontSize:'13px', fontWeight:'700', color:'#fff', cursor:'pointer', fontFamily:'Inter,sans-serif' }}>
           Conferma
         </button>
       </div>

@@ -8,7 +8,7 @@ import { logAttivita } from '../../lib/activityLog'
 import { Modal, RuoloBadge, Field, Input, Select, Btn, EmptyState } from '../../components/ui'
 import { Users, Plus, Pencil, Trash2, ShieldCheck, Eye, EyeOff, Activity, Clock, ToggleLeft, ToggleRight, Settings } from 'lucide-react'
 
-const RUOLO_COL  = { admin:'#003DA5', supervisore:'#D97706', utente:'#6B7280' }
+const RUOLO_COL  = { admin:'#E11D48', supervisore:'#D97706', utente:'#6B7280' }
 const RUOLO_DESC_FALLBACK = {
   admin:       'Accesso completo: crea, modifica, elimina, gestisce utenti.',
   supervisore: 'Crea e modifica eventi. Non elimina né gestisce utenti.',
@@ -167,7 +167,7 @@ export default function UtentiPage() {
                           <p style={{ fontWeight:'700', color:'#0A0A0A', margin:0, fontSize:'14px' }}>
                             {u.nome&&u.cognome ? `${u.nome} ${u.cognome}` : u.username}
                           </p>
-                          {u.id===me?.id && <span style={{ fontSize:'10px', fontWeight:'700', backgroundColor:'#EEF3FF', color:'#003DA5', padding:'1px 7px', borderRadius:'10px' }}>Tu</span>}
+                          {u.id===me?.id && <span style={{ fontSize:'10px', fontWeight:'700', backgroundColor:'#FEE4E6', color:'#E11D48', padding:'1px 7px', borderRadius:'10px' }}>Tu</span>}
                         </div>
                         <p style={{ fontSize:'12px', color:'#6B7280', margin:'1px 0 0' }}>{u.email}</p>
                         {(u.nome||u.cognome) && <p style={{ fontSize:'11px', color:'#9CA3AF', margin:'1px 0 0' }}>@{u.username}</p>}
@@ -179,7 +179,7 @@ export default function UtentiPage() {
                   </td>
                   <td style={{ padding:'12px 16px', borderBottom:'1px solid #F3F4F6', verticalAlign:'middle' }}>
                     <button onClick={()=>u.id!==me?.id&&toggleAttivo(u)} disabled={u.id===me?.id}
-                      style={{ display:'flex', alignItems:'center', gap:'5px', background:'none', border:'none', cursor:u.id===me?.id?'default':'pointer', fontFamily:"'Inter',sans-serif", fontSize:'13px', fontWeight:'600', color:u.attivo?'#16A34A':'#9CA3AF', opacity:u.id===me?.id?.5:1 }}>
+                      style={{ display:'flex', alignItems:'center', gap:'5px', background:'none', border:'none', cursor:u.id===me?.id?'default':'pointer', fontFamily:"'Outfit',sans-serif", fontSize:'13px', fontWeight:'600', color:u.attivo?'#16A34A':'#9CA3AF', opacity:u.id===me?.id?.5:1 }}>
                       {u.attivo ? <ToggleRight size={20} style={{ color:'#16A34A' }}/> : <ToggleLeft size={20}/>}
                       {u.attivo ? 'Attivo' : 'Inattivo'}
                     </button>
@@ -286,7 +286,7 @@ export default function UtentiPage() {
       )}
 
       {toast && (
-        <div style={{ position:'fixed', bottom:'24px', left:'50%', transform:'translateX(-50%)', zIndex:300, display:'flex', alignItems:'center', gap:'10px', backgroundColor:toast.type==='ok'?'#F0FDF4':'#FEF2F2', border:`1px solid ${toast.type==='ok'?'#86EFAC':'#FECACA'}`, borderRadius:'12px', padding:'14px 20px', boxShadow:'0 8px 32px rgba(0,0,0,.15)', fontFamily:"'Inter',sans-serif", fontSize:'14px', fontWeight:'600', color:toast.type==='ok'?'#15803D':'#DC2626', whiteSpace:'nowrap' }}>
+        <div style={{ position:'fixed', bottom:'24px', left:'50%', transform:'translateX(-50%)', zIndex:300, display:'flex', alignItems:'center', gap:'10px', backgroundColor:toast.type==='ok'?'#F0FDF4':'#FEF2F2', border:`1px solid ${toast.type==='ok'?'#86EFAC':'#FECACA'}`, borderRadius:'12px', padding:'14px 20px', boxShadow:'0 8px 32px rgba(0,0,0,.15)', fontFamily:"'Outfit',sans-serif", fontSize:'14px', fontWeight:'600', color:toast.type==='ok'?'#15803D':'#DC2626', whiteSpace:'nowrap' }}>
           {toast.type==='ok'?'✅':'❌'} {toast.msg}
           <button onClick={()=>setToast(null)} style={{ background:'none', border:'none', cursor:'pointer', color:'inherit', marginLeft:'8px', fontSize:'16px' }}>×</button>
         </div>

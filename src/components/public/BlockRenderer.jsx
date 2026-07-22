@@ -75,7 +75,7 @@ export function AccordionItem({ domanda, risposta, cp }) {
     <div style={{ border: '1px solid #E5E7EB', borderRadius: '10px', overflow: 'hidden', marginBottom: '8px' }}>
       <button onClick={() => setOpen(o => !o)} style={{
         width: '100%', display: 'flex', alignItems: 'center', justifyContent: 'space-between',
-        padding: '16px 20px', background: open ? '#EEF3FF' : '#fff', border: 'none',
+        padding: '16px 20px', background: open ? '#FEE4E6' : '#fff', border: 'none',
         cursor: 'pointer', fontFamily: 'Inter,sans-serif', textAlign: 'left',
       }}>
         <span style={{ fontSize: '15px', fontWeight: '700', color: open ? cp : '#0A0A0A', lineHeight: 1.4 }}>{domanda}</span>
@@ -146,7 +146,7 @@ export function videoEmbedUrl(url) {
 }
 
 // ── Block Renderer principale ─────────────────────────────────────
-export default function BlockRenderer({ block, cp = '#003DA5', formTarget = '#lp-form' }) {
+export default function BlockRenderer({ block, cp = '#E11D48', formTarget = '#lp-form' }) {
   if (!block) return null
 
   if (block.tipo === 'testo') return (
@@ -360,7 +360,7 @@ export default function BlockRenderer({ block, cp = '#003DA5', formTarget = '#lp
 // ── Programma evento ──────────────────────────────────────────────
 function ProgrammaBlock({ block, cp }) {
   const cTitoli = block.colore_titoli || '#E91E8C'
-  const cOrari  = block.colore_orari  || cp || '#003DA5'
+  const cOrari  = block.colore_orari  || cp || '#E11D48'
   const voci    = block.voci || []
 
   // Icone inline per i tipi di voce
@@ -680,13 +680,13 @@ function SocialBlock({ block, cp }) {
             <div style={{ display:'flex', flexWrap:'wrap', gap:'8px', justifyContent:'center' }}>
               {shareButtons.map((btn, i) => (
                 btn.href
-                  ? <a key={i} href={btn.href} target="_blank" rel="noreferrer" style={{ display:'flex', alignItems:'center', gap:'7px', padding:'9px 16px', background:btn.color+'15', border:`1px solid ${btn.color}30`, borderRadius:'8px', textDecoration:'none', fontSize:'13px', fontWeight:'700', color:btn.color, transition:'all .15s', fontFamily:"'Inter',sans-serif" }}
+                  ? <a key={i} href={btn.href} target="_blank" rel="noreferrer" style={{ display:'flex', alignItems:'center', gap:'7px', padding:'9px 16px', background:btn.color+'15', border:`1px solid ${btn.color}30`, borderRadius:'8px', textDecoration:'none', fontSize:'13px', fontWeight:'700', color:btn.color, transition:'all .15s', fontFamily:"'Outfit',sans-serif" }}
                       onMouseEnter={e=>{e.currentTarget.style.background=btn.color+'25'}}
                       onMouseLeave={e=>{e.currentTarget.style.background=btn.color+'15'}}>
                       <span style={{ width:'18px', height:'18px', flexShrink:0 }}>{btn.icon}</span>
                       {btn.label}
                     </a>
-                  : <button key={i} type="button" onClick={btn.onClick} style={{ display:'flex', alignItems:'center', gap:'7px', padding:'9px 16px', background:btn.color+'15', border:`1px solid ${btn.color}30`, borderRadius:'8px', fontSize:'13px', fontWeight:'700', color:btn.color, cursor:'pointer', fontFamily:"'Inter',sans-serif", transition:'all .15s' }}
+                  : <button key={i} type="button" onClick={btn.onClick} style={{ display:'flex', alignItems:'center', gap:'7px', padding:'9px 16px', background:btn.color+'15', border:`1px solid ${btn.color}30`, borderRadius:'8px', fontSize:'13px', fontWeight:'700', color:btn.color, cursor:'pointer', fontFamily:"'Outfit',sans-serif", transition:'all .15s' }}
                       onMouseEnter={e=>{e.currentTarget.style.background=btn.color+'25'}}
                       onMouseLeave={e=>{e.currentTarget.style.background=btn.color+'15'}}>
                       <span style={{ width:'18px', height:'18px', flexShrink:0 }}>{btn.icon}</span>

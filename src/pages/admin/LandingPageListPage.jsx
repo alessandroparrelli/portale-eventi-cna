@@ -71,7 +71,7 @@ export default function LandingPageListPage() {
           <h1 style={{ fontSize:'22px', fontWeight:'800', color:'#0A0A0A', margin:0, letterSpacing:'-0.03em' }}>Landing Page</h1>
           <p style={{ fontSize:'13px', color:'#6B7280', margin:'4px 0 0' }}>Pagine di marketing per raccogliere contatti</p>
         </div>
-        <button onClick={crea} style={{ background:'#003DA5', color:'#fff', border:'none', borderRadius:'8px', padding:'10px 20px', fontFamily:'Inter,sans-serif', fontSize:'13px', fontWeight:'700', cursor:'pointer', display:'flex', alignItems:'center', gap:'6px' }}>
+        <button onClick={crea} style={{ background:'#E11D48', color:'#fff', border:'none', borderRadius:'8px', padding:'10px 20px', fontFamily:'Inter,sans-serif', fontSize:'13px', fontWeight:'700', cursor:'pointer', display:'flex', alignItems:'center', gap:'6px' }}>
           <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5"><path d="M12 5v14M5 12h14"/></svg>
           Nuova Landing Page
         </button>
@@ -84,7 +84,7 @@ export default function LandingPageListPage() {
             { label:'Totale',          val: pages.length,                                      color:'#6B7280' },
             { label:'Pubblicate',      val: pages.filter(p=>p.stato==='pubblicata').length,    color:'#059669' },
             { label:'Bozze',           val: pages.filter(p=>p.stato==='bozza').length,         color:'#F59E0B' },
-            { label:'Contatti totali', val: totContatti,                                        color:'#003DA5' },
+            { label:'Contatti totali', val: totContatti,                                        color:'#E11D48' },
           ].map(k => (
             <div key={k.label} style={{ background:'#fff', border:'1px solid #E5E7EB', borderRadius:'10px', padding:'12px 14px' }}>
               <span style={{ fontSize:'22px', fontWeight:'800', color:k.color, letterSpacing:'-.03em', display:'block' }}>{k.val}</span>
@@ -132,7 +132,7 @@ export default function LandingPageListPage() {
                     <td style={tdSt}><span style={{ fontWeight:'600', color:'#0A0A0A', fontSize:'14px' }}>{p.titolo}</span></td>
                     <td style={tdSt}><span style={{ fontSize:'12px', color:'#6B7280', fontFamily:'monospace' }}>/lp/{p.slug}</span></td>
                     <td style={tdSt}><span style={{ background:sc.bg, color:sc.color, borderRadius:'4px', padding:'3px 8px', fontSize:'12px', fontWeight:'600' }}>{sc.label}</span></td>
-                    <td style={{ ...tdSt, textAlign:'center' }}><span style={{ fontWeight:'700', fontSize:'14px', color: n>0?'#003DA5':'#9CA3AF' }}>{n>0?n:'—'}</span></td>
+                    <td style={{ ...tdSt, textAlign:'center' }}><span style={{ fontWeight:'700', fontSize:'14px', color: n>0?'#E11D48':'#9CA3AF' }}>{n>0?n:'—'}</span></td>
                     <td style={{ ...tdSt, color:'#9CA3AF', fontSize:'13px' }}>{new Date(p.created_at).toLocaleDateString('it-IT',{day:'2-digit',month:'short',year:'numeric'})}</td>
                     <td style={{ ...tdSt, textAlign:'right' }}>
                       <Azioni p={p} navigate={navigate} elimina={elimina} />
@@ -163,7 +163,7 @@ export default function LandingPageListPage() {
                 <div style={{ display:'flex', alignItems:'center', justifyContent:'space-between' }}>
                   <div style={{ display:'flex', gap:'16px', fontSize:'12px', color:'#9CA3AF' }}>
                     <span>{new Date(p.created_at).toLocaleDateString('it-IT',{day:'2-digit',month:'short'})}</span>
-                    {n > 0 && <span style={{ color:'#003DA5', fontWeight:'700' }}>{n} contatti</span>}
+                    {n > 0 && <span style={{ color:'#E11D48', fontWeight:'700' }}>{n} contatti</span>}
                   </div>
                   <Azioni p={p} navigate={navigate} elimina={elimina} compact />
                 </div>
@@ -184,12 +184,12 @@ function Azioni({ p, navigate, elimina, compact }) {
         <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2"><path d="M1 12s4-8 11-8 11 8 11 8-4 8-11 8-11-8-11-8z"/><circle cx="12" cy="12" r="3"/></svg>
       </a>
       <button onClick={() => navigate(`/admin/landing/${p.id}/contatti`)} title="Contatti" style={{ background:'none', border:'none', padding:0, cursor:'pointer' }}>
-        <div style={btnB('#EFF6FF','#003DA5')}>
+        <div style={btnB('#EFF6FF','#E11D48')}>
           <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2"><path d="M17 21v-2a4 4 0 0 0-4-4H5a4 4 0 0 0-4 4v2"/><circle cx="9" cy="7" r="4"/><path d="M23 21v-2a4 4 0 0 0-3-3.87"/><path d="M16 3.13a4 4 0 0 1 0 7.75"/></svg>
         </div>
       </button>
       <button onClick={() => navigate(`/admin/landing/${p.id}/editor`)} title="Modifica" style={{ background:'none', border:'none', padding:0, cursor:'pointer' }}>
-        <div style={btnB('#EFF6FF','#003DA5')}>
+        <div style={btnB('#EFF6FF','#E11D48')}>
           <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2"><path d="M11 4H4a2 2 0 0 0-2 2v14a2 2 0 0 0 2 2h14a2 2 0 0 0 2-2v-7"/><path d="M18.5 2.5a2.121 2.121 0 0 1 3 3L12 15l-4 1 1-4 9.5-9.5z"/></svg>
         </div>
       </button>

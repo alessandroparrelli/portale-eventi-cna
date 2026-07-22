@@ -5,7 +5,7 @@ import { useAuth } from '../hooks/useAuth'
 import { useRole } from '../hooks/useRole'
 import { supabase } from '../lib/supabase'
 
-const RUOLO_COLORS = { superadmin:'#9F1239', admin:'#E11D48', supervisore:'#BE123C', utente:'#6B7280' }
+const RUOLO_COLORS = { superadmin:'#7C3AED', admin:'#003DA5', supervisore:'#059669', utente:'#6B7280' }
 const RUOLO_LABELS = { superadmin:'Super Admin', admin:'Admin', supervisore:'Supervisore', utente:'Utente' }
 
 function VerifiedBadge() {
@@ -48,20 +48,20 @@ function UserBox() {
         gap: '9px',
         padding: '5px 12px 5px 5px',
         borderRadius: '40px',
-        backgroundColor: isActive ? '#FEE4E6' : '#F7F7F5',
-        border: '1px solid ' + (isActive ? '#FDA4AF' : '#E8E8E4'),
+        backgroundColor: isActive ? '#EEF3FF' : '#F4F5F7',
+        border: '1px solid ' + (isActive ? '#C7D9F8' : '#E5E7EB'),
         textDecoration: 'none',
         cursor: 'pointer',
         transition: 'background .15s',
         flexShrink: 0,
       })}
-      onMouseEnter={e => e.currentTarget.style.backgroundColor = '#FEE4E6'}
-      onMouseLeave={e => e.currentTarget.style.backgroundColor = '#F7F7F5'}
+      onMouseEnter={e => e.currentTarget.style.backgroundColor = '#EEF3FF'}
+      onMouseLeave={e => e.currentTarget.style.backgroundColor = '#F4F5F7'}
     >
       {/* Avatar */}
       <div style={{
         width: '32px', height: '32px', borderRadius: '50%', flexShrink: 0,
-        background: `linear-gradient(135deg,${roleColor},#E11D48)`,
+        background: `linear-gradient(135deg,${roleColor},#1a56db)`,
         display: 'flex', alignItems: 'center', justifyContent: 'center',
         overflow: 'hidden',
       }}>
@@ -130,10 +130,7 @@ export default function AdminLayout() {
             title="Ricarica pagina"
           />
           <div style={s.titleBlock}>
-            <span style={s.pageTitle}>
-      <span style={{ color:'#fff' }}>evently</span>
-      <span style={{ color:'#E11D48' }}>pro</span>
-    </span>
+            <span style={s.pageTitle}>Eventi</span>
           </div>
         </div>
 
@@ -158,12 +155,12 @@ const s = {
     display: 'flex',
     flexDirection: 'column',
     minHeight: '100dvh',
-    backgroundColor: 'var(--bg-app)',
-    fontFamily: "'Outfit', sans-serif",
+    backgroundColor: '#F4F5F7',
+    fontFamily: "'Inter', sans-serif",
   },
   header: {
     flexShrink: 0,
-    background: 'linear-gradient(135deg, #130510 0%, #3B0A20 50%, #5C1030 100%)',
+    background: 'linear-gradient(135deg, #0A1628 0%, #0D2247 40%, #0A3366 100%)',
     borderBottom: 'none',
     display: 'flex',
     alignItems: 'center',
@@ -190,7 +187,7 @@ const s = {
     fontWeight: '800',
     color: '#FFFFFF',
     letterSpacing: '-0.02em',
-    fontFamily: "'Outfit', sans-serif",
+    fontFamily: "'Inter', sans-serif",
     lineHeight: 1,
     whiteSpace: 'nowrap',
   },

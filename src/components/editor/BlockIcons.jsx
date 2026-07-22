@@ -27,7 +27,7 @@ export const BLOCK_ICONS = {
     </svg>
   ),
   stats: (
-    <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="#003DA5" strokeWidth="2" strokeLinecap="round">
+    <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="#E11D48" strokeWidth="2" strokeLinecap="round">
       <path d="M18 20V10M12 20V4M6 20v-6"/>
     </svg>
   ),
@@ -68,7 +68,7 @@ export const BLOCK_ICONS = {
     </svg>
   ),
   cta: (
-    <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="#003DA5" strokeWidth="2" strokeLinecap="round">
+    <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="#E11D48" strokeWidth="2" strokeLinecap="round">
       <path d="M22 16.92v3a2 2 0 0 1-2.18 2 19.79 19.79 0 0 1-8.63-3.07 19.5 19.5 0 0 1-6-6"/>
       <rect x="2" y="8" width="20" height="8" rx="2"/>
     </svg>
@@ -144,7 +144,7 @@ export const ICON_LIBRARY = [
 
 // ── Palette colori icone ───────────────────────────────────────────
 export const ICON_COLORS = [
-  { value:'#003DA5', label:'Blu CNA' },
+  { value:'#E11D48', label:'Blu CNA' },
   { value:'#059669', label:'Verde' },
   { value:'#DC2626', label:'Rosso' },
   { value:'#D97706', label:'Arancio' },
@@ -159,7 +159,7 @@ export const ICON_COLORS = [
 import { useState, useRef, useEffect } from 'react'
 import { createPortal } from 'react-dom'
 
-export function IconPicker({ value, color = '#003DA5', onChangeIcon, onChangeColor }) {
+export function IconPicker({ value, color = '#E11D48', onChangeIcon, onChangeColor }) {
   const [open, setOpen] = useState(false)
   const [pos, setPos] = useState({ top: 0, left: 0 })
   const btnRef = useRef(null)
@@ -266,7 +266,7 @@ export function IconPicker({ value, color = '#003DA5', onChangeIcon, onChangeCol
 }
 
 // ── Render SVG icona con colore per la pagina pubblica ─────────────
-export function IconDisplay({ iconId, color = '#003DA5', size = 28 }) {
+export function IconDisplay({ iconId, color = '#E11D48', size = 28 }) {
   const icon = ICON_LIBRARY.find(i => i.id === iconId)
   if (!icon) return null
   return (

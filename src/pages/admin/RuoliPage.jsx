@@ -42,7 +42,7 @@ function LivelloPill({ value, current, onClick, disabled }) {
         backgroundColor: active ? l.color+'18' : '#FFFFFF',
         color: active ? l.color : '#9CA3AF',
         cursor: disabled ? 'not-allowed' : 'pointer',
-        fontFamily:"'Inter',sans-serif",
+        fontFamily:"'Outfit',sans-serif",
       }}>
       {l.label}
     </button>

@@ -151,12 +151,12 @@ export default function SmsPage() {
   const s = {
     page: { padding: '0', fontFamily: 'Inter, sans-serif', color: '#0A0A0A' },
     header: { marginBottom: 24 },
-    title: { fontSize: 22, fontWeight: 900, color: '#003DA5', letterSpacing: '-0.04em', margin: '0 0 4px' },
+    title: { fontSize: 22, fontWeight: 900, color: '#E11D48', letterSpacing: '-0.04em', margin: '0 0 4px' },
     sub: { color: '#6B7280', fontSize: 13 },
     tabs: { display: 'flex', gap: 8, marginBottom: 24 },
     tab: (active) => ({
       padding: '8px 20px', borderRadius: 8, border: 'none', cursor: 'pointer', fontWeight: 600,
-      fontSize: 13, background: active ? '#003DA5' : '#F3F4F6', color: active ? '#fff' : '#6B7280',
+      fontSize: 13, background: active ? '#E11D48' : '#F3F4F6', color: active ? '#fff' : '#6B7280',
       transition: 'all .15s',
     }),
     card: { background: '#fff', border: '1px solid #E5E7EB', borderRadius: 12, padding: 20, marginBottom: 16 },
@@ -270,7 +270,7 @@ export default function SmsPage() {
                 <span style={s.label}>Destinatari</span>
                 <button
                   onClick={toggleTutti}
-                  style={{ fontSize: 12, color: '#003DA5', background: 'none', border: 'none', cursor: 'pointer', fontWeight: 600 }}
+                  style={{ fontSize: 12, color: '#E11D48', background: 'none', border: 'none', cursor: 'pointer', fontWeight: 600 }}
                 >
                   {iscrittiVisibili.every(r => selezione.includes(r.id)) ? 'Deseleziona tutti' : 'Seleziona tutti'}
                 </button>
@@ -313,7 +313,7 @@ export default function SmsPage() {
         <div style={s.card}>
           <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: 16 }}>
             <span style={s.label}>Ultimi 200 invii</span>
-            <button onClick={caricaLog} style={{ fontSize: 12, color: '#003DA5', background: 'none', border: 'none', cursor: 'pointer', fontWeight: 600 }}>
+            <button onClick={caricaLog} style={{ fontSize: 12, color: '#E11D48', background: 'none', border: 'none', cursor: 'pointer', fontWeight: 600 }}>
               Aggiorna
             </button>
           </div>

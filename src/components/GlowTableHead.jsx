@@ -12,7 +12,7 @@
  */
 
 const HEADER_PALETTES = {
-  blue:    { from: '#003DA5', to: '#1a56db', text: '#ffffff', icon: '#93c5fd' },
+  blue:    { from: '#E11D48', to: '#1a56db', text: '#ffffff', icon: '#93c5fd' },
   green:   { from: '#059669', to: '#10b981', text: '#ffffff', icon: '#6ee7b7' },
   violet:  { from: '#7c3aed', to: '#8b5cf6', text: '#ffffff', icon: '#c4b5fd' },
   amber:   { from: '#d97706', to: '#f59e0b', text: '#ffffff', icon: '#fde68a' },
@@ -44,7 +44,7 @@ export default function GlowTableHead({ columns = [] }) {
                 color: p.text,
                 fontSize: '11px',
                 fontWeight: '700',
-                fontFamily: "'Inter', sans-serif",
+                fontFamily: "'Outfit', sans-serif",
                 textTransform: 'uppercase',
                 letterSpacing: '0.05em',
                 whiteSpace: 'nowrap',

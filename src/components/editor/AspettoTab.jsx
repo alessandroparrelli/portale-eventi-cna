@@ -6,14 +6,14 @@ import { ChevronDown, ChevronUp, RotateCcw } from 'lucide-react'
 /* ─── Defaults tema ────────────────────────────────────────────── */
 export const TEMA_DEFAULT = {
   // Colori brand
-  colore_primario:     '#003DA5',
-  colore_pulsanti:     '#003DA5',
+  colore_primario:     '#E11D48',
+  colore_pulsanti:     '#E11D48',
   colore_testo_btn:    '#FFFFFF',
-  colore_link:         '#003DA5',
+  colore_link:         '#E11D48',
   // Sfondo pagina
   sfondo_pagina:       '#FFFFFF',
   sfondo_header:       '#FFFFFF',
-  bordo_header:        '#003DA5',
+  bordo_header:        '#E11D48',
   spessore_bordo:      '3',
   // Logo
   logo_altezza:        '44',   // px
@@ -27,13 +27,13 @@ export const TEMA_DEFAULT = {
   // Sezioni
   sfondo_sezioni:      '#F4F5F7',
   // Footer/CTA
-  cta_bg:              '#EEF3FF',
+  cta_bg:              '#FEE4E6',
   // Footer
   sfondo_footer:       '',          // vuoto = eredita sfondo_pagina
   testo_footer:        '#9CA3AF',
   // Pattern sfondo
   sfondo_pattern:      'nessuno',  // nessuno | pallini | pallini_angolo
-  pattern_colore1:     '#003DA5',
+  pattern_colore1:     '#E11D48',
   pattern_colore2:     '#E8792F',
   pattern_opacita:     '25',       // 0-100
 }
@@ -74,11 +74,11 @@ function Sezione({ title, icon, children, defaultOpen = false }) {
         onClick={() => setOpen(o => !o)}
         style={{
           width: '100%', display: 'flex', alignItems: 'center', justifyContent: 'space-between',
-          padding: '13px 16px', background: open ? '#EEF3FF' : '#FAFAFA',
-          border: 'none', cursor: 'pointer', fontFamily: "'Inter',sans-serif",
+          padding: '13px 16px', background: open ? '#FEE4E6' : '#FAFAFA',
+          border: 'none', cursor: 'pointer', fontFamily: "'Outfit',sans-serif",
         }}
       >
-        <span style={{ fontSize: '13px', fontWeight: '700', color: open ? '#003DA5' : '#0A0A0A', display: 'flex', alignItems: 'center', gap: '8px' }}>
+        <span style={{ fontSize: '13px', fontWeight: '700', color: open ? '#E11D48' : '#0A0A0A', display: 'flex', alignItems: 'center', gap: '8px' }}>
           {icon} {title}
         </span>
         {open ? <ChevronUp size={16} style={{ color: '#6B7280' }} /> : <ChevronDown size={16} style={{ color: '#6B7280' }} />}
@@ -94,8 +94,8 @@ function Sezione({ title, icon, children, defaultOpen = false }) {
 
 /* ─── Palette preset ────────────────────────────────────────────── */
 const PALETTE = [
-  { nome: 'CNA Roma',     primario: '#003DA5', pulsanti: '#003DA5', sfondo_header: '#FFFFFF', bordo_header: '#003DA5', sfondo_pagina: '#FFFFFF' },
-  { nome: 'Notte CNA',    primario: '#003DA5', pulsanti: '#003DA5', sfondo_header: '#003DA5', bordo_header: '#003DA5', sfondo_pagina: '#F8F9FF', colore_testo_btn: '#FFFFFF', colore_link: '#003DA5' },
+  { nome: 'CNA Roma',     primario: '#E11D48', pulsanti: '#E11D48', sfondo_header: '#FFFFFF', bordo_header: '#E11D48', sfondo_pagina: '#FFFFFF' },
+  { nome: 'Notte CNA',    primario: '#E11D48', pulsanti: '#E11D48', sfondo_header: '#E11D48', bordo_header: '#E11D48', sfondo_pagina: '#F8F9FF', colore_testo_btn: '#FFFFFF', colore_link: '#E11D48' },
   { nome: 'Verde',        primario: '#16A34A', pulsanti: '#16A34A', sfondo_header: '#FFFFFF', bordo_header: '#16A34A', sfondo_pagina: '#FFFFFF', sfondo_sezioni: '#F0FDF4', cta_bg: '#F0FDF4' },
   { nome: 'Rosso',        primario: '#DC2626', pulsanti: '#DC2626', sfondo_header: '#FFFFFF', bordo_header: '#DC2626', sfondo_pagina: '#FFFFFF', sfondo_sezioni: '#FEF2F2', cta_bg: '#FEF2F2' },
   { nome: 'Viola',        primario: '#7C3AED', pulsanti: '#7C3AED', sfondo_header: '#FFFFFF', bordo_header: '#7C3AED', sfondo_pagina: '#FFFFFF', sfondo_sezioni: '#F5F3FF', cta_bg: '#F5F3FF' },
@@ -103,8 +103,8 @@ const PALETTE = [
   { nome: 'Grafite',      primario: '#1F2937', pulsanti: '#1F2937', sfondo_header: '#1F2937', bordo_header: '#1F2937', sfondo_pagina: '#F9FAFB', sfondo_sezioni: '#F1F2F4', colore_testo_btn: '#FFFFFF' },
   { nome: 'Teal',         primario: '#0D9488', pulsanti: '#0D9488', sfondo_header: '#FFFFFF', bordo_header: '#0D9488', sfondo_pagina: '#FFFFFF', sfondo_sezioni: '#F0FDFA', cta_bg: '#F0FDFA' },
   { nome: 'Nero élite',   primario: '#0A0A0A', pulsanti: '#0A0A0A', sfondo_header: '#0A0A0A', bordo_header: '#0A0A0A', sfondo_pagina: '#FFFFFF', sfondo_sezioni: '#F9FAFB', colore_testo_btn: '#FFFFFF' },
-  { nome: 'Bianco puro',  primario: '#003DA5', pulsanti: '#003DA5', sfondo_header: '#FFFFFF', bordo_header: '#FFFFFF', sfondo_pagina: '#FFFFFF', sfondo_sezioni: '#FFFFFF', cta_bg: '#F4F5F7' },
-  { nome: 'CNA Pallini',  primario: '#003DA5', pulsanti: '#E8792F', sfondo_header: '#FFFFFF', bordo_header: '#003DA5', sfondo_pagina: '#FFFFFF', sfondo_sezioni: '#F8F9FF', cta_bg: '#EEF3FF', colore_testo_btn: '#FFFFFF', sfondo_pattern: 'pallini_angolo', pattern_colore1: '#003DA5', pattern_colore2: '#E8792F', pattern_opacita: '25' },
+  { nome: 'Bianco puro',  primario: '#E11D48', pulsanti: '#E11D48', sfondo_header: '#FFFFFF', bordo_header: '#FFFFFF', sfondo_pagina: '#FFFFFF', sfondo_sezioni: '#FFFFFF', cta_bg: '#F4F5F7' },
+  { nome: 'CNA Pallini',  primario: '#E11D48', pulsanti: '#E8792F', sfondo_header: '#FFFFFF', bordo_header: '#E11D48', sfondo_pagina: '#FFFFFF', sfondo_sezioni: '#F8F9FF', cta_bg: '#FEE4E6', colore_testo_btn: '#FFFFFF', sfondo_pattern: 'pallini_angolo', pattern_colore1: '#E11D48', pattern_colore2: '#E8792F', pattern_opacita: '25' },
 ]
 
 /* ─── Anteprima mini ────────────────────────────────────────────── */
@@ -127,7 +127,7 @@ function Anteprima({ tema, logoUrl, titolo }) {
   const patternSvg = (() => {
     const p = t.sfondo_pattern
     if (!p || p === 'nessuno') return null
-    const c1 = t.pattern_colore1 || '#003DA5', c2 = t.pattern_colore2 || '#E8792F'
+    const c1 = t.pattern_colore1 || '#E11D48', c2 = t.pattern_colore2 || '#E8792F'
     const o = (parseInt(t.pattern_opacita) || 25) / 100
     const seed = [
       {x:82,y:5,r:2,c:1},{x:88,y:3,r:1.5,c:2},{x:95,y:6,r:2.5,c:1},
@@ -170,7 +170,7 @@ function Anteprima({ tema, logoUrl, titolo }) {
           Breve descrizione dell'evento. Il testo usa il colore selezionato.
         </p>
         <div style={{ display: 'flex', gap: '8px', flexWrap: 'wrap', alignItems: 'center' }}>
-          <button style={{ background: btnBg, color: btnColor, border: btnBorder, borderRadius: btnRadius, padding: '8px 16px', fontSize: '12px', fontWeight: '700', fontFamily: "'Inter',sans-serif", cursor: 'default' }}>
+          <button style={{ background: btnBg, color: btnColor, border: btnBorder, borderRadius: btnRadius, padding: '8px 16px', fontSize: '12px', fontWeight: '700', fontFamily: "'Outfit',sans-serif", cursor: 'default' }}>
             Partecipa →
           </button>
           <a style={{ fontSize: '12px', color: t.colore_link, fontWeight: '600', textDecoration: 'underline', cursor: 'default' }}>
@@ -211,10 +211,10 @@ export default function AspettoTab({ event, setEvent }) {
         bordo_header:     pl.bordo_header  ?? pl.primario,
         sfondo_pagina:    pl.sfondo_pagina ?? '#FFFFFF',
         sfondo_sezioni:   pl.sfondo_sezioni ?? '#F4F5F7',
-        cta_bg:           pl.cta_bg        ?? '#EEF3FF',
+        cta_bg:           pl.cta_bg        ?? '#FEE4E6',
         colore_testo_btn: pl.colore_testo_btn ?? '#FFFFFF',
         sfondo_pattern:   pl.sfondo_pattern ?? 'nessuno',
-        pattern_colore1:  pl.pattern_colore1 ?? '#003DA5',
+        pattern_colore1:  pl.pattern_colore1 ?? '#E11D48',
         pattern_colore2:  pl.pattern_colore2 ?? '#E8792F',
         pattern_opacita:  pl.pattern_opacita ?? '25',
       }
@@ -239,7 +239,7 @@ export default function AspettoTab({ event, setEvent }) {
           </div>
           <button
             type="button" onClick={resetTema}
-            style={{ display: 'flex', alignItems: 'center', gap: '6px', background: '#FEF2F2', border: '1px solid #FECACA', color: '#DC2626', borderRadius: '8px', padding: '7px 13px', fontSize: '12px', fontWeight: '700', fontFamily: "'Inter',sans-serif", cursor: 'pointer' }}
+            style={{ display: 'flex', alignItems: 'center', gap: '6px', background: '#FEF2F2', border: '1px solid #FECACA', color: '#DC2626', borderRadius: '8px', padding: '7px 13px', fontSize: '12px', fontWeight: '700', fontFamily: "'Outfit',sans-serif", cursor: 'pointer' }}
           >
             <RotateCcw size={13} /> Reset
           </button>
@@ -258,7 +258,7 @@ export default function AspettoTab({ event, setEvent }) {
                     padding: '7px 12px', border: `2px solid ${attiva ? pl.primario : '#E5E7EB'}`,
                     borderRadius: '8px', background: attiva ? '#F0F4FF' : '#fff',
                     cursor: 'pointer', fontSize: '12px', fontWeight: '600',
-                    color: attiva ? pl.primario : '#374151', fontFamily: "'Inter',sans-serif",
+                    color: attiva ? pl.primario : '#374151', fontFamily: "'Outfit',sans-serif",
                     transition: 'all .15s',
                   }}
                 >
@@ -301,7 +301,7 @@ export default function AspettoTab({ event, setEvent }) {
             <div style={{ display: 'flex', gap: '4px', marginTop: '6px' }}>
               {[['24', 'XS'], ['44', 'S'], ['64', 'M'], ['96', 'L'], ['128', 'XL'], ['160', 'XXL']].map(([v, l]) => (
                 <button key={v} type="button" onClick={() => setT('logo_altezza', v)}
-                  style={{ flex: 1, padding: '4px', border: `1px solid ${tema.logo_altezza == v ? '#003DA5' : '#E5E7EB'}`, borderRadius: '5px', background: tema.logo_altezza == v ? '#EEF3FF' : '#fff', fontSize: '11px', fontWeight: '700', color: tema.logo_altezza == v ? '#003DA5' : '#6B7280', cursor: 'pointer', fontFamily: "'Inter',sans-serif" }}
+                  style={{ flex: 1, padding: '4px', border: `1px solid ${tema.logo_altezza == v ? '#E11D48' : '#E5E7EB'}`, borderRadius: '5px', background: tema.logo_altezza == v ? '#FEE4E6' : '#fff', fontSize: '11px', fontWeight: '700', color: tema.logo_altezza == v ? '#E11D48' : '#6B7280', cursor: 'pointer', fontFamily: "'Outfit',sans-serif" }}
                 >{l}</button>
               ))}
             </div>
@@ -311,7 +311,7 @@ export default function AspettoTab({ event, setEvent }) {
             <div style={{ display: 'flex', gap: '8px', marginTop: '6px' }}>
               {[['trasparente', 'Trasparente'], ['bianco', 'Bianco'], ['colore_primario', 'Colore brand']].map(([v, l]) => (
                 <button key={v} type="button" onClick={() => setT('logo_bg', v)}
-                  style={{ flex: 1, padding: '8px 6px', border: `1px solid ${tema.logo_bg === v ? '#003DA5' : '#E5E7EB'}`, borderRadius: '7px', background: tema.logo_bg === v ? '#EEF3FF' : '#fff', fontSize: '11px', fontWeight: '700', color: tema.logo_bg === v ? '#003DA5' : '#6B7280', cursor: 'pointer', fontFamily: "'Inter',sans-serif", textAlign: 'center' }}
+                  style={{ flex: 1, padding: '8px 6px', border: `1px solid ${tema.logo_bg === v ? '#E11D48' : '#E5E7EB'}`, borderRadius: '7px', background: tema.logo_bg === v ? '#FEE4E6' : '#fff', fontSize: '11px', fontWeight: '700', color: tema.logo_bg === v ? '#E11D48' : '#6B7280', cursor: 'pointer', fontFamily: "'Outfit',sans-serif", textAlign: 'center' }}
                 >{l}</button>
               ))}
             </div>
@@ -355,7 +355,7 @@ export default function AspettoTab({ event, setEvent }) {
             <div style={{ display: 'flex', gap: '8px', marginTop: '6px' }}>
               {[['nessuno', '✕ Nessuno'], ['pallini', '● Pallini sparsi'], ['pallini_angolo', '◔ Pallini angolo']].map(([v, l]) => (
                 <button key={v} type="button" onClick={() => setT('sfondo_pattern', v)}
-                  style={{ flex: 1, padding: '9px 8px', border: `1.5px solid ${(tema.sfondo_pattern || 'nessuno') === v ? '#003DA5' : '#E5E7EB'}`, borderRadius: '8px', background: (tema.sfondo_pattern || 'nessuno') === v ? '#EEF3FF' : '#fff', fontSize: '12px', fontWeight: '700', color: (tema.sfondo_pattern || 'nessuno') === v ? '#003DA5' : '#374151', cursor: 'pointer', fontFamily: "'Inter',sans-serif" }}>
+                  style={{ flex: 1, padding: '9px 8px', border: `1.5px solid ${(tema.sfondo_pattern || 'nessuno') === v ? '#E11D48' : '#E5E7EB'}`, borderRadius: '8px', background: (tema.sfondo_pattern || 'nessuno') === v ? '#FEE4E6' : '#fff', fontSize: '12px', fontWeight: '700', color: (tema.sfondo_pattern || 'nessuno') === v ? '#E11D48' : '#374151', cursor: 'pointer', fontFamily: "'Outfit',sans-serif" }}>
                   {l}
                 </button>
               ))}
@@ -365,7 +365,7 @@ export default function AspettoTab({ event, setEvent }) {
           {tema.sfondo_pattern && tema.sfondo_pattern !== 'nessuno' && (
             <>
               <div style={sGrid}>
-                <ColorPicker label="Colore pallini 1" value={tema.pattern_colore1 || '#003DA5'} onChange={v => setT('pattern_colore1', v)} />
+                <ColorPicker label="Colore pallini 1" value={tema.pattern_colore1 || '#E11D48'} onChange={v => setT('pattern_colore1', v)} />
                 <ColorPicker label="Colore pallini 2" value={tema.pattern_colore2 || '#E8792F'} onChange={v => setT('pattern_colore2', v)} />
               </div>
               <div>
@@ -392,9 +392,9 @@ export default function AspettoTab({ event, setEvent }) {
                 return (
                   <button key={v} type="button" onClick={() => {
                     if (v === '') { setT('sfondo_footer', ''); setT('testo_footer', '#6B7280') }
-                    else { setT('sfondo_footer', '#003DA5'); setT('testo_footer', '#ffffff') }
+                    else { setT('sfondo_footer', '#E11D48'); setT('testo_footer', '#ffffff') }
                   }}
-                    style={{ flex: 1, padding: '9px 8px', border: `1.5px solid ${isActive ? '#003DA5' : '#E5E7EB'}`, borderRadius: '8px', background: isActive ? '#EEF3FF' : '#fff', fontSize: '12px', fontWeight: '700', color: isActive ? '#003DA5' : '#374151', cursor: 'pointer', fontFamily: "'Inter',sans-serif" }}>
+                    style={{ flex: 1, padding: '9px 8px', border: `1.5px solid ${isActive ? '#E11D48' : '#E5E7EB'}`, borderRadius: '8px', background: isActive ? '#FEE4E6' : '#fff', fontSize: '12px', fontWeight: '700', color: isActive ? '#E11D48' : '#374151', cursor: 'pointer', fontFamily: "'Outfit',sans-serif" }}>
                     {l}
                   </button>
                 )
@@ -424,7 +424,7 @@ export default function AspettoTab({ event, setEvent }) {
                     if (v === 'same') setEvent(p => ({ ...p, footer_logo_url: '' }))
                     else setEvent(p => ({ ...p, footer_logo_url: p.footer_logo_url || 'PENDING' }))
                   }}
-                    style={{ flex: 1, padding: '9px 8px', border: `1.5px solid ${isActive ? '#003DA5' : '#E5E7EB'}`, borderRadius: '8px', background: isActive ? '#EEF3FF' : '#fff', fontSize: '12px', fontWeight: '700', color: isActive ? '#003DA5' : '#374151', cursor: 'pointer', fontFamily: "'Inter',sans-serif" }}>
+                    style={{ flex: 1, padding: '9px 8px', border: `1.5px solid ${isActive ? '#E11D48' : '#E5E7EB'}`, borderRadius: '8px', background: isActive ? '#FEE4E6' : '#fff', fontSize: '12px', fontWeight: '700', color: isActive ? '#E11D48' : '#374151', cursor: 'pointer', fontFamily: "'Outfit',sans-serif" }}>
                     {l}
                   </button>
                 )
@@ -439,14 +439,14 @@ export default function AspettoTab({ event, setEvent }) {
           )}
 
           <button type="button" onClick={() => {
-            setT('sfondo_footer', 'linear-gradient(160deg, #003DA5 0%, #001F5C 100%)')
+            setT('sfondo_footer', 'linear-gradient(160deg, #E11D48 0%, #001F5C 100%)')
             setT('testo_footer', '#ffffff')
             setEvent(p => ({
               ...p,
               footer_modalita: 'ricco',
               footer_html: '<p style="text-align:center;font-family:Inter,sans-serif;font-weight:700;font-size:14px;margin:0 0 12px">👉 Insieme è meglio 👈</p><p style="text-align:center;font-family:Inter,sans-serif;font-size:13px;line-height:1.7;margin:0"><strong>CNA di Roma</strong><br/>Via Cristoforo Colombo, 283/A, 00147 Roma<br/>Tel. 06570151 • Email info@cnaroma.it</p>',
             }))
-          }} style={{ width: '100%', padding: '9px 14px', border: '1.5px solid #003DA5', borderRadius: '8px', background: '#EEF3FF', color: '#003DA5', fontSize: '12px', fontWeight: '700', cursor: 'pointer', fontFamily: "'Inter',sans-serif", display: 'flex', alignItems: 'center', justifyContent: 'center', gap: '6px' }}>
+          }} style={{ width: '100%', padding: '9px 14px', border: '1.5px solid #E11D48', borderRadius: '8px', background: '#FEE4E6', color: '#E11D48', fontSize: '12px', fontWeight: '700', cursor: 'pointer', fontFamily: "'Outfit',sans-serif", display: 'flex', alignItems: 'center', justifyContent: 'center', gap: '6px' }}>
             ↩ Ripristina footer di default
           </button>
 
@@ -457,7 +457,7 @@ export default function AspettoTab({ event, setEvent }) {
               {[['semplice', '✏️ Testo semplice'], ['ricco', '🖊 Editor ricco']].map(([v, l]) => (
                 <button key={v} type="button"
                   onClick={() => setEvent(p => ({ ...p, footer_modalita: v }))}
-                  style={{ flex: 1, padding: '9px 8px', border: `1.5px solid ${(event.footer_modalita || 'semplice') === v ? '#003DA5' : '#E5E7EB'}`, borderRadius: '8px', background: (event.footer_modalita || 'semplice') === v ? '#EEF3FF' : '#fff', fontSize: '12px', fontWeight: '700', color: (event.footer_modalita || 'semplice') === v ? '#003DA5' : '#374151', cursor: 'pointer', fontFamily: "'Inter',sans-serif" }}>
+                  style={{ flex: 1, padding: '9px 8px', border: `1.5px solid ${(event.footer_modalita || 'semplice') === v ? '#E11D48' : '#E5E7EB'}`, borderRadius: '8px', background: (event.footer_modalita || 'semplice') === v ? '#FEE4E6' : '#fff', fontSize: '12px', fontWeight: '700', color: (event.footer_modalita || 'semplice') === v ? '#E11D48' : '#374151', cursor: 'pointer', fontFamily: "'Outfit',sans-serif" }}>
                   {l}
                 </button>
               ))}
@@ -501,7 +501,7 @@ export default function AspettoTab({ event, setEvent }) {
             <div style={{ display: 'flex', gap: '8px', marginTop: '6px' }}>
               {[['pieno', '▬ Pieno'], ['contorno', '□ Contorno'], ['pill', '( Pill )']].map(([v, l]) => (
                 <button key={v} type="button" onClick={() => setT('btn_stile', v)}
-                  style={{ flex: 1, padding: '9px 8px', border: `1.5px solid ${tema.btn_stile === v ? '#003DA5' : '#E5E7EB'}`, borderRadius: '8px', background: tema.btn_stile === v ? '#EEF3FF' : '#fff', fontSize: '12px', fontWeight: '700', color: tema.btn_stile === v ? '#003DA5' : '#374151', cursor: 'pointer', fontFamily: "'Inter',sans-serif" }}
+                  style={{ flex: 1, padding: '9px 8px', border: `1.5px solid ${tema.btn_stile === v ? '#E11D48' : '#E5E7EB'}`, borderRadius: '8px', background: tema.btn_stile === v ? '#FEE4E6' : '#fff', fontSize: '12px', fontWeight: '700', color: tema.btn_stile === v ? '#E11D48' : '#374151', cursor: 'pointer', fontFamily: "'Outfit',sans-serif" }}
                 >{l}</button>
               ))}
             </div>

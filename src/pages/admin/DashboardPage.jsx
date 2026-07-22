@@ -18,7 +18,7 @@ const STATUS_COLORS = {
   archiviato:{ bg:'#F3F4F6', text:'#9CA3AF' },
 }
 
-function StatCard({ icon: Icon, label, value, sub, color='#003DA5', trend }) {
+function StatCard({ icon: Icon, label, value, sub, color='#E11D48', trend }) {
   return (
     <div style={styles.statCard}>
       <div style={{ ...styles.statIcon, backgroundColor:color+'14', color }}>
@@ -54,7 +54,7 @@ function WeeklyChart({ data }) {
       {data.map((d, i) => (
         <div key={i} style={{ flex:1, display:'flex', flexDirection:'column', alignItems:'center', gap:'3px' }}>
           <div style={{
-            width:'100%', backgroundColor:'#003DA5', borderRadius:'3px 3px 0 0',
+            width:'100%', backgroundColor:'#E11D48', borderRadius:'3px 3px 0 0',
             height:`${Math.max((d.count/max)*40, d.count>0?4:0)}px`,
             opacity: i === data.length-1 ? 1 : 0.4 + (i/data.length)*0.5,
             transition:'height 0.3s ease',
@@ -196,7 +196,7 @@ export default function DashboardPage() {
               : <p style={{ color:'#9CA3AF', fontSize:'13px', margin:'8px 0', textAlign:'center' }}>Nessuna iscrizione nell'ultima settimana</p>
             }
             <p style={{ fontSize:'12px', color:'#9CA3AF', margin:'10px 0 0', textAlign:'right' }}>
-              Totale: <strong style={{color:'#003DA5'}}>{weeklyData.reduce((a,d)=>a+d.count,0)}</strong>
+              Totale: <strong style={{color:'#E11D48'}}>{weeklyData.reduce((a,d)=>a+d.count,0)}</strong>
             </p>
           </div>
         </div>
@@ -226,7 +226,7 @@ export default function DashboardPage() {
                     </p>
                   </div>
                   <div style={{ textAlign:'right', flexShrink:0 }}>
-                    <p style={{ fontSize:'13px', fontWeight:'600', color:'#003DA5', margin:'0 0 2px' }}>
+                    <p style={{ fontSize:'13px', fontWeight:'600', color:'#E11D48', margin:'0 0 2px' }}>
                       {ev.iscritti}{ev.capienza_max?<span style={{color:'#9CA3AF',fontWeight:'400'}}>/{ev.capienza_max}</span>:null}
                     </p>
                     <p style={{ fontSize:'11px', color:'#9CA3AF', margin:0 }}>iscritti</p>
@@ -295,7 +295,7 @@ export default function DashboardPage() {
                       onMouseEnter={e=>e.currentTarget.style.backgroundColor='#F9FAFB'}
                       onMouseLeave={e=>e.currentTarget.style.backgroundColor='transparent'}>
                       <td style={{...styles.td,width:'60px'}} className="col-hide-mobile">
-                        <span style={{fontSize:'11px',fontWeight:'700',color:'#003DA5',backgroundColor:'#EEF3FF',padding:'2px 7px',borderRadius:'4px',fontFamily:'monospace',whiteSpace:'nowrap'}}>
+                        <span style={{fontSize:'11px',fontWeight:'700',color:'#E11D48',backgroundColor:'#FEE4E6',padding:'2px 7px',borderRadius:'4px',fontFamily:'monospace',whiteSpace:'nowrap'}}>
                           EVT-{String(ev.codice||0).padStart(4,'0')}
                         </span>
                       </td>
@@ -317,7 +317,7 @@ export default function DashboardPage() {
                         {rate != null ? (
                           <div style={{ display:'flex', alignItems:'center', gap:'8px' }}>
                             <div style={{ width:'50px', height:'6px', backgroundColor:'#F3F4F6', borderRadius:'3px', overflow:'hidden' }}>
-                              <div style={{ width:`${rate}%`, height:'100%', backgroundColor: rate>=80?'#16A34A':rate>=50?'#D97706':'#003DA5', borderRadius:'3px', transition:'width 0.3s' }}/>
+                              <div style={{ width:`${rate}%`, height:'100%', backgroundColor: rate>=80?'#16A34A':rate>=50?'#D97706':'#E11D48', borderRadius:'3px', transition:'width 0.3s' }}/>
                             </div>
                             <span style={{ fontSize:'12px', color:'#6B7280', fontWeight:'600' }}>{rate}%</span>
                           </div>
@@ -345,7 +345,7 @@ const styles = {
   pageHeader: { display:'flex', alignItems:'flex-start', justifyContent:'space-between', marginBottom:'28px', flexWrap:'wrap', gap:'16px' },
   pageTitle: { fontSize:'32px', fontWeight:'900', color:'#0A0A0A', letterSpacing:'-0.03em', margin:0 },
   pageSubtitle: { fontSize:'14px', color:'#6B7280', margin:'4px 0 0', fontWeight:'500', textTransform:'capitalize' },
-  primaryBtn: { display:'flex', alignItems:'center', gap:'8px', backgroundColor:'#003DA5', color:'#FFFFFF', border:'none', borderRadius:'4px', padding:'10px 20px', fontSize:'14px', fontWeight:'700', fontFamily:"'Inter',sans-serif", cursor:'pointer', letterSpacing:'-0.01em', whiteSpace:'nowrap' },
+  primaryBtn: { display:'flex', alignItems:'center', gap:'8px', backgroundColor:'#E11D48', color:'#FFFFFF', border:'none', borderRadius:'4px', padding:'10px 20px', fontSize:'14px', fontWeight:'700', fontFamily:"'Outfit',sans-serif", cursor:'pointer', letterSpacing:'-0.01em', whiteSpace:'nowrap' },
   statsGrid: { display:'grid', gridTemplateColumns:'repeat(4,1fr)', gap:'12px', marginBottom:'12px' },
   statCard: { backgroundColor:'#FFFFFF', borderRadius:'6px', padding:'16px 20px', display:'flex', alignItems:'flex-start', gap:'14px', border:'1px solid #E5E7EB' },
   statIcon: { width:'44px', height:'44px', borderRadius:'8px', display:'flex', alignItems:'center', justifyContent:'center', flexShrink:0 },
@@ -355,7 +355,7 @@ const styles = {
   section: { backgroundColor:'#FFFFFF', borderRadius:'6px', border:'1px solid #E5E7EB', overflow:'hidden' },
   sectionHeader: { display:'flex', alignItems:'center', justifyContent:'space-between', padding:'16px 20px', borderBottom:'1px solid #E5E7EB' },
   sectionTitle: { fontSize:'15px', fontWeight:'700', color:'#0A0A0A', letterSpacing:'-0.02em', margin:0 },
-  ghostBtn: { display:'flex', alignItems:'center', gap:'4px', background:'none', border:'none', cursor:'pointer', fontSize:'12px', fontFamily:"'Inter',sans-serif", color:'#003DA5', fontWeight:'600', padding:'4px 0' },
+  ghostBtn: { display:'flex', alignItems:'center', gap:'4px', background:'none', border:'none', cursor:'pointer', fontSize:'12px', fontFamily:"'Outfit',sans-serif", color:'#E11D48', fontWeight:'600', padding:'4px 0' },
   nextEventRow: { display:'flex', alignItems:'center', gap:'16px', padding:'12px 20px', borderBottom:'1px solid #F3F4F6', transition:'background-color 0.1s', cursor:'default' },
   tableWrap: { overflowX:'auto' },
   table: { width:'100%', borderCollapse:'collapse', fontSize:'14px' },
@@ -367,7 +367,7 @@ const styles = {
   cellText: { color:'#374151', margin:0, fontSize:'13px' },
   capTxt: { color:'#9CA3AF', fontSize:'11px' },
   badge: { display:'inline-flex', alignItems:'center', padding:'3px 10px', borderRadius:'20px', fontSize:'11px', fontWeight:'600' },
-  rowBtn: { background:'none', border:'1px solid #003DA5', color:'#003DA5', borderRadius:'4px', padding:'5px 12px', fontSize:'12px', fontWeight:'600', fontFamily:"'Inter',sans-serif", cursor:'pointer', whiteSpace:'nowrap' },
+  rowBtn: { background:'none', border:'1px solid #E11D48', color:'#E11D48', borderRadius:'4px', padding:'5px 12px', fontSize:'12px', fontWeight:'600', fontFamily:"'Outfit',sans-serif", cursor:'pointer', whiteSpace:'nowrap' },
   loadingState: { padding:'48px', textAlign:'center' },
   loadingText: { color:'#9CA3AF', fontSize:'14px', margin:0 },
   emptyState: { padding:'64px 32px', textAlign:'center', display:'flex', flexDirection:'column', alignItems:'center' },

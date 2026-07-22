@@ -46,7 +46,7 @@ export default function ShareBar({ event, compact = false }) {
         display: 'flex', alignItems: 'center', justifyContent: 'center',
         gap: '8px', padding: '10px 24px 18px', flexWrap: 'wrap',
       }}>
-        <span style={{ fontSize: '12px', color: '#9CA3AF', fontFamily: "'Inter',sans-serif", fontWeight: '600', marginRight: '4px' }}>
+        <span style={{ fontSize: '12px', color: '#9CA3AF', fontFamily: "'Outfit',sans-serif", fontWeight: '600', marginRight: '4px' }}>
           Condividi:
         </span>
 
@@ -57,7 +57,7 @@ export default function ShareBar({ event, compact = false }) {
         </button>
 
         <button type="button" onClick={handleEmail} title="Condividi via Email"
-          style={compactBtn('#003DA5', '#fff')}>
+          style={compactBtn('#E11D48', '#fff')}>
           <EmailIcon size={14} />
           Email
         </button>
@@ -82,7 +82,7 @@ export default function ShareBar({ event, compact = false }) {
       <p style={{
         fontSize: '12px', fontWeight: '700', color: '#9CA3AF',
         textTransform: 'uppercase', letterSpacing: '.08em',
-        margin: '0 0 12px', fontFamily: "'Inter', sans-serif",
+        margin: '0 0 12px', fontFamily: "'Outfit', sans-serif",
       }}>
         Condividi questo evento
       </p>
@@ -90,7 +90,7 @@ export default function ShareBar({ event, compact = false }) {
         <button type="button" onClick={handleWhatsApp} style={fullBtn('#25D366', '#fff')}>
           <WhatsAppIcon size={18} /> WhatsApp
         </button>
-        <button type="button" onClick={handleEmail} style={fullBtn('#003DA5', '#fff')}>
+        <button type="button" onClick={handleEmail} style={fullBtn('#E11D48', '#fff')}>
           <EmailIcon size={17} /> Email
         </button>
         <button type="button" onClick={handleCopy}
@@ -109,7 +109,7 @@ function compactBtn(bg, color) {
     padding: '6px 12px', borderRadius: '20px', border: 'none',
     background: bg, color,
     fontSize: '12px', fontWeight: '700',
-    fontFamily: "'Inter', sans-serif", cursor: 'pointer',
+    fontFamily: "'Outfit', sans-serif", cursor: 'pointer',
     transition: 'opacity .15s',
   }
 }
@@ -120,7 +120,7 @@ function fullBtn(bg, color) {
     padding: '10px 18px', borderRadius: '8px', border: 'none',
     background: bg, color,
     fontSize: '14px', fontWeight: '700',
-    fontFamily: "'Inter', sans-serif", cursor: 'pointer',
+    fontFamily: "'Outfit', sans-serif", cursor: 'pointer',
   }
 }
 

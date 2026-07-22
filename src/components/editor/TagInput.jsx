@@ -51,11 +51,11 @@ export default function TagInput({ value = [], onChange }) {
         onClick={() => document.getElementById('tag-input-field')?.focus()}>
         {value.map(tag => (
           <span key={tag} style={{ display: 'inline-flex', alignItems: 'center', gap: '5px',
-            backgroundColor: '#003DA514', color: '#003DA5', fontSize: '12px', fontWeight: '700',
+            backgroundColor: '#E11D4814', color: '#E11D48', fontSize: '12px', fontWeight: '700',
             borderRadius: '999px', padding: '3px 10px', letterSpacing: '0.01em' }}>
             {tag}
             <button type="button" onClick={() => removeTag(tag)}
-              style={{ background: 'none', border: 'none', cursor: 'pointer', color: '#003DA5',
+              style={{ background: 'none', border: 'none', cursor: 'pointer', color: '#E11D48',
                 padding: 0, display: 'flex', alignItems: 'center', lineHeight: 1, fontSize: '13px' }}>
               ×
             </button>
@@ -69,7 +69,7 @@ export default function TagInput({ value = [], onChange }) {
           onFocus={() => setShowSug(true)}
           onBlur={() => setTimeout(() => setShowSug(false), 150)}
           placeholder={value.length === 0 ? 'Aggiungi tag… (Invio o virgola per confermare)' : ''}
-          style={{ border: 'none', outline: 'none', fontSize: '13px', fontFamily: "'Inter',sans-serif",
+          style={{ border: 'none', outline: 'none', fontSize: '13px', fontFamily: "'Outfit',sans-serif",
             flex: 1, minWidth: '140px', color: '#0A0A0A', backgroundColor: 'transparent' }}
         />
       </div>
@@ -86,7 +86,7 @@ export default function TagInput({ value = [], onChange }) {
             <button key={s} type="button" onMouseDown={() => addTag(s)}
               style={{ display: 'block', width: '100%', textAlign: 'left', padding: '9px 12px',
                 border: 'none', backgroundColor: 'transparent', cursor: 'pointer',
-                fontSize: '13px', fontFamily: "'Inter',sans-serif", color: '#374151', fontWeight: '500' }}
+                fontSize: '13px', fontFamily: "'Outfit',sans-serif", color: '#374151', fontWeight: '500' }}
               onMouseEnter={e => e.target.style.backgroundColor = '#F3F4F6'}
               onMouseLeave={e => e.target.style.backgroundColor = 'transparent'}>
               {s}

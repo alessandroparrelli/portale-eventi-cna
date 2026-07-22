@@ -5,7 +5,7 @@ import { useRole } from '../../hooks/useRole'
 import { Field, Input, Btn } from '../../components/ui'
 import { Camera, Eye, EyeOff, Save, CheckCircle2, AlertCircle, Clock, Loader2 } from 'lucide-react'
 
-const RUOLO_COL = { admin:'#003DA5', supervisore:'#D97706', utente:'#6B7280' }
+const RUOLO_COL = { admin:'#E11D48', supervisore:'#D97706', utente:'#6B7280' }
 
 function Toast({ msg, type, onClose }) {
   useEffect(() => { const t = setTimeout(onClose, 3500); return () => clearTimeout(t) }, [])
@@ -17,7 +17,7 @@ function Toast({ msg, type, onClose }) {
       border:`1.5px solid ${type==='ok' ? '#86EFAC' : '#FECACA'}`,
       borderRadius:'12px', padding:'14px 22px',
       boxShadow:'0 8px 32px rgba(0,0,0,.18)',
-      fontFamily:"'Inter',sans-serif", fontSize:'14px', fontWeight:'700',
+      fontFamily:"'Outfit',sans-serif", fontSize:'14px', fontWeight:'700',
       color: type==='ok' ? '#15803D' : '#DC2626', whiteSpace:'nowrap',
     }}>
       {type==='ok' ? <CheckCircle2 size={18}/> : <AlertCircle size={18}/>}
@@ -163,7 +163,7 @@ export default function ProfiloPage() {
   }
 
   return (
-    <div style={{ maxWidth:'520px', margin:'0 auto', fontFamily:"'Inter',sans-serif", width:'100%', boxSizing:'border-box' }}>
+    <div style={{ maxWidth:'520px', margin:'0 auto', fontFamily:"'Outfit',sans-serif", width:'100%', boxSizing:'border-box' }}>
 
       {/* ── HEADER PROFILO ── */}
       <div style={{ backgroundColor:'#FFFFFF', border:'1px solid #E5E7EB', borderRadius:'12px', padding:'20px', marginBottom:'16px', display:'flex', alignItems:'center', gap:'16px' }}>
@@ -171,7 +171,7 @@ export default function ProfiloPage() {
         <div style={{ position:'relative', flexShrink:0, cursor:'pointer' }} onClick={() => fileRef.current?.click()}>
           <div style={{
             width:'72px', height:'72px', borderRadius:'50%',
-            backgroundColor: RUOLO_COL[ruolo]||'#003DA5',
+            backgroundColor: RUOLO_COL[ruolo]||'#E11D48',
             overflow:'hidden', display:'flex', alignItems:'center',
             justifyContent:'center', fontSize:'26px', fontWeight:'900', color:'#FFF',
             border:'3px solid #FFF', boxShadow:'0 2px 12px rgba(0,0,0,.12)',
@@ -182,7 +182,7 @@ export default function ProfiloPage() {
                 ? <img src={avatarUrl} alt="" style={{ width:'100%', height:'100%', objectFit:'cover' }}/>
                 : initials}
           </div>
-          <div style={{ position:'absolute', bottom:0, right:0, width:'22px', height:'22px', borderRadius:'50%', backgroundColor:'#003DA5', border:'2px solid #FFF', display:'flex', alignItems:'center', justifyContent:'center' }}>
+          <div style={{ position:'absolute', bottom:0, right:0, width:'22px', height:'22px', borderRadius:'50%', backgroundColor:'#E11D48', border:'2px solid #FFF', display:'flex', alignItems:'center', justifyContent:'center' }}>
             <Camera size={11} style={{ color:'#FFF' }}/>
           </div>
         </div>

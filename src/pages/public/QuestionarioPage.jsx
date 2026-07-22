@@ -62,7 +62,7 @@ export default function QuestionarioPage() {
 
   if (loading) return (
     <div style={s.center}>
-      <Loader2 size={32} style={{ color:'#003DA5', animation:'spin 1s linear infinite', marginBottom:'12px' }}/>
+      <Loader2 size={32} style={{ color:'#E11D48', animation:'spin 1s linear infinite', marginBottom:'12px' }}/>
       <p style={{ color:'#6B7280', fontSize:'14px' }}>Caricamento…</p>
       <style>{`@keyframes spin{from{transform:rotate(0)}to{transform:rotate(360deg)}}`}</style>
     </div>
@@ -155,7 +155,7 @@ export default function QuestionarioPage() {
                       <input type="radio" name={`q_${q.id}`} value={op}
                         checked={answers[q.id]===op}
                         onChange={()=>setAnswer(q.id,op)}
-                        style={{ accentColor:'#003DA5', width:'16px', height:'16px' }}/>
+                        style={{ accentColor:'#E11D48', width:'16px', height:'16px' }}/>
                       {op}
                     </label>
                   ))}
@@ -166,8 +166,8 @@ export default function QuestionarioPage() {
                 <textarea value={answers[q.id]||''} onChange={e=>setAnswer(q.id,e.target.value)}
                   placeholder="La tua risposta…" rows={3}
                   style={{ width:'100%', padding:'12px', border:'1px solid #D1D5DB', borderRadius:'6px',
-                    fontSize:'14px', fontFamily:"'Inter',sans-serif", outline:'none', resize:'vertical', boxSizing:'border-box', marginTop:'6px' }}
-                  onFocus={e=>(e.target.style.borderColor='#003DA5')}
+                    fontSize:'14px', fontFamily:"'Outfit',sans-serif", outline:'none', resize:'vertical', boxSizing:'border-box', marginTop:'6px' }}
+                  onFocus={e=>(e.target.style.borderColor='#E11D48')}
                   onBlur={e=>(e.target.style.borderColor='#D1D5DB')}/>
               )}
             </div>
@@ -180,8 +180,8 @@ export default function QuestionarioPage() {
               placeholder="Cosa hai apprezzato di più? Cosa miglioreresti?"
               rows={4}
               style={{ width:'100%', padding:'12px', border:'1px solid #D1D5DB', borderRadius:'6px',
-                fontSize:'14px', fontFamily:"'Inter',sans-serif", outline:'none', resize:'vertical', boxSizing:'border-box' }}
-              onFocus={e=>(e.target.style.borderColor='#003DA5')}
+                fontSize:'14px', fontFamily:"'Outfit',sans-serif", outline:'none', resize:'vertical', boxSizing:'border-box' }}
+              onFocus={e=>(e.target.style.borderColor='#E11D48')}
               onBlur={e=>(e.target.style.borderColor='#D1D5DB')}/>
           </div>
 
@@ -227,11 +227,11 @@ function ScalaNumero({ value, onChange }) {
       {[1,2,3,4,5,6,7,8,9,10].map(n=>(
         <button key={n} type="button" onClick={()=>onChange(n)}
           style={{ width:'40px', height:'40px', borderRadius:'6px', border:'1px solid',
-            borderColor: value===n?'#003DA5':'#D1D5DB',
-            backgroundColor: value===n?'#003DA5':'#FFFFFF',
+            borderColor: value===n?'#E11D48':'#D1D5DB',
+            backgroundColor: value===n?'#E11D48':'#FFFFFF',
             color: value===n?'#FFFFFF':'#374151',
             fontSize:'14px', fontWeight:'700', cursor:'pointer',
-            fontFamily:"'Inter',sans-serif", transition:'all 0.1s' }}>
+            fontFamily:"'Outfit',sans-serif", transition:'all 0.1s' }}>
           {n}
         </button>
       ))}
@@ -240,16 +240,16 @@ function ScalaNumero({ value, onChange }) {
 }
 
 const s = {
-  page: { minHeight:'100vh', backgroundColor:'#F4F5F7', fontFamily:"'Inter',sans-serif" },
+  page: { minHeight:'100vh', backgroundColor:'#F4F5F7', fontFamily:"'Outfit',sans-serif" },
   center: { minHeight:'100vh', display:'flex', flexDirection:'column', alignItems:'center', justifyContent:'center',
-    backgroundColor:'#F4F5F7', fontFamily:"'Inter',sans-serif", padding:'24px' },
-  header: { backgroundColor:'#FFFFFF', borderBottom:'2px solid #003DA5', display:'flex', alignItems:'center', justifyContent:'center', padding:'16px 24px' },
+    backgroundColor:'#F4F5F7', fontFamily:"'Outfit',sans-serif", padding:'24px' },
+  header: { backgroundColor:'#FFFFFF', borderBottom:'2px solid #E11D48', display:'flex', alignItems:'center', justifyContent:'center', padding:'16px 24px' },
   card: { maxWidth:'520px', margin:'40px auto', backgroundColor:'#FFFFFF', borderRadius:'12px', padding:'40px', boxShadow:'0 4px 24px rgba(0,0,0,0.08)' },
   title: { fontSize:'26px', fontWeight:'900', color:'#0A0A0A', letterSpacing:'-0.03em', margin:'0 0 6px', textAlign:'center' },
-  eventName: { fontSize:'14px', color:'#003DA5', fontWeight:'600', textAlign:'center', margin:'0 0 16px' },
+  eventName: { fontSize:'14px', color:'#E11D48', fontWeight:'600', textAlign:'center', margin:'0 0 16px' },
   greeting: { fontSize:'15px', color:'#374151', textAlign:'center', margin:'0 0 8px', lineHeight:'1.5' },
   fieldLabel: { fontSize:'13px', fontWeight:'600', color:'#0A0A0A', margin:'0 0 4px' },
-  submitBtn: { display:'flex', alignItems:'center', justifyContent:'center', gap:'8px', backgroundColor:'#003DA5', color:'#FFFFFF',
+  submitBtn: { display:'flex', alignItems:'center', justifyContent:'center', gap:'8px', backgroundColor:'#E11D48', color:'#FFFFFF',
     border:'none', borderRadius:'6px', padding:'14px 24px', fontSize:'15px', fontWeight:'700',
-    fontFamily:"'Inter',sans-serif", cursor:'pointer', letterSpacing:'-0.01em', transition:'opacity 0.15s' },
+    fontFamily:"'Outfit',sans-serif", cursor:'pointer', letterSpacing:'-0.01em', transition:'opacity 0.15s' },
 }

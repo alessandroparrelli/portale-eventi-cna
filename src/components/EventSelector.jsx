@@ -31,14 +31,14 @@ export default function EventSelector({ eventi = [], value, onChange, label = 'E
               padding: '9px 36px 9px 12px',
               fontSize: '14px',
               fontWeight: '600',
-              fontFamily: "'Inter', sans-serif",
+              fontFamily: "'Outfit', sans-serif",
               color: value ? '#0A0A0A' : '#9CA3AF',
               backgroundColor: '#fff',
               cursor: 'pointer',
               outline: 'none',
               transition: 'border-color .15s',
             }}
-            onFocus={e => (e.target.style.borderColor = '#003DA5')}
+            onFocus={e => (e.target.style.borderColor = '#E11D48')}
             onBlur={e => (e.target.style.borderColor = '#D1D5DB')}
           >
             <option value="">{placeholder}</option>

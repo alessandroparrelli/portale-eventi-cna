@@ -1,8 +1,7 @@
 import { useState, useEffect } from 'react'
 
 const PALETTES = {
-  crimisi: { accent:'#E11D48', bg:'#FEE4E6', num:'#E11D48', label:'#BE123C', border:'#E11D48' },
-  blue:   { accent:'#E11D48', bg:'#FEE4E6', num:'#E11D48', label:'#BE123C', border:'#E11D48' },
+  blue:   { accent:'#003DA5', bg:'#EEF3FF', num:'#003DA5', label:'#3B5EAE', border:'#003DA5' },
   green:  { accent:'#059669', bg:'#ECFDF5', num:'#059669', label:'#0B7A55', border:'#059669' },
   violet: { accent:'#7c3aed', bg:'#F5F3FF', num:'#7c3aed', label:'#6025C0', border:'#7c3aed' },
   amber:  { accent:'#d97706', bg:'#FFFBEB', num:'#b45309', label:'#92400E', border:'#d97706' },
@@ -29,9 +28,9 @@ const SVG_ICONS = {
   globe:    <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round"><circle cx="12" cy="12" r="10"/><line x1="2" y1="12" x2="22" y2="12"/><path d="M12 2a15.3 15.3 0 0 1 4 10 15.3 15.3 0 0 1-4 10 15.3 15.3 0 0 1-4-10 15.3 15.3 0 0 1 4-10z"/></svg>,
 }
 
-export default function GlowStatCard({ icon, label, value, sub, palette = 'crimisi', trend }) {
+export default function GlowStatCard({ icon, label, value, sub, palette = 'blue', trend }) {
   const [hovered, setHovered] = useState(false)
-  const p = PALETTES[palette] || PALETTES.crimisi
+  const p = PALETTES[palette] || PALETTES.blue
   const IconEl = typeof icon === 'string' ? SVG_ICONS[icon] : icon
 
   return (
@@ -74,7 +73,7 @@ export default function GlowStatCard({ icon, label, value, sub, palette = 'crimi
           <span style={{
             fontSize: '22px', fontWeight: '800',
             color: p.num, letterSpacing: '-0.03em',
-            lineHeight: 1, fontFamily: "'Outfit', sans-serif",
+            lineHeight: 1, fontFamily: "'Inter', sans-serif",
           }}>
             {value}
           </span>
@@ -93,7 +92,7 @@ export default function GlowStatCard({ icon, label, value, sub, palette = 'crimi
           fontSize: '11px', fontWeight: '600',
           color: '#6B7280', margin: '1px 0 0',
           textTransform: 'uppercase', letterSpacing: '0.05em',
-          fontFamily: "'Outfit', sans-serif",
+          fontFamily: "'Inter', sans-serif",
           overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap',
         }}>
           {label}
@@ -101,7 +100,7 @@ export default function GlowStatCard({ icon, label, value, sub, palette = 'crimi
         {sub && (
           <p style={{
             fontSize: '11px', color: '#9CA3AF',
-            margin: '1px 0 0', fontFamily: "'Outfit', sans-serif",
+            margin: '1px 0 0', fontFamily: "'Inter', sans-serif",
             overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap',
           }}>
             {sub}

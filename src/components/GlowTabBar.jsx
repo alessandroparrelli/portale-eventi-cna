@@ -13,7 +13,8 @@ function useMobile() {
 }
 
 const PALETTES = {
-  blue:   { from:'#003DA5', to:'#1a56db', glow:'rgba(0,61,165,.40)',   hint:'rgba(0,61,165,.09)',   text:'#003DA5' },
+  blue:   { from:'#E11D48', to:'#BE123C', glow:'rgba(225,29,72,.35)',   hint:'rgba(225,29,72,.09)',   text:'#E11D48' },
+  crimisi:{ from:'#E11D48', to:'#BE123C', glow:'rgba(225,29,72,.35)',   hint:'rgba(225,29,72,.09)',   text:'#E11D48' },
   green:  { from:'#059669', to:'#10b981', glow:'rgba(5,150,105,.40)',  hint:'rgba(5,150,105,.09)',  text:'#059669' },
   violet: { from:'#7c3aed', to:'#a78bfa', glow:'rgba(124,58,237,.40)', hint:'rgba(124,58,237,.09)', text:'#7c3aed' },
   amber:  { from:'#d97706', to:'#f59e0b', glow:'rgba(217,119,6,.40)',  hint:'rgba(217,119,6,.09)',  text:'#d97706' },
@@ -38,7 +39,7 @@ function Tab({ t, isActive, color, onChange, mobile }) {
           display: 'inline-flex', alignItems: 'center',
           padding: '7px 13px', borderRadius: '6px', border: 'none',
           cursor: 'pointer', fontSize: '14px', fontWeight: isActive ? '700' : '500',
-          fontFamily: "'Inter', sans-serif", whiteSpace: 'nowrap', outline: 'none',
+          fontFamily: "'Outfit', sans-serif", whiteSpace: 'nowrap', outline: 'none',
           flexShrink: 0,
           background: isActive ? `linear-gradient(135deg, ${p.from}, ${p.to})` : 'transparent',
           color: isActive ? '#ffffff' : '#6B7280',
@@ -61,7 +62,7 @@ function Tab({ t, isActive, color, onChange, mobile }) {
         padding: '8px 16px', borderRadius: '8px', border: 'none',
         cursor: 'pointer', fontSize: '13px',
         fontWeight: isActive ? '700' : '500',
-        fontFamily: "'Inter', sans-serif",
+        fontFamily: "'Outfit', sans-serif",
         letterSpacing: '-0.01em', whiteSpace: 'nowrap', outline: 'none',
         transition: 'all 0.18s cubic-bezier(.4,0,.2,1)',
         background: isActive

@@ -6,14 +6,14 @@ const CNA_LOGO = 'https://raw.githubusercontent.com/alessandroparrelli/fileappog
 // Icone SVG inline colorate
 function IconUser() {
   return (
-    <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="#003DA5" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+    <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="#E11D48" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
       <circle cx="12" cy="8" r="4"/><path d="M4 20c0-4 3.6-7 8-7s8 3 8 7"/>
     </svg>
   )
 }
 function IconLock() {
   return (
-    <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="#003DA5" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+    <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="#E11D48" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
       <rect x="3" y="11" width="18" height="11" rx="2"/><path d="M7 11V7a5 5 0 0 1 10 0v4"/>
     </svg>
   )
@@ -95,7 +95,7 @@ export default function LoginPage() {
                 required
                 autoComplete="username"
                 style={s.input}
-                onFocus={e => e.target.style.borderColor = '#003DA5'}
+                onFocus={e => e.target.style.borderColor = '#E11D48'}
                 onBlur={e => e.target.style.borderColor = '#D1D5DB'}
               />
             </div>
@@ -114,7 +114,7 @@ export default function LoginPage() {
                 required
                 autoComplete="current-password"
                 style={{ ...s.input, paddingRight: '44px' }}
-                onFocus={e => e.target.style.borderColor = '#003DA5'}
+                onFocus={e => e.target.style.borderColor = '#E11D48'}
                 onBlur={e => e.target.style.borderColor = '#D1D5DB'}
               />
               <button type="button" onClick={() => setShowPwd(!showPwd)} style={s.eyeBtn}>
@@ -146,7 +146,7 @@ const s = {
     display: 'flex', flexDirection: 'column',
     alignItems: 'center', justifyContent: 'center',
     padding: '24px',
-    fontFamily: "'Inter', sans-serif",
+    fontFamily: "'Outfit', sans-serif",
   },
   card: {
     backgroundColor: '#FFFFFF',
@@ -165,7 +165,7 @@ const s = {
     letterSpacing: '-0.04em',
     margin: '0 0 6px',
     textAlign: 'center',
-    fontFamily: "'Inter', sans-serif",
+    fontFamily: "'Outfit', sans-serif",
   },
   subtitle: {
     fontSize: '14px',
@@ -174,7 +174,7 @@ const s = {
     color: '#6B7280',
     margin: '0 0 32px',
     textAlign: 'center',
-    fontFamily: "'Inter', sans-serif",
+    fontFamily: "'Outfit', sans-serif",
   },
   form: { display: 'flex', flexDirection: 'column', gap: '20px' },
   field: { display: 'flex', flexDirection: 'column', gap: '6px' },
@@ -190,7 +190,7 @@ const s = {
     border: '1.5px solid #D1D5DB',
     borderRadius: '8px',
     fontSize: '16px',
-    fontFamily: "'Inter', sans-serif",
+    fontFamily: "'Outfit', sans-serif",
     color: '#0A0A0A',
     outline: 'none',
     transition: 'border-color 0.15s',
@@ -209,10 +209,10 @@ const s = {
   },
   submitBtn: {
     display: 'flex', alignItems: 'center', justifyContent: 'center', gap: '8px',
-    background: 'linear-gradient(135deg, #003DA5, #1a56db)',
+    background: 'linear-gradient(135deg, #E11D48, #BE123C)',
     color: '#FFFFFF', border: 'none', borderRadius: '8px',
     padding: '13px 24px', fontSize: '15px', fontWeight: '700',
-    fontFamily: "'Inter', sans-serif",
+    fontFamily: "'Outfit', sans-serif",
     cursor: 'pointer', letterSpacing: '-0.01em',
     boxShadow: '0 4px 14px rgba(0,61,165,.30)',
     transition: 'opacity .15s',

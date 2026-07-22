@@ -9,7 +9,7 @@ import GlowStatCard from '../../components/GlowStatCard'
 import GlowTableHead from '../../components/GlowTableHead'
 import * as XLSX from 'xlsx'
 
-function StatCard({ icon: Icon, label, value, color='#003DA5', sub, iconClass }) {
+function StatCard({ icon: Icon, label, value, color='#E11D48', sub, iconClass }) {
   return (
     <div className="glow-card" style={{ backgroundColor:'#FFFFFF', border:'1px solid #E5E7EB', borderRadius:'10px', padding:'18px', display:'flex', gap:'14px', alignItems:'center' }}>
       <div className={iconClass||'icon-badge-blue'} style={{ width:'44px', height:'44px', display:'flex', alignItems:'center', justifyContent:'center', flexShrink:0 }}>
@@ -36,7 +36,7 @@ function StarRating({ value, max=5 }) {
   )
 }
 
-function BarMini({ label, value, max, color='#003DA5' }) {
+function BarMini({ label, value, max, color='#E11D48' }) {
   const pct = max > 0 ? Math.round((value/max)*100) : 0
   return (
     <div style={{ display:'flex', alignItems:'center', gap:'10px', marginBottom:'8px' }}>
@@ -51,7 +51,7 @@ function BarMini({ label, value, max, color='#003DA5' }) {
 }
 
 // Header tabella con icona colorata SVG
-function ThIcon({ icon: Icon, label, color='#003DA5', bg='#EEF3FF' }) {
+function ThIcon({ icon: Icon, label, color='#E11D48', bg='#FEE4E6' }) {
   return (
     <div className="th-icon" style={{ color:'#6B7280' }}>
       <div style={{ width:20, height:20, borderRadius:4, backgroundColor:bg, display:'flex', alignItems:'center', justifyContent:'center', flexShrink:0 }}>
@@ -363,7 +363,7 @@ export default function StatistichePage() {
                       ))}
                     </div>
                     <p style={{ fontSize:'12px', color:'#9CA3AF', margin:'6px 0 0', textAlign:'right' }}>
-                      Tasso di presenza: <strong style={{color:'#003DA5'}}>{stats.total>0 ? Math.round(((stats.presenti+stats.walkin)/stats.total)*100) : 0}%</strong>
+                      Tasso di presenza: <strong style={{color:'#E11D48'}}>{stats.total>0 ? Math.round(((stats.presenti+stats.walkin)/stats.total)*100) : 0}%</strong>
                     </p>
                   </>
                 ) : <p style={{ fontSize:'14px', color:'#9CA3AF' }}>Nessun dato disponibile</p>}
@@ -375,7 +375,7 @@ export default function StatistichePage() {
                   <div style={s.section}>
                     <h2 style={s.sectionTitle}>Categorie professionali</h2>
                     {topMestieri.map(([id,count])=>(
-                      <BarMini key={id} label={getMestiereNome(id)} value={count} max={stats.total} color='#003DA5'/>
+                      <BarMini key={id} label={getMestiereNome(id)} value={count} max={stats.total} color='#E11D48'/>
                     ))}
                   </div>
                 )}
@@ -397,7 +397,7 @@ export default function StatistichePage() {
                 return (
                   <div style={s.section}>
                     <h2 style={s.sectionTitle}>Visite alla landing page</h2>
-                    <p style={{ fontSize:'12px', color:'#9CA3AF', margin:'-4px 0 12px' }}>Visitatori unici per sessione · totale: <strong style={{color:'#003DA5'}}>{pageViews.total}</strong></p>
+                    <p style={{ fontSize:'12px', color:'#9CA3AF', margin:'-4px 0 12px' }}>Visitatori unici per sessione · totale: <strong style={{color:'#E11D48'}}>{pageViews.total}</strong></p>
                     {days.length > 0 ? (
                       <div style={{ display:'flex', alignItems:'flex-end', gap:'4px', height:'80px', overflowX:'auto', paddingBottom:'4px' }}>
                         {days.map(d => {
@@ -406,8 +406,8 @@ export default function StatistichePage() {
                           const label = new Date(d+'T12:00:00').toLocaleDateString('it-IT',{day:'2-digit',month:'short'})
                           return (
                             <div key={d} style={{ display:'flex', flexDirection:'column', alignItems:'center', gap:'2px', flex:'0 0 auto', minWidth:'32px' }} title={`${label}: ${v} visit${v===1?'a':'e'}`}>
-                              <span style={{ fontSize:'9px', color:'#003DA5', fontWeight:'700' }}>{v}</span>
-                              <div style={{ width:'24px', height:`${h}px`, background:'linear-gradient(180deg,#3B82F6,#003DA5)', borderRadius:'3px 3px 0 0' }}/>
+                              <span style={{ fontSize:'9px', color:'#E11D48', fontWeight:'700' }}>{v}</span>
+                              <div style={{ width:'24px', height:`${h}px`, background:'linear-gradient(180deg,#3B82F6,#E11D48)', borderRadius:'3px 3px 0 0' }}/>
                               <span style={{ fontSize:'9px', color:'#9CA3AF', whiteSpace:'nowrap', transform:'rotate(-35deg)', transformOrigin:'top center', marginTop:'6px', display:'block' }}>{label}</span>
                             </div>
                           )
@@ -495,13 +495,13 @@ export default function StatistichePage() {
                 <Search size={15} style={{ position:'absolute', left:10, top:'50%', transform:'translateY(-50%)', color:'#9CA3AF' }}/>
                 <input value={searchUtente} onChange={e=>setSearchUtente(e.target.value)}
                   placeholder="Cerca per nome, email, azienda…"
-                  style={{ width:'100%', boxSizing:'border-box', border:'1px solid #D1D5DB', borderRadius:'8px', padding:'9px 12px 9px 32px', fontSize:'13px', fontFamily:"'Inter',sans-serif", outline:'none' }}/>
+                  style={{ width:'100%', boxSizing:'border-box', border:'1px solid #D1D5DB', borderRadius:'8px', padding:'9px 12px 9px 32px', fontSize:'13px', fontFamily:"'Outfit',sans-serif", outline:'none' }}/>
               </div>
               <span style={{ fontSize:'12px', color:'#9CA3AF', whiteSpace:'nowrap' }}>{filteredUtenti.length} partecipanti</span>
               <button
                 onClick={exportPartecipanti}
                 disabled={exportingXlsx || utenti.length === 0}
-                style={{ display:'flex', alignItems:'center', gap:'6px', backgroundColor: exportingXlsx ? '#9CA3AF' : '#16A34A', color:'#fff', border:'none', borderRadius:'8px', padding:'9px 14px', fontSize:'13px', fontWeight:'700', cursor: exportingXlsx ? 'default' : 'pointer', fontFamily:"'Inter',sans-serif", whiteSpace:'nowrap', flexShrink:0 }}>
+                style={{ display:'flex', alignItems:'center', gap:'6px', backgroundColor: exportingXlsx ? '#9CA3AF' : '#16A34A', color:'#fff', border:'none', borderRadius:'8px', padding:'9px 14px', fontSize:'13px', fontWeight:'700', cursor: exportingXlsx ? 'default' : 'pointer', fontFamily:"'Outfit',sans-serif", whiteSpace:'nowrap', flexShrink:0 }}>
                 <Download size={15}/>
                 {exportingXlsx ? 'Esportazione…' : 'Esporta Excel'}
               </button>
@@ -525,13 +525,13 @@ export default function StatistichePage() {
                       const isSelected = selectedUtente?.email === u.email
                       return (
                         <tr key={idx}
-                          style={{ borderBottom:'1px solid #F3F4F6', backgroundColor: isSelected ? '#EEF3FF' : 'transparent', cursor:'pointer', transition:'background-color .1s' }}
+                          style={{ borderBottom:'1px solid #F3F4F6', backgroundColor: isSelected ? '#FEE4E6' : 'transparent', cursor:'pointer', transition:'background-color .1s' }}
                           onClick={() => selectUtente(u)}
                           onMouseEnter={e => { if (!isSelected) e.currentTarget.style.backgroundColor='#F9FAFB' }}
-                          onMouseLeave={e => { e.currentTarget.style.backgroundColor = isSelected ? '#EEF3FF' : 'transparent' }}>
+                          onMouseLeave={e => { e.currentTarget.style.backgroundColor = isSelected ? '#FEE4E6' : 'transparent' }}>
                           <td style={s.td}>
                             <div style={{ display:'flex', alignItems:'center', gap:'8px' }}>
-                              <div style={{ width:28, height:28, borderRadius:'50%', background:'linear-gradient(135deg,#003DA5,#1a56db)', display:'flex', alignItems:'center', justifyContent:'center', flexShrink:0 }}>
+                              <div style={{ width:28, height:28, borderRadius:'50%', background:'linear-gradient(135deg,#E11D48,#BE123C)', display:'flex', alignItems:'center', justifyContent:'center', flexShrink:0 }}>
                                 <span style={{ fontSize:'11px', fontWeight:'800', color:'#fff' }}>
                                   {(u.nome?.[0]||'')}{(u.cognome?.[0]||'')}
                                 </span>
@@ -542,12 +542,12 @@ export default function StatistichePage() {
                               </div>
                             </div>
                           </td>
-                          <td style={s.td}><span style={{ fontWeight:'700', color:'#003DA5' }}>{u.eventi_totali}</span></td>
+                          <td style={s.td}><span style={{ fontWeight:'700', color:'#E11D48' }}>{u.eventi_totali}</span></td>
                           <td style={s.td}><span style={{ fontWeight:'700', color:'#059669' }}>{u.presenze}</span></td>
                           <td style={s.td}>
                             <div style={{ display:'flex', alignItems:'center', gap:'6px' }}>
                               <div style={{ width:36, height:5, backgroundColor:'#F3F4F6', borderRadius:3, overflow:'hidden' }}>
-                                <div style={{ width:`${tasso}%`, height:'100%', background:`linear-gradient(90deg,${tasso>=80?'#059669':tasso>=50?'#D97706':'#003DA5'},${tasso>=80?'#10b981':tasso>=50?'#f59e0b':'#1a56db'})`, borderRadius:3 }}/>
+                                <div style={{ width:`${tasso}%`, height:'100%', background:`linear-gradient(90deg,${tasso>=80?'#059669':tasso>=50?'#D97706':'#E11D48'},${tasso>=80?'#10b981':tasso>=50?'#f59e0b':'#BE123C'})`, borderRadius:3 }}/>
                               </div>
                               <span style={{ fontSize:'11px', color:'#6B7280', fontWeight:'600' }}>{tasso}%</span>
                             </div>
@@ -572,7 +572,7 @@ export default function StatistichePage() {
             <div>
               <div style={{ backgroundColor:'#fff', borderRadius:'10px', border:'1px solid #E5E7EB', padding:'20px', marginBottom:'16px' }}>
                 <div style={{ display:'flex', alignItems:'center', gap:'12px', marginBottom:'16px' }}>
-                  <div style={{ width:44, height:44, borderRadius:'50%', background:'linear-gradient(135deg,#003DA5,#1a56db)', display:'flex', alignItems:'center', justifyContent:'center' }}>
+                  <div style={{ width:44, height:44, borderRadius:'50%', background:'linear-gradient(135deg,#E11D48,#BE123C)', display:'flex', alignItems:'center', justifyContent:'center' }}>
                     <span style={{ fontSize:'16px', fontWeight:'800', color:'#fff' }}>
                       {(selectedUtente.nome?.[0]||'')}{(selectedUtente.cognome?.[0]||'')}
                     </span>

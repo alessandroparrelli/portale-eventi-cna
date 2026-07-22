@@ -3,7 +3,7 @@ import { supabase } from '../../lib/supabase'
 import PushButton from '../../components/PushButton'
 
 const DEFAULT_LOGO = 'https://customer31551.img.musvc2.net/static/31551/images/1/CNARoma%20NEGATIVO%20COLORE%20SOLO%20ROMA.png'
-const BLU = '#003DA5'
+const BLU = '#E11D48'
 const NERO = '#0A0A0A'
 const MESI_IT = ['Gennaio','Febbraio','Marzo','Aprile','Maggio','Giugno','Luglio','Agosto','Settembre','Ottobre','Novembre','Dicembre']
 const MESI_SHORT = ['GEN','FEB','MAR','APR','MAG','GIU','LUG','AGO','SET','OTT','NOV','DIC']
@@ -108,7 +108,7 @@ export default function CalendarioPage() {
   const nPassati = eventi.filter(e=>isPast(e.data_inizio)).length
 
   return (
-    <div style={{fontFamily:"'Inter',sans-serif",backgroundColor:'#ffffff',minHeight:'100vh',color:NERO}}>
+    <div style={{fontFamily:"'Outfit',sans-serif",backgroundColor:'#ffffff',minHeight:'100vh',color:NERO}}>
       <style>{`
         @keyframes blink{0%,100%{opacity:1}50%{opacity:0.3}}
         @keyframes fadeUp{from{opacity:0;transform:translateY(14px)}to{opacity:1;transform:none}}
@@ -284,7 +284,7 @@ export default function CalendarioPage() {
           ].map(t => (
             <button key={t.k} onClick={() => setSezione(t.k)}
               className='cal-tab-btn' style={{flex:1,padding:'14px 20px',border:'none',cursor:'pointer',
-                fontFamily:"'Inter',sans-serif",fontSize:'14px',fontWeight:'700',
+                fontFamily:"'Outfit',sans-serif",fontSize:'14px',fontWeight:'700',
                 backgroundColor: sezione===t.k ? 'rgba(255,255,255,0.15)' : 'transparent',
                 transition:'all 0.15s',
                 color: sezione===t.k ? '#ffffff' : 'rgba(255,255,255,0.5)',
@@ -322,7 +322,7 @@ export default function CalendarioPage() {
                 <button onClick={()=>setTagFilter('')}
                   style={{display:'flex',alignItems:'center',gap:'4px',padding:'4px 10px',borderRadius:'999px',
                     border:`1px solid ${color}`,backgroundColor:color,color:'#ffffff',
-                    fontSize:'12px',fontWeight:'700',cursor:'pointer',fontFamily:"'Inter',sans-serif"}}>
+                    fontSize:'12px',fontWeight:'700',cursor:'pointer',fontFamily:"'Outfit',sans-serif"}}>
                   {tagFilter} ×
                 </button>
               )}
@@ -330,7 +330,7 @@ export default function CalendarioPage() {
                 <button key={tag} onClick={()=>setTagFilter(tag)}
                   style={{padding:'4px 12px',borderRadius:'999px',border:'1px solid #E5E7EB',
                     backgroundColor:'#F9FAFB',color:'#6B7280',fontSize:'12px',fontWeight:'600',
-                    cursor:'pointer',fontFamily:"'Inter',sans-serif",transition:'all 0.12s'}}
+                    cursor:'pointer',fontFamily:"'Outfit',sans-serif",transition:'all 0.12s'}}
                   onMouseEnter={e=>{e.target.style.borderColor=color;e.target.style.color=color}}
                   onMouseLeave={e=>{e.target.style.borderColor='#E5E7EB';e.target.style.color='#6B7280'}}>
                   {tag}
@@ -365,8 +365,8 @@ export default function CalendarioPage() {
             {/* Abbonamento live — si aggiorna automaticamente */}
             <a href="webcal://hnkhckcclgabunkqfmrz.supabase.co/functions/v1/calendario-ics"
               className='cal-ics-btn' style={{display:'flex',alignItems:'center',gap:'10px',padding:'13px 20px',
-                backgroundColor:'#003DA5',color:'#ffffff',borderRadius:'8px',
-                fontSize:'14px',fontWeight:'700',textDecoration:'none',fontFamily:"'Inter',sans-serif",
+                backgroundColor:'#E11D48',color:'#ffffff',borderRadius:'8px',
+                fontSize:'14px',fontWeight:'700',textDecoration:'none',fontFamily:"'Outfit',sans-serif",
                 lineHeight:'1.35'}}>
               <svg width="20" height="20" viewBox="0 0 24 24" fill="none" strokeWidth="2" strokeLinecap="round" style={{flexShrink:0}}>
                 <rect x="3" y="4" width="18" height="18" rx="2" stroke="white" fill="rgba(255,255,255,0.15)"/>
@@ -384,10 +384,10 @@ export default function CalendarioPage() {
               Su iPhone e Mac si apre direttamente Apple Calendar.
               Su Android usa <a href="https://calendar.google.com/calendar/r?cid=webcal%3A%2F%2Fhnkhckcclgabunkqfmrz.supabase.co%2Ffunctions%2Fv1%2Fcalendario-ics"
                 target="_blank" rel="noopener noreferrer"
-                style={{color:'#003DA5',fontWeight:'600',textDecoration:'none'}}>Google Calendar</a>.
+                style={{color:'#E11D48',fontWeight:'600',textDecoration:'none'}}>Google Calendar</a>.
               Su Outlook: <a href="https://hnkhckcclgabunkqfmrz.supabase.co/functions/v1/calendario-ics"
                 target="_blank" rel="noopener noreferrer"
-                style={{color:'#003DA5',fontWeight:'600',textDecoration:'none'}}>aggiungi da URL</a>.
+                style={{color:'#E11D48',fontWeight:'600',textDecoration:'none'}}>aggiungi da URL</a>.
             </p>
           </div>
         </div>
@@ -423,7 +423,7 @@ export default function CalendarioPage() {
                   ].map(t=>(
                     <button key={t.k} onClick={()=>setTabEventi(t.k)}
                       style={{padding:'8px 14px',borderRadius:'7px',border:'none',cursor:'pointer',
-                        fontFamily:"'Inter',sans-serif",fontSize:'13px',fontWeight:'700',transition:'all 0.15s',
+                        fontFamily:"'Outfit',sans-serif",fontSize:'13px',fontWeight:'700',transition:'all 0.15s',
                         backgroundColor:tabEventi===t.k?'#ffffff':'transparent',
                         color:tabEventi===t.k?t.c:'#9CA3AF',
                         boxShadow:tabEventi===t.k?'0 1px 6px rgba(0,0,0,0.08)':'none',
@@ -747,7 +747,7 @@ function SearchBox({value,onChange,color,placeholder}) {
     </svg>
     <input value={value} onChange={e=>onChange(e.target.value)} placeholder={placeholder}
       style={{padding:'9px 12px 9px 34px',border:'1px solid #E5E7EB',borderRadius:'8px',fontSize:'13px',
-        fontFamily:"'Inter',sans-serif",outline:'none',width:'200px',color:NERO,boxSizing:'border-box'}}
+        fontFamily:"'Outfit',sans-serif",outline:'none',width:'200px',color:NERO,boxSizing:'border-box'}}
       onFocus={e=>e.target.style.borderColor=color}
       onBlur={e=>e.target.style.borderColor='#E5E7EB'}/>
   </div>

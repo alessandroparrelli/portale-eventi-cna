@@ -165,8 +165,8 @@ export default function ImageUploader({ value, onChange }) {
             onDragLeave={() => setDragOver(false)}
             onDrop={e => { e.preventDefault(); setDragOver(false); handleFile(e.dataTransfer.files[0]) }}
             style={{
-              border: `2px dashed ${dragOver ? '#003DA5' : '#D1D5DB'}`,
-              background: dragOver ? '#EEF3FF' : '#FAFAFA',
+              border: `2px dashed ${dragOver ? '#E11D48' : '#D1D5DB'}`,
+              background: dragOver ? '#FEE4E6' : '#FAFAFA',
               borderRadius:'10px', padding:'32px 24px', textAlign:'center',
               cursor:'pointer', transition:'all .15s',
               display:'flex', flexDirection:'column', alignItems:'center',
@@ -181,7 +181,7 @@ export default function ImageUploader({ value, onChange }) {
               <>
                 <svg width="32" height="32" viewBox="0 0 24 24" fill="none" stroke="#9CA3AF" strokeWidth="1.5" style={{ marginBottom:'10px' }}><rect x="3" y="3" width="18" height="18" rx="2"/><circle cx="8.5" cy="8.5" r="1.5"/><polyline points="21 15 16 10 5 21"/></svg>
                 <p style={{ fontSize:'14px', color:'#6B7280', margin:0 }}>
-                  {changing ? 'Carica la nuova immagine' : 'Trascina qui oppure'} <span style={{ color:'#003DA5', fontWeight:'600' }}>sfoglia</span>
+                  {changing ? 'Carica la nuova immagine' : 'Trascina qui oppure'} <span style={{ color:'#E11D48', fontWeight:'600' }}>sfoglia</span>
                 </p>
                 <p style={{ fontSize:'12px', color:'#9CA3AF', margin:'4px 0 0' }}>JPG, PNG, WebP · consigliato 1600×900px</p>
               </>
