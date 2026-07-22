@@ -1,8 +1,6 @@
 import { useState } from 'react'
 import { useAuth } from '../hooks/useAuth'
 
-const CNA_LOGO = 'https://raw.githubusercontent.com/alessandroparrelli/fileappoggio/main/NUOVO-LOGO-CNA-ROMA-SOLO-ROMA.png'
-
 // Icone SVG inline colorate
 function IconUser() {
   return (
@@ -68,15 +66,29 @@ export default function LoginPage() {
     <div style={s.page}>
       <div style={s.card}>
 
-        {/* Logo */}
+        {/* Wordmark eventlypro */}
         <div style={s.logoWrap}>
-          <img src={CNA_LOGO} alt="CNA Roma" style={s.logo} />
+          <div style={{ display:'flex', alignItems:'center', gap:'10px' }}>
+            {/* Cubo isometrico SVG */}
+            <svg width="40" height="40" viewBox="0 0 40 40" fill="none" xmlns="http://www.w3.org/2000/svg">
+              {/* Top face */}
+              <polygon points="20,4 36,13 20,22 4,13" fill="#E11D48"/>
+              {/* Left face */}
+              <polygon points="4,13 20,22 20,36 4,27" fill="#9F1239"/>
+              {/* Right face */}
+              <polygon points="36,13 20,22 20,36 36,27" fill="#BE123C"/>
+            </svg>
+            {/* Wordmark */}
+            <div style={{ display:'flex', alignItems:'baseline', lineHeight:1 }}>
+              <span style={{ fontFamily:"'Outfit',sans-serif", fontWeight:800, fontSize:32, letterSpacing:'-0.04em', color:'#111111' }}>evently</span>
+              <span style={{ fontFamily:"'Outfit',sans-serif", fontWeight:800, fontSize:32, letterSpacing:'-0.04em', color:'#E11D48' }}>pro</span>
+            </div>
+          </div>
         </div>
 
         <div style={s.divider} />
 
-        {/* Titolo */}
-        <h1 style={s.title}>EVENTI</h1>
+        {/* Sottotitolo */}
         <p style={s.subtitle}>Portale di gestione eventi</p>
 
         {/* Form */}
@@ -155,8 +167,7 @@ const s = {
     width: '100%', maxWidth: '420px',
     boxShadow: '0 1px 3px rgba(0,0,0,0.07), 0 8px 32px rgba(0,61,165,0.10)',
   },
-  logoWrap: { display: 'flex', justifyContent: 'center', marginBottom: '24px' },
-  logo: { height: '52px', objectFit: 'contain' },
+  logoWrap: { display: 'flex', justifyContent: 'center', marginBottom: '28px' },
   divider: { height: '1px', backgroundColor: '#E5E7EB', marginBottom: '28px' },
   title: {
     fontSize: '28px',
@@ -167,12 +178,12 @@ const s = {
     textAlign: 'center',
     fontFamily: "'Outfit', sans-serif",
   },
-  subtitle: {
+  subtitle_old_UNUSED: {
     fontSize: '14px',
     fontWeight: '400',
     fontStyle: 'italic',
     color: '#6B7280',
-    margin: '0 0 32px',
+    margin: '0 0 28px',
     textAlign: 'center',
     fontFamily: "'Outfit', sans-serif",
   },

@@ -1,14 +1,16 @@
 {
-  "name": "CNA Roma Check-in",
-  "short_name": "CNA Check-in",
-  "description": "App check-in eventi CNA Roma",
+  "name": "eventlypro",
+  "short_name": "eventlypro",
+  "description": "Portale di gestione eventi CNA Roma",
   "start_url": "/admin",
   "display": "standalone",
-  "background_color": "#ffffff",
-  "theme_color": "#003DA5",
+  "background_color": "#130510",
+  "theme_color": "#E11D48",
   "orientation": "portrait",
   "icons": [
-    { "src": "/logo192.png", "sizes": "192x192", "type": "image/png", "purpose": "any maskable" },
-    { "src": "/logo512.png", "sizes": "512x512", "type": "image/png" }
+    { "src": "/icon-144.png", "sizes": "144x144", "type": "image/png" },
+    { "src": "/icon-192.png", "sizes": "192x192", "type": "image/png", "purpose": "any" },
+    { "src": "/icon-192-bg.png", "sizes": "192x192", "type": "image/png", "purpose": "maskable" },
+    { "src": "/icon-512.png", "sizes": "512x512", "type": "image/png" }
   ]
 }
