@@ -98,7 +98,7 @@ export default function IscrittiPage() {
   const [smsModal, setSmsModal] = useState(false)
   const [smsSelezione, setSmsSelezione] = useState(new Set()) // Set di reg_id
   const [smsTesto, setSmsTesto] = useState('')
-  const [smsMittente, setSmsMittente] = useState('CNAROMA')
+  const [smsMittente, setSmsMittente] = useState('CNA Roma')
   const [smsInvioInCorso, setSmsInvioInCorso] = useState(false)
   const [smsRisultato, setSmsRisultato] = useState(null)
   const [smsTarget, setSmsTarget] = useState('tutti') // 'tutti'|'selezione'|'singolo'|'prova'
@@ -1477,19 +1477,13 @@ export default function IscrittiPage() {
 
               {/* Mittente */}
               <div style={{ marginBottom:14 }}>
-                <p style={{ fontSize:'11px', fontWeight:'700', color:'#6B7280', textTransform:'uppercase', letterSpacing:'.05em', margin:'0 0 6px' }}>
-                  Mittente
-                  <span style={{ fontWeight:400, textTransform:'none', color:'#9CA3AF', marginLeft:4 }}>(max 11 car., solo lettere e numeri)</span>
-                </p>
+                <p style={{ fontSize:'11px', fontWeight:'700', color:'#6B7280', textTransform:'uppercase', letterSpacing:'.05em', margin:'0 0 6px' }}>Mittente</p>
                 <input
-                  style={{ width:'100%', padding:'8px 10px', border:'1.5px solid #E5E7EB', borderRadius:7, fontSize:13, boxSizing:'border-box', fontFamily:'monospace', fontWeight:700, letterSpacing:'.05em' }}
+                  style={{ width:'100%', padding:'8px 10px', border:'1.5px solid #E5E7EB', borderRadius:7, fontSize:13, boxSizing:'border-box', fontWeight:700 }}
                   value={smsMittente}
                   maxLength={11}
-                  onChange={e => setSmsMittente(e.target.value.toUpperCase().replace(/[^A-Z0-9]/g,''))}
+                  onChange={e => setSmsMittente(e.target.value)}
                 />
-                <p style={{ fontSize:11, color:'#9CA3AF', margin:'3px 0 0' }}>
-                  Nota: spazi e caratteri speciali non ammessi dagli operatori SMS. Usa <strong>CNAROMA</strong>.
-                </p>
               </div>
 
               {/* Variabili rapide */}
