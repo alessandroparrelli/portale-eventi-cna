@@ -182,9 +182,9 @@ const s = {
   },
   titleBlock: {
     display: 'flex',
-    alignItems: 'flex-end',
+    alignItems: 'center',
     paddingLeft: '12px',
-    paddingBottom: '2px',
+    transform: 'translateY(8px)',
   },
   pageTitle: {
     fontSize: '22px',

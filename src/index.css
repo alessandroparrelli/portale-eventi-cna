@@ -169,7 +169,7 @@ header img { display: block; }
   }
   .admin-header-center {
     display: flex;
-    align-items: flex-end;
+    align-items: center;
     gap: 0;
   }
   .admin-header-right {
