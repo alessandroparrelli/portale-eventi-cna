@@ -1,4 +1,8 @@
-const CACHE = 'cna-portale-v4'
+const CACHE = 'ep-portale-v5'
+
+// Percorsi che non vanno MAI cachati (icone, manifest — devono essere sempre freschi)
+const NO_CACHE = ['/manifest.json', '/favicon.ico', '/favicon.svg', '/favicon-32.png']
+const NO_CACHE_PREFIX = ['/ep-', '/icon-', '/apple-touch']
 
 self.addEventListener('install', () => {
   self.skipWaiting()
@@ -6,8 +10,9 @@ self.addEventListener('install', () => {
 
 self.addEventListener('activate', e => {
   e.waitUntil(
+    // Svuota TUTTE le cache vecchie — versione precedente inclusa
     caches.keys().then(keys =>
-      Promise.all(keys.filter(k => k !== CACHE).map(k => caches.delete(k)))
+      Promise.all(keys.map(k => caches.delete(k)))
     ).then(() => clients.claim())
   )
 })
@@ -19,18 +24,24 @@ self.addEventListener('fetch', e => {
   const url = new URL(req.url)
   if (url.origin !== self.location.origin) return
 
-  // CRITICO: non intercettare MAI le navigazioni HTML (cambio pagina/route).
-  // Se le mettiamo in cache, rischiamo di servire pagine HTML vecchie/rotte
-  // di build precedenti invece del contenuto fresco dal server, anche
-  // quando la rete funziona perfettamente. Le navigazioni vanno sempre
-  // dirette alla rete, mai alla cache.
+  // Navigazioni HTML: sempre dalla rete
   if (req.mode === 'navigate') {
     e.respondWith(fetch(req).catch(() => caches.match('/')))
     return
   }
 
-  // Solo asset statici (immagini, font, JS, CSS) possono essere cachati
-  // per uso offline, mai documenti HTML di navigazione.
+  const path = url.pathname
+
+  // Icone, manifest, favicon: sempre dalla rete, mai dalla cache
+  const isIcon = NO_CACHE.includes(path) || NO_CACHE_PREFIX.some(p => path.startsWith(p))
+  if (isIcon) {
+    e.respondWith(
+      fetch(req, { cache: 'no-store' }).catch(() => new Response('', { status: 404 }))
+    )
+    return
+  }
+
+  // Asset statici: network-first con fallback cache
   e.respondWith(
     fetch(req)
       .then(res => {
@@ -47,10 +58,10 @@ self.addEventListener('fetch', e => {
 self.addEventListener('push', e => {
   const data = e.data?.json() || {}
   e.waitUntil(
-    self.registration.showNotification(data.title || 'CNA Roma', {
+    self.registration.showNotification(data.title || 'eventlypro', {
       body: data.body || '',
-      icon: data.icon || '/logo192.png',
-      badge: '/logo192.png',
+      icon: data.icon || '/ep-icon-192-a0826b3f.png',
+      badge: '/ep-icon-192-a0826b3f.png',
       data: { url: data.url || '/' }
     })
   )
