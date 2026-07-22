@@ -1615,10 +1615,40 @@ export default function IscrittiPage() {
                     )}
                   </div>
 
-                  {smsSelezione.size === 0 && (
+                  {smsSelezione.size === 0 ? (
                     <p style={{ fontSize:11, color:'#6B7280', margin:0 }}>
                       Nessuna selezione = SMS inviato a tutti gli iscritti con cellulare.
                     </p>
+                  ) : (
+                    <div style={{ marginTop:8, border:'1.5px solid #059669', borderRadius:8, background:'#F0FDF4', overflow:'hidden' }}>
+                      <div style={{ display:'flex', justifyContent:'space-between', alignItems:'center', padding:'7px 11px', borderBottom:'1px solid #D1FAE5' }}>
+                        <span style={{ fontSize:11, fontWeight:700, color:'#065F46', textTransform:'uppercase', letterSpacing:'.05em' }}>
+                          Selezionati ({smsSelezione.size})
+                        </span>
+                        <button onClick={() => { setSmsSelezione(new Set()); setSmsAnteprimaIscritto(null) }}
+                          style={{ fontSize:11, color:'#DC2626', background:'none', border:'none', cursor:'pointer', fontWeight:600 }}>
+                          Rimuovi tutti
+                        </button>
+                      </div>
+                      <div style={{ maxHeight:130, overflowY:'auto' }}>
+                        {[...smsSelezione].map(id => {
+                          const r = registrations.find(x => x.id === id)
+                          if (!r) return null
+                          return (
+                            <div key={id} style={{ display:'flex', alignItems:'center', gap:8, padding:'6px 11px',
+                              borderBottom:'1px solid #D1FAE5', fontSize:12 }}>
+                              <span style={{ flex:1, fontWeight:600 }}>{r.nome} {r.cognome}</span>
+                              <span style={{ color:'#6B7280', fontSize:11 }}>{r.cellulare}</span>
+                              <button onClick={() => { toggleSmsSelezione(id); if (smsAnteprimaIscritto?.id === id) setSmsAnteprimaIscritto(null) }}
+                                style={{ background:'none', border:'none', cursor:'pointer', color:'#DC2626', padding:'0 2px', lineHeight:1, fontSize:15 }}
+                                title="Rimuovi">
+                                &times;
+                              </button>
+                            </div>
+                          )
+                        })}
+                      </div>
+                    </div>
                   )}
                 </>
               )}
