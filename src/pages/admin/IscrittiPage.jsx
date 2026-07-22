@@ -39,7 +39,7 @@ function SortableHead({ columns, sortCol, sortDir, onSort }) {
               onClick={() => col.sortable && onSort(col.label)}
               style={{
                 background:`linear-gradient(135deg,${pal.from},${pal.to})`,
-                color:pal.text, padding:'10px 14px', textAlign:'left',
+                color:pal.text, padding:'8px 12px', textAlign:'left',
                 fontSize:'11px', fontWeight:'700', letterSpacing:'.05em',
                 textTransform:'uppercase', userSelect:'none',
                 cursor: col.sortable ? 'pointer' : 'default',
@@ -828,8 +828,16 @@ export default function IscrittiPage() {
   }
 
   function apriSmsModal(target, iscritto) {
-    setSmsSelezione(iscritto ? new Set([iscritto.id]) : new Set())
-    setSmsTarget(target)
+    if (iscritto) {
+      setSmsSelezione(new Set([iscritto.id]))
+      setSmsTarget('singolo')
+    } else if (target === 'selezione' && smsSelezione.size === 0) {
+      // nessuna selezione attiva -> passa a tutti
+      setSmsTarget('tutti')
+    } else {
+      setSmsSelezione(new Set())
+      setSmsTarget(target)
+    }
     setSmsRisultato(null)
     setSmsModal(true)
   }
@@ -925,18 +933,14 @@ export default function IscrittiPage() {
             </span>
           )}
           <Btn variant="secondary" onClick={loadRegs} size="md" style={{ background:'#FACC15', color:'#0A0A0A', borderColor:'#FACC15', fontWeight:'700' }}><RefreshCw size={16}/> Aggiorna</Btn>
-          <Btn variant="secondary" onClick={() => apriSmsModal('tutti', null)} size="md"
-            style={{ background:'#059669', color:'#fff', borderColor:'#059669' }}
-            title="Invia SMS a tutti gli iscritti con cellulare"
+          <Btn variant="secondary"
+            onClick={() => apriSmsModal(smsSelezione.size > 0 ? 'selezione' : 'tutti', null)}
+            size="md"
+            style={{ background:'#059669', color:'#fff', borderColor:'#059669', fontWeight:'700', padding:'8px 18px' }}
             disabled={registrations.filter(r => r.cellulare).length === 0}>
-            <MessageSquare size={16}/> SMS ({registrations.filter(r => r.cellulare).length})
+            <MessageSquare size={16}/>
+            {smsSelezione.size > 0 ? 'Comunica (' + smsSelezione.size + ' selezionati)' : 'Comunica'}
           </Btn>
-          {smsSelezione.size > 0 && (
-            <Btn variant="secondary" onClick={() => { setSmsTarget('selezione'); setSmsRisultato(null); setSmsModal(true) }} size="md"
-              style={{ background:'#7C3AED', color:'#fff', borderColor:'#7C3AED' }}>
-              <MessageSquare size={16}/> SMS a {smsSelezione.size} selezionati
-            </Btn>
-          )}
           <div style={{flex:1}}/>
           {eventi.find(e=>e.id===selectedEvento)?.certificato_abilitato && (
             <Btn variant="secondary" onClick={inviaCertificati} disabled={invioInCorso} size="md">
@@ -1276,7 +1280,6 @@ export default function IscrittiPage() {
               <table style={s.table}>
                 <SortableHead
                   columns={[
-                    { label:'', color:'neutral', sortable:false },
                     { label:'Nominativo',  color:'blue',    sortable:true },
                     { label:'Email',       color:'cyan',    sortable:true, hideOnMobile:true },
                     { label:'Mestiere',    color:'violet',  sortable:true, hideOnMobile:true },
@@ -1301,15 +1304,6 @@ export default function IscrittiPage() {
                       <tr key={r.id} style={{...s.tr, backgroundColor:smsSelezione.has(r.id) ? '#F0FDF4' : _rc.bg}}
                         onMouseEnter={e=>e.currentTarget.style.backgroundColor=smsSelezione.has(r.id) ? '#DCFCE7' : _rc.hov}
                         onMouseLeave={e=>e.currentTarget.style.backgroundColor=smsSelezione.has(r.id) ? '#F0FDF4' : _rc.bg}>
-                        <td style={{...s.td, width:32, paddingRight:0}}>
-                          {r.cellulare && (
-                            <input type="checkbox" checked={smsSelezione.has(r.id)}
-                              onChange={() => toggleSmsSelezione(r.id)}
-                              style={{ accentColor:'#059669', cursor:'pointer', width:15, height:15 }}
-                              title={r.cellulare}
-                            />
-                          )}
-                        </td>
                         <td style={s.td}>
                           <p style={s.name}>{r.nome} {r.cognome}</p>
                           {r.ragione_sociale && <p style={s.sub}>{r.ragione_sociale}</p>}
@@ -1352,12 +1346,7 @@ export default function IscrittiPage() {
                             <button style={s.iconBtn} title="Dettaglio" onClick={()=>setDetail(r)}>
                               <Eye size={15}/>
                             </button>
-                            {r.cellulare && (
-                              <button style={{...s.iconBtn, color:'#059669'}} title={"Invia SMS a " + r.nome + " " + r.cognome}
-                                onClick={() => apriSmsModal('singolo', r)}>
-                                <MessageSquare size={15}/>
-                              </button>
-                            )}
+
                             {canDelete && (
                               <button style={{...s.iconBtn, color:'#DC2626'}} title="Elimina" onClick={()=>setDelConfirm(r)}>
                                 <Trash2 size={15}/>
@@ -1819,7 +1808,7 @@ const s = {
   table: { width:'100%', borderCollapse:'collapse', fontSize:'14px' },
   th: { padding:'10px 20px', textAlign:'left', fontSize:'11px', fontWeight:'600', color:'#6B7280', textTransform:'uppercase', letterSpacing:'0.06em', borderBottom:'1px solid #E5E7EB', whiteSpace:'nowrap', backgroundColor:'#FAFAFA' },
   tr: { transition:'background-color 0.1s' },
-  td: { padding:'14px 20px', borderBottom:'1px solid #F3F4F6', verticalAlign:'middle' },
+  td: { padding:'10px 12px', borderBottom:'1px solid #F3F4F6', verticalAlign:'middle' },
   name: { fontWeight:'600', color:'#0A0A0A', margin:'0 0 2px', letterSpacing:'-0.01em' },
   sub: { fontSize:'12px', color:'#6B7280', margin:0 },
   cell: { color:'#374151', fontSize:'14px' },
