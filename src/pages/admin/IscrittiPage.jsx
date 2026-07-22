@@ -105,6 +105,8 @@ export default function IscrittiPage() {
   const [smsProvaNumero, setSmsProvaNumero] = useState('')
   const [smsAnteprimaSearch, setSmsAnteprimaSearch] = useState('')
   const [smsAnteprimaIscritto, setSmsAnteprimaIscritto] = useState(null)
+  const [smsListaSearch, setSmsListaSearch] = useState('')
+  const [smsProva, setSmsProva] = useState(false)
   const [eventoDettagli, setEventoDettagli] = useState(null) // {titolo, data_inizio, luogo}
 
   // Mappa id→nome per referenti di gruppo (calcolata dai registrations caricati)
@@ -746,19 +748,15 @@ export default function IscrittiPage() {
 
     let destinatari = []
 
-    if (smsTarget === 'prova') {
+    if (smsProva) {
       if (!smsProvaNumero.trim()) { setSmsInvioInCorso(false); return }
       destinatari = [{ telefono: smsProvaNumero.trim(), nome: 'Test', cognome: 'CNA' }]
-    } else if (smsTarget === 'singolo' || smsTarget === 'selezione') {
-      const ids = smsTarget === 'singolo'
-        ? [smsSelezione.values().next().value]
-        : [...smsSelezione]
-      destinatari = ids.map(id => {
+    } else if (smsSelezione.size > 0) {
+      destinatari = [...smsSelezione].map(id => {
         const r = registrations.find(x => x.id === id)
         return r ? { registrazione_id: r.id, telefono: r.cellulare, nome: r.nome, cognome: r.cognome } : null
       }).filter(Boolean).filter(d => d.telefono)
     } else {
-      // tutti gli iscritti con cellulare
       destinatari = registrations
         .filter(r => r.cellulare)
         .map(r => ({ registrazione_id: r.id, telefono: r.cellulare, nome: r.nome, cognome: r.cognome }))
@@ -830,34 +828,30 @@ export default function IscrittiPage() {
   }
 
   function apriSmsModal(target, iscritto) {
+    // Se arrivo con selezione preesistente la mantengo, altrimenti tutti
     if (iscritto) {
       setSmsSelezione(new Set([iscritto.id]))
-      setSmsTarget('singolo')
       setSmsAnteprimaIscritto(iscritto)
-    } else if (target === 'selezione' && smsSelezione.size === 0) {
-      setSmsTarget('tutti')
-      setSmsAnteprimaIscritto(null)
     } else {
-      setSmsSelezione(new Set())
-      setSmsTarget(target)
+      // mantieni selezione se c'e', altrimenti tutti => selezione vuota = tutti
       setSmsAnteprimaIscritto(null)
     }
+    setSmsProva(false)
     setSmsAnteprimaSearch('')
+    setSmsListaSearch('')
     setSmsRisultato(null)
     setSmsModal(true)
   }
 
   function getDestinatariCount() {
-    if (smsTarget === 'prova') return smsProvaNumero.trim() ? 1 : 0
-    if (smsTarget === 'tutti') return registrations.filter(r => r.cellulare).length
+    if (smsProva) return smsProvaNumero.trim() ? 1 : 0
+    if (smsSelezione.size === 0) return registrations.filter(r => r.cellulare).length
     return [...smsSelezione].filter(id => registrations.find(r => r.id === id && r.cellulare)).length
   }
 
   function getAnteprimaSms() {
-    if (smsTarget === 'prova') return interpolaSms(smsTesto, { nome: 'Mario', cognome: 'Rossi' })
-    // Se c'e' un iscritto selezionato dalla ricerca, usa quello
+    if (smsProva) return interpolaSms(smsTesto, { nome: 'Mario', cognome: 'Rossi' })
     if (smsAnteprimaIscritto) return interpolaSms(smsTesto, smsAnteprimaIscritto)
-    // Altrimenti usa il primo della selezione o il primo della lista
     const primoId = [...smsSelezione][0]
     const primo = primoId ? registrations.find(r => r.id === primoId) : registrations.find(r => r.cellulare)
     return interpolaSms(smsTesto, primo)
@@ -1441,204 +1435,192 @@ export default function IscrittiPage() {
 
       {/* MODAL SMS */}
       {smsModal && (
-        <Modal title="Invia SMS" onClose={() => { setSmsModal(false); setSmsRisultato(null) }} width="700px">
-          <div style={{ display:'grid', gridTemplateColumns:'1fr 1fr', gap:'20px' }}>
+        <Modal title="Invia SMS" onClose={() => { setSmsModal(false); setSmsRisultato(null) }} width="780px">
 
-            {/* Colonna sinistra: editor */}
-            <div>
-              {/* Selettore target */}
-              <div style={{ marginBottom:16 }}>
-                <p style={{ fontSize:'11px', fontWeight:'700', color:'#6B7280', textTransform:'uppercase', letterSpacing:'.05em', margin:'0 0 8px' }}>Destinatari</p>
-                <div style={{ display:'flex', flexDirection:'column', gap:6 }}>
-                  {[
-                    ['tutti', 'Tutti gli iscritti (' + registrations.filter(r => r.cellulare).length + ' con cellulare)'],
-                    ['selezione', 'Iscritti selezionati (' + smsSelezione.size + ')'],
-                    ['singolo', smsSelezione.size === 1 ? (() => { const r = registrations.find(x => x.id === [...smsSelezione][0]); return r ? r.nome + ' ' + r.cognome + ' (' + r.cellulare + ')' : 'Singolo iscritto' })() : 'Singolo iscritto'],
-                    ['prova', 'SMS di prova (numero manuale)'],
-                  ].map(([val, label]) => (
-                    <label key={val} style={{ display:'flex', alignItems:'center', gap:8, cursor:'pointer', fontSize:13, fontWeight: smsTarget === val ? 700 : 400, color: smsTarget === val ? '#003DA5' : '#374151' }}>
-                      <input type="radio" name="smsTarget" value={val} checked={smsTarget === val} onChange={() => setSmsTarget(val)} style={{ accentColor:'#003DA5' }}/>
-                      {label}
-                    </label>
-                  ))}
-                </div>
-                {smsTarget === 'selezione' && smsSelezione.size === 0 && (
-                  <p style={{ fontSize:12, color:'#DC2626', marginTop:6 }}>Nessun iscritto selezionato nella tabella.</p>
-                )}
-                {smsTarget === 'prova' && (
-                  <input
-                    style={{ marginTop:8, width:'100%', padding:'8px 10px', border:'1.5px solid #E5E7EB', borderRadius:7, fontSize:13, boxSizing:'border-box' }}
-                    placeholder="Es. 3331234567 o +39333..."
-                    value={smsProvaNumero}
-                    onChange={e => setSmsProvaNumero(e.target.value)}
-                  />
-                )}
-              </div>
+          {/* Layout: colonna sinistra (editor) + colonna destra (destinatari) */}
+          <div style={{ display:'grid', gridTemplateColumns:'1fr 1fr', gap:20, alignItems:'start' }}>
+
+            {/* ── SINISTRA: editor ─────────────────────────────────── */}
+            <div style={{ display:'flex', flexDirection:'column', gap:14 }}>
 
               {/* Mittente */}
-              <div style={{ marginBottom:14 }}>
-                <p style={{ fontSize:'11px', fontWeight:'700', color:'#6B7280', textTransform:'uppercase', letterSpacing:'.05em', margin:'0 0 6px' }}>Mittente</p>
+              <div>
+                <p style={{ fontSize:'11px', fontWeight:'700', color:'#6B7280', textTransform:'uppercase', letterSpacing:'.05em', margin:'0 0 5px' }}>Mittente</p>
                 <input
                   style={{ width:'100%', padding:'8px 10px', border:'1.5px solid #E5E7EB', borderRadius:7, fontSize:13, boxSizing:'border-box', fontWeight:700 }}
                   value={smsMittente}
-                  maxLength={11}
+                  maxLength={20}
                   onChange={e => setSmsMittente(e.target.value)}
                 />
               </div>
 
-              {/* Variabili rapide */}
-              <div style={{ marginBottom:10 }}>
+              {/* Variabili */}
+              <div>
                 <p style={{ fontSize:'11px', fontWeight:'700', color:'#6B7280', textTransform:'uppercase', letterSpacing:'.05em', margin:'0 0 6px' }}>Inserisci variabile</p>
                 <div style={{ display:'flex', flexWrap:'wrap', gap:5 }}>
-                  {[
-                    ['nome', 'Nome'],
-                    ['cognome', 'Cognome'],
-                    ['nome_completo', 'Nome completo'],
-                    ['evento', 'Titolo evento'],
-                    ['data', 'Data evento'],
-                    ['ora', 'Ora evento'],
-                    ['luogo', 'Luogo'],
+                  {[['nome','Nome'],['cognome','Cognome'],['nome_completo','Nome completo'],
+                    ['evento','Evento'],['data','Data'],['ora','Ora'],['luogo','Luogo']
                   ].map(([v, label]) => (
                     <button key={v} onClick={() => inserisciVariabile(v)}
                       style={{ fontSize:11, fontWeight:600, padding:'3px 9px', borderRadius:20,
-                        background:'#EEF3FF', color:'#003DA5', border:'1px solid #C7D7F9',
-                        cursor:'pointer', fontFamily:'monospace' }}>
-                      {'{' + '{' + v + '}' + '}'}
+                        background:'#EEF3FF', color:'#003DA5', border:'1px solid #C7D7F9', cursor:'pointer', fontFamily:'monospace' }}>
+                      {'{{' + v + '}}'}
                     </button>
                   ))}
                 </div>
               </div>
 
-              {/* Textarea testo */}
-              <div style={{ marginBottom:6 }}>
-                <p style={{ fontSize:'11px', fontWeight:'700', color:'#6B7280', textTransform:'uppercase', letterSpacing:'.05em', margin:'0 0 6px' }}>Testo SMS</p>
+              {/* Testo */}
+              <div>
+                <p style={{ fontSize:'11px', fontWeight:'700', color:'#6B7280', textTransform:'uppercase', letterSpacing:'.05em', margin:'0 0 5px' }}>Testo SMS</p>
                 <textarea
                   style={{ width:'100%', padding:'10px', border:'1.5px solid #E5E7EB', borderRadius:8,
-                    fontSize:13, minHeight:100, resize:'vertical', fontFamily:"'Inter',sans-serif",
+                    fontSize:13, minHeight:110, resize:'vertical', fontFamily:"'Inter',sans-serif",
                     boxSizing:'border-box', outline:'none', lineHeight:1.5 }}
                   value={smsTesto}
                   onChange={e => setSmsTesto(e.target.value)}
                   placeholder="Scrivi il testo del messaggio..."
                 />
                 <p style={{ fontSize:11, color: smsTesto.length > 160 ? '#DC2626' : '#9CA3AF', textAlign:'right', margin:'3px 0 0' }}>
-                  {smsTesto.length} car. &nbsp;|&nbsp; {Math.ceil(smsTesto.length / 160) || 1} SMS per destinatario
-                  {smsTesto.length > 160 && <span style={{ color:'#D97706' }}> (costo maggiorato)</span>}
+                  {smsTesto.length} car. | {Math.ceil(smsTesto.length / 160) || 1} SMS per destinatario
+                  {smsTesto.length > 160 && <span style={{ color:'#D97706' }}> (costo doppio)</span>}
                 </p>
               </div>
-            </div>
 
-            {/* Colonna destra: anteprima + ricerca */}
-            <div style={{ display:'flex', flexDirection:'column', gap:14 }}>
-
-              {/* Ricerca iscritto per anteprima */}
-              {smsTarget !== 'prova' && (
-                <div>
-                  <p style={{ fontSize:'11px', fontWeight:'700', color:'#6B7280', textTransform:'uppercase', letterSpacing:'.05em', margin:'0 0 6px' }}>
-                    Anteprima per
-                    {smsAnteprimaIscritto && (
-                      <span style={{ fontWeight:700, color:'#003DA5', textTransform:'none', letterSpacing:0, marginLeft:6 }}>
-                        {smsAnteprimaIscritto.nome} {smsAnteprimaIscritto.cognome}
-                      </span>
-                    )}
-                  </p>
-                  <div style={{ position:'relative' }}>
-                    <input
-                      value={smsAnteprimaSearch}
-                      onChange={e => { setSmsAnteprimaSearch(e.target.value); if (!e.target.value) setSmsAnteprimaIscritto(null) }}
-                      placeholder="Cerca iscritto per anteprima…"
-                      style={{ width:'100%', padding:'8px 10px', border:'1.5px solid #E5E7EB', borderRadius:8,
-                        fontSize:13, boxSizing:'border-box', outline:'none' }}
-                    />
-                    {smsAnteprimaSearch && (
-                      <div style={{ position:'absolute', top:'100%', left:0, right:0, zIndex:50,
-                        background:'#fff', border:'1px solid #E5E7EB', borderRadius:8,
-                        boxShadow:'0 4px 16px rgba(0,0,0,.10)', maxHeight:180, overflowY:'auto', marginTop:2 }}>
-                        {registrations
-                          .filter(r => r.cellulare && (r.nome + ' ' + r.cognome).toLowerCase().includes(smsAnteprimaSearch.toLowerCase()))
-                          .slice(0, 8)
-                          .map(r => (
-                            <div key={r.id}
-                              onClick={() => { setSmsAnteprimaIscritto(r); setSmsAnteprimaSearch('') }}
-                              style={{ padding:'9px 12px', cursor:'pointer', fontSize:13, borderBottom:'1px solid #F3F4F6',
-                                display:'flex', justifyContent:'space-between', alignItems:'center' }}
-                              onMouseEnter={e => e.currentTarget.style.background='#F0FDF4'}
-                              onMouseLeave={e => e.currentTarget.style.background='transparent'}>
-                              <span style={{ fontWeight:600 }}>{r.nome} {r.cognome}</span>
-                              <span style={{ fontSize:11, color:'#9CA3AF' }}>{r.cellulare}</span>
-                            </div>
-                          ))}
-                        {registrations.filter(r => r.cellulare && (r.nome + ' ' + r.cognome).toLowerCase().includes(smsAnteprimaSearch.toLowerCase())).length === 0 && (
-                          <div style={{ padding:'12px', fontSize:13, color:'#9CA3AF', textAlign:'center' }}>Nessun risultato</div>
-                        )}
-                      </div>
-                    )}
-                  </div>
-                </div>
-              )}
-
-              {/* Bubble stile smartphone */}
+              {/* Anteprima */}
               <div>
-                <div style={{ background:'#F1F5F9', borderRadius:16, padding:16, minHeight:100 }}>
-                  <div style={{ fontSize:10, fontWeight:700, color:'#9CA3AF', marginBottom:8, letterSpacing:'.05em' }}>
+                <div style={{ display:'flex', justifyContent:'space-between', alignItems:'center', marginBottom:6 }}>
+                  <p style={{ fontSize:'11px', fontWeight:'700', color:'#6B7280', textTransform:'uppercase', letterSpacing:'.05em', margin:0 }}>
+                    Anteprima
+                  </p>
+                  {smsAnteprimaIscritto && (
+                    <span style={{ fontSize:11, color:'#003DA5', fontWeight:600 }}>
+                      {smsAnteprimaIscritto.nome} {smsAnteprimaIscritto.cognome}
+                    </span>
+                  )}
+                </div>
+                <div style={{ background:'#F1F5F9', borderRadius:14, padding:14 }}>
+                  <div style={{ fontSize:10, fontWeight:700, color:'#9CA3AF', marginBottom:6, letterSpacing:'.05em' }}>
                     {smsMittente || 'MITTENTE'}
                   </div>
-                  <div style={{
-                    background:'#E8F5E9', borderRadius:'16px 16px 4px 16px',
-                    padding:'12px 14px', fontSize:14, lineHeight:1.5, color:'#0A0A0A',
-                    whiteSpace:'pre-wrap', wordBreak:'break-word',
-                    minHeight:56, border:'1px solid #C8E6C9'
-                  }}>
+                  <div style={{ background:'#E8F5E9', borderRadius:'14px 14px 4px 14px', padding:'10px 13px',
+                    fontSize:13, lineHeight:1.5, color:'#0A0A0A', whiteSpace:'pre-wrap', wordBreak:'break-word',
+                    minHeight:44, border:'1px solid #C8E6C9' }}>
                     {smsTesto ? getAnteprimaSms() : <span style={{ color:'#D1D5DB' }}>Il messaggio apparirà qui...</span>}
                   </div>
-                  <div style={{ fontSize:10, color:'#9CA3AF', textAlign:'right', marginTop:6 }}>
-                    {new Date().toLocaleTimeString('it-IT', { hour:'2-digit', minute:'2-digit' })}
+                  <div style={{ fontSize:10, color:'#9CA3AF', textAlign:'right', marginTop:4 }}>
+                    {new Date().toLocaleTimeString('it-IT',{hour:'2-digit',minute:'2-digit'})}
                   </div>
                 </div>
               </div>
 
-              {/* Riepilogo invio */}
-              <div style={{ background:'#F9FAFB', border:'1px solid #E5E7EB', borderRadius:10, padding:14 }}>
-                <p style={{ fontSize:12, fontWeight:700, color:'#374151', margin:'0 0 8px' }}>Riepilogo</p>
+              {/* Riepilogo */}
+              <div style={{ background:'#F9FAFB', border:'1px solid #E5E7EB', borderRadius:10, padding:12 }}>
                 <div style={{ display:'flex', flexDirection:'column', gap:4 }}>
                   {[
-                    ['Destinatari', getDestinatariCount()],
-                    ['SMS per dest.', Math.ceil((smsTesto.length || 1) / 160)],
-                    ['SMS totali', getDestinatariCount() * Math.ceil((smsTesto.length || 1) / 160)],
-                    ['Mittente', smsMittente || '—'],
-                  ].map(([label, val]) => (
+                    ['Destinatari', smsProva ? '1 (prova)' : getDestinatariCount()],
+                    ['SMS totali', smsProva ? 1 : getDestinatariCount() * Math.ceil((smsTesto.length||1)/160)],
+                  ].map(([label,val]) => (
                     <div key={label} style={{ display:'flex', justifyContent:'space-between', fontSize:12 }}>
                       <span style={{ color:'#6B7280' }}>{label}</span>
-                      <span style={{ fontWeight:700, color:'#0A0A0A' }}>{val}</span>
+                      <span style={{ fontWeight:700 }}>{val}</span>
                     </div>
                   ))}
                 </div>
               </div>
+            </div>
 
-              {/* Lista selezionabili (solo target=selezione) */}
-              {smsTarget === 'selezione' && (
-                <div>
-                  <div style={{ display:'flex', justifyContent:'space-between', alignItems:'center', marginBottom:6 }}>
+            {/* ── DESTRA: destinatari ───────────────────────────────── */}
+            <div style={{ display:'flex', flexDirection:'column', gap:10 }}>
+
+              {/* Toggle prova */}
+              <label style={{ display:'flex', alignItems:'center', gap:8, cursor:'pointer', padding:'8px 10px',
+                borderRadius:8, border:'1.5px solid ' + (smsProva ? '#059669' : '#E5E7EB'),
+                background: smsProva ? '#F0FDF4' : '#fff', fontSize:13, fontWeight: smsProva ? 700 : 400 }}>
+                <input type="checkbox" checked={smsProva} onChange={e => setSmsProva(e.target.checked)}
+                  style={{ accentColor:'#059669' }}/>
+                SMS di prova — invia solo a me
+                {smsProva && (
+                  <input
+                    value={smsProvaNumero}
+                    onChange={e => setSmsProvaNumero(e.target.value)}
+                    placeholder="Es. 3331234567"
+                    onClick={e => e.stopPropagation()}
+                    style={{ marginLeft:'auto', padding:'4px 8px', border:'1px solid #D1D5DB', borderRadius:6,
+                      fontSize:12, width:130, outline:'none' }}
+                  />
+                )}
+              </label>
+
+              {!smsProva && (
+                <>
+                  {/* Header lista */}
+                  <div style={{ display:'flex', justifyContent:'space-between', alignItems:'center' }}>
                     <p style={{ fontSize:'11px', fontWeight:'700', color:'#6B7280', textTransform:'uppercase', letterSpacing:'.05em', margin:0 }}>
-                      Iscritti selezionati
+                      {smsSelezione.size === 0
+                        ? 'Tutti (' + registrations.filter(r=>r.cellulare).length + ')'
+                        : smsSelezione.size + ' selezionati'}
                     </p>
-                    <button onClick={toggleTuttiSmsSelezione}
-                      style={{ fontSize:11, color:'#003DA5', background:'none', border:'none', cursor:'pointer', fontWeight:600 }}>
-                      {smsSelezione.size === filtered.filter(r => r.cellulare).length ? 'Deseleziona tutti' : 'Seleziona tutti'}
-                    </button>
+                    <div style={{ display:'flex', gap:8 }}>
+                      {smsSelezione.size > 0 && (
+                        <button onClick={() => { setSmsSelezione(new Set()); setSmsAnteprimaIscritto(null) }}
+                          style={{ fontSize:11, color:'#DC2626', background:'none', border:'none', cursor:'pointer', fontWeight:600 }}>
+                          Deseleziona tutti
+                        </button>
+                      )}
+                      <button onClick={toggleTuttiSmsSelezione}
+                        style={{ fontSize:11, color:'#003DA5', background:'none', border:'none', cursor:'pointer', fontWeight:600 }}>
+                        {smsSelezione.size > 0 && smsSelezione.size === registrations.filter(r=>r.cellulare).length ? 'Deseleziona tutti' : 'Seleziona tutti'}
+                      </button>
+                    </div>
                   </div>
-                  <div style={{ maxHeight:130, overflowY:'auto', border:'1px solid #E5E7EB', borderRadius:8 }}>
-                    {filtered.filter(r => r.cellulare).map(r => (
-                      <label key={r.id} style={{ display:'flex', alignItems:'center', gap:8, padding:'6px 10px',
-                        borderBottom:'1px solid #F3F4F6', cursor:'pointer', fontSize:12,
-                        background: smsSelezione.has(r.id) ? '#F0FDF4' : 'transparent' }}>
-                        <input type="checkbox" checked={smsSelezione.has(r.id)} onChange={() => { toggleSmsSelezione(r.id); setSmsAnteprimaIscritto(r); }}
-                          style={{ accentColor:'#059669' }}/>
-                        <span style={{ fontWeight: smsSelezione.has(r.id) ? 700 : 400 }}>{r.nome} {r.cognome}</span>
-                        <span style={{ color:'#9CA3AF', marginLeft:'auto', fontSize:11 }}>{r.cellulare}</span>
-                      </label>
-                    ))}
+
+                  {/* Ricerca nella lista */}
+                  <input
+                    value={smsListaSearch}
+                    onChange={e => setSmsListaSearch(e.target.value)}
+                    placeholder="Cerca per nome o cellulare..."
+                    style={{ width:'100%', padding:'8px 10px', border:'1.5px solid #E5E7EB', borderRadius:8,
+                      fontSize:13, boxSizing:'border-box', outline:'none' }}
+                  />
+
+                  {/* Lista iscritti con checkbox */}
+                  <div style={{ border:'1px solid #E5E7EB', borderRadius:8, overflowY:'auto', maxHeight:320 }}>
+                    {registrations
+                      .filter(r => r.cellulare && (!smsListaSearch ||
+                        (r.nome+' '+r.cognome+' '+(r.cellulare||'')).toLowerCase().includes(smsListaSearch.toLowerCase())))
+                      .map(r => (
+                        <label key={r.id} style={{ display:'flex', alignItems:'center', gap:9, padding:'8px 11px',
+                          borderBottom:'1px solid #F3F4F6', cursor:'pointer',
+                          background: smsSelezione.has(r.id) ? '#F0FDF4' : 'transparent' }}>
+                          <input type="checkbox" checked={smsSelezione.has(r.id)}
+                            onChange={() => { toggleSmsSelezione(r.id); setSmsAnteprimaIscritto(r) }}
+                            style={{ accentColor:'#059669', flexShrink:0 }}/>
+                          <div style={{ flex:1, minWidth:0 }}>
+                            <div style={{ fontSize:13, fontWeight: smsSelezione.has(r.id) ? 700 : 500,
+                              whiteSpace:'nowrap', overflow:'hidden', textOverflow:'ellipsis' }}>
+                              {r.nome} {r.cognome}
+                            </div>
+                            <div style={{ fontSize:11, color:'#9CA3AF' }}>{r.cellulare}</div>
+                          </div>
+                          {smsSelezione.has(r.id) && (
+                            <span style={{ fontSize:10, color:'#059669', fontWeight:700, flexShrink:0 }}>✓</span>
+                          )}
+                        </label>
+                      ))}
+                    {registrations.filter(r => r.cellulare).length === 0 && (
+                      <div style={{ padding:20, textAlign:'center', color:'#9CA3AF', fontSize:13 }}>
+                        Nessun iscritto con cellulare
+                      </div>
+                    )}
                   </div>
-                </div>
+
+                  {smsSelezione.size === 0 && (
+                    <p style={{ fontSize:11, color:'#6B7280', margin:0 }}>
+                      Nessuna selezione = SMS inviato a tutti gli iscritti con cellulare.
+                    </p>
+                  )}
+                </>
               )}
             </div>
           </div>
@@ -1648,29 +1630,23 @@ export default function IscrittiPage() {
             <div style={{ marginTop:14, padding:'12px 16px', borderRadius:8,
               background: smsRisultato.successo ? '#ECFDF5' : '#FEF2F2',
               border: '1px solid ' + (smsRisultato.successo ? '#6EE7B7' : '#FECACA'),
-              fontSize:13, fontWeight:600,
-              color: smsRisultato.successo ? '#065F46' : '#991B1B' }}>
+              fontSize:13, fontWeight:600, color: smsRisultato.successo ? '#065F46' : '#991B1B' }}>
               {smsRisultato.successo
-                ? 'Invio completato: ' + smsRisultato.inviati + ' SMS inviati' + (smsRisultato.errori > 0 ? ', ' + smsRisultato.errori + ' errori' : ' con successo') + '.'
+                ? 'Inviato: ' + smsRisultato.inviati + ' SMS' + (smsRisultato.errori > 0 ? ', ' + smsRisultato.errori + ' errori' : ' con successo') + '.'
                 : 'Errore: ' + smsRisultato.errore}
             </div>
           )}
 
-          {/* Footer bottoni */}
-          <div style={{ display:'flex', justifyContent:'space-between', alignItems:'center', marginTop:20 }}>
+          {/* Footer */}
+          <div style={{ display:'flex', justifyContent:'space-between', alignItems:'center', marginTop:18 }}>
             <Btn variant="ghost" onClick={() => { setSmsModal(false); setSmsRisultato(null) }}>Chiudi</Btn>
-            <Btn variant="primary"
-              onClick={inviaSms}
-              disabled={
-                smsInvioInCorso || !smsTesto.trim() || getDestinatariCount() === 0 ||
-                (smsTarget === 'prova' && !smsProvaNumero.trim())
-              }
-              style={{ background:'#059669', borderColor:'#059669', minWidth:180 }}>
-              {smsInvioInCorso
-                ? 'Invio in corso...'
-                : (smsTarget === 'prova'
-                    ? 'Invia SMS di prova'
-                    : 'Invia SMS a ' + getDestinatariCount() + ' destinatari')}
+            <Btn variant="primary" onClick={inviaSms}
+              disabled={smsInvioInCorso || !smsTesto.trim() || getDestinatariCount() === 0 || (smsProva && !smsProvaNumero.trim())}
+              style={{ background:'#059669', borderColor:'#059669', minWidth:200 }}>
+              {smsInvioInCorso ? 'Invio in corso...'
+                : smsProva ? 'Invia SMS di prova'
+                : smsSelezione.size > 0 ? 'Invia a ' + smsSelezione.size + ' iscritti'
+                : 'Invia a tutti (' + registrations.filter(r=>r.cellulare).length + ')'}
             </Btn>
           </div>
         </Modal>
