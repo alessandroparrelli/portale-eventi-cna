@@ -3,10 +3,11 @@ import { usePageTitle } from '../../hooks/usePageTitle'
 import { useSearchParams } from 'react-router-dom'
 import { supabase } from '../../lib/supabase'
 import { useRole } from '../../hooks/useRole'
+import { useAuth } from '../../hooks/useAuth'
 import GlowTableHead from '../../components/GlowTableHead'
 import GlowStatCard from '../../components/GlowStatCard'
 import { Modal, PresenzaBadge, Field, Input, Select, Btn, EmptyState } from '../../components/ui'
-import { Users, Search, Download, Upload, Eye, Trash2, UserCheck, AlertCircle, CheckCircle2, X, MapPin, Ticket, RefreshCw } from 'lucide-react'
+import { Users, Search, Download, Upload, Eye, Trash2, UserCheck, AlertCircle, CheckCircle2, X, MapPin, Ticket, RefreshCw, MessageSquare } from 'lucide-react'
 import * as XLSX from 'xlsx'
 import ExcelJS from 'exceljs/dist/exceljs.min.js'
 import { logAttivita } from '../../lib/activityLog'
@@ -91,6 +92,18 @@ export default function IscrittiPage() {
   const [sortDir, setSortDir] = useState('asc')  // 'asc' | 'desc'
   const [pagina, setPagina] = useState(1)
   const PAGE_SIZE = 20
+
+  // ── SMS ─────────────────────────────────────────────────────────────
+  const { user: authUser } = useAuth()
+  const [smsModal, setSmsModal] = useState(false)
+  const [smsSelezione, setSmsSelezione] = useState(new Set()) // Set di reg_id
+  const [smsTesto, setSmsTesto] = useState('')
+  const [smsMittente, setSmsMittente] = useState('CNAROMA')
+  const [smsInvioInCorso, setSmsInvioInCorso] = useState(false)
+  const [smsRisultato, setSmsRisultato] = useState(null)
+  const [smsTarget, setSmsTarget] = useState('tutti') // 'tutti'|'selezione'|'singolo'|'prova'
+  const [smsProvaNumero, setSmsProvaNumero] = useState('')
+  const [eventoDettagli, setEventoDettagli] = useState(null) // {titolo, data_inizio, luogo}
 
   // Mappa id→nome per referenti di gruppo (calcolata dai registrations caricati)
   const referentiMap = {}
@@ -226,9 +239,12 @@ export default function IscrittiPage() {
   useEffect(() => {
     if (!selectedEvento) { setRegistrations([]); setFormFields([]); setTeatroAbilitato(false); return }
     loadRegs()
-    // Controlla se l'evento ha teatro abilitato
-    supabase.from('events').select('teatro_abilitato').eq('id', selectedEvento).single()
-      .then(({ data }) => setTeatroAbilitato(!!data?.teatro_abilitato))
+    // Controlla se l'evento ha teatro abilitato + carica dettagli per variabili SMS
+    supabase.from('events').select('teatro_abilitato, titolo, data_inizio, luogo').eq('id', selectedEvento).single()
+      .then(({ data }) => {
+        setTeatroAbilitato(!!data?.teatro_abilitato)
+        setEventoDettagli(data ? { titolo: data.titolo, data_inizio: data.data_inizio, luogo: data.luogo } : null)
+      })
     supabase.from('form_fields').select('*')
       .eq('event_id', selectedEvento).eq('visibile', true).like('colonna_db', 'extra_%')
       .order('ordine')
@@ -697,6 +713,156 @@ export default function IscrittiPage() {
     noPiva:   { bg:'#FFF7ED', hov:'#FED7AA' }, // arancione
     none:     { bg:'transparent', hov:'#F9FAFB' },
   }
+  // ── Funzioni SMS ────────────────────────────────────────────────────
+  const MAX_SMS_CHARS = 160
+
+  function interpolaSms(testo, iscritto) {
+    const dataEvento = eventoDettagli?.data_inizio
+      ? new Date(eventoDettagli.data_inizio).toLocaleDateString('it-IT', { day: '2-digit', month: 'long', year: 'numeric', timeZone: 'Europe/Rome' })
+      : ''
+    const oraEvento = eventoDettagli?.data_inizio
+      ? new Date(eventoDettagli.data_inizio).toLocaleTimeString('it-IT', { hour: '2-digit', minute: '2-digit', timeZone: 'Europe/Rome' })
+      : ''
+    return testo
+      .replace(/{{nome}}/g, iscritto?.nome || '')
+      .replace(/{{cognome}}/g, iscritto?.cognome || '')
+      .replace(/{{nome_completo}}/g, [iscritto?.nome, iscritto?.cognome].filter(Boolean).join(' '))
+      .replace(/{{evento}}/g, eventoDettagli?.titolo || '')
+      .replace(/{{data}}/g, dataEvento)
+      .replace(/{{ora}}/g, oraEvento)
+      .replace(/{{luogo}}/g, eventoDettagli?.luogo || '')
+  }
+
+  function inserisciVariabile(variabile) {
+    setSmsTesto(prev => prev + '{{' + variabile + '}}')
+  }
+
+  async function inviaSms() {
+    if (!smsTesto.trim()) return
+    setSmsInvioInCorso(true)
+    setSmsRisultato(null)
+
+    let destinatari = []
+
+    if (smsTarget === 'prova') {
+      if (!smsProvaNumero.trim()) { setSmsInvioInCorso(false); return }
+      destinatari = [{ telefono: smsProvaNumero.trim(), nome: 'Test', cognome: 'CNA' }]
+    } else if (smsTarget === 'singolo' || smsTarget === 'selezione') {
+      const ids = smsTarget === 'singolo'
+        ? [smsSelezione.values().next().value]
+        : [...smsSelezione]
+      destinatari = ids.map(id => {
+        const r = registrations.find(x => x.id === id)
+        return r ? { registrazione_id: r.id, telefono: r.cellulare, nome: r.nome, cognome: r.cognome } : null
+      }).filter(Boolean).filter(d => d.telefono)
+    } else {
+      // tutti gli iscritti con cellulare
+      destinatari = registrations
+        .filter(r => r.cellulare)
+        .map(r => ({ registrazione_id: r.id, telefono: r.cellulare, nome: r.nome, cognome: r.cognome }))
+    }
+
+    // Personalizza messaggio per ogni destinatario
+    const destinatariPersonalizzati = destinatari.map(d => ({
+      ...d,
+      messaggio: interpolaSms(smsTesto, d),
+    }))
+
+    // Per l'API, ogni messaggio e' gia' personalizzato — li inviamo individualmente se diversi
+    // Se il testo non ha variabili personali, batch unico
+    const hasPersonalVars = smsTesto.includes('{{nome}}') || smsTesto.includes('{{cognome}}') || smsTesto.includes('{{nome_completo}}')
+
+    try {
+      const { data: { session } } = await supabase.auth.getSession()
+
+      let totInviati = 0, totErrori = 0
+
+      if (hasPersonalVars) {
+        // Invio batch da 50 per non superare limiti
+        const BATCH = 50
+        for (let i = 0; i < destinatariPersonalizzati.length; i += BATCH) {
+          const chunk = destinatariPersonalizzati.slice(i, i + BATCH)
+          // Per variabili personali: invio uno per uno con messaggio personalizzato
+          for (const d of chunk) {
+            const resp = await fetch('https://hnkhckcclgabunkqfmrz.supabase.co/functions/v1/invia-sms', {
+              method: 'POST',
+              headers: { 'Content-Type': 'application/json', 'Authorization': 'Bearer ' + session.access_token },
+              body: JSON.stringify({
+                destinatari: [{ registrazione_id: d.registrazione_id, telefono: d.telefono }],
+                messaggio: d.messaggio,
+                mittente: smsMittente,
+                evento_id: selectedEvento || undefined,
+                inviato_da: authUser?.id,
+              }),
+            })
+            const json = await resp.json()
+            totInviati += json.inviati || 0
+            totErrori += json.errori || 0
+          }
+        }
+      } else {
+        // Testo uguale per tutti — batch unico
+        const resp = await fetch('https://hnkhckcclgabunkqfmrz.supabase.co/functions/v1/invia-sms', {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json', 'Authorization': 'Bearer ' + session.access_token },
+          body: JSON.stringify({
+            destinatari: destinatariPersonalizzati.map(d => ({ registrazione_id: d.registrazione_id, telefono: d.telefono })),
+            messaggio: interpolaSms(smsTesto, {}),
+            mittente: smsMittente,
+            evento_id: selectedEvento || undefined,
+            inviato_da: authUser?.id,
+          }),
+        })
+        const json = await resp.json()
+        totInviati = json.inviati || 0
+        totErrori = json.errori || 0
+        if (!json.successo) { setSmsRisultato({ successo: false, errore: json.errore }); setSmsInvioInCorso(false); return }
+      }
+
+      setSmsRisultato({ successo: true, inviati: totInviati, errori: totErrori })
+      logAttivita('sms_inviato', { eventoId: selectedEvento, dettagli: { destinatari: destinatariPersonalizzati.length, inviati: totInviati } })
+    } catch (err) {
+      setSmsRisultato({ successo: false, errore: String(err) })
+    }
+    setSmsInvioInCorso(false)
+  }
+
+  function apriSmsModal(target, iscritto) {
+    setSmsSelezione(iscritto ? new Set([iscritto.id]) : new Set())
+    setSmsTarget(target)
+    setSmsRisultato(null)
+    setSmsModal(true)
+  }
+
+  function getDestinatariCount() {
+    if (smsTarget === 'prova') return smsProvaNumero.trim() ? 1 : 0
+    if (smsTarget === 'tutti') return registrations.filter(r => r.cellulare).length
+    return [...smsSelezione].filter(id => registrations.find(r => r.id === id && r.cellulare)).length
+  }
+
+  function getAnteprimaSms() {
+    if (smsTarget === 'prova') return interpolaSms(smsTesto, { nome: 'Mario', cognome: 'Rossi' })
+    const primoId = [...smsSelezione][0]
+    const primo = primoId ? registrations.find(r => r.id === primoId) : registrations[0]
+    return interpolaSms(smsTesto, primo)
+  }
+
+  function toggleSmsSelezione(id) {
+    setSmsSelezione(prev => {
+      const n = new Set(prev)
+      n.has(id) ? n.delete(id) : n.add(id)
+      return n
+    })
+  }
+
+  function toggleTuttiSmsSelezione() {
+    if (smsSelezione.size === filtered.filter(r => r.cellulare).length) {
+      setSmsSelezione(new Set())
+    } else {
+      setSmsSelezione(new Set(filtered.filter(r => r.cellulare).map(r => r.id)))
+    }
+  }
+
   function getRC(r) {
     if (!verificaEseguita) return RC.none
     const p = (r.partita_iva||'').toString().replace(/\s/g,'').replace(/^0+/,'')
@@ -759,6 +925,18 @@ export default function IscrittiPage() {
             </span>
           )}
           <Btn variant="secondary" onClick={loadRegs} size="md" style={{ background:'#FACC15', color:'#0A0A0A', borderColor:'#FACC15', fontWeight:'700' }}><RefreshCw size={16}/> Aggiorna</Btn>
+          <Btn variant="secondary" onClick={() => apriSmsModal('tutti', null)} size="md"
+            style={{ background:'#059669', color:'#fff', borderColor:'#059669' }}
+            title="Invia SMS a tutti gli iscritti con cellulare"
+            disabled={registrations.filter(r => r.cellulare).length === 0}>
+            <MessageSquare size={16}/> SMS ({registrations.filter(r => r.cellulare).length})
+          </Btn>
+          {smsSelezione.size > 0 && (
+            <Btn variant="secondary" onClick={() => { setSmsTarget('selezione'); setSmsRisultato(null); setSmsModal(true) }} size="md"
+              style={{ background:'#7C3AED', color:'#fff', borderColor:'#7C3AED' }}>
+              <MessageSquare size={16}/> SMS a {smsSelezione.size} selezionati
+            </Btn>
+          )}
           <div style={{flex:1}}/>
           {eventi.find(e=>e.id===selectedEvento)?.certificato_abilitato && (
             <Btn variant="secondary" onClick={inviaCertificati} disabled={invioInCorso} size="md">
@@ -1098,6 +1276,7 @@ export default function IscrittiPage() {
               <table style={s.table}>
                 <SortableHead
                   columns={[
+                    { label:'', color:'neutral', sortable:false },
                     { label:'Nominativo',  color:'blue',    sortable:true },
                     { label:'Email',       color:'cyan',    sortable:true, hideOnMobile:true },
                     { label:'Mestiere',    color:'violet',  sortable:true, hideOnMobile:true },
@@ -1119,9 +1298,18 @@ export default function IscrittiPage() {
                     const _piva = (r.partita_iva||'').toString().replace(/\s/g,'').replace(/^0+/,'')
                     const _ass = verificaEseguita ? (associatiMap[_piva] || null) : null
                     return (
-                      <tr key={r.id} style={{...s.tr, backgroundColor:_rc.bg}}
-                        onMouseEnter={e=>e.currentTarget.style.backgroundColor=_rc.hov}
-                        onMouseLeave={e=>e.currentTarget.style.backgroundColor=_rc.bg}>
+                      <tr key={r.id} style={{...s.tr, backgroundColor:smsSelezione.has(r.id) ? '#F0FDF4' : _rc.bg}}
+                        onMouseEnter={e=>e.currentTarget.style.backgroundColor=smsSelezione.has(r.id) ? '#DCFCE7' : _rc.hov}
+                        onMouseLeave={e=>e.currentTarget.style.backgroundColor=smsSelezione.has(r.id) ? '#F0FDF4' : _rc.bg}>
+                        <td style={{...s.td, width:32, paddingRight:0}}>
+                          {r.cellulare && (
+                            <input type="checkbox" checked={smsSelezione.has(r.id)}
+                              onChange={() => toggleSmsSelezione(r.id)}
+                              style={{ accentColor:'#059669', cursor:'pointer', width:15, height:15 }}
+                              title={r.cellulare}
+                            />
+                          )}
+                        </td>
                         <td style={s.td}>
                           <p style={s.name}>{r.nome} {r.cognome}</p>
                           {r.ragione_sociale && <p style={s.sub}>{r.ragione_sociale}</p>}
@@ -1164,6 +1352,12 @@ export default function IscrittiPage() {
                             <button style={s.iconBtn} title="Dettaglio" onClick={()=>setDetail(r)}>
                               <Eye size={15}/>
                             </button>
+                            {r.cellulare && (
+                              <button style={{...s.iconBtn, color:'#059669'}} title={"Invia SMS a " + r.nome + " " + r.cognome}
+                                onClick={() => apriSmsModal('singolo', r)}>
+                                <MessageSquare size={15}/>
+                              </button>
+                            )}
                             {canDelete && (
                               <button style={{...s.iconBtn, color:'#DC2626'}} title="Elimina" onClick={()=>setDelConfirm(r)}>
                                 <Trash2 size={15}/>
@@ -1246,6 +1440,204 @@ export default function IscrittiPage() {
         )}
       </div>
       )} {/* fine condizionale tab iscritti */}
+
+
+      {/* MODAL SMS */}
+      {smsModal && (
+        <Modal title="Invia SMS" onClose={() => { setSmsModal(false); setSmsRisultato(null) }} width="700px">
+          <div style={{ display:'grid', gridTemplateColumns:'1fr 1fr', gap:'20px' }}>
+
+            {/* Colonna sinistra: editor */}
+            <div>
+              {/* Selettore target */}
+              <div style={{ marginBottom:16 }}>
+                <p style={{ fontSize:'11px', fontWeight:'700', color:'#6B7280', textTransform:'uppercase', letterSpacing:'.05em', margin:'0 0 8px' }}>Destinatari</p>
+                <div style={{ display:'flex', flexDirection:'column', gap:6 }}>
+                  {[
+                    ['tutti', 'Tutti gli iscritti (' + registrations.filter(r => r.cellulare).length + ' con cellulare)'],
+                    ['selezione', 'Iscritti selezionati (' + smsSelezione.size + ')'],
+                    ['singolo', smsSelezione.size === 1 ? (() => { const r = registrations.find(x => x.id === [...smsSelezione][0]); return r ? r.nome + ' ' + r.cognome + ' (' + r.cellulare + ')' : 'Singolo iscritto' })() : 'Singolo iscritto'],
+                    ['prova', 'SMS di prova (numero manuale)'],
+                  ].map(([val, label]) => (
+                    <label key={val} style={{ display:'flex', alignItems:'center', gap:8, cursor:'pointer', fontSize:13, fontWeight: smsTarget === val ? 700 : 400, color: smsTarget === val ? '#003DA5' : '#374151' }}>
+                      <input type="radio" name="smsTarget" value={val} checked={smsTarget === val} onChange={() => setSmsTarget(val)} style={{ accentColor:'#003DA5' }}/>
+                      {label}
+                    </label>
+                  ))}
+                </div>
+                {smsTarget === 'selezione' && smsSelezione.size === 0 && (
+                  <p style={{ fontSize:12, color:'#DC2626', marginTop:6 }}>Nessun iscritto selezionato nella tabella.</p>
+                )}
+                {smsTarget === 'prova' && (
+                  <input
+                    style={{ marginTop:8, width:'100%', padding:'8px 10px', border:'1.5px solid #E5E7EB', borderRadius:7, fontSize:13, boxSizing:'border-box' }}
+                    placeholder="Es. 3331234567 o +39333..."
+                    value={smsProvaNumero}
+                    onChange={e => setSmsProvaNumero(e.target.value)}
+                  />
+                )}
+              </div>
+
+              {/* Mittente */}
+              <div style={{ marginBottom:14 }}>
+                <p style={{ fontSize:'11px', fontWeight:'700', color:'#6B7280', textTransform:'uppercase', letterSpacing:'.05em', margin:'0 0 6px' }}>Mittente (max 11 car.)</p>
+                <input
+                  style={{ width:'100%', padding:'8px 10px', border:'1.5px solid #E5E7EB', borderRadius:7, fontSize:13, boxSizing:'border-box', fontFamily:'monospace', fontWeight:700 }}
+                  value={smsMittente}
+                  maxLength={11}
+                  onChange={e => setSmsMittente(e.target.value.toUpperCase().replace(/[^A-Z0-9]/g,''))}
+                />
+              </div>
+
+              {/* Variabili rapide */}
+              <div style={{ marginBottom:10 }}>
+                <p style={{ fontSize:'11px', fontWeight:'700', color:'#6B7280', textTransform:'uppercase', letterSpacing:'.05em', margin:'0 0 6px' }}>Inserisci variabile</p>
+                <div style={{ display:'flex', flexWrap:'wrap', gap:5 }}>
+                  {[
+                    ['nome', 'Nome'],
+                    ['cognome', 'Cognome'],
+                    ['nome_completo', 'Nome completo'],
+                    ['evento', 'Titolo evento'],
+                    ['data', 'Data evento'],
+                    ['ora', 'Ora evento'],
+                    ['luogo', 'Luogo'],
+                  ].map(([v, label]) => (
+                    <button key={v} onClick={() => inserisciVariabile(v)}
+                      style={{ fontSize:11, fontWeight:600, padding:'3px 9px', borderRadius:20,
+                        background:'#EEF3FF', color:'#003DA5', border:'1px solid #C7D7F9',
+                        cursor:'pointer', fontFamily:'monospace' }}>
+                      {'{' + '{' + v + '}' + '}'}
+                    </button>
+                  ))}
+                </div>
+              </div>
+
+              {/* Textarea testo */}
+              <div style={{ marginBottom:6 }}>
+                <p style={{ fontSize:'11px', fontWeight:'700', color:'#6B7280', textTransform:'uppercase', letterSpacing:'.05em', margin:'0 0 6px' }}>Testo SMS</p>
+                <textarea
+                  style={{ width:'100%', padding:'10px', border:'1.5px solid #E5E7EB', borderRadius:8,
+                    fontSize:13, minHeight:100, resize:'vertical', fontFamily:"'Inter',sans-serif",
+                    boxSizing:'border-box', outline:'none', lineHeight:1.5 }}
+                  value={smsTesto}
+                  onChange={e => setSmsTesto(e.target.value)}
+                  placeholder="Scrivi il testo del messaggio..."
+                />
+                <p style={{ fontSize:11, color: smsTesto.length > 160 ? '#DC2626' : '#9CA3AF', textAlign:'right', margin:'3px 0 0' }}>
+                  {smsTesto.length} car. &nbsp;|&nbsp; {Math.ceil(smsTesto.length / 160) || 1} SMS per destinatario
+                  {smsTesto.length > 160 && <span style={{ color:'#D97706' }}> (costo maggiorato)</span>}
+                </p>
+              </div>
+            </div>
+
+            {/* Colonna destra: anteprima */}
+            <div>
+              <p style={{ fontSize:'11px', fontWeight:'700', color:'#6B7280', textTransform:'uppercase', letterSpacing:'.05em', margin:'0 0 10px' }}>
+                Anteprima
+                {smsTarget !== 'prova' && registrations.length > 0 && (
+                  <span style={{ fontWeight:400, textTransform:'none', letterSpacing:0, color:'#9CA3AF', marginLeft:6 }}>
+                    (primo destinatario)
+                  </span>
+                )}
+              </p>
+
+              {/* Bubble stile smartphone */}
+              <div style={{ background:'#F1F5F9', borderRadius:16, padding:16, minHeight:120, position:'relative' }}>
+                <div style={{ fontSize:10, fontWeight:700, color:'#9CA3AF', marginBottom:8, letterSpacing:'.05em' }}>
+                  {smsMittente || 'MITTENTE'}
+                </div>
+                <div style={{
+                  background:'#E8F5E9', borderRadius:'16px 16px 4px 16px',
+                  padding:'12px 14px', fontSize:14, lineHeight:1.5, color:'#0A0A0A',
+                  whiteSpace:'pre-wrap', wordBreak:'break-word',
+                  minHeight:60, border:'1px solid #C8E6C9'
+                }}>
+                  {smsTesto ? getAnteprimaSms() || '...' : <span style={{ color:'#D1D5DB' }}>Il messaggio apparirà qui...</span>}
+                </div>
+                <div style={{ fontSize:10, color:'#9CA3AF', textAlign:'right', marginTop:6 }}>
+                  {new Date().toLocaleTimeString('it-IT', { hour:'2-digit', minute:'2-digit' })}
+                </div>
+              </div>
+
+              {/* Riepilogo invio */}
+              <div style={{ marginTop:16, background:'#F9FAFB', border:'1px solid #E5E7EB', borderRadius:10, padding:14 }}>
+                <p style={{ fontSize:12, fontWeight:700, color:'#374151', margin:'0 0 8px' }}>Riepilogo</p>
+                <div style={{ display:'flex', flexDirection:'column', gap:4 }}>
+                  {[
+                    ['Destinatari', getDestinatariCount()],
+                    ['SMS per destinatario', Math.ceil((smsTesto.length || 1) / 160)],
+                    ['SMS totali', getDestinatariCount() * (Math.ceil((smsTesto.length || 1) / 160))],
+                    ['Mittente', smsMittente || '—'],
+                  ].map(([label, val]) => (
+                    <div key={label} style={{ display:'flex', justifyContent:'space-between', fontSize:12 }}>
+                      <span style={{ color:'#6B7280' }}>{label}</span>
+                      <span style={{ fontWeight:700, color:'#0A0A0A' }}>{val}</span>
+                    </div>
+                  ))}
+                </div>
+              </div>
+
+              {/* Selezione iscritti (solo target=selezione) */}
+              {smsTarget === 'selezione' && (
+                <div style={{ marginTop:14 }}>
+                  <div style={{ display:'flex', justifyContent:'space-between', alignItems:'center', marginBottom:6 }}>
+                    <p style={{ fontSize:'11px', fontWeight:'700', color:'#6B7280', textTransform:'uppercase', letterSpacing:'.05em', margin:0 }}>
+                      Iscritti selezionati
+                    </p>
+                    <button onClick={toggleTuttiSmsSelezione}
+                      style={{ fontSize:11, color:'#003DA5', background:'none', border:'none', cursor:'pointer', fontWeight:600 }}>
+                      {smsSelezione.size === filtered.filter(r => r.cellulare).length ? 'Deseleziona tutti' : 'Seleziona tutti'}
+                    </button>
+                  </div>
+                  <div style={{ maxHeight:140, overflowY:'auto', border:'1px solid #E5E7EB', borderRadius:8 }}>
+                    {filtered.filter(r => r.cellulare).map(r => (
+                      <label key={r.id} style={{ display:'flex', alignItems:'center', gap:8, padding:'6px 10px',
+                        borderBottom:'1px solid #F3F4F6', cursor:'pointer', fontSize:12,
+                        background: smsSelezione.has(r.id) ? '#F0FDF4' : 'transparent' }}>
+                        <input type="checkbox" checked={smsSelezione.has(r.id)} onChange={() => toggleSmsSelezione(r.id)}
+                          style={{ accentColor:'#059669' }}/>
+                        <span style={{ fontWeight:600 }}>{r.nome} {r.cognome}</span>
+                        <span style={{ color:'#9CA3AF', marginLeft:'auto' }}>{r.cellulare}</span>
+                      </label>
+                    ))}
+                  </div>
+                </div>
+              )}
+            </div>
+          </div>
+
+          {/* Risultato */}
+          {smsRisultato && (
+            <div style={{ marginTop:14, padding:'12px 16px', borderRadius:8,
+              background: smsRisultato.successo ? '#ECFDF5' : '#FEF2F2',
+              border: '1px solid ' + (smsRisultato.successo ? '#6EE7B7' : '#FECACA'),
+              fontSize:13, fontWeight:600,
+              color: smsRisultato.successo ? '#065F46' : '#991B1B' }}>
+              {smsRisultato.successo
+                ? 'Invio completato: ' + smsRisultato.inviati + ' SMS inviati' + (smsRisultato.errori > 0 ? ', ' + smsRisultato.errori + ' errori' : ' con successo') + '.'
+                : 'Errore: ' + smsRisultato.errore}
+            </div>
+          )}
+
+          {/* Footer bottoni */}
+          <div style={{ display:'flex', justifyContent:'space-between', alignItems:'center', marginTop:20 }}>
+            <Btn variant="ghost" onClick={() => { setSmsModal(false); setSmsRisultato(null) }}>Chiudi</Btn>
+            <Btn variant="primary"
+              onClick={inviaSms}
+              disabled={
+                smsInvioInCorso || !smsTesto.trim() || getDestinatariCount() === 0 ||
+                (smsTarget === 'prova' && !smsProvaNumero.trim())
+              }
+              style={{ background:'#059669', borderColor:'#059669', minWidth:180 }}>
+              {smsInvioInCorso
+                ? 'Invio in corso...'
+                : (smsTarget === 'prova'
+                    ? 'Invia SMS di prova'
+                    : 'Invia SMS a ' + getDestinatariCount() + ' destinatari')}
+            </Btn>
+          </div>
+        </Modal>
+      )}
 
       {/* MODAL DETTAGLIO */}
       {detail && (
