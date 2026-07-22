@@ -4,6 +4,7 @@ import { useOGMeta } from '../../hooks/useOGMeta'
 import ShareBar from '../../components/public/ShareBar'
 import { useParams } from 'react-router-dom'
 import { supabase } from '../../lib/supabase'
+import { useAuth } from '../../hooks/useAuth'
 import { temaConDefault } from '../../components/editor/AspettoTab'
 import { MapPin, Calendar, ChevronRight, AlertCircle, Download, Share2 } from 'lucide-react'
 import { RICH_CSS } from '../../components/editor/RichEditor'
@@ -265,6 +266,8 @@ function ModalConferma({ reg, event, onClose }) {
 
 export default function LandingPage() {
   const { slug } = useParams()
+  const { user } = useAuth()
+  const [isAdminPreview, setIsAdminPreview] = useState(false)
   const [event,       setEvent]       = useState(null)
   const [loading,     setLoading]     = useState(true)
   const [notFound,    setNotFound]    = useState(false)
@@ -300,9 +303,15 @@ export default function LandingPage() {
   }, [])
 
   useEffect(() => {
-    supabase.from('events').select('*').eq('slug', slug).eq('stato','pubblicato').single()
-      .then(({ data, error }) => {
+    // Se c'e' una sessione admin attiva, carica l'evento a prescindere dallo stato
+    supabase.auth.getSession().then(({ data: { session } }) => {
+      const isAdmin = !!session?.user
+      setIsAdminPreview(false)
+      const query = supabase.from('events').select('*').eq('slug', slug)
+      if (!isAdmin) query.eq('stato', 'pubblicato')
+      query.single().then(({ data, error }) => {
         if (error || !data) { setNotFound(true); setLoading(false); return }
+        if (isAdmin && data.stato !== 'pubblicato') setIsAdminPreview(true)
         setEvent(data)
         supabase.from('registrations').select('id',{count:'exact'}).eq('event_id',data.id)
           .then(({ count }) => setIscrizioniN(count||0))
@@ -318,6 +327,7 @@ export default function LandingPage() {
           }).catch(() => {})
         } catch(_) {}
       })
+    })
   }, [slug])
 
   const { links: socialLinks } = useSocial()
@@ -349,6 +359,15 @@ export default function LandingPage() {
 
   return (
     <div style={{...s.root, backgroundColor: tema.sfondo_pagina || '#FFFFFF', position: 'relative'}}>
+      {isAdminPreview && (
+        <div style={{ position:'sticky', top:0, zIndex:9999, background:'#F59E0B', color:'#000',
+          textAlign:'center', padding:'8px 16px', fontSize:13, fontWeight:700,
+          display:'flex', alignItems:'center', justifyContent:'center', gap:8 }}>
+          <span>&#9888;</span>
+          ANTEPRIMA ADMIN — Evento in stato &quot;{event?.stato}&quot;, non visibile al pubblico
+          <span>&#9888;</span>
+        </div>
+      )}
       <PatternOverlay tema={tema} />
       <style>{`
         ${RICH_CSS}
