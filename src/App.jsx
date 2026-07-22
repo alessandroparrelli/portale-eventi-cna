@@ -13,6 +13,7 @@ import EventoEditorPage from './pages/admin/EventoEditorPage'
 import IscrittiPage from './pages/admin/IscrittiPage'
 import CheckinPage from './pages/admin/CheckinPage'
 import EmailPage from './pages/admin/EmailPage'
+import SmsPage from './pages/admin/SmsPage'
 import EmailEditorPage from './pages/admin/EmailEditorPage'
 import StatistichePage from './pages/admin/StatistichePage'
 import UtentiPage from './pages/admin/UtentiPage'
@@ -53,6 +54,7 @@ export default function App() {
             <Route path="eventi" element={<RequireSection sezione="eventi"><EventiPage /></RequireSection>} />
             <Route path="iscritti" element={<RequireSection sezione="iscritti"><IscrittiPage /></RequireSection>} />
             <Route path="email" element={<RequireSection sezione="email"><EmailPage /></RequireSection>} />
+            <Route path="sms" element={<RequireSection sezione="sms"><SmsPage /></RequireSection>} />
             <Route path="checkin" element={<RequireSection sezione="checkin"><CheckinPage /></RequireSection>} />
             <Route path="statistiche" element={<RequireSection sezione="statistiche"><StatistichePage /></RequireSection>} />
             <Route path="utenti" element={<RequireSection sezione="utenti"><UtentiPage /></RequireSection>} />

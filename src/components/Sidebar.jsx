@@ -57,6 +57,12 @@ const icons = {
       <rect x="2" y="4" width="20" height="16" rx="2"/><polyline points="2,4 12,13 22,4"/>
     </svg>
   ),
+  sms: (c='#6B7280') => (
+    <svg width="17" height="17" viewBox="0 0 24 24" fill="none" stroke={c} strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+      <path d="M21 15a2 2 0 0 1-2 2H7l-4 4V5a2 2 0 0 1 2-2h14a2 2 0 0 1 2 2z"/>
+      <line x1="9" y1="10" x2="9" y2="10"/><line x1="12" y1="10" x2="12" y2="10"/><line x1="15" y1="10" x2="15" y2="10"/>
+    </svg>
+  ),
   landing: (c='#6B7280') => (
     <svg width="17" height="17" viewBox="0 0 24 24" fill="none" stroke={c} strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
       <rect x="3" y="3" width="18" height="18" rx="2"/><path d="M3 9h18"/><path d="M9 21V9"/>
@@ -125,6 +131,7 @@ const NAV_GROUPS = [
     label: 'Comunicazioni',
     items: [
       { to:'/admin/email',       label:'Email',        iconKey:'mail',                 activeColor:'#E85D24', sezione:'email' },
+      { to:'/admin/sms',         label:'SMS',          iconKey:'sms',                  activeColor:'#059669', sezione:'sms' },
     ],
   },
   {
