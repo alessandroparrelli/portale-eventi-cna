@@ -1,6 +1,8 @@
 import { useState } from 'react'
 import { useAuth } from '../hooks/useAuth'
 
+const CNA_LOGO = 'https://raw.githubusercontent.com/alessandroparrelli/fileappoggio/main/NUOVO-LOGO-CNA-ROMA-SOLO-ROMA.png'
+
 // Icone SVG inline colorate
 function IconUser() {
   return (
@@ -66,30 +68,32 @@ export default function LoginPage() {
     <div style={s.page}>
       <div style={s.card}>
 
+        {/* Logo CNA Roma */}
+        <div style={{ display:'flex', justifyContent:'center', marginBottom:'20px' }}>
+          <img src={CNA_LOGO} alt="CNA Roma" style={{ height:'48px', objectFit:'contain' }} />
+        </div>
+
         {/* Wordmark eventlypro */}
         <div style={s.logoWrap}>
           <div style={{ display:'flex', alignItems:'center', gap:'10px' }}>
-            {/* Cubo isometrico SVG */}
-            <svg width="40" height="40" viewBox="0 0 40 40" fill="none" xmlns="http://www.w3.org/2000/svg">
-              {/* Top face */}
-              <polygon points="20,4 36,13 20,22 4,13" fill="#E11D48"/>
-              {/* Left face */}
+            <svg width="36" height="36" viewBox="0 0 40 40" fill="none" xmlns="http://www.w3.org/2000/svg">
+              <polygon points="20,4 36,13 20,22 4,13" fill="#FB7185"/>
               <polygon points="4,13 20,22 20,36 4,27" fill="#9F1239"/>
-              {/* Right face */}
               <polygon points="36,13 20,22 20,36 36,27" fill="#BE123C"/>
             </svg>
-            {/* Wordmark */}
             <div style={{ display:'flex', alignItems:'baseline', lineHeight:1 }}>
-              <span style={{ fontFamily:"'Outfit',sans-serif", fontWeight:800, fontSize:32, letterSpacing:'-0.04em', color:'#111111' }}>evently</span>
-              <span style={{ fontFamily:"'Outfit',sans-serif", fontWeight:800, fontSize:32, letterSpacing:'-0.04em', color:'#E11D48' }}>pro</span>
+              <span style={{ fontFamily:"'Outfit',sans-serif", fontWeight:800, fontSize:30, letterSpacing:'-0.04em', color:'#111111' }}>evently</span>
+              <span style={{ fontFamily:"'Outfit',sans-serif", fontWeight:800, fontSize:30, letterSpacing:'-0.04em', color:'#E11D48' }}>pro</span>
             </div>
           </div>
         </div>
 
-        <div style={s.divider} />
+        {/* Tagline */}
+        <p style={{ fontFamily:"'Outfit',sans-serif", fontSize:'12px', color:'#9CA3AF', textAlign:'center', margin:'6px 0 20px', letterSpacing:'0.01em' }}>
+          Portale di gestione eventi sviluppato dalla CNA di Roma
+        </p>
 
-        {/* Sottotitolo */}
-        <p style={s.subtitle}>Portale di gestione eventi</p>
+        <div style={s.divider} />
 
         {/* Form */}
         <form onSubmit={handleSubmit} style={s.form}>
