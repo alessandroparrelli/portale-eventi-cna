@@ -119,19 +119,16 @@ export default function AdminLayout() {
           </button>
         )}
 
-        {/* Centro: logo + titolo */}
+        {/* Centro: wordmark eventlypro */}
         <div className="admin-header-center" style={{ display:'flex', alignItems:'center', gap:0 }}>
-          <img
-            src="https://customer31551.img.musvc2.net/static/31551/images/1/CNARoma%20NEGATIVO%20COLORE%20SOLO%20ROMA.png"
-            alt="CNA Roma"
-            className="admin-header-logo"
-            style={{ cursor: 'pointer', objectFit: 'contain', flexShrink: 0 }}
-            onClick={() => window.location.reload()}
-            title="Ricarica pagina"
-          />
-          <div style={s.titleBlock}>
+          <div style={s.titleBlock} onClick={() => window.location.reload()} title="Ricarica pagina" role="button" tabIndex={0} style={{ ...s.titleBlock, cursor:'pointer' }}>
+            <svg width="36" height="36" viewBox="0 0 40 40" fill="none" xmlns="http://www.w3.org/2000/svg">
+              <polygon points="20,4 36,13 20,22 4,13" fill="#FB7185"/>
+              <polygon points="4,13 20,22 20,36 4,27" fill="#9F1239"/>
+              <polygon points="36,13 20,22 20,36 36,27" fill="#BE123C"/>
+            </svg>
             <span style={s.pageTitle}>
-              <span style={{ color:'#fff' }}>evently</span>
+              <span style={{ color:'#111111' }}>evently</span>
               <span style={{ color:'#E11D48' }}>pro</span>
             </span>
           </div>
@@ -163,8 +160,8 @@ const s = {
   },
   header: {
     flexShrink: 0,
-    background: 'linear-gradient(135deg, #130510 0%, #3B0A20 50%, #5C1030 100%)',
-    borderBottom: 'none',
+    background: '#FFFFFF',
+    borderBottom: '1px solid #E8E8E4',
     display: 'flex',
     alignItems: 'center',
     paddingLeft: '20px',
@@ -172,25 +169,26 @@ const s = {
     paddingTop: 'calc(env(safe-area-inset-top, 0px) + 10px)',
     paddingBottom: '10px',
     gap: '12px',
-    boxShadow: '0 3px 14px rgba(0,20,60,0.22)',
+    boxShadow: '0 1px 8px rgba(0,0,0,0.06)',
     boxSizing: 'border-box',
   },
   hamburger: {
     background: 'none', border: 'none', cursor: 'pointer',
-    color: '#FFFFFF', display: 'flex', alignItems: 'center',
+    color: '#374151', display: 'flex', alignItems: 'center',
     padding: '6px', borderRadius: '6px', flexShrink: 0,
   },
   titleBlock: {
     display: 'flex',
     alignItems: 'center',
-    paddingLeft: '14px',
+    gap: '10px',
+    paddingLeft: '0px',
     alignSelf: 'center',
   },
   pageTitle: {
-    fontSize: '22px',
+    fontSize: '28px',
     fontWeight: '800',
-    color: '#FFFFFF',
-    letterSpacing: '-0.02em',
+    color: '#111111',
+    letterSpacing: '-0.04em',
     fontFamily: "'Outfit', sans-serif",
     lineHeight: 1,
     whiteSpace: 'nowrap',

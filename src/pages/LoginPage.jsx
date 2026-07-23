@@ -68,28 +68,23 @@ export default function LoginPage() {
     <div style={s.page}>
       <div style={s.card}>
 
-        {/* Logo CNA Roma */}
-        <div style={{ display:'flex', justifyContent:'center', marginBottom:'20px' }}>
-          <img src={CNA_LOGO} alt="CNA Roma" style={{ height:'48px', objectFit:'contain' }} />
-        </div>
-
-        {/* Wordmark eventlypro */}
+        {/* Wordmark eventlypro — grande */}
         <div style={s.logoWrap}>
-          <div style={{ display:'flex', alignItems:'center', gap:'10px' }}>
-            <svg width="36" height="36" viewBox="0 0 40 40" fill="none" xmlns="http://www.w3.org/2000/svg">
+          <div style={{ display:'flex', alignItems:'center', gap:'14px' }}>
+            <svg width="52" height="52" viewBox="0 0 40 40" fill="none" xmlns="http://www.w3.org/2000/svg">
               <polygon points="20,4 36,13 20,22 4,13" fill="#FB7185"/>
               <polygon points="4,13 20,22 20,36 4,27" fill="#9F1239"/>
               <polygon points="36,13 20,22 20,36 36,27" fill="#BE123C"/>
             </svg>
             <div style={{ display:'flex', alignItems:'baseline', lineHeight:1 }}>
-              <span style={{ fontFamily:"'Outfit',sans-serif", fontWeight:800, fontSize:30, letterSpacing:'-0.04em', color:'#111111' }}>evently</span>
-              <span style={{ fontFamily:"'Outfit',sans-serif", fontWeight:800, fontSize:30, letterSpacing:'-0.04em', color:'#E11D48' }}>pro</span>
+              <span style={{ fontFamily:"'Outfit',sans-serif", fontWeight:800, fontSize:42, letterSpacing:'-0.04em', color:'#111111' }}>evently</span>
+              <span style={{ fontFamily:"'Outfit',sans-serif", fontWeight:800, fontSize:42, letterSpacing:'-0.04em', color:'#E11D48' }}>pro</span>
             </div>
           </div>
         </div>
 
         {/* Tagline */}
-        <p style={{ fontFamily:"'Outfit',sans-serif", fontSize:'12px', color:'#9CA3AF', textAlign:'center', margin:'6px 0 20px', letterSpacing:'0.01em' }}>
+        <p style={{ fontFamily:"'Outfit',sans-serif", fontSize:'12px', color:'#9CA3AF', textAlign:'center', margin:'4px 0 24px', letterSpacing:'0.01em' }}>
           Portale di gestione eventi sviluppato dalla CNA di Roma
         </p>
 
@@ -148,7 +143,10 @@ export default function LoginPage() {
         </form>
       </div>
 
-      <p style={s.footer}>© {new Date().getFullYear()} CNA Roma — Area Riservata</p>
+      <div style={{ display:'flex', flexDirection:'column', alignItems:'center', gap:'8px', marginTop:'24px' }}>
+        <img src={CNA_LOGO} alt="CNA Roma" style={{ height:'28px', objectFit:'contain', opacity:0.7 }} />
+        <p style={s.footer}>© {new Date().getFullYear()} CNA Roma — Area Riservata</p>
+      </div>
 
       <style>{`@keyframes spin{from{transform:rotate(0)}to{transform:rotate(360deg)}}`}</style>
     </div>
@@ -171,7 +169,7 @@ const s = {
     width: '100%', maxWidth: '420px',
     boxShadow: '0 1px 3px rgba(0,0,0,0.07), 0 8px 32px rgba(0,61,165,0.10)',
   },
-  logoWrap: { display: 'flex', justifyContent: 'center', marginBottom: '28px' },
+  logoWrap: { display: 'flex', justifyContent: 'center', marginBottom: '0px' },
   divider: { height: '1px', backgroundColor: '#E5E7EB', marginBottom: '28px' },
   title: {
     fontSize: '28px',
@@ -233,5 +231,5 @@ const s = {
     transition: 'opacity .15s',
     marginTop: '4px',
   },
-  footer: { marginTop: '24px', fontSize: '12px', color: '#9CA3AF', textAlign: 'center' },
+  footer: { margin: 0, fontSize: '12px', color: '#9CA3AF', textAlign: 'center' },
 }
