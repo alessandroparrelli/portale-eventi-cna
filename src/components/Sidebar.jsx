@@ -110,6 +110,33 @@ const icons = {
   ),
 }
 
+function HoverNavLink({ to, end, onClick, activeColor, iconKey, label, activeDot, iconWrap, navLink }) {
+  const [hovered, setHovered] = useState(false)
+  return (
+    <NavLink to={to} end={end} onClick={onClick}
+      style={({ isActive }) => ({
+        ...navLink,
+        backgroundColor: isActive ? activeColor + '18' : hovered ? activeColor + '12' : 'transparent',
+        color: isActive ? activeColor : hovered ? activeColor : '#4B5563',
+      })}
+      onMouseEnter={() => setHovered(true)}
+      onMouseLeave={() => setHovered(false)}>
+      {({ isActive }) => (
+        <>
+          <div style={{
+            ...iconWrap,
+            backgroundColor: isActive ? activeColor : hovered ? activeColor + '28' : activeColor + '18',
+          }}>
+            {icons[iconKey]?.(isActive || hovered ? (isActive ? '#fff' : activeColor) : activeColor)}
+          </div>
+          <span className="nav-label" style={{ fontSize:'13px', fontWeight: isActive ? '700' : hovered ? '600' : '500', letterSpacing:'-0.01em', flex:1 }}>{label}</span>
+          {isActive && <div style={{ ...activeDot, backgroundColor: activeColor }}/>}
+        </>
+      )}
+    </NavLink>
+  )
+}
+
 const NAV_GROUPS = [
   {
     label: 'Gestione', color: '#E11D48',
@@ -246,25 +273,9 @@ export default function Sidebar({ mobileOpen, onMobileClose, isMobile }) {
                     </svg>
                   </a>
                 ) : (
-                <NavLink key={to} to={to} end={end} onClick={handleNavClick}
-                  style={({ isActive }) => ({
-                    ...st.navLink,
-                    backgroundColor: isActive ? activeColor + '12' : 'transparent',
-                    color: isActive ? activeColor : '#4B5563',
-                  })}>
-                  {({ isActive }) => (
-                    <>
-                      <div style={{
-                        ...st.iconWrap,
-                        backgroundColor: isActive ? activeColor : activeColor + '18',
-                      }}>
-                        {icons[iconKey]?.(isActive ? '#fff' : activeColor)}
-                      </div>
-                      <span className="nav-label" style={{ fontSize:'13px', fontWeight: isActive ? '700' : '500', letterSpacing:'-0.01em', flex:1 }}>{label}</span>
-                      {isActive && <div style={{ ...st.activeDot, backgroundColor: activeColor }}/>}
-                    </>
-                  )}
-                </NavLink>
+                <HoverNavLink key={to} to={to} end={end} onClick={handleNavClick}
+                  activeColor={activeColor} iconKey={iconKey} label={label}
+                  activeDot={st.activeDot} iconWrap={st.iconWrap} navLink={st.navLink} />
                 )
               ))}
               {group.label === 'Amministrazione' && (
