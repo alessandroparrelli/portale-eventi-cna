@@ -27,7 +27,7 @@ export const TEMA_DEFAULT = {
   // Sezioni
   sfondo_sezioni:      '#F4F5F7',
   // Footer/CTA
-  cta_bg:              '#FEE4E6',
+  cta_bg:              '#EEF4FF',
   // Footer
   sfondo_footer:       '',          // vuoto = eredita sfondo_pagina
   testo_footer:        '#9CA3AF',
@@ -104,6 +104,8 @@ const PALETTE = [
   { nome: 'Teal',         primario: '#0D9488', pulsanti: '#0D9488', sfondo_header: '#FFFFFF', bordo_header: '#0D9488', sfondo_pagina: '#FFFFFF', sfondo_sezioni: '#F0FDFA', cta_bg: '#F0FDFA' },
   { nome: 'Nero élite',   primario: '#0A0A0A', pulsanti: '#0A0A0A', sfondo_header: '#0A0A0A', bordo_header: '#0A0A0A', sfondo_pagina: '#FFFFFF', sfondo_sezioni: '#F9FAFB', colore_testo_btn: '#FFFFFF' },
   { nome: 'Bianco puro',  primario: '#E11D48', pulsanti: '#E11D48', sfondo_header: '#FFFFFF', bordo_header: '#FFFFFF', sfondo_pagina: '#FFFFFF', sfondo_sezioni: '#FFFFFF', cta_bg: '#F4F5F7' },
+  { nome: 'CNA Blu',      primario: '#005AC9', pulsanti: '#005AC9', sfondo_header: '#FFFFFF', bordo_header: '#005AC9', sfondo_pagina: '#FFFFFF', sfondo_sezioni: '#EEF4FF', cta_bg: '#EEF4FF', colore_testo_btn: '#FFFFFF', colore_link: '#005AC9' },
+  { nome: 'CNA Blu Notte', primario: '#005AC9', pulsanti: '#005AC9', sfondo_header: '#003DA5', bordo_header: '#003DA5', sfondo_pagina: '#FFFFFF', sfondo_sezioni: '#EEF4FF', cta_bg: '#EEF4FF', colore_testo_btn: '#FFFFFF', colore_link: '#005AC9' },
   { nome: 'CNA Pallini',  primario: '#E11D48', pulsanti: '#E8792F', sfondo_header: '#FFFFFF', bordo_header: '#E11D48', sfondo_pagina: '#FFFFFF', sfondo_sezioni: '#F8F9FF', cta_bg: '#FEE4E6', colore_testo_btn: '#FFFFFF', sfondo_pattern: 'pallini_angolo', pattern_colore1: '#E11D48', pattern_colore2: '#E8792F', pattern_opacita: '25' },
 ]
 

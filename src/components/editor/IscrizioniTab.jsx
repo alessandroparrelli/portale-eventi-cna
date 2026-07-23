@@ -332,6 +332,137 @@ export default function IscrizioniTab({ event, setEvent, eventId }) {
         </div>
       )}
 
+      {/* ── Colori box registrazione ── */}
+      <div style={sCard}>
+        <p style={sCardTitle}>🎨 Box registrazione</p>
+        <p style={{ fontSize:'12px', color:'#6B7280', margin:'0 0 14px' }}>
+          Personalizza l’aspetto del box &ldquo;Partecipa all&rsquo;evento&rdquo; nella pagina pubblica.
+        </p>
+
+        {/* Preview live */}
+        <div style={{
+          display:'flex', alignItems:'center', justifyContent:'space-between',
+          gap:'16px', flexWrap:'wrap',
+          backgroundColor: event?.tema?.cta_bg || '#EEF4FF',
+          border: `2px solid ${event?.tema?.colore_primario || '#005AC9'}22`,
+          borderRadius:'12px', padding:'16px 20px', marginBottom:'16px',
+        }}>
+          <div style={{ flex:1, minWidth:'160px' }}>
+            <div style={{ fontSize:'14px', fontWeight:'800', color: event?.tema?.heading_colore || '#0A0A0A', marginBottom:'3px' }}>
+              Partecipa all’evento
+            </div>
+            <div style={{ fontSize:'12px', color: event?.tema?.testo_colore || '#374151' }}>
+              Registrazione gratuita. Ricevi il QR Code per l’ingresso.
+            </div>
+          </div>
+          <div style={{
+            background: event?.tema?.colore_pulsanti || '#005AC9',
+            color: event?.tema?.colore_testo_btn || '#FFFFFF',
+            borderRadius:'8px', padding:'9px 18px',
+            fontSize:'13px', fontWeight:'700',
+            fontFamily:"'Outfit',sans-serif", whiteSpace:'nowrap',
+            flexShrink:0,
+          }}>
+            Iscriviti ora &rsaquo;
+          </div>
+        </div>
+
+        {/* Picker colori */}
+        <div style={{ display:'grid', gridTemplateColumns:'repeat(auto-fit, minmax(180px, 1fr))', gap:'12px' }}>
+          {/* Sfondo box */}
+          <div>
+            <label style={sLabel}>Sfondo box</label>
+            <div style={{ display:'flex', alignItems:'center', gap:'8px' }}>
+              <input
+                type="color"
+                value={event?.tema?.cta_bg || '#EEF4FF'}
+                onChange={e => setEvent(ev => ({ ...ev, tema: { ...(ev.tema||{}), cta_bg: e.target.value } }))}
+                style={{ width:'36px', height:'36px', border:'1px solid #E5E7EB', borderRadius:'6px', padding:'2px', cursor:'pointer', background:'none' }}
+              />
+              <input
+                type="text"
+                value={event?.tema?.cta_bg || '#EEF4FF'}
+                onChange={e => setEvent(ev => ({ ...ev, tema: { ...(ev.tema||{}), cta_bg: e.target.value } }))}
+                style={{ ...sInput, width:'100px', fontFamily:'monospace', fontSize:'13px' }}
+                placeholder="#EEF4FF"
+              />
+              <button type="button" title="Reset default CNA" onClick={() => setEvent(ev => ({ ...ev, tema: { ...(ev.tema||{}), cta_bg: '#EEF4FF' } }))}
+                style={{ fontSize:'11px', color:'#005AC9', background:'none', border:'none', cursor:'pointer', padding:0, fontFamily:"'Outfit',sans-serif", fontWeight:'700' }}>
+                CNA
+              </button>
+            </div>
+          </div>
+
+          {/* Colore pulsante */}
+          <div>
+            <label style={sLabel}>Colore pulsante</label>
+            <div style={{ display:'flex', alignItems:'center', gap:'8px' }}>
+              <input
+                type="color"
+                value={event?.tema?.colore_pulsanti || '#005AC9'}
+                onChange={e => setEvent(ev => ({ ...ev, tema: { ...(ev.tema||{}), colore_pulsanti: e.target.value } }))}
+                style={{ width:'36px', height:'36px', border:'1px solid #E5E7EB', borderRadius:'6px', padding:'2px', cursor:'pointer', background:'none' }}
+              />
+              <input
+                type="text"
+                value={event?.tema?.colore_pulsanti || '#005AC9'}
+                onChange={e => setEvent(ev => ({ ...ev, tema: { ...(ev.tema||{}), colore_pulsanti: e.target.value } }))}
+                style={{ ...sInput, width:'100px', fontFamily:'monospace', fontSize:'13px' }}
+                placeholder="#005AC9"
+              />
+              <button type="button" title="Reset default CNA" onClick={() => setEvent(ev => ({ ...ev, tema: { ...(ev.tema||{}), colore_pulsanti: '#005AC9' } }))}
+                style={{ fontSize:'11px', color:'#005AC9', background:'none', border:'none', cursor:'pointer', padding:0, fontFamily:"'Outfit',sans-serif", fontWeight:'700' }}>
+                CNA
+              </button>
+            </div>
+          </div>
+
+          {/* Testo pulsante */}
+          <div>
+            <label style={sLabel}>Testo pulsante</label>
+            <div style={{ display:'flex', alignItems:'center', gap:'8px' }}>
+              <input
+                type="color"
+                value={event?.tema?.colore_testo_btn || '#FFFFFF'}
+                onChange={e => setEvent(ev => ({ ...ev, tema: { ...(ev.tema||{}), colore_testo_btn: e.target.value } }))}
+                style={{ width:'36px', height:'36px', border:'1px solid #E5E7EB', borderRadius:'6px', padding:'2px', cursor:'pointer', background:'none' }}
+              />
+              <input
+                type="text"
+                value={event?.tema?.colore_testo_btn || '#FFFFFF'}
+                onChange={e => setEvent(ev => ({ ...ev, tema: { ...(ev.tema||{}), colore_testo_btn: e.target.value } }))}
+                style={{ ...sInput, width:'100px', fontFamily:'monospace', fontSize:'13px' }}
+                placeholder="#FFFFFF"
+              />
+            </div>
+          </div>
+        </div>
+
+        {/* Shortcut palette CNA */}
+        <div style={{ marginTop:'12px', paddingTop:'12px', borderTop:'1px solid #F3F4F6' }}>
+          <span style={{ fontSize:'11px', fontWeight:'700', color:'#9CA3AF', textTransform:'uppercase', letterSpacing:'.06em', marginRight:'10px' }}>Preset rapidi</span>
+          {[
+            { label:'CNA Blu', bg:'#EEF4FF', btn:'#005AC9', txt:'#FFFFFF' },
+            { label:'Bianco', bg:'#FFFFFF', btn:'#005AC9', txt:'#FFFFFF' },
+            { label:'Blu pieno', bg:'#005AC9', btn:'#FFFFFF', txt:'#003DA5' },
+            { label:'Crimisi', bg:'#FEE4E6', btn:'#E11D48', txt:'#FFFFFF' },
+          ].map(p => (
+            <button key={p.label} type="button"
+              onClick={() => setEvent(ev => ({ ...ev, tema: { ...(ev.tema||{}), cta_bg: p.bg, colore_pulsanti: p.btn, colore_testo_btn: p.txt } }))}
+              style={{
+                display:'inline-flex', alignItems:'center', gap:'6px',
+                background:'#fff', border:'1px solid #E5E7EB', borderRadius:'20px',
+                padding:'4px 10px 4px 6px', fontSize:'12px', fontWeight:'600',
+                fontFamily:"'Outfit',sans-serif", cursor:'pointer', marginRight:'6px', marginTop:'6px',
+              }}>
+              <span style={{ width:'12px', height:'12px', borderRadius:'50%', background:p.bg, border:'1px solid #E5E7EB', flexShrink:0, display:'inline-block' }}/>
+              <span style={{ width:'12px', height:'12px', borderRadius:'50%', background:p.btn, flexShrink:0, display:'inline-block' }}/>
+              {p.label}
+            </button>
+          ))}
+        </div>
+      </div>
+
       {/* ── Capienza e posti ── */}
       <div style={sCard}>
         <p style={sCardTitle}>📦 Capienza e posti</p>
