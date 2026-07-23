@@ -112,7 +112,7 @@ const icons = {
 
 const NAV_GROUPS = [
   {
-    label: 'Gestione',
+    label: 'Gestione', color: '#E11D48',
     items: [
       { to:'/admin',             label:'Dashboard',    iconKey:'dashboard', end:true,  activeColor:'#E11D48', sezione:'dashboard' },
       { to:'/admin/eventi',      label:'Eventi',       iconKey:'calendar',             activeColor:'#E11D48', sezione:'eventi' },
@@ -121,21 +121,21 @@ const NAV_GROUPS = [
     ],
   },
   {
-    label: 'Analisi',
+    label: 'Analisi', color: '#D97706',
     items: [
       { to:'/admin/statistiche', label:'Statistiche',  iconKey:'chart',                activeColor:'#D97706', sezione:'statistiche' },
       { to:'/admin/log',         label:'Log attività', iconKey:'activity',             activeColor:'#0891B2', sezione:'log' },
     ],
   },
   {
-    label: 'Comunicazioni',
+    label: 'Comunicazioni', color: '#E85D24',
     items: [
       { to:'/admin/email',       label:'Email',        iconKey:'mail',                 activeColor:'#E85D24', sezione:'email' },
       { to:'/admin/sms',         label:'SMS',          iconKey:'sms',                  activeColor:'#059669', sezione:'sms' },
     ],
   },
   {
-    label: 'Marketing',
+    label: 'Marketing', color: '#059669',
     items: [
       { to:'/admin/landing',     label:'Landing Page', iconKey:'landing',              activeColor:'#0891B2', sezione:'landing' },
       { to:'/admin/social',      label:'Social',       iconKey:'social',               activeColor:'#E1306C', sezione:'social' },
@@ -143,7 +143,7 @@ const NAV_GROUPS = [
     ],
   },
   {
-    label: 'Amministrazione',
+    label: 'Amministrazione', color: '#7C3AED',
     items: [
       { to:'/admin/utenti',      label:'Utenti',       iconKey:'usercog',              activeColor:'#7C3AED', sezione:'utenti' },
       { to:'/admin/ruoli',       label:'Ruoli',        iconKey:'usercog',              activeColor:'#7C3AED', sezione:'ruoli' },
@@ -217,8 +217,19 @@ export default function Sidebar({ mobileOpen, onMobileClose, isMobile }) {
         <nav style={st.nav}>
 
           {allGroups.map(group => (
-            <div key={group.label} style={st.group}>
-              <p style={st.groupLabel}>{group.label}</p>
+            <div key={group.label} style={{ ...st.group, borderRadius:'8px', overflow:'hidden' }}>
+              <p style={{
+                ...st.groupLabel,
+                color: group.color,
+                background: group.color + '10',
+                margin:'8px 0 2px',
+                padding:'4px 8px',
+                borderRadius:'6px',
+                display:'flex', alignItems:'center', gap:'6px',
+              }}>
+                <span style={{ width:'6px', height:'6px', borderRadius:'50%', background: group.color, flexShrink:0, display:'inline-block' }}/>
+                {group.label}
+              </p>
               {group.items.map(({ to, label, iconKey, end, activeColor, external }) => (
                 external ? (
                   <a key={to} href={to} target="_blank" rel="noopener noreferrer" onClick={handleNavClick}
