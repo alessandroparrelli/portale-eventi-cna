@@ -748,7 +748,7 @@ export default function LandingPage() {
       </div>
 
       {/* ── Barra condivisione ── */}
-      <ShareBar event={event} />
+      <ShareBar event={event} tema={tema} />
 
       <footer style={{ ...s.footer, background: tema.sfondo_footer || 'transparent', borderTop: tema.sfondo_footer ? 'none' : '1px solid #E5E7EB', color: tema.testo_footer || (tema.sfondo_footer ? '#ffffff' : '#6B7280') }}>
         <img

@@ -6,14 +6,14 @@ import { ChevronDown, ChevronUp, RotateCcw } from 'lucide-react'
 /* ─── Defaults tema ────────────────────────────────────────────── */
 export const TEMA_DEFAULT = {
   // Colori brand
-  colore_primario:     '#E11D48',
-  colore_pulsanti:     '#E11D48',
+  colore_primario:     '#005AC9',
+  colore_pulsanti:     '#005AC9',
   colore_testo_btn:    '#FFFFFF',
-  colore_link:         '#E11D48',
+  colore_link:         '#005AC9',
   // Sfondo pagina
   sfondo_pagina:       '#FFFFFF',
   sfondo_header:       '#FFFFFF',
-  bordo_header:        '#E11D48',
+  bordo_header:        '#005AC9',
   spessore_bordo:      '3',
   // Logo
   logo_altezza:        '44',   // px

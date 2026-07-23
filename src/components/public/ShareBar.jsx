@@ -1,6 +1,8 @@
 import { useState } from 'react'
 
-export default function ShareBar({ event, compact = false }) {
+export default function ShareBar({ event, compact = false, tema = {} }) {
+  const brandColor = tema.colore_pulsanti || tema.colore_primario || '#005AC9'
+  const brandText  = tema.colore_testo_btn || '#FFFFFF'
   const [copied, setCopied] = useState(false)
 
   if (!event?.slug) return null
@@ -57,7 +59,7 @@ export default function ShareBar({ event, compact = false }) {
         </button>
 
         <button type="button" onClick={handleEmail} title="Condividi via Email"
-          style={compactBtn('#E11D48', '#fff')}>
+          style={compactBtn(brandColor, brandText)}>
           <EmailIcon size={14} />
           Email
         </button>
@@ -90,7 +92,7 @@ export default function ShareBar({ event, compact = false }) {
         <button type="button" onClick={handleWhatsApp} style={fullBtn('#25D366', '#fff')}>
           <WhatsAppIcon size={18} /> WhatsApp
         </button>
-        <button type="button" onClick={handleEmail} style={fullBtn('#E11D48', '#fff')}>
+        <button type="button" onClick={handleEmail} style={fullBtn(brandColor, brandText)}>
           <EmailIcon size={17} /> Email
         </button>
         <button type="button" onClick={handleCopy}
