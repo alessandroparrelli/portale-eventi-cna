@@ -88,25 +88,25 @@ function isImprenditore(dati, campi) {
 }
 
 /* ─── Blocco dati singola persona ─── */
-function PersonaForm({ idx, dati, onChange, errors, campi, mestieri, isAccompagnatore }) {
+function PersonaForm({ idx, dati, onChange, errors, campi, mestieri, isAccompagnatore, color = '#005AC9', bg = '#EEF4FF' }) {
   const pIvaObbligatoria = isImprenditore(dati, campi)
   return (
     <div style={{
-      border: `1px solid ${isAccompagnatore ? '#E5E7EB' : '#E11D48'}`,
+      border: `1px solid ${isAccompagnatore ? '#E5E7EB' : (color || '#005AC9')}`,
       borderRadius: '10px', padding: '16px', marginBottom: '16px',
-      background: isAccompagnatore ? '#FAFAFA' : '#FEE4E6',
+      background: isAccompagnatore ? '#FAFAFA' : (bg || '#EEF4FF'),
       overflow: 'hidden',
     }}>
       {/* Header */}
       <div style={{ display: 'flex', alignItems: 'center', gap: '8px', marginBottom: '14px' }}>
         <div style={{
           width: '28px', height: '28px', borderRadius: '50%',
-          background: isAccompagnatore ? '#E5E7EB' : '#E11D48',
+          background: isAccompagnatore ? '#E5E7EB' : (color || '#005AC9'),
           display: 'flex', alignItems: 'center', justifyContent: 'center', flexShrink: 0,
         }}>
           {isAccompagnatore ? <User size={14} color="#6B7280" /> : <Users size={14} color="#fff" />}
         </div>
-        <span style={{ fontSize: '13px', fontWeight: '700', color: isAccompagnatore ? '#374151' : '#E11D48' }}>
+        <span style={{ fontSize: '13px', fontWeight: '700', color: isAccompagnatore ? '#374151' : (color || '#005AC9') }}>
           {isAccompagnatore ? `Accompagnatore ${idx}` : 'Intestatario'}
         </span>
       </div>
@@ -221,7 +221,10 @@ function PersonaForm({ idx, dati, onChange, errors, campi, mestieri, isAccompagn
 }
 
 /* ─── FORM ISCRIZIONE PRINCIPALE ─── */
-export default function FormIscrizione({ event, onSuccess }) {
+export default function FormIscrizione({ event, onSuccess, tema = {} }) {
+  const brandColor = tema.colore_pulsanti || tema.colore_primario || '#005AC9'
+  const brandBg    = tema.cta_bg || '#EEF4FF'
+  const brandText  = tema.colore_testo_btn || '#FFFFFF'
   const postiPerUtente = event.posti_per_utente || 1
 
   const [mestieri, setMestieri] = useState([])
@@ -375,33 +378,33 @@ export default function FormIscrizione({ event, onSuccess }) {
       {errGen && <div style={s.errBox}>{errGen}</div>}
 
       {postiPerUtente > 1 && (
-        <div style={{ background:'linear-gradient(135deg,#FEE4E6 0%,#E0EAFF 100%)', border:'2px solid #E11D48', borderRadius:'14px', padding:'18px 20px', marginBottom:'24px', boxShadow:'0 2px 12px rgba(0,61,165,0.10)' }}>
+        <div style={{ background: brandBg, border:`2px solid ${brandColor}`, borderRadius:'14px', padding:'18px 20px', marginBottom:'24px', boxShadow:`0 2px 12px ${brandColor}22` }}>
           <div style={{ display:'flex', alignItems:'center', justifyContent:'space-between', gap:'12px' }}>
             <div style={{ display:'flex', alignItems:'center', gap:'10px' }}>
-              <div style={{ background:'#E11D48', borderRadius:'10px', padding:'8px', display:'flex', alignItems:'center', justifyContent:'center', flexShrink:0 }}>
+              <div style={{ background: brandColor, borderRadius:'10px', padding:'8px', display:'flex', alignItems:'center', justifyContent:'center', flexShrink:0 }}>
                 <Users size={20} style={{ color:'#fff' }} />
               </div>
               <div>
-                <p style={{ fontSize:'15px', color:'#E11D48', margin:0, fontWeight:'800', letterSpacing:'-.01em' }}>
+                <p style={{ fontSize:'15px', color: brandColor, margin:0, fontWeight:'800', letterSpacing:'-.01em' }}>
                   Vuoi registrare più persone?
                 </p>
                 <p style={{ fontSize:'12px', color:'#6B7280', margin:'2px 0 0' }}>
-                  Puoi aggiungere fino a <strong style={{color:'#E11D48'}}>{postiPerUtente} persone</strong> con questa iscrizione
+                  Puoi aggiungere fino a <strong style={{color: brandColor}}>{postiPerUtente} persone</strong> con questa iscrizione
                 </p>
               </div>
             </div>
             <div style={{ display:'flex', alignItems:'center', gap:'12px', flexShrink:0 }}>
               <button type="button" onClick={() => removePersona(persone.length - 1)}
                 disabled={persone.length <= 1}
-                style={{ width:'36px', height:'36px', borderRadius:'50%', border:'2px solid', borderColor: persone.length <= 1 ? '#D1D5DB' : '#E11D48', background: persone.length <= 1 ? '#F3F4F6' : '#fff', cursor: persone.length <= 1 ? 'not-allowed' : 'pointer', fontSize:'20px', fontWeight:'700', color: persone.length <= 1 ? '#D1D5DB' : '#E11D48', display:'flex', alignItems:'center', justifyContent:'center', lineHeight:1, transition:'all .15s' }}>
+                style={{ width:'36px', height:'36px', borderRadius:'50%', border:'2px solid', borderColor: persone.length <= 1 ? '#D1D5DB' : brandColor, background: persone.length <= 1 ? '#F3F4F6' : '#fff', cursor: persone.length <= 1 ? 'not-allowed' : 'pointer', fontSize:'20px', fontWeight:'700', color: persone.length <= 1 ? '#D1D5DB' : brandColor, display:'flex', alignItems:'center', justifyContent:'center', lineHeight:1, transition:'all .15s' }}>
                 −
               </button>
-              <span style={{ fontSize:'28px', fontWeight:'900', color:'#E11D48', minWidth:'28px', textAlign:'center', letterSpacing:'-.02em' }}>
+              <span style={{ fontSize:'28px', fontWeight:'900', color: brandColor, minWidth:'28px', textAlign:'center', letterSpacing:'-.02em' }}>
                 {persone.length}
               </span>
               <button type="button" onClick={addPersona}
                 disabled={persone.length >= postiPerUtente}
-                style={{ width:'36px', height:'36px', borderRadius:'50%', border:'2px solid', borderColor: persone.length >= postiPerUtente ? '#D1D5DB' : '#E11D48', background: persone.length >= postiPerUtente ? '#F3F4F6' : '#E11D48', cursor: persone.length >= postiPerUtente ? 'not-allowed' : 'pointer', fontSize:'20px', fontWeight:'700', color: persone.length >= postiPerUtente ? '#D1D5DB' : '#fff', display:'flex', alignItems:'center', justifyContent:'center', lineHeight:1, transition:'all .15s' }}>
+                style={{ width:'36px', height:'36px', borderRadius:'50%', border:'2px solid', borderColor: persone.length >= postiPerUtente ? '#D1D5DB' : brandColor, background: persone.length >= postiPerUtente ? '#F3F4F6' : brandColor, cursor: persone.length >= postiPerUtente ? 'not-allowed' : 'pointer', fontSize:'20px', fontWeight:'700', color: persone.length >= postiPerUtente ? '#D1D5DB' : brandText, display:'flex', alignItems:'center', justifyContent:'center', lineHeight:1, transition:'all .15s' }}>
                 +
               </button>
             </div>
@@ -418,6 +421,8 @@ export default function FormIscrizione({ event, onSuccess }) {
             </button>
           )}
           <PersonaForm
+            color={brandColor}
+            bg={brandBg}
             key={idx} idx={idx} dati={dati}
             onChange={handleChange} errors={errors[idx] || {}}
             campi={campi} mestieri={mestieri}

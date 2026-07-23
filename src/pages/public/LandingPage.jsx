@@ -670,7 +670,7 @@ export default function LandingPage() {
 
         {/* CTA / FORM */}
         {!conferma && (
-          <section style={{ ...s.ctaSection, backgroundColor: tema.cta_bg || '#FEE4E6' }}>
+          <section style={{ ...s.ctaSection, backgroundColor: tema.cta_bg || '#EEF4FF', border: `1px solid ${(tema.colore_pulsanti || tema.colore_primario || '#005AC9')}33` }}>
             <div style={s.ctaRow}>
               <div style={{ flex:1 }}>
                 <h2 style={s.ctaTitle}>Partecipa all'evento</h2>
@@ -716,7 +716,7 @@ export default function LandingPage() {
             </div>
           )}
 
-          <FormIscrizione event={event} onSuccess={dati => {
+          <FormIscrizione event={event} tema={tema} onSuccess={dati => {
               setFormVisible(false)
               setConferma(dati)
             }}/>
@@ -801,7 +801,7 @@ const s = {
   // actionRow: rimosso — layout semplificato con pulsante singolo
   // actionBtn / actionBtnPrimary: stili generati inline in base al tema
   // CTA box
-  ctaSection:  { backgroundColor:'#FEE4E6', border:'1px solid #FDA4AF', borderRadius:'12px', padding:'24px', marginBottom:'24px' },
+  ctaSection:  { backgroundColor:'#FEE4E6', borderRadius:'12px', padding:'24px', marginBottom:'24px' },
   ctaRow:      { display:'flex', alignItems:'center', justifyContent:'space-between', gap:'16px', flexWrap:'wrap' },
   ctaTitle:    { fontSize:'18px', fontWeight:'900', color:'#0A0A0A', letterSpacing:'-.02em', margin:'0 0 4px' },
   ctaSub:      { fontSize:'13px', color:'#4B5563', margin:0, lineHeight:'1.5' },
