@@ -290,17 +290,6 @@ export default function Sidebar({ mobileOpen, onMobileClose, isMobile }) {
             <span className="logout-label">Esci dall'app</span>
           </button>
 
-          {/* Footer CNA */}
-          <div style={st.sidebarFooter}>
-            <img
-              src="https://raw.githubusercontent.com/alessandroparrelli/fileappoggio/main/NUOVO-LOGO-CNA-ROMA-SOLO-ROMA.png"
-              alt="CNA Roma" style={{ height:'22px', objectFit:'contain', flexShrink:0 }}
-            />
-            <span style={st.sidebarFooterText}>
-              eventlypro © 2026, software di gestione marketing ed eventi sviluppato da CNA di Roma
-            </span>
-          </div>
-
         </div>
 
       </aside>
