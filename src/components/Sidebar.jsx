@@ -257,29 +257,30 @@ export default function Sidebar({ mobileOpen, onMobileClose, isMobile }) {
             </div>
           ))}
 
-          {/* Profilo */}
-          <div style={{ ...st.group, marginTop:'auto', paddingTop:'8px', borderTop:'1px solid #F3F4F6' }}>
-            <NavLink to="/admin/profilo" onClick={handleNavClick}
-              style={({ isActive }) => ({
-                ...st.navLink,
-                backgroundColor: isActive ? '#E11D4812' : 'transparent',
-                color: isActive ? '#E11D48' : '#4B5563',
-              })}>
-              {({ isActive }) => (
-                <>
-                  <div style={{ ...st.iconWrap, backgroundColor: isActive ? '#E11D48' : 'transparent' }}>
-                    {icons.user2(isActive ? '#fff' : '#9CA3AF')}
-                  </div>
-                  <span style={{ fontSize:'13px', fontWeight: isActive ? '700' : '500', letterSpacing:'-0.01em', flex:1 }}>Profilo</span>
-                  {isActive && <div style={{ ...st.activeDot, backgroundColor:'#E11D48' }}/>}
-                </>
-              )}
-            </NavLink>
-          </div>
         </nav>
 
-        {/* LOGOUT */}
-        <div style={st.logoutWrap}>
+        {/* ── BOTTOM: Profilo + Esci + Footer ── */}
+        <div style={st.bottomWrap}>
+
+          {/* Profilo */}
+          <NavLink to="/admin/profilo" onClick={handleNavClick}
+            style={({ isActive }) => ({
+              ...st.navLink,
+              backgroundColor: isActive ? '#E11D4812' : 'transparent',
+              color: isActive ? '#E11D48' : '#4B5563',
+            })}>
+            {({ isActive }) => (
+              <>
+                <div style={{ ...st.iconWrap, backgroundColor: isActive ? '#E11D48' : 'transparent' }}>
+                  {icons.user2(isActive ? '#fff' : '#9CA3AF')}
+                </div>
+                <span style={{ fontSize:'13px', fontWeight: isActive ? '700' : '500', letterSpacing:'-0.01em', flex:1 }}>Profilo</span>
+                {isActive && <div style={{ ...st.activeDot, backgroundColor:'#E11D48' }}/>}
+              </>
+            )}
+          </NavLink>
+
+          {/* Esci */}
           <button
             onClick={() => signOut()}
             style={st.logoutBtn}
@@ -288,6 +289,18 @@ export default function Sidebar({ mobileOpen, onMobileClose, isMobile }) {
             {icons.logout()}
             <span className="logout-label">Esci dall'app</span>
           </button>
+
+          {/* Footer CNA */}
+          <div style={st.sidebarFooter}>
+            <img
+              src="https://raw.githubusercontent.com/alessandroparrelli/fileappoggio/main/NUOVO-LOGO-CNA-ROMA-SOLO-ROMA.png"
+              alt="CNA Roma" style={{ height:'22px', objectFit:'contain', flexShrink:0 }}
+            />
+            <span style={st.sidebarFooterText}>
+              eventlypro © 2026, software di gestione marketing ed eventi sviluppato da CNA di Roma
+            </span>
+          </div>
+
         </div>
 
       </aside>
@@ -356,14 +369,30 @@ const st = {
   activeDot: {
     width:'5px', height:'5px', borderRadius:'50%',
   },
-  logoutWrap: { padding:'8px 10px 12px', flexShrink:0 },
+  bottomWrap: {
+    flexShrink: 0,
+    borderTop: '1px solid #F3F4F6',
+    padding: '8px 10px 0',
+    display: 'flex', flexDirection: 'column', gap: '2px',
+  },
   logoutBtn: {
-    display:'flex', alignItems:'center', gap:'8px',
-    padding:'9px 12px', width:'100%',
-    background:'none', border:'1px solid #FECACA',
+    display:'flex', alignItems:'center', gap:'9px',
+    padding:'7px 10px', width:'100%',
+    background:'none', border:'none',
     borderRadius:'8px', cursor:'pointer',
     fontSize:'13px', fontFamily:"'Outfit',sans-serif",
-    color:'#DC2626', fontWeight:'700',
+    color:'#DC2626', fontWeight:'600',
     transition:'background-color .12s',
+    textAlign:'left', minHeight:'34px',
+  },
+  sidebarFooter: {
+    display:'flex', alignItems:'center', gap:'8px',
+    padding:'10px 10px 14px',
+    borderTop:'1px solid #F3F4F6',
+    marginTop:'4px',
+  },
+  sidebarFooterText: {
+    fontSize:'9px', color:'#C4C4C0', lineHeight:'1.4',
+    fontFamily:"'Outfit',sans-serif", fontWeight:'500',
   },
 }
