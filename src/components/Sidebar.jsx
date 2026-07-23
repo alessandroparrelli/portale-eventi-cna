@@ -147,6 +147,7 @@ const NAV_GROUPS = [
     items: [
       { to:'/admin/utenti',      label:'Utenti',       iconKey:'usercog',              activeColor:'#7C3AED', sezione:'utenti' },
       { to:'/admin/ruoli',       label:'Ruoli',        iconKey:'usercog',              activeColor:'#7C3AED', sezione:'ruoli' },
+      { to:'/admin/profilo',     label:'Profilo',      iconKey:'user2',                activeColor:'#E11D48', sezione:'profilo' },
     ],
   },
 ]
@@ -215,34 +216,6 @@ export default function Sidebar({ mobileOpen, onMobileClose, isMobile }) {
         {/* NAVIGAZIONE */}
         <nav style={st.nav}>
 
-          {/* Profilo + Esci — sempre visibili in cima */}
-          <div style={{ ...st.group, marginBottom:'8px', paddingBottom:'8px', borderBottom:'1px solid #F3F4F6' }}>
-            <NavLink to="/admin/profilo" onClick={handleNavClick}
-              style={({ isActive }) => ({
-                ...st.navLink,
-                backgroundColor: isActive ? '#E11D4812' : 'transparent',
-                color: isActive ? '#E11D48' : '#4B5563',
-              })}>
-              {({ isActive }) => (
-                <>
-                  <div style={{ ...st.iconWrap, backgroundColor: isActive ? '#E11D48' : 'transparent' }}>
-                    {icons.user2(isActive ? '#fff' : '#9CA3AF')}
-                  </div>
-                  <span style={{ fontSize:'13px', fontWeight: isActive ? '700' : '500', letterSpacing:'-0.01em', flex:1 }}>Profilo</span>
-                  {isActive && <div style={{ ...st.activeDot, backgroundColor:'#E11D48' }}/>}
-                </>
-              )}
-            </NavLink>
-            <button
-              onClick={() => signOut()}
-              style={st.logoutBtn}
-              onMouseEnter={e => e.currentTarget.style.backgroundColor='#FEF2F2'}
-              onMouseLeave={e => e.currentTarget.style.backgroundColor='transparent'}>
-              {icons.logout()}
-              <span className="logout-label">Esci dall'app</span>
-            </button>
-          </div>
-
           {allGroups.map(group => (
             <div key={group.label} style={st.group}>
               <p style={st.groupLabel}>{group.label}</p>
@@ -283,6 +256,16 @@ export default function Sidebar({ mobileOpen, onMobileClose, isMobile }) {
                 </NavLink>
                 )
               ))}
+              {group.label === 'Amministrazione' && (
+                <button
+                  onClick={() => signOut()}
+                  style={st.logoutBtn}
+                  onMouseEnter={e => e.currentTarget.style.backgroundColor='#FEF2F2'}
+                  onMouseLeave={e => e.currentTarget.style.backgroundColor='transparent'}>
+                  {icons.logout()}
+                  <span className="logout-label">Esci dall'app</span>
+                </button>
+              )}
             </div>
           ))}
 
