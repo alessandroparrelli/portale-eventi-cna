@@ -111,8 +111,13 @@ export default function IscrittiPage() {
 
   // Mappa id→nome per referenti di gruppo (calcolata dai registrations caricati)
   const referentiMap = {}
+  const referentiPivaMap = {} // id capogruppo -> partita_iva normalizzata
   registrations.forEach(r => {
-    if (r.gruppo_id === r.id) referentiMap[r.id] = `${r.nome||''} ${r.cognome||''}`.trim()
+    if (r.gruppo_id === r.id) {
+      referentiMap[r.id] = `${r.nome||''} ${r.cognome||''}`.trim()
+      const piva = (r.partita_iva||'').toString().replace(/\s/g,'').replace(/^0+/,'')
+      if (piva) referentiPivaMap[r.id] = piva
+    }
   })
 
   // Teatro
@@ -342,6 +347,10 @@ export default function IscrittiPage() {
   function getAssLabel(r) {
     if (!verificaEseguita) return ''
     const p = (r.partita_iva||'').toString().replace(/\s/g,'').replace(/^0+/,'')
+    if (!p && r.referente_id) {
+      const refPiva = referentiPivaMap[r.referente_id]
+      if (refPiva && associatiMap[refPiva]?.associato) return 'Associato (tramite referente)'
+    }
     if (!p) return 'P.IVA assente'
     const a = associatiMap[p]
     if (!a) return 'Non trovato'
@@ -373,6 +382,14 @@ export default function IscrittiPage() {
     function rigaStile(r) {
       if (!verificaEseguita) return null
       const p = (r.partita_iva||'').toString().replace(/\s/g,'').replace(/^0+/,'')
+      // Accompagnatore senza P.IVA propria: eredita colore dal referente se associato
+      if (!p && r.referente_id) {
+        const refPiva = referentiPivaMap[r.referente_id]
+        if (refPiva && associatiMap[refPiva]?.associato) {
+          const refAss = associatiMap[refPiva]
+          return { bg:C.assocBg, fg:C.assocFg, br:C.assocBr, label:'Associato CNA (tramite referente)', datastipulaRef: refAss.datastipula||'' }
+        }
+      }
       if (!p) return { bg:C.noPivaBg, fg:C.noPivaFg, br:C.noPivaBr, label:'P.IVA assente' }
       const a = associatiMap[p]
       if (!a) return { bg:C.nfBg, fg:C.nfFg, br:C.nfBr, label:'Non trovato' }
@@ -520,7 +537,16 @@ export default function IscrittiPage() {
       ]
       if (verificaEseguita) {
         values.push(getAssLabel(r))
-        values.push(ass?.datastipula||'')
+        // Data stipula: usa quella del referente se accompagnatore senza P.IVA propria
+        const pAcc = (r.partita_iva||'').toString().replace(/\s/g,'').replace(/^0+/,'')
+        let datastipulaExcel = ass?.datastipula||''
+        if (!pAcc && r.referente_id) {
+          const refPiva = referentiPivaMap[r.referente_id]
+          if (refPiva && associatiMap[refPiva]?.associato) {
+            datastipulaExcel = associatiMap[refPiva].datastipula||''
+          }
+        }
+        values.push(datastipulaExcel)
       }
 
       const row = ws.getRow(rowIdx)
@@ -579,6 +605,7 @@ export default function IscrittiPage() {
 
       const legenda = [
         { label:'Associato CNA', desc:'Socio attivo, nessuna disdetta registrata', bg:C.assocBg, fg:C.assocFg },
+        { label:'Associato (tramite referente)', desc:'Accompagnatore di un associato CNA — contratto e data stipula del referente del gruppo', bg:C.assocBg, fg:C.assocFg },
         { label:'Non associato', desc:'P.IVA presente in archivio ma non come iscritto attivo (disdetta o altro servizio)', bg:C.disdBg, fg:C.disdFg },
         { label:'Non trovato', desc:'P.IVA non presente in archivio associati', bg:C.nfBg, fg:C.nfFg },
         { label:'P.IVA assente', desc:'Iscritto senza P.IVA — verifica non eseguibile', bg:C.noPivaBg, fg:C.noPivaFg },
@@ -876,6 +903,11 @@ export default function IscrittiPage() {
   function getRC(r) {
     if (!verificaEseguita) return RC.none
     const p = (r.partita_iva||'').toString().replace(/\s/g,'').replace(/^0+/,'')
+    // Accompagnatore senza P.IVA propria: eredita colore dal referente se associato
+    if (!p && r.referente_id) {
+      const refPiva = referentiPivaMap[r.referente_id]
+      if (refPiva && associatiMap[refPiva]?.associato) return RC.assoc
+    }
     if (!p) return RC.noPiva
     const a = associatiMap[p]
     if (!a) return RC.notFound
