@@ -7,7 +7,7 @@ import { useAuth } from '../../hooks/useAuth'
 import GlowTableHead from '../../components/GlowTableHead'
 import GlowStatCard from '../../components/GlowStatCard'
 import { Modal, PresenzaBadge, Field, Input, Select, Btn, EmptyState } from '../../components/ui'
-import { Users, Search, Download, Upload, Eye, Trash2, UserCheck, AlertCircle, CheckCircle2, X, MapPin, Ticket, RefreshCw, MessageSquare, UserPlus, Link2 } from 'lucide-react'
+import { Users, Search, Download, Upload, Eye, Trash2, UserCheck, AlertCircle, CheckCircle2, X, MapPin, Ticket, RefreshCw, MessageSquare, UserPlus, Link2, Pencil } from 'lucide-react'
 import * as XLSX from 'xlsx'
 import ExcelJS from 'exceljs/dist/exceljs.min.js'
 import { logAttivita } from '../../lib/activityLog'
@@ -102,6 +102,10 @@ export default function IscrittiPage() {
   const [addCapoSearch, setAddCapoSearch] = useState('')
   const [addSaving, setAddSaving] = useState(false)
   const [addError, setAddError] = useState(null)
+  const [editModal, setEditModal] = useState(null)
+  const [editForm, setEditForm] = useState({})
+  const [editSaving, setEditSaving] = useState(false)
+  const [editError, setEditError] = useState(null)
   const [smsSelezione, setSmsSelezione] = useState(new Set()) // Set di reg_id
   const [smsTesto, setSmsTesto] = useState('')
   const [smsMittente, setSmsMittente] = useState('CNA Roma')
@@ -235,6 +239,44 @@ export default function IscrittiPage() {
       next.has(id) ? next.delete(id) : next.add(id)
       return next
     })
+  }
+
+  function apriEditIscritto(r) {
+    setEditForm({
+      nome: r.nome || '', cognome: r.cognome || '', email: r.email || '',
+      cellulare: r.cellulare || '', ragione_sociale: r.ragione_sociale || '',
+      partita_iva: r.partita_iva || '', cap: r.cap || '',
+    })
+    setEditError(null)
+    setEditModal(r)
+  }
+
+  async function salvaEditIscritto() {
+    if (!editModal) return
+    if (!editForm.nome?.trim() || !editForm.cognome?.trim()) {
+      setEditError('Nome e cognome sono obbligatori')
+      return
+    }
+    setEditSaving(true)
+    setEditError(null)
+    try {
+      const { error } = await supabase.from('registrations').update({
+        nome: editForm.nome.trim(),
+        cognome: editForm.cognome.trim(),
+        email: editForm.email?.trim() || null,
+        cellulare: editForm.cellulare?.trim() || null,
+        ragione_sociale: editForm.ragione_sociale?.trim() || null,
+        partita_iva: editForm.partita_iva?.trim() || null,
+        cap: editForm.cap?.trim() || null,
+      }).eq('id', editModal.id)
+      if (error) throw error
+      logAttivita('iscritto_modificato', 'Modificato: ' + editForm.nome.trim() + ' ' + editForm.cognome.trim())
+      setEditModal(null)
+      loadRegs()
+    } catch (e) {
+      setEditError(e.message || 'Errore durante il salvataggio')
+    }
+    setEditSaving(false)
   }
 
   async function salvaIscrittoManuale() {
@@ -1469,6 +1511,11 @@ export default function IscrittiPage() {
                             <button style={s.iconBtn} title="Dettaglio" onClick={()=>setDetail(r)}>
                               <Eye size={15}/>
                             </button>
+                            {canDelete && (
+                              <button style={{...s.iconBtn, color:'#2563EB'}} title="Modifica" onClick={()=>apriEditIscritto(r)}>
+                                <Pencil size={15}/>
+                              </button>
+                            )}
 
                             {canDelete && (
                               <button style={{...s.iconBtn, color:'#DC2626'}} title="Elimina" onClick={()=>setDelConfirm(r)}>
@@ -1962,7 +2009,36 @@ export default function IscrittiPage() {
           )}
         </Modal>
       )}
-    {/* MODALE AGGIUNGI ISCRITTO MANUALE */}
+    {/* MODALE MODIFICA ISCRITTO */}
+      {editModal && (
+        <Modal open onClose={() => setEditModal(null)} title="Modifica iscritto" maxWidth="560px">
+          <div style={{ display:'flex', flexDirection:'column', gap:'16px' }}>
+            <p style={{ margin:0, fontSize:'12px', color:'#9CA3AF' }}>Codice: {editModal.codice_iscrizione || '—'} &middot; QR: {editModal.qr_code || '—'}</p>
+            <div style={{ display:'grid', gridTemplateColumns:'1fr 1fr', gap:'12px' }}>
+              <Field label="Nome *"><Input value={editForm.nome} onChange={e => setEditForm(f=>({...f,nome:e.target.value}))} /></Field>
+              <Field label="Cognome *"><Input value={editForm.cognome} onChange={e => setEditForm(f=>({...f,cognome:e.target.value}))} /></Field>
+            </div>
+            <div style={{ display:'grid', gridTemplateColumns:'1fr 1fr', gap:'12px' }}>
+              <Field label="Email"><Input type="email" value={editForm.email} onChange={e => setEditForm(f=>({...f,email:e.target.value}))} /></Field>
+              <Field label="Cellulare"><Input value={editForm.cellulare} onChange={e => setEditForm(f=>({...f,cellulare:e.target.value}))} /></Field>
+            </div>
+            <div style={{ display:'grid', gridTemplateColumns:'2fr 1fr 1fr', gap:'12px' }}>
+              <Field label="Ragione Sociale"><Input value={editForm.ragione_sociale} onChange={e => setEditForm(f=>({...f,ragione_sociale:e.target.value}))} /></Field>
+              <Field label="Partita IVA"><Input value={editForm.partita_iva} onChange={e => setEditForm(f=>({...f,partita_iva:e.target.value}))} /></Field>
+              <Field label="CAP"><Input value={editForm.cap} onChange={e => setEditForm(f=>({...f,cap:e.target.value}))} /></Field>
+            </div>
+            {editError && <p style={{ margin:0, padding:'10px 14px', background:'#FEF2F2', border:'1px solid #FECACA', borderRadius:'8px', fontSize:'13px', color:'#DC2626', fontWeight:'600' }}>{editError}</p>}
+            <div style={{ display:'flex', gap:'10px', justifyContent:'flex-end', borderTop:'1px solid #E5E7EB', paddingTop:'16px' }}>
+              <Btn variant="secondary" onClick={() => setEditModal(null)} size="md">Annulla</Btn>
+              <Btn variant="primary" onClick={salvaEditIscritto} disabled={editSaving} size="md" style={{ fontWeight:'700' }}>
+                <Pencil size={16}/> {editSaving ? 'Salvataggio...' : 'Salva modifiche'}
+              </Btn>
+            </div>
+          </div>
+        </Modal>
+      )}
+
+        {/* MODALE AGGIUNGI ISCRITTO MANUALE */}
       {addModal && (
         <Modal open onClose={() => setAddModal(false)} title="Aggiungi iscritto manuale" maxWidth="560px">
           <div style={{ display:'flex', flexDirection:'column', gap:'16px' }}>
