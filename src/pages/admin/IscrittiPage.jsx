@@ -780,13 +780,40 @@ export default function IscrittiPage() {
     },
   }
 
-  const sorted = sortCol && SORT_KEYS[sortCol]
-    ? [...filtered].sort((a,b) => {
-        const va = SORT_KEYS[sortCol](a)
-        const vb = SORT_KEYS[sortCol](b)
-        return sortDir === 'asc' ? va.localeCompare(vb) : vb.localeCompare(va)
-      })
-    : filtered
+  // Ordinamento con raggruppamento capogruppo/accompagnatori
+  const sorted = (() => {
+    const base = sortCol && SORT_KEYS[sortCol]
+      ? [...filtered].sort((a,b) => {
+          const va = SORT_KEYS[sortCol](a)
+          const vb = SORT_KEYS[sortCol](b)
+          return sortDir === 'asc' ? va.localeCompare(vb) : vb.localeCompare(va)
+        })
+      : filtered
+
+    // Raggruppa: accompagnatori subito dopo il loro capogruppo
+    const capogruppoIds = new Set(base.filter(r => r.gruppo_id && r.gruppo_id === r.id).map(r => r.id))
+    const accompagnatoriByCapo = {}
+    const standalone = []
+    const usedAsAccomp = new Set()
+
+    for (const r of base) {
+      if (r.referente_id && r.referente_id !== r.id && (capogruppoIds.has(r.referente_id) || base.some(x => x.id === r.referente_id))) {
+        if (!accompagnatoriByCapo[r.referente_id]) accompagnatoriByCapo[r.referente_id] = []
+        accompagnatoriByCapo[r.referente_id].push(r)
+        usedAsAccomp.add(r.id)
+      }
+    }
+
+    const result = []
+    for (const r of base) {
+      if (usedAsAccomp.has(r.id)) continue
+      result.push(r)
+      if (accompagnatoriByCapo[r.id]) {
+        result.push(...accompagnatoriByCapo[r.id])
+      }
+    }
+    return result
+  })()
 
   const totalPages = Math.ceil(sorted.length / PAGE_SIZE)
   const paginated = sorted.slice((pagina-1)*PAGE_SIZE, pagina*PAGE_SIZE)
