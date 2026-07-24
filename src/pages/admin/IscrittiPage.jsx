@@ -7,7 +7,7 @@ import { useAuth } from '../../hooks/useAuth'
 import GlowTableHead from '../../components/GlowTableHead'
 import GlowStatCard from '../../components/GlowStatCard'
 import { Modal, PresenzaBadge, Field, Input, Select, Btn, EmptyState } from '../../components/ui'
-import { Users, Search, Download, Upload, Eye, Trash2, UserCheck, AlertCircle, CheckCircle2, X, MapPin, Ticket, RefreshCw, MessageSquare } from 'lucide-react'
+import { Users, Search, Download, Upload, Eye, Trash2, UserCheck, AlertCircle, CheckCircle2, X, MapPin, Ticket, RefreshCw, MessageSquare, UserPlus, Link2 } from 'lucide-react'
 import * as XLSX from 'xlsx'
 import ExcelJS from 'exceljs/dist/exceljs.min.js'
 import { logAttivita } from '../../lib/activityLog'
@@ -96,6 +96,12 @@ export default function IscrittiPage() {
   // ── SMS ─────────────────────────────────────────────────────────────
   const { user: authUser } = useAuth()
   const [smsModal, setSmsModal] = useState(false)
+  const [addModal, setAddModal] = useState(false)
+  const [addForm, setAddForm] = useState({ nome:'', cognome:'', email:'', cellulare:'', ragione_sociale:'', partita_iva:'', cap:'' })
+  const [addCapogruppo, setAddCapogruppo] = useState(null)
+  const [addCapoSearch, setAddCapoSearch] = useState('')
+  const [addSaving, setAddSaving] = useState(false)
+  const [addError, setAddError] = useState(null)
   const [smsSelezione, setSmsSelezione] = useState(new Set()) // Set di reg_id
   const [smsTesto, setSmsTesto] = useState('')
   const [smsMittente, setSmsMittente] = useState('CNA Roma')
@@ -231,7 +237,56 @@ export default function IscrittiPage() {
     })
   }
 
-  function toggleSelezioneTeatroTutti(regs) {
+  async function salvaIscrittoManuale() {
+    if (!selectedEvento) return
+    if (!addForm.nome?.trim() || !addForm.cognome?.trim()) {
+      setAddError('Nome e cognome sono obbligatori')
+      return
+    }
+    setAddSaving(true)
+    setAddError(null)
+    try {
+      const regId = crypto.randomUUID()
+      const { data: qrData } = await supabase.rpc('generate_qr_token')
+      const qr = qrData || ('QR-' + Math.random().toString(36).slice(2,10).toUpperCase())
+      const { data: codData } = await supabase.rpc('genera_codice_iscrizione', { p_event_id: selectedEvento })
+      const codice = codData || ('MAN-' + Math.random().toString(36).slice(2,6).toUpperCase())
+
+      const payload = {
+        id: regId,
+        event_id: selectedEvento,
+        nome: addForm.nome.trim(),
+        cognome: addForm.cognome.trim(),
+        email: addForm.email?.trim() || null,
+        cellulare: addForm.cellulare?.trim() || null,
+        ragione_sociale: addForm.ragione_sociale?.trim() || null,
+        partita_iva: addForm.partita_iva?.trim() || null,
+        cap: addForm.cap?.trim() || null,
+        qr_code: qr,
+        codice_iscrizione: codice,
+        stato: 'confermato',
+        presente: false,
+        gruppo_id: addCapogruppo ? addCapogruppo.id : null,
+        referente_id: addCapogruppo ? addCapogruppo.id : null,
+      }
+
+      const { error } = await supabase.from('registrations').insert(payload)
+      if (error) throw error
+
+      logAttivita('iscritto_manuale', 'Aggiunto manualmente: ' + payload.nome + ' ' + payload.cognome + (addCapogruppo ? ' (capogruppo: ' + addCapogruppo.nome + ' ' + addCapogruppo.cognome + ')' : ''))
+
+      setAddModal(false)
+      setAddForm({ nome:'', cognome:'', email:'', cellulare:'', ragione_sociale:'', partita_iva:'', cap:'' })
+      setAddCapogruppo(null)
+      setAddCapoSearch('')
+      loadRegs()
+    } catch (e) {
+      setAddError(e.message || 'Errore durante il salvataggio')
+    }
+    setAddSaving(false)
+  }
+
+    function toggleSelezioneTeatroTutti(regs) {
     const conPosto = regs.filter(r => r.numero_posto && r.email).map(r => r.id)
     setTeatroSelezione(prev => {
       const tuttiSelezionati = conPosto.every(id => prev.has(id))
@@ -967,6 +1022,7 @@ export default function IscrittiPage() {
             </span>
           )}
           <Btn variant="secondary" onClick={loadRegs} size="md" style={{ background:'#FACC15', color:'#0A0A0A', borderColor:'#FACC15', fontWeight:'700' }}><RefreshCw size={16}/> Aggiorna</Btn>
+          <Btn variant="primary" onClick={() => { setAddModal(true); setAddError(null); setAddForm({ nome:'', cognome:'', email:'', cellulare:'', ragione_sociale:'', partita_iva:'', cap:'' }); setAddCapogruppo(null); setAddCapoSearch('') }} size="md" style={{ fontWeight:'700' }}><UserPlus size={16}/> Aggiungi</Btn>
           <Btn variant="secondary"
             onClick={() => apriSmsModal(smsSelezione.size > 0 ? 'selezione' : 'tutti', null)}
             size="md"
@@ -1873,6 +1929,90 @@ export default function IscrittiPage() {
           )}
         </Modal>
       )}
+    {/* MODALE AGGIUNGI ISCRITTO MANUALE */}
+      {addModal && (
+        <Modal open onClose={() => setAddModal(false)} title="Aggiungi iscritto manuale" maxWidth="560px">
+          <div style={{ display:'flex', flexDirection:'column', gap:'16px' }}>
+            <div style={{ display:'grid', gridTemplateColumns:'1fr 1fr', gap:'12px' }}>
+              <Field label="Nome *"><Input value={addForm.nome} onChange={e => setAddForm(f=>({...f,nome:e.target.value}))} placeholder="Nome" /></Field>
+              <Field label="Cognome *"><Input value={addForm.cognome} onChange={e => setAddForm(f=>({...f,cognome:e.target.value}))} placeholder="Cognome" /></Field>
+            </div>
+            <div style={{ display:'grid', gridTemplateColumns:'1fr 1fr', gap:'12px' }}>
+              <Field label="Email"><Input type="email" value={addForm.email} onChange={e => setAddForm(f=>({...f,email:e.target.value}))} placeholder="email@esempio.it" /></Field>
+              <Field label="Cellulare"><Input value={addForm.cellulare} onChange={e => setAddForm(f=>({...f,cellulare:e.target.value}))} placeholder="+39..." /></Field>
+            </div>
+            <div style={{ display:'grid', gridTemplateColumns:'2fr 1fr 1fr', gap:'12px' }}>
+              <Field label="Ragione Sociale"><Input value={addForm.ragione_sociale} onChange={e => setAddForm(f=>({...f,ragione_sociale:e.target.value}))} placeholder="Ragione sociale" /></Field>
+              <Field label="Partita IVA"><Input value={addForm.partita_iva} onChange={e => setAddForm(f=>({...f,partita_iva:e.target.value}))} placeholder="P.IVA" /></Field>
+              <Field label="CAP"><Input value={addForm.cap} onChange={e => setAddForm(f=>({...f,cap:e.target.value}))} placeholder="00100" /></Field>
+            </div>
+
+            {/* CAPOGRUPPO */}
+            <div style={{ borderTop:'1px solid #E5E7EB', paddingTop:'16px' }}>
+              <p style={{ margin:'0 0 8px', fontSize:'13px', fontWeight:'700', color:'#374151', display:'flex', alignItems:'center', gap:'6px' }}><Link2 size={14}/> Collega a capogruppo (opzionale)</p>
+              {addCapogruppo ? (
+                <div style={{ display:'flex', alignItems:'center', gap:'10px', padding:'10px 14px', background:'#EFF6FF', border:'1px solid #BFDBFE', borderRadius:'8px' }}>
+                  <UserCheck size={16} style={{ color:'#2563EB', flexShrink:0 }}/>
+                  <div style={{ flex:1 }}>
+                    <p style={{ margin:0, fontSize:'14px', fontWeight:'700', color:'#1E40AF' }}>{addCapogruppo.nome} {addCapogruppo.cognome}</p>
+                    <p style={{ margin:'2px 0 0', fontSize:'12px', color:'#6B7280' }}>{addCapogruppo.email || addCapogruppo.cellulare || 'Nessun contatto'}{addCapogruppo.codice_iscrizione ? (' - ' + addCapogruppo.codice_iscrizione) : ''}</p>
+                  </div>
+                  <button onClick={() => { setAddCapogruppo(null); setAddCapoSearch('') }} style={{ background:'none', border:'none', cursor:'pointer', color:'#9CA3AF', padding:'4px' }}><X size={16}/></button>
+                </div>
+              ) : (
+                <div style={{ position:'relative' }}>
+                  <div style={{ position:'relative' }}>
+                    <Search size={14} style={{ position:'absolute', left:'10px', top:'50%', transform:'translateY(-50%)', color:'#9CA3AF' }}/>
+                    <Input
+                      value={addCapoSearch}
+                      onChange={e => setAddCapoSearch(e.target.value)}
+                      placeholder="Cerca per nome, cognome o email..."
+                      style={{ paddingLeft:'32px', fontSize:'13px' }}
+                    />
+                  </div>
+                  {addCapoSearch.trim().length >= 2 && (() => {
+                    const q = addCapoSearch.toLowerCase().trim()
+                    const risultati = registrations.filter(r =>
+                      (r.nome && r.nome.toLowerCase().includes(q)) ||
+                      (r.cognome && r.cognome.toLowerCase().includes(q)) ||
+                      (r.email && r.email.toLowerCase().includes(q)) ||
+                      ((r.nome + ' ' + r.cognome).toLowerCase().includes(q))
+                    ).slice(0, 8)
+                    if (risultati.length === 0) return <p style={{ margin:'8px 0 0', fontSize:'12px', color:'#9CA3AF' }}>Nessun iscritto trovato</p>
+                    return (
+                      <div style={{ marginTop:'4px', border:'1px solid #E5E7EB', borderRadius:'8px', maxHeight:'200px', overflowY:'auto', background:'#fff' }}>
+                        {risultati.map(r => (
+                          <button key={r.id} onClick={() => { setAddCapogruppo(r); setAddCapoSearch('') }}
+                            style={{ display:'flex', alignItems:'center', gap:'10px', width:'100%', padding:'10px 14px', background:'none', border:'none', borderBottom:'1px solid #F3F4F6', cursor:'pointer', textAlign:'left', fontSize:'13px' }}
+                            onMouseEnter={e => e.currentTarget.style.background='#F9FAFB'}
+                            onMouseLeave={e => e.currentTarget.style.background='none'}>
+                            <Users size={14} style={{ color:'#9CA3AF', flexShrink:0 }}/>
+                            <div style={{ flex:1 }}>
+                              <span style={{ fontWeight:'600', color:'#0A0A0A' }}>{r.nome} {r.cognome}</span>
+                              <span style={{ color:'#6B7280', marginLeft:'8px' }}>{r.email || r.cellulare || ''}</span>
+                            </div>
+                            {r.codice_iscrizione && <span style={{ fontSize:'11px', color:'#9CA3AF', fontFamily:'monospace' }}>{r.codice_iscrizione}</span>}
+                          </button>
+                        ))}
+                      </div>
+                    )
+                  })()}
+                </div>
+              )}
+            </div>
+
+            {addError && <p style={{ margin:0, padding:'10px 14px', background:'#FEF2F2', border:'1px solid #FECACA', borderRadius:'8px', fontSize:'13px', color:'#DC2626', fontWeight:'600' }}>{addError}</p>}
+
+            <div style={{ display:'flex', gap:'10px', justifyContent:'flex-end', borderTop:'1px solid #E5E7EB', paddingTop:'16px' }}>
+              <Btn variant="secondary" onClick={() => setAddModal(false)} size="md">Annulla</Btn>
+              <Btn variant="primary" onClick={salvaIscrittoManuale} disabled={addSaving} size="md" style={{ fontWeight:'700' }}>
+                <UserPlus size={16}/> {addSaving ? 'Salvataggio...' : 'Aggiungi iscritto'}
+              </Btn>
+            </div>
+          </div>
+        </Modal>
+      )}
+
     </div>
   )
 }
