@@ -275,6 +275,12 @@ export default function IscrittiPage() {
 
       logAttivita('iscritto_manuale', 'Aggiunto manualmente: ' + payload.nome + ' ' + payload.cognome + (addCapogruppo ? ' (capogruppo: ' + addCapogruppo.nome + ' ' + addCapogruppo.cognome + ')' : ''))
 
+      // Email conferma (fire-and-forget) - parte anche se stessa email del capogruppo
+      if (payload.email) {
+        supabase.functions.invoke('send-event-email', { body: { tipo: 'conferma_iscrizione', iscrizione_id: regId } })
+          .catch(e => console.warn('Email conferma fallita:', e))
+      }
+
       setAddModal(false)
       setAddForm({ nome:'', cognome:'', email:'', cellulare:'', ragione_sociale:'', partita_iva:'', cap:'' })
       setAddCapogruppo(null)
