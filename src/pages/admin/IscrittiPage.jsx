@@ -105,6 +105,8 @@ export default function IscrittiPage() {
   const [editModal, setEditModal] = useState(null)
   const [editForm, setEditForm] = useState({})
   const [editSaving, setEditSaving] = useState(false)
+  const [editCapogruppo, setEditCapogruppo] = useState(null)
+  const [editCapoSearch, setEditCapoSearch] = useState('')
   const [editError, setEditError] = useState(null)
   const [smsSelezione, setSmsSelezione] = useState(new Set()) // Set di reg_id
   const [smsTesto, setSmsTesto] = useState('')
@@ -248,6 +250,9 @@ export default function IscrittiPage() {
       partita_iva: r.partita_iva || '', cap: r.cap || '',
     })
     setEditError(null)
+    setEditCapoSearch('')
+    const ref = r.referente_id && r.referente_id !== r.id ? registrations.find(x => x.id === r.referente_id) || null : null
+    setEditCapogruppo(ref)
     setEditModal(r)
   }
 
@@ -268,6 +273,8 @@ export default function IscrittiPage() {
         ragione_sociale: editForm.ragione_sociale?.trim() || null,
         partita_iva: editForm.partita_iva?.trim() || null,
         cap: editForm.cap?.trim() || null,
+        gruppo_id: editCapogruppo ? editCapogruppo.id : null,
+        referente_id: editCapogruppo ? editCapogruppo.id : null,
       }).eq('id', editModal.id)
       if (error) throw error
       logAttivita('iscritto_modificato', 'Modificato: ' + editForm.nome.trim() + ' ' + editForm.cognome.trim())
@@ -2027,7 +2034,62 @@ export default function IscrittiPage() {
               <Field label="Partita IVA"><Input value={editForm.partita_iva} onChange={e => setEditForm(f=>({...f,partita_iva:e.target.value}))} /></Field>
               <Field label="CAP"><Input value={editForm.cap} onChange={e => setEditForm(f=>({...f,cap:e.target.value}))} /></Field>
             </div>
-            {editError && <p style={{ margin:0, padding:'10px 14px', background:'#FEF2F2', border:'1px solid #FECACA', borderRadius:'8px', fontSize:'13px', color:'#DC2626', fontWeight:'600' }}>{editError}</p>}
+            {/* CAPOGRUPPO */}
+            <div style={{ borderTop:'1px solid #E5E7EB', paddingTop:'16px' }}>
+              <p style={{ margin:'0 0 8px', fontSize:'13px', fontWeight:'700', color:'#374151', display:'flex', alignItems:'center', gap:'6px' }}><Link2 size={14}/> Capogruppo (opzionale)</p>
+              {editCapogruppo ? (
+                <div style={{ display:'flex', alignItems:'center', gap:'10px', padding:'10px 14px', background:'#EFF6FF', border:'1px solid #BFDBFE', borderRadius:'8px' }}>
+                  <UserCheck size={16} style={{ color:'#2563EB', flexShrink:0 }}/>
+                  <div style={{ flex:1 }}>
+                    <p style={{ margin:0, fontSize:'14px', fontWeight:'700', color:'#1E40AF' }}>{editCapogruppo.nome} {editCapogruppo.cognome}</p>
+                    <p style={{ margin:'2px 0 0', fontSize:'12px', color:'#6B7280' }}>{editCapogruppo.email || editCapogruppo.cellulare || 'Nessun contatto'}{editCapogruppo.codice_iscrizione ? (' - ' + editCapogruppo.codice_iscrizione) : ''}</p>
+                  </div>
+                  <button onClick={() => { setEditCapogruppo(null); setEditCapoSearch('') }} style={{ background:'none', border:'none', cursor:'pointer', color:'#9CA3AF', padding:'4px' }}><X size={16}/></button>
+                </div>
+              ) : (
+                <div style={{ position:'relative' }}>
+                  <div style={{ position:'relative' }}>
+                    <Search size={14} style={{ position:'absolute', left:'10px', top:'50%', transform:'translateY(-50%)', color:'#9CA3AF' }}/>
+                    <Input
+                      value={editCapoSearch}
+                      onChange={e => setEditCapoSearch(e.target.value)}
+                      placeholder="Cerca per nome, cognome o email..."
+                      style={{ paddingLeft:'32px', fontSize:'13px' }}
+                    />
+                  </div>
+                  {editCapoSearch.trim().length >= 2 && (() => {
+                    const q = editCapoSearch.toLowerCase().trim()
+                    const risultati = registrations.filter(r =>
+                      r.id !== editModal.id &&
+                      ((r.nome && r.nome.toLowerCase().includes(q)) ||
+                      (r.cognome && r.cognome.toLowerCase().includes(q)) ||
+                      (r.email && r.email.toLowerCase().includes(q)) ||
+                      ((r.nome + ' ' + r.cognome).toLowerCase().includes(q)))
+                    ).slice(0, 8)
+                    if (risultati.length === 0) return <p style={{ margin:'8px 0 0', fontSize:'12px', color:'#9CA3AF' }}>Nessun iscritto trovato</p>
+                    return (
+                      <div style={{ marginTop:'4px', border:'1px solid #E5E7EB', borderRadius:'8px', maxHeight:'200px', overflowY:'auto', background:'#fff' }}>
+                        {risultati.map(r => (
+                          <button key={r.id} onClick={() => { setEditCapogruppo(r); setEditCapoSearch('') }}
+                            style={{ display:'flex', alignItems:'center', gap:'10px', width:'100%', padding:'10px 14px', background:'none', border:'none', borderBottom:'1px solid #F3F4F6', cursor:'pointer', textAlign:'left', fontSize:'13px' }}
+                            onMouseEnter={e => e.currentTarget.style.background='#F9FAFB'}
+                            onMouseLeave={e => e.currentTarget.style.background='none'}>
+                            <Users size={14} style={{ color:'#9CA3AF', flexShrink:0 }}/>
+                            <div style={{ flex:1 }}>
+                              <span style={{ fontWeight:'600', color:'#0A0A0A' }}>{r.nome} {r.cognome}</span>
+                              <span style={{ color:'#6B7280', marginLeft:'8px' }}>{r.email || r.cellulare || ''}</span>
+                            </div>
+                            {r.codice_iscrizione && <span style={{ fontSize:'11px', color:'#9CA3AF', fontFamily:'monospace' }}>{r.codice_iscrizione}</span>}
+                          </button>
+                        ))}
+                      </div>
+                    )
+                  })()}
+                </div>
+              )}
+            </div>
+
+                        {editError && <p style={{ margin:0, padding:'10px 14px', background:'#FEF2F2', border:'1px solid #FECACA', borderRadius:'8px', fontSize:'13px', color:'#DC2626', fontWeight:'600' }}>{editError}</p>}
             <div style={{ display:'flex', gap:'10px', justifyContent:'flex-end', borderTop:'1px solid #E5E7EB', paddingTop:'16px' }}>
               <Btn variant="secondary" onClick={() => setEditModal(null)} size="md">Annulla</Btn>
               <Btn variant="primary" onClick={salvaEditIscritto} disabled={editSaving} size="md" style={{ fontWeight:'700' }}>
