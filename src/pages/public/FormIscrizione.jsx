@@ -339,16 +339,19 @@ export default function FormIscrizione({ event, onSuccess, tema = {} }) {
 
       if (err0) throw new Error(err0.message)
 
+      const tuttiIds = [reg0Id]
       for (let i = 1; i < persone.length; i++) {
+        const accId = crypto.randomUUID()
         const { data: qrAcc } = await supabase.rpc('generate_qr_token')
         await supabase.from('registrations').insert({
-          id: crypto.randomUUID(),
+          id: accId,
           ...buildPayload(persone[i]),
           qr_code: qrAcc || ('QR-' + Math.random().toString(36).slice(2,10).toUpperCase()),
           codice_iscrizione: codiceBase + suffissi[i],
           gruppo_id: reg0Id,
           referente_id: reg0Id,
         })
+        tuttiIds.push(accId)
       }
 
       onSuccess?.({
@@ -357,11 +360,13 @@ export default function FormIscrizione({ event, onSuccess, tema = {} }) {
         email: persone[0].email?.trim(), accompagnatori: persone.length - 1,
       })
 
-      // Email conferma iscritto + notifica admin (fire-and-forget)
-      const emailPayload = { iscrizione_id: reg0Id }
-      supabase.functions.invoke('send-event-email', { body: { tipo: 'conferma_iscrizione', ...emailPayload } })
-        .catch(e => console.warn('Email conferma fallita:', e))
-      supabase.functions.invoke('send-event-email', { body: { tipo: 'notifica_admin', ...emailPayload } })
+      // Email conferma per OGNI iscritto del gruppo (fire-and-forget)
+      tuttiIds.forEach(rid => {
+        supabase.functions.invoke('send-event-email', { body: { tipo: 'conferma_iscrizione', iscrizione_id: rid } })
+          .catch(e => console.warn('Email conferma fallita:', e))
+      })
+      // Notifica admin solo una volta (referente)
+      supabase.functions.invoke('send-event-email', { body: { tipo: 'notifica_admin', iscrizione_id: reg0Id } })
         .catch(e => console.warn('Email admin fallita:', e))
     } catch (err) {
       setErrGen(err.message?.includes('capienza_esaurita')
