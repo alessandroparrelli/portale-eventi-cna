@@ -97,7 +97,7 @@ export default function IscrittiPage() {
   const { user: authUser } = useAuth()
   const [smsModal, setSmsModal] = useState(false)
   const [addModal, setAddModal] = useState(false)
-  const [addForm, setAddForm] = useState({ nome:'', cognome:'', email:'', cellulare:'', ragione_sociale:'', partita_iva:'', cap:'' })
+  const [addForm, setAddForm] = useState({ nome:'', cognome:'', email:'', cellulare:'', ragione_sociale:'', partita_iva:'', cap:'', extra_1:'', extra_2:'', extra_3:'', extra_4:'', extra_5:'' })
   const [addCapogruppo, setAddCapogruppo] = useState(null)
   const [addCapoSearch, setAddCapoSearch] = useState('')
   const [addSaving, setAddSaving] = useState(false)
@@ -248,6 +248,9 @@ export default function IscrittiPage() {
       nome: r.nome || '', cognome: r.cognome || '', email: r.email || '',
       cellulare: r.cellulare || '', ragione_sociale: r.ragione_sociale || '',
       partita_iva: r.partita_iva || '', cap: r.cap || '',
+      extra_1: r.extra_1 || '', extra_2: r.extra_2 || '',
+      extra_3: r.extra_3 || '', extra_4: r.extra_4 || '',
+      extra_5: r.extra_5 || '',
     })
     setEditError(null)
     setEditCapoSearch('')
@@ -273,6 +276,11 @@ export default function IscrittiPage() {
         ragione_sociale: editForm.ragione_sociale?.trim() || null,
         partita_iva: editForm.partita_iva?.trim() || null,
         cap: editForm.cap?.trim() || null,
+        extra_1: editForm.extra_1 || null,
+        extra_2: editForm.extra_2 || null,
+        extra_3: editForm.extra_3 || null,
+        extra_4: editForm.extra_4 || null,
+        extra_5: editForm.extra_5 || null,
         gruppo_id: editCapogruppo ? editCapogruppo.id : null,
         referente_id: editCapogruppo ? editCapogruppo.id : null,
       }).eq('id', editModal.id)
@@ -311,6 +319,11 @@ export default function IscrittiPage() {
         ragione_sociale: addForm.ragione_sociale?.trim() || null,
         partita_iva: addForm.partita_iva?.trim() || null,
         cap: addForm.cap?.trim() || null,
+        extra_1: addForm.extra_1 || null,
+        extra_2: addForm.extra_2 || null,
+        extra_3: addForm.extra_3 || null,
+        extra_4: addForm.extra_4 || null,
+        extra_5: addForm.extra_5 || null,
         qr_code: qr,
         codice_iscrizione: codice,
         stato: 'confermato',
@@ -331,7 +344,7 @@ export default function IscrittiPage() {
       }
 
       setAddModal(false)
-      setAddForm({ nome:'', cognome:'', email:'', cellulare:'', ragione_sociale:'', partita_iva:'', cap:'' })
+      setAddForm({ nome:'', cognome:'', email:'', cellulare:'', ragione_sociale:'', partita_iva:'', cap:'', extra_1:'', extra_2:'', extra_3:'', extra_4:'', extra_5:'' })
       setAddCapogruppo(null)
       setAddCapoSearch('')
       loadRegs()
@@ -1104,7 +1117,7 @@ export default function IscrittiPage() {
             </span>
           )}
           <Btn variant="secondary" onClick={loadRegs} size="md" style={{ background:'#FACC15', color:'#0A0A0A', borderColor:'#FACC15', fontWeight:'700' }}><RefreshCw size={16}/> Aggiorna</Btn>
-          <Btn variant="primary" onClick={() => { setAddModal(true); setAddError(null); setAddForm({ nome:'', cognome:'', email:'', cellulare:'', ragione_sociale:'', partita_iva:'', cap:'' }); setAddCapogruppo(null); setAddCapoSearch('') }} size="md" style={{ fontWeight:'700' }}><UserPlus size={16}/> Aggiungi</Btn>
+          <Btn variant="primary" onClick={() => { setAddModal(true); setAddError(null); setAddForm({ nome:'', cognome:'', email:'', cellulare:'', ragione_sociale:'', partita_iva:'', cap:'', extra_1:'', extra_2:'', extra_3:'', extra_4:'', extra_5:'' }); setAddCapogruppo(null); setAddCapoSearch('') }} size="md" style={{ fontWeight:'700' }}><UserPlus size={16}/> Aggiungi</Btn>
           <Btn variant="secondary"
             onClick={() => apriSmsModal(smsSelezione.size > 0 ? 'selezione' : 'tutti', null)}
             size="md"
@@ -2034,6 +2047,24 @@ export default function IscrittiPage() {
               <Field label="Partita IVA"><Input value={editForm.partita_iva} onChange={e => setEditForm(f=>({...f,partita_iva:e.target.value}))} /></Field>
               <Field label="CAP"><Input value={editForm.cap} onChange={e => setEditForm(f=>({...f,cap:e.target.value}))} /></Field>
             </div>
+            {/* CAMPI EXTRA EVENTO */}
+            {formFields.length > 0 && (
+              <div style={{ display:'grid', gridTemplateColumns: formFields.length === 1 ? '1fr' : '1fr 1fr', gap:'12px' }}>
+                {formFields.map(f => (
+                  <Field key={f.colonna_db} label={f.label}>
+                    {f.tipo === 'select' && f.opzioni?.choices ? (
+                      <Select value={editForm[f.colonna_db] || ''} onChange={e => setEditForm(prev => ({...prev, [f.colonna_db]: e.target.value}))}>
+                        <option value="">-- Seleziona --</option>
+                        {f.opzioni.choices.map(o => <option key={o} value={o}>{o}</option>)}
+                      </Select>
+                    ) : (
+                      <Input value={editForm[f.colonna_db] || ''} onChange={e => setEditForm(prev => ({...prev, [f.colonna_db]: e.target.value}))} placeholder={f.label} />
+                    )}
+                  </Field>
+                ))}
+              </div>
+            )}
+
             {/* CAPOGRUPPO */}
             <div style={{ borderTop:'1px solid #E5E7EB', paddingTop:'16px' }}>
               <p style={{ margin:'0 0 8px', fontSize:'13px', fontWeight:'700', color:'#374151', display:'flex', alignItems:'center', gap:'6px' }}><Link2 size={14}/> Capogruppo (opzionale)</p>
@@ -2117,6 +2148,24 @@ export default function IscrittiPage() {
               <Field label="Partita IVA"><Input value={addForm.partita_iva} onChange={e => setAddForm(f=>({...f,partita_iva:e.target.value}))} placeholder="P.IVA" /></Field>
               <Field label="CAP"><Input value={addForm.cap} onChange={e => setAddForm(f=>({...f,cap:e.target.value}))} placeholder="00100" /></Field>
             </div>
+
+            {/* CAMPI EXTRA EVENTO */}
+            {formFields.length > 0 && (
+              <div style={{ display:'grid', gridTemplateColumns: formFields.length === 1 ? '1fr' : '1fr 1fr', gap:'12px' }}>
+                {formFields.map(f => (
+                  <Field key={f.colonna_db} label={f.label}>
+                    {f.tipo === 'select' && f.opzioni?.choices ? (
+                      <Select value={addForm[f.colonna_db] || ''} onChange={e => setAddForm(prev => ({...prev, [f.colonna_db]: e.target.value}))}>
+                        <option value="">-- Seleziona --</option>
+                        {f.opzioni.choices.map(o => <option key={o} value={o}>{o}</option>)}
+                      </Select>
+                    ) : (
+                      <Input value={addForm[f.colonna_db] || ''} onChange={e => setAddForm(prev => ({...prev, [f.colonna_db]: e.target.value}))} placeholder={f.label} />
+                    )}
+                  </Field>
+                ))}
+              </div>
+            )}
 
             {/* CAPOGRUPPO */}
             <div style={{ borderTop:'1px solid #E5E7EB', paddingTop:'16px' }}>
