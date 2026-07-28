@@ -92,66 +92,43 @@ function svgDataUri(chiave, color) {
   return `data:image/svg+xml,${encodeURIComponent(svg)}`
 }
 
-// Lettera/sigla visualizzata nel cerchio per ogni social
-const SOCIAL_LETTER = {
-  facebook:  'f',
-  instagram: 'in',
-  x:         'X',
-  linkedin:  'in',
-  whatsapp:  'wa',
-  youtube:   'yt',
-  tiktok:    'tt',
-  website:   'www',
-}
+const CDN = 'https://raw.githubusercontent.com/alessandroparrelli/fileappoggio/main/social-icons'
 
-// Colori brand fissi (non dipendono dal tema email)
-const SOCIAL_COLOR = {
-  facebook:  '#1877F2',
-  instagram: '#E1306C',
-  x:         '#000000',
-  linkedin:  '#0A66C2',
-  whatsapp:  '#25D366',
-  youtube:   '#FF0000',
-  tiktok:    '#000000',
-  website:   '#E11D48',
+// URL PNG icone ufficiali ospitate su GitHub (compatibili con tutti i client email)
+const SOCIAL_ICON_URL = {
+  facebook:  `${CDN}/facebook.png`,
+  instagram: `${CDN}/instagram.png`,
+  x:         `${CDN}/x.png`,
+  linkedin:  `${CDN}/linkedin.png`,
+  whatsapp:  `${CDN}/whatsapp.png`,
+  youtube:   `${CDN}/youtube.png`,
+  tiktok:    `${CDN}/tiktok.png`,
+  website:   `${CDN}/website.png`,
 }
 
 /**
  * Genera HTML email-safe per i link social.
- * Usa cerchi colorati con testo (tabelle HTML) invece di SVG/data-URI,
- * garantendo la visualizzazione in tutti i client email incluso Outlook desktop.
- * Il parametro F (font stack) e color (testo footer) sono mantenuti per firma compatibile.
+ * Usa PNG reali ospitati su CDN GitHub — icone ufficiali, visibili in tutti i client
+ * email (Gmail, Outlook desktop/web, Apple Mail, iOS Mail, Android Gmail).
  */
 export function socialLinksEmailHtml(links, cp, F, color) {
-  const fontStack = F || 'Arial,sans-serif'
   const attivi = (links || []).filter(l => l.attivo && l.valore && l.valore.trim())
   if (!attivi.length) return ''
 
-  const size = 36  // diametro cerchio px
+  const size = 32
 
   const items = attivi.map(({ chiave, valore }) => {
     const meta = SOCIAL_META[chiave]
     if (!meta) return ''
-    const url = normalizeUrl(valore, chiave)
-    const bg  = SOCIAL_COLOR[chiave] || '#555555'
-    const lbl = SOCIAL_LETTER[chiave] || chiave.charAt(0).toUpperCase()
-    const fontSize = lbl.length > 1 ? '10' : '15'
+    const url    = normalizeUrl(valore, chiave)
+    const imgUrl = SOCIAL_ICON_URL[chiave]
+    if (!imgUrl) return ''
 
-    // Cerchio colorato table-based: funziona in Outlook, Gmail, Apple Mail, iOS, Android
     return (
-      `<td align="center" valign="middle" style="padding:0 6px;">` +
+      `<td align="center" valign="middle" style="padding:0 7px;">` +
         `<a href="${url}" target="_blank" style="text-decoration:none;display:inline-block;" title="${meta.label}">` +
-          `<!--[if mso]><v:roundrect xmlns:v="urn:schemas-microsoft-com:vml" xmlns:w="urn:schemas-microsoft-com:office:word" href="${url}" style="height:${size}px;width:${size}px;v-text-anchor:middle;" arcsize="50%" fillcolor="${bg}" stroke="f"><w:anchorlock/><center style="color:#ffffff;font-family:${fontStack};font-size:${fontSize}px;font-weight:bold;">${lbl}</center></v:roundrect><![endif]-->` +
-          `<!--[if !mso]><!-->` +
-          `<table cellpadding="0" cellspacing="0" border="0" style="border-collapse:collapse;mso-hide:all;">` +
-            `<tr><td align="center" valign="middle" width="${size}" height="${size}" ` +
-              `style="width:${size}px;height:${size}px;border-radius:50%;background-color:${bg};` +
-              `font-family:${fontStack};font-size:${fontSize}px;font-weight:bold;color:#ffffff;` +
-              `text-align:center;line-height:${size}px;mso-line-height-rule:exactly;">` +
-              lbl +
-            `</td></tr>` +
-          `</table>` +
-          `<!--<![endif]-->` +
+          `<img src="${imgUrl}" width="${size}" height="${size}" alt="${meta.label}" ` +
+            `style="width:${size}px;height:${size}px;display:block;border:0;outline:none;" />` +
         `</a>` +
       `</td>`
     )
