@@ -837,7 +837,7 @@ export default function MailUpExportTab({ event, setEvent }) {
             {sezioni.length > 0 && blocchi.length > 0 && (
               <button type="button"
                 onClick={() => { if (window.confirm(`Sovrascrivere i ${blocchi.length} blocchi email con i ${sezioni.length} blocchi del Contenuto?`)) importaDaContenuto() }}
-                style={{ ...sF, padding:'5px 10px', backgroundColor:'#fff', color:'#6B7280', border:'1px solid #E5E7EB', borderRadius:'6px', fontSize:'12px', fontWeight:'600', cursor:'pointer' }}>
+                style={{ ...sF, padding:'9px 16px', backgroundColor:'#003DA5', color:'#fff', border:'none', borderRadius:'8px', fontSize:'14px', fontWeight:'700', cursor:'pointer', display:'flex', alignItems:'center', gap:'6px', boxShadow:'0 2px 6px rgba(0,61,165,0.35)', letterSpacing:'-0.01em', whiteSpace:'nowrap' }}>
                 ↺ Reimporta da Contenuto
               </button>
             )}
