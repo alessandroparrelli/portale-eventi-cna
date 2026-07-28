@@ -92,18 +92,76 @@ function svgDataUri(chiave, color) {
   return `data:image/svg+xml,${encodeURIComponent(svg)}`
 }
 
+// Lettera/sigla visualizzata nel cerchio per ogni social
+const SOCIAL_LETTER = {
+  facebook:  'f',
+  instagram: 'in',
+  x:         'X',
+  linkedin:  'in',
+  whatsapp:  'wa',
+  youtube:   'yt',
+  tiktok:    'tt',
+  website:   'www',
+}
+
+// Colori brand fissi (non dipendono dal tema email)
+const SOCIAL_COLOR = {
+  facebook:  '#1877F2',
+  instagram: '#E1306C',
+  x:         '#000000',
+  linkedin:  '#0A66C2',
+  whatsapp:  '#25D366',
+  youtube:   '#FF0000',
+  tiktok:    '#000000',
+  website:   '#E11D48',
+}
+
+/**
+ * Genera HTML email-safe per i link social.
+ * Usa cerchi colorati con testo (tabelle HTML) invece di SVG/data-URI,
+ * garantendo la visualizzazione in tutti i client email incluso Outlook desktop.
+ * Il parametro F (font stack) e color (testo footer) sono mantenuti per firma compatibile.
+ */
 export function socialLinksEmailHtml(links, cp, F, color) {
-  const iconColor = color || cp
+  const fontStack = F || 'Arial,sans-serif'
   const attivi = (links || []).filter(l => l.attivo && l.valore && l.valore.trim())
   if (!attivi.length) return ''
-  const size = 22
+
+  const size = 36  // diametro cerchio px
+
   const items = attivi.map(({ chiave, valore }) => {
-    const meta = SOCIAL_META[chiave]; if (!meta) return ''
+    const meta = SOCIAL_META[chiave]
+    if (!meta) return ''
     const url = normalizeUrl(valore, chiave)
-    const dataUri = svgDataUri(chiave, iconColor)
-    if (!dataUri) return ''
-    return `<a href="${url}" target="_blank" style="display:inline-block;margin:0 6px;text-decoration:none;" title="${meta.label}"><img src="${dataUri}" width="${size}" height="${size}" alt="${meta.label}" style="width:${size}px;height:${size}px;display:inline-block;border:0;vertical-align:middle;" /></a>`
+    const bg  = SOCIAL_COLOR[chiave] || '#555555'
+    const lbl = SOCIAL_LETTER[chiave] || chiave.charAt(0).toUpperCase()
+    const fontSize = lbl.length > 1 ? '10' : '15'
+
+    // Cerchio colorato table-based: funziona in Outlook, Gmail, Apple Mail, iOS, Android
+    return (
+      `<td align="center" valign="middle" style="padding:0 6px;">` +
+        `<a href="${url}" target="_blank" style="text-decoration:none;display:inline-block;" title="${meta.label}">` +
+          `<!--[if mso]><v:roundrect xmlns:v="urn:schemas-microsoft-com:vml" xmlns:w="urn:schemas-microsoft-com:office:word" href="${url}" style="height:${size}px;width:${size}px;v-text-anchor:middle;" arcsize="50%" fillcolor="${bg}" stroke="f"><w:anchorlock/><center style="color:#ffffff;font-family:${fontStack};font-size:${fontSize}px;font-weight:bold;">${lbl}</center></v:roundrect><![endif]-->` +
+          `<!--[if !mso]><!-->` +
+          `<table cellpadding="0" cellspacing="0" border="0" style="border-collapse:collapse;mso-hide:all;">` +
+            `<tr><td align="center" valign="middle" width="${size}" height="${size}" ` +
+              `style="width:${size}px;height:${size}px;border-radius:50%;background-color:${bg};` +
+              `font-family:${fontStack};font-size:${fontSize}px;font-weight:bold;color:#ffffff;` +
+              `text-align:center;line-height:${size}px;mso-line-height-rule:exactly;">` +
+              lbl +
+            `</td></tr>` +
+          `</table>` +
+          `<!--<![endif]-->` +
+        `</a>` +
+      `</td>`
+    )
   }).filter(Boolean)
+
   if (!items.length) return ''
-  return `<p style="margin:14px 0 0;text-align:center;">${items.join('')}</p>`
+
+  return (
+    `<table cellpadding="0" cellspacing="0" border="0" align="center" style="border-collapse:collapse;margin:14px auto 0;">` +
+      `<tr>${items.join('')}</tr>` +
+    `</table>`
+  )
 }
