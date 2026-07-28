@@ -83,9 +83,9 @@ export default function EmbedWidget({ url, titolo }) {
           {PRESETS.map(pr => (
             <button key={pr.id} onClick={() => setPreset(pr.id)}
               style={{ padding: '10px 16px', borderRadius: '8px', border: '1px solid',
-                borderColor: preset === pr.id ? '#E11D48' : '#E5E7EB',
+                borderColor: preset === pr.id ? '#003DA5' : '#E5E7EB',
                 backgroundColor: preset === pr.id ? '#EFF6FF' : '#ffffff',
-                color: preset === pr.id ? '#E11D48' : '#374151',
+                color: preset === pr.id ? '#003DA5' : '#374151',
                 fontSize: '13px', fontWeight: '600', cursor: 'pointer',
                 fontFamily: "'Outfit',sans-serif", textAlign: 'left', transition: 'all 0.15s' }}>
               <div style={{ fontWeight: '700' }}>{pr.label}</div>
@@ -96,9 +96,9 @@ export default function EmbedWidget({ url, titolo }) {
           ))}
           <button onClick={() => setPreset('custom')}
             style={{ padding: '10px 16px', borderRadius: '8px', border: '1px solid',
-              borderColor: preset === 'custom' ? '#E11D48' : '#E5E7EB',
+              borderColor: preset === 'custom' ? '#003DA5' : '#E5E7EB',
               backgroundColor: preset === 'custom' ? '#EFF6FF' : '#ffffff',
-              color: preset === 'custom' ? '#E11D48' : '#374151',
+              color: preset === 'custom' ? '#003DA5' : '#374151',
               fontSize: '13px', fontWeight: '600', cursor: 'pointer',
               fontFamily: "'Outfit',sans-serif", textAlign: 'left', transition: 'all 0.15s' }}>
             <div style={{ fontWeight: '700' }}>Personalizzato</div>
@@ -146,7 +146,7 @@ export default function EmbedWidget({ url, titolo }) {
             </button>
             <button onClick={copy}
               style={{ padding: '6px 16px', border: 'none', borderRadius: '6px',
-                backgroundColor: copied ? '#059669' : '#E11D48',
+                backgroundColor: copied ? '#059669' : '#003DA5',
                 fontSize: '12px', fontWeight: '700', color: '#ffffff',
                 cursor: 'pointer', fontFamily: "'Outfit',sans-serif", transition: 'background 0.2s',
                 display: 'flex', alignItems: 'center', gap: '6px' }}>

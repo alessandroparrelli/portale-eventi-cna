@@ -36,7 +36,7 @@ export function StatoBadge({ stato }) {
 
 // ---- BADGE RUOLO ----
 const RUOLO_COLORS = {
-  admin:       { bg: '#FEE4E6', text: '#E11D48' },
+  admin:       { bg: '#EBF0FA', text: '#003DA5' },
   supervisore: { bg: '#FEF3C7', text: '#D97706' },
   utente:      { bg: '#F3F4F6', text: '#6B7280' },
 }
@@ -87,7 +87,7 @@ export function Input({ value, onChange, placeholder, type='text', disabled=fals
       style={{ padding:'9px 12px', border:'1px solid #D1D5DB', borderRadius:'4px',
         fontSize:'14px', fontFamily:"'Outfit',sans-serif", color:'#0A0A0A', outline:'none',
         backgroundColor: disabled ? '#F9FAFB' : '#FFFFFF', ...style }}
-      onFocus={e => !disabled && (e.target.style.borderColor='#E11D48')}
+      onFocus={e => !disabled && (e.target.style.borderColor='#003DA5')}
       onBlur={e => (e.target.style.borderColor='#D1D5DB')}
     />
   )
@@ -99,7 +99,7 @@ export function Select({ value, onChange, children, disabled=false }) {
       style={{ padding:'9px 12px', border:'1px solid #D1D5DB', borderRadius:'4px',
         fontSize:'14px', fontFamily:"'Outfit',sans-serif", color:'#0A0A0A', outline:'none',
         backgroundColor: disabled ? '#F9FAFB' : '#FFFFFF', cursor: disabled ? 'not-allowed' : 'pointer' }}
-      onFocus={e => !disabled && (e.target.style.borderColor='#E11D48')}
+      onFocus={e => !disabled && (e.target.style.borderColor='#003DA5')}
       onBlur={e => (e.target.style.borderColor='#D1D5DB')}>
       {children}
     </select>
@@ -112,7 +112,7 @@ export function Textarea({ value, onChange, placeholder, rows=4 }) {
       style={{ padding:'9px 12px', border:'1px solid #D1D5DB', borderRadius:'4px',
         fontSize:'14px', fontFamily:"'Outfit',sans-serif", color:'#0A0A0A', outline:'none',
         resize:'vertical' }}
-      onFocus={e => (e.target.style.borderColor='#E11D48')}
+      onFocus={e => (e.target.style.borderColor='#003DA5')}
       onBlur={e => (e.target.style.borderColor='#D1D5DB')} />
   )
 }
@@ -126,8 +126,8 @@ export function Btn({ onClick, children, variant='primary', size='md', disabled=
     fontSize: size==='sm' ? '13px' : '14px',
   }
   const variants = {
-    primary:   { backgroundColor:'#E11D48', color:'#FFFFFF' },
-    secondary: { backgroundColor:'transparent', color:'#E11D48', border:'1px solid #E11D48' },
+    primary:   { backgroundColor:'#003DA5', color:'#FFFFFF' },
+    secondary: { backgroundColor:'transparent', color:'#003DA5', border:'1px solid #003DA5' },
     danger:    { backgroundColor:'#DC2626', color:'#FFFFFF' },
     ghost:     { backgroundColor:'transparent', color:'#6B7280', border:'1px solid #E5E7EB' },
   }

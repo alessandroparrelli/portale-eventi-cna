@@ -43,7 +43,7 @@ QR Code: ${pageUrl}
   return (
     <div style={{ display:'flex', gap:'8px', justifyContent:'center', flexWrap:'wrap', marginTop:'12px' }}>
       <button onClick={saveQR} disabled={saving}
-        style={{ display:'flex', alignItems:'center', gap:'6px', backgroundColor:'#E11D48', color:'#fff', border:'none', borderRadius:'8px', padding:'10px 16px', fontSize:'13px', fontWeight:'700', cursor:'pointer', fontFamily:"'Outfit',sans-serif", opacity:saving?0.7:1 }}>
+        style={{ display:'flex', alignItems:'center', gap:'6px', backgroundColor:'#003DA5', color:'#fff', border:'none', borderRadius:'8px', padding:'10px 16px', fontSize:'13px', fontWeight:'700', cursor:'pointer', fontFamily:"'Outfit',sans-serif", opacity:saving?0.7:1 }}>
         <Download size={15}/> {saved ? '✓ Salvato!' : saving ? '…' : 'Salva QR'}
       </button>
       <button onClick={shareWhatsApp}
@@ -89,7 +89,7 @@ function QRCodeDisplay({ value }) {
         : err
           ? <p style={{ fontSize:'13px', color:'#DC2626' }}>Errore generazione QR</p>
           : <div style={{ width:220, height:220, borderRadius:'8px', border:'1px solid #E5E7EB', display:'flex', alignItems:'center', justifyContent:'center', backgroundColor:'#F9FAFB' }}>
-              <div style={{ width:28, height:28, border:'3px solid #E5E7EB', borderTopColor:'#E11D48', borderRadius:'50%', animation:'qrspin .8s linear infinite' }}/>
+              <div style={{ width:28, height:28, border:'3px solid #E5E7EB', borderTopColor:'#003DA5', borderRadius:'50%', animation:'qrspin .8s linear infinite' }}/>
             </div>
       }
       <p style={{ fontSize:'11px', color:'#9CA3AF', margin:0, fontFamily:'monospace', letterSpacing:'0.05em' }}>{value}</p>
@@ -153,7 +153,7 @@ export default function Iscrizione() {
     setSearching(false)
   }
 
-  const primaryColor = event?.tema?.colore_primario || '#E11D48'
+  const primaryColor = event?.tema?.colore_primario || '#003DA5'
   const logoUrl = event?.logo_url || CNA_LOGO
 
   return (
@@ -317,7 +317,7 @@ export default function Iscrizione() {
                 </div>
                 <div style={{ marginTop:'14px', paddingTop:'14px', borderTop:'1px solid #F3F4F6' }}>
                   <p style={{ fontSize:'11px', color:'#9CA3AF', margin:'0 0 4px' }}>Codice iscrizione</p>
-                  <p style={{ fontSize:'13px', fontFamily:'monospace', fontWeight:'700', color:'#E11D48', margin:0, letterSpacing:'0.05em' }}>{reg.codice_iscrizione}</p>
+                  <p style={{ fontSize:'13px', fontFamily:'monospace', fontWeight:'700', color:'#003DA5', margin:0, letterSpacing:'0.05em' }}>{reg.codice_iscrizione}</p>
                 </div>
               </div>
 

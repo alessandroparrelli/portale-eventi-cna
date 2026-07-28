@@ -18,7 +18,7 @@ function Inp({ label, required, value, onChange, type = 'text', placeholder, err
           fontFamily: "'Outfit',sans-serif", outline: 'none',
           boxSizing: 'border-box', width: '100%', minWidth: 0,
         }}
-        onFocus={e => (e.target.style.borderColor = '#E11D48')}
+        onFocus={e => (e.target.style.borderColor = '#003DA5')}
         onBlur={e => (e.target.style.borderColor = error ? '#DC2626' : '#D1D5DB')}
       />
       {error && <span style={{ fontSize: '12px', color: '#DC2626' }}>{error}</span>}
@@ -467,5 +467,5 @@ const defaultCampi = [
 const s = {
   grid: { display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(140px, 1fr))', gap: '12px' },
   errBox: { backgroundColor:'#FEF2F2', border:'1px solid #FECACA', borderRadius:'6px', padding:'10px 14px', fontSize:'14px', color:'#DC2626', marginBottom:'12px' },
-  submitBtn: { marginTop:'8px', display:'flex', alignItems:'center', justifyContent:'center', gap:'8px', backgroundColor:'#E11D48', color:'#FFFFFF', border:'none', borderRadius:'6px', padding:'14px 24px', fontSize:'15px', fontWeight:'700', fontFamily:"'Outfit',sans-serif", cursor:'pointer', letterSpacing:'-0.01em', transition:'opacity 0.15s' },
+  submitBtn: { marginTop:'8px', display:'flex', alignItems:'center', justifyContent:'center', gap:'8px', backgroundColor:'#003DA5', color:'#FFFFFF', border:'none', borderRadius:'6px', padding:'14px 24px', fontSize:'15px', fontWeight:'700', fontFamily:"'Outfit',sans-serif", cursor:'pointer', letterSpacing:'-0.01em', transition:'opacity 0.15s' },
 }

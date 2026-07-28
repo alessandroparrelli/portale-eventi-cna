@@ -16,7 +16,7 @@ import {
 import RichEditor from '../../components/editor/RichEditor'
 import HeaderEditor, { mergeHeaderConfig, buildFullEmailHtml, DEFAULT_HEADER_CONFIG } from '../../components/editor/HeaderEditor'
 
-const BLU = '#E11D48'
+const BLU = '#003DA5'
 const NERO = '#0A0A0A'
 
 // ─── Tipi email ────────────────────────────────────────────────────────────────
@@ -100,7 +100,7 @@ function blocchiToHtml(blocchi) {
       if (b.tipo==='qr') return `<div style="text-align:center;padding:28px 0;margin:0 0 20px"><p style="font-size:13px;color:#6B7280;margin:0 0 16px;font-family:Inter,Arial,sans-serif">${b.testo||'Il tuo QR code di accesso'}</p>{{QR_BLOCK_${b.size||160}}}<p style="font-size:12px;color:#9CA3AF;margin:12px 0 0;font-family:monospace">{{qr_code}}</p></div>`
       if (b.tipo==='separatore') return `<div style="padding:${b.spazio||24}px 0"><hr style="border:none;border-top:${b.spessore||1}px solid ${b.colore||'#E5E7EB'};margin:0"/></div>`
       if (b.tipo==='spazio') return `<div style="height:${b.altezza||32}px"></div>`
-      if (b.tipo==='mappa') { const addr=(b.indirizzo||'').replace(/\{\{luogo_evento\}\}/g,b.indirizzo||''); const addrEnc=encodeURIComponent(addr); const h=b.altezza||200; const mapUrl=`https://www.google.com/maps/search/?api=1&query=${addrEnc}`; return `<table role="presentation" width="100%" cellpadding="0" cellspacing="0" border="0" style="margin:0 0 20px;border-radius:10px;overflow:hidden;border:1.5px solid #E5E7EB"><tr><td><a href="${mapUrl}" target="_blank" rel="noopener" style="display:block;text-decoration:none"><table role="presentation" width="100%" cellpadding="0" cellspacing="0" border="0"><tr><td align="center" valign="middle" height="${h}" style="background:#EFF6FF;padding:20px;text-align:center"><div>&#x1F5FA;&#xFE0F;</div><p style="margin:8px 0 0;font-size:14px;color:#1D4ED8;font-weight:700;font-family:Inter,Arial,sans-serif">Clicca per aprire la mappa</p></td></tr><tr><td style="padding:14px 18px;background:#ffffff;border-top:2px solid #DBEAFE"><table role="presentation" width="100%" cellpadding="0" cellspacing="0" border="0"><tr><td width="30" valign="middle" style="font-size:22px;padding-right:12px">&#x1F4CD;</td><td valign="middle"><p style="margin:0 0 2px;font-size:14px;font-weight:700;color:#0A0A0A;font-family:Inter,Arial,sans-serif">${b.testo||'Come raggiungerci'}</p><p style="margin:0;font-size:12px;color:#374151;font-family:Inter,Arial,sans-serif">${addr}</p></td><td width="100" align="right" valign="middle"><span style="font-size:11px;font-weight:700;color:#E11D48;font-family:Inter,Arial,sans-serif;border:1.5px solid #BFDBFE;padding:5px 10px;border-radius:6px;white-space:nowrap">Apri Maps &#8594;</span></td></tr></table></td></tr></table></a></td></tr></table>` }
+      if (b.tipo==='mappa') { const addr=(b.indirizzo||'').replace(/\{\{luogo_evento\}\}/g,b.indirizzo||''); const addrEnc=encodeURIComponent(addr); const h=b.altezza||200; const mapUrl=`https://www.google.com/maps/search/?api=1&query=${addrEnc}`; return `<table role="presentation" width="100%" cellpadding="0" cellspacing="0" border="0" style="margin:0 0 20px;border-radius:10px;overflow:hidden;border:1.5px solid #E5E7EB"><tr><td><a href="${mapUrl}" target="_blank" rel="noopener" style="display:block;text-decoration:none"><table role="presentation" width="100%" cellpadding="0" cellspacing="0" border="0"><tr><td align="center" valign="middle" height="${h}" style="background:#EFF6FF;padding:20px;text-align:center"><div>&#x1F5FA;&#xFE0F;</div><p style="margin:8px 0 0;font-size:14px;color:#1D4ED8;font-weight:700;font-family:Inter,Arial,sans-serif">Clicca per aprire la mappa</p></td></tr><tr><td style="padding:14px 18px;background:#ffffff;border-top:2px solid #DBEAFE"><table role="presentation" width="100%" cellpadding="0" cellspacing="0" border="0"><tr><td width="30" valign="middle" style="font-size:22px;padding-right:12px">&#x1F4CD;</td><td valign="middle"><p style="margin:0 0 2px;font-size:14px;font-weight:700;color:#0A0A0A;font-family:Inter,Arial,sans-serif">${b.testo||'Come raggiungerci'}</p><p style="margin:0;font-size:12px;color:#374151;font-family:Inter,Arial,sans-serif">${addr}</p></td><td width="100" align="right" valign="middle"><span style="font-size:11px;font-weight:700;color:#003DA5;font-family:Inter,Arial,sans-serif;border:1.5px solid #BFDBFE;padding:5px 10px;border-radius:6px;white-space:nowrap">Apri Maps &#8594;</span></td></tr></table></td></tr></table></a></td></tr></table>` }
       return ''
     } catch(e) { return '' }
   }).join('\n')
@@ -145,7 +145,7 @@ function ImageDropZone({ value, onChange, label='Immagine' }) {
         <div onDragOver={e=>{e.preventDefault();setDrag(true)}} onDragLeave={()=>setDrag(false)}
           onDrop={e=>{e.preventDefault();setDrag(false);handleFile(e.dataTransfer.files[0])}}
           onClick={()=>ref.current?.click()}
-          style={{ border:`2px dashed ${drag?BLU:'#D1D5DB'}`, borderRadius:'7px', padding:'12px', textAlign:'center', cursor:'pointer', background:drag?'#FEE4E6':'#FAFAFA', marginBottom:'5px' }}>
+          style={{ border:`2px dashed ${drag?BLU:'#D1D5DB'}`, borderRadius:'7px', padding:'12px', textAlign:'center', cursor:'pointer', background:drag?'#EBF0FA':'#FAFAFA', marginBottom:'5px' }}>
           <input ref={ref} type="file" accept="image/*" style={{ display:'none' }} onChange={e=>handleFile(e.target.files[0])}/>
           {uploading ? <div style={{ display:'flex',alignItems:'center',justifyContent:'center',gap:'5px',fontSize:'11px',color:'#6B7280' }}><Loader2 size={13} style={{animation:'spin 1s linear infinite'}}/>Caricamento…</div>
             : <><Upload size={14} style={{color:'#9CA3AF',marginBottom:'3px'}}/><p style={{margin:0,fontSize:'11px',color:'#6B7280'}}><strong style={{color:BLU}}>Trascina</strong> o clicca</p></>}
@@ -185,7 +185,7 @@ function BlockProps({ block, onChange }) {
       <label style={lbl}>Allineamento</label>
       <div style={{display:'flex',gap:'3px'}}>
         {[['left',<AlignLeft size={12}/>],['center',<AlignCenter size={12}/>],['right',<AlignRight size={12}/>]].map(([v,ic])=>(
-          <button key={v} onClick={()=>set(key,v)} style={{flex:1,padding:'5px',border:`1px solid ${block[key]===v?BLU:'#E5E7EB'}`,borderRadius:'5px',cursor:'pointer',background:block[key]===v?'#FEE4E6':'#fff',color:block[key]===v?BLU:'#9CA3AF',display:'flex',alignItems:'center',justifyContent:'center'}}>{ic}</button>
+          <button key={v} onClick={()=>set(key,v)} style={{flex:1,padding:'5px',border:`1px solid ${block[key]===v?BLU:'#E5E7EB'}`,borderRadius:'5px',cursor:'pointer',background:block[key]===v?'#EBF0FA':'#fff',color:block[key]===v?BLU:'#9CA3AF',display:'flex',alignItems:'center',justifyContent:'center'}}>{ic}</button>
         ))}
       </div>
     </div>
@@ -397,7 +397,7 @@ export default function EmailEditorPage() {
         <span style={{fontSize:'13px',fontWeight:'700',color:NERO,flex:1,overflow:'hidden',textOverflow:'ellipsis',whiteSpace:'nowrap'}}>
           {isNew ? 'Nuovo template email' : (template.oggetto||'…')}
         </span>
-        {tipoLabel && <span style={{background:'#FEE4E6',color:BLU,fontSize:'11px',fontWeight:'700',padding:'2px 8px',borderRadius:'20px',flexShrink:0}}>{tipoLabel.icon} {tipoLabel.label}</span>}
+        {tipoLabel && <span style={{background:'#EBF0FA',color:BLU,fontSize:'11px',fontWeight:'700',padding:'2px 8px',borderRadius:'20px',flexShrink:0}}>{tipoLabel.icon} {tipoLabel.label}</span>}
         <div style={{display:'flex',gap:'5px',alignItems:'center',flexShrink:0}}>
           <button onClick={()=>setShowTest(!showTest)} style={ghostBtn}><Send size={11}/> Test</button>
           <button onClick={save} disabled={saving} style={{display:'flex',alignItems:'center',gap:'4px',padding:'6px 16px',borderRadius:'6px',border:'none',cursor:'pointer',fontFamily:"'Outfit',sans-serif",background:saved?'#16A34A':BLU,color:'#fff',fontWeight:'700',fontSize:'12px',transition:'background .2s'}}>
@@ -437,7 +437,7 @@ export default function EmailEditorPage() {
             <div style={{display:'flex',flexDirection:'column',gap:'3px'}}>
               {TIPI.map(t=>(
                 <button key={t.key} type="button" onClick={()=>updT('tipo',t.key)}
-                  style={{display:'flex',alignItems:'center',gap:'6px',padding:'7px 10px',borderRadius:'7px',border:`1.5px solid ${template.tipo===t.key?BLU:'#E5E7EB'}`,cursor:'pointer',background:template.tipo===t.key?'#FEE4E6':'#fff',fontFamily:"'Outfit',sans-serif",textAlign:'left'}}>
+                  style={{display:'flex',alignItems:'center',gap:'6px',padding:'7px 10px',borderRadius:'7px',border:`1.5px solid ${template.tipo===t.key?BLU:'#E5E7EB'}`,cursor:'pointer',background:template.tipo===t.key?'#EBF0FA':'#fff',fontFamily:"'Outfit',sans-serif",textAlign:'left'}}>
                   <span style={{fontSize:'14px'}}>{t.icon}</span>
                   <div>
                     <div style={{fontSize:'11px',fontWeight:'700',color:template.tipo===t.key?BLU:NERO}}>{t.label}</div>
@@ -543,7 +543,7 @@ export default function EmailEditorPage() {
                     </div>
                     {isSel && selectedBl && (
                       <div onClick={e=>e.stopPropagation()} onMouseDown={e=>e.stopPropagation()} onPointerDown={e=>e.stopPropagation()}
-                        style={{padding:'10px 10px 14px',borderTop:'1px solid #FEE4E6',background:'#fff'}}>
+                        style={{padding:'10px 10px 14px',borderTop:'1px solid #EBF0FA',background:'#fff'}}>
                         <BlockProps block={selectedBl} onChange={nb=>updateBlock(i,nb)}/>
                       </div>
                     )}

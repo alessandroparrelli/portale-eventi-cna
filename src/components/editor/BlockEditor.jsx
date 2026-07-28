@@ -16,9 +16,9 @@ export function newBlock(tipo) {
   const base = { id: uid(), tipo }
   switch (tipo) {
     case 'testo':       return { ...base, html: '<p>Scrivi qui…</p>' }
-    case 'stats':       return { ...base, items: [{ num: '100+', label: 'Partecipanti' }, { num: '10', label: 'Relatori' }], colore: '#E11D48', animato: true }
-    case 'griglia':     return { ...base, cols: [{ icona:'target', icona_colore:'#E11D48', titolo: 'Titolo 1', testo: 'Descrizione.' }, { icona:'lightbulb', icona_colore:'#059669', titolo: 'Titolo 2', testo: 'Descrizione.' }, { icona:'rocket', icona_colore:'#7C3AED', titolo: 'Titolo 3', testo: 'Descrizione.' }] }
-    case 'cta':         return { ...base, titolo: 'Pronti a iniziare?', testo_btn: 'Contattaci →', colore: '#E11D48', stile: 'pieno' }
+    case 'stats':       return { ...base, items: [{ num: '100+', label: 'Partecipanti' }, { num: '10', label: 'Relatori' }], colore: '#003DA5', animato: true }
+    case 'griglia':     return { ...base, cols: [{ icona:'target', icona_colore:'#003DA5', titolo: 'Titolo 1', testo: 'Descrizione.' }, { icona:'lightbulb', icona_colore:'#059669', titolo: 'Titolo 2', testo: 'Descrizione.' }, { icona:'rocket', icona_colore:'#7C3AED', titolo: 'Titolo 3', testo: 'Descrizione.' }] }
+    case 'cta':         return { ...base, titolo: 'Pronti a iniziare?', testo_btn: 'Contattaci →', colore: '#003DA5', stile: 'pieno' }
     case 'separatore':  return { ...base, stile: 'linea' }
     case 'immagine':    return { ...base, src: '', didascalia: '' }
     case 'titolo':      return { ...base, testo: 'Titolo sezione', sottotitolo: '', allineamento: 'center', animazione: 'fadeup' }
@@ -28,10 +28,10 @@ export function newBlock(tipo) {
     case 'video':       return { ...base, url: '', didascalia: '' }
     case 'testimonial': return { ...base, items: [{ testo: 'Un servizio eccellente, lo consiglio a tutti.', nome: 'Mario Rossi', ruolo: 'Artigiano' }] }
     case 'countdown':   return { ...base, data: '', titolo: 'Evento tra:', messaggio_scaduto: 'L\'evento è iniziato!' }
-    case 'badge_list':  return { ...base, items: [{ icona: 'check', icona_colore:'#E11D48', testo: 'Vantaggio uno' }, { icona: 'check', icona_colore:'#E11D48', testo: 'Vantaggio due' }, { icona: 'check', icona_colore:'#E11D48', testo: 'Vantaggio tre' }], colore: '#E11D48', colonne: 2 }
+    case 'badge_list':  return { ...base, items: [{ icona: 'check', icona_colore:'#003DA5', testo: 'Vantaggio uno' }, { icona: 'check', icona_colore:'#003DA5', testo: 'Vantaggio due' }, { icona: 'check', icona_colore:'#003DA5', testo: 'Vantaggio tre' }], colore: '#003DA5', colonne: 2 }
     case 'carosello':   return { ...base, immagini: [], didascalia: '', rapporto: '1:1' }
     case 'social':      return { ...base, tipo_social: 'condivisione', url_post: '', mostra_condivisione: true }
-    case 'programma':   return { ...base, titolo: 'Programma', colore_titoli: '#E91E8C', colore_orari: '#E11D48', cornice_stile: 'dotted', cornice_colore: '#D1D5DB', cornice_spessore: 2.5, cornice_radius: 16, sfondo: '#ffffff', voci: [
+    case 'programma':   return { ...base, titolo: 'Programma', colore_titoli: '#E91E8C', colore_orari: '#003DA5', cornice_stile: 'dotted', cornice_colore: '#D1D5DB', cornice_spessore: 2.5, cornice_radius: 16, sfondo: '#ffffff', voci: [
       { tipo: 'orario', orario: 'ORE 10.30', testo: 'Registrazione dei partecipanti' },
       { tipo: 'orario', orario: 'ORE 11.00', testo: 'Avvio dei lavori' },
       { tipo: 'sessione', titolo: 'Titolo intervento', relatori: [{ nome: 'Nome Cognome', ruolo: 'Ruolo / Ente' }] },
@@ -103,7 +103,7 @@ function StatsEditor({ block, onChange }) {
       <div style={{display:'flex',gap:'12px',alignItems:'center',flexWrap:'wrap'}}>
         <div style={{display:'flex',gap:'8px',alignItems:'center'}}>
           <label style={lb}>Colore</label>
-          <input type="color" value={block.colore||'#E11D48'} onChange={e=>onChange({...block,colore:e.target.value})} style={{width:'36px',height:'28px',border:'none',cursor:'pointer'}} />
+          <input type="color" value={block.colore||'#003DA5'} onChange={e=>onChange({...block,colore:e.target.value})} style={{width:'36px',height:'28px',border:'none',cursor:'pointer'}} />
         </div>
         <label style={{display:'flex',alignItems:'center',gap:'6px',cursor:'pointer',fontSize:'13px',fontWeight:'600',color:'#374151'}}>
           <input type="checkbox" checked={block.animato!==false} onChange={e=>onChange({...block,animato:e.target.checked})} />
@@ -128,7 +128,7 @@ function GrigliaEditor({ block, onChange }) {
       <div style={{display:'flex',gap:'8px',alignItems:'center',marginBottom:'4px'}}>
         <label style={lb}>Colonne:</label>
         {[2,3,4].map(n=>(
-          <button key={n} onClick={()=>{let cols=[...(block.cols||[])];while(cols.length<n)cols.push({titolo:`Titolo ${cols.length+1}`,testo:'Descrizione.'});onChange({...block,cols:cols.slice(0,n)})}} style={{...btnAdd,padding:'4px 12px',background:(block.cols||[]).length===n?'#E11D48':'#F3F4F6',color:(block.cols||[]).length===n?'#fff':'#374151'}}>{n}</button>
+          <button key={n} onClick={()=>{let cols=[...(block.cols||[])];while(cols.length<n)cols.push({titolo:`Titolo ${cols.length+1}`,testo:'Descrizione.'});onChange({...block,cols:cols.slice(0,n)})}} style={{...btnAdd,padding:'4px 12px',background:(block.cols||[]).length===n?'#003DA5':'#F3F4F6',color:(block.cols||[]).length===n?'#fff':'#374151'}}>{n}</button>
         ))}
       </div>
       {(block.cols||[]).map((col,i)=>(
@@ -136,7 +136,7 @@ function GrigliaEditor({ block, onChange }) {
           <div style={{display:'flex',gap:'8px',alignItems:'center'}}>
             <IconPicker
               value={col.icona||''}
-              color={col.icona_colore||'#E11D48'}
+              color={col.icona_colore||'#003DA5'}
               onChangeIcon={id=>{const cols=[...block.cols];cols[i]={...cols[i],icona:id};onChange({...block,cols})}}
               onChangeColor={c=>{const cols=[...block.cols];cols[i]={...cols[i],icona_colore:c};onChange({...block,cols})}}
             />
@@ -155,7 +155,7 @@ function CtaEditor({ block, onChange }) {
       <div><label style={lb}>Titolo</label><input value={block.titolo||''} onChange={e=>onChange({...block,titolo:e.target.value})} style={inp} /></div>
       <div><label style={lb}>Testo pulsante</label><input value={block.testo_btn||''} onChange={e=>onChange({...block,testo_btn:e.target.value})} style={inp} /></div>
       <div style={{display:'flex',gap:'12px',alignItems:'center'}}>
-        <div><label style={lb}>Colore</label><input type="color" value={block.colore||'#E11D48'} onChange={e=>onChange({...block,colore:e.target.value})} style={{width:'36px',height:'28px',border:'none',cursor:'pointer'}} /></div>
+        <div><label style={lb}>Colore</label><input type="color" value={block.colore||'#003DA5'} onChange={e=>onChange({...block,colore:e.target.value})} style={{width:'36px',height:'28px',border:'none',cursor:'pointer'}} /></div>
         <div style={{flex:1}}><label style={lb}>Stile</label>
           <select value={block.stile||'pieno'} onChange={e=>onChange({...block,stile:e.target.value})} style={inp}>
             <option value="pieno">Pieno</option>
@@ -174,12 +174,12 @@ function ImmagineEditor({ block, onChange }) {
       <ImageUploader value={block.src||null} onChange={url=>onChange({...block,src:url||''})} />
       <div style={{display:'flex',gap:'6px'}}>
         {[['left','◀ Sin'],['center','■ Ctr'],['right','▶ Dex']].map(([v,l])=>(
-          <button key={v} onClick={()=>onChange({...block,align:v})} style={{flex:1,padding:'7px',border:`1px solid ${(block.align||'center')===v?'#E11D48':'#E5E7EB'}`,borderRadius:'6px',background:(block.align||'center')===v?'#FEE4E6':'#fff',cursor:'pointer',fontSize:'12px',fontWeight:'600',fontFamily:"'Outfit',sans-serif",color:(block.align||'center')===v?'#E11D48':'#6B7280'}}>{l}</button>
+          <button key={v} onClick={()=>onChange({...block,align:v})} style={{flex:1,padding:'7px',border:`1px solid ${(block.align||'center')===v?'#003DA5':'#E5E7EB'}`,borderRadius:'6px',background:(block.align||'center')===v?'#EBF0FA':'#fff',cursor:'pointer',fontSize:'12px',fontWeight:'600',fontFamily:"'Outfit',sans-serif",color:(block.align||'center')===v?'#003DA5':'#6B7280'}}>{l}</button>
         ))}
       </div>
       <div style={{display:'flex',gap:'6px'}}>
         {[['small','33%'],['medium','60%'],['large','100%']].map(([v,l])=>(
-          <button key={v} onClick={()=>onChange({...block,size:v})} style={{flex:1,padding:'7px',border:`1px solid ${(block.size||'large')===v?'#E11D48':'#E5E7EB'}`,borderRadius:'6px',background:(block.size||'large')===v?'#FEE4E6':'#fff',cursor:'pointer',fontSize:'12px',fontWeight:'600',fontFamily:"'Outfit',sans-serif",color:(block.size||'large')===v?'#E11D48':'#6B7280'}}>{l}</button>
+          <button key={v} onClick={()=>onChange({...block,size:v})} style={{flex:1,padding:'7px',border:`1px solid ${(block.size||'large')===v?'#003DA5':'#E5E7EB'}`,borderRadius:'6px',background:(block.size||'large')===v?'#EBF0FA':'#fff',cursor:'pointer',fontSize:'12px',fontWeight:'600',fontFamily:"'Outfit',sans-serif",color:(block.size||'large')===v?'#003DA5':'#6B7280'}}>{l}</button>
         ))}
       </div>
       <input value={block.didascalia||''} onChange={e=>onChange({...block,didascalia:e.target.value})} placeholder="Didascalia opzionale" style={inp} />
@@ -188,7 +188,7 @@ function ImmagineEditor({ block, onChange }) {
 }
 
 function BannerEditor({ block, onChange }) {
-  const stili = [['info','ℹ️ Info','#EFF6FF','#E11D48'],['success','✅ Successo','#D1FAE5','#065F46'],['warning','⚠️ Attenzione','#FFFBEB','#92400E'],['error','🚨 Errore','#FEF2F2','#991B1B']]
+  const stili = [['info','ℹ️ Info','#EFF6FF','#003DA5'],['success','✅ Successo','#D1FAE5','#065F46'],['warning','⚠️ Attenzione','#FFFBEB','#92400E'],['error','🚨 Errore','#FEF2F2','#991B1B']]
   return (
     <div style={{ padding:'16px', display:'flex', flexDirection:'column', gap:'10px' }}>
       <div><label style={lb}>Messaggio</label><textarea value={block.testo||''} onChange={e=>onChange({...block,testo:e.target.value})} rows={2} style={{...inp,resize:'vertical',fontFamily:"'Outfit',sans-serif"}} /></div>
@@ -291,7 +291,7 @@ function BadgeListEditor({ block, onChange }) {
       <div style={{display:'flex',gap:'8px',alignItems:'center',flexWrap:'wrap'}}>
         <div style={{display:'flex',gap:'8px',alignItems:'center'}}>
           <label style={lb}>Colore icona</label>
-          <input type="color" value={block.colore||'#E11D48'} onChange={e=>onChange({...block,colore:e.target.value})} style={{width:'36px',height:'28px',border:'none',cursor:'pointer'}} />
+          <input type="color" value={block.colore||'#003DA5'} onChange={e=>onChange({...block,colore:e.target.value})} style={{width:'36px',height:'28px',border:'none',cursor:'pointer'}} />
         </div>
         <div>
           <label style={lb}>Colonne</label>
@@ -306,7 +306,7 @@ function BadgeListEditor({ block, onChange }) {
         <div key={i} style={{display:'flex',gap:'8px',alignItems:'center'}}>
           <IconPicker
             value={item.icona||'check'}
-            color={item.icona_colore||block.colore||'#E11D48'}
+            color={item.icona_colore||block.colore||'#003DA5'}
             onChangeIcon={id=>{const items=[...block.items];items[i]={...items[i],icona:id};onChange({...block,items})}}
             onChangeColor={c=>{const items=[...block.items];items[i]={...items[i],icona_colore:c};onChange({...block,items})}}
           />
@@ -364,7 +364,7 @@ function ProgrammaEditor({ block, onChange }) {
             </div>
             <div>
               <label style={lb}>Colore orari</label>
-              <input type="color" value={block.colore_orari || '#E11D48'} onChange={e => onChange({ ...block, colore_orari: e.target.value })} style={{ width: '36px', height: '36px', border: 'none', cursor: 'pointer', borderRadius: '4px' }} />
+              <input type="color" value={block.colore_orari || '#003DA5'} onChange={e => onChange({ ...block, colore_orari: e.target.value })} style={{ width: '36px', height: '36px', border: 'none', cursor: 'pointer', borderRadius: '4px' }} />
             </div>
           </div>
         </div>
@@ -402,9 +402,9 @@ function ProgrammaEditor({ block, onChange }) {
         <div style={{ padding: '12px', background: '#F9FAFB', borderRadius: '8px', border: '1px solid #E5E7EB', display: 'flex', flexDirection: 'column', gap: '10px' }}>
           <label style={{ ...lb, marginBottom: 0 }}>Sfondo box</label>
           <div style={{ display: 'flex', gap: '8px', alignItems: 'center', flexWrap: 'wrap' }}>
-            {['#ffffff','#FEE4E6','#FFF0F7','#F9FAFB','#FFF8E6','#E8F5E9','#E11D48','#0A0A0A'].map(c => (
+            {['#ffffff','#EBF0FA','#FFF0F7','#F9FAFB','#FFF8E6','#E8F5E9','#003DA5','#0A0A0A'].map(c => (
               <button key={c} type="button" onClick={() => onChange({ ...block, sfondo: c })} style={{
-                width: '28px', height: '28px', borderRadius: '6px', border: `2px solid ${(block.sfondo || '#ffffff') === c ? '#E11D48' : '#E5E7EB'}`,
+                width: '28px', height: '28px', borderRadius: '6px', border: `2px solid ${(block.sfondo || '#ffffff') === c ? '#003DA5' : '#E5E7EB'}`,
                 background: c, cursor: 'pointer', padding: 0, flexShrink: 0,
               }} title={c} />
             ))}
@@ -519,7 +519,7 @@ function CaroselloEditor({ block, onChange }) {
         <div style={{ display:'flex', gap:'8px' }}>
           {[['1:1','Quadrato'],['4:5','Portrait'],['16:9','Landscape']].map(([v,l])=>(
             <button key={v} type="button" onClick={()=>onChange({...block,rapporto:v})}
-              style={{ flex:1, padding:'7px 4px', border:`1px solid ${(block.rapporto||'1:1')===v?'#E11D48':'#E5E7EB'}`, borderRadius:'6px', background:(block.rapporto||'1:1')===v?'#FEE4E6':'#fff', cursor:'pointer', fontSize:'12px', fontWeight:'600', color:(block.rapporto||'1:1')===v?'#E11D48':'#6B7280', fontFamily:"'Outfit',sans-serif" }}>
+              style={{ flex:1, padding:'7px 4px', border:`1px solid ${(block.rapporto||'1:1')===v?'#003DA5':'#E5E7EB'}`, borderRadius:'6px', background:(block.rapporto||'1:1')===v?'#EBF0FA':'#fff', cursor:'pointer', fontSize:'12px', fontWeight:'600', color:(block.rapporto||'1:1')===v?'#003DA5':'#6B7280', fontFamily:"'Outfit',sans-serif" }}>
               {l}
             </button>
           ))}
@@ -696,10 +696,10 @@ export default function BlockEditor({ blocks = [], onChange }) {
         <button type="button" onClick={()=>setShowAddMenu(o=>!o)} style={{
           display:'flex',alignItems:'center',justifyContent:'center',gap:'8px',
           width:'100%',padding:'13px',
-          border:`2px dashed ${showAddMenu?'#E11D48':'#D1D5DB'}`,
-          borderRadius:'8px',background:showAddMenu?'#FEE4E6':'#FAFAFA',
+          border:`2px dashed ${showAddMenu?'#003DA5':'#D1D5DB'}`,
+          borderRadius:'8px',background:showAddMenu?'#EBF0FA':'#FAFAFA',
           cursor:'pointer',fontSize:'14px',fontWeight:'700',
-          color:showAddMenu?'#E11D48':'#6B7280',fontFamily:"'Outfit',sans-serif",transition:'all .15s',
+          color:showAddMenu?'#003DA5':'#6B7280',fontFamily:"'Outfit',sans-serif",transition:'all .15s',
         }}>
           <span style={{fontSize:'18px'}}>+</span>
           Aggiungi blocco
@@ -723,7 +723,7 @@ export default function BlockEditor({ blocks = [], onChange }) {
                     border:'none',borderBottom:'1px solid #F3F4F6',background:'#fff',cursor:'pointer',
                     fontFamily:"'Outfit',sans-serif",textAlign:'left',transition:'background .1s',
                   }}
-                  onMouseEnter={e=>e.currentTarget.style.background='#FEE4E6'}
+                  onMouseEnter={e=>e.currentTarget.style.background='#EBF0FA'}
                   onMouseLeave={e=>e.currentTarget.style.background='#fff'}>
                     <span style={{display:'flex',alignItems:'center',width:'22px',height:'22px',flexShrink:0}}>
                       {BLOCK_ICONS[tipo]}

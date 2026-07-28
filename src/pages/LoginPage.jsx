@@ -6,14 +6,14 @@ const CNA_LOGO = 'https://raw.githubusercontent.com/alessandroparrelli/fileappog
 // Icone SVG inline colorate
 function IconUser() {
   return (
-    <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="#E11D48" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+    <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="#003DA5" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
       <circle cx="12" cy="8" r="4"/><path d="M4 20c0-4 3.6-7 8-7s8 3 8 7"/>
     </svg>
   )
 }
 function IconLock() {
   return (
-    <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="#E11D48" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+    <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="#003DA5" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
       <rect x="3" y="11" width="18" height="11" rx="2"/><path d="M7 11V7a5 5 0 0 1 10 0v4"/>
     </svg>
   )
@@ -78,7 +78,7 @@ export default function LoginPage() {
             </svg>
             <div style={{ display:'flex', alignItems:'baseline', lineHeight:1 }}>
               <span style={{ fontFamily:"'Outfit',sans-serif", fontWeight:800, fontSize:42, letterSpacing:'-0.04em', color:'#111111' }}>evently</span>
-              <span style={{ fontFamily:"'Outfit',sans-serif", fontWeight:800, fontSize:42, letterSpacing:'-0.04em', color:'#E11D48' }}>pro</span>
+              <span style={{ fontFamily:"'Outfit',sans-serif", fontWeight:800, fontSize:42, letterSpacing:'-0.04em', color:'#003DA5' }}>pro</span>
             </div>
           </div>
         </div>
@@ -106,7 +106,7 @@ export default function LoginPage() {
                 required
                 autoComplete="username"
                 style={s.input}
-                onFocus={e => e.target.style.borderColor = '#E11D48'}
+                onFocus={e => e.target.style.borderColor = '#003DA5'}
                 onBlur={e => e.target.style.borderColor = '#D1D5DB'}
               />
             </div>
@@ -125,7 +125,7 @@ export default function LoginPage() {
                 required
                 autoComplete="current-password"
                 style={{ ...s.input, paddingRight: '44px' }}
-                onFocus={e => e.target.style.borderColor = '#E11D48'}
+                onFocus={e => e.target.style.borderColor = '#003DA5'}
                 onBlur={e => e.target.style.borderColor = '#D1D5DB'}
               />
               <button type="button" onClick={() => setShowPwd(!showPwd)} style={s.eyeBtn}>
@@ -222,7 +222,7 @@ const s = {
   },
   submitBtn: {
     display: 'flex', alignItems: 'center', justifyContent: 'center', gap: '8px',
-    background: 'linear-gradient(135deg, #E11D48, #BE123C)',
+    background: 'linear-gradient(135deg, #003DA5, #BE123C)',
     color: '#FFFFFF', border: 'none', borderRadius: '8px',
     padding: '13px 24px', fontSize: '15px', fontWeight: '700',
     fontFamily: "'Outfit', sans-serif",

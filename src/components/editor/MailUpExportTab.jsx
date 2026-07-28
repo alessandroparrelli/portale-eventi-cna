@@ -195,7 +195,7 @@ function richToEmail(html, cp) {
 /* ── Builder HTML ─────────────────────────────────────────────────── */
 function buildHtml(ev, url, blocchi, opts, socialLinks) {
   const tema = temaConDefault(ev?.tema)
-  const cp   = tema.colore_primario || '#E11D48'
+  const cp   = tema.colore_primario || '#003DA5'
   const lh   = ev.layout_hero || {}
   const W    = opts.larghezza || 600
   const PAD  = opts.padding   || 32
@@ -663,7 +663,7 @@ i,em{font-style:italic;}
   </td></tr>` : ''}
 
   ${opts.mostraCtaFondo ? `
-  <tr><td bgcolor="#FEE4E6" style="padding:20px ${PAD}px;background-color:#FEE4E6;">
+  <tr><td bgcolor="#EBF0FA" style="padding:20px ${PAD}px;background-color:#EBF0FA;">
     <table width="100%" cellpadding="0" cellspacing="0" border="0"><tr>
       <td valign="middle" style="padding-right:12px;">
         <p style="margin:0 0 3px;padding:0;font-size:15px;font-weight:bold;color:#0A0A0A;font-family:${F};">Partecipa all&apos;evento</p>
@@ -706,7 +706,7 @@ function Row({ children }) { return <div style={{ display:'flex', gap:'12px', fl
 function Toggle({ label, value, onChange }) {
   return (
     <label style={{ display:'flex', alignItems:'center', gap:'8px', cursor:'pointer', userSelect:'none' }}>
-      <div onClick={() => onChange(!value)} style={{ width:'36px', height:'20px', borderRadius:'10px', flexShrink:0, backgroundColor:value?'#E11D48':'#D1D5DB', position:'relative', cursor:'pointer', transition:'background .2s' }}>
+      <div onClick={() => onChange(!value)} style={{ width:'36px', height:'20px', borderRadius:'10px', flexShrink:0, backgroundColor:value?'#003DA5':'#D1D5DB', position:'relative', cursor:'pointer', transition:'background .2s' }}>
         <div style={{ position:'absolute', top:'2px', left:value?'18px':'2px', width:'16px', height:'16px', borderRadius:'50%', backgroundColor:'#fff', transition:'left .2s' }} />
       </div>
       <span style={{ ...sF, fontSize:'13px', color:'#374151' }}>{label}</span>
@@ -820,7 +820,7 @@ export default function MailUpExportTab({ event, setEvent }) {
 
       <div style={{ display:'flex', alignItems:'center', gap:'8px', padding:'9px 12px', backgroundColor:'#F4F5F7', borderRadius:'8px', marginBottom:'20px', border:'1px solid #E5E7EB' }}>
         <ExternalLink size={13} style={{ color:'#9CA3AF', flexShrink:0 }}/>
-        <a href={eventUrl} target="_blank" rel="noopener noreferrer" style={{ ...sF, fontSize:'12px', color:'#E11D48', textDecoration:'none', overflow:'hidden', textOverflow:'ellipsis', whiteSpace:'nowrap' }}>{eventUrl}</a>
+        <a href={eventUrl} target="_blank" rel="noopener noreferrer" style={{ ...sF, fontSize:'12px', color:'#003DA5', textDecoration:'none', overflow:'hidden', textOverflow:'ellipsis', whiteSpace:'nowrap' }}>{eventUrl}</a>
       </div>
 
       {/* Editor blocchi */}
@@ -911,11 +911,11 @@ export default function MailUpExportTab({ event, setEvent }) {
       </div>
 
       {/* Tasto Salva dedicato MailUp */}
-      <div style={{ display:'flex', alignItems:'center', gap:'12px', padding:'14px 18px', backgroundColor: saveOk ? '#F0FDF4' : '#FEE4E6', border:`1px solid ${saveOk?'#86EFAC':'#FDA4AF'}`, borderRadius:'10px', marginBottom:'16px' }}>
+      <div style={{ display:'flex', alignItems:'center', gap:'12px', padding:'14px 18px', backgroundColor: saveOk ? '#F0FDF4' : '#EBF0FA', border:`1px solid ${saveOk?'#86EFAC':'#FDA4AF'}`, borderRadius:'10px', marginBottom:'16px' }}>
         <button
           onClick={salvaMailup}
           disabled={saving}
-          style={{ ...sF, display:'flex', alignItems:'center', gap:'8px', padding:'11px 24px', borderRadius:'8px', border:'none', backgroundColor: saveOk ? '#16A34A' : '#E11D48', color:'#fff', fontSize:'14px', fontWeight:'800', cursor: saving ? 'not-allowed' : 'pointer', opacity: saving ? .7 : 1, flexShrink:0 }}>
+          style={{ ...sF, display:'flex', alignItems:'center', gap:'8px', padding:'11px 24px', borderRadius:'8px', border:'none', backgroundColor: saveOk ? '#16A34A' : '#003DA5', color:'#fff', fontSize:'14px', fontWeight:'800', cursor: saving ? 'not-allowed' : 'pointer', opacity: saving ? .7 : 1, flexShrink:0 }}>
           {saving ? '⏳ Salvataggio…' : saveOk ? '✓ Salvato!' : '💾 Salva blocchi MailUp'}
         </button>
         <span style={{ ...sF, fontSize:'12px', color: saveOk ? '#15803D' : '#6B7280', lineHeight:'1.4' }}>
@@ -935,7 +935,7 @@ export default function MailUpExportTab({ event, setEvent }) {
 
       {/* Azioni */}
       <div style={{ display:'flex', gap:'10px', marginBottom:'20px', flexWrap:'wrap' }}>
-        <button onClick={copyHtml} style={{ ...sF, display:'flex', alignItems:'center', gap:'7px', padding:'10px 20px', borderRadius:'8px', border:'none', backgroundColor:copied?'#16A34A':'#E11D48', color:'#fff', fontSize:'14px', fontWeight:'700', cursor:'pointer' }}>
+        <button onClick={copyHtml} style={{ ...sF, display:'flex', alignItems:'center', gap:'7px', padding:'10px 20px', borderRadius:'8px', border:'none', backgroundColor:copied?'#16A34A':'#003DA5', color:'#fff', fontSize:'14px', fontWeight:'700', cursor:'pointer' }}>
           {copied?<Check size={15}/>:<Copy size={15}/>} {copied?'Copiato!':'Copia HTML'}
         </button>
         <a href={`data:text/html;charset=utf-8,${encodeURIComponent(html)}`} download={`email-${event.slug}.html`}
@@ -945,8 +945,8 @@ export default function MailUpExportTab({ event, setEvent }) {
       </div>
 
       {/* Istruzioni */}
-      <div style={{ backgroundColor:'#FEE4E6', border:'1px solid #FDA4AF', borderRadius:'10px', padding:'14px 18px', marginBottom:'20px' }}>
-        <p style={{ ...sF, margin:'0 0 6px', fontSize:'13px', fontWeight:'800', color:'#E11D48' }}>Come importare in MailUp</p>
+      <div style={{ backgroundColor:'#EBF0FA', border:'1px solid #FDA4AF', borderRadius:'10px', padding:'14px 18px', marginBottom:'20px' }}>
+        <p style={{ ...sF, margin:'0 0 6px', fontSize:'13px', fontWeight:'800', color:'#003DA5' }}>Come importare in MailUp</p>
         <ol style={{ ...sF, margin:0, paddingLeft:'16px', fontSize:'13px', color:'#374151', lineHeight:'1.9' }}>
           <li>Vai su <strong>Messaggi → Email → Nuovo messaggio</strong></li>
           <li>Scegli <strong>Da editor HTML</strong></li>

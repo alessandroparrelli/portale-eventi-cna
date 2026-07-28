@@ -38,7 +38,7 @@ export default function EventSelector({ eventi = [], value, onChange, label = 'E
               outline: 'none',
               transition: 'border-color .15s',
             }}
-            onFocus={e => (e.target.style.borderColor = '#E11D48')}
+            onFocus={e => (e.target.style.borderColor = '#003DA5')}
             onBlur={e => (e.target.style.borderColor = '#D1D5DB')}
           >
             <option value="">{placeholder}</option>

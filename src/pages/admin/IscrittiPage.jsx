@@ -20,7 +20,7 @@ function formatDt(ts) {
 
 function SortableHead({ columns, sortCol, sortDir, onSort }) {
   const PALETTES = {
-    blue:    { from:'#E11D48', to:'#BE123C', text:'#ffffff' },
+    blue:    { from:'#003DA5', to:'#BE123C', text:'#ffffff' },
     green:   { from:'#059669', to:'#10b981', text:'#ffffff' },
     violet:  { from:'#7c3aed', to:'#8b5cf6', text:'#ffffff' },
     amber:   { from:'#d97706', to:'#f59e0b', text:'#ffffff' },
@@ -1147,7 +1147,7 @@ export default function IscrittiPage() {
                 flex:1, padding:'11px 24px', border:'none', cursor:'pointer',
                 fontSize:'14px', fontWeight:'700', fontFamily:"'Outfit',sans-serif",
                 borderRadius:'9px', transition:'all .18s',
-                background: tabAttivo === tab.id ? '#C2185B' : '#E11D48',
+                background: tabAttivo === tab.id ? '#C2185B' : '#003DA5',
                 color: '#fff',
                 boxShadow: tabAttivo === tab.id ? '0 2px 8px rgba(194,24,91,.30)' : '0 2px 8px rgba(0,61,165,.20)',
                 letterSpacing:'-.01em',
@@ -1164,7 +1164,7 @@ export default function IscrittiPage() {
           {/* Stats */}
           <div style={{ display:'flex', gap:'12px', flexWrap:'wrap', marginBottom:'16px' }}>
             {[
-              { label:'Con posto', value: registrations.filter(r => r.numero_posto).length, color:'#E11D48' },
+              { label:'Con posto', value: registrations.filter(r => r.numero_posto).length, color:'#003DA5' },
               { label:'Senza posto', value: registrations.filter(r => !r.numero_posto).length, color:'#DC2626' },
               { label:'Presenza confermata', value: registrations.filter(r => r.presenza_confermata).length, color:'#059669' },
               { label:'In attesa conferma', value: registrations.filter(r => r.numero_posto && !r.presenza_confermata).length, color:'#D97706' },
@@ -1187,9 +1187,9 @@ export default function IscrittiPage() {
               ].map(opt => (
                 <button key={opt.v} onClick={() => setFiltroPostoAssegnato(opt.v)}
                   style={{ padding:'5px 12px', borderRadius:'6px', border:'1px solid', fontSize:'12px', fontWeight:'600', cursor:'pointer', fontFamily:"'Outfit',sans-serif",
-                    background: filtroPostoAssegnato === opt.v ? '#E11D48' : '#fff',
+                    background: filtroPostoAssegnato === opt.v ? '#003DA5' : '#fff',
                     color: filtroPostoAssegnato === opt.v ? '#fff' : '#374151',
-                    borderColor: filtroPostoAssegnato === opt.v ? '#E11D48' : '#D1D5DB',
+                    borderColor: filtroPostoAssegnato === opt.v ? '#003DA5' : '#D1D5DB',
                   }}>{opt.label}</button>
               ))}
             </div>
@@ -1203,9 +1203,9 @@ export default function IscrittiPage() {
               ].map(opt => (
                 <button key={opt.v} onClick={() => setFiltroMailPosto(opt.v)}
                   style={{ padding:'5px 12px', borderRadius:'6px', border:'1px solid', fontSize:'12px', fontWeight:'600', cursor:'pointer', fontFamily:"'Outfit',sans-serif",
-                    background: filtroMailPosto === opt.v ? '#E11D48' : '#fff',
+                    background: filtroMailPosto === opt.v ? '#003DA5' : '#fff',
                     color: filtroMailPosto === opt.v ? '#fff' : '#374151',
-                    borderColor: filtroMailPosto === opt.v ? '#E11D48' : '#D1D5DB',
+                    borderColor: filtroMailPosto === opt.v ? '#003DA5' : '#D1D5DB',
                   }}>{opt.label}</button>
               ))}
             </div>
@@ -1303,7 +1303,7 @@ export default function IscrittiPage() {
               <table style={s.table}>
                 <thead>
                   <tr>
-                    <th style={{ padding:'10px 12px', background:'linear-gradient(135deg,#E11D48,#BE123C)', color:'#fff', width:'40px' }}>
+                    <th style={{ padding:'10px 12px', background:'linear-gradient(135deg,#003DA5,#BE123C)', color:'#fff', width:'40px' }}>
                       <input type="checkbox"
                         checked={registrations.filter(r => r.numero_posto && r.email).length > 0 &&
                           registrations.filter(r => r.numero_posto && r.email).every(r => teatroSelezione.has(r.id))}
@@ -1313,7 +1313,7 @@ export default function IscrittiPage() {
                       />
                     </th>
                     {['Iscritto','Email','Posto','Conferma presenza','Confermato il','Azioni'].map((h,i) => (
-                      <th key={i} style={{ padding:'10px 14px', background:'linear-gradient(135deg,#E11D48,#BE123C)', color:'#fff', fontSize:'11px', fontWeight:'700', letterSpacing:'.05em', textTransform:'uppercase', textAlign:'left', whiteSpace:'nowrap' }}>{h}</th>
+                      <th key={i} style={{ padding:'10px 14px', background:'linear-gradient(135deg,#003DA5,#BE123C)', color:'#fff', fontSize:'11px', fontWeight:'700', letterSpacing:'.05em', textTransform:'uppercase', textAlign:'left', whiteSpace:'nowrap' }}>{h}</th>
                     ))}
                   </tr>
                 </thead>
@@ -1329,7 +1329,7 @@ export default function IscrittiPage() {
                             <input type="checkbox"
                               checked={selezionato}
                               onChange={() => toggleSelezioneTeatroReg(r.id)}
-                              style={{ cursor:'pointer', width:'16px', height:'16px', accentColor:'#E11D48' }}
+                              style={{ cursor:'pointer', width:'16px', height:'16px', accentColor:'#003DA5' }}
                             />
                           ) : (
                             <span title="Nessun posto o email mancante" style={{ color:'#D1D5DB', fontSize:'12px' }}>—</span>
@@ -1339,7 +1339,7 @@ export default function IscrittiPage() {
                           <p style={s.name}>{r.nome} {r.cognome}</p>
                           {r.ragione_sociale && <p style={s.sub}>{r.ragione_sociale}</p>}
                           {r.gruppo_id === r.id && (
-                            <span style={{ display:'inline-flex', alignItems:'center', gap:'3px', fontSize:'10px', fontWeight:'700', color:'#E11D48', background:'#FEE4E6', borderRadius:'999px', padding:'2px 7px', marginTop:'3px' }}>👥 Capogruppo</span>
+                            <span style={{ display:'inline-flex', alignItems:'center', gap:'3px', fontSize:'10px', fontWeight:'700', color:'#003DA5', background:'#EBF0FA', borderRadius:'999px', padding:'2px 7px', marginTop:'3px' }}>👥 Capogruppo</span>
                           )}
                           {r.referente_id && referentiMap[r.referente_id] && (
                             <span style={{ display:'inline-flex', alignItems:'center', gap:'3px', fontSize:'10px', fontWeight:'700', color:'#6B7280', background:'#F3F4F6', borderRadius:'999px', padding:'2px 7px', marginTop:'3px' }}>↩ {referentiMap[r.referente_id]}</span>
@@ -1358,7 +1358,7 @@ export default function IscrittiPage() {
                                 if (e.key === 'Enter') { e.target.blur(); salvaPosto(r.id, e.target.value) }
                                 if (e.key === 'Escape') setPostoEdit(p => ({ ...p, [r.id]: undefined }))
                               }}
-                              style={{ width:'110px', padding:'6px 10px', border:`1px solid ${postoError[r.id] ? '#DC2626' : '#D1D5DB'}`, borderRadius:'6px', fontSize:'13px', fontWeight:'700', color: r.numero_posto ? '#E11D48' : '#6B7280', fontFamily:"'Outfit',sans-serif" }}
+                              style={{ width:'110px', padding:'6px 10px', border:`1px solid ${postoError[r.id] ? '#DC2626' : '#D1D5DB'}`, borderRadius:'6px', fontSize:'13px', fontWeight:'700', color: r.numero_posto ? '#003DA5' : '#6B7280', fontFamily:"'Outfit',sans-serif" }}
                               placeholder="es. Platea 1A"
                             />
                             {postoSaving[r.id] && <span style={{ fontSize:'12px', color:'#9CA3AF' }}>⏳</span>}
@@ -1493,7 +1493,7 @@ export default function IscrittiPage() {
                           <p style={s.name}>{r.nome} {r.cognome}</p>
                           {r.ragione_sociale && <p style={s.sub}>{r.ragione_sociale}</p>}
                           {r.gruppo_id === r.id && (
-                            <span style={{ display:'inline-flex', alignItems:'center', gap:'3px', fontSize:'10px', fontWeight:'700', color:'#E11D48', background:'#FEE4E6', borderRadius:'999px', padding:'2px 7px', marginTop:'3px' }}>👥 Capogruppo</span>
+                            <span style={{ display:'inline-flex', alignItems:'center', gap:'3px', fontSize:'10px', fontWeight:'700', color:'#003DA5', background:'#EBF0FA', borderRadius:'999px', padding:'2px 7px', marginTop:'3px' }}>👥 Capogruppo</span>
                           )}
                           {r.referente_id && referentiMap[r.referente_id] && (
                             <span style={{ display:'inline-flex', alignItems:'center', gap:'3px', fontSize:'10px', fontWeight:'700', color:'#6B7280', background:'#F3F4F6', borderRadius:'999px', padding:'2px 7px', marginTop:'3px' }}>↩ {referentiMap[r.referente_id]}</span>
@@ -1501,7 +1501,7 @@ export default function IscrittiPage() {
                         </td>
                         <td style={s.td} className="col-hide-mobile"><span style={s.cell}>{r.email||'—'}</span></td>
                         <td style={s.td} className="col-hide-mobile"><span style={s.cell}>{getMestiere(r.mestiere_id)}</span></td>
-                        <td style={s.td} className="col-hide-mobile"><span style={{ fontSize:'12px', fontWeight:'700', color:'#E11D48', fontFamily:'monospace' }}>#{r.numero_iscrizione||'—'}</span></td>
+                        <td style={s.td} className="col-hide-mobile"><span style={{ fontSize:'12px', fontWeight:'700', color:'#003DA5', fontFamily:'monospace' }}>#{r.numero_iscrizione||'—'}</span></td>
                         <td style={s.td} className="col-hide-mobile"><span style={s.cell}>{formatDt(r.created_at)}</span></td>
                         <td style={s.td}><PresenzaBadge stato={r.stato}/></td>
                         {formFields.map(f => (
@@ -1576,8 +1576,8 @@ export default function IscrittiPage() {
                     p==='…' ? <span key={`e${i}`} style={{padding:'6px 4px',fontSize:'13px',color:'#9CA3AF'}}>…</span>
                     : <button key={p} onClick={()=>setPagina(p)}
                         style={{padding:'6px 11px',border:'1px solid',
-                          borderColor:pagina===p?'#E11D48':'#E5E7EB',borderRadius:'6px',
-                          backgroundColor:pagina===p?'#E11D48':'#fff',
+                          borderColor:pagina===p?'#003DA5':'#E5E7EB',borderRadius:'6px',
+                          backgroundColor:pagina===p?'#003DA5':'#fff',
                           color:pagina===p?'#fff':'#374151',
                           fontWeight:pagina===p?'700':'400',
                           cursor:'pointer',fontSize:'13px',fontFamily:"'Outfit',sans-serif"}}>
@@ -1651,7 +1651,7 @@ export default function IscrittiPage() {
                   ].map(([v, label]) => (
                     <button key={v} onClick={() => inserisciVariabile(v)}
                       style={{ fontSize:11, fontWeight:600, padding:'3px 9px', borderRadius:20,
-                        background:'#FEE4E6', color:'#E11D48', border:'1px solid #C7D7F9', cursor:'pointer', fontFamily:'monospace' }}>
+                        background:'#EBF0FA', color:'#003DA5', border:'1px solid #C7D7F9', cursor:'pointer', fontFamily:'monospace' }}>
                       {'{{' + v + '}}'}
                     </button>
                   ))}
@@ -1682,7 +1682,7 @@ export default function IscrittiPage() {
                     Anteprima
                   </p>
                   {smsAnteprimaIscritto && (
-                    <span style={{ fontSize:11, color:'#E11D48', fontWeight:600 }}>
+                    <span style={{ fontSize:11, color:'#003DA5', fontWeight:600 }}>
                       {smsAnteprimaIscritto.nome} {smsAnteprimaIscritto.cognome}
                     </span>
                   )}
@@ -1757,7 +1757,7 @@ export default function IscrittiPage() {
                         </button>
                       )}
                       <button onClick={toggleTuttiSmsSelezione}
-                        style={{ fontSize:11, color:'#E11D48', background:'none', border:'none', cursor:'pointer', fontWeight:600 }}>
+                        style={{ fontSize:11, color:'#003DA5', background:'none', border:'none', cursor:'pointer', fontWeight:600 }}>
                         {smsSelezione.size > 0 && smsSelezione.size === registrations.filter(r=>r.cellulare).length ? 'Deseleziona tutti' : 'Seleziona tutti'}
                       </button>
                     </div>
@@ -1951,7 +1951,7 @@ export default function IscrittiPage() {
                   <div style={{ border:'2px dashed #D1D5DB', borderRadius:'8px', padding:'32px', textAlign:'center',
                     backgroundColor:'#FAFAFA', cursor:'pointer' }}
                     onClick={() => fileInputRef.current?.click()}
-                    onDragOver={e => { e.preventDefault(); e.currentTarget.style.borderColor='#E11D48' }}
+                    onDragOver={e => { e.preventDefault(); e.currentTarget.style.borderColor='#003DA5' }}
                     onDragLeave={e => e.currentTarget.style.borderColor='#D1D5DB'}
                     onDrop={e => { e.preventDefault(); e.currentTarget.style.borderColor='#D1D5DB';
                       const f = e.dataTransfer.files[0]; if (f) { const dt = new DataTransfer(); dt.items.add(f); fileInputRef.current.files = dt.files; handleFileImport({ target: fileInputRef.current }) } }}>
@@ -1963,7 +1963,7 @@ export default function IscrittiPage() {
                   </div>
                   <input ref={fileInputRef} type="file" accept=".xlsx,.xls" onChange={handleFileImport} style={{ display:'none' }}/>
                   <div style={{ marginTop:'16px', display:'flex', justifyContent:'space-between', alignItems:'center' }}>
-                    <button onClick={downloadTemplate} style={{ fontSize:'13px', color:'#E11D48', background:'none', border:'none', cursor:'pointer', fontWeight:'600', padding:0 }}>
+                    <button onClick={downloadTemplate} style={{ fontSize:'13px', color:'#003DA5', background:'none', border:'none', cursor:'pointer', fontWeight:'600', padding:0 }}>
                       ↓ Scarica template Excel
                     </button>
                     <Btn variant="ghost" onClick={resetImport}>Annulla</Btn>

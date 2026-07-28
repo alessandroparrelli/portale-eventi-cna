@@ -130,7 +130,7 @@ export default function AddressSearch({ value, onChange }) {
       {/* Input con icone */}
       <div style={{
         display: 'flex', alignItems: 'center',
-        border: `1.5px solid ${open ? '#E11D48' : selected ? '#16A34A' : '#D1D5DB'}`,
+        border: `1.5px solid ${open ? '#003DA5' : selected ? '#16A34A' : '#D1D5DB'}`,
         borderRadius: '8px', background: '#fff',
         overflow: 'hidden', transition: 'border-color .15s',
       }}>
@@ -183,7 +183,7 @@ export default function AddressSearch({ value, onChange }) {
                 onMouseEnter={e => e.currentTarget.style.background = '#F9FAFB'}
                 onMouseLeave={e => e.currentTarget.style.background = 'none'}
               >
-                <MapPin size={14} style={{ color: '#E11D48', marginTop: '2px', flexShrink: 0 }} />
+                <MapPin size={14} style={{ color: '#003DA5', marginTop: '2px', flexShrink: 0 }} />
                 <div style={{ flex: 1, minWidth: 0 }}>
                   <p style={{ fontSize: '13px', fontWeight: '600', color: '#0A0A0A', margin: '0 0 2px' }}>
                     {fmt.indirizzo || r.display_name.split(',')[0]}

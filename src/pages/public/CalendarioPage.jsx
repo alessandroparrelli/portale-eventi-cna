@@ -3,7 +3,7 @@ import { supabase } from '../../lib/supabase'
 import PushButton from '../../components/PushButton'
 
 const DEFAULT_LOGO = 'https://customer31551.img.musvc2.net/static/31551/images/1/CNARoma%20NEGATIVO%20COLORE%20SOLO%20ROMA.png'
-const BLU = '#E11D48'
+const BLU = '#003DA5'
 const NERO = '#0A0A0A'
 const MESI_IT = ['Gennaio','Febbraio','Marzo','Aprile','Maggio','Giugno','Luglio','Agosto','Settembre','Ottobre','Novembre','Dicembre']
 const MESI_SHORT = ['GEN','FEB','MAR','APR','MAG','GIU','LUG','AGO','SET','OTT','NOV','DIC']
@@ -365,7 +365,7 @@ export default function CalendarioPage() {
             {/* Abbonamento live — si aggiorna automaticamente */}
             <a href="webcal://hnkhckcclgabunkqfmrz.supabase.co/functions/v1/calendario-ics"
               className='cal-ics-btn' style={{display:'flex',alignItems:'center',gap:'10px',padding:'13px 20px',
-                backgroundColor:'#E11D48',color:'#ffffff',borderRadius:'8px',
+                backgroundColor:'#003DA5',color:'#ffffff',borderRadius:'8px',
                 fontSize:'14px',fontWeight:'700',textDecoration:'none',fontFamily:"'Outfit',sans-serif",
                 lineHeight:'1.35'}}>
               <svg width="20" height="20" viewBox="0 0 24 24" fill="none" strokeWidth="2" strokeLinecap="round" style={{flexShrink:0}}>
@@ -384,10 +384,10 @@ export default function CalendarioPage() {
               Su iPhone e Mac si apre direttamente Apple Calendar.
               Su Android usa <a href="https://calendar.google.com/calendar/r?cid=webcal%3A%2F%2Fhnkhckcclgabunkqfmrz.supabase.co%2Ffunctions%2Fv1%2Fcalendario-ics"
                 target="_blank" rel="noopener noreferrer"
-                style={{color:'#E11D48',fontWeight:'600',textDecoration:'none'}}>Google Calendar</a>.
+                style={{color:'#003DA5',fontWeight:'600',textDecoration:'none'}}>Google Calendar</a>.
               Su Outlook: <a href="https://hnkhckcclgabunkqfmrz.supabase.co/functions/v1/calendario-ics"
                 target="_blank" rel="noopener noreferrer"
-                style={{color:'#E11D48',fontWeight:'600',textDecoration:'none'}}>aggiungi da URL</a>.
+                style={{color:'#003DA5',fontWeight:'600',textDecoration:'none'}}>aggiungi da URL</a>.
             </p>
           </div>
         </div>

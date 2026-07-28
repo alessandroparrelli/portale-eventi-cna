@@ -34,7 +34,7 @@ export default function PwaInstallBanner() {
       padding: '14px 16px', marginBottom: '16px', fontFamily: "'Outfit',sans-serif" }}>
       <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'flex-start' }}>
         <div style={{ display: 'flex', gap: '10px', alignItems: 'flex-start' }}>
-          <Download size={18} style={{ color: '#E11D48', flexShrink: 0, marginTop: '2px' }} />
+          <Download size={18} style={{ color: '#003DA5', flexShrink: 0, marginTop: '2px' }} />
           <div>
             <p style={{ fontSize: '13px', fontWeight: '700', color: '#1D4ED8', margin: '0 0 3px' }}>
               Installa l'app check-in
@@ -58,7 +58,7 @@ export default function PwaInstallBanner() {
       padding: '14px 16px', marginBottom: '16px', fontFamily: "'Outfit',sans-serif",
       display: 'flex', alignItems: 'center', justifyContent: 'space-between', gap: '12px' }}>
       <div style={{ display: 'flex', gap: '10px', alignItems: 'center' }}>
-        <Download size={18} style={{ color: '#E11D48', flexShrink: 0 }} />
+        <Download size={18} style={{ color: '#003DA5', flexShrink: 0 }} />
         <div>
           <p style={{ fontSize: '13px', fontWeight: '700', color: '#1D4ED8', margin: '0 0 2px' }}>Installa l'app check-in</p>
           <p style={{ fontSize: '12px', color: '#3B82F6', margin: 0 }}>Funziona offline — aggiornamenti automatici</p>
@@ -71,7 +71,7 @@ export default function PwaInstallBanner() {
           Dopo
         </button>
         <button onClick={install} style={{ padding: '7px 14px', border: 'none', borderRadius: '6px',
-          backgroundColor: '#E11D48', color: '#fff', fontSize: '12px', fontWeight: '700',
+          backgroundColor: '#003DA5', color: '#fff', fontSize: '12px', fontWeight: '700',
           cursor: 'pointer', fontFamily: "'Outfit',sans-serif" }}>
           Installa
         </button>

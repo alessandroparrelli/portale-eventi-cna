@@ -70,7 +70,7 @@ export default function HeroDragPreview({ event, setH }) {
               {pos.x}% {pos.y}%
             </span>
             <button onClick={resetPos} style={{
-              fontSize: '11px', color: '#E11D48', background: '#FEE4E6',
+              fontSize: '11px', color: '#003DA5', background: '#EBF0FA',
               border: '1px solid #FDA4AF', borderRadius: '5px',
               padding: '3px 8px', cursor: 'pointer',
               fontFamily: "'Outfit',sans-serif", fontWeight: '700',
@@ -91,12 +91,12 @@ export default function HeroDragPreview({ event, setH }) {
           position: 'relative',
           borderRadius: '10px',
           overflow: 'hidden',
-          border: `2px solid ${dragging ? '#E11D48' : '#E5E7EB'}`,
+          border: `2px solid ${dragging ? '#003DA5' : '#E5E7EB'}`,
           height: `${altezza}px`,
           cursor: imgUrl ? (dragging ? 'grabbing' : 'grab') : 'default',
           userSelect: 'none',
           touchAction: 'none',
-          background: imgUrl ? '#000' : 'linear-gradient(135deg,#E11D48,#001a50)',
+          background: imgUrl ? '#000' : 'linear-gradient(135deg,#003DA5,#001a50)',
           transition: dragging ? 'none' : 'border-color .15s',
         }}
       >
@@ -150,7 +150,7 @@ export default function HeroDragPreview({ event, setH }) {
             width: '14px', height: '14px',
             border: '2px solid #fff',
             borderRadius: '50%',
-            background: dragging ? '#E11D48' : 'rgba(0,61,165,.8)',
+            background: dragging ? '#003DA5' : 'rgba(0,61,165,.8)',
             boxShadow: '0 0 0 2px rgba(0,0,0,.4)',
             pointerEvents: 'none',
           }} />

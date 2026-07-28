@@ -37,7 +37,7 @@ export default class IframePreview extends Component {
           {fallbackUrl && (
             <a href={fallbackUrl} target="_blank" rel="noopener noreferrer"
               style={{ display:'inline-flex', alignItems:'center', gap:'6px',
-                padding:'8px 16px', backgroundColor:'#E11D48', color:'#fff',
+                padding:'8px 16px', backgroundColor:'#003DA5', color:'#fff',
                 borderRadius:'6px', textDecoration:'none', fontSize:'13px',
                 fontWeight:'700', fontFamily:"'Outfit',sans-serif" }}>
               Apri in nuova scheda ↗

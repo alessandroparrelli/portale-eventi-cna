@@ -8,7 +8,7 @@ import { logAttivita } from '../../lib/activityLog'
 import { Modal, RuoloBadge, Field, Input, Select, Btn, EmptyState } from '../../components/ui'
 import { Users, Plus, Pencil, Trash2, ShieldCheck, Eye, EyeOff, Activity, Clock, ToggleLeft, ToggleRight, Settings } from 'lucide-react'
 
-const RUOLO_COL  = { admin:'#E11D48', supervisore:'#D97706', utente:'#6B7280' }
+const RUOLO_COL  = { admin:'#003DA5', supervisore:'#D97706', utente:'#6B7280' }
 const RUOLO_DESC_FALLBACK = {
   admin:       'Accesso completo: crea, modifica, elimina, gestisce utenti.',
   supervisore: 'Crea e modifica eventi. Non elimina né gestisce utenti.',
@@ -167,7 +167,7 @@ export default function UtentiPage() {
                           <p style={{ fontWeight:'700', color:'#0A0A0A', margin:0, fontSize:'14px' }}>
                             {u.nome&&u.cognome ? `${u.nome} ${u.cognome}` : u.username}
                           </p>
-                          {u.id===me?.id && <span style={{ fontSize:'10px', fontWeight:'700', backgroundColor:'#FEE4E6', color:'#E11D48', padding:'1px 7px', borderRadius:'10px' }}>Tu</span>}
+                          {u.id===me?.id && <span style={{ fontSize:'10px', fontWeight:'700', backgroundColor:'#EBF0FA', color:'#003DA5', padding:'1px 7px', borderRadius:'10px' }}>Tu</span>}
                         </div>
                         <p style={{ fontSize:'12px', color:'#6B7280', margin:'1px 0 0' }}>{u.email}</p>
                         {(u.nome||u.cognome) && <p style={{ fontSize:'11px', color:'#9CA3AF', margin:'1px 0 0' }}>@{u.username}</p>}

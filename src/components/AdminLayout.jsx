@@ -5,7 +5,7 @@ import { useAuth } from '../hooks/useAuth'
 import { useRole } from '../hooks/useRole'
 import { supabase } from '../lib/supabase'
 
-const RUOLO_COLORS = { superadmin:'#9F1239', admin:'#E11D48', supervisore:'#BE123C', utente:'#6B7280' }
+const RUOLO_COLORS = { superadmin:'#9F1239', admin:'#003DA5', supervisore:'#BE123C', utente:'#6B7280' }
 const RUOLO_LABELS = { superadmin:'Super Admin', admin:'Admin', supervisore:'Supervisore', utente:'Utente' }
 
 function VerifiedBadge() {
@@ -48,20 +48,20 @@ function UserBox() {
         gap: '9px',
         padding: '5px 12px 5px 5px',
         borderRadius: '40px',
-        backgroundColor: isActive ? '#FEE4E6' : '#F7F7F5',
+        backgroundColor: isActive ? '#EBF0FA' : '#F7F7F5',
         border: '1px solid ' + (isActive ? '#FDA4AF' : '#E8E8E4'),
         textDecoration: 'none',
         cursor: 'pointer',
         transition: 'background .15s',
         flexShrink: 0,
       })}
-      onMouseEnter={e => e.currentTarget.style.backgroundColor = '#FEE4E6'}
+      onMouseEnter={e => e.currentTarget.style.backgroundColor = '#EBF0FA'}
       onMouseLeave={e => e.currentTarget.style.backgroundColor = '#F7F7F5'}
     >
       {/* Avatar */}
       <div style={{
         width: '32px', height: '32px', borderRadius: '50%', flexShrink: 0,
-        background: `linear-gradient(135deg,${roleColor},#E11D48)`,
+        background: `linear-gradient(135deg,${roleColor},#003DA5)`,
         display: 'flex', alignItems: 'center', justifyContent: 'center',
         overflow: 'hidden',
       }}>
@@ -129,7 +129,7 @@ export default function AdminLayout() {
             </svg>
             <span style={s.pageTitle}>
               <span style={{ color:'#111111' }}>evently</span>
-              <span style={{ color:'#E11D48' }}>pro</span>
+              <span style={{ color:'#003DA5' }}>pro</span>
             </span>
           </div>
         </div>

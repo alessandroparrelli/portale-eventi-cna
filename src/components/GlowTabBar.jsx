@@ -13,8 +13,8 @@ function useMobile() {
 }
 
 const PALETTES = {
-  blue:   { from:'#E11D48', to:'#BE123C', glow:'rgba(225,29,72,.35)',   hint:'rgba(225,29,72,.09)',   text:'#E11D48' },
-  crimisi:{ from:'#E11D48', to:'#BE123C', glow:'rgba(225,29,72,.35)',   hint:'rgba(225,29,72,.09)',   text:'#E11D48' },
+  blue:   { from:'#003DA5', to:'#BE123C', glow:'rgba(225,29,72,.35)',   hint:'rgba(225,29,72,.09)',   text:'#003DA5' },
+  crimisi:{ from:'#003DA5', to:'#BE123C', glow:'rgba(225,29,72,.35)',   hint:'rgba(225,29,72,.09)',   text:'#003DA5' },
   green:  { from:'#059669', to:'#10b981', glow:'rgba(5,150,105,.40)',  hint:'rgba(5,150,105,.09)',  text:'#059669' },
   violet: { from:'#7c3aed', to:'#a78bfa', glow:'rgba(124,58,237,.40)', hint:'rgba(124,58,237,.09)', text:'#7c3aed' },
   amber:  { from:'#d97706', to:'#f59e0b', glow:'rgba(217,119,6,.40)',  hint:'rgba(217,119,6,.09)',  text:'#d97706' },

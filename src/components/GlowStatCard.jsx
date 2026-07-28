@@ -1,8 +1,8 @@
 import { useState, useEffect } from 'react'
 
 const PALETTES = {
-  crimisi: { accent:'#E11D48', bg:'#FEE4E6', num:'#E11D48', label:'#BE123C', border:'#E11D48' },
-  blue:   { accent:'#E11D48', bg:'#FEE4E6', num:'#E11D48', label:'#BE123C', border:'#E11D48' },
+  crimisi: { accent:'#003DA5', bg:'#EBF0FA', num:'#003DA5', label:'#BE123C', border:'#003DA5' },
+  blue:   { accent:'#003DA5', bg:'#EBF0FA', num:'#003DA5', label:'#BE123C', border:'#003DA5' },
   green:  { accent:'#059669', bg:'#ECFDF5', num:'#059669', label:'#0B7A55', border:'#059669' },
   violet: { accent:'#7c3aed', bg:'#F5F3FF', num:'#7c3aed', label:'#6025C0', border:'#7c3aed' },
   amber:  { accent:'#d97706', bg:'#FFFBEB', num:'#b45309', label:'#92400E', border:'#d97706' },

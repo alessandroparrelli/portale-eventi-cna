@@ -119,13 +119,13 @@ export default function CalendarioAdminPage() {
           </Field>
           <Field label="Colore primario">
             <div style={{ display: 'flex', alignItems: 'center', gap: '12px' }}>
-              <input type="color" value={cfg.colore_primario || '#E11D48'}
+              <input type="color" value={cfg.colore_primario || '#003DA5'}
                 onChange={e => upd('colore_primario', e.target.value)}
                 style={{ width: '48px', height: '38px', border: '1px solid #D1D5DB', borderRadius: '6px', cursor: 'pointer', padding: '2px' }}/>
-              <Input value={cfg.colore_primario || '#E11D48'}
+              <Input value={cfg.colore_primario || '#003DA5'}
                 onChange={e => upd('colore_primario', e.target.value)}
                 style={{ maxWidth: '140px' }}/>
-              <button onClick={() => upd('colore_primario', '#E11D48')}
+              <button onClick={() => upd('colore_primario', '#003DA5')}
                 style={{ fontSize: '12px', color: '#9CA3AF', background: 'none', border: 'none',
                   cursor: 'pointer', fontFamily: "'Outfit',sans-serif" }}>
                 Reset blu CNA
@@ -191,7 +191,7 @@ export default function CalendarioAdminPage() {
           </div>
           <a href="/calendario" target="_blank" rel="noopener noreferrer"
             style={{ display: 'flex', alignItems: 'center', gap: '6px', padding: '9px 16px',
-              backgroundColor: '#E11D48', color: '#ffffff', borderRadius: '6px',
+              backgroundColor: '#003DA5', color: '#ffffff', borderRadius: '6px',
               fontSize: '13px', fontWeight: '700', textDecoration: 'none', fontFamily: "'Outfit',sans-serif",
               whiteSpace: 'nowrap', flexShrink: 0 }}>
             <ExternalLink size={14}/> Apri pagina
@@ -224,7 +224,7 @@ function Toggle({ label, hint, value, onChange }) {
       <div style={{ position: 'relative', width: '40px', height: '22px', flexShrink: 0, marginTop: '1px' }}
         onClick={() => onChange(!value)}>
         <div style={{ position: 'absolute', inset: 0, borderRadius: '999px', transition: 'background 0.2s',
-          backgroundColor: value ? '#E11D48' : '#D1D5DB' }}/>
+          backgroundColor: value ? '#003DA5' : '#D1D5DB' }}/>
         <div style={{ position: 'absolute', top: '3px', left: value ? '21px' : '3px', width: '16px', height: '16px',
           borderRadius: '50%', backgroundColor: '#ffffff', transition: 'left 0.2s',
           boxShadow: '0 1px 4px rgba(0,0,0,0.2)' }}/>

@@ -4,7 +4,7 @@ import { supabase } from '../../lib/supabase'
 import { usePushNotifications } from '../../hooks/usePushNotifications'
 import { Bell, BellOff, TrendingUp, Users, Mail, Award, Calendar, BarChart2 } from 'lucide-react'
 
-const BLU = '#E11D48'
+const BLU = '#003DA5'
 const PUSH_URL = 'https://hnkhckcclgabunkqfmrz.supabase.co/functions/v1/web-push'
 
 function StatCard({ icon: Icon, label, value, sub, color = BLU }) {

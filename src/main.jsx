@@ -98,14 +98,14 @@ if ('serviceWorker' in navigator) {
           </svg>
           <div style="flex:1;min-width:0">
             <div style="font-weight:800;font-size:15px;letter-spacing:-0.02em;margin-bottom:4px">
-              <span style="color:#fff">evently</span><span style="color:#E11D48">pro</span>
+              <span style="color:#fff">evently</span><span style="color:#003DA5">pro</span>
               &nbsp;ha una nuova icona
             </div>
             <div style="font-size:13px;color:#FDA4AF;line-height:1.4;margin-bottom:12px">
               Per aggiornare l'icona sul tuo dispositivo: rimuovi l'app dalla schermata Home, poi riaprila da browser e aggiungila di nuovo.
             </div>
             <button id="ep-banner-close" style="
-              background:#E11D48;color:#fff;border:none;border-radius:8px;
+              background:#003DA5;color:#fff;border:none;border-radius:8px;
               padding:8px 16px;font-size:13px;font-weight:700;
               font-family:'Outfit',sans-serif;cursor:pointer;
             ">Ho capito</button>

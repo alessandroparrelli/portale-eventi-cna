@@ -48,7 +48,7 @@ export default function CertificatoPage() {
             <p style={{ margin: '2px 0 0', fontSize: '12px', color: '#9CA3AF' }}>Codice verifica: <strong style={{ fontFamily: 'monospace' }}>{codice}</strong></p>
           </div>
           <a href={downloadUrl} target="_blank" rel="noopener noreferrer"
-            style={{ padding: '10px 20px', backgroundColor: '#E11D48', color: '#fff', border: 'none', borderRadius: '8px',
+            style={{ padding: '10px 20px', backgroundColor: '#003DA5', color: '#fff', border: 'none', borderRadius: '8px',
               fontSize: '14px', fontWeight: '700', cursor: 'pointer', fontFamily: "'Outfit',sans-serif", textDecoration: 'none' }}>
             ⬇ Scarica PDF
           </a>

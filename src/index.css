@@ -2,15 +2,15 @@
 
 /* ─── eventlypro Design Tokens ─────────────────────────── */
 :root {
-  --brand-primary:      #E11D48;
+  --brand-primary:      #003DA5;
   --brand-secondary:    #BE123C;
   --brand-dark:         #9F1239;
   --brand-light:        #FB7185;
-  --brand-subtle:       #FEE4E6;
+  --brand-subtle:       #EBF0FA;
   --bg-app:             #F7F7F5;
   --bg-card:            #FFFFFF;
   --border-light:       #E8E8E4;
-  --border-focus:       #E11D48;
+  --border-focus:       #003DA5;
   --text-primary:       #111111;
   --text-secondary:     #555555;
   --text-muted:         #9CA3AF;
@@ -141,7 +141,7 @@ header img { display: block; }
 }
 .slim-tab::after {
   content: ''; position: absolute; bottom: -1px; left: 50%; right: 50%;
-  height: 2px; background: linear-gradient(90deg,#E11D48,#BE123C);
+  height: 2px; background: linear-gradient(90deg,#003DA5,#BE123C);
   border-radius: 2px 2px 0 0;
   transition: left .2s cubic-bezier(.4,0,.2,1), right .2s cubic-bezier(.4,0,.2,1);
 }

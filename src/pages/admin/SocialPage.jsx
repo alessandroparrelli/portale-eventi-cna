@@ -10,7 +10,7 @@ const SOCIAL_META = {
   whatsapp:  { label:'Canale WhatsApp',placeholder:'https://whatsapp.com/channel/...',            color:'#25D366' },
   youtube:   { label:'YouTube',        placeholder:'https://youtube.com/@cnaroma',                color:'#FF0000' },
   tiktok:    { label:'TikTok',         placeholder:'https://tiktok.com/@cnaroma',                 color:'#000000' },
-  website:   { label:'Sito internet',  placeholder:'https://www.cnaroma.it',                      color:'#E11D48' },
+  website:   { label:'Sito internet',  placeholder:'https://www.cnaroma.it',                      color:'#003DA5' },
 }
 
 const sF = { fontFamily:"'Outfit',sans-serif" }
@@ -126,15 +126,15 @@ export default function SocialPage() {
         <button
           onClick={salva}
           disabled={saving}
-          style={{ ...sF, padding:'11px 28px', backgroundColor: saved ? '#16A34A' : '#E11D48', color:'#fff', border:'none', borderRadius:'8px', fontSize:'14px', fontWeight:'700', cursor: saving ? 'not-allowed' : 'pointer', opacity: saving ? .7 : 1, transition:'background .2s' }}>
+          style={{ ...sF, padding:'11px 28px', backgroundColor: saved ? '#16A34A' : '#003DA5', color:'#fff', border:'none', borderRadius:'8px', fontSize:'14px', fontWeight:'700', cursor: saving ? 'not-allowed' : 'pointer', opacity: saving ? .7 : 1, transition:'background .2s' }}>
           {saving ? 'Salvataggio…' : saved ? '✓ Salvato' : 'Salva configurazione'}
         </button>
         {saved && <span style={{ ...sF, fontSize:'13px', color:'#16A34A', fontWeight:'600' }}>Le modifiche sono attive su tutte le pagine</span>}
       </div>
 
       {/* Info */}
-      <div style={{ marginTop:'32px', padding:'16px 20px', backgroundColor:'#FEE4E6', border:'1px solid #FDA4AF', borderRadius:'10px' }}>
-        <p style={{ ...sF, margin:'0 0 6px', fontSize:'13px', fontWeight:'800', color:'#E11D48' }}>Dove vengono mostrati i social?</p>
+      <div style={{ marginTop:'32px', padding:'16px 20px', backgroundColor:'#EBF0FA', border:'1px solid #FDA4AF', borderRadius:'10px' }}>
+        <p style={{ ...sF, margin:'0 0 6px', fontSize:'13px', fontWeight:'800', color:'#003DA5' }}>Dove vengono mostrati i social?</p>
         <ul style={{ ...sF, margin:0, paddingLeft:'18px', fontSize:'13px', color:'#374151', lineHeight:'2' }}>
           <li>Footer di tutte le <strong>pagine evento</strong> pubbliche</li>
           <li>Footer di tutte le <strong>landing page</strong></li>

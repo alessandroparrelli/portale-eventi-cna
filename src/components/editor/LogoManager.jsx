@@ -232,7 +232,7 @@ export default function LogoManager({
                   if (deleteMode && !logo.isDefault) { toggleSel(logo.path); return }
                   if (!deleteMode) onChange(logo.isDefault ? null : logo.url)
                 }} title={logo.name}
-                style={{ position:'relative', border:`2px solid ${deleteMode && isChecked ? '#DC2626' : isSelected && !deleteMode ? '#E11D48' : '#E5E7EB'}`,
+                style={{ position:'relative', border:`2px solid ${deleteMode && isChecked ? '#DC2626' : isSelected && !deleteMode ? '#003DA5' : '#E5E7EB'}`,
                   borderRadius:'10px', background: deleteMode && isChecked ? '#FEF2F2' : '#fff', padding:'10px 8px', cursor: logo.isDefault && deleteMode ? 'default' : 'pointer',
                   display:'flex', flexDirection:'column', alignItems:'center', gap:'6px',
                   boxShadow: isSelected && !deleteMode ? '0 0 0 3px rgba(0,61,165,.15)' : 'none', opacity: logo.isDefault && deleteMode ? 0.5 : 1 }}>
@@ -244,7 +244,7 @@ export default function LogoManager({
                   </div>
                 )}
                 {isSelected && !deleteMode && (
-                  <div style={{ position:'absolute', top:'4px', right:'4px', width:'18px', height:'18px', borderRadius:'50%', background:'#E11D48', display:'flex', alignItems:'center', justifyContent:'center' }}>
+                  <div style={{ position:'absolute', top:'4px', right:'4px', width:'18px', height:'18px', borderRadius:'50%', background:'#003DA5', display:'flex', alignItems:'center', justifyContent:'center' }}>
                     <Check size={11} color="#fff" strokeWidth={3}/>
                   </div>
                 )}
@@ -255,7 +255,7 @@ export default function LogoManager({
                     <ImageOff size={20}/>
                   </div>
                 </div>
-                <span style={{ fontSize:'10px', color: isChecked ? '#DC2626' : isSelected && !deleteMode ? '#E11D48' : '#6B7280',
+                <span style={{ fontSize:'10px', color: isChecked ? '#DC2626' : isSelected && !deleteMode ? '#003DA5' : '#6B7280',
                   fontWeight: isChecked || (isSelected && !deleteMode) ? '700' : '500', textAlign:'center', lineHeight:'1.3',
                   overflow:'hidden', textOverflow:'ellipsis', display:'-webkit-box', WebkitLineClamp:2, WebkitBoxOrient:'vertical', width:'100%' }}>
                   {logo.name}
@@ -274,7 +274,7 @@ export default function LogoManager({
         <input ref={fileRef} type="file" accept="image/png,image/jpeg,image/svg+xml,image/webp" style={{ display:'none' }}
           onChange={e => { handleUpload(e.target.files[0]); e.target.value = '' }}/>
         <button onClick={() => fileRef.current?.click()} disabled={uploading}
-          style={{ display:'flex', alignItems:'center', gap:'8px', background: uploading ? '#E5E7EB' : '#E11D48', color:'#fff', border:'none', borderRadius:'8px', padding:'9px 16px', fontSize:'13px', fontWeight:'700', fontFamily:"'Outfit',sans-serif", cursor: uploading ? 'not-allowed' : 'pointer' }}>
+          style={{ display:'flex', alignItems:'center', gap:'8px', background: uploading ? '#E5E7EB' : '#003DA5', color:'#fff', border:'none', borderRadius:'8px', padding:'9px 16px', fontSize:'13px', fontWeight:'700', fontFamily:"'Outfit',sans-serif", cursor: uploading ? 'not-allowed' : 'pointer' }}>
           {uploading ? <><Loader2 size={15} style={{ animation:'spin .8s linear infinite' }}/> Caricamento…</> : <><Upload size={15}/> Scegli file</>}
         </button>
         {uploadErr && <p style={{ fontSize:'12px', color:'#DC2626', margin:'8px 0 0' }}>{uploadErr}</p>}

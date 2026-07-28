@@ -40,7 +40,7 @@ export const RICH_CSS = `
   .rich-content ul[data-type="taskList"] li { display:flex; align-items:flex-start; gap:8px; }
   .rich-content ul[data-type="taskList"] li > label { margin-top:2px; }
   .rich-content ul[data-type="taskList"] li > div { flex:1; }
-  .rich-content blockquote { border-left:4px solid #E11D48; padding:10px 18px; margin:12px 0; background:#FEE4E6; border-radius:0 8px 8px 0; color:#1d4ed8; font-style:italic; }
+  .rich-content blockquote { border-left:4px solid #003DA5; padding:10px 18px; margin:12px 0; background:#EBF0FA; border-radius:0 8px 8px 0; color:#1d4ed8; font-style:italic; }
   .rich-content code { background:#F3F4F6; padding:2px 7px; border-radius:4px; font-family:'Courier New',monospace; font-size:.88em; color:#DC2626; }
   .rich-content pre { background:#1F2937; color:#F9FAFB; padding:14px 18px; border-radius:8px; overflow-x:auto; margin:12px 0; font-family:'Courier New',monospace; font-size:.9em; line-height:1.5; }
   .rich-content pre code { background:none; color:inherit; padding:0; }
@@ -52,9 +52,9 @@ export const RICH_CSS = `
   .rich-content img[data-size=small]   { max-width:30%; }
   .rich-content img[data-size=medium]  { max-width:60%; }
   .rich-content img[data-size=large]   { max-width:100%; }
-  .rich-content a { color:#E11D48; text-decoration:underline; text-underline-offset:2px; font-weight:500; }
+  .rich-content a { color:#003DA5; text-decoration:underline; text-underline-offset:2px; font-weight:500; }
   .rich-content table { border-collapse:collapse; width:100%; margin:12px 0; border-radius:8px; overflow:hidden; }
-  .rich-content th { background:#E11D48; color:#FFF; border:1px solid #1d4ed8; padding:8px 14px; font-weight:700; font-size:14px; text-align:left; }
+  .rich-content th { background:#003DA5; color:#FFF; border:1px solid #1d4ed8; padding:8px 14px; font-weight:700; font-size:14px; text-align:left; }
   .rich-content td { border:1px solid #E5E7EB; padding:8px 14px; font-size:14px; }
   .rich-content tr:nth-child(even) td { background:#F9FAFB; }
   .rich-content sub { font-size:.75em; vertical-align:sub; }
@@ -68,17 +68,17 @@ export const RICH_CSS = `
   .rich-content .callout-warning { background:#FFFBEB; border:1px solid #FCD34D; border-radius:8px; padding:12px 16px; margin:12px 0; }
   .rich-content .callout-success { background:#F0FDF4; border:1px solid #86EFAC; border-radius:8px; padding:12px 16px; margin:12px 0; }
   .rich-content .callout-error   { background:#FEF2F2; border:1px solid #FECACA; border-radius:8px; padding:12px 16px; margin:12px 0; }
-  .rich-content .var-pill { display:inline-block; background:#FEE4E6; color:#E11D48; border:1px solid #FDA4AF; border-radius:12px; padding:1px 8px; font-family:monospace; font-size:.85em; font-weight:600; white-space:nowrap; }
+  .rich-content .var-pill { display:inline-block; background:#EBF0FA; color:#003DA5; border:1px solid #FDA4AF; border-radius:12px; padding:1px 8px; font-family:monospace; font-size:.85em; font-weight:600; white-space:nowrap; }
   .rich-content .block-stats { display:flex; flex-wrap:wrap; gap:20px; justify-content:center; padding:24px 0; }
   .rich-content .stat-item { text-align:center; flex:1 1 80px; }
-  .rich-content .stat-num { display:block; font-size:clamp(32px,5vw,48px); font-weight:900; color:#E11D48; letter-spacing:-.04em; line-height:1; }
+  .rich-content .stat-num { display:block; font-size:clamp(32px,5vw,48px); font-weight:900; color:#003DA5; letter-spacing:-.04em; line-height:1; }
   .rich-content .stat-label { display:block; font-size:12px; color:#6B7280; font-weight:700; text-transform:uppercase; letter-spacing:.06em; margin-top:3px; }
   .rich-content .block-grid2 { display:grid; grid-template-columns:1fr 1fr; gap:12px; margin:12px 0; }
   .rich-content .block-grid3 { display:grid; grid-template-columns:1fr 1fr 1fr; gap:12px; margin:12px 0; }
   .rich-content .grid-card { background:#FFF; border:1px solid #E5E7EB; border-radius:8px; padding:16px; }
-  .rich-content .block-cta { background:#FEE4E6; border:1px solid #FDA4AF; border-radius:10px; padding:24px; text-align:center; margin:16px 0; }
+  .rich-content .block-cta { background:#EBF0FA; border:1px solid #FDA4AF; border-radius:10px; padding:24px; text-align:center; margin:16px 0; }
   .rich-content .cta-title { font-size:1.3em; font-weight:900; color:#0A0A0A; margin:0 0 12px; letter-spacing:-.02em; }
-  .rich-content .cta-btn { display:inline-block; background:#E11D48; color:#FFF; border-radius:6px; padding:10px 28px; font-weight:800; font-size:14px; text-decoration:none; }
+  .rich-content .cta-btn { display:inline-block; background:#003DA5; color:#FFF; border-radius:6px; padding:10px 28px; font-weight:800; font-size:14px; text-decoration:none; }
   .rich-content .animate-fade  { animation:richFadeIn .6s ease both; }
   .rich-content .animate-slide { animation:richSlideUp .5s ease both; }
   .rich-content mark { border-radius:3px; padding:1px 3px; }
@@ -91,8 +91,8 @@ function Btn({ children, title, active, onClick, disabled, danger }) {
   return (
     <button type="button" title={title} onClick={onClick} disabled={disabled}
       style={{ minWidth:'28px', height:'30px', padding:'0 6px', border:'none',
-        background: active ? '#FEE4E6' : 'transparent',
-        color: active ? '#E11D48' : disabled ? '#D1D5DB' : danger ? '#DC2626' : '#374151',
+        background: active ? '#EBF0FA' : 'transparent',
+        color: active ? '#003DA5' : disabled ? '#D1D5DB' : danger ? '#DC2626' : '#374151',
         borderRadius:'5px', cursor: disabled ? 'not-allowed' : 'pointer',
         fontSize:'12px', fontWeight: active ? '700' : '500',
         display:'flex', alignItems:'center', justifyContent:'center', gap:'3px',
@@ -136,7 +136,7 @@ const LINE_HEIGHTS = [
 
 // Palette colori
 const COLOR_PALETTE = {
-  'Blu CNA': ['#001B4D','#002E7A','#E11D48','#1d4ed8','#3B82F6','#93C5FD','#BFDBFE','#EFF6FF'],
+  'Blu CNA': ['#001B4D','#002E7A','#003DA5','#1d4ed8','#3B82F6','#93C5FD','#BFDBFE','#EFF6FF'],
   'Verde':   ['#064E3B','#065F46','#16A34A','#22C55E','#4ADE80','#86EFAC','#BBF7D0','#F0FDF4'],
   'Rosso':   ['#7F1D1D','#991B1B','#B91C1C','#DC2626','#EF4444','#FCA5A5','#FECACA','#FEF2F2'],
   'Giallo':  ['#78350F','#92400E','#B45309','#D97706','#F59E0B','#FCD34D','#FDE68A','#FFFBEB'],
@@ -427,7 +427,7 @@ export default function RichEditor({ value, onChange, placeholder = 'Scrivi quiâ
                 <button key={f.value} type="button" onClick={() => { editor.chain().focus().setFontFamily(f.value).run(); setShowFontPicker(false) }}
                   style={{ display:'block', width:'100%', textAlign:'left', padding:'7px 10px', border:'none', borderRadius:'6px', cursor:'pointer',
                     fontSize:'13px', fontFamily: f.value, background: curFont === f.value ? '#EFF6FF' : 'transparent',
-                    color: curFont === f.value ? '#E11D48' : '#374151', fontWeight: curFont === f.value ? '700' : '400' }}
+                    color: curFont === f.value ? '#003DA5' : '#374151', fontWeight: curFont === f.value ? '700' : '400' }}
                   onMouseEnter={e => { if(curFont !== f.value) e.currentTarget.style.background='#F3F4F6' }}
                   onMouseLeave={e => { if(curFont !== f.value) e.currentTarget.style.background='transparent' }}>
                   {f.label}
@@ -556,8 +556,8 @@ export default function RichEditor({ value, onChange, placeholder = 'Scrivi quiâ
                   const sel = r<=tableHover.r && c<=tableHover.c
                   return <div key={i} onMouseEnter={() => setTableHover({r,c})}
                     onClick={() => { editor.chain().focus().insertTable({rows:r,cols:c,withHeaderRow:true}).run(); setShowTablePicker(false) }}
-                    style={{ width:'20px', height:'20px', border:`1.5px solid ${sel?'#E11D48':'#D1D5DB'}`,
-                      backgroundColor:sel?'#FEE4E6':'#FFF', borderRadius:'2px', cursor:'pointer', transition:'all .1s' }}/>
+                    style={{ width:'20px', height:'20px', border:`1.5px solid ${sel?'#003DA5':'#D1D5DB'}`,
+                      backgroundColor:sel?'#EBF0FA':'#FFF', borderRadius:'2px', cursor:'pointer', transition:'all .1s' }}/>
                 })}
               </div>
               {editor.isActive('table') && (
@@ -602,8 +602,8 @@ export default function RichEditor({ value, onChange, placeholder = 'Scrivi quiâ
           <div style={{ position:'relative' }} onClick={e => e.stopPropagation()}>
             <button type="button"
               onClick={() => { setShowVarPicker(!showVarPicker); setShowTablePicker(false); setShowSpecial(false) }}
-              style={{ height:'30px', padding:'0 10px', border:'1px solid #FDA4AF', background: showVarPicker ? '#FEE4E6' : '#F8FAFF',
-                borderRadius:'5px', cursor:'pointer', fontSize:'12px', fontWeight:'700', color:'#E11D48',
+              style={{ height:'30px', padding:'0 10px', border:'1px solid #FDA4AF', background: showVarPicker ? '#EBF0FA' : '#F8FAFF',
+                borderRadius:'5px', cursor:'pointer', fontSize:'12px', fontWeight:'700', color:'#003DA5',
                 fontFamily:"'Outfit',sans-serif", display:'flex', alignItems:'center', gap:'4px', flexShrink:0 }}>
               {'{ }'} Variabili
             </button>
@@ -619,8 +619,8 @@ export default function RichEditor({ value, onChange, placeholder = 'Scrivi quiâ
                 <div style={{ height:'1px', background:'#E5E7EB', margin:'4px 0 8px' }}/>
                 {variables.map(v =>
                   <button key={v} onClick={() => insertVariable(v)}
-                    style={{ ...st.specialBtn, fontFamily:'monospace', fontWeight:'600', color:'#E11D48' }}
-                    onMouseEnter={e => e.currentTarget.style.background='#FEE4E6'}
+                    style={{ ...st.specialBtn, fontFamily:'monospace', fontWeight:'600', color:'#003DA5' }}
+                    onMouseEnter={e => e.currentTarget.style.background='#EBF0FA'}
                     onMouseLeave={e => e.currentTarget.style.background='transparent'}>
                     {v}
                   </button>
@@ -641,9 +641,9 @@ export default function RichEditor({ value, onChange, placeholder = 'Scrivi quiâ
           <span style={{ fontSize:'11px', color:'#6B7280' }}>Allinea:</span>
           {['left','center','right'].map(a =>
             <button key={a} type="button" onClick={() => updateImageAttr('data-align', a)}
-              style={{ padding:'3px 9px', border:`1px solid ${selectedImg.attrs?.['data-align']===a?'#E11D48':'#E5E7EB'}`,
-                borderRadius:'4px', background:selectedImg.attrs?.['data-align']===a?'#FEE4E6':'#FFF',
-                cursor:'pointer', fontSize:'12px', fontWeight:'600', color:selectedImg.attrs?.['data-align']===a?'#E11D48':'#6B7280',
+              style={{ padding:'3px 9px', border:`1px solid ${selectedImg.attrs?.['data-align']===a?'#003DA5':'#E5E7EB'}`,
+                borderRadius:'4px', background:selectedImg.attrs?.['data-align']===a?'#EBF0FA':'#FFF',
+                cursor:'pointer', fontSize:'12px', fontWeight:'600', color:selectedImg.attrs?.['data-align']===a?'#003DA5':'#6B7280',
                 fontFamily:"'Outfit',sans-serif" }}>
               {a==='left'?'â—€':a==='center'?'â– ':'â–¶'}
             </button>
@@ -652,9 +652,9 @@ export default function RichEditor({ value, onChange, placeholder = 'Scrivi quiâ
           <span style={{ fontSize:'11px', color:'#6B7280' }}>Dimensione:</span>
           {[['small','Piccola'],['medium','Media'],['large','Piena']].map(([sz,label]) =>
             <button key={sz} type="button" onClick={() => updateImageAttr('data-size', sz)}
-              style={{ padding:'3px 9px', border:`1px solid ${selectedImg.attrs?.['data-size']===sz?'#E11D48':'#E5E7EB'}`,
-                borderRadius:'4px', background:selectedImg.attrs?.['data-size']===sz?'#FEE4E6':'#FFF',
-                cursor:'pointer', fontSize:'12px', fontWeight:'600', color:selectedImg.attrs?.['data-size']===sz?'#E11D48':'#6B7280',
+              style={{ padding:'3px 9px', border:`1px solid ${selectedImg.attrs?.['data-size']===sz?'#003DA5':'#E5E7EB'}`,
+                borderRadius:'4px', background:selectedImg.attrs?.['data-size']===sz?'#EBF0FA':'#FFF',
+                cursor:'pointer', fontSize:'12px', fontWeight:'600', color:selectedImg.attrs?.['data-size']===sz?'#003DA5':'#6B7280',
                 fontFamily:"'Outfit',sans-serif" }}>
               {label}
             </button>
@@ -674,12 +674,12 @@ export default function RichEditor({ value, onChange, placeholder = 'Scrivi quiâ
         .ProseMirror { outline:none; }
         .ProseMirror p.is-editor-empty:first-child::before { content:attr(data-placeholder); float:left; color:#9CA3AF; pointer-events:none; height:0; }
         .ProseMirror .selectedCell:after { background:rgba(0,61,165,.07); content:""; position:absolute; inset:0; pointer-events:none; z-index:2; }
-        .ProseMirror .column-resize-handle { background:#E11D48; bottom:-2px; position:absolute; right:-2px; pointer-events:none; top:0; width:3px; }
+        .ProseMirror .column-resize-handle { background:#003DA5; bottom:-2px; position:absolute; right:-2px; pointer-events:none; top:0; width:3px; }
         .ProseMirror table { position:relative; }
         .ProseMirror ul[data-type="taskList"] { padding-left:0; }
         .ProseMirror ul[data-type="taskList"] li { display:flex; gap:8px; align-items:flex-start; list-style:none; }
         .ProseMirror ul[data-type="taskList"] li > label { display:flex; align-items:center; }
-        .ProseMirror ul[data-type="taskList"] li > label input { width:16px; height:16px; cursor:pointer; accent-color:#E11D48; }
+        .ProseMirror ul[data-type="taskList"] li > label input { width:16px; height:16px; cursor:pointer; accent-color:#003DA5; }
         .ProseMirror ul[data-type="taskList"] li > div { flex:1; }
         @keyframes spin { from{transform:rotate(0)} to{transform:rotate(360deg)} }
       `}</style>

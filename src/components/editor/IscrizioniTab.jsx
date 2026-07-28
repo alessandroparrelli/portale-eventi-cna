@@ -16,7 +16,7 @@ function Toggle({ on, onChange, disabled }) {
       style={{
         width: '38px', height: '20px', borderRadius: '10px',
         border: 'none', flexShrink: 0,
-        background: on ? '#E11D48' : '#D1D5DB',
+        background: on ? '#003DA5' : '#D1D5DB',
         cursor: disabled ? 'not-allowed' : 'pointer',
         position: 'relative', transition: 'background .2s',
         opacity: disabled ? 0.4 : 1,
@@ -59,7 +59,7 @@ function RigaCampo({ campo, onChange }) {
             {campo.colonna_db}
           </code>
           {fisso && (
-            <span style={{ fontSize: '10px', color: '#E11D48', background: '#FEE4E6', borderRadius: '3px', padding: '1px 5px', fontWeight: '700' }}>
+            <span style={{ fontSize: '10px', color: '#003DA5', background: '#EBF0FA', borderRadius: '3px', padding: '1px 5px', fontWeight: '700' }}>
               fisso
             </span>
           )}
@@ -73,7 +73,7 @@ function RigaCampo({ campo, onChange }) {
           disabled={fisso}
           onChange={v => onChange({ ...campo, visibile: v, obbligatorio: v ? campo.obbligatorio : false })}
         />
-        <span style={{ fontSize: '10px', color: campo.visibile ? '#E11D48' : '#9CA3AF', fontWeight: '600' }}>
+        <span style={{ fontSize: '10px', color: campo.visibile ? '#003DA5' : '#9CA3AF', fontWeight: '600' }}>
           {campo.visibile ? 'Sì' : 'No'}
         </span>
       </div>
@@ -85,7 +85,7 @@ function RigaCampo({ campo, onChange }) {
           disabled={fisso || !campo.visibile}
           onChange={v => onChange({ ...campo, obbligatorio: v })}
         />
-        <span style={{ fontSize: '10px', color: campo.obbligatorio ? '#E11D48' : '#9CA3AF', fontWeight: '600' }}>
+        <span style={{ fontSize: '10px', color: campo.obbligatorio ? '#003DA5' : '#9CA3AF', fontWeight: '600' }}>
           {campo.obbligatorio ? 'Sì' : 'No'}
         </span>
       </div>
@@ -314,7 +314,7 @@ export default function IscrizioniTab({ event, setEvent, eventId }) {
             type="button" onClick={salva} disabled={saving}
             style={{
               display: 'flex', alignItems: 'center', gap: '6px',
-              background: saved ? '#16A34A' : '#E11D48',
+              background: saved ? '#16A34A' : '#003DA5',
               color: '#fff', border: 'none', borderRadius: '8px',
               padding: '9px 16px', fontSize: '13px', fontWeight: '700',
               fontFamily: "'Outfit',sans-serif", cursor: saving ? 'not-allowed' : 'pointer',
@@ -445,7 +445,7 @@ export default function IscrizioniTab({ event, setEvent, eventId }) {
             { label:'CNA Blu', bg:'#EEF4FF', btn:'#005AC9', txt:'#FFFFFF' },
             { label:'Bianco', bg:'#FFFFFF', btn:'#005AC9', txt:'#FFFFFF' },
             { label:'Blu pieno', bg:'#005AC9', btn:'#FFFFFF', txt:'#003DA5' },
-            { label:'Crimisi', bg:'#FEE4E6', btn:'#E11D48', txt:'#FFFFFF' },
+            { label:'Crimisi', bg:'#EBF0FA', btn:'#003DA5', txt:'#FFFFFF' },
           ].map(p => (
             <button key={p.label} type="button"
               onClick={() => setEvent(ev => ({ ...ev, tema: { ...(ev.tema||{}), cta_bg: p.bg, colore_pulsanti: p.btn, colore_testo_btn: p.txt } }))}
@@ -506,7 +506,7 @@ export default function IscrizioniTab({ event, setEvent, eventId }) {
           </div>
           <div style={{ marginLeft: 'auto' }}>
             <span style={sStat}>CODICE EVENTO</span>
-            <code style={{ fontSize: '13px', fontWeight: '900', color: '#E11D48', letterSpacing: '.04em', fontFamily: 'monospace' }}>
+            <code style={{ fontSize: '13px', fontWeight: '900', color: '#003DA5', letterSpacing: '.04em', fontFamily: 'monospace' }}>
               EVT-{new Date().getFullYear().toString().slice(2)}{String(event.codice || 0).padStart(4, '0')}-NNNN
             </code>
           </div>
@@ -559,7 +559,7 @@ export default function IscrizioniTab({ event, setEvent, eventId }) {
             {campiExtra.length < 5 && (
               <button
                 type="button" onClick={aggiungiExtra}
-                style={{ display: 'flex', alignItems: 'center', gap: '5px', background: '#FEE4E6', color: '#E11D48', border: '1px solid #FDA4AF', borderRadius: '7px', padding: '7px 12px', fontSize: '12px', fontWeight: '700', fontFamily: "'Outfit',sans-serif", cursor: 'pointer', flexShrink: 0 }}
+                style={{ display: 'flex', alignItems: 'center', gap: '5px', background: '#EBF0FA', color: '#003DA5', border: '1px solid #FDA4AF', borderRadius: '7px', padding: '7px 12px', fontSize: '12px', fontWeight: '700', fontFamily: "'Outfit',sans-serif", cursor: 'pointer', flexShrink: 0 }}
               >
                 <Plus size={13} /> Aggiungi
               </button>
@@ -614,5 +614,5 @@ const sInput = {
 }
 const sHint = { fontSize: '11px', color: '#9CA3AF', margin: '3px 0 0' }
 const sStat = { fontSize: '10px', color: '#6B7280', fontWeight: '700', textTransform: 'uppercase', letterSpacing: '.05em', display: 'block' }
-const sVal  = { fontSize: '20px', fontWeight: '900', color: '#E11D48', letterSpacing: '-.02em' }
+const sVal  = { fontSize: '20px', fontWeight: '900', color: '#003DA5', letterSpacing: '-.02em' }
 const sUnit = { fontSize: '11px', color: '#9CA3AF' }

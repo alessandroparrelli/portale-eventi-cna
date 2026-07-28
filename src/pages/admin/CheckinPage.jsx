@@ -468,7 +468,7 @@ export default function CheckinPage() {
               <div style={s.presentiList}>
                 {presenti.map((p, i) => {
                   const initials = `${p.nome?.[0] || ''}${p.cognome?.[0] || ''}`.toUpperCase()
-                  const colors   = ['#E11D48','#16A34A','#D97706','#7C3AED','#DC2626','#0891B2']
+                  const colors   = ['#003DA5','#16A34A','#D97706','#7C3AED','#DC2626','#0891B2']
                   const bg       = colors[i % colors.length]
                   const isWalkin = p.stato === 'walk-in'
                   return (
@@ -519,7 +519,7 @@ export default function CheckinPage() {
                 style={{ width:'100%', padding:'10px 12px 10px 36px', border:'1px solid #E5E7EB', borderRadius:'8px', fontSize:'14px', fontFamily:"'Outfit',sans-serif", outline:'none', boxSizing:'border-box' }} />
             </div>
             <div style={{ display:'flex', gap:'8px' }}>
-              {[{ label:'Totale', val:iscritti.length, color:'#E11D48' },
+              {[{ label:'Totale', val:iscritti.length, color:'#003DA5' },
                 { label:'Presenti', val:iscritti.filter(r => r.presente).length, color:'#16A34A' },
                 { label:'Attesa', val:iscritti.filter(r => !r.presente).length, color:'#D97706' }
               ].map(stat => (
@@ -553,7 +553,7 @@ export default function CheckinPage() {
                       <div style={{ flex:1, minWidth:0 }}>
                         <p style={{ fontSize:'14px', fontWeight:'700', color:'#0A0A0A', margin:0, letterSpacing:'-.01em' }}>{r.cognome} {r.nome}</p>
                         {r.ragione_sociale && <p style={{ fontSize:'12px', color:'#6B7280', margin:'1px 0 0', overflow:'hidden', textOverflow:'ellipsis', whiteSpace:'nowrap' }}>{r.ragione_sociale}</p>}
-                        {r.numero_posto && <p style={{ fontSize:'11px', color:'#E11D48', margin:'2px 0 0', fontWeight:'700' }}>🪑 {r.numero_posto}</p>}
+                        {r.numero_posto && <p style={{ fontSize:'11px', color:'#003DA5', margin:'2px 0 0', fontWeight:'700' }}>🪑 {r.numero_posto}</p>}
                       </div>
                       <div style={{ textAlign:'right', flexShrink:0 }}>
                         {r.presente ? (
@@ -668,9 +668,9 @@ const s = {
   emptyHero:      { display: 'flex', flexDirection: 'column', alignItems: 'center', justifyContent: 'center', padding: '80px 24px', textAlign: 'center' },
   scanCard:       { backgroundColor: '#FFFFFF', border: '1px solid #E5E7EB', borderRadius: '12px', overflow: 'hidden', marginBottom: '12px' },
   scanPlaceholder:{ display: 'flex', flexDirection: 'column', alignItems: 'center', justifyContent: 'center', padding: '32px 24px' },
-  bigBtn:         { width: '100%', display: 'flex', alignItems: 'center', justifyContent: 'center', gap: '10px', background: '#E11D48', color: '#FFFFFF', border: 'none', borderRadius: '8px', padding: '15px', fontSize: '16px', fontWeight: '800', fontFamily: "'Outfit',sans-serif", cursor: 'pointer', letterSpacing: '-.01em' },
+  bigBtn:         { width: '100%', display: 'flex', alignItems: 'center', justifyContent: 'center', gap: '10px', background: '#003DA5', color: '#FFFFFF', border: 'none', borderRadius: '8px', padding: '15px', fontSize: '16px', fontWeight: '800', fontFamily: "'Outfit',sans-serif", cursor: 'pointer', letterSpacing: '-.01em' },
   actionsRow:     { display: 'grid', gridTemplateColumns: '1fr 1fr 1fr', gap: '10px', marginBottom: '16px' },
-  actionBtn:      { display: 'flex', alignItems: 'center', justifyContent: 'center', gap: '7px', backgroundColor: '#FEE4E6', color: '#E11D48', border: '1px solid #FDA4AF', borderRadius: '10px', padding: '13px 8px', fontSize: '13px', fontWeight: '700', fontFamily: "'Outfit',sans-serif", cursor: 'pointer' },
+  actionBtn:      { display: 'flex', alignItems: 'center', justifyContent: 'center', gap: '7px', backgroundColor: '#EBF0FA', color: '#003DA5', border: '1px solid #FDA4AF', borderRadius: '10px', padding: '13px 8px', fontSize: '13px', fontWeight: '700', fontFamily: "'Outfit',sans-serif", cursor: 'pointer' },
   presentiSection:{ backgroundColor: '#FFFFFF', border: '1px solid #E5E7EB', borderRadius: '12px', overflow: 'hidden' },
   presentiHeader: { display: 'flex', alignItems: 'center', justifyContent: 'space-between', padding: '13px 18px', borderBottom: '1px solid #E5E7EB' },
   presentiTitle:  { fontSize: '14px', fontWeight: '700', color: '#0A0A0A', letterSpacing: '-.01em', margin: 0 },

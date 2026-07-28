@@ -1,7 +1,7 @@
 import { useEffect, useState } from 'react'
 import { useParams } from 'react-router-dom'
 
-const BLU  = '#E11D48'
+const BLU  = '#003DA5'
 const LOGO = 'https://raw.githubusercontent.com/alessandroparrelli/fileappoggio/main/NUOVO-LOGO-CNA-ROMA-SOLO-ROMA.png'
 const FN_URL = 'https://hnkhckcclgabunkqfmrz.supabase.co/functions/v1/conferma-presenza'
 const QR_API = (val, size = 200) => `https://api.qrserver.com/v1/create-qr-code/?size=${size}x${size}&format=png&data=${encodeURIComponent(val)}`
@@ -89,7 +89,7 @@ function PostoCard({ numero_posto }) {
   const len = (numero_posto || '').length
   const fs = len > 8 ? '28px' : len > 5 ? '38px' : len > 3 ? '50px' : '64px'
   return (
-    <div style={{ background: 'linear-gradient(135deg,#E11D48,#BE123C)', borderRadius: '14px', padding: '24px 32px', marginBottom: '20px', width: '100%', boxSizing: 'border-box' }}>
+    <div style={{ background: 'linear-gradient(135deg,#003DA5,#BE123C)', borderRadius: '14px', padding: '24px 32px', marginBottom: '20px', width: '100%', boxSizing: 'border-box' }}>
       <p style={{ margin: '0 0 6px', fontSize: '11px', fontWeight: '700', color: 'rgba(255,255,255,0.7)', textTransform: 'uppercase', letterSpacing: '.1em' }}>Il tuo posto</p>
       <p style={{ margin: 0, fontSize: fs, fontWeight: '900', color: '#fff', lineHeight: 1.1, letterSpacing: '-0.02em' }}>{numero_posto}</p>
     </div>

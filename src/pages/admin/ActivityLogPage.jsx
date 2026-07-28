@@ -147,7 +147,7 @@ function OpRow({ log }) {
       </td>
       <td style={{ ...s.tdL3, color:'#374151', fontSize:'12px' }}>
         {log.evento_titolo && (
-          <span style={{ fontWeight:'600', color:'#E11D48', marginRight:'6px' }}>
+          <span style={{ fontWeight:'600', color:'#003DA5', marginRight:'6px' }}>
             {log.evento_titolo}
           </span>
         )}
@@ -248,8 +248,8 @@ function UserDayRow({ utenteNome, sessions, defaultOpen }) {
             {open
               ? <ChevronDown size={15} style={{ color:'#9CA3AF', flexShrink:0 }} />
               : <ChevronRight size={15} style={{ color:'#9CA3AF', flexShrink:0 }} />}
-            <div style={{ width:'30px', height:'30px', borderRadius:'50%', backgroundColor:'#FEE4E6', display:'flex', alignItems:'center', justifyContent:'center', flexShrink:0 }}>
-              <User size={15} style={{ color:'#E11D48' }} />
+            <div style={{ width:'30px', height:'30px', borderRadius:'50%', backgroundColor:'#EBF0FA', display:'flex', alignItems:'center', justifyContent:'center', flexShrink:0 }}>
+              <User size={15} style={{ color:'#003DA5' }} />
             </div>
             <span style={{ fontSize:'14px', fontWeight:'700', color:'#0A0A0A' }}>{utenteNome}</span>
           </div>

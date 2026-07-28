@@ -4,7 +4,7 @@ import { useRole } from '../hooks/useRole'
 import { supabase } from '../lib/supabase'
 import { useState, useEffect } from 'react'
 
-const RUOLO_COLORS = { superadmin:'#9F1239', admin:'#E11D48', supervisore:'#BE123C', utente:'#6B7280' }
+const RUOLO_COLORS = { superadmin:'#9F1239', admin:'#003DA5', supervisore:'#BE123C', utente:'#6B7280' }
 const RUOLO_LABELS = { superadmin:'Super Admin', admin:'Admin', supervisore:'Supervisore', utente:'Utente' }
 
 // ── SVG icons inline colorate ──────────────────────────────────────
@@ -139,10 +139,10 @@ function HoverNavLink({ to, end, onClick, activeColor, iconKey, label, activeDot
 
 const NAV_GROUPS = [
   {
-    label: 'Gestione', color: '#E11D48',
+    label: 'Gestione', color: '#003DA5',
     items: [
-      { to:'/admin',             label:'Dashboard',    iconKey:'dashboard', end:true,  activeColor:'#E11D48', sezione:'dashboard' },
-      { to:'/admin/eventi',      label:'Eventi',       iconKey:'calendar',             activeColor:'#E11D48', sezione:'eventi' },
+      { to:'/admin',             label:'Dashboard',    iconKey:'dashboard', end:true,  activeColor:'#003DA5', sezione:'dashboard' },
+      { to:'/admin/eventi',      label:'Eventi',       iconKey:'calendar',             activeColor:'#003DA5', sezione:'eventi' },
       { to:'/admin/iscritti',    label:'Iscritti',     iconKey:'users',                activeColor:'#059669', sezione:'iscritti' },
       { to:'/admin/checkin',     label:'Check-in',     iconKey:'qr',                   activeColor:'#7C3AED', sezione:'checkin' },
     ],
@@ -174,7 +174,7 @@ const NAV_GROUPS = [
     items: [
       { to:'/admin/utenti',      label:'Utenti',       iconKey:'usercog',              activeColor:'#7C3AED', sezione:'utenti' },
       { to:'/admin/ruoli',       label:'Ruoli',        iconKey:'usercog',              activeColor:'#7C3AED', sezione:'ruoli' },
-      { to:'/admin/profilo',     label:'Profilo',      iconKey:'user2',                activeColor:'#E11D48', sezione:'profilo' },
+      { to:'/admin/profilo',     label:'Profilo',      iconKey:'user2',                activeColor:'#003DA5', sezione:'profilo' },
     ],
   },
 ]

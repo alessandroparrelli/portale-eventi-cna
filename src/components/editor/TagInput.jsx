@@ -51,11 +51,11 @@ export default function TagInput({ value = [], onChange }) {
         onClick={() => document.getElementById('tag-input-field')?.focus()}>
         {value.map(tag => (
           <span key={tag} style={{ display: 'inline-flex', alignItems: 'center', gap: '5px',
-            backgroundColor: '#E11D4814', color: '#E11D48', fontSize: '12px', fontWeight: '700',
+            backgroundColor: '#003DA514', color: '#003DA5', fontSize: '12px', fontWeight: '700',
             borderRadius: '999px', padding: '3px 10px', letterSpacing: '0.01em' }}>
             {tag}
             <button type="button" onClick={() => removeTag(tag)}
-              style={{ background: 'none', border: 'none', cursor: 'pointer', color: '#E11D48',
+              style={{ background: 'none', border: 'none', cursor: 'pointer', color: '#003DA5',
                 padding: 0, display: 'flex', alignItems: 'center', lineHeight: 1, fontSize: '13px' }}>
               ×
             </button>

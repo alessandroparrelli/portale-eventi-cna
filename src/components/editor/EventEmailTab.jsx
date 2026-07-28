@@ -14,7 +14,7 @@ import {
 } from 'lucide-react'
 
 //  Costanti 
-const BLU = '#E11D48'
+const BLU = '#003DA5'
 const NERO = '#0A0A0A'
 
 const TIPI = [
@@ -102,7 +102,7 @@ function blocchiToHtml(blocchi) {
         const addrEnc = encodeURIComponent(addr)
         const h       = b.altezza || 200
         const mapUrl  = `https://www.google.com/maps/search/?api=1&query=${addrEnc}`
-        return `<table role="presentation" width="100%" cellpadding="0" cellspacing="0" border="0" style="margin:0 0 20px;border-radius:10px;overflow:hidden;border:1.5px solid #E5E7EB"><tr><td><a href="${mapUrl}" target="_blank" rel="noopener" style="display:block;text-decoration:none"><table role="presentation" width="100%" cellpadding="0" cellspacing="0" border="0"><tr><td align="center" valign="middle" height="${h}" style="background:#EFF6FF;padding:20px;text-align:center"><div>&#x1F5FA;&#xFE0F;</div><p style="margin:8px 0 0;font-size:14px;color:#1D4ED8;font-weight:700;font-family:Inter,Arial,sans-serif">Clicca per aprire la mappa</p></td></tr><tr><td style="padding:14px 18px;background:#ffffff;border-top:2px solid #DBEAFE"><table role="presentation" width="100%" cellpadding="0" cellspacing="0" border="0"><tr><td width="30" valign="middle" style="font-size:22px;padding-right:12px">&#x1F4CD;</td><td valign="middle"><p style="margin:0 0 2px;font-size:14px;font-weight:700;color:#0A0A0A;font-family:Inter,Arial,sans-serif">${b.testo||'Come raggiungerci'}</p><p style="margin:0;font-size:12px;color:#374151;font-family:Inter,Arial,sans-serif">${addr}</p></td><td width="100" align="right" valign="middle"><span style="font-size:11px;font-weight:700;color:#E11D48;font-family:Inter,Arial,sans-serif;border:1.5px solid #BFDBFE;padding:5px 10px;border-radius:6px;white-space:nowrap">Apri Maps &#8594;</span></td></tr></table></td></tr></table></a></td></tr></table>`
+        return `<table role="presentation" width="100%" cellpadding="0" cellspacing="0" border="0" style="margin:0 0 20px;border-radius:10px;overflow:hidden;border:1.5px solid #E5E7EB"><tr><td><a href="${mapUrl}" target="_blank" rel="noopener" style="display:block;text-decoration:none"><table role="presentation" width="100%" cellpadding="0" cellspacing="0" border="0"><tr><td align="center" valign="middle" height="${h}" style="background:#EFF6FF;padding:20px;text-align:center"><div>&#x1F5FA;&#xFE0F;</div><p style="margin:8px 0 0;font-size:14px;color:#1D4ED8;font-weight:700;font-family:Inter,Arial,sans-serif">Clicca per aprire la mappa</p></td></tr><tr><td style="padding:14px 18px;background:#ffffff;border-top:2px solid #DBEAFE"><table role="presentation" width="100%" cellpadding="0" cellspacing="0" border="0"><tr><td width="30" valign="middle" style="font-size:22px;padding-right:12px">&#x1F4CD;</td><td valign="middle"><p style="margin:0 0 2px;font-size:14px;font-weight:700;color:#0A0A0A;font-family:Inter,Arial,sans-serif">${b.testo||'Come raggiungerci'}</p><p style="margin:0;font-size:12px;color:#374151;font-family:Inter,Arial,sans-serif">${addr}</p></td><td width="100" align="right" valign="middle"><span style="font-size:11px;font-weight:700;color:#003DA5;font-family:Inter,Arial,sans-serif;border:1.5px solid #BFDBFE;padding:5px 10px;border-radius:6px;white-space:nowrap">Apri Maps &#8594;</span></td></tr></table></td></tr></table></a></td></tr></table>`
       }
       return ''
     } catch(e) { console.error('blocco error', b?.tipo, e); return '' }
@@ -166,7 +166,7 @@ function ImageDropZone({ value, onChange, label='Immagine' }) {
         <div onDragOver={e=>{e.preventDefault();setDrag(true)}} onDragLeave={()=>setDrag(false)}
           onDrop={e=>{e.preventDefault();setDrag(false);handleFile(e.dataTransfer.files[0])}}
           onClick={()=>ref.current?.click()}
-          style={{ border:`2px dashed ${drag?BLU:'#D1D5DB'}`, borderRadius:'7px', padding:'14px', textAlign:'center', cursor:'pointer', background:drag?'#FEE4E6':'#FAFAFA', marginBottom:'6px' }}>
+          style={{ border:`2px dashed ${drag?BLU:'#D1D5DB'}`, borderRadius:'7px', padding:'14px', textAlign:'center', cursor:'pointer', background:drag?'#EBF0FA':'#FAFAFA', marginBottom:'6px' }}>
           <input ref={ref} type="file" accept="image/*" style={{ display:'none' }} onChange={e=>handleFile(e.target.files[0])}/>
           {uploading ? (
             <div style={{ display:'flex', alignItems:'center', justifyContent:'center', gap:'6px', fontSize:'12px', color:'#6B7280' }}>
@@ -219,7 +219,7 @@ function BlockProps({ block, onChange }) {
       <div style={{ display:'flex', gap:'3px' }}>
         {[['left',<AlignLeft size={12}/>],['center',<AlignCenter size={12}/>],['right',<AlignRight size={12}/>]].map(([v,ic])=>(
           <button key={v} onClick={()=>set(key,v)}
-            style={{ flex:1, padding:'5px', border:`1px solid ${block[key]===v?BLU:'#E5E7EB'}`, borderRadius:'5px', cursor:'pointer', background:block[key]===v?'#FEE4E6':'#fff', color:block[key]===v?BLU:'#9CA3AF', display:'flex', alignItems:'center', justifyContent:'center' }}>
+            style={{ flex:1, padding:'5px', border:`1px solid ${block[key]===v?BLU:'#E5E7EB'}`, borderRadius:'5px', cursor:'pointer', background:block[key]===v?'#EBF0FA':'#fff', color:block[key]===v?BLU:'#9CA3AF', display:'flex', alignItems:'center', justifyContent:'center' }}>
             {ic}
           </button>
         ))}
@@ -591,7 +591,7 @@ export default function EventEmailTab({ eventoId }) {
               style={{ ...inp, fontSize:'12px', fontWeight:'600', marginBottom:'6px' }} placeholder="Oggetto email"/>
             <div
               onClick={()=>setSelectedBlock('header')}
-              style={{ display:'flex', alignItems:'center', gap:'6px', padding:'7px 10px', borderRadius:'8px', border:`2px solid ${selectedBlock==='header'?BLU:'#E5E7EB'}`, background:selectedBlock==='header'?'#FEE4E6':'#fff', cursor:'pointer', transition:'all .1s' }}>
+              style={{ display:'flex', alignItems:'center', gap:'6px', padding:'7px 10px', borderRadius:'8px', border:`2px solid ${selectedBlock==='header'?BLU:'#E5E7EB'}`, background:selectedBlock==='header'?'#EBF0FA':'#fff', cursor:'pointer', transition:'all .1s' }}>
               <Settings2 size={12} style={{ color:selectedBlock==='header'?BLU:'#9CA3AF', flexShrink:0 }}/>
               <span style={{ fontSize:'12px', fontWeight:'600', color:selectedBlock==='header'?BLU:'#374151', flex:1 }}>Intestazione email</span>
               <div style={{ background:headerConfig.sfondo||BLU, borderRadius:'3px', width:'20px', height:'14px', flexShrink:0 }}/>
@@ -607,7 +607,7 @@ export default function EventEmailTab({ eventoId }) {
                 <div style={{ padding:'6px 0 2px', display:'flex', flexWrap:'wrap', gap:'3px' }}>
                   {[...VARIABILI, ...(formFields.map(f=>`{{${f.colonna_db}}`))].map(v=>(
                     <button key={v} type="button" onClick={()=>navigator.clipboard.writeText(v)} title="Copia negli appunti"
-                      style={{ padding:'2px 6px', background:'#FEE4E6', border:'1px solid #BFDBFE', borderRadius:'4px', cursor:'pointer', fontSize:'9px', color:'#1d4ed8', fontFamily:'monospace' }}>
+                      style={{ padding:'2px 6px', background:'#EBF0FA', border:'1px solid #BFDBFE', borderRadius:'4px', cursor:'pointer', fontSize:'9px', color:'#1d4ed8', fontFamily:'monospace' }}>
                       {v}
                     </button>
                   ))}
@@ -634,7 +634,7 @@ export default function EventEmailTab({ eventoId }) {
               const isSel = selectedBlock === i
               return (
                 <div key={b.id||i} {...dragHandlers(i)} onClick={()=>setSelectedBlock(isSel?null:i)}
-                  style={{ display:'flex', alignItems:'center', gap:'6px', padding:'7px 8px', borderRadius:'7px', border:`1.5px solid ${isSel?BLU:'#E5E7EB'}`, background:isSel?'#FEE4E6':'#fff', cursor:'pointer', transition:'all .1s', flexShrink:0 }}>
+                  style={{ display:'flex', alignItems:'center', gap:'6px', padding:'7px 8px', borderRadius:'7px', border:`1.5px solid ${isSel?BLU:'#E5E7EB'}`, background:isSel?'#EBF0FA':'#fff', cursor:'pointer', transition:'all .1s', flexShrink:0 }}>
                   <GripVertical size={11} style={{ color:'#D1D5DB', cursor:'grab', flexShrink:0 }}/>
                   <span style={{ color:isSel?BLU:'#6B7280', display:'flex', flexShrink:0 }}>{info.icon}</span>
                   <span style={{ fontSize:'11px', fontWeight:'600', color:isSel?BLU:'#374151', flex:1, overflow:'hidden', textOverflow:'ellipsis', whiteSpace:'nowrap' }}>{info.label}</span>
@@ -665,7 +665,7 @@ export default function EventEmailTab({ eventoId }) {
         {/* Resizer 1 */}
         <div onMouseDown={e=>startResize('left',e)}
           style={{ width:'5px', flexShrink:0, cursor:'ew-resize', background:'transparent', position:'relative', zIndex:10 }}
-          onMouseEnter={e=>{e.currentTarget.style.background='#FEE4E6'}} onMouseLeave={e=>{e.currentTarget.style.background='transparent'}}>
+          onMouseEnter={e=>{e.currentTarget.style.background='#EBF0FA'}} onMouseLeave={e=>{e.currentTarget.style.background='transparent'}}>
           <div style={{ position:'absolute', top:'50%', left:'50%', transform:'translate(-50%,-50%)', width:'3px', height:'24px', borderRadius:'2px', background:'#D1D5DB' }}/>
         </div>
 
@@ -689,7 +689,7 @@ export default function EventEmailTab({ eventoId }) {
                 <div style={{ display:'flex', flexWrap:'wrap', gap:'4px' }}>
                   {VARIABILI.map(v=>(
                     <button key={v} type="button" onClick={()=>navigator.clipboard.writeText(v)}
-                      style={{ padding:'3px 8px', background:'#FEE4E6', border:'1px solid #BFDBFE', borderRadius:'4px', cursor:'pointer', fontSize:'10px', color:'#1d4ed8', fontFamily:'monospace' }}>
+                      style={{ padding:'3px 8px', background:'#EBF0FA', border:'1px solid #BFDBFE', borderRadius:'4px', cursor:'pointer', fontSize:'10px', color:'#1d4ed8', fontFamily:'monospace' }}>
                       {v}
                     </button>
                   ))}
@@ -727,7 +727,7 @@ export default function EventEmailTab({ eventoId }) {
         {!previewCollapsed && (
           <div onMouseDown={e=>startResize('right',e)}
             style={{ width:'5px', flexShrink:0, cursor:'ew-resize', background:'transparent', position:'relative', zIndex:10, borderLeft:'1px solid #E5E7EB' }}
-            onMouseEnter={e=>{e.currentTarget.style.background='#FEE4E6'}} onMouseLeave={e=>{e.currentTarget.style.background='transparent'}}>
+            onMouseEnter={e=>{e.currentTarget.style.background='#EBF0FA'}} onMouseLeave={e=>{e.currentTarget.style.background='transparent'}}>
             <div style={{ position:'absolute', top:'50%', left:'50%', transform:'translate(-50%,-50%)', width:'3px', height:'24px', borderRadius:'2px', background:'#D1D5DB' }}/>
           </div>
         )}

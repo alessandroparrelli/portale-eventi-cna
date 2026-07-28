@@ -75,7 +75,7 @@ export function AccordionItem({ domanda, risposta, cp }) {
     <div style={{ border: '1px solid #E5E7EB', borderRadius: '10px', overflow: 'hidden', marginBottom: '8px' }}>
       <button onClick={() => setOpen(o => !o)} style={{
         width: '100%', display: 'flex', alignItems: 'center', justifyContent: 'space-between',
-        padding: '16px 20px', background: open ? '#FEE4E6' : '#fff', border: 'none',
+        padding: '16px 20px', background: open ? '#EBF0FA' : '#fff', border: 'none',
         cursor: 'pointer', fontFamily: 'Inter,sans-serif', textAlign: 'left',
       }}>
         <span style={{ fontSize: '15px', fontWeight: '700', color: open ? cp : '#0A0A0A', lineHeight: 1.4 }}>{domanda}</span>
@@ -146,7 +146,7 @@ export function videoEmbedUrl(url) {
 }
 
 // ── Block Renderer principale ─────────────────────────────────────
-export default function BlockRenderer({ block, cp = '#E11D48', formTarget = '#lp-form' }) {
+export default function BlockRenderer({ block, cp = '#003DA5', formTarget = '#lp-form' }) {
   if (!block) return null
 
   if (block.tipo === 'testo') return (
@@ -360,7 +360,7 @@ export default function BlockRenderer({ block, cp = '#E11D48', formTarget = '#lp
 // ── Programma evento ──────────────────────────────────────────────
 function ProgrammaBlock({ block, cp }) {
   const cTitoli = block.colore_titoli || '#E91E8C'
-  const cOrari  = block.colore_orari  || cp || '#E11D48'
+  const cOrari  = block.colore_orari  || cp || '#003DA5'
   const voci    = block.voci || []
 
   // Icone inline per i tipi di voce
