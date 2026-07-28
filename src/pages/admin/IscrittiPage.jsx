@@ -285,7 +285,7 @@ export default function IscrittiPage() {
         referente_id: editCapogruppo ? editCapogruppo.id : null,
       }).eq('id', editModal.id)
       if (error) throw error
-      logAttivita('iscritto_modificato', 'Modificato: ' + editForm.nome.trim() + ' ' + editForm.cognome.trim())
+      logAttivita('iscritto_modificato', { eventoId: selectedEvento, dettagli: { nome: editForm.nome.trim() + ' ' + editForm.cognome.trim() } })
       setEditModal(null)
       loadRegs()
     } catch (e) {
@@ -335,7 +335,7 @@ export default function IscrittiPage() {
       const { error } = await supabase.from('registrations').insert(payload)
       if (error) throw error
 
-      logAttivita('iscritto_manuale', 'Aggiunto manualmente: ' + payload.nome + ' ' + payload.cognome + (addCapogruppo ? ' (capogruppo: ' + addCapogruppo.nome + ' ' + addCapogruppo.cognome + ')' : ''))
+      logAttivita('iscritto_manuale', { eventoId: selectedEvento, dettagli: { nome: payload.nome + ' ' + payload.cognome, ...(addCapogruppo ? { capogruppo: addCapogruppo.nome + ' ' + addCapogruppo.cognome } : {}) } })
 
       // Email conferma (fire-and-forget) - parte anche se stessa email del capogruppo
       if (payload.email) {
