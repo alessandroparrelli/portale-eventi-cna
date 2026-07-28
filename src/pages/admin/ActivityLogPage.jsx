@@ -33,9 +33,6 @@ const AZIONE_LABELS = {
   sms_inviato:           { label:'SMS inviato',            color:'#059669', bg:'#ECFDF5' },
 }
 
-// Azioni che aprono una nuova sessione
-const SESSION_STARTERS = new Set(['login'])
-// Timeout tra azioni che crea sessione implicita (minuti)
 const SESSION_GAP_MINUTES = 60
 
 function AzioneBadge({ azione, small }) {
@@ -53,38 +50,19 @@ function AzioneBadge({ azione, small }) {
   )
 }
 
-function fmtDt(ts) {
-  if (!ts) return '—'
-  return new Date(ts).toLocaleString('it-IT', {
-    day:'2-digit', month:'2-digit', year:'numeric', hour:'2-digit', minute:'2-digit', second:'2-digit'
-  })
-}
-
 function fmtTime(ts) {
   if (!ts) return '—'
   return new Date(ts).toLocaleString('it-IT', { hour:'2-digit', minute:'2-digit', second:'2-digit' })
 }
 
-function relTime(ts) {
-  if (!ts) return ''
-  const diff = Date.now() - new Date(ts).getTime()
-  const m = Math.floor(diff / 60000)
-  if (m < 1) return 'ora'
-  if (m < 60) return `${m}m fa`
-  const h = Math.floor(m / 60)
-  if (h < 24) return `${h}h fa`
-  const d = Math.floor(h / 24)
-  return `${d}g fa`
-}
-
-function durataStr(startTs, endTs) {
-  const diff = new Date(endTs).getTime() - new Date(startTs).getTime()
-  const m = Math.floor(diff / 60000)
-  if (m < 1) return '< 1 min'
-  if (m < 60) return `${m} min`
-  const h = Math.floor(m / 60)
-  const rm = m % 60
-  return rm > 0 ? `${h}h ${rm}m` : `${h}h`
+function fmtDayLabel(dateStr) {
+  const d = new Date(dateStr + 'T12:00:00')
+  const oggi = new Date()
+  const ieri = new Date(); ieri.setDate(oggi.getDate() - 1)
+  const fmtFull = d.toLocaleDateString('it-IT', { weekday:'long', day:'numeric', month:'long', year:'numeric' })
+  if (d.toDateString() === oggi.toDateString()) return 'Oggi — ' + fmtFull
+  if (d.toDateString() === ieri.toDateString()) return 'Ieri — ' + fmtFull
+  return fmtFull.charAt(0).toUpperCase() + fmtFull.slice(1)
 }
 
 function parseDettaglio(raw) {
@@ -93,220 +71,207 @@ function parseDettaglio(raw) {
   try { return JSON.parse(raw) } catch { return null }
 }
 
-function DettaglioInline({ raw }) {
+function DettaglioText({ raw }) {
   const d = parseDettaglio(raw)
-  if (!d) return null
-  // Se ha una chiave "nome", mostrala direttamente
-  if (d.nome) return <span style={{ color:'#374151' }}>{d.nome}</span>
-  // altrimenti mostra key: value compatti
-  const entries = Object.entries(d).filter(([k]) => k !== 'nome')
-  if (!entries.length) return null
+  if (!d || !Object.keys(d).length) return null
+  if (d.nome) return <span>{d.nome}</span>
+  return <span>{Object.entries(d).map(([k,v]) => `${k}: ${v}`).join(' · ')}</span>
+}
+
+// Conta badge con contatore
+function AzioniBadges({ logs, small }) {
+  const counts = {}
+  for (const l of logs) counts[l.azione] = (counts[l.azione] || 0) + 1
+  const entries = Object.entries(counts)
   return (
-    <span style={{ color:'#6B7280', fontSize:'11px' }}>
-      {entries.map(([k, v]) => `${k}: ${v}`).join(' · ')}
-    </span>
+    <div style={{ display:'flex', flexWrap:'wrap', gap:'4px', alignItems:'center' }}>
+      {entries.slice(0, 5).map(([a, n]) => (
+        <span key={a} style={{ position:'relative', display:'inline-flex' }}>
+          <AzioneBadge azione={a} small={small} />
+          {n > 1 && (
+            <span style={{
+              position:'absolute', top:'-5px', right:'-5px',
+              background:'#003DA5', color:'#fff', borderRadius:'10px',
+              fontSize:'9px', fontWeight:'800', padding:'1px 4px', lineHeight:'1.2',
+              minWidth:'14px', textAlign:'center'
+            }}>{n}</span>
+          )}
+        </span>
+      ))}
+      {entries.length > 5 && (
+        <span style={{ fontSize:'11px', color:'#9CA3AF' }}>+{entries.length - 5}</span>
+      )}
+    </div>
   )
 }
 
-// Raggruppa i log in sessioni per utente
-function buildSessions(logs) {
-  if (!logs.length) return []
-
-  // Ordina cronologicamente
-  const sorted = [...logs].sort((a, b) => new Date(a.created_at) - new Date(b.created_at))
-
+// Spezza i log di un utente in sessioni basate sul gap temporale
+function splitIntoSessions(logs) {
+  const sorted = [...logs].sort((a,b) => new Date(a.created_at) - new Date(b.created_at))
   const sessions = []
-  let current = null
-
-  for (const log of sorted) {
-    const ts = new Date(log.created_at).getTime()
-    const utenteKey = log.utente_nome || 'Sistema'
-
-    const isNewSession =
-      !current ||
-      current.utente_nome !== utenteKey ||
-      SESSION_STARTERS.has(log.azione) ||
-      (ts - new Date(current.last_at).getTime()) > SESSION_GAP_MINUTES * 60000
-
-    if (isNewSession) {
-      current = {
-        id: log.id + '_sess',
-        utente_nome: utenteKey,
-        utente_avatar: log.utente_avatar || null,
-        ip_address: log.ip_address || log.ip || null,
-        started_at: log.created_at,
-        last_at: log.created_at,
-        logs: [log],
-      }
-      sessions.push(current)
+  let cur = null
+  for (const l of sorted) {
+    const ts = new Date(l.created_at).getTime()
+    if (!cur || (ts - new Date(cur.last_at).getTime()) > SESSION_GAP_MINUTES * 60000) {
+      cur = { start: l.created_at, last_at: l.created_at, logs: [l] }
+      sessions.push(cur)
     } else {
-      current.last_at = log.created_at
-      current.logs.push(log)
+      cur.last_at = l.created_at
+      cur.logs.push(l)
     }
   }
-
-  // Ritorna in ordine decrescente (la sessione piu recente prima)
-  return sessions.reverse()
+  return sessions
 }
 
-function SessionRow({ session, defaultOpen }) {
+// Riga singola operazione (livello 3)
+function OpRow({ log }) {
+  const d = parseDettaglio(log.dettaglio)
+  const hasDetail = d && Object.keys(d).length > 0
+  return (
+    <tr style={{ backgroundColor:'#F5F7FF' }}>
+      <td style={{ ...s.tdL3, width:'90px', paddingLeft:'64px' }}>
+        <span style={{ fontFamily:'monospace', fontSize:'11px', color:'#9CA3AF' }}>
+          {fmtTime(log.created_at)}
+        </span>
+      </td>
+      <td style={s.tdL3}>
+        <AzioneBadge azione={log.azione} small />
+      </td>
+      <td style={{ ...s.tdL3, color:'#374151', fontSize:'12px' }}>
+        {log.evento_titolo && (
+          <span style={{ fontWeight:'600', color:'#E11D48', marginRight:'6px' }}>
+            {log.evento_titolo}
+          </span>
+        )}
+        {hasDetail && <DettaglioText raw={log.dettaglio} />}
+        {!log.evento_titolo && !hasDetail && <span style={{ color:'#D1D5DB' }}>—</span>}
+      </td>
+      <td style={s.tdL3}>
+        <span style={{ fontSize:'11px', color:'#D1D5DB', fontFamily:'monospace' }}>
+          {log.ip_address || ''}
+        </span>
+      </td>
+    </tr>
+  )
+}
+
+// Riga sessione (livello 2) — espandibile → mostra operazioni
+function SessionBlock({ session, defaultOpen }) {
   const [open, setOpen] = useState(defaultOpen || false)
-
-  const azioni = session.logs.map(l => l.azione)
-  const uniqueAzioni = [...new Set(azioni)]
-
-  // Riassunto: conta per azione
-  const counts = {}
-  for (const a of azioni) counts[a] = (counts[a] || 0) + 1
-
-  const isMulti = session.logs.length > 1
-  const durata = isMulti ? durataStr(session.started_at, session.last_at) : null
+  const n = session.logs.length
+  const durMin = Math.round((new Date(session.last_at) - new Date(session.start)) / 60000)
+  const durLabel = durMin < 1 ? null : durMin < 60 ? `${durMin} min` : `${Math.floor(durMin/60)}h ${durMin%60 ? durMin%60+'m' : ''}`
 
   return (
     <>
-      {/* Riga sessione */}
       <tr
-        style={{
-          ...s.tr,
-          cursor: isMulti ? 'pointer' : 'default',
-          backgroundColor: open ? '#FAFBFF' : 'transparent',
-        }}
-        onClick={() => isMulti && setOpen(o => !o)}
-        onMouseEnter={e => { if (!open) e.currentTarget.style.backgroundColor = '#F9FAFB' }}
-        onMouseLeave={e => { if (!open) e.currentTarget.style.backgroundColor = 'transparent' }}
+        style={{ ...s.trSess, cursor: n > 1 ? 'pointer' : 'default', backgroundColor: open ? '#EEF2FF' : '#F8FAFF' }}
+        onClick={() => n > 0 && setOpen(o => !o)}
+        onMouseEnter={e => { if (!open) e.currentTarget.style.backgroundColor = '#EFF1FF' }}
+        onMouseLeave={e => { if (!open) e.currentTarget.style.backgroundColor = '#F8FAFF' }}
       >
-        {/* Quando */}
-        <td style={s.td}>
+        <td style={{ ...s.tdL2, paddingLeft:'36px', width:'130px' }}>
           <div style={{ display:'flex', alignItems:'center', gap:'6px' }}>
-            {isMulti && (
-              open
-                ? <ChevronDown size={14} style={{ color:'#9CA3AF', flexShrink:0 }} />
-                : <ChevronRight size={14} style={{ color:'#9CA3AF', flexShrink:0 }} />
-            )}
+            {open
+              ? <ChevronDown size={12} style={{ color:'#9CA3AF', flexShrink:0 }} />
+              : <ChevronRight size={12} style={{ color:'#9CA3AF', flexShrink:0 }} />}
             <div>
-              <p style={{ fontSize:'13px', color:'#374151', margin:0, whiteSpace:'nowrap' }}>
-                {fmtDt(session.started_at)}
-              </p>
-              <p style={{ fontSize:'11px', color:'#9CA3AF', margin:'2px 0 0' }}>
-                {relTime(session.started_at)}
-                {durata && <span style={{ marginLeft:'6px', color:'#D1D5DB' }}>· {durata}</span>}
-              </p>
+              <span style={{ fontFamily:'monospace', fontSize:'12px', color:'#374151' }}>
+                {fmtTime(session.start)}
+              </span>
+              {durLabel && (
+                <span style={{ fontSize:'10px', color:'#9CA3AF', marginLeft:'5px' }}>
+                  {durLabel}
+                </span>
+              )}
             </div>
           </div>
         </td>
-
-        {/* Azioni */}
-        <td style={s.td}>
-          {isMulti ? (
-            <div style={{ display:'flex', flexWrap:'wrap', gap:'4px', alignItems:'center' }}>
-              {uniqueAzioni.slice(0, 4).map(a => (
-                <span key={a} style={{ position:'relative' }}>
-                  <AzioneBadge azione={a} small />
-                  {counts[a] > 1 && (
-                    <span style={{
-                      position:'absolute', top:'-5px', right:'-5px',
-                      background:'#003DA5', color:'#fff', borderRadius:'10px',
-                      fontSize:'9px', fontWeight:'800', padding:'1px 4px', lineHeight:'1.2',
-                      minWidth:'14px', textAlign:'center'
-                    }}>{counts[a]}</span>
-                  )}
-                </span>
-              ))}
-              {uniqueAzioni.length > 4 && (
-                <span style={{ fontSize:'11px', color:'#9CA3AF' }}>+{uniqueAzioni.length - 4}</span>
-              )}
-              <span style={{ fontSize:'11px', color:'#9CA3AF', marginLeft:'4px' }}>
-                ({session.logs.length} op.)
-              </span>
-            </div>
-          ) : (
-            <AzioneBadge azione={session.logs[0].azione} />
-          )}
+        <td style={s.tdL2}>
+          <AzioniBadges logs={session.logs} small />
         </td>
-
-        {/* Utente */}
-        <td style={s.td} className="col-hide-mobile">
-          {session.utente_nome !== 'Sistema' ? (
-            <div style={{ display:'flex', alignItems:'center', gap:'8px' }}>
-              <div style={{ width:'28px', height:'28px', borderRadius:'50%', backgroundColor:'#FEE4E6', display:'flex', alignItems:'center', justifyContent:'center', flexShrink:0 }}>
-                <User size={14} style={{ color:'#E11D48' }} />
-              </div>
-              <p style={{ fontSize:'13px', fontWeight:'600', color:'#0A0A0A', margin:0 }}>
-                {session.utente_nome}
-              </p>
-            </div>
-          ) : (
-            <span style={{ fontSize:'13px', color:'#9CA3AF' }}>Sistema</span>
-          )}
+        <td style={s.tdL2}>
+          <span style={{ fontSize:'11px', color:'#9CA3AF' }}>{n} {n === 1 ? 'op.' : 'op.'}</span>
         </td>
-
-        {/* Evento / Dettaglio */}
-        <td style={s.td}>
-          {!isMulti ? (
-            <>
-              {session.logs[0].evento_titolo && (
-                <p style={{ fontSize:'12px', fontWeight:'600', color:'#E11D48', margin:'0 0 2px' }}>
-                  {session.logs[0].evento_titolo}
-                </p>
-              )}
-              <DettaglioInline raw={session.logs[0].dettaglio} />
-              {!session.logs[0].evento_titolo && !session.logs[0].dettaglio && (
-                <span style={{ color:'#D1D5DB' }}>—</span>
-              )}
-            </>
-          ) : (
-            // Lista eventi coinvolti (deduplicati)
-            (() => {
-              const eventi = [...new Set(
-                session.logs.map(l => l.evento_titolo).filter(Boolean)
-              )]
-              return eventi.length > 0 ? (
-                <div>
-                  {eventi.slice(0, 2).map(e => (
-                    <p key={e} style={{ fontSize:'12px', fontWeight:'600', color:'#E11D48', margin:'0 0 2px' }}>{e}</p>
-                  ))}
-                  {eventi.length > 2 && (
-                    <p style={{ fontSize:'11px', color:'#9CA3AF', margin:0 }}>+{eventi.length - 2} altri</p>
-                  )}
-                </div>
-              ) : <span style={{ color:'#D1D5DB' }}>—</span>
-            })()
-          )}
-        </td>
-
-        {/* IP */}
-        <td style={s.td} className="col-hide-mobile">
-          <span style={{ fontSize:'11px', color:'#9CA3AF', fontFamily:'monospace' }}>
-            {session.ip_address || '—'}
+        <td style={s.tdL2}>
+          <span style={{ fontSize:'11px', color:'#D1D5DB', fontFamily:'monospace' }}>
+            {session.logs[0]?.ip_address || '—'}
           </span>
         </td>
       </tr>
+      {open && session.logs.map(l => <OpRow key={l.id} log={l} />)}
+    </>
+  )
+}
 
-      {/* Righe dettaglio espanse */}
-      {open && session.logs.map((l, i) => (
-        <tr key={l.id} style={{ backgroundColor:'#F8FAFF' }}>
-          <td style={{ ...s.tdSub, paddingLeft:'36px' }}>
-            <p style={{ fontSize:'12px', color:'#6B7280', margin:0, whiteSpace:'nowrap', fontFamily:'monospace' }}>
-              {fmtTime(l.created_at)}
-            </p>
-          </td>
-          <td style={s.tdSub}>
-            <AzioneBadge azione={l.azione} small />
-          </td>
-          <td style={{ ...s.tdSub }} className="col-hide-mobile" />
-          <td style={s.tdSub}>
-            {l.evento_titolo && (
-              <p style={{ fontSize:'11px', fontWeight:'600', color:'#E11D48', margin:'0 0 2px' }}>
-                {l.evento_titolo}
-              </p>
-            )}
-            <DettaglioInline raw={l.dettaglio} />
-          </td>
-          <td style={s.tdSub} className="col-hide-mobile" />
-        </tr>
+// Riga utente×giorno (livello 1) — espandibile → mostra sessioni
+function UserDayRow({ utenteNome, sessions, defaultOpen }) {
+  const [open, setOpen] = useState(defaultOpen || false)
+  const allLogs = sessions.flatMap(s => s.logs)
+  const nSess = sessions.length
+  const nOp = allLogs.length
+
+  return (
+    <>
+      <tr
+        style={{ ...s.trUser, cursor:'pointer', backgroundColor: open ? '#FFF8F8' : '#fff' }}
+        onClick={() => setOpen(o => !o)}
+        onMouseEnter={e => { if (!open) e.currentTarget.style.backgroundColor = '#FFF5F5' }}
+        onMouseLeave={e => { if (!open) e.currentTarget.style.backgroundColor = '#fff' }}
+      >
+        {/* Utente */}
+        <td style={s.tdL1}>
+          <div style={{ display:'flex', alignItems:'center', gap:'10px' }}>
+            {open
+              ? <ChevronDown size={15} style={{ color:'#9CA3AF', flexShrink:0 }} />
+              : <ChevronRight size={15} style={{ color:'#9CA3AF', flexShrink:0 }} />}
+            <div style={{ width:'30px', height:'30px', borderRadius:'50%', backgroundColor:'#FEE4E6', display:'flex', alignItems:'center', justifyContent:'center', flexShrink:0 }}>
+              <User size={15} style={{ color:'#E11D48' }} />
+            </div>
+            <span style={{ fontSize:'14px', fontWeight:'700', color:'#0A0A0A' }}>{utenteNome}</span>
+          </div>
+        </td>
+        {/* Riepilogo azioni */}
+        <td style={s.tdL1}>
+          <AzioniBadges logs={allLogs} />
+        </td>
+        {/* Contatori */}
+        <td style={s.tdL1}>
+          <span style={{ fontSize:'12px', color:'#6B7280' }}>
+            {nSess} {nSess === 1 ? 'sessione' : 'sessioni'} · {nOp} operazioni
+          </span>
+        </td>
+        <td style={s.tdL1} />
+      </tr>
+      {open && sessions.map((sess, i) => (
+        <SessionBlock key={sess.start + i} session={sess} defaultOpen={nSess === 1} />
       ))}
     </>
   )
+}
+
+// Costruisce struttura: [ { dateStr, utenti: [ { nome, sessions } ] } ]
+function buildTree(logs) {
+  // 1. Raggruppa per giorno (ora di Roma approssimata — usiamo locale del browser)
+  const byDay = {}
+  for (const l of logs) {
+    const d = new Date(l.created_at)
+    const dateStr = d.toLocaleDateString('sv-SE') // YYYY-MM-DD
+    if (!byDay[dateStr]) byDay[dateStr] = {}
+    const utente = l.utente_nome || 'Sistema'
+    if (!byDay[dateStr][utente]) byDay[dateStr][utente] = []
+    byDay[dateStr][utente].push(l)
+  }
+
+  // 2. Per ogni giorno/utente costruisce le sessioni
+  const days = Object.keys(byDay).sort((a,b) => b.localeCompare(a)) // desc
+  return days.map(dateStr => ({
+    dateStr,
+    utenti: Object.entries(byDay[dateStr]).map(([nome, uLogs]) => ({
+      nome,
+      sessions: splitIntoSessions(uLogs),
+    })).sort((a,b) => a.nome.localeCompare(b.nome)),
+  }))
 }
 
 export default function ActivityLogPage() {
@@ -327,20 +292,16 @@ export default function ActivityLogPage() {
       .select('*', { count:'exact' })
       .order('created_at', { ascending:false })
       .limit(PAGE)
-
     if (filterAzione !== 'tutti') q = q.eq('azione', filterAzione)
-
     const { data, count } = await q
     const normalized = (data || []).map(l => {
       let dettaglio = l.dettaglio || l.dettagli || null
-      if (dettaglio && typeof dettaglio === 'object') {
-        dettaglio = JSON.stringify(dettaglio)
-      }
+      if (dettaglio && typeof dettaglio === 'object') dettaglio = JSON.stringify(dettaglio)
       return {
         ...l,
-        utente_nome:   l.utente_nome   || l.username || null,
+        utente_nome:   l.utente_nome || l.username || null,
         evento_titolo: l.evento_titolo || null,
-        ip_address:    l.ip_address    || l.ip       || null,
+        ip_address:    l.ip_address || l.ip || null,
         dettaglio,
       }
     })
@@ -349,7 +310,7 @@ export default function ActivityLogPage() {
     setLoading(false)
   }
 
-  const sessions = useMemo(() => {
+  const tree = useMemo(() => {
     let filtered = logs
     if (search) {
       const q = search.toLowerCase()
@@ -360,7 +321,7 @@ export default function ActivityLogPage() {
         l.azione?.toLowerCase().includes(q)
       )
     }
-    return buildSessions(filtered)
+    return buildTree(filtered)
   }, [logs, search])
 
   return (
@@ -368,7 +329,7 @@ export default function ActivityLogPage() {
       <div style={s.header} className="page-header-row">
         <div>
           <h1 style={s.title}>Log Attività</h1>
-          <p style={s.sub}>{total.toLocaleString('it-IT')} eventi · {sessions.length} sessioni</p>
+          <p style={s.sub}>{total.toLocaleString('it-IT')} eventi</p>
         </div>
         <button onClick={loadLogs} style={s.refreshBtn} disabled={loading}>
           <RefreshCw size={15} style={{ animation: loading ? 'spin 1s linear infinite' : 'none' }} />
@@ -380,12 +341,12 @@ export default function ActivityLogPage() {
         active={filterAzione}
         onChange={setFilterAzione}
         tabs={[
-          { id:'tutti',           label:'Tutto',         icon:'📋', color:'blue'   },
-          { id:'iscrizione',      label:'Iscrizioni',    icon:'✅', color:'green'  },
-          { id:'checkin_qr',      label:'Check-in QR',   icon:'📱', color:'cyan'   },
-          { id:'checkin_manuale', label:'Check-in man.',  icon:'✋', color:'amber' },
-          { id:'evento_creato',   label:'Nuovi eventi',  icon:'🗓', color:'violet' },
-          { id:'login',           label:'Accessi',       icon:'🔑', color:'coral'  },
+          { id:'tutti',           label:'Tutto',        icon:'📋', color:'blue'   },
+          { id:'iscrizione',      label:'Iscrizioni',   icon:'✅', color:'green'  },
+          { id:'checkin_qr',      label:'Check-in QR',  icon:'📱', color:'cyan'   },
+          { id:'checkin_manuale', label:'Check-in man.', icon:'✋', color:'amber' },
+          { id:'evento_creato',   label:'Nuovi eventi', icon:'🗓', color:'violet' },
+          { id:'login',           label:'Accessi',      icon:'🔑', color:'coral'  },
         ]}
       />
 
@@ -400,41 +361,56 @@ export default function ActivityLogPage() {
         </div>
       </div>
 
-      <div style={s.tableCard}>
-        {loading && sessions.length === 0 ? (
-          <div style={s.emptyState}>
-            <Activity size={32} style={{ color:'#D1D5DB', marginBottom:'12px' }} />
-            <p style={{ color:'#9CA3AF', fontSize:'14px', margin:0 }}>Caricamento…</p>
+      {loading && !tree.length ? (
+        <div style={s.emptyState}>
+          <Activity size={32} style={{ color:'#D1D5DB', marginBottom:'12px' }} />
+          <p style={{ color:'#9CA3AF', fontSize:'14px', margin:0 }}>Caricamento…</p>
+        </div>
+      ) : !tree.length ? (
+        <div style={s.emptyState}>
+          <Activity size={32} style={{ color:'#D1D5DB', marginBottom:'12px' }} />
+          <p style={{ fontWeight:'700', color:'#374151', margin:'0 0 4px' }}>Nessuna attività trovata</p>
+        </div>
+      ) : (
+        tree.map((day, di) => (
+          <div key={day.dateStr} style={{ marginBottom:'24px' }}>
+            {/* Separatore giorno */}
+            <div style={s.dayHeader}>
+              <span style={s.dayLabel}>{fmtDayLabel(day.dateStr)}</span>
+              <span style={s.dayMeta}>
+                {day.utenti.length} {day.utenti.length === 1 ? 'utente' : 'utenti'} · {day.utenti.reduce((acc, u) => acc + u.sessions.flatMap(s => s.logs).length, 0)} operazioni
+              </span>
+            </div>
+
+            <div style={s.tableCard}>
+              <div style={{ overflowX:'auto' }} className="table-wrap">
+                <table style={s.table}>
+                  <GlowTableHead columns={[
+                    { label:'Utente / Sessione', color:'blue' },
+                    { label:'Operazioni',        color:'violet' },
+                    { label:'',                  color:'neutral' },
+                    { label:'IP',                color:'neutral', hideOnMobile:true },
+                  ]} />
+                  <tbody>
+                    {day.utenti.map(u => (
+                      <UserDayRow
+                        key={u.nome}
+                        utenteNome={u.nome}
+                        sessions={u.sessions}
+                        defaultOpen={di === 0 && day.utenti.length === 1}
+                      />
+                    ))}
+                  </tbody>
+                </table>
+              </div>
+            </div>
           </div>
-        ) : sessions.length === 0 ? (
-          <div style={s.emptyState}>
-            <Activity size={32} style={{ color:'#D1D5DB', marginBottom:'12px' }} />
-            <p style={{ fontWeight:'700', color:'#374151', margin:'0 0 4px' }}>Nessuna attività trovata</p>
-            <p style={{ color:'#9CA3AF', fontSize:'13px', margin:0 }}>Il log verrà popolato automaticamente con l'uso del portale.</p>
-          </div>
-        ) : (
-          <div style={{ overflowX:'auto' }} className="table-wrap">
-            <table style={s.table}>
-              <GlowTableHead columns={[
-                { label:'Quando',             color:'blue'    },
-                { label:'Operazioni',         color:'violet'  },
-                { label:'Utente',             color:'green',  hideOnMobile:true },
-                { label:'Evento / Dettaglio', color:'amber'   },
-                { label:'IP',                 color:'neutral', hideOnMobile:true },
-              ]}/>
-              <tbody>
-                {sessions.map((sess, i) => (
-                  <SessionRow key={sess.id} session={sess} defaultOpen={i === 0 && sess.logs.length > 1} />
-                ))}
-              </tbody>
-            </table>
-          </div>
-        )}
-      </div>
+        ))
+      )}
 
       {total > PAGE && (
         <p style={{ fontSize:'12px', color:'#9CA3AF', textAlign:'center', marginTop:'12px' }}>
-          Visualizzati {total} eventi su {total} totali. Usa i filtri per affinare la ricerca.
+          Visualizzati gli ultimi {PAGE} eventi. Usa i filtri per affinare la ricerca.
         </p>
       )}
 
@@ -444,16 +420,25 @@ export default function ActivityLogPage() {
 }
 
 const s = {
-  page: { width:'100%' },
-  header: { display:'flex', justifyContent:'space-between', alignItems:'flex-start', marginBottom:'24px', gap:'12px', flexWrap:'wrap' },
-  title: { fontSize:'32px', fontWeight:'900', color:'#0A0A0A', letterSpacing:'-0.03em', margin:0 },
-  sub: { fontSize:'14px', color:'#6B7280', margin:'4px 0 0', fontWeight:'500' },
+  page:       { width:'100%' },
+  header:     { display:'flex', justifyContent:'space-between', alignItems:'flex-start', marginBottom:'24px', gap:'12px', flexWrap:'wrap' },
+  title:      { fontSize:'32px', fontWeight:'900', color:'#0A0A0A', letterSpacing:'-0.03em', margin:0 },
+  sub:        { fontSize:'14px', color:'#6B7280', margin:'4px 0 0', fontWeight:'500' },
   refreshBtn: { display:'flex', alignItems:'center', gap:'6px', border:'1px solid #E5E7EB', backgroundColor:'#fff', borderRadius:'6px', padding:'8px 14px', fontSize:'13px', fontWeight:'600', cursor:'pointer', fontFamily:"'Outfit',sans-serif", color:'#374151' },
-  input: { border:'1px solid #D1D5DB', borderRadius:'6px', padding:'9px 12px', fontSize:'13px', fontFamily:"'Outfit',sans-serif", color:'#0A0A0A', backgroundColor:'#fff', outline:'none' },
-  tableCard: { backgroundColor:'#fff', borderRadius:'8px', border:'1px solid #E5E7EB', overflow:'hidden' },
-  table: { width:'100%', borderCollapse:'collapse', fontSize:'13px' },
-  tr: { transition:'background-color 0.1s', borderBottom:'1px solid #F3F4F6' },
-  td: { padding:'12px 16px', verticalAlign:'middle' },
-  tdSub: { padding:'7px 16px', verticalAlign:'middle', borderBottom:'1px solid #EEF0F8', fontSize:'12px' },
+  input:      { border:'1px solid #D1D5DB', borderRadius:'6px', padding:'9px 12px', fontSize:'13px', fontFamily:"'Outfit',sans-serif", color:'#0A0A0A', backgroundColor:'#fff', outline:'none' },
+  tableCard:  { backgroundColor:'#fff', borderRadius:'8px', border:'1px solid #E5E7EB', overflow:'hidden' },
+  table:      { width:'100%', borderCollapse:'collapse', fontSize:'13px' },
   emptyState: { padding:'64px 32px', textAlign:'center', display:'flex', flexDirection:'column', alignItems:'center' },
+  // Day header
+  dayHeader:  { display:'flex', alignItems:'baseline', gap:'12px', marginBottom:'8px', paddingLeft:'2px' },
+  dayLabel:   { fontSize:'15px', fontWeight:'800', color:'#0A0A0A', letterSpacing:'-0.02em' },
+  dayMeta:    { fontSize:'12px', color:'#9CA3AF', fontWeight:'500' },
+  // L1 — utente
+  trUser:     { borderBottom:'1px solid #F3F4F6', transition:'background-color 0.1s' },
+  tdL1:       { padding:'13px 16px', verticalAlign:'middle' },
+  // L2 — sessione
+  trSess:     { borderBottom:'1px solid #EAECF8', transition:'background-color 0.1s' },
+  tdL2:       { padding:'8px 16px', verticalAlign:'middle' },
+  // L3 — operazione
+  tdL3:       { padding:'6px 16px', verticalAlign:'middle', borderBottom:'1px solid #EEF0FB', fontSize:'12px', color:'#374151' },
 }
