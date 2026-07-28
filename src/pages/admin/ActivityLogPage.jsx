@@ -410,11 +410,11 @@ export default function ActivityLogPage() {
               <div style={{ overflowX:'auto' }} className="table-wrap">
                 <table style={s.table}>
                   <GlowTableHead columns={[
-                    { label:'Utente / Sessione', color:'blue' },
-                    { label:'Operazioni',        color:'violet' },
-                    { label:'',                  color:'neutral' },
-                    { label:'Dispositivo',       color:'neutral', hideOnMobile:true },
-                    { label:'Località / IP',     color:'neutral', hideOnMobile:true },
+                    { label:'Utente / Sessione' },
+                    { label:'Operazioni' },
+                    { label:'' },
+                    { label:'Dispositivo', hideOnMobile:true },
+                    { label:'Localita / IP', hideOnMobile:true },
                   ]} />
                   <tbody>
                     {day.utenti.map(u => (
