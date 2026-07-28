@@ -127,6 +127,14 @@ function splitIntoSessions(logs) {
 function OpRow({ log }) {
   const d = parseDettaglio(log.dettaglio)
   const hasDetail = d && Object.keys(d).length > 0
+  const meta = parseDettaglio(log.metadata) || {}
+
+  // Icona dispositivo
+  const devIcon = meta.dispositivo === 'Mobile' ? '📱' : meta.dispositivo === 'Tablet' ? '🖥️' : meta.dispositivo === 'Desktop' ? '💻' : null
+
+  // Etichetta geo
+  const geo = [meta.citta, meta.paese].filter(Boolean).join(', ')
+
   return (
     <tr style={{ backgroundColor:'#F5F7FF' }}>
       <td style={{ ...s.tdL3, width:'90px', paddingLeft:'64px' }}>
@@ -146,10 +154,24 @@ function OpRow({ log }) {
         {hasDetail && <DettaglioText raw={log.dettaglio} />}
         {!log.evento_titolo && !hasDetail && <span style={{ color:'#D1D5DB' }}>—</span>}
       </td>
+      {/* Dispositivo + browser */}
       <td style={s.tdL3}>
-        <span style={{ fontSize:'11px', color:'#D1D5DB', fontFamily:'monospace' }}>
-          {log.ip_address || ''}
-        </span>
+        {(meta.browser || meta.dispositivo) ? (
+          <span style={{ fontSize:'11px', color:'#6B7280', whiteSpace:'nowrap' }}>
+            {devIcon && <span style={{ marginRight:'4px' }}>{devIcon}</span>}
+            {[meta.browser, meta.os].filter(Boolean).join(' · ')}
+          </span>
+        ) : <span style={{ color:'#E5E7EB' }}>—</span>}
+      </td>
+      {/* Geo + IP */}
+      <td style={s.tdL3}>
+        <div>
+          {geo && <p style={{ fontSize:'11px', color:'#6B7280', margin:0 }}>📍 {geo}</p>}
+          {log.ip_address && (
+            <p style={{ fontSize:'10px', color:'#9CA3AF', fontFamily:'monospace', margin:0 }}>{log.ip_address}</p>
+          )}
+          {!geo && !log.ip_address && <span style={{ color:'#E5E7EB' }}>—</span>}
+        </div>
       </td>
     </tr>
   )
@@ -193,6 +215,7 @@ function SessionBlock({ session, defaultOpen }) {
         <td style={s.tdL2}>
           <span style={{ fontSize:'11px', color:'#9CA3AF' }}>{n} {n === 1 ? 'op.' : 'op.'}</span>
         </td>
+        <td style={s.tdL2} />
         <td style={s.tdL2}>
           <span style={{ fontSize:'11px', color:'#D1D5DB', fontFamily:'monospace' }}>
             {session.logs[0]?.ip_address || '—'}
@@ -241,6 +264,7 @@ function UserDayRow({ utenteNome, sessions, defaultOpen }) {
             {nSess} {nSess === 1 ? 'sessione' : 'sessioni'} · {nOp} operazioni
           </span>
         </td>
+        <td style={s.tdL1} />
         <td style={s.tdL1} />
       </tr>
       {open && sessions.map((sess, i) => (
@@ -389,7 +413,8 @@ export default function ActivityLogPage() {
                     { label:'Utente / Sessione', color:'blue' },
                     { label:'Operazioni',        color:'violet' },
                     { label:'',                  color:'neutral' },
-                    { label:'IP',                color:'neutral', hideOnMobile:true },
+                    { label:'Dispositivo',       color:'neutral', hideOnMobile:true },
+                    { label:'Località / IP',     color:'neutral', hideOnMobile:true },
                   ]} />
                   <tbody>
                     {day.utenti.map(u => (
