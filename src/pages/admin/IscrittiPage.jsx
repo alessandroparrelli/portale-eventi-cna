@@ -1496,8 +1496,8 @@ export default function IscrittiPage() {
             <div style={{ overflowX:'auto' }}>
               <table style={s.table}>
                 <thead>
-                  <tr>
-                    <th style={{ padding:'10px 12px', background:'linear-gradient(135deg,#0A1628,#003DA5)', color:'#fff', width:'40px' }}>
+                  <tr style={{ background:'linear-gradient(90deg,#003DA5,#001a4d)' }}>
+                    <th style={{ padding:'10px 12px', background:'transparent', color:'#fff', width:'40px' }}>
                       <input type="checkbox"
                         checked={registrations.filter(r => r.numero_posto && r.email).length > 0 &&
                           registrations.filter(r => r.numero_posto && r.email).every(r => teatroSelezione.has(r.id))}
@@ -1507,7 +1507,7 @@ export default function IscrittiPage() {
                       />
                     </th>
                     {['Iscritto','Email','Posto','Conferma presenza','Confermato il','Azioni'].map((h,i) => (
-                      <th key={i} style={{ padding:'10px 14px', background:'linear-gradient(135deg,#0A1628,#003DA5)', color:'#fff', fontSize:'11px', fontWeight:'700', letterSpacing:'.05em', textTransform:'uppercase', textAlign:'left', whiteSpace:'nowrap' }}>{h}</th>
+                      <th key={i} style={{ padding:'10px 14px', background:'transparent', color:'#fff', fontSize:'11px', fontWeight:'700', letterSpacing:'.05em', textTransform:'uppercase', textAlign:'left', whiteSpace:'nowrap' }}>{h}</th>
                     ))}
                   </tr>
                 </thead>
