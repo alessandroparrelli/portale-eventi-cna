@@ -1140,16 +1140,17 @@ export default function IscrittiPage() {
 
       {/* TAB SWITCHER — visibile solo se teatro abilitato */}
       {selectedEvento && teatroAbilitato && (
-        <div style={{ display:'flex', gap:'6px', marginBottom:'20px', background:'#F1F5F9', borderRadius:'12px', padding:'5px' }}>
+        <div style={{ display:'flex', gap:'0', marginBottom:'20px', background:'linear-gradient(90deg,#003DA5,#001a4d)', borderRadius:'10px', padding:'0', overflow:'hidden' }}>
           {[{ id:'iscritti', label:'👥 Iscritti' }, { id:'teatro', label:'🎭 Gestione posti' }].map(tab => (
             <button key={tab.id} onClick={() => setTabAttivo(tab.id)}
               style={{
                 flex:1, padding:'11px 24px', border:'none', cursor:'pointer',
                 fontSize:'14px', fontWeight:'700', fontFamily:"'Outfit',sans-serif",
-                borderRadius:'9px', transition:'all .18s',
-                background: tabAttivo === tab.id ? 'linear-gradient(135deg,#0A1628,#003DA5)' : '#E5E7EB',
-                color: tabAttivo === tab.id ? '#fff' : '#6B7280',
-                boxShadow: tabAttivo === tab.id ? '0 2px 8px rgba(0,61,165,.30)' : 'none',
+                borderRadius:'0', transition:'all .18s',
+                background: tabAttivo === tab.id ? 'linear-gradient(90deg,#003DA5,#001a4d)' : 'rgba(0,26,77,0.55)',
+                color: '#fff',
+                boxShadow: tabAttivo === tab.id ? '0 2px 8px rgba(0,61,165,.35)' : 'none',
+                opacity: tabAttivo === tab.id ? 1 : 0.7,
                 letterSpacing:'-.01em',
               }}>
               {tab.label}
