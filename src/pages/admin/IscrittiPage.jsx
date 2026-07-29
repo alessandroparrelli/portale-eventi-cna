@@ -19,30 +19,18 @@ function formatDt(ts) {
 }
 
 function SortableHead({ columns, sortCol, sortDir, onSort }) {
-  const PALETTES = {
-    blue:    { from:'#003DA5', to:'#001a4d', text:'#ffffff' },
-    green:   { from:'#003DA5', to:'#001a4d', text:'#ffffff' },
-    violet:  { from:'#003DA5', to:'#001a4d', text:'#ffffff' },
-    amber:   { from:'#003DA5', to:'#001a4d', text:'#ffffff' },
-    cyan:    { from:'#003DA5', to:'#001a4d', text:'#ffffff' },
-    purple:  { from:'#003DA5', to:'#001a4d', text:'#ffffff' },
-    neutral: { from:'#003DA5', to:'#001a4d', text:'#ffffff' },
-    gray:    { from:'#003DA5', to:'#001a4d', text:'#ffffff' },
-    red:     { from:'#003DA5', to:'#001a4d', text:'#ffffff' },
-  }
   return (
     <thead>
-      <tr>
+      <tr style={{ background:'linear-gradient(90deg,#003DA5,#001a4d)' }}>
         {columns.map((col,i) => {
-          const pal = PALETTES[col.color] || PALETTES.blue
           const isActive = sortCol === col.label
           return (
             <th key={i}
               className={col.hideOnMobile ? 'col-hide-mobile' : undefined}
               onClick={() => col.sortable && onSort(col.label)}
               style={{
-                background:`linear-gradient(90deg,${pal.from},${pal.to})`,
-                color:pal.text, padding:'8px 12px', textAlign:'left',
+                background:'transparent',
+                color:'#ffffff', padding:'8px 12px', textAlign:'left',
                 fontSize:'11px', fontWeight:'700', letterSpacing:'.05em',
                 textTransform:'uppercase', userSelect:'none',
                 cursor: col.sortable ? 'pointer' : 'default',
