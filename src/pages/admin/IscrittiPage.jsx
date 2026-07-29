@@ -1147,9 +1147,9 @@ export default function IscrittiPage() {
                 flex:1, padding:'11px 24px', border:'none', cursor:'pointer',
                 fontSize:'14px', fontWeight:'700', fontFamily:"'Outfit',sans-serif",
                 borderRadius:'9px', transition:'all .18s',
-                background: tabAttivo === tab.id ? '#C2185B' : '#003DA5',
-                color: '#fff',
-                boxShadow: tabAttivo === tab.id ? '0 2px 8px rgba(194,24,91,.30)' : '0 2px 8px rgba(0,61,165,.20)',
+                background: tabAttivo === tab.id ? 'linear-gradient(135deg,#0A1628,#003DA5)' : '#E5E7EB',
+                color: tabAttivo === tab.id ? '#fff' : '#6B7280',
+                boxShadow: tabAttivo === tab.id ? '0 2px 8px rgba(0,61,165,.30)' : 'none',
                 letterSpacing:'-.01em',
               }}>
               {tab.label}
