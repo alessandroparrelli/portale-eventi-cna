@@ -759,6 +759,203 @@ export default function IscrittiPage() {
     XLSX.writeFile(wb, 'template-import-iscritti.xlsx')
   }
 
+  async function exportExcelTeatro() {
+    const evento = eventi.find(e => e.id === selectedEvento)
+    const eventoTitle = evento?.titolo || 'evento'
+    const dataExport = new Date().toLocaleDateString('it-IT', { day:'2-digit', month:'long', year:'numeric' })
+    const oraExport  = new Date().toLocaleTimeString('it-IT', { hour:'2-digit', minute:'2-digit' })
+
+    const C = {
+      bluCna:   'FF003DA5', bluScuro: 'FF001a4d',
+      bianco:   'FFFFFFFF', nero:     'FF0A0A0A',
+      grigio:   'FF6B7280', grigioCh: 'FFF4F5F7',
+      bordoCh:  'FFE5E7EB',
+      postoBg:  'FFEFF6FF', postoFg:  'FF1D4ED8',
+      confBg:   'FFF0FDF4', confFg:   'FF15803D',
+      attesaBg: 'FFFFF7ED', attesaFg: 'FFC2410C',
+    }
+    const fill = (argb) => ({ type:'pattern', pattern:'solid', fgColor:{ argb } })
+    const thin  = (argb) => ({ style:'thin', color:{ argb } })
+
+    const cols = ['#','Posto','Nome','Cognome','Ragione Sociale','Email','Cellulare',
+      'Stato iscrizione','Conferma presenza','Confermato il',
+      ...formFields.map(f => f.label)]
+    const nCols = cols.length
+
+    const wb = new ExcelJS.Workbook()
+    wb.creator = 'CNA Roma — Portale Eventi'
+    wb.created = new Date()
+
+    const ws = wb.addWorksheet('Posti teatro', { views:[{ state:'frozen', ySplit:7 }] })
+
+    ws.columns = cols.map(col => ({
+      width: col==='Posto'?14 : col==='Nome'||col==='Cognome'?18 :
+             col==='Ragione Sociale'?34 : col==='Email'?28 :
+             col==='Cellulare'?14 : col==='Conferma presenza'?18 :
+             col==='Confermato il'?20 : col==='#'?6 : 20
+    }))
+
+    // Riga 1: titolo
+    ws.mergeCells(1,1,1,nCols)
+    const r1 = ws.getRow(1)
+    r1.height = 32
+    r1.getCell(1).value = 'POSTI TEATRO — ' + eventoTitle.toUpperCase()
+    r1.eachCell({ includeEmpty:true }, (cell, ci) => {
+      cell.fill = fill(C.bluCna)
+      cell.font = { bold:true, size:16, color:{ argb:C.bianco }, name:'Calibri' }
+      cell.alignment = { horizontal: ci===1?'left':'center', vertical:'middle', indent: ci===1?1:0 }
+    })
+
+    // Riga 2: sottotitolo
+    ws.mergeCells(2,1,2,nCols)
+    const r2 = ws.getRow(2)
+    r2.height = 20
+    r2.getCell(1).value = `Esportato il ${dataExport} alle ${oraExport} · CNA Roma — Portale Eventi`
+    r2.eachCell({ includeEmpty:true }, cell => {
+      cell.fill = fill(C.bluScuro)
+      cell.font = { italic:true, size:10, color:{ argb:'FFBFDBFE' }, name:'Calibri' }
+      cell.alignment = { horizontal:'left', vertical:'middle', indent:1 }
+    })
+
+    // Riga 3: stats
+    ws.mergeCells(3,1,3,nCols)
+    const r3 = ws.getRow(3)
+    r3.height = 18
+    const totCon    = registrations.filter(r => r.numero_posto).length
+    const totSenza  = registrations.filter(r => !r.numero_posto).length
+    const totConf   = registrations.filter(r => r.presenza_confermata).length
+    r3.getCell(1).value = `Totale iscritti: ${registrations.length}  |  Con posto: ${totCon}  |  Senza posto: ${totSenza}  |  Presenza confermata: ${totConf}`
+    r3.eachCell({ includeEmpty:true }, cell => {
+      cell.fill = fill(C.grigioCh)
+      cell.font = { size:10, color:{ argb:C.grigio }, name:'Calibri' }
+      cell.alignment = { horizontal:'left', vertical:'middle', indent:1 }
+    })
+
+    // Righe 4-6: vuote di spaziatura
+    ;[4,5,6].forEach(n => {
+      const r = ws.getRow(n); r.height = 6
+      for (let c=1; c<=nCols; c++) ws.getRow(n).getCell(c).fill = fill(C.grigioCh)
+    })
+
+    // Riga 7: intestazione colonne
+    const headerRowIdx = 7
+    const rH = ws.getRow(headerRowIdx)
+    rH.height = 26
+    cols.forEach((label, ci) => {
+      const cell = rH.getCell(ci+1)
+      cell.value = label
+      cell.fill  = fill(C.bluCna)
+      cell.font  = { bold:true, size:10, color:{ argb:C.bianco }, name:'Calibri' }
+      cell.alignment = { horizontal:'center', vertical:'middle' }
+      cell.border = { bottom: thin(C.bluScuro) }
+    })
+
+    ws.autoFilter = { from:{ row:headerRowIdx, column:1 }, to:{ row:headerRowIdx, column:nCols } }
+
+    // Righe dati — ordinate per posto (prima con posto, poi senza)
+    const sorted = [...registrations].sort((a,b) => {
+      if (a.numero_posto && !b.numero_posto) return -1
+      if (!a.numero_posto && b.numero_posto) return 1
+      if (a.numero_posto && b.numero_posto)
+        return a.numero_posto.localeCompare(b.numero_posto, 'it', { numeric:true })
+      return 0
+    })
+
+    sorted.forEach((r, idx) => {
+      const rowIdx = headerRowIdx + 1 + idx
+      const wr = ws.getRow(rowIdx)
+      wr.height = 18
+
+      const hasPosto    = !!r.numero_posto
+      const confermato  = !!r.presenza_confermata
+      const confDate    = r.presenza_confermata_at
+        ? new Date(r.presenza_confermata_at).toLocaleString('it-IT',{timeZone:'Europe/Rome',day:'2-digit',month:'2-digit',year:'numeric',hour:'2-digit',minute:'2-digit'})
+        : ''
+
+      const rowBg = !hasPosto ? C.grigioCh : (idx % 2 === 0 ? C.bianco : 'FFF8FAFF')
+
+      const values = [
+        r.numero_iscrizione ? `#${r.numero_iscrizione}` : '',
+        r.numero_posto || '—',
+        r.nome || '',
+        r.cognome || '',
+        r.ragione_sociale || '',
+        r.email || '',
+        r.cellulare || '',
+        r.stato || '',
+        confermato ? 'Confermata' : 'In attesa',
+        confDate,
+        ...formFields.map(f => r.campi_extra?.[f.id] ?? ''),
+      ]
+
+      values.forEach((val, ci) => {
+        const cell = wr.getCell(ci+1)
+        cell.value = val
+        cell.font  = { size:10, name:'Calibri', color:{ argb:C.nero } }
+        cell.alignment = { vertical:'middle', horizontal: ci===0||ci===1 ? 'center' : 'left', indent: ci>1 ? 1 : 0 }
+        cell.border = { bottom: thin(C.bordoCh) }
+
+        // Colore cella posto
+        if (ci === 1) {
+          cell.fill = hasPosto ? fill(C.postoBg) : fill(C.grigioCh)
+          cell.font = { size:10, name:'Calibri', bold:hasPosto, color:{ argb: hasPosto ? C.postoFg : C.grigio } }
+        }
+        // Colore conferma presenza
+        else if (ci === 8) {
+          cell.fill = confermato ? fill(C.confBg) : fill(C.attesaBg)
+          cell.font = { size:10, name:'Calibri', bold:true, color:{ argb: confermato ? C.confFg : C.attesaFg } }
+        }
+        else {
+          cell.fill = fill(rowBg)
+        }
+      })
+    })
+
+    // Sheet Legenda
+    const wsLeg = wb.addWorksheet('Legenda', { views:[{}] })
+    wsLeg.columns = [{ width:24 }, { width:55 }]
+    const legRows = [
+      ['Colonna', 'Descrizione'],
+      ['#', 'Numero progressivo di iscrizione'],
+      ['Posto', 'Posto assegnato (es. Platea 1A). Sfondo blu = assegnato, grigio = non assegnato'],
+      ['Nome / Cognome', 'Dati anagrafici del partecipante'],
+      ['Ragione Sociale', 'Azienda o ente di appartenenza'],
+      ['Email / Cellulare', 'Contatti del partecipante'],
+      ['Stato iscrizione', 'confermato / in attesa / walk-in / assente'],
+      ['Conferma presenza', 'Confermata = presenza verificata via link QR; In attesa = non ancora confermata'],
+      ['Confermato il', 'Data e ora in cui il partecipante ha confermato la presenza via link'],
+    ]
+    legRows.forEach((row, ri) => {
+      const wr = wsLeg.getRow(ri+1)
+      wr.height = ri===0 ? 22 : 16
+      row.forEach((val, ci) => {
+        const cell = wr.getCell(ci+1)
+        cell.value = val
+        if (ri===0) {
+          cell.fill = fill(C.bluCna)
+          cell.font = { bold:true, color:{ argb:C.bianco }, name:'Calibri', size:10 }
+        } else {
+          cell.fill = fill(ci===0 ? C.grigioCh : C.bianco)
+          cell.font = { name:'Calibri', size:10 }
+        }
+        cell.border = { bottom: thin(C.bordoCh) }
+        cell.alignment = { vertical:'middle', indent:1 }
+      })
+    })
+
+    const buffer = await wb.xlsx.writeBuffer()
+    const blob = new Blob([buffer], { type:'application/vnd.openxmlformats-officedocument.spreadsheetml.sheet' })
+    const url = URL.createObjectURL(blob)
+    const a = document.createElement('a')
+    a.href = url
+    a.download = `posti-teatro-${eventoTitle.toLowerCase().replace(/\s+/g,'-')}.xlsx`
+    document.body.appendChild(a)
+    a.click()
+    document.body.removeChild(a)
+    URL.revokeObjectURL(url)
+    logAttivita('teatro_posti_esportati', { eventoId:selectedEvento, eventoTitolo:eventoTitle, dettagli:{ totale:registrations.length, conPosto:totCon } })
+  }
+
   function handleFileImport(e) {
     const file = e.target.files[0]
     if (!file) return
@@ -1244,6 +1441,12 @@ export default function IscrittiPage() {
               <Btn variant="ghost" onClick={() => inviaMailPosti(true, teatroSelezione.size > 0 ? [...teatroSelezione] : null)} size="md">
                 🔍 {teatroSelezione.size > 0 ? `Anteprima selezionati (${teatroSelezione.size})` : 'Anteprima tutti'}
               </Btn>
+              {/* Export Excel posti */}
+              <div style={{ marginLeft:'auto' }}>
+                <Btn variant="secondary" onClick={exportExcelTeatro} size="md">
+                  <Download size={15}/> Esporta posti Excel
+                </Btn>
+              </div>
             </div>
 
             {/* Info selezione */}
