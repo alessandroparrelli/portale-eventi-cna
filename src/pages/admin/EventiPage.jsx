@@ -297,6 +297,7 @@ export default function EventiPage() {
   const [modal,      setModal]      = useState(null)
   const [cur,        setCur]        = useState(EMPTY)
   const [saving,     setSaving]     = useState(false)
+  const [deleteInput, setDeleteInput] = useState('')
   const [errors,     setErrors]     = useState({})
   const [linkModal,  setLinkModal]  = useState(null)
   const [copied,     setCopied]     = useState(false)
@@ -485,7 +486,7 @@ export default function EventiPage() {
                         {/* Elimina */}
                         {canDelete && (
                           <button className="btn-pill" style={{ background:'transparent', border:'1px solid #FCA5A5', color:'#DC2626' }}
-                            title="Elimina" onClick={()=>{setCur(ev);setModal('delete')}}>
+                            title="Elimina" onClick={()=>{setCur(ev);setDeleteInput('');setModal('delete')}}>
                             <Trash2 size={12}/>
                           </button>
                         )}
@@ -507,14 +508,29 @@ export default function EventiPage() {
 
       {/* Delete */}
       {modal==='delete' && (
-        <Modal title="Elimina evento" onClose={()=>setModal(null)} width="440px">
+        <Modal title="Elimina evento" onClose={()=>{setModal(null);setDeleteInput('')}} width="460px">
           <p style={{ fontSize:'14px', color:'#374151', margin:'0 0 8px' }}>
-            Elimina <strong>«{cur.titolo}»</strong>? Verranno eliminati tutti gli iscritti.
+            Stai per eliminare <strong>«{cur.titolo}»</strong> con tutti i suoi iscritti.
           </p>
-          <p style={{ fontSize:'13px', color:'#DC2626', margin:'0 0 24px' }}>Operazione irreversibile.</p>
+          <div style={{ background:'#FEF2F2', border:'1px solid #FECACA', borderRadius:'8px', padding:'10px 14px', fontSize:'13px', color:'#DC2626', margin:'0 0 20px', display:'flex', gap:'8px', alignItems:'flex-start' }}>
+            <span style={{ fontSize:'16px', flexShrink:0 }}>🗑️</span>
+            <span>Questa operazione è <strong>irreversibile</strong>. Verranno eliminati tutti gli iscritti, i dati di check-in e le configurazioni dell’evento.</span>
+          </div>
+          <p style={{ fontSize:'13px', color:'#374151', margin:'0 0 6px' }}>
+            Digita il nome dell’evento per confermare:
+          </p>
+          <p style={{ fontSize:'12px', fontWeight:'700', color:'#DC2626', fontFamily:'monospace', background:'#FEF2F2', padding:'4px 8px', borderRadius:'4px', margin:'0 0 10px', display:'inline-block' }}>{cur.titolo}</p>
+          <input
+            type="text"
+            value={deleteInput}
+            onChange={e => setDeleteInput(e.target.value)}
+            placeholder="Scrivi il nome esatto dell’evento…"
+            style={{ width:'100%', padding:'8px 12px', border:'1px solid #E5E7EB', borderRadius:'6px', fontSize:'14px', fontFamily:"'Outfit',sans-serif", boxSizing:'border-box', marginBottom:'20px', outline:'none' }}
+            autoFocus
+          />
           <div style={{ display:'flex', justifyContent:'flex-end', gap:'10px' }}>
-            <Btn variant="ghost" onClick={()=>setModal(null)}>Annulla</Btn>
-            <Btn variant="danger" onClick={deleteEvent} disabled={saving}>
+            <Btn variant="ghost" onClick={()=>{setModal(null);setDeleteInput('')}}>Annulla</Btn>
+            <Btn variant="danger" onClick={deleteEvent} disabled={saving || deleteInput.trim() !== cur.titolo.trim()}>
               {saving ? 'Eliminazione…' : 'Elimina definitivamente'}
             </Btn>
           </div>

@@ -131,6 +131,7 @@ export default function IscrittiPage() {
   const [postoError, setPostoError] = useState({}) // { [reg_id]: string }
   const [invioPostoInCorso, setInvioPostoInCorso] = useState(false)
   const [invioPostoRis, setInvioPostoRis] = useState(null)
+  const [confirmInvioTeatro, setConfirmInvioTeatro] = useState(null) // { ids: [...] | null } oppure null
   const [dryRunRis, setDryRunRis] = useState(null)
   const [teatroSelezione, setTeatroSelezione] = useState(new Set()) // Set di reg_id selezionati
   const [filtroPostoAssegnato, setFiltroPostoAssegnato] = useState('tutti') // 'tutti' | 'con_posto' | 'senza_posto'
@@ -1424,13 +1425,13 @@ export default function IscrittiPage() {
           <div style={{ background:'#F9FAFB', border:'1px solid #E5E7EB', borderRadius:'10px', padding:'14px 16px', marginBottom:'16px' }}>
             <div style={{ display:'flex', gap:'10px', flexWrap:'wrap', alignItems:'center' }}>
               {/* Invio massivo a tutti */}
-              <Btn variant="primary" onClick={() => inviaMailPosti(false, null)} disabled={invioPostoInCorso} size="md">
+              <Btn variant="primary" onClick={() => setConfirmInvioTeatro({ ids: null })} disabled={invioPostoInCorso} size="md">
                 {invioPostoInCorso ? '📨 Invio…' : '📨 Invia a tutti'}
               </Btn>
 
               {/* Invio ai selezionati */}
               {teatroSelezione.size > 0 && (
-                <Btn variant="secondary" onClick={() => inviaMailPosti(false, [...teatroSelezione])} disabled={invioPostoInCorso} size="md">
+                <Btn variant="secondary" onClick={() => setConfirmInvioTeatro({ ids: [...teatroSelezione] })} disabled={invioPostoInCorso} size="md">
                   📨 Invia ai selezionati ({teatroSelezione.size})
                 </Btn>
               )}
@@ -1814,6 +1815,35 @@ export default function IscrittiPage() {
       </div>
       )} {/* fine condizionale tab iscritti */}
 
+
+      {/* MODAL CONFERMA INVIO TEATRO */}
+      {confirmInvioTeatro && (() => {
+        const ids = confirmInvioTeatro.ids
+        const isTutti = ids === null
+        const conPosto = registrations.filter(r => r.numero_posto && r.email)
+        const destinatari = isTutti ? conPosto.length : (ids || []).filter(id => {
+          const r = registrations.find(x => x.id === id)
+          return r?.numero_posto && r?.email
+        }).length
+        return (
+          <Modal title="Conferma invio email posto" onClose={() => setConfirmInvioTeatro(null)} width="460px">
+            <div style={{ fontSize:'14px', color:'#374151', marginBottom:'12px' }}>
+              Stai per inviare l’email con il posto assegnato a{' '}
+              <strong>{destinatari} {isTutti ? 'iscritti (tutti con posto e email)' : `selezionati`}</strong>.
+            </div>
+            <div style={{ background:'#FEF3C7', border:'1px solid #FCD34D', borderRadius:'8px', padding:'10px 14px', fontSize:'13px', color:'#92400E', marginBottom:'24px', display:'flex', gap:'8px', alignItems:'flex-start' }}>
+              <span style={{ fontSize:'16px', flexShrink:0 }}>⚠️</span>
+              <span>Ogni destinatario riceverà una email con il proprio posto. Verifica che i posti siano stati assegnati correttamente prima di procedere.</span>
+            </div>
+            <div style={{ display:'flex', justifyContent:'flex-end', gap:'10px' }}>
+              <Btn variant="ghost" onClick={() => setConfirmInvioTeatro(null)}>Annulla</Btn>
+              <Btn variant="primary" onClick={() => { setConfirmInvioTeatro(null); inviaMailPosti(false, ids) }}>
+                📨 Conferma e invia
+              </Btn>
+            </div>
+          </Modal>
+        )
+      })()}
 
       {/* MODAL SMS */}
       {smsModal && (
