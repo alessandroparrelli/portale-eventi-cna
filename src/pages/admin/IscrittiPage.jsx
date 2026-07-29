@@ -20,12 +20,15 @@ function formatDt(ts) {
 
 function SortableHead({ columns, sortCol, sortDir, onSort }) {
   const PALETTES = {
-    blue:    { from:'#003DA5', to:'#BE123C', text:'#ffffff' },
-    green:   { from:'#059669', to:'#10b981', text:'#ffffff' },
-    violet:  { from:'#7c3aed', to:'#8b5cf6', text:'#ffffff' },
-    amber:   { from:'#d97706', to:'#f59e0b', text:'#ffffff' },
-    cyan:    { from:'#0891b2', to:'#06b6d4', text:'#ffffff' },
-    neutral: { from:'#F9FAFB', to:'#F3F4F6', text:'#6B7280' },
+    blue:    { from:'#003DA5', to:'#001a4d', text:'#ffffff' },
+    green:   { from:'#003DA5', to:'#001a4d', text:'#ffffff' },
+    violet:  { from:'#003DA5', to:'#001a4d', text:'#ffffff' },
+    amber:   { from:'#003DA5', to:'#001a4d', text:'#ffffff' },
+    cyan:    { from:'#003DA5', to:'#001a4d', text:'#ffffff' },
+    purple:  { from:'#003DA5', to:'#001a4d', text:'#ffffff' },
+    neutral: { from:'#003DA5', to:'#001a4d', text:'#ffffff' },
+    gray:    { from:'#003DA5', to:'#001a4d', text:'#ffffff' },
+    red:     { from:'#003DA5', to:'#001a4d', text:'#ffffff' },
   }
   return (
     <thead>
@@ -38,7 +41,7 @@ function SortableHead({ columns, sortCol, sortDir, onSort }) {
               className={col.hideOnMobile ? 'col-hide-mobile' : undefined}
               onClick={() => col.sortable && onSort(col.label)}
               style={{
-                background:`linear-gradient(135deg,${pal.from},${pal.to})`,
+                background:`linear-gradient(90deg,${pal.from},${pal.to})`,
                 color:pal.text, padding:'8px 12px', textAlign:'left',
                 fontSize:'11px', fontWeight:'700', letterSpacing:'.05em',
                 textTransform:'uppercase', userSelect:'none',
@@ -1140,17 +1143,16 @@ export default function IscrittiPage() {
 
       {/* TAB SWITCHER — visibile solo se teatro abilitato */}
       {selectedEvento && teatroAbilitato && (
-        <div style={{ display:'flex', gap:'0', marginBottom:'20px', background:'linear-gradient(90deg,#003DA5,#001a4d)', borderRadius:'10px', padding:'0', overflow:'hidden' }}>
+        <div style={{ display:'flex', gap:'6px', marginBottom:'20px', background:'#F1F5F9', borderRadius:'12px', padding:'5px' }}>
           {[{ id:'iscritti', label:'👥 Iscritti' }, { id:'teatro', label:'🎭 Gestione posti' }].map(tab => (
             <button key={tab.id} onClick={() => setTabAttivo(tab.id)}
               style={{
                 flex:1, padding:'11px 24px', border:'none', cursor:'pointer',
                 fontSize:'14px', fontWeight:'700', fontFamily:"'Outfit',sans-serif",
-                borderRadius:'0', transition:'all .18s',
-                background: tabAttivo === tab.id ? 'linear-gradient(90deg,#003DA5,#001a4d)' : 'rgba(0,26,77,0.55)',
-                color: '#fff',
-                boxShadow: tabAttivo === tab.id ? '0 2px 8px rgba(0,61,165,.35)' : 'none',
-                opacity: tabAttivo === tab.id ? 1 : 0.7,
+                borderRadius:'9px', transition:'all .18s',
+                background: tabAttivo === tab.id ? 'linear-gradient(90deg,#003DA5,#001a4d)' : '#E5E7EB',
+                color: tabAttivo === tab.id ? '#fff' : '#6B7280',
+                boxShadow: 'none',
                 letterSpacing:'-.01em',
               }}>
               {tab.label}
