@@ -110,10 +110,11 @@ const icons = {
   ),
 }
 
-function HoverNavLink({ to, end, onClick, activeColor, iconKey, label, activeDot, iconWrap, navLink }) {
+function HoverNavLink({ to, end, onClick, activeColor, iconKey, label, activeDot, iconWrap, navLink, collapsed }) {
   const [hovered, setHovered] = useState(false)
   return (
     <NavLink to={to} end={end} onClick={onClick}
+      title={collapsed ? label : undefined}
       style={({ isActive }) => ({
         ...navLink,
         backgroundColor: isActive ? activeColor + '18' : hovered ? activeColor + '12' : 'transparent',
@@ -129,8 +130,12 @@ function HoverNavLink({ to, end, onClick, activeColor, iconKey, label, activeDot
           }}>
             {icons[iconKey]?.(isActive || hovered ? (isActive ? '#fff' : activeColor) : activeColor)}
           </div>
-          <span className="nav-label" style={{ fontSize:'13px', fontWeight: isActive ? '700' : hovered ? '600' : '500', letterSpacing:'-0.01em', flex:1 }}>{label}</span>
-          {isActive && <div style={{ ...activeDot, backgroundColor: activeColor }}/>}
+          {!collapsed && (
+            <>
+              <span className="nav-label" style={{ fontSize:'13px', fontWeight: isActive ? '600' : hovered ? '600' : '500', letterSpacing:'-0.01em', flex:1 }}>{label}</span>
+              {isActive && <div style={{ ...activeDot, backgroundColor: activeColor }}/>}
+            </>
+          )}
         </>
       )}
     </NavLink>
@@ -184,6 +189,17 @@ export default function Sidebar({ mobileOpen, onMobileClose, isMobile }) {
   const { ruolo, canView } = useRole()
   const [avatarUrl, setAvatarUrl] = useState(null)
   const [displayName, setDisplayName] = useState('')
+  const [collapsed, setCollapsed] = useState(() => {
+    try { return localStorage.getItem('sidebar-collapsed') === '1' } catch { return false }
+  })
+
+  const toggleCollapse = () => {
+    setCollapsed(v => {
+      const next = !v
+      try { localStorage.setItem('sidebar-collapsed', next ? '1' : '0') } catch {}
+      return next
+    })
+  }
 
   useEffect(() => {
     if (!user?.id) return
@@ -206,6 +222,8 @@ export default function Sidebar({ mobileOpen, onMobileClose, isMobile }) {
 
   const handleNavClick = () => { if (onMobileClose) onMobileClose() }
 
+  const isCollapsed = !isMobile && collapsed
+
   return (
     <>
       {mobileOpen && isMobile && (
@@ -217,10 +235,7 @@ export default function Sidebar({ mobileOpen, onMobileClose, isMobile }) {
 
       <aside style={{
         ...st.sidebar,
-        // Mobile: drawer overlay fullscreen, sempre position:fixed (necessario
-        // per coprire tutto lo schermo indipendentemente dallo scroll).
-        // Desktop: sticky, resta affiancata al contenuto nel flusso normale
-        // (NON fixed — evita i bug iOS documentati in IOS_FIXED_HEADER_BUG.md).
+        width: isCollapsed ? '56px' : '220px',
         position: isMobile ? 'fixed' : 'sticky',
         top: isMobile ? 0 : 0,
         height: isMobile ? '100vh' : '100vh',
@@ -238,54 +253,83 @@ export default function Sidebar({ mobileOpen, onMobileClose, isMobile }) {
           </div>
         )}
 
-
+        {/* Toggle collassa — solo desktop */}
+        {!isMobile && (
+          <div style={{ display:'flex', justifyContent: isCollapsed ? 'center' : 'flex-end', padding: isCollapsed ? '10px 0' : '10px 10px 0', flexShrink:0 }}>
+            <button
+              onClick={toggleCollapse}
+              title={isCollapsed ? 'Espandi sidebar' : 'Comprimi sidebar'}
+              style={{ background:'none', border:'1px solid #E5E7EB', borderRadius:'6px', cursor:'pointer', padding:'5px 6px', display:'flex', alignItems:'center', color:'#9CA3AF', transition:'color .15s, background .15s' }}
+              onMouseEnter={e => { e.currentTarget.style.backgroundColor='#F3F4F6'; e.currentTarget.style.color='#374151' }}
+              onMouseLeave={e => { e.currentTarget.style.backgroundColor='transparent'; e.currentTarget.style.color='#9CA3AF' }}
+            >
+              {isCollapsed ? (
+                <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round"><path d="M13 17l5-5-5-5M6 17l5-5-5-5"/></svg>
+              ) : (
+                <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round"><path d="M11 17l-5-5 5-5M18 17l-5-5 5-5"/></svg>
+              )}
+            </button>
+          </div>
+        )}
 
         {/* NAVIGAZIONE */}
-        <nav style={st.nav}>
+        <nav style={{ ...st.nav, padding: isCollapsed ? '6px 6px 4px' : '6px 10px 4px' }}>
 
           {allGroups.map(group => (
             <div key={group.label} style={{ ...st.group, borderRadius:'8px', overflow:'hidden' }}>
-              <p style={{
-                ...st.groupLabel,
-                color: group.color,
-                background: group.color + '10',
-                margin:'8px 0 2px',
-                padding:'4px 8px',
-                borderRadius:'6px',
-                display:'flex', alignItems:'center', gap:'6px',
-              }}>
-                <span style={{ width:'6px', height:'6px', borderRadius:'50%', background: group.color, flexShrink:0, display:'inline-block' }}/>
-                {group.label}
-              </p>
+              {!isCollapsed && (
+                <p style={{
+                  ...st.groupLabel,
+                  color: group.color,
+                  background: group.color + '10',
+                  margin:'8px 0 2px',
+                  padding:'4px 8px',
+                  borderRadius:'6px',
+                  display:'flex', alignItems:'center', gap:'6px',
+                }}>
+                  <span style={{ width:'6px', height:'6px', borderRadius:'50%', background: group.color, flexShrink:0, display:'inline-block' }}/>
+                  {group.label}
+                </p>
+              )}
+              {isCollapsed && <div style={{ height:'8px' }}/>}
               {group.items.map(({ to, label, iconKey, end, activeColor, external }) => (
                 external ? (
                   <a key={to} href={to} target="_blank" rel="noopener noreferrer" onClick={handleNavClick}
-                    style={{ ...st.navLink, color:'#4B5563', textDecoration:'none' }}
+                    title={isCollapsed ? label : undefined}
+                    style={{ ...st.navLink, color:'#4B5563', textDecoration:'none', justifyContent: isCollapsed ? 'center' : undefined, padding: isCollapsed ? '7px' : '7px 10px' }}
                     onMouseEnter={e => e.currentTarget.style.backgroundColor='#F3F4F6'}
                     onMouseLeave={e => e.currentTarget.style.backgroundColor='transparent'}>
-                    <div style={st.iconWrap}>
-                      {icons[iconKey]?.('#9CA3AF')}
+                    <div style={{ ...st.iconWrap, backgroundColor: activeColor + '18' }}>
+                      {icons[iconKey]?.(activeColor)}
                     </div>
-                    <span className="nav-label" style={{ fontSize:'13px', fontWeight:'500', letterSpacing:'-0.01em', flex:1 }}>{label}</span>
-                    <svg width="11" height="11" viewBox="0 0 24 24" fill="none" stroke="#9CA3AF" strokeWidth="2">
-                      <path d="M18 13v6a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2V8a2 2 0 0 1 2-2h6"/>
-                      <polyline points="15 3 21 3 21 9"/><line x1="10" y1="14" x2="21" y2="3"/>
-                    </svg>
+                    {!isCollapsed && (
+                      <>
+                        <span className="nav-label" style={{ fontSize:'13px', fontWeight:'500', letterSpacing:'-0.01em', flex:1 }}>{label}</span>
+                        <svg width="11" height="11" viewBox="0 0 24 24" fill="none" stroke="#9CA3AF" strokeWidth="2">
+                          <path d="M18 13v6a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2V8a2 2 0 0 1 2-2h6"/>
+                          <polyline points="15 3 21 3 21 9"/><line x1="10" y1="14" x2="21" y2="3"/>
+                        </svg>
+                      </>
+                    )}
                   </a>
                 ) : (
-                <HoverNavLink key={to} to={to} end={end} onClick={handleNavClick}
-                  activeColor={activeColor} iconKey={iconKey} label={label}
-                  activeDot={st.activeDot} iconWrap={st.iconWrap} navLink={st.navLink} />
+                  <HoverNavLink key={to} to={to} end={end} onClick={handleNavClick}
+                    activeColor={activeColor} iconKey={iconKey} label={label}
+                    activeDot={st.activeDot} iconWrap={st.iconWrap}
+                    navLink={{ ...st.navLink, justifyContent: isCollapsed ? 'center' : undefined, padding: isCollapsed ? '7px' : '7px 10px' }}
+                    collapsed={isCollapsed}
+                  />
                 )
               ))}
               {group.label === 'Amministrazione' && (
                 <button
                   onClick={() => signOut()}
-                  style={st.logoutBtn}
+                  title={isCollapsed ? 'Esci' : undefined}
+                  style={{ ...st.logoutBtn, justifyContent: isCollapsed ? 'center' : undefined, padding: isCollapsed ? '7px' : '7px 10px' }}
                   onMouseEnter={e => e.currentTarget.style.backgroundColor='#FEF2F2'}
                   onMouseLeave={e => e.currentTarget.style.backgroundColor='transparent'}>
                   {icons.logout()}
-                  <span className="logout-label">Esci dall'app</span>
+                  {!isCollapsed && <span className="logout-label">Esci dall'app</span>}
                 </button>
               )}
             </div>
@@ -306,7 +350,7 @@ const st = {
     zIndex:100,
     backgroundColor:'#FFFFFF', borderRight:'1px solid #E5E7EB',
     display:'flex', flexDirection:'column',
-    transition:'transform .22s cubic-bezier(.4,0,.2,1)',
+    transition:'transform .22s cubic-bezier(.4,0,.2,1), width .2s cubic-bezier(.4,0,.2,1)',
     overflowY:'auto', overflowX:'hidden',
   },
   mobileTop: {

@@ -1,10 +1,33 @@
 import { X } from 'lucide-react'
+import { useEffect, useRef } from 'react'
 
 // ---- MODAL ----
+const MODAL_ANIM_CSS = `
+@keyframes _modal-in{from{opacity:0;transform:translateY(-10px) scale(0.98)}to{opacity:1;transform:translateY(0) scale(1)}}
+@keyframes _overlay-in{from{opacity:0}to{opacity:1}}
+._modal-overlay{animation:_overlay-in 0.18s ease}
+._modal-box{animation:_modal-in 0.2s cubic-bezier(0.34,1.1,0.64,1)}
+`
+
+let _modalStyleInjected = false
+
 export function Modal({ title, onClose, children, width = '560px' }) {
+  if (!_modalStyleInjected) {
+    const s = document.createElement('style')
+    s.textContent = MODAL_ANIM_CSS
+    document.head.appendChild(s)
+    _modalStyleInjected = true
+  }
+
+  useEffect(() => {
+    const onKey = e => e.key === 'Escape' && onClose()
+    document.addEventListener('keydown', onKey)
+    return () => document.removeEventListener('keydown', onKey)
+  }, [onClose])
+
   return (
-    <div style={modal.overlay} onClick={e => e.target === e.currentTarget && onClose()}>
-      <div style={{ ...modal.box, maxWidth: width }}>
+    <div className="_modal-overlay" style={modal.overlay} onClick={e => e.target === e.currentTarget && onClose()}>
+      <div className="_modal-box" style={{ ...modal.box, maxWidth: width }}>
         <div style={modal.header}>
           <h2 style={modal.title}>{title}</h2>
           <button style={modal.closeBtn} onClick={onClose}><X size={20} /></button>
@@ -151,7 +174,7 @@ export function EmptyState({ icon: Icon, title, desc, action }) {
 
 // Modal styles
 const modal = {
-  overlay: { position:'fixed', inset:0, backgroundColor:'rgba(0,0,0,0.4)', display:'flex',
+  overlay: { position:'fixed', inset:0, backgroundColor:'rgba(0,0,0,0.35)', backdropFilter:'blur(4px)', WebkitBackdropFilter:'blur(4px)', display:'flex',
     alignItems:'center', justifyContent:'center', zIndex:1000, padding:'24px' },
   box: { backgroundColor:'#FFFFFF', borderRadius:'8px', width:'100%',
     boxShadow:'0 20px 60px rgba(0,0,0,0.15)', display:'flex', flexDirection:'column',

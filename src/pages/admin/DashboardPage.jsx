@@ -4,10 +4,8 @@ import { useNavigate } from 'react-router-dom'
 import { supabase } from '../../lib/supabase'
 import GlowTabBar from '../../components/GlowTabBar'
 import GlowStatCard from '../../components/GlowStatCard'
-import GlowTableHead from '../../components/GlowTableHead'
 import {
-  CalendarDays, Users, CheckCircle2, Clock, TrendingUp, Plus,
-  ArrowRight, AlertCircle, Activity, Percent, Calendar
+  CalendarDays, Clock, Plus, ArrowRight
 } from 'lucide-react'
 
 const STATUS_LABELS = { bozza:'Bozza', pubblicato:'Pubblicato', chiuso:'Chiuso', archiviato:'Archiviato' }
@@ -238,7 +236,7 @@ export default function DashboardPage() {
         </div>
       </div>
 
-      {/* Tabella eventi recenti */}
+      {/* Card grid eventi recenti */}
       <div style={styles.section}>
         <div style={styles.sectionHeader}>
           <h2 style={styles.sectionTitle}>Ultimi eventi</h2>
@@ -261,12 +259,13 @@ export default function DashboardPage() {
             ]}
           />
         </div>
+
         {loading ? (
           <div style={styles.loadingState}>
             <Clock size={24} style={{color:'#9CA3AF',marginBottom:'8px'}}/>
             <p style={styles.loadingText}>Caricamento…</p>
           </div>
-        ) : events.length === 0 ? (
+        ) : events.filter(ev => tabFilter === 'tutti' || ev.stato === tabFilter).length === 0 ? (
           <div style={styles.emptyState}>
             <CalendarDays size={40} style={{color:'#D1D5DB',marginBottom:'12px'}}/>
             <p style={styles.emptyTitle}>Nessun evento ancora</p>
@@ -276,63 +275,72 @@ export default function DashboardPage() {
             </button>
           </div>
         ) : (
-          <div style={styles.tableWrap} className="table-wrap">
-            <table style={styles.table}>
-              <GlowTableHead columns={[
-                { label:'#',        color:'neutral', width:'60px', hideOnMobile:true },
-                { label:'Evento',   color:'blue' },
-                { label:'Data',     color:'cyan',    hideOnMobile:true },
-                { label:'Stato',    color:'green' },
-                { label:'Iscritti', color:'violet' },
-                { label:'Pres. %',  color:'amber',   hideOnMobile:true },
-                { label:'',         color:'neutral' },
-              ]}/>
-              <tbody>
-                {events.filter(ev => tabFilter === 'tutti' || ev.stato === tabFilter).map(ev=>{
-                  const rate = ev.iscritti > 0 ? Math.round((ev.presenti/ev.iscritti)*100) : null
-                  return (
-                    <tr key={ev.id} style={styles.tr}
-                      onMouseEnter={e=>e.currentTarget.style.backgroundColor='#F9FAFB'}
-                      onMouseLeave={e=>e.currentTarget.style.backgroundColor='transparent'}>
-                      <td style={{...styles.td,width:'60px'}} className="col-hide-mobile">
-                        <span style={{fontSize:'11px',fontWeight:'700',color:'#003DA5',backgroundColor:'#EBF0FA',padding:'2px 7px',borderRadius:'4px',fontFamily:'monospace',whiteSpace:'nowrap'}}>
-                          EVT-{String(ev.codice||0).padStart(4,'0')}
-                        </span>
-                      </td>
-                      <td style={styles.td}>
-                        <p style={styles.eventTitle}>{ev.titolo}</p>
-                        <p style={styles.eventSlug}>/{ev.slug}</p>
-                      </td>
-                      <td style={styles.td} className="col-hide-mobile">
-                        <p style={styles.cellText}>{formatDate(ev.data_inizio)}</p>
-                      </td>
-                      <td style={styles.td}><StatusBadge stato={ev.stato}/></td>
-                      <td style={styles.td}>
-                        <p style={styles.cellText}>
-                          {ev.iscritti}
-                          {ev.capienza_max&&<span style={styles.capTxt}>/{ev.capienza_max}</span>}
-                        </p>
-                      </td>
-                      <td style={styles.td} className="col-hide-mobile">
-                        {rate != null ? (
-                          <div style={{ display:'flex', alignItems:'center', gap:'8px' }}>
-                            <div style={{ width:'50px', height:'6px', backgroundColor:'#F3F4F6', borderRadius:'3px', overflow:'hidden' }}>
-                              <div style={{ width:`${rate}%`, height:'100%', backgroundColor: rate>=80?'#16A34A':rate>=50?'#D97706':'#003DA5', borderRadius:'3px', transition:'width 0.3s' }}/>
-                            </div>
-                            <span style={{ fontSize:'12px', color:'#6B7280', fontWeight:'600' }}>{rate}%</span>
-                          </div>
-                        ) : <span style={{color:'#D1D5DB',fontSize:'13px'}}>—</span>}
-                      </td>
-                      <td style={styles.td}>
-                        <button onClick={()=>navigate(`/admin/eventi`)} style={styles.rowBtn}>
-                          Gestisci
-                        </button>
-                      </td>
-                    </tr>
-                  )
-                })}
-              </tbody>
-            </table>
+          <div style={styles.cardGrid} className="event-card-grid">
+            {events.filter(ev => tabFilter === 'tutti' || ev.stato === tabFilter).map(ev => {
+              const fillPct = ev.capienza_max > 0 ? Math.min(Math.round((ev.iscritti/ev.capienza_max)*100), 100) : null
+              const presRate = ev.iscritti > 0 ? Math.round((ev.presenti/ev.iscritti)*100) : null
+              const sc = STATUS_COLORS[ev.stato] || STATUS_COLORS.bozza
+              const borderAccent = ev.stato === 'pubblicato' ? '#16A34A' : ev.stato === 'chiuso' ? '#D97706' : ev.stato === 'archiviato' ? '#9CA3AF' : '#D1D5DB'
+              return (
+                <div key={ev.id} style={{ ...styles.eventCard, borderTop:`3px solid ${borderAccent}` }}
+                  onMouseEnter={e => e.currentTarget.style.boxShadow='0 4px 16px rgba(0,0,0,0.08)'}
+                  onMouseLeave={e => e.currentTarget.style.boxShadow='none'}>
+
+                  {/* Header card */}
+                  <div style={{ display:'flex', alignItems:'flex-start', justifyContent:'space-between', gap:'8px', marginBottom:'10px' }}>
+                    <div style={{ minWidth:0 }}>
+                      <p style={{ fontWeight:'700', fontSize:'13px', color:'#0A0A0A', margin:'0 0 3px', letterSpacing:'-0.01em', lineHeight:1.3, overflow:'hidden', display:'-webkit-box', WebkitLineClamp:2, WebkitBoxOrient:'vertical' }}>
+                        {ev.titolo}
+                      </p>
+                      <span style={{ fontSize:'10px', fontWeight:'700', color:'#003DA5', backgroundColor:'#EBF0FA', padding:'1px 6px', borderRadius:'3px', fontFamily:'monospace' }}>
+                        EVT-{String(ev.codice||0).padStart(4,'0')}
+                      </span>
+                    </div>
+                    <span style={{ flexShrink:0, display:'inline-flex', alignItems:'center', padding:'2px 8px', borderRadius:'20px', fontSize:'11px', fontWeight:'600', backgroundColor:sc.bg, color:sc.text }}>
+                      {STATUS_LABELS[ev.stato]||ev.stato}
+                    </span>
+                  </div>
+
+                  {/* Data e luogo */}
+                  <div style={{ display:'flex', alignItems:'center', gap:'6px', marginBottom:'12px' }}>
+                    <CalendarDays size={12} style={{ color:'#9CA3AF', flexShrink:0 }}/>
+                    <span style={{ fontSize:'12px', color:'#6B7280' }}>
+                      {ev.data_inizio ? formatDate(ev.data_inizio) : '—'}
+                      {ev.luogo ? ` · ${ev.luogo}` : ''}
+                    </span>
+                  </div>
+
+                  {/* Barra riempimento iscritti */}
+                  <div style={{ marginBottom:'12px' }}>
+                    <div style={{ display:'flex', justifyContent:'space-between', alignItems:'baseline', marginBottom:'5px' }}>
+                      <span style={{ fontSize:'11px', color:'#9CA3AF', fontWeight:'500' }}>Iscritti</span>
+                      <span style={{ fontSize:'13px', fontWeight:'700', color:'#0A0A0A' }}>
+                        {ev.iscritti}
+                        {ev.capienza_max > 0 && <span style={{ fontWeight:'400', color:'#9CA3AF', fontSize:'11px' }}>/{ev.capienza_max}</span>}
+                      </span>
+                    </div>
+                    {fillPct != null ? (
+                      <div style={{ height:'5px', backgroundColor:'#F3F4F6', borderRadius:'3px', overflow:'hidden' }}>
+                        <div style={{ width:`${fillPct}%`, height:'100%', borderRadius:'3px', transition:'width .3s',
+                          backgroundColor: fillPct >= 90 ? '#DC2626' : fillPct >= 70 ? '#D97706' : '#003DA5' }}/>
+                      </div>
+                    ) : (
+                      <div style={{ height:'5px', backgroundColor:'#F3F4F6', borderRadius:'3px' }}/>
+                    )}
+                  </div>
+
+                  {/* Footer: tasso presenze + CTA */}
+                  <div style={{ display:'flex', alignItems:'center', justifyContent:'space-between' }}>
+                    <span style={{ fontSize:'11px', color:'#9CA3AF' }}>
+                      {presRate != null ? `${presRate}% presenti` : 'Nessun check-in'}
+                    </span>
+                    <button onClick={()=>navigate('/admin/eventi')} style={styles.rowBtn}>
+                      Gestisci →
+                    </button>
+                  </div>
+                </div>
+              )
+            })}
           </div>
         )}
       </div>
@@ -357,17 +365,10 @@ const styles = {
   sectionTitle: { fontSize:'15px', fontWeight:'700', color:'#0A0A0A', letterSpacing:'-0.02em', margin:0 },
   ghostBtn: { display:'flex', alignItems:'center', gap:'4px', background:'none', border:'none', cursor:'pointer', fontSize:'12px', fontFamily:"'Outfit',sans-serif", color:'#003DA5', fontWeight:'600', padding:'4px 0' },
   nextEventRow: { display:'flex', alignItems:'center', gap:'16px', padding:'12px 20px', borderBottom:'1px solid #F3F4F6', transition:'background-color 0.1s', cursor:'default' },
-  tableWrap: { overflowX:'auto' },
-  table: { width:'100%', borderCollapse:'collapse', fontSize:'14px' },
-  th: { padding:'10px 20px', textAlign:'left', fontSize:'11px', fontWeight:'600', color:'#6B7280', textTransform:'uppercase', letterSpacing:'0.06em', borderBottom:'1px solid #E5E7EB', whiteSpace:'nowrap', backgroundColor:'#FAFAFA' },
-  tr: { transition:'background-color 0.1s' },
-  td: { padding:'13px 20px', borderBottom:'1px solid #F3F4F6', verticalAlign:'middle' },
-  eventTitle: { fontWeight:'600', color:'#0A0A0A', margin:'0 0 2px', letterSpacing:'-0.01em', fontSize:'13px' },
-  eventSlug: { fontSize:'11px', color:'#9CA3AF', margin:0, fontFamily:'monospace' },
-  cellText: { color:'#374151', margin:0, fontSize:'13px' },
-  capTxt: { color:'#9CA3AF', fontSize:'11px' },
+  cardGrid: { display:'grid', gridTemplateColumns:'repeat(auto-fill,minmax(240px,1fr))', gap:'12px', padding:'16px 20px 20px' },
+  eventCard: { backgroundColor:'#FFFFFF', border:'1px solid #E5E7EB', borderRadius:'8px', padding:'14px 16px', display:'flex', flexDirection:'column', transition:'box-shadow .15s', cursor:'default' },
   badge: { display:'inline-flex', alignItems:'center', padding:'3px 10px', borderRadius:'20px', fontSize:'11px', fontWeight:'600' },
-  rowBtn: { background:'none', border:'1px solid #003DA5', color:'#003DA5', borderRadius:'4px', padding:'5px 12px', fontSize:'12px', fontWeight:'600', fontFamily:"'Outfit',sans-serif", cursor:'pointer', whiteSpace:'nowrap' },
+  rowBtn: { background:'none', border:'1px solid #003DA5', color:'#003DA5', borderRadius:'4px', padding:'4px 10px', fontSize:'12px', fontWeight:'600', fontFamily:"'Outfit',sans-serif", cursor:'pointer', whiteSpace:'nowrap' },
   loadingState: { padding:'48px', textAlign:'center' },
   loadingText: { color:'#9CA3AF', fontSize:'14px', margin:0 },
   emptyState: { padding:'64px 32px', textAlign:'center', display:'flex', flexDirection:'column', alignItems:'center' },
