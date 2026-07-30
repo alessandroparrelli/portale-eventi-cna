@@ -40,18 +40,30 @@ export function Modal({ title, onClose, children, width = '560px' }) {
 
 // ---- BADGE STATO EVENTO ----
 const STATO_COLORS = {
-  bozza:      { bg: '#F3F4F6', text: '#6B7280' },
-  pubblicato: { bg: '#DCFCE7', text: '#16A34A' },
-  chiuso:     { bg: '#FEF3C7', text: '#D97706' },
-  archiviato: { bg: '#F3F4F6', text: '#9CA3AF' },
+  bozza:      { bg: '#F3F4F6', text: '#6B7280', dot: '#9CA3AF', pulse: false },
+  pubblicato: { bg: '#DCFCE7', text: '#16A34A', dot: '#16A34A', pulse: true  },
+  chiuso:     { bg: '#FEF3C7', text: '#D97706', dot: '#D97706', pulse: false },
+  archiviato: { bg: '#F3F4F6', text: '#9CA3AF', dot: '#D1D5DB', pulse: false },
 }
 const STATO_LABELS = { bozza:'Bozza', pubblicato:'Pubblicato', chiuso:'Chiuso', archiviato:'Archiviato' }
 
 export function StatoBadge({ stato }) {
   const c = STATO_COLORS[stato] || STATO_COLORS.bozza
   return (
-    <span style={{ display:'inline-flex', alignItems:'center', padding:'3px 10px', borderRadius:'20px',
+    <span style={{ display:'inline-flex', alignItems:'center', gap:'5px', padding:'3px 10px', borderRadius:'20px',
       fontSize:'12px', fontWeight:'600', backgroundColor:c.bg, color:c.text }}>
+      <span style={{ position:'relative', display:'inline-flex', alignItems:'center', justifyContent:'center', width:'7px', height:'7px', flexShrink:0 }}>
+        {c.pulse && (
+          <span style={{
+            position:'absolute', inset:'-3px', borderRadius:'50%',
+            backgroundColor: c.dot, opacity:0.35,
+            animation:'stato-pulse 1.8s ease-in-out infinite',
+          }}/>
+        )}
+        <svg width="7" height="7" viewBox="0 0 7 7" style={{ flexShrink:0, position:'relative' }}>
+          <circle cx="3.5" cy="3.5" r="3.5" fill={c.dot}/>
+        </svg>
+      </span>
       {STATO_LABELS[stato] || stato}
     </span>
   )
@@ -75,16 +87,28 @@ export function RuoloBadge({ ruolo }) {
 
 // ---- BADGE PRESENZA ----
 const PRES_COLORS = {
-  presente:   { bg:'#DCFCE7', text:'#16A34A' },
-  confermato: { bg:'#DBEAFE', text:'#2563EB' },
-  assente:    { bg:'#FEE2E2', text:'#DC2626' },
-  'walk-in':  { bg:'#F3E8FF', text:'#7C3AED' },
+  presente:   { bg:'#DCFCE7', text:'#16A34A', dot:'#16A34A', pulse:true  },
+  confermato: { bg:'#DBEAFE', text:'#2563EB', dot:'#2563EB', pulse:false },
+  assente:    { bg:'#FEE2E2', text:'#DC2626', dot:'#DC2626', pulse:false },
+  'walk-in':  { bg:'#F3E8FF', text:'#7C3AED', dot:'#7C3AED', pulse:false },
 }
 export function PresenzaBadge({ stato }) {
   const c = PRES_COLORS[stato] || PRES_COLORS.confermato
   return (
-    <span style={{ display:'inline-flex', alignItems:'center', padding:'3px 10px', borderRadius:'20px',
+    <span style={{ display:'inline-flex', alignItems:'center', gap:'5px', padding:'3px 10px', borderRadius:'20px',
       fontSize:'12px', fontWeight:'600', backgroundColor:c.bg, color:c.text, textTransform:'capitalize' }}>
+      <span style={{ position:'relative', display:'inline-flex', alignItems:'center', justifyContent:'center', width:'7px', height:'7px', flexShrink:0 }}>
+        {c.pulse && (
+          <span style={{
+            position:'absolute', inset:'-3px', borderRadius:'50%',
+            backgroundColor: c.dot, opacity:0.35,
+            animation:'stato-pulse 1.8s ease-in-out infinite',
+          }}/>
+        )}
+        <svg width="7" height="7" viewBox="0 0 7 7" style={{ flexShrink:0, position:'relative' }}>
+          <circle cx="3.5" cy="3.5" r="3.5" fill={c.dot}/>
+        </svg>
+      </span>
       {stato}
     </span>
   )
@@ -158,13 +182,33 @@ export function Btn({ onClick, children, variant='primary', size='md', disabled=
 }
 
 // ---- EMPTY STATE ----
+const EMPTY_ILLUSTRATIONS = {
+  CalendarDays: (
+    <svg width="72" height="72" viewBox="0 0 72 72" fill="none"><rect x="8" y="16" width="56" height="48" rx="8" fill="#EBF0FA" stroke="#003DA5" strokeWidth="1.5" strokeDasharray="4 3"/><rect x="8" y="16" width="56" height="15" rx="8" fill="#003DA5" opacity="0.1"/><line x1="8" y1="31" x2="64" y2="31" stroke="#003DA5" strokeWidth="1" opacity="0.25"/><rect x="20" y="8" width="6" height="14" rx="3" fill="#003DA5" opacity="0.45"/><rect x="46" y="8" width="6" height="14" rx="3" fill="#003DA5" opacity="0.45"/><rect x="16" y="40" width="10" height="9" rx="3" fill="#003DA5" opacity="0.15"/><rect x="31" y="40" width="10" height="9" rx="3" fill="#003DA5" opacity="0.15"/><rect x="46" y="40" width="10" height="9" rx="3" fill="#003DA5" opacity="0.15"/><rect x="16" y="52" width="10" height="9" rx="3" fill="#003DA5" opacity="0.08"/><rect x="31" y="52" width="10" height="9" rx="3" fill="#003DA5" opacity="0.15"/></svg>
+  ),
+  Users: (
+    <svg width="72" height="72" viewBox="0 0 72 72" fill="none"><circle cx="36" cy="26" r="14" fill="#EBF0FA" stroke="#003DA5" strokeWidth="1.5" strokeDasharray="4 3"/><circle cx="36" cy="26" r="7" fill="#003DA5" opacity="0.18"/><path d="M12 64c0-13.255 10.745-24 24-24s24 10.745 24 24" stroke="#003DA5" strokeWidth="1.5" strokeDasharray="4 3" strokeLinecap="round" fill="none"/></svg>
+  ),
+  Mail: (
+    <svg width="72" height="72" viewBox="0 0 72 72" fill="none"><rect x="8" y="20" width="56" height="38" rx="8" fill="#EBF0FA" stroke="#003DA5" strokeWidth="1.5" strokeDasharray="4 3"/><path d="M8 28l28 18 28-18" stroke="#003DA5" strokeWidth="1.5" opacity="0.45" fill="none"/></svg>
+  ),
+  MessageSquare: (
+    <svg width="72" height="72" viewBox="0 0 72 72" fill="none"><rect x="8" y="12" width="56" height="40" rx="8" fill="#EBF0FA" stroke="#003DA5" strokeWidth="1.5" strokeDasharray="4 3"/><path d="M20 60l8-8h36a8 8 0 0 0 0-16H20" stroke="#003DA5" strokeWidth="1.5" strokeDasharray="4 3" strokeLinecap="round" fill="none" opacity="0.5"/><line x1="20" y1="28" x2="52" y2="28" stroke="#003DA5" strokeWidth="1.5" strokeLinecap="round" opacity="0.35"/><line x1="20" y1="38" x2="44" y2="38" stroke="#003DA5" strokeWidth="1.5" strokeLinecap="round" opacity="0.35"/></svg>
+  ),
+  Activity: (
+    <svg width="72" height="72" viewBox="0 0 72 72" fill="none"><rect x="8" y="8" width="56" height="56" rx="8" fill="#EBF0FA" stroke="#003DA5" strokeWidth="1.5" strokeDasharray="4 3"/><polyline points="14,44 24,28 34,48 44,20 54,36 60,36" stroke="#003DA5" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" fill="none" opacity="0.5"/></svg>
+  ),
+}
+const EMPTY_DEFAULT_ICON = (
+  <svg width="72" height="72" viewBox="0 0 72 72" fill="none"><rect x="18" y="12" width="36" height="48" rx="6" fill="#EBF0FA" stroke="#003DA5" strokeWidth="1.5" strokeDasharray="4 3"/><line x1="26" y1="28" x2="46" y2="28" stroke="#003DA5" strokeWidth="1.5" strokeLinecap="round" opacity="0.4"/><line x1="26" y1="38" x2="46" y2="38" stroke="#003DA5" strokeWidth="1.5" strokeLinecap="round" opacity="0.4"/><line x1="26" y1="48" x2="38" y2="48" stroke="#003DA5" strokeWidth="1.5" strokeLinecap="round" opacity="0.4"/></svg>
+)
+
 export function EmptyState({ icon: Icon, title, desc, action }) {
+  const iconName = Icon?.displayName || Icon?.name || ''
+  const illustration = EMPTY_ILLUSTRATIONS[iconName] || EMPTY_DEFAULT_ICON
   return (
-    <div style={{ padding:'64px 32px', textAlign:'center', display:'flex', flexDirection:'column', alignItems:'center' }}>
-      <div style={{ width:'56px', height:'56px', backgroundColor:'#F3F4F6', borderRadius:'12px',
-        display:'flex', alignItems:'center', justifyContent:'center', marginBottom:'16px' }}>
-        <Icon size={28} style={{ color:'#9CA3AF' }} />
-      </div>
+    <div style={{ padding:'64px 32px', textAlign:'center', display:'flex', flexDirection:'column', alignItems:'center', gap:'4px' }}>
+      <div style={{ marginBottom:'12px', opacity:0.9 }}>{illustration}</div>
       <p style={{ fontSize:'16px', fontWeight:'700', color:'#0A0A0A', margin:'0 0 6px', letterSpacing:'-0.02em' }}>{title}</p>
       <p style={{ fontSize:'14px', color:'#6B7280', margin:'0 0 20px' }}>{desc}</p>
       {action}

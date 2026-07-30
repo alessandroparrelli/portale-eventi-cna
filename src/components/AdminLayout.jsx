@@ -151,7 +151,7 @@ export default function AdminLayout() {
       <footer style={s.footer}>
         <img
           src="https://raw.githubusercontent.com/alessandroparrelli/fileappoggio/main/NUOVO-LOGO-CNA-ROMA-SOLO-ROMA.png"
-          alt="CNA Roma" style={{ height:'20px', objectFit:'contain', flexShrink:0 }}
+          alt="CNA Roma" style={{ height:'14px', objectFit:'contain', flexShrink:0, opacity:0.45 }}
         />
         <span style={s.footerText}>
           eventlypro © 2026, software di gestione marketing ed eventi sviluppato da CNA di Roma
@@ -183,7 +183,7 @@ const s = {
     paddingTop: 'calc(env(safe-area-inset-top, 0px) + 10px)',
     paddingBottom: '10px',
     gap: '12px',
-    boxShadow: '0 1px 8px rgba(0,0,0,0.06)',
+    boxShadow: '0 1px 3px rgba(0,0,0,0.04)',
     boxSizing: 'border-box',
   },
   hamburger: {
@@ -224,18 +224,18 @@ const s = {
     bottom: 0,
     zIndex: 200,
     background: '#FFFFFF',
-    borderTop: '1px solid #E8E8E4',
+    borderTop: '1px solid #F0F0EC',
     display: 'flex',
     alignItems: 'center',
-    gap: '10px',
-    padding: '10px 24px',
+    gap: '8px',
+    padding: '6px 24px',
     boxSizing: 'border-box',
   },
   footerText: {
-    fontSize: '11px',
-    color: '#C4C4C0',
+    fontSize: '10px',
+    color: '#D8D8D4',
     fontFamily: "'Outfit', sans-serif",
-    fontWeight: '500',
+    fontWeight: '400',
     lineHeight: 1.4,
   },
 }
