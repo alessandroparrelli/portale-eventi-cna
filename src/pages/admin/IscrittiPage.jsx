@@ -1086,10 +1086,10 @@ export default function IscrittiPage() {
 
   // 4 colori per stato verifica associati
   const RC = {
-    assoc:    { bg:'#F0FDF4', hov:'#DCFCE7' }, // verde
-    disdetto: { bg:'#FEF2F2', hov:'#FECACA' }, // rosso
-    notFound: { bg:'#F1F5F9', hov:'#E2E8F0' }, // grigio
-    noPiva:   { bg:'#FFF7ED', hov:'#FED7AA' }, // arancione
+    assoc:    { bg:'#BBFBD0', hov:'#86EFAC' }, // verde
+    disdetto: { bg:'#FECACA', hov:'#FCA5A5' }, // rosso
+    notFound: { bg:'#CBD5E1', hov:'#94A3B8' }, // grigio
+    noPiva:   { bg:'#FED7AA', hov:'#FDBA74' }, // arancione
     none:     { bg:'transparent', hov:'#F9FAFB' },
   }
   // ── Funzioni SMS ────────────────────────────────────────────────────
