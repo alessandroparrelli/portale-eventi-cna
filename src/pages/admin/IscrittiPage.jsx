@@ -82,7 +82,7 @@ export default function IscrittiPage() {
   const [sortCol, setSortCol] = useState(null)   // chiave colonna
   const [sortDir, setSortDir] = useState('asc')  // 'asc' | 'desc'
   const [pagina, setPagina] = useState(1)
-  const PAGE_SIZE = 20
+  const PAGE_SIZE = 50
 
   // ── SMS ─────────────────────────────────────────────────────────────
   const { user: authUser } = useAuth()
