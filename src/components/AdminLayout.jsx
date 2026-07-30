@@ -129,7 +129,7 @@ export default function AdminLayout() {
             </svg>
             <span style={s.pageTitle}>
               <span style={{ color:'#111111' }}>evently</span>
-              <span style={{ color:'#003DA5' }}>pro</span>
+              <span style={{ color:'#C0392B' }}>pro</span>
             </span>
           </div>
         </div>
