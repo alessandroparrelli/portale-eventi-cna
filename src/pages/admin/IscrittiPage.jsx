@@ -277,6 +277,10 @@ export default function IscrittiPage() {
         referente_id: editCapogruppo ? editCapogruppo.id : null,
       }).eq('id', editModal.id)
       if (error) throw error
+      // Se è accompagnatore, assicura che il capogruppo abbia gruppo_id = id
+      if (editCapogruppo && !editCapogruppo.gruppo_id) {
+        await supabase.from('registrations').update({ gruppo_id: editCapogruppo.id }).eq('id', editCapogruppo.id)
+      }
       logAttivita('iscritto_modificato', { eventoId: selectedEvento, dettagli: { nome: editForm.nome.trim() + ' ' + editForm.cognome.trim() } })
       setEditModal(null)
       loadRegs()
@@ -326,6 +330,11 @@ export default function IscrittiPage() {
 
       const { error } = await supabase.from('registrations').insert(payload)
       if (error) throw error
+
+      // Se è accompagnatore, assicura che il capogruppo abbia gruppo_id = id
+      if (addCapogruppo && !addCapogruppo.gruppo_id) {
+        await supabase.from('registrations').update({ gruppo_id: addCapogruppo.id }).eq('id', addCapogruppo.id)
+      }
 
       logAttivita('iscritto_manuale', { eventoId: selectedEvento, dettagli: { nome: payload.nome + ' ' + payload.cognome, ...(addCapogruppo ? { capogruppo: addCapogruppo.nome + ' ' + addCapogruppo.cognome } : {}) } })
 
