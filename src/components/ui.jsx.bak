@@ -131,8 +131,8 @@ export function Input({ value, onChange, placeholder, type='text', disabled=fals
   return (
     <input
       type={type} value={value} onChange={onChange} placeholder={placeholder} disabled={disabled}
-      style={{ padding:'9px 12px', border:'1px solid #E8ECF4', borderRadius:'4px',
-        fontSize:'14px', fontFamily:"'Inter',sans-serif", color:'#0A0A0A', outline:'none',
+      style={{ padding:'9px 12px', border:'1px solid #D1D5DB', borderRadius:'4px',
+        fontSize:'14px', fontFamily:"'Outfit',sans-serif", color:'#0A0A0A', outline:'none',
         backgroundColor: disabled ? '#F9FAFB' : '#FFFFFF', ...style }}
       onFocus={e => !disabled && (e.target.style.borderColor='#003DA5')}
       onBlur={e => (e.target.style.borderColor='#D1D5DB')}
@@ -143,8 +143,8 @@ export function Input({ value, onChange, placeholder, type='text', disabled=fals
 export function Select({ value, onChange, children, disabled=false }) {
   return (
     <select value={value} onChange={onChange} disabled={disabled}
-      style={{ padding:'9px 12px', border:'1px solid #E8ECF4', borderRadius:'4px',
-        fontSize:'14px', fontFamily:"'Inter',sans-serif", color:'#0A0A0A', outline:'none',
+      style={{ padding:'9px 12px', border:'1px solid #D1D5DB', borderRadius:'4px',
+        fontSize:'14px', fontFamily:"'Outfit',sans-serif", color:'#0A0A0A', outline:'none',
         backgroundColor: disabled ? '#F9FAFB' : '#FFFFFF', cursor: disabled ? 'not-allowed' : 'pointer' }}
       onFocus={e => !disabled && (e.target.style.borderColor='#003DA5')}
       onBlur={e => (e.target.style.borderColor='#D1D5DB')}>
@@ -156,8 +156,8 @@ export function Select({ value, onChange, children, disabled=false }) {
 export function Textarea({ value, onChange, placeholder, rows=4 }) {
   return (
     <textarea value={value} onChange={onChange} placeholder={placeholder} rows={rows}
-      style={{ padding:'9px 12px', border:'1px solid #E8ECF4', borderRadius:'4px',
-        fontSize:'14px', fontFamily:"'Inter',sans-serif", color:'#0A0A0A', outline:'none',
+      style={{ padding:'9px 12px', border:'1px solid #D1D5DB', borderRadius:'4px',
+        fontSize:'14px', fontFamily:"'Outfit',sans-serif", color:'#0A0A0A', outline:'none',
         resize:'vertical' }}
       onFocus={e => (e.target.style.borderColor='#003DA5')}
       onBlur={e => (e.target.style.borderColor='#D1D5DB')} />
@@ -167,13 +167,13 @@ export function Textarea({ value, onChange, placeholder, rows=4 }) {
 // ---- BTN ----
 export function Btn({ onClick, children, variant='primary', size='md', disabled=false, style={} }) {
   const base = { display:'flex', alignItems:'center', gap:'6px', border:'none', borderRadius:'4px',
-    fontFamily:"'Inter',sans-serif", fontWeight:'700', cursor: disabled ? 'not-allowed' : 'pointer',
+    fontFamily:"'Outfit',sans-serif", fontWeight:'700', cursor: disabled ? 'not-allowed' : 'pointer',
     transition:'opacity 0.15s', opacity: disabled ? 0.6 : 1, whiteSpace:'nowrap',
     padding: size==='sm' ? '6px 12px' : size==='lg' ? '12px 24px' : '9px 16px',
     fontSize: size==='sm' ? '13px' : '14px',
   }
   const variants = {
-    primary:   { backgroundColor:'#5B5FEF', color:'#FFFFFF' },
+    primary:   { backgroundColor:'#003DA5', color:'#FFFFFF' },
     secondary: { backgroundColor:'transparent', color:'#003DA5', border:'1px solid #003DA5' },
     danger:    { backgroundColor:'#DC2626', color:'#FFFFFF' },
     ghost:     { backgroundColor:'transparent', color:'#6B7280', border:'1px solid #E5E7EB' },
@@ -218,9 +218,9 @@ export function EmptyState({ icon: Icon, title, desc, action }) {
 
 // Modal styles
 const modal = {
-  overlay: { position:'fixed', inset:0, backgroundColor:'rgba(17,24,39,0.4)', backdropFilter:'blur(4px)', WebkitBackdropFilter:'blur(4px)', display:'flex',
+  overlay: { position:'fixed', inset:0, backgroundColor:'rgba(0,0,0,0.35)', backdropFilter:'blur(4px)', WebkitBackdropFilter:'blur(4px)', display:'flex',
     alignItems:'center', justifyContent:'center', zIndex:1000, padding:'24px' },
-  box: { backgroundColor:'#FFFFFF', borderRadius:'20px', width:'100%',
+  box: { backgroundColor:'#FFFFFF', borderRadius:'8px', width:'100%',
     boxShadow:'0 20px 60px rgba(0,0,0,0.15)', display:'flex', flexDirection:'column',
     maxHeight:'90vh', overflow:'hidden' },
   header: { display:'flex', alignItems:'center', justifyContent:'space-between',

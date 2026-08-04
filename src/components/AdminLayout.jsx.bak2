@@ -48,15 +48,15 @@ function UserBox() {
         gap: '9px',
         padding: '5px 12px 5px 5px',
         borderRadius: '40px',
-        backgroundColor: isActive ? '#EEEFFD' : '#F7F8FC',
-        border: '1px solid ' + (isActive ? '#5B5FEF30' : '#E8ECF4'),
+        backgroundColor: isActive ? '#EBF0FA' : '#F7F7F5',
+        border: '1px solid ' + (isActive ? '#FDA4AF' : '#E8E8E4'),
         textDecoration: 'none',
         cursor: 'pointer',
         transition: 'background .15s',
         flexShrink: 0,
       })}
-      onMouseEnter={e => e.currentTarget.style.backgroundColor = '#EEEFFD'}
-      onMouseLeave={e => e.currentTarget.style.backgroundColor = '#F7F8FC'}
+      onMouseEnter={e => e.currentTarget.style.backgroundColor = '#EBF0FA'}
+      onMouseLeave={e => e.currentTarget.style.backgroundColor = '#F7F7F5'}
     >
       {/* Avatar */}
       <div style={{
@@ -167,7 +167,7 @@ const s = {
     flexDirection: 'column',
     minHeight: '100dvh',
     backgroundColor: 'var(--bg-app)',
-    fontFamily: "'Inter', sans-serif",
+    fontFamily: "'Outfit', sans-serif",
   },
   header: {
     flexShrink: 0,
@@ -175,7 +175,7 @@ const s = {
     top: 0,
     zIndex: 200,
     background: '#FFFFFF',
-    borderBottom: '1px solid #E8ECF4',
+    borderBottom: '1px solid #E8E8E4',
     display: 'flex',
     alignItems: 'center',
     paddingLeft: '20px',
@@ -203,7 +203,7 @@ const s = {
     fontWeight: '800',
     color: '#111111',
     letterSpacing: '-0.04em',
-    fontFamily: "'Inter', sans-serif",
+    fontFamily: "'Outfit', sans-serif",
     lineHeight: 1,
     whiteSpace: 'nowrap',
   },
@@ -234,7 +234,7 @@ const s = {
   footerText: {
     fontSize: '10px',
     color: '#D8D8D4',
-    fontFamily: "'Inter', sans-serif",
+    fontFamily: "'Outfit', sans-serif",
     fontWeight: '400',
     lineHeight: 1.4,
   },
