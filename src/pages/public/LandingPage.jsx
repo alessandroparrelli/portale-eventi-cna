@@ -6,13 +6,12 @@ import { useParams } from 'react-router-dom'
 import { supabase } from '../../lib/supabase'
 import { useAuth } from '../../hooks/useAuth'
 import { temaConDefault } from '../../components/editor/AspettoTab'
+import { MapPin, Calendar, ChevronRight, AlertCircle, Download, Share2 } from 'lucide-react'
 import { RICH_CSS } from '../../components/editor/RichEditor'
 import FormIscrizione from './FormIscrizione'
 import SocialLinks from '../../components/SocialLinks'
 import { useSocial } from '../../hooks/useSocial'
 import BlockRenderer from '../../components/public/BlockRenderer'
-import { AlertCircle, Calendar, ChevronRight, Download, MapPin, Share2 } from '../../components/SFIcon'
-
 
 /* ── PATTERN PALLINI DECORATIVI ──────────────────────── */
 function generaPalliniSVG(c1, c2, opacita, angolo) {

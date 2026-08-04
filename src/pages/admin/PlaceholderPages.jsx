@@ -1,6 +1,6 @@
-function Placeholder({ icon: Icon, title, description }) {
-import { BarChart2, CalendarDays, Mail, QrCode, Users } from '../../components/SFIcon'
+import { CalendarDays, Users, Mail, QrCode, BarChart2 } from 'lucide-react'
 
+function Placeholder({ icon: Icon, title, description }) {
   return (
     <div style={styles.page}>
       <div style={styles.card}>

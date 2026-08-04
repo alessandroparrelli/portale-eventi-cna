@@ -3,7 +3,7 @@ import { supabase } from '../../lib/supabase'
 import { useAuth } from '../../hooks/useAuth'
 import { useRole } from '../../hooks/useRole'
 import { Field, Input, Btn } from '../../components/ui'
-import { AlertCircle, Camera, CheckCircle2, Clock, Eye, EyeOff, Loader2, Save } from '../../components/SFIcon'
+import { Camera, Eye, EyeOff, Save, CheckCircle2, AlertCircle, Clock, Loader2 } from 'lucide-react'
 
 const RUOLO_COL = { admin:'#003DA5', supervisore:'#D97706', utente:'#6B7280' }
 

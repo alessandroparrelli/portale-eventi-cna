@@ -1,6 +1,6 @@
-/**
-import { CalendarDays, ChevronDown } from './SFIcon'
+import { CalendarDays, ChevronDown } from 'lucide-react'
 
+/**
  * Card selettore evento con stile "luminous" — usato in Checkin, Iscritti, Statistiche
  * Props: eventi, value, onChange, label?, placeholder?
  */

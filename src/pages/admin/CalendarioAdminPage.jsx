@@ -4,7 +4,7 @@ import { supabase } from '../../lib/supabase'
 import { Btn, Field, Input } from '../../components/ui'
 import LogoManager from '../../components/editor/LogoManager'
 import ImageUploader from '../../components/editor/ImageUploader'
-import { ExternalLink, Eye, Save } from '../../components/SFIcon'
+import { Save, ExternalLink, Eye } from 'lucide-react'
 
 const CFG_ID = '00000000-0000-0000-0000-000000000001'
 

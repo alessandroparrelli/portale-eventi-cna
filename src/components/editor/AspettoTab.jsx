@@ -1,7 +1,7 @@
 import { useState } from 'react'
 import RichEditor from './RichEditor'
 import ImageUploader from './ImageUploader'
-import { ChevronDown, ChevronUp, RotateCcw } from '../SFIcon'
+import { ChevronDown, ChevronUp, RotateCcw } from 'lucide-react'
 
 /* ─── Defaults tema ────────────────────────────────────────────── */
 export const TEMA_DEFAULT = {

@@ -1,6 +1,5 @@
+import { X } from 'lucide-react'
 import { useEffect, useRef } from 'react'
-import { X } from './SFIcon'
-
 
 // ---- MODAL ----
 const MODAL_ANIM_CSS = `

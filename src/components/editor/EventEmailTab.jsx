@@ -5,7 +5,13 @@ import React, { useState, useEffect, useRef } from 'react'
 import { supabase, getFreshJwt } from '../../lib/supabase'
 import RichEditor from './RichEditor'
 import HeaderEditor, { mergeHeaderConfig, buildFullEmailHtml, DEFAULT_HEADER_CONFIG } from './HeaderEditor'
-import { AlertTriangle, AlignCenter, AlignLeft, AlignRight, CheckCircle, ChevronDown, ChevronRight, ChevronUp, Code, Columns, Eye as EyeIcon, GripVertical, Image as ImageIcon, Layers, LayoutTemplate, Loader2, MapPin, Minus, Monitor, PanelRightClose, PanelRightOpen, Plus, RotateCcw, Save, Send, Settings2, Smartphone, Square, Star, Trash2, Type, Upload, X, Zap } from '../SFIcon'
+import {
+  Save, RotateCcw, CheckCircle, Code, Eye as EyeIcon, AlertTriangle,
+  Layers, Image as ImageIcon, Type, AlignLeft, Square, Star, Zap, Minus,
+  Columns, LayoutTemplate, ChevronUp, ChevronDown, Trash2, GripVertical, MapPin,
+  AlignCenter, AlignRight, Upload, X, Loader2, Smartphone, Monitor, Plus,
+  Settings2, ChevronRight, PanelRightClose, PanelRightOpen, Send
+} from 'lucide-react'
 
 //  Costanti 
 const BLU = '#003DA5'

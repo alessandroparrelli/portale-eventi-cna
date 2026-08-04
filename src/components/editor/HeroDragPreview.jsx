@@ -1,5 +1,5 @@
 import { useCallback, useEffect, useRef, useState } from 'react'
-import { Move } from '../SFIcon'
+import { Move } from 'lucide-react'
 
 export default function HeroDragPreview({ event, setH }) {
   const lh      = event.layout_hero || {}

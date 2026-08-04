@@ -1,10 +1,9 @@
 import { useEffect, useState, useMemo } from 'react'
 import { usePageTitle } from '../../hooks/usePageTitle'
 import { supabase } from '../../lib/supabase'
+import { Activity, Search, RefreshCw, User, ChevronDown, ChevronRight } from 'lucide-react'
 import GlowTabBar from '../../components/GlowTabBar'
 import GlowTableHead from '../../components/GlowTableHead'
-import { Activity, ChevronDown, ChevronRight, RefreshCw, Search, User } from '../../components/SFIcon'
-
 
 const AZIONE_LABELS = {
   checkin_qr:            { label:'Check-in QR',           color:'#16A34A', bg:'#F0FDF4' },

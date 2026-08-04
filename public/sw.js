@@ -1,4 +1,4 @@
-const CACHE = 'ep-portale-v6'
+const CACHE = 'ep-portale-v5'
 
 // Percorsi che non vanno MAI cachati (icone, manifest — devono essere sempre freschi)
 const NO_CACHE = ['/manifest.json', '/favicon.ico', '/favicon.svg', '/favicon-32.png']

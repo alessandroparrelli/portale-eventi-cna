@@ -1,5 +1,5 @@
 import { useState, useEffect } from 'react'
-import { Bell, BellOff, Loader2 } from './SFIcon'
+import { Bell, BellOff, Loader2 } from 'lucide-react'
 
 const PUSH_URL = 'https://hnkhckcclgabunkqfmrz.supabase.co/functions/v1/web-push'
 // Chiave pubblica VAPID — generata con web-push generate-vapid-keys

@@ -5,7 +5,7 @@ import { supabase } from '../../lib/supabase'
 import { useRole } from '../../hooks/useRole'
 import { logAttivita } from '../../lib/activityLog'
 import { Modal, Field, Input, Btn, EmptyState } from '../../components/ui'
-import { ArrowLeft, Lock, Pencil, Plus, ShieldCheck, Trash2 } from '../../components/SFIcon'
+import { ShieldCheck, Plus, Pencil, Trash2, Lock, ArrowLeft } from 'lucide-react'
 
 const SEZIONI = [
   { key:'dashboard',  label:'Dashboard' },

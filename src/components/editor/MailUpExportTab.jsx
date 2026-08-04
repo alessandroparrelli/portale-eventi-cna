@@ -4,12 +4,11 @@
  */
 import { useState, useMemo, useEffect, useRef } from 'react'
 import { supabase } from '../../lib/supabase'
+import { Copy, Check, AlertTriangle, ExternalLink, Mail, Settings, ChevronDown, ChevronUp } from 'lucide-react'
 import BlockEditor from './BlockEditor'
 import { socialLinksEmailHtml } from '../SocialLinks'
 import { temaConDefault } from './AspettoTab'
 import { useSocial } from '../../hooks/useSocial'
-import { AlertTriangle, Check, ChevronDown, ChevronUp, Copy, ExternalLink, Mail, Settings } from '../SFIcon'
-
 
 /* ── helpers ─────────────────────────────────────────────────────── */
 const F = "'Outfit','Inter UI',Arial,Helvetica,sans-serif"

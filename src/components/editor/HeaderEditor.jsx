@@ -4,7 +4,10 @@
  */
 import { useState, useEffect, useRef } from 'react'
 import { supabase } from '../../lib/supabase'
-import { AlignCenter, AlignLeft, AlignRight, ChevronRight, Image as ImageIcon, Layout, Loader2, Palette, Settings2, Type, Upload, X } from '../SFIcon'
+import {
+  AlignLeft, AlignCenter, AlignRight, ChevronRight, X,
+  Upload, Loader2, Settings2, Layout, Type, Palette, Image as ImageIcon
+} from 'lucide-react'
 
 const BLU = '#003DA5'
 const NERO = '#0A0A0A'

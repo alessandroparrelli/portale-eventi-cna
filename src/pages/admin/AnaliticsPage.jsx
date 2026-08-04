@@ -2,7 +2,7 @@ import { useEffect, useState } from 'react'
 import { usePageTitle } from '../../hooks/usePageTitle'
 import { supabase } from '../../lib/supabase'
 import { usePushNotifications } from '../../hooks/usePushNotifications'
-import { Award, BarChart2, Bell, BellOff, Calendar, Mail, TrendingUp, Users } from '../../components/SFIcon'
+import { Bell, BellOff, TrendingUp, Users, Mail, Award, Calendar, BarChart2 } from 'lucide-react'
 
 const BLU = '#003DA5'
 const PUSH_URL = 'https://hnkhckcclgabunkqfmrz.supabase.co/functions/v1/web-push'

@@ -8,7 +8,11 @@ import { Modal, StatoBadge, Field, Input, Textarea, Select, Btn, EmptyState } fr
 import ImageUploader from '../../components/editor/ImageUploader'
 import GlowTabBar from '../../components/GlowTabBar'
 import GlowTableHead from '../../components/GlowTableHead'
-import { AlignCenter, AlignLeft, CalendarDays, ChevronDown, ChevronUp, ClipboardCheck, Copy, ExternalLink, Globe, Hash, Image, Link2, Loader2, Pencil, Plus, Search, SlidersHorizontal, Trash2, Users, Wand2, X } from '../../components/SFIcon'
+import {
+  Plus, CalendarDays, Pencil, Trash2, Copy, ExternalLink, Search,
+  Link2, ClipboardCheck, Globe, Image, X, ChevronDown, ChevronUp,
+  Wand2, Loader2, AlignLeft, AlignCenter, SlidersHorizontal, Hash, Users
+} from 'lucide-react'
 
 const EMPTY = {
   titolo:'', slug:'', descrizione:'', data_inizio:'', data_fine:'',

@@ -1,6 +1,6 @@
 import { useEffect, useRef, useState } from 'react'
 import { supabase, getFreshJwt } from '../../lib/supabase'
-import { Check, CheckSquare, ImageOff, Loader2, Square, Trash2, Upload, X } from '../SFIcon'
+import { Upload, Check, X, Loader2, ImageOff, Trash2, CheckSquare, Square } from 'lucide-react'
 
 const LOGO_DEFAULT = {
   name: 'CNA Roma (default)',

@@ -6,7 +6,7 @@ import { useAuth } from '../../hooks/useAuth'
 import { adminApi } from '../../lib/adminApi'
 import { logAttivita } from '../../lib/activityLog'
 import { Modal, RuoloBadge, Field, Input, Select, Btn, EmptyState } from '../../components/ui'
-import { Activity, Clock, Eye, EyeOff, Pencil, Plus, Settings, ShieldCheck, ToggleLeft, ToggleRight, Trash2, Users } from '../../components/SFIcon'
+import { Users, Plus, Pencil, Trash2, ShieldCheck, Eye, EyeOff, Activity, Clock, ToggleLeft, ToggleRight, Settings } from 'lucide-react'
 
 const RUOLO_COL  = { admin:'#003DA5', supervisore:'#D97706', utente:'#6B7280' }
 const RUOLO_DESC_FALLBACK = {

@@ -1,6 +1,6 @@
 import { useEffect, useState } from 'react'
 import { supabase } from '../../lib/supabase'
-import { AlertCircle, Check, GripVertical, Plus, Save, Trash2 } from '../SFIcon'
+import { Plus, Trash2, GripVertical, AlertCircle, Save, Check } from 'lucide-react'
 
 /* ─── Campi fissi — sempre visibili e obbligatori ─────────────── */
 const CAMPI_FISSI = ['nome', 'cognome', 'email']
