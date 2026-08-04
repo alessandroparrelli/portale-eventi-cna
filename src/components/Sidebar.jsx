@@ -4,7 +4,7 @@ import { useRole } from '../hooks/useRole'
 import { supabase } from '../lib/supabase'
 import { useState, useEffect } from 'react'
 
-const RUOLO_COLORS = { superadmin:'#9F1239', admin:'#003DA5', supervisore:'#BE123C', utente:'#6B7280' }
+const RUOLO_COLORS = { superadmin:'#5B5FEF', admin:'#5B5FEF', supervisore:'#7C4DFF', utente:'#6B7280' }
 const RUOLO_LABELS = { superadmin:'Super Admin', admin:'Admin', supervisore:'Supervisore', utente:'Utente' }
 
 // ── SVG icons inline colorate ──────────────────────────────────────
@@ -259,7 +259,7 @@ export default function Sidebar({ mobileOpen, onMobileClose, isMobile }) {
             <button
               onClick={toggleCollapse}
               title={isCollapsed ? 'Espandi sidebar' : 'Comprimi sidebar'}
-              style={{ background:'none', border:'1px solid #E5E7EB', borderRadius:'6px', cursor:'pointer', padding:'5px 6px', display:'flex', alignItems:'center', color:'#9CA3AF', transition:'color .15s, background .15s' }}
+              style={{ background:'none', border:'1px solid #E8ECF4', borderRadius:'14px', cursor:'pointer', padding:'5px 6px', display:'flex', alignItems:'center', color:'#9CA3AF', transition:'color .15s, background .15s' }}
               onMouseEnter={e => { e.currentTarget.style.backgroundColor='#F3F4F6'; e.currentTarget.style.color='#374151' }}
               onMouseLeave={e => { e.currentTarget.style.backgroundColor='transparent'; e.currentTarget.style.color='#9CA3AF' }}
             >
@@ -276,7 +276,7 @@ export default function Sidebar({ mobileOpen, onMobileClose, isMobile }) {
         <nav style={{ ...st.nav, padding: isCollapsed ? '6px 6px 4px' : '6px 10px 4px' }}>
 
           {allGroups.map(group => (
-            <div key={group.label} style={{ ...st.group, borderRadius:'8px', overflow:'hidden' }}>
+            <div key={group.label} style={{ ...st.group, borderRadius:'16px', overflow:'hidden' }}>
               {!isCollapsed && (
                 <p style={{
                   ...st.groupLabel,
@@ -284,7 +284,7 @@ export default function Sidebar({ mobileOpen, onMobileClose, isMobile }) {
                   background: group.color + '10',
                   margin:'8px 0 2px',
                   padding:'4px 8px',
-                  borderRadius:'6px',
+                  borderRadius:'14px',
                   display:'flex', alignItems:'center', gap:'6px',
                 }}>
                   <span style={{ width:'6px', height:'6px', borderRadius:'50%', background: group.color, flexShrink:0, display:'inline-block' }}/>
@@ -348,7 +348,7 @@ const st = {
     position:'sticky', top:0, alignSelf:'flex-start',
     height:'100vh', maxHeight:'100dvh',
     zIndex:100,
-    backgroundColor:'#FFFFFF', borderRight:'1px solid #E5E7EB',
+    backgroundColor:'#FFFFFF', borderRight:'1px solid #E8ECF4',
     display:'flex', flexDirection:'column',
     transition:'transform .22s cubic-bezier(.4,0,.2,1), width .2s cubic-bezier(.4,0,.2,1)',
     overflowY:'auto', overflowX:'hidden',
@@ -358,13 +358,13 @@ const st = {
     padding:'12px 14px 8px', borderBottom:'1px solid #F3F4F6', flexShrink:0,
   },
   closeBtn: {
-    background:'none', border:'1px solid #E5E7EB', borderRadius:'6px',
+    background:'none', border:'1px solid #E8ECF4', borderRadius:'14px',
     cursor:'pointer', padding:'5px', display:'flex', alignItems:'center',
   },
   userCard: {
     display:'flex', alignItems:'center', gap:'10px',
     margin:'10px 10px 4px', padding:'10px 12px',
-    borderRadius:'10px', border:'1px solid transparent',
+    borderRadius:'14px', border:'1px solid transparent',
     textDecoration:'none', transition:'all .15s', flexShrink:0,
   },
   avatar: {
@@ -372,7 +372,7 @@ const st = {
     display:'flex', alignItems:'center', justifyContent:'center', overflow:'hidden',
   },
   userName: {
-    fontSize:'13px', fontWeight:'700', color:'#0A0A0A',
+    fontSize:'13px', fontWeight:'700', color:'#111827',
     margin:0, overflow:'hidden', textOverflow:'ellipsis', whiteSpace:'nowrap', letterSpacing:'-0.01em',
   },
   roleBadge: {
@@ -391,12 +391,12 @@ const st = {
   },
   navLink: {
     display:'flex', alignItems:'center', gap:'9px',
-    padding:'7px 10px', borderRadius:'8px',
+    padding:'7px 10px', borderRadius:'16px',
     textDecoration:'none', transition:'background-color .12s',
     position:'relative', minHeight:'34px',
   },
   iconWrap: {
-    width:'26px', height:'26px', borderRadius:'6px', flexShrink:0,
+    width:'26px', height:'26px', borderRadius:'14px', flexShrink:0,
     display:'flex', alignItems:'center', justifyContent:'center',
     transition:'background .15s',
   },
@@ -413,8 +413,8 @@ const st = {
     display:'flex', alignItems:'center', gap:'9px',
     padding:'7px 10px', width:'100%',
     background:'none', border:'none',
-    borderRadius:'8px', cursor:'pointer',
-    fontSize:'13px', fontFamily:"'Outfit',sans-serif",
+    borderRadius:'16px', cursor:'pointer',
+    fontSize:'13px', fontFamily:"'Inter',sans-serif",
     color:'#DC2626', fontWeight:'600',
     transition:'background-color .12s',
     textAlign:'left', minHeight:'34px',
@@ -427,6 +427,6 @@ const st = {
   },
   sidebarFooterText: {
     fontSize:'9px', color:'#C4C4C0', lineHeight:'1.4',
-    fontFamily:"'Outfit',sans-serif", fontWeight:'500',
+    fontFamily:"'Inter',sans-serif", fontWeight:'500',
   },
 }

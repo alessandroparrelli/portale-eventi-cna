@@ -4,18 +4,18 @@ import { supabase } from '../../lib/supabase'
 import { usePushNotifications } from '../../hooks/usePushNotifications'
 import { Bell, BellOff, TrendingUp, Users, Mail, Award, Calendar, BarChart2 } from 'lucide-react'
 
-const BLU = '#003DA5'
+const BLU = '#5B5FEF'
 const PUSH_URL = 'https://hnkhckcclgabunkqfmrz.supabase.co/functions/v1/web-push'
 
 function StatCard({ icon: Icon, label, value, sub, color = BLU }) {
   return (
-    <div style={{ backgroundColor: '#fff', border: '1px solid #E5E7EB', borderRadius: '12px', padding: '20px 24px', display: 'flex', gap: '16px', alignItems: 'flex-start' }}>
-      <div style={{ width: '44px', height: '44px', borderRadius: '10px', backgroundColor: color + '14', display: 'flex', alignItems: 'center', justifyContent: 'center', flexShrink: 0 }}>
+    <div style={{ backgroundColor: '#fff', border: '1px solid #E8ECF4', borderRadius: '16px', padding: '20px 24px', display: 'flex', gap: '16px', alignItems: 'flex-start' }}>
+      <div style={{ width: '44px', height: '44px', borderRadius: '14px', backgroundColor: color + '14', display: 'flex', alignItems: 'center', justifyContent: 'center', flexShrink: 0 }}>
         <Icon size={20} style={{ color }} />
       </div>
       <div>
         <p style={{ fontSize: '13px', color: '#6B7280', margin: '0 0 4px', fontWeight: '500' }}>{label}</p>
-        <p style={{ fontSize: '28px', fontWeight: '900', color: '#0A0A0A', letterSpacing: '-0.03em', margin: '0 0 2px', lineHeight: 1 }}>{value}</p>
+        <p style={{ fontSize: '28px', fontWeight: '900', color: '#111827', letterSpacing: '-0.03em', margin: '0 0 2px', lineHeight: 1 }}>{value}</p>
         {sub && <p style={{ fontSize: '12px', color: '#9CA3AF', margin: 0 }}>{sub}</p>}
       </div>
     </div>
@@ -28,7 +28,7 @@ function BarRow({ label, value, max, color = BLU }) {
     <div style={{ marginBottom: '12px' }}>
       <div style={{ display: 'flex', justifyContent: 'space-between', marginBottom: '5px' }}>
         <span style={{ fontSize: '13px', color: '#374151', fontWeight: '500', overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap', maxWidth: '70%' }}>{label}</span>
-        <span style={{ fontSize: '13px', fontWeight: '700', color: '#0A0A0A' }}>{value}</span>
+        <span style={{ fontSize: '13px', fontWeight: '700', color: '#111827' }}>{value}</span>
       </div>
       <div style={{ height: '6px', backgroundColor: '#F3F4F6', borderRadius: '3px', overflow: 'hidden' }}>
         <div style={{ height: '100%', width: `${pct}%`, backgroundColor: color, borderRadius: '3px', transition: 'width 0.6s ease' }} />
@@ -128,10 +128,10 @@ export default function AnaliticsPage() {
   const maxGiorni = Math.max(...data.giorni.map(g => g.count), 1)
 
   return (
-    <div style={{ width: '100%', maxWidth: '960px', fontFamily: "'Outfit',sans-serif" }}>
+    <div style={{ width: '100%', maxWidth: '960px', fontFamily: "'Inter',sans-serif" }}>
       <div style={{ display: 'flex', alignItems: 'flex-start', justifyContent: 'space-between', marginBottom: '32px', flexWrap: 'wrap', gap: '12px' }}>
         <div>
-          <h1 style={{ fontSize: '32px', fontWeight: '900', color: '#0A0A0A', letterSpacing: '-0.03em', margin: 0 }}>Analytics</h1>
+          <h1 style={{ fontSize: '32px', fontWeight: '900', color: '#111827', letterSpacing: '-0.03em', margin: 0 }}>Analytics</h1>
           <p style={{ fontSize: '14px', color: '#6B7280', margin: '4px 0 0' }}>Panoramica attività portale</p>
         </div>
         <div style={{ display: 'flex', gap: '10px', flexWrap: 'wrap' }}>
@@ -143,7 +143,7 @@ export default function AnaliticsPage() {
                 borderRadius: '7px', backgroundColor: '#fff',
                 color: subscribed ? '#DC2626' : BLU,
                 fontSize: '13px', fontWeight: '700', cursor: 'pointer',
-                fontFamily: "'Outfit',sans-serif", opacity: pushLoading ? 0.6 : 1 }}>
+                fontFamily: "'Inter',sans-serif", opacity: pushLoading ? 0.6 : 1 }}>
               {subscribed ? <BellOff size={15} /> : <Bell size={15} />}
               {subscribed ? 'Disattiva notifiche' : 'Attiva notifiche'}
             </button>
@@ -151,7 +151,7 @@ export default function AnaliticsPage() {
           <button onClick={() => setPushModal(true)}
             style={{ display: 'flex', alignItems: 'center', gap: '6px', padding: '9px 16px',
               border: 'none', borderRadius: '7px', backgroundColor: BLU, color: '#fff',
-              fontSize: '13px', fontWeight: '700', cursor: 'pointer', fontFamily: "'Outfit',sans-serif" }}>
+              fontSize: '13px', fontWeight: '700', cursor: 'pointer', fontFamily: "'Inter',sans-serif" }}>
             <Bell size={15} /> Invia notifica push
           </button>
         </div>
@@ -168,8 +168,8 @@ export default function AnaliticsPage() {
 
       <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '20px', marginBottom: '20px' }}>
         {/* Iscrizioni ultimi 14gg */}
-        <div style={{ backgroundColor: '#fff', border: '1px solid #E5E7EB', borderRadius: '12px', padding: '24px' }}>
-          <h3 style={{ fontSize: '15px', fontWeight: '800', color: '#0A0A0A', letterSpacing: '-0.02em', margin: '0 0 20px', display: 'flex', alignItems: 'center', gap: '8px' }}>
+        <div style={{ backgroundColor: '#fff', border: '1px solid #E8ECF4', borderRadius: '16px', padding: '24px' }}>
+          <h3 style={{ fontSize: '15px', fontWeight: '800', color: '#111827', letterSpacing: '-0.02em', margin: '0 0 20px', display: 'flex', alignItems: 'center', gap: '8px' }}>
             <BarChart2 size={16} style={{ color: BLU }} /> Iscrizioni ultimi 14 giorni
           </h3>
           <div style={{ display: 'flex', alignItems: 'flex-end', gap: '4px', height: '100px' }}>
@@ -189,8 +189,8 @@ export default function AnaliticsPage() {
         </div>
 
         {/* Top eventi per iscrizioni */}
-        <div style={{ backgroundColor: '#fff', border: '1px solid #E5E7EB', borderRadius: '12px', padding: '24px' }}>
-          <h3 style={{ fontSize: '15px', fontWeight: '800', color: '#0A0A0A', letterSpacing: '-0.02em', margin: '0 0 20px', display: 'flex', alignItems: 'center', gap: '8px' }}>
+        <div style={{ backgroundColor: '#fff', border: '1px solid #E8ECF4', borderRadius: '16px', padding: '24px' }}>
+          <h3 style={{ fontSize: '15px', fontWeight: '800', color: '#111827', letterSpacing: '-0.02em', margin: '0 0 20px', display: 'flex', alignItems: 'center', gap: '8px' }}>
             <Users size={16} style={{ color: '#059669' }} /> Top eventi per iscrizioni
           </h3>
           {data.eventiTop.length === 0
@@ -207,8 +207,8 @@ export default function AnaliticsPage() {
         <div style={{ position: 'fixed', inset: 0, backgroundColor: 'rgba(0,0,0,0.5)', zIndex: 1000,
           display: 'flex', alignItems: 'center', justifyContent: 'center', padding: '24px' }}>
           <div style={{ backgroundColor: '#fff', borderRadius: '14px', padding: '32px', width: '100%', maxWidth: '480px',
-            boxShadow: '0 24px 64px rgba(0,0,0,0.2)', fontFamily: "'Outfit',sans-serif" }}>
-            <h3 style={{ fontSize: '20px', fontWeight: '900', color: '#0A0A0A', margin: '0 0 4px', letterSpacing: '-0.02em' }}>
+            boxShadow: '0 24px 64px rgba(0,0,0,0.2)', fontFamily: "'Inter',sans-serif" }}>
+            <h3 style={{ fontSize: '20px', fontWeight: '900', color: '#111827', margin: '0 0 4px', letterSpacing: '-0.02em' }}>
               Invia notifica push
             </h3>
             <p style={{ fontSize: '13px', color: '#6B7280', margin: '0 0 24px' }}>
@@ -224,7 +224,7 @@ export default function AnaliticsPage() {
                 <button onClick={() => { setPushModal(false); setPushSent(null) }}
                   style={{ marginTop: '16px', padding: '10px 24px', backgroundColor: BLU, color: '#fff',
                     border: 'none', borderRadius: '7px', fontSize: '14px', fontWeight: '700',
-                    cursor: 'pointer', fontFamily: "'Outfit',sans-serif" }}>
+                    cursor: 'pointer', fontFamily: "'Inter',sans-serif" }}>
                   Chiudi
                 </button>
               </div>
@@ -233,34 +233,34 @@ export default function AnaliticsPage() {
                 <div>
                   <label style={{ fontSize: '12px', fontWeight: '700', color: '#374151', display: 'block', marginBottom: '6px' }}>Titolo</label>
                   <input value={pushForm.title} onChange={e => setPushForm(f => ({ ...f, title: e.target.value }))}
-                    style={{ width: '100%', padding: '9px 12px', border: '1px solid #D1D5DB', borderRadius: '6px',
-                      fontSize: '14px', fontFamily: "'Outfit',sans-serif", outline: 'none', boxSizing: 'border-box' }}/>
+                    style={{ width: '100%', padding: '9px 12px', border: '1px solid #D1D5DB', borderRadius: '14px',
+                      fontSize: '14px', fontFamily: "'Inter',sans-serif", outline: 'none', boxSizing: 'border-box' }}/>
                 </div>
                 <div>
                   <label style={{ fontSize: '12px', fontWeight: '700', color: '#374151', display: 'block', marginBottom: '6px' }}>Messaggio</label>
                   <textarea value={pushForm.body} onChange={e => setPushForm(f => ({ ...f, body: e.target.value }))}
                     rows={3} placeholder="Es. Nuovo evento disponibile: iscriviti ora!"
-                    style={{ width: '100%', padding: '9px 12px', border: '1px solid #D1D5DB', borderRadius: '6px',
-                      fontSize: '14px', fontFamily: "'Outfit',sans-serif", outline: 'none', resize: 'vertical', boxSizing: 'border-box' }}/>
+                    style={{ width: '100%', padding: '9px 12px', border: '1px solid #D1D5DB', borderRadius: '14px',
+                      fontSize: '14px', fontFamily: "'Inter',sans-serif", outline: 'none', resize: 'vertical', boxSizing: 'border-box' }}/>
                 </div>
                 <div>
                   <label style={{ fontSize: '12px', fontWeight: '700', color: '#374151', display: 'block', marginBottom: '6px' }}>URL destinazione</label>
                   <input value={pushForm.url} onChange={e => setPushForm(f => ({ ...f, url: e.target.value }))}
                     placeholder="/calendario"
-                    style={{ width: '100%', padding: '9px 12px', border: '1px solid #D1D5DB', borderRadius: '6px',
-                      fontSize: '14px', fontFamily: "'Outfit',sans-serif", outline: 'none', boxSizing: 'border-box' }}/>
+                    style={{ width: '100%', padding: '9px 12px', border: '1px solid #D1D5DB', borderRadius: '14px',
+                      fontSize: '14px', fontFamily: "'Inter',sans-serif", outline: 'none', boxSizing: 'border-box' }}/>
                 </div>
                 <div style={{ display: 'flex', gap: '10px', justifyContent: 'flex-end', paddingTop: '8px' }}>
                   <button onClick={() => setPushModal(false)}
-                    style={{ padding: '10px 18px', border: '1px solid #E5E7EB', borderRadius: '7px',
+                    style={{ padding: '10px 18px', border: '1px solid #E8ECF4', borderRadius: '7px',
                       backgroundColor: '#fff', color: '#374151', fontSize: '13px', fontWeight: '600',
-                      cursor: 'pointer', fontFamily: "'Outfit',sans-serif" }}>
+                      cursor: 'pointer', fontFamily: "'Inter',sans-serif" }}>
                     Annulla
                   </button>
                   <button onClick={sendPush} disabled={sending || !pushForm.body}
                     style={{ padding: '10px 20px', border: 'none', borderRadius: '7px',
                       backgroundColor: BLU, color: '#fff', fontSize: '13px', fontWeight: '700',
-                      cursor: 'pointer', fontFamily: "'Outfit',sans-serif",
+                      cursor: 'pointer', fontFamily: "'Inter',sans-serif",
                       opacity: sending || !pushForm.body ? 0.6 : 1 }}>
                     {sending ? 'Invio…' : `Invia a ${data.pushSubs} abbonati`}
                   </button>

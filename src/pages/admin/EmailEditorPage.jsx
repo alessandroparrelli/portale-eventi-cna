@@ -16,7 +16,7 @@ import {
 import RichEditor from '../../components/editor/RichEditor'
 import HeaderEditor, { mergeHeaderConfig, buildFullEmailHtml, DEFAULT_HEADER_CONFIG } from '../../components/editor/HeaderEditor'
 
-const BLU = '#003DA5'
+const BLU = '#5B5FEF'
 const NERO = '#0A0A0A'
 
 // ─── Tipi email ────────────────────────────────────────────────────────────────
@@ -79,7 +79,7 @@ function blockDefaults(tipo) {
     colonne:    { sinistra:'<p>Colonna sinistra</p>', destra:'<p>Colonna destra</p>', gap:24 },
     info_box:   { bg:'#F0F7FF', bordo:'#BFDBFE', radius:10 },
     qr:         { testo:'Il tuo QR code di accesso', size:160 },
-    separatore: { colore:'#E5E7EB', spessore:1, spazio:24 },
+    separatore: { colore:'#E8ECF4', spessore:1, spazio:24 },
     spazio:     { altezza:32 },
     mappa:      { indirizzo:'{{luogo_evento}}', testo:'Come raggiungerci', zoom:15, altezza:200 },
   }
@@ -98,9 +98,9 @@ function blocchiToHtml(blocchi) {
       if (b.tipo==='colonne') return `<table style="width:100%;border-collapse:collapse;margin:0 0 20px"><tr><td style="width:50%;vertical-align:top;padding-right:${(b.gap||24)/2}px;font-family:Inter,Arial,sans-serif;font-size:14px;color:#374151;line-height:1.6">${b.sinistra||''}</td><td style="width:50%;vertical-align:top;padding-left:${(b.gap||24)/2}px;font-family:Inter,Arial,sans-serif;font-size:14px;color:#374151;line-height:1.6">${b.destra||''}</td></tr></table>`
       if (b.tipo==='info_box') return `<div style="background:${b.bg||'#F0F7FF'};border:1.5px solid ${b.bordo||'#BFDBFE'};border-radius:${b.radius||10}px;padding:20px 24px;margin:0 0 20px"><table style="width:100%;border-collapse:collapse"><tr><td style="width:32px;vertical-align:top;font-size:20px;padding:6px 0">&#x1F4C5;</td><td style="padding:6px 0 6px 12px;vertical-align:top"><p style="margin:0;font-size:11px;color:#6B7280;text-transform:uppercase;letter-spacing:.06em;font-family:Inter,Arial,sans-serif">Data e ora</p><p style="margin:4px 0 0;font-size:15px;font-weight:700;color:${NERO};font-family:Inter,Arial,sans-serif">{{data_evento}}</p></td></tr><tr><td style="vertical-align:top;font-size:20px;padding:6px 0">&#x1F4CD;</td><td style="padding:6px 0 0 12px;vertical-align:top"><p style="margin:0;font-size:11px;color:#6B7280;text-transform:uppercase;letter-spacing:.06em;font-family:Inter,Arial,sans-serif">Luogo</p><p style="margin:4px 0 0;font-size:15px;font-weight:700;color:${NERO};font-family:Inter,Arial,sans-serif">{{luogo_evento}}</p></td></tr></table></div>`
       if (b.tipo==='qr') return `<div style="text-align:center;padding:28px 0;margin:0 0 20px"><p style="font-size:13px;color:#6B7280;margin:0 0 16px;font-family:Inter,Arial,sans-serif">${b.testo||'Il tuo QR code di accesso'}</p>{{QR_BLOCK_${b.size||160}}}<p style="font-size:12px;color:#9CA3AF;margin:12px 0 0;font-family:monospace">{{qr_code}}</p></div>`
-      if (b.tipo==='separatore') return `<div style="padding:${b.spazio||24}px 0"><hr style="border:none;border-top:${b.spessore||1}px solid ${b.colore||'#E5E7EB'};margin:0"/></div>`
+      if (b.tipo==='separatore') return `<div style="padding:${b.spazio||24}px 0"><hr style="border:none;border-top:${b.spessore||1}px solid ${b.colore||'#E8ECF4'};margin:0"/></div>`
       if (b.tipo==='spazio') return `<div style="height:${b.altezza||32}px"></div>`
-      if (b.tipo==='mappa') { const addr=(b.indirizzo||'').replace(/\{\{luogo_evento\}\}/g,b.indirizzo||''); const addrEnc=encodeURIComponent(addr); const h=b.altezza||200; const mapUrl=`https://www.google.com/maps/search/?api=1&query=${addrEnc}`; return `<table role="presentation" width="100%" cellpadding="0" cellspacing="0" border="0" style="margin:0 0 20px;border-radius:10px;overflow:hidden;border:1.5px solid #E5E7EB"><tr><td><a href="${mapUrl}" target="_blank" rel="noopener" style="display:block;text-decoration:none"><table role="presentation" width="100%" cellpadding="0" cellspacing="0" border="0"><tr><td align="center" valign="middle" height="${h}" style="background:#EFF6FF;padding:20px;text-align:center"><div>&#x1F5FA;&#xFE0F;</div><p style="margin:8px 0 0;font-size:14px;color:#1D4ED8;font-weight:700;font-family:Inter,Arial,sans-serif">Clicca per aprire la mappa</p></td></tr><tr><td style="padding:14px 18px;background:#ffffff;border-top:2px solid #DBEAFE"><table role="presentation" width="100%" cellpadding="0" cellspacing="0" border="0"><tr><td width="30" valign="middle" style="font-size:22px;padding-right:12px">&#x1F4CD;</td><td valign="middle"><p style="margin:0 0 2px;font-size:14px;font-weight:700;color:#0A0A0A;font-family:Inter,Arial,sans-serif">${b.testo||'Come raggiungerci'}</p><p style="margin:0;font-size:12px;color:#374151;font-family:Inter,Arial,sans-serif">${addr}</p></td><td width="100" align="right" valign="middle"><span style="font-size:11px;font-weight:700;color:#003DA5;font-family:Inter,Arial,sans-serif;border:1.5px solid #BFDBFE;padding:5px 10px;border-radius:6px;white-space:nowrap">Apri Maps &#8594;</span></td></tr></table></td></tr></table></a></td></tr></table>` }
+      if (b.tipo==='mappa') { const addr=(b.indirizzo||'').replace(/\{\{luogo_evento\}\}/g,b.indirizzo||''); const addrEnc=encodeURIComponent(addr); const h=b.altezza||200; const mapUrl=`https://www.google.com/maps/search/?api=1&query=${addrEnc}`; return `<table role="presentation" width="100%" cellpadding="0" cellspacing="0" border="0" style="margin:0 0 20px;border-radius:10px;overflow:hidden;border:1.5px solid #E8ECF4"><tr><td><a href="${mapUrl}" target="_blank" rel="noopener" style="display:block;text-decoration:none"><table role="presentation" width="100%" cellpadding="0" cellspacing="0" border="0"><tr><td align="center" valign="middle" height="${h}" style="background:#EFF6FF;padding:20px;text-align:center"><div>&#x1F5FA;&#xFE0F;</div><p style="margin:8px 0 0;font-size:14px;color:#1D4ED8;font-weight:700;font-family:Inter,Arial,sans-serif">Clicca per aprire la mappa</p></td></tr><tr><td style="padding:14px 18px;background:#ffffff;border-top:2px solid #DBEAFE"><table role="presentation" width="100%" cellpadding="0" cellspacing="0" border="0"><tr><td width="30" valign="middle" style="font-size:22px;padding-right:12px">&#x1F4CD;</td><td valign="middle"><p style="margin:0 0 2px;font-size:14px;font-weight:700;color:#0A0A0A;font-family:Inter,Arial,sans-serif">${b.testo||'Come raggiungerci'}</p><p style="margin:0;font-size:12px;color:#374151;font-family:Inter,Arial,sans-serif">${addr}</p></td><td width="100" align="right" valign="middle"><span style="font-size:11px;font-weight:700;color:#5B5FEF;font-family:Inter,Arial,sans-serif;border:1.5px solid #BFDBFE;padding:5px 10px;border-radius:6px;white-space:nowrap">Apri Maps &#8594;</span></td></tr></table></td></tr></table></a></td></tr></table>` }
       return ''
     } catch(e) { return '' }
   }).join('\n')
@@ -137,7 +137,7 @@ function ImageDropZone({ value, onChange, label='Immagine' }) {
     <div>
       <label style={lbl}>{label}</label>
       {value ? (
-        <div style={{ position:'relative', borderRadius:'7px', overflow:'hidden', border:'1px solid #E5E7EB', marginBottom:'5px' }}>
+        <div style={{ position:'relative', borderRadius:'7px', overflow:'hidden', border:'1px solid #E8ECF4', marginBottom:'5px' }}>
           <img src={value} style={{ width:'100%', maxHeight:'90px', objectFit:'cover', display:'block' }}/>
           <button onClick={()=>onChange('')} style={{ position:'absolute', top:'5px', right:'5px', background:'rgba(0,0,0,0.6)', border:'none', borderRadius:'50%', width:'20px', height:'20px', cursor:'pointer', display:'flex', alignItems:'center', justifyContent:'center', color:'#fff' }}><X size={10}/></button>
         </div>
@@ -145,7 +145,7 @@ function ImageDropZone({ value, onChange, label='Immagine' }) {
         <div onDragOver={e=>{e.preventDefault();setDrag(true)}} onDragLeave={()=>setDrag(false)}
           onDrop={e=>{e.preventDefault();setDrag(false);handleFile(e.dataTransfer.files[0])}}
           onClick={()=>ref.current?.click()}
-          style={{ border:`2px dashed ${drag?BLU:'#D1D5DB'}`, borderRadius:'7px', padding:'12px', textAlign:'center', cursor:'pointer', background:drag?'#EBF0FA':'#FAFAFA', marginBottom:'5px' }}>
+          style={{ border:`2px dashed ${drag?BLU:'#D1D5DB'}`, borderRadius:'7px', padding:'12px', textAlign:'center', cursor:'pointer', background:drag?'#EEEFFD':'#FAFAFA', marginBottom:'5px' }}>
           <input ref={ref} type="file" accept="image/*" style={{ display:'none' }} onChange={e=>handleFile(e.target.files[0])}/>
           {uploading ? <div style={{ display:'flex',alignItems:'center',justifyContent:'center',gap:'5px',fontSize:'11px',color:'#6B7280' }}><Loader2 size={13} style={{animation:'spin 1s linear infinite'}}/>Caricamento…</div>
             : <><Upload size={14} style={{color:'#9CA3AF',marginBottom:'3px'}}/><p style={{margin:0,fontSize:'11px',color:'#6B7280'}}><strong style={{color:BLU}}>Trascina</strong> o clicca</p></>}
@@ -164,7 +164,7 @@ function BlockProps({ block, onChange }) {
     <div style={{marginBottom:'8px'}}>
       <label style={lbl}>{label}</label>
       <div style={{display:'flex',gap:'6px',alignItems:'center'}}>
-        <input type="color" value={block[key]||def} onChange={e=>set(key,e.target.value)} style={{width:'30px',height:'24px',border:'1px solid #E5E7EB',borderRadius:'4px',cursor:'pointer',padding:'1px',flexShrink:0}}/>
+        <input type="color" value={block[key]||def} onChange={e=>set(key,e.target.value)} style={{width:'30px',height:'24px',border:'1px solid #E8ECF4',borderRadius:'4px',cursor:'pointer',padding:'1px',flexShrink:0}}/>
         <input value={block[key]||def} onChange={e=>set(key,e.target.value)} style={{...inp,padding:'4px 7px',fontSize:'11px',fontFamily:'monospace',flex:1}}/>
       </div>
     </div>
@@ -185,7 +185,7 @@ function BlockProps({ block, onChange }) {
       <label style={lbl}>Allineamento</label>
       <div style={{display:'flex',gap:'3px'}}>
         {[['left',<AlignLeft size={12}/>],['center',<AlignCenter size={12}/>],['right',<AlignRight size={12}/>]].map(([v,ic])=>(
-          <button key={v} onClick={()=>set(key,v)} style={{flex:1,padding:'5px',border:`1px solid ${block[key]===v?BLU:'#E5E7EB'}`,borderRadius:'5px',cursor:'pointer',background:block[key]===v?'#EBF0FA':'#fff',color:block[key]===v?BLU:'#9CA3AF',display:'flex',alignItems:'center',justifyContent:'center'}}>{ic}</button>
+          <button key={v} onClick={()=>set(key,v)} style={{flex:1,padding:'5px',border:`1px solid ${block[key]===v?BLU:'#E8ECF4'}`,borderRadius:'5px',cursor:'pointer',background:block[key]===v?'#EEEFFD':'#fff',color:block[key]===v?BLU:'#9CA3AF',display:'flex',alignItems:'center',justifyContent:'center'}}>{ic}</button>
         ))}
       </div>
     </div>
@@ -212,7 +212,7 @@ function BlockProps({ block, onChange }) {
       <div style={{marginBottom:'8px'}}>
         <label style={lbl}>Larghezza</label>
         <div style={{display:'flex',flexWrap:'wrap',gap:'4px'}}>
-          {['100%','75%','50%','200px','300px'].map(w=><button key={w} onClick={()=>set('larghezza',w)} style={{padding:'3px 7px',border:`1px solid ${block.larghezza===w?BLU:'#E5E7EB'}`,borderRadius:'4px',cursor:'pointer',fontSize:'10px',background:block.larghezza===w?BLU:'#fff',color:block.larghezza===w?'#fff':'#374151',fontFamily:'monospace'}}>{w}</button>)}
+          {['100%','75%','50%','200px','300px'].map(w=><button key={w} onClick={()=>set('larghezza',w)} style={{padding:'3px 7px',border:`1px solid ${block.larghezza===w?BLU:'#E8ECF4'}`,borderRadius:'4px',cursor:'pointer',fontSize:'10px',background:block.larghezza===w?BLU:'#fff',color:block.larghezza===w?'#fff':'#374151',fontFamily:'monospace'}}>{w}</button>)}
         </div>
       </div>
       {numField('Radius','radius',0,'px',0,24)}{alignField()}
@@ -233,7 +233,7 @@ function BlockProps({ block, onChange }) {
       <div style={{marginBottom:'8px'}}><label style={lbl}>Testo sopra</label><input value={block.testo||''} onChange={e=>set('testo',e.target.value)} style={inp}/></div>
       {numField('Dimensione QR','size',160,'px',80,240)}
     </>
-    case 'separatore': return <>{colorField('Colore','colore','#E5E7EB')}{numField('Spessore','spessore',1,'px',1,4)}{numField('Spazio','spazio',24,'px',0,64)}</>
+    case 'separatore': return <>{colorField('Colore','colore','#E8ECF4')}{numField('Spessore','spessore',1,'px',1,4)}{numField('Spazio','spazio',24,'px',0,64)}</>
     case 'spazio': return numField('Altezza','altezza',32,'px',8,120)
     case 'mappa': return <>
       <div style={{marginBottom:'8px'}}>
@@ -386,21 +386,21 @@ export default function EmailEditorPage() {
   if (loading) return <div style={{padding:'60px',textAlign:'center',color:'#9CA3AF',fontSize:'14px',fontFamily:'Inter,sans-serif'}}>Caricamento…</div>
 
   return (
-    <div style={{fontFamily:"'Outfit',sans-serif",display:'flex',flexDirection:'column',height:'100vh',background:'#fff',overflow:'hidden'}}>
+    <div style={{fontFamily:"'Inter',sans-serif",display:'flex',flexDirection:'column',height:'100vh',background:'#fff',overflow:'hidden'}}>
 
       {/* ══ TOP BAR ══ */}
-      <div style={{display:'flex',alignItems:'center',height:'52px',padding:'0 14px',borderBottom:'1px solid #E5E7EB',background:'#fff',flexShrink:0,gap:'8px'}}>
-        <button onClick={()=>navigate('/admin/email')} style={{display:'flex',alignItems:'center',gap:'4px',background:'none',border:'1px solid #E5E7EB',borderRadius:'6px',padding:'5px 10px',cursor:'pointer',fontSize:'12px',fontWeight:'600',color:'#374151',fontFamily:"'Outfit',sans-serif",flexShrink:0}}>
+      <div style={{display:'flex',alignItems:'center',height:'52px',padding:'0 14px',borderBottom:'1px solid #E8ECF4',background:'#fff',flexShrink:0,gap:'8px'}}>
+        <button onClick={()=>navigate('/admin/email')} style={{display:'flex',alignItems:'center',gap:'4px',background:'none',border:'1px solid #E8ECF4',borderRadius:'14px',padding:'5px 10px',cursor:'pointer',fontSize:'12px',fontWeight:'600',color:'#374151',fontFamily:"'Inter',sans-serif",flexShrink:0}}>
           <ArrowLeft size={13}/> Email
         </button>
         <Mail size={14} style={{color:BLU,flexShrink:0}}/>
         <span style={{fontSize:'13px',fontWeight:'700',color:NERO,flex:1,overflow:'hidden',textOverflow:'ellipsis',whiteSpace:'nowrap'}}>
           {isNew ? 'Nuovo template email' : (template.oggetto||'…')}
         </span>
-        {tipoLabel && <span style={{background:'#EBF0FA',color:BLU,fontSize:'11px',fontWeight:'700',padding:'2px 8px',borderRadius:'20px',flexShrink:0}}>{tipoLabel.icon} {tipoLabel.label}</span>}
+        {tipoLabel && <span style={{background:'#EEEFFD',color:BLU,fontSize:'11px',fontWeight:'700',padding:'2px 8px',borderRadius:'20px',flexShrink:0}}>{tipoLabel.icon} {tipoLabel.label}</span>}
         <div style={{display:'flex',gap:'5px',alignItems:'center',flexShrink:0}}>
           <button onClick={()=>setShowTest(!showTest)} style={ghostBtn}><Send size={11}/> Test</button>
-          <button onClick={save} disabled={saving} style={{display:'flex',alignItems:'center',gap:'4px',padding:'6px 16px',borderRadius:'6px',border:'none',cursor:'pointer',fontFamily:"'Outfit',sans-serif",background:saved?'#16A34A':BLU,color:'#fff',fontWeight:'700',fontSize:'12px',transition:'background .2s'}}>
+          <button onClick={save} disabled={saving} style={{display:'flex',alignItems:'center',gap:'4px',padding:'6px 16px',borderRadius:'14px',border:'none',cursor:'pointer',fontFamily:"'Inter',sans-serif",background:saved?'#16A34A':BLU,color:'#fff',fontWeight:'700',fontSize:'12px',transition:'background .2s'}}>
             {saving?<><Loader2 size={13} style={{animation:'spin 1s linear infinite'}}/>Salvo…</>:saved?<><Check size={13}/>Salvato</>:<><Save size={13}/>Salva</>}
           </button>
         </div>
@@ -413,7 +413,7 @@ export default function EmailEditorPage() {
           <span style={{fontSize:'11px',fontWeight:'700',color:'#92400E'}}>Invia test a:</span>
           <input value={testEmail} onChange={e=>setTestEmail(e.target.value)} placeholder="email@esempio.it" type="email"
             style={{...inp,width:'200px',padding:'5px 9px',fontSize:'12px'}} onKeyDown={e=>e.key==='Enter'&&sendTest()}/>
-          <button onClick={sendTest} disabled={sending||!testEmail.trim()} style={{padding:'5px 14px',borderRadius:'6px',border:'none',background:'#D97706',color:'#fff',cursor:'pointer',fontSize:'12px',fontWeight:'700',fontFamily:"'Outfit',sans-serif"}}>{sending?'Invio…':'Invia'}</button>
+          <button onClick={sendTest} disabled={sending||!testEmail.trim()} style={{padding:'5px 14px',borderRadius:'14px',border:'none',background:'#D97706',color:'#fff',cursor:'pointer',fontSize:'12px',fontWeight:'700',fontFamily:"'Inter',sans-serif"}}>{sending?'Invio…':'Invia'}</button>
           <button onClick={()=>setShowTest(false)} style={{background:'none',border:'none',cursor:'pointer',color:'#9CA3AF',marginLeft:'auto'}}>×</button>
         </div>
       )}
@@ -437,7 +437,7 @@ export default function EmailEditorPage() {
             <div style={{display:'flex',flexDirection:'column',gap:'3px'}}>
               {TIPI.map(t=>(
                 <button key={t.key} type="button" onClick={()=>updT('tipo',t.key)}
-                  style={{display:'flex',alignItems:'center',gap:'6px',padding:'7px 10px',borderRadius:'7px',border:`1.5px solid ${template.tipo===t.key?BLU:'#E5E7EB'}`,cursor:'pointer',background:template.tipo===t.key?'#EBF0FA':'#fff',fontFamily:"'Outfit',sans-serif",textAlign:'left'}}>
+                  style={{display:'flex',alignItems:'center',gap:'6px',padding:'7px 10px',borderRadius:'7px',border:`1.5px solid ${template.tipo===t.key?BLU:'#E8ECF4'}`,cursor:'pointer',background:template.tipo===t.key?'#EEEFFD':'#fff',fontFamily:"'Inter',sans-serif",textAlign:'left'}}>
                   <span style={{fontSize:'14px'}}>{t.icon}</span>
                   <div>
                     <div style={{fontSize:'11px',fontWeight:'700',color:template.tipo===t.key?BLU:NERO}}>{t.label}</div>
@@ -471,14 +471,14 @@ export default function EmailEditorPage() {
           <HeaderEditor config={headerConfig} onChange={setHeaderConfig}/>
 
           {/* Variabili */}
-          <div style={{background:'#F9FAFB',borderRadius:'8px',border:'1px solid #E5E7EB',overflow:'hidden'}}>
+          <div style={{background:'#F9FAFB',borderRadius:'16px',border:'1px solid #E8ECF4',overflow:'hidden'}}>
             <button type="button" onClick={()=>setShowVars(!showVars)}
-              style={{width:'100%',padding:'8px 10px',display:'flex',alignItems:'center',justifyContent:'space-between',background:'none',border:'none',cursor:'pointer',fontFamily:"'Outfit',sans-serif"}}>
+              style={{width:'100%',padding:'8px 10px',display:'flex',alignItems:'center',justifyContent:'space-between',background:'none',border:'none',cursor:'pointer',fontFamily:"'Inter',sans-serif"}}>
               <span style={{fontSize:'10px',fontWeight:'800',color:'#6B7280',textTransform:'uppercase',letterSpacing:'.07em'}}>{'{ } Variabili'}</span>
               <ChevronRight size={12} style={{color:'#9CA3AF',transform:showVars?'rotate(90deg)':'none',transition:'transform .15s'}}/>
             </button>
             {showVars && (
-              <div style={{padding:'6px 10px 10px',display:'flex',flexWrap:'wrap',gap:'4px',borderTop:'1px solid #E5E7EB'}}>
+              <div style={{padding:'6px 10px 10px',display:'flex',flexWrap:'wrap',gap:'4px',borderTop:'1px solid #E8ECF4'}}>
                 {VARIABILI.map(v=>(
                   <button key={v} type="button" onClick={()=>navigator.clipboard.writeText(v)}
                     style={{padding:'3px 7px',background:'#fff',border:'1px solid #BFDBFE',borderRadius:'4px',cursor:'pointer',fontSize:'10px',color:'#1d4ed8',fontFamily:'monospace'}}>
@@ -493,7 +493,7 @@ export default function EmailEditorPage() {
         {/* Resizer 1 */}
         <div onMouseDown={e=>startResize('left',e)}
           style={{width:'5px',flexShrink:0,cursor:'ew-resize',background:'transparent',position:'relative',zIndex:10,
-            borderLeft:'1px solid #E5E7EB',borderRight:'1px solid #E5E7EB'}}>
+            borderLeft:'1px solid #E8ECF4',borderRight:'1px solid #E8ECF4'}}>
           <div style={{position:'absolute',top:'50%',left:'50%',transform:'translate(-50%,-50%)',
             width:'3px',height:'24px',borderRadius:'2px',background:'#D1D5DB'}}/>
         </div>
@@ -502,10 +502,10 @@ export default function EmailEditorPage() {
         <div style={{flex:1,minWidth:0,display:'flex',flexDirection:'column',overflow:'hidden',borderRight:'none'}}>
 
           {/* Toolbar modo */}
-          <div style={{display:'flex',gap:'4px',alignItems:'center',padding:'8px 12px',borderBottom:'1px solid #E5E7EB',flexShrink:0,background:'#FAFBFC'}}>
+          <div style={{display:'flex',gap:'4px',alignItems:'center',padding:'8px 12px',borderBottom:'1px solid #E8ECF4',flexShrink:0,background:'#FAFBFC'}}>
             {[['blocchi',<Layers size={11}/>,'Blocchi'],['html',<Code2 size={11}/>,'HTML']].map(([m,ic,lb])=>(
               <button key={m} type="button" onClick={()=>setMode(m)}
-                style={{display:'flex',alignItems:'center',gap:'4px',padding:'5px 12px',borderRadius:'6px',border:'none',cursor:'pointer',background:mode===m?BLU:'#F3F4F6',color:mode===m?'#fff':'#555',fontSize:'11px',fontWeight:'600',fontFamily:"'Outfit',sans-serif"}}>
+                style={{display:'flex',alignItems:'center',gap:'4px',padding:'5px 12px',borderRadius:'14px',border:'none',cursor:'pointer',background:mode===m?BLU:'#F3F4F6',color:mode===m?'#fff':'#555',fontSize:'11px',fontWeight:'600',fontFamily:"'Inter',sans-serif"}}>
                 {ic}{lb}
               </button>
             ))}
@@ -516,7 +516,7 @@ export default function EmailEditorPage() {
 
             {mode==='blocchi' && <>
               {blocchi.length===0 && (
-                <div style={{textAlign:'center',padding:'40px 16px',color:'#9CA3AF',background:'#fff',border:'1px dashed #E5E7EB',borderRadius:'10px'}}>
+                <div style={{textAlign:'center',padding:'40px 16px',color:'#9CA3AF',background:'#fff',border:'1px dashed #E8ECF4',borderRadius:'14px'}}>
                   <LayoutTemplate size={24} style={{marginBottom:'8px',opacity:.3}}/>
                   <p style={{margin:0,fontSize:'13px',fontWeight:'600'}}>Canvas vuoto</p>
                   <p style={{margin:'3px 0 0',fontSize:'11px'}}>Aggiungi un blocco qui sotto</p>
@@ -529,7 +529,7 @@ export default function EmailEditorPage() {
                 const dh2 = !isSel ? dragHandlers(i) : {}
                 return (
                   <div key={b.id||i} {...dh2} ref={isSel ? (el => { if(el) setTimeout(()=>el.scrollIntoView({behavior:'smooth',block:'nearest'}),50) }) : null}
-                    style={{border:`2px solid ${isSel?BLU:'#E5E7EB'}`,borderRadius:'8px',background:'#fff',boxShadow:isSel?'0 0 0 3px rgba(0,61,165,0.07)':'none',transition:'border-color .1s',overflow:'hidden'}}>
+                    style={{border:`2px solid ${isSel?BLU:'#E8ECF4'}`,borderRadius:'16px',background:'#fff',boxShadow:isSel?'0 0 0 3px rgba(0,61,165,0.07)':'none',transition:'border-color .1s',overflow:'hidden'}}>
                     <div onClick={()=>setSelectedBlock(isSel?null:i)}
                       style={{display:'flex',alignItems:'center',gap:'6px',padding:'8px 10px',cursor:'pointer'}}>
                       <GripVertical size={12} style={{color:'#D1D5DB',cursor:'grab',flexShrink:0}}/>
@@ -543,7 +543,7 @@ export default function EmailEditorPage() {
                     </div>
                     {isSel && selectedBl && (
                       <div onClick={e=>e.stopPropagation()} onMouseDown={e=>e.stopPropagation()} onPointerDown={e=>e.stopPropagation()}
-                        style={{padding:'10px 10px 14px',borderTop:'1px solid #EBF0FA',background:'#fff'}}>
+                        style={{padding:'10px 10px 14px',borderTop:'1px solid #EEEFFD',background:'#fff'}}>
                         <BlockProps block={selectedBl} onChange={nb=>updateBlock(i,nb)}/>
                       </div>
                     )}
@@ -568,12 +568,12 @@ export default function EmailEditorPage() {
               })}
 
               {/* + Aggiungi blocco */}
-              <div style={{background:'#F9FAFB',border:'1.5px dashed #E5E7EB',borderRadius:'8px',padding:'10px 12px',marginTop:'2px',flexShrink:0}}>
+              <div style={{background:'#F9FAFB',border:'1.5px dashed #E8ECF4',borderRadius:'16px',padding:'10px 12px',marginTop:'2px',flexShrink:0}}>
                 <p style={{margin:'0 0 6px',fontSize:'9px',fontWeight:'800',color:'#9CA3AF',textTransform:'uppercase',letterSpacing:'.08em'}}>+ Aggiungi blocco</p>
                 <div style={{display:'flex',flexWrap:'wrap',gap:'4px'}}>
                   {BLOCK_TYPES.map(bt=>(
                     <button key={bt.tipo} type="button" onClick={()=>addBlock(bt.tipo)}
-                      style={{display:'flex',alignItems:'center',gap:'4px',padding:'4px 8px',background:'#fff',border:'1px solid #E5E7EB',borderRadius:'5px',cursor:'pointer',fontSize:'10px',color:'#374151',fontFamily:"'Outfit',sans-serif",fontWeight:'500'}}>
+                      style={{display:'flex',alignItems:'center',gap:'4px',padding:'4px 8px',background:'#fff',border:'1px solid #E8ECF4',borderRadius:'5px',cursor:'pointer',fontSize:'10px',color:'#374151',fontFamily:"'Inter',sans-serif",fontWeight:'500'}}>
                       <span style={{color:BLU}}>{bt.icon}</span>{bt.label}
                     </button>
                   ))}
@@ -592,7 +592,7 @@ export default function EmailEditorPage() {
         {!previewCollapsed && (
           <div onMouseDown={e=>startResize('right',e)}
             style={{width:'5px',flexShrink:0,cursor:'ew-resize',background:'transparent',position:'relative',zIndex:10,
-              borderLeft:'1px solid #E5E7EB',borderRight:'1px solid #E5E7EB'}}>
+              borderLeft:'1px solid #E8ECF4',borderRight:'1px solid #E8ECF4'}}>
             <div style={{position:'absolute',top:'50%',left:'50%',transform:'translate(-50%,-50%)',
               width:'3px',height:'24px',borderRadius:'2px',background:'#D1D5DB'}}/>
           </div>
@@ -607,14 +607,14 @@ export default function EmailEditorPage() {
               <span style={{fontSize:'9px',fontWeight:'700',writingMode:'vertical-rl',letterSpacing:'.06em',color:'#9CA3AF'}}>ANTEPRIMA</span>
             </button>
           ) : <>
-            <div style={{padding:'8px 12px',borderBottom:'1px solid #E5E7EB',display:'flex',alignItems:'center',gap:'8px',background:'#FAFBFC',flexShrink:0}}>
+            <div style={{padding:'8px 12px',borderBottom:'1px solid #E8ECF4',display:'flex',alignItems:'center',gap:'8px',background:'#FAFBFC',flexShrink:0}}>
               <EyeIcon size={13} style={{color:BLU}}/>
               <span style={{fontSize:'12px',fontWeight:'700',color:NERO,flex:1}}>Anteprima</span>
               <span style={{fontSize:'9px',color:'#9CA3AF',background:'#F3F4F6',padding:'2px 6px',borderRadius:'4px'}}>dati di esempio</span>
-              <div style={{display:'flex',border:'1px solid #E5E7EB',borderRadius:'5px',overflow:'hidden'}}>
+              <div style={{display:'flex',border:'1px solid #E8ECF4',borderRadius:'5px',overflow:'hidden'}}>
                 {[['desktop',<Monitor size={11}/>],['mobile',<Smartphone size={11}/>]].map(([d,ic])=>(
                   <button key={d} type="button" onClick={()=>setPreviewDevice(d)}
-                    style={{padding:'4px 8px',border:'none',cursor:'pointer',background:previewDevice===d?'#E5E7EB':'#fff',color:previewDevice===d?NERO:'#9CA3AF',display:'flex',alignItems:'center'}}>
+                    style={{padding:'4px 8px',border:'none',cursor:'pointer',background:previewDevice===d?'#E8ECF4':'#fff',color:previewDevice===d?NERO:'#9CA3AF',display:'flex',alignItems:'center'}}>
                     {ic}
                   </button>
                 ))}
@@ -628,7 +628,7 @@ export default function EmailEditorPage() {
               <div style={{fontSize:'11px',color:'#374151',fontWeight:'500',overflow:'hidden',textOverflow:'ellipsis',whiteSpace:'nowrap'}}><span style={{fontWeight:'700'}}>Oggetto:</span> {replacePreview(template.oggetto||'(nessun oggetto)')}</div>
             </div>
             <div style={{flex:1,overflow:'hidden',background:'#F0F2F5',padding:'12px'}}>
-              <div style={{maxWidth:previewDevice==='mobile'?'375px':'100%',margin:'0 auto',height:'100%',background:'#fff',borderRadius:'8px',overflow:'hidden',boxShadow:'0 2px 12px rgba(0,0,0,0.08)'}}>
+              <div style={{maxWidth:previewDevice==='mobile'?'375px':'100%',margin:'0 auto',height:'100%',background:'#fff',borderRadius:'16px',overflow:'hidden',boxShadow:'0 2px 12px rgba(0,0,0,0.08)'}}>
                 <iframe srcDoc={getPreviewHtml()} style={{width:'100%',height:'100%',border:'none',display:'block'}} title="Anteprima email" sandbox="allow-same-origin"/>
               </div>
             </div>
@@ -641,7 +641,7 @@ export default function EmailEditorPage() {
   )
 }
 
-const inp     = { width:'100%', padding:'7px 10px', border:'1px solid #E5E7EB', borderRadius:'6px', fontSize:'12px', fontFamily:"'Outfit',sans-serif", outline:'none', color:'#0A0A0A', background:'#fff', boxSizing:'border-box' }
+const inp     = { width:'100%', padding:'7px 10px', border:'1px solid #E8ECF4', borderRadius:'14px', fontSize:'12px', fontFamily:"'Inter',sans-serif", outline:'none', color:'#111827', background:'#fff', boxSizing:'border-box' }
 const lbl     = { display:'block', fontSize:'10px', fontWeight:'800', color:'#9CA3AF', textTransform:'uppercase', letterSpacing:'.07em', marginBottom:'4px' }
-const btnTiny = { padding:'3px 4px', background:'#fff', border:'1px solid #E5E7EB', borderRadius:'4px', cursor:'pointer', display:'flex', alignItems:'center', justifyContent:'center', color:'#374151' }
-const ghostBtn = { display:'flex', alignItems:'center', gap:'4px', border:'1px solid #E5E7EB', borderRadius:'6px', padding:'5px 10px', cursor:'pointer', fontSize:'12px', fontWeight:'600', fontFamily:"'Outfit',sans-serif", background:'transparent', color:'#374151' }
+const btnTiny = { padding:'3px 4px', background:'#fff', border:'1px solid #E8ECF4', borderRadius:'4px', cursor:'pointer', display:'flex', alignItems:'center', justifyContent:'center', color:'#374151' }
+const ghostBtn = { display:'flex', alignItems:'center', gap:'4px', border:'1px solid #E8ECF4', borderRadius:'14px', padding:'5px 10px', cursor:'pointer', fontSize:'12px', fontWeight:'600', fontFamily:"'Inter',sans-serif", background:'transparent', color:'#374151' }

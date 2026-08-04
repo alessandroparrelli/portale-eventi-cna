@@ -55,7 +55,7 @@ export default function LandingContactsPage() {
           <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2"><path d="M19 12H5M12 5l-7 7 7 7"/></svg>
         </button>
         <div>
-          <h1 style={{ fontSize:'20px', fontWeight:'800', color:'#0A0A0A', margin:0, letterSpacing:'-0.03em' }}>
+          <h1 style={{ fontSize:'20px', fontWeight:'800', color:'#111827', margin:0, letterSpacing:'-0.03em' }}>
             Contatti — {page?.titolo || '...'}
           </h1>
           <p style={{ fontSize:'13px', color:'#6B7280', margin:'2px 0 0' }}>{contacts.length} contatto{contacts.length !== 1 ? 'i' : ''} raccolto{contacts.length !== 1 ? 'i' : ''}</p>
@@ -68,10 +68,10 @@ export default function LandingContactsPage() {
           value={search}
           onChange={e => setSearch(e.target.value)}
           placeholder="Cerca per nome, cognome, email..."
-          style={{ flex:1, minWidth:'200px', padding:'10px 14px', border:'1px solid #E5E7EB', borderRadius:'8px', fontSize:'14px', fontFamily:'Inter,sans-serif', outline:'none' }}
+          style={{ flex:1, minWidth:'200px', padding:'10px 14px', border:'1px solid #E8ECF4', borderRadius:'16px', fontSize:'14px', fontFamily:'Inter,sans-serif', outline:'none' }}
         />
         <button onClick={exportXlsx} disabled={contacts.length === 0} style={{
-          background:'#059669', color:'#fff', border:'none', borderRadius:'8px',
+          background:'#059669', color:'#fff', border:'none', borderRadius:'16px',
           padding:'10px 18px', fontFamily:'Inter,sans-serif', fontSize:'13px',
           fontWeight:'700', cursor:'pointer', display:'flex', alignItems:'center', gap:'6px',
           opacity: contacts.length === 0 ? .5 : 1
@@ -90,10 +90,10 @@ export default function LandingContactsPage() {
           <p style={{ margin:'4px 0 0', fontSize:'13px' }}>I contatti appariranno qui quando qualcuno compila il form</p>
         </div>
       ) : (
-        <div style={{ background:'#fff', borderRadius:'12px', border:'1px solid #E5E7EB', overflow:'hidden' }}>
+        <div style={{ background:'#fff', borderRadius:'16px', border:'1px solid #E8ECF4', overflow:'hidden' }}>
           <table style={{ width:'100%', borderCollapse:'collapse' }}>
             <thead>
-              <tr style={{ background:'#F9FAFB', borderBottom:'1px solid #E5E7EB' }}>
+              <tr style={{ background:'#F9FAFB', borderBottom:'1px solid #E8ECF4' }}>
                 <th style={thSt}>Nome</th>
                 <th style={thSt}>Email</th>
                 <th style={thSt}>Telefono</th>
@@ -106,7 +106,7 @@ export default function LandingContactsPage() {
               {filtered.map((c, i) => (
                 <tr key={c.id} style={{ borderBottom: i < filtered.length-1 ? '1px solid #F3F4F6' : 'none' }}>
                   <td style={tdSt}>
-                    <span style={{ fontWeight:'600', color:'#0A0A0A', fontSize:'14px' }}>
+                    <span style={{ fontWeight:'600', color:'#111827', fontSize:'14px' }}>
                       {[c.nome, c.cognome].filter(Boolean).join(' ') || '—'}
                     </span>
                   </td>

@@ -89,14 +89,14 @@ export default function PushButton({ eventId = null, tipo = 'calendario', label,
     return (
       <button onClick={toggle} disabled={isLoading} title={isOn ? 'Disattiva notifiche' : 'Attiva notifiche'}
         style={{ display: 'flex', alignItems: 'center', justifyContent: 'center',
-          width: '38px', height: '38px', borderRadius: '8px', border: '1px solid',
-          borderColor: isOn ? '#003DA5' : '#E5E7EB',
+          width: '38px', height: '38px', borderRadius: '16px', border: '1px solid',
+          borderColor: isOn ? '#5B5FEF' : '#E8ECF4',
           backgroundColor: isOn ? '#EFF6FF' : '#ffffff',
           cursor: 'pointer', transition: 'all 0.15s', flexShrink: 0 }}>
         {isLoading
           ? <Loader2 size={16} style={{ color: '#9CA3AF', animation: 'spin 1s linear infinite' }} />
           : isOn
-            ? <Bell size={16} style={{ color: '#003DA5' }} />
+            ? <Bell size={16} style={{ color: '#5B5FEF' }} />
             : <BellOff size={16} style={{ color: '#9CA3AF' }} />
         }
         <style>{`@keyframes spin{to{transform:rotate(360deg)}}`}</style>
@@ -108,12 +108,12 @@ export default function PushButton({ eventId = null, tipo = 'calendario', label,
     <div>
       <button onClick={toggle} disabled={isLoading}
         style={{ display: 'flex', alignItems: 'center', gap: '8px',
-          padding: '10px 18px', borderRadius: '8px', border: '1px solid',
-          borderColor: isOn ? '#003DA5' : '#E5E7EB',
+          padding: '10px 18px', borderRadius: '16px', border: '1px solid',
+          borderColor: isOn ? '#5B5FEF' : '#E8ECF4',
           backgroundColor: isOn ? '#EFF6FF' : '#ffffff',
-          color: isOn ? '#003DA5' : '#374151',
+          color: isOn ? '#5B5FEF' : '#374151',
           fontSize: '14px', fontWeight: '600', cursor: 'pointer',
-          fontFamily: "'Outfit',sans-serif", transition: 'all 0.15s',
+          fontFamily: "'Inter',sans-serif", transition: 'all 0.15s',
           opacity: isLoading ? 0.7 : 1 }}>
         {isLoading
           ? <Loader2 size={16} style={{ animation: 'spin 1s linear infinite' }} />

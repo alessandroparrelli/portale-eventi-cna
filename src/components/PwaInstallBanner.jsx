@@ -30,11 +30,11 @@ export default function PwaInstallBanner() {
 
   // iOS: mostra istruzioni manuali
   if (isIos) return (
-    <div style={{ backgroundColor: '#EFF6FF', border: '1px solid #BFDBFE', borderRadius: '10px',
-      padding: '14px 16px', marginBottom: '16px', fontFamily: "'Outfit',sans-serif" }}>
+    <div style={{ backgroundColor: '#EFF6FF', border: '1px solid #BFDBFE', borderRadius: '14px',
+      padding: '14px 16px', marginBottom: '16px', fontFamily: "'Inter',sans-serif" }}>
       <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'flex-start' }}>
         <div style={{ display: 'flex', gap: '10px', alignItems: 'flex-start' }}>
-          <Download size={18} style={{ color: '#003DA5', flexShrink: 0, marginTop: '2px' }} />
+          <Download size={18} style={{ color: '#5B5FEF', flexShrink: 0, marginTop: '2px' }} />
           <div>
             <p style={{ fontSize: '13px', fontWeight: '700', color: '#1D4ED8', margin: '0 0 3px' }}>
               Installa l'app check-in
@@ -54,25 +54,25 @@ export default function PwaInstallBanner() {
   if (!prompt) return null
 
   return (
-    <div style={{ backgroundColor: '#EFF6FF', border: '1px solid #BFDBFE', borderRadius: '10px',
-      padding: '14px 16px', marginBottom: '16px', fontFamily: "'Outfit',sans-serif",
+    <div style={{ backgroundColor: '#EFF6FF', border: '1px solid #BFDBFE', borderRadius: '14px',
+      padding: '14px 16px', marginBottom: '16px', fontFamily: "'Inter',sans-serif",
       display: 'flex', alignItems: 'center', justifyContent: 'space-between', gap: '12px' }}>
       <div style={{ display: 'flex', gap: '10px', alignItems: 'center' }}>
-        <Download size={18} style={{ color: '#003DA5', flexShrink: 0 }} />
+        <Download size={18} style={{ color: '#5B5FEF', flexShrink: 0 }} />
         <div>
           <p style={{ fontSize: '13px', fontWeight: '700', color: '#1D4ED8', margin: '0 0 2px' }}>Installa l'app check-in</p>
           <p style={{ fontSize: '12px', color: '#3B82F6', margin: 0 }}>Funziona offline — aggiornamenti automatici</p>
         </div>
       </div>
       <div style={{ display: 'flex', gap: '8px', flexShrink: 0 }}>
-        <button onClick={dismiss} style={{ padding: '7px 12px', border: '1px solid #BFDBFE', borderRadius: '6px',
+        <button onClick={dismiss} style={{ padding: '7px 12px', border: '1px solid #BFDBFE', borderRadius: '14px',
           backgroundColor: '#fff', color: '#6B7280', fontSize: '12px', fontWeight: '600',
-          cursor: 'pointer', fontFamily: "'Outfit',sans-serif" }}>
+          cursor: 'pointer', fontFamily: "'Inter',sans-serif" }}>
           Dopo
         </button>
-        <button onClick={install} style={{ padding: '7px 14px', border: 'none', borderRadius: '6px',
-          backgroundColor: '#003DA5', color: '#fff', fontSize: '12px', fontWeight: '700',
-          cursor: 'pointer', fontFamily: "'Outfit',sans-serif" }}>
+        <button onClick={install} style={{ padding: '7px 14px', border: 'none', borderRadius: '14px',
+          backgroundColor: '#5B5FEF', color: '#fff', fontSize: '12px', fontWeight: '700',
+          cursor: 'pointer', fontFamily: "'Inter',sans-serif" }}>
           Installa
         </button>
       </div>

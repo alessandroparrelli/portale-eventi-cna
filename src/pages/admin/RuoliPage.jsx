@@ -38,11 +38,11 @@ function LivelloPill({ value, current, onClick, disabled }) {
       type="button" disabled={disabled} onClick={onClick}
       style={{
         padding:'4px 10px', borderRadius:'20px', fontSize:'12px', fontWeight:'700',
-        border:`1px solid ${active ? l.color : '#E5E7EB'}`,
+        border:`1px solid ${active ? l.color : '#E8ECF4'}`,
         backgroundColor: active ? l.color+'18' : '#FFFFFF',
         color: active ? l.color : '#9CA3AF',
         cursor: disabled ? 'not-allowed' : 'pointer',
-        fontFamily:"'Outfit',sans-serif",
+        fontFamily:"'Inter',sans-serif",
       }}>
       {l.label}
     </button>
@@ -134,7 +134,7 @@ export default function RuoliPage() {
   if (!canManageRuoli) return (
     <div style={{ display:'flex', alignItems:'center', justifyContent:'center', minHeight:'60vh', flexDirection:'column', gap:'12px', textAlign:'center' }}>
       <ShieldCheck size={48} style={{ color:'#D1D5DB' }}/>
-      <p style={{ fontSize:'18px', fontWeight:'700', color:'#0A0A0A' }}>Accesso non autorizzato</p>
+      <p style={{ fontSize:'18px', fontWeight:'700', color:'#111827' }}>Accesso non autorizzato</p>
       <p style={{ fontSize:'14px', color:'#6B7280' }}>Non hai i permessi per gestire i ruoli.</p>
     </div>
   )
@@ -146,20 +146,20 @@ export default function RuoliPage() {
           <Link to="/admin/utenti" style={{ display:'inline-flex', alignItems:'center', gap:'4px', fontSize:'13px', color:'#6B7280', textDecoration:'none', marginBottom:'6px' }}>
             <ArrowLeft size={14}/> Utenti
           </Link>
-          <h1 style={{ fontSize:'32px', fontWeight:'900', color:'#0A0A0A', letterSpacing:'-.03em', margin:0 }}>Gestione Ruoli</h1>
+          <h1 style={{ fontSize:'32px', fontWeight:'900', color:'#111827', letterSpacing:'-.03em', margin:0 }}>Gestione Ruoli</h1>
           <p style={{ fontSize:'14px', color:'#6B7280', margin:'4px 0 0' }}>{roles.length} ruoli — definisci cosa può vedere e fare ogni ruolo per sezione</p>
         </div>
         <Btn onClick={openCreate}><Plus size={18}/> Nuovo ruolo</Btn>
       </div>
 
       {toast && (
-        <div style={{ marginBottom:'16px', padding:'10px 14px', borderRadius:'6px', fontSize:'13px', fontWeight:'600',
+        <div style={{ marginBottom:'16px', padding:'10px 14px', borderRadius:'14px', fontSize:'13px', fontWeight:'600',
           backgroundColor: toast.type==='ok' ? '#F0FDF4' : '#FEF2F2', color: toast.type==='ok' ? '#16A34A' : '#DC2626' }}>
           {toast.msg}
         </div>
       )}
 
-      <div style={{ backgroundColor:'#FFFFFF', borderRadius:'8px', border:'1px solid #E5E7EB', overflow:'hidden' }}>
+      <div style={{ backgroundColor:'#FFFFFF', borderRadius:'16px', border:'1px solid #E8ECF4', overflow:'hidden' }}>
         {loading ? (
           <p style={{ padding:'40px', textAlign:'center', color:'#9CA3AF', fontSize:'14px' }}>Caricamento…</p>
         ) : roles.length === 0 ? (
@@ -168,14 +168,14 @@ export default function RuoliPage() {
           <table style={{ width:'100%', borderCollapse:'collapse', fontSize:'14px' }}>
             <thead>
               <tr>{['Ruolo','Descrizione','Tipo','Azioni'].map(h=>(
-                <th key={h} style={{ padding:'10px 16px', textAlign:'left', fontSize:'11px', fontWeight:'600', color:'#6B7280', textTransform:'uppercase', letterSpacing:'.06em', borderBottom:'1px solid #E5E7EB', backgroundColor:'#FAFAFA' }}>{h}</th>
+                <th key={h} style={{ padding:'10px 16px', textAlign:'left', fontSize:'11px', fontWeight:'600', color:'#6B7280', textTransform:'uppercase', letterSpacing:'.06em', borderBottom:'1px solid #E8ECF4', backgroundColor:'#FAFAFA' }}>{h}</th>
               ))}</tr>
             </thead>
             <tbody>
               {roles.map(r => (
                 <tr key={r.id}>
                   <td style={{ padding:'12px 16px', borderBottom:'1px solid #F3F4F6', verticalAlign:'middle' }}>
-                    <span style={{ fontWeight:'700', color:'#0A0A0A', textTransform:'capitalize' }}>{r.nome}</span>
+                    <span style={{ fontWeight:'700', color:'#111827', textTransform:'capitalize' }}>{r.nome}</span>
                   </td>
                   <td style={{ padding:'12px 16px', borderBottom:'1px solid #F3F4F6', verticalAlign:'middle', color:'#6B7280' }}>
                     {r.descrizione || '—'}
@@ -187,7 +187,7 @@ export default function RuoliPage() {
                   </td>
                   <td style={{ padding:'12px 16px', borderBottom:'1px solid #F3F4F6', verticalAlign:'middle' }}>
                     <div style={{ display:'flex', gap:'5px' }}>
-                      <button style={{ background:'none', border:'1px solid #E5E7EB', borderRadius:'4px', padding:'5px 6px', cursor:'pointer', color:'#6B7280', display:'flex', alignItems:'center' }} title="Modifica permessi" onClick={()=>openEdit(r)}><Pencil size={14}/></button>
+                      <button style={{ background:'none', border:'1px solid #E8ECF4', borderRadius:'4px', padding:'5px 6px', cursor:'pointer', color:'#6B7280', display:'flex', alignItems:'center' }} title="Modifica permessi" onClick={()=>openEdit(r)}><Pencil size={14}/></button>
                       {!r.is_sistema && <button style={{ background:'none', border:'1px solid #FECACA', borderRadius:'4px', padding:'5px 6px', cursor:'pointer', color:'#DC2626', display:'flex', alignItems:'center' }} title="Elimina" onClick={()=>{setCur(r);setErrors({});setModal('delete')}}><Trash2 size={14}/></button>}
                     </div>
                   </td>
@@ -202,7 +202,7 @@ export default function RuoliPage() {
       {(modal==='create'||modal==='edit') && (
         <Modal title={modal==='create'?'Nuovo ruolo':`Permessi — ${cur.nome}`} onClose={()=>setModal(null)} width="640px">
           <div style={{ display:'flex', flexDirection:'column', gap:'13px' }}>
-            {errors.general && <div style={{ backgroundColor:'#FEF2F2', border:'1px solid #FECACA', borderRadius:'6px', padding:'10px 14px', fontSize:'13px', color:'#DC2626' }}>{errors.general}</div>}
+            {errors.general && <div style={{ backgroundColor:'#FEF2F2', border:'1px solid #FECACA', borderRadius:'14px', padding:'10px 14px', fontSize:'13px', color:'#DC2626' }}>{errors.general}</div>}
             {modal==='create' && (
               <Field label="Nome ruolo" required error={errors.nome}>
                 <Input value={cur.nome} onChange={e=>{setCur(p=>({...p,nome:e.target.value}));setErrors(p=>({...p,nome:''}))}} placeholder="es. marketing"/>
@@ -213,10 +213,10 @@ export default function RuoliPage() {
             </Field>
 
             <div>
-              <label style={{ fontSize:'13px', fontWeight:'500', color:'#0A0A0A', display:'block', marginBottom:'8px' }}>
+              <label style={{ fontSize:'13px', fontWeight:'500', color:'#111827', display:'block', marginBottom:'8px' }}>
                 Permessi per sezione
               </label>
-              <div style={{ display:'flex', flexDirection:'column', gap:'2px', border:'1px solid #E5E7EB', borderRadius:'8px', overflow:'hidden' }}>
+              <div style={{ display:'flex', flexDirection:'column', gap:'2px', border:'1px solid #E8ECF4', borderRadius:'16px', overflow:'hidden' }}>
                 {SEZIONI.map((s, i) => (
                   <div key={s.key} style={{
                     display:'flex', alignItems:'center', justifyContent:'space-between',
@@ -252,7 +252,7 @@ export default function RuoliPage() {
       {/* Modal elimina */}
       {modal==='delete' && (
         <Modal title="Elimina ruolo" onClose={()=>setModal(null)} width="420px">
-          {errors.general && <div style={{ backgroundColor:'#FEF2F2', border:'1px solid #FECACA', borderRadius:'6px', padding:'10px 14px', fontSize:'13px', color:'#DC2626', marginBottom:'16px' }}>{errors.general}</div>}
+          {errors.general && <div style={{ backgroundColor:'#FEF2F2', border:'1px solid #FECACA', borderRadius:'14px', padding:'10px 14px', fontSize:'13px', color:'#DC2626', marginBottom:'16px' }}>{errors.general}</div>}
           <p style={{ fontSize:'14px', color:'#374151', lineHeight:1.6, margin:'0 0 20px' }}>
             Eliminare il ruolo <strong>{cur.nome}</strong>?
           </p>

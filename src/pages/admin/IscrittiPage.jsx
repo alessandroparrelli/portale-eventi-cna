@@ -21,7 +21,7 @@ function formatDt(ts) {
 function SortableHead({ columns, sortCol, sortDir, onSort }) {
   return (
     <thead>
-      <tr style={{ background:'linear-gradient(90deg,#003DA5,#001a4d)' }}>
+      <tr style={{ background:'linear-gradient(90deg,#5B5FEF,#3730A3)' }}>
         {columns.map((col,i) => {
           const isActive = sortCol === col.label
           return (
@@ -1314,7 +1314,7 @@ export default function IscrittiPage() {
               })()}
             </span>
           )}
-          <Btn variant="secondary" onClick={loadRegs} size="md" style={{ background:'#FACC15', color:'#0A0A0A', borderColor:'#FACC15', fontWeight:'700' }}><RefreshCw size={16}/> Aggiorna</Btn>
+          <Btn variant="secondary" onClick={loadRegs} size="md" style={{ background:'#FACC15', color:'#111827', borderColor:'#FACC15', fontWeight:'700' }}><RefreshCw size={16}/> Aggiorna</Btn>
           <Btn variant="primary" onClick={() => { setAddModal(true); setAddError(null); setAddForm({ nome:'', cognome:'', email:'', cellulare:'', ragione_sociale:'', partita_iva:'', cap:'', extra_1:'', extra_2:'', extra_3:'', extra_4:'', extra_5:'' }); setAddCapogruppo(null); setAddCapoSearch('') }} size="md" style={{ fontWeight:'700' }}><UserPlus size={16}/> Aggiungi</Btn>
           <Btn variant="secondary"
             onClick={() => apriSmsModal(smsSelezione.size > 0 ? 'selezione' : 'tutti', null)}
@@ -1338,14 +1338,14 @@ export default function IscrittiPage() {
 
       {/* TAB SWITCHER — visibile solo se teatro abilitato */}
       {selectedEvento && teatroAbilitato && (
-        <div style={{ display:'flex', gap:'6px', marginBottom:'20px', background:'#F1F5F9', borderRadius:'12px', padding:'5px' }}>
+        <div style={{ display:'flex', gap:'6px', marginBottom:'20px', background:'#F1F5F9', borderRadius:'16px', padding:'5px' }}>
           {[{ id:'iscritti', label:'👥 Iscritti' }, { id:'teatro', label:'🎭 Gestione posti' }].map(tab => (
             <button key={tab.id} onClick={() => setTabAttivo(tab.id)}
               style={{
                 flex:1, padding:'11px 24px', border:'none', cursor:'pointer',
-                fontSize:'14px', fontWeight:'700', fontFamily:"'Outfit',sans-serif",
+                fontSize:'14px', fontWeight:'700', fontFamily:"'Inter',sans-serif",
                 borderRadius:'9px', transition:'all .18s',
-                background: tabAttivo === tab.id ? 'linear-gradient(90deg,#003DA5,#001a4d)' : '#E5E7EB',
+                background: tabAttivo === tab.id ? 'linear-gradient(90deg,#5B5FEF,#3730A3)' : '#E8ECF4',
                 color: tabAttivo === tab.id ? '#fff' : '#6B7280',
                 boxShadow: 'none',
                 letterSpacing:'-.01em',
@@ -1362,12 +1362,12 @@ export default function IscrittiPage() {
           {/* Stats */}
           <div style={{ display:'flex', gap:'12px', flexWrap:'wrap', marginBottom:'16px' }}>
             {[
-              { label:'Con posto', value: registrations.filter(r => r.numero_posto).length, color:'#003DA5' },
+              { label:'Con posto', value: registrations.filter(r => r.numero_posto).length, color:'#5B5FEF' },
               { label:'Senza posto', value: registrations.filter(r => !r.numero_posto).length, color:'#DC2626' },
               { label:'Presenza confermata', value: registrations.filter(r => r.presenza_confermata).length, color:'#059669' },
               { label:'In attesa conferma', value: registrations.filter(r => r.numero_posto && !r.presenza_confermata).length, color:'#D97706' },
             ].map(st => (
-              <div key={st.label} style={{ background:'#fff', border:'1px solid #E5E7EB', borderRadius:'8px', padding:'14px 20px', flex:1, minWidth:'140px' }}>
+              <div key={st.label} style={{ background:'#fff', border:'1px solid #E8ECF4', borderRadius:'16px', padding:'14px 20px', flex:1, minWidth:'140px' }}>
                 <p style={{ margin:'0 0 4px', fontSize:'24px', fontWeight:'900', color:st.color, letterSpacing:'-0.02em' }}>{st.value}</p>
                 <p style={{ margin:0, fontSize:'12px', color:'#6B7280', fontWeight:'500' }}>{st.label}</p>
               </div>
@@ -1384,14 +1384,14 @@ export default function IscrittiPage() {
                 { v:'senza_posto', label:'Senza posto' },
               ].map(opt => (
                 <button key={opt.v} onClick={() => setFiltroPostoAssegnato(opt.v)}
-                  style={{ padding:'5px 12px', borderRadius:'6px', border:'1px solid', fontSize:'12px', fontWeight:'600', cursor:'pointer', fontFamily:"'Outfit',sans-serif",
-                    background: filtroPostoAssegnato === opt.v ? '#003DA5' : '#fff',
+                  style={{ padding:'5px 12px', borderRadius:'14px', border:'1px solid', fontSize:'12px', fontWeight:'600', cursor:'pointer', fontFamily:"'Inter',sans-serif",
+                    background: filtroPostoAssegnato === opt.v ? '#5B5FEF' : '#fff',
                     color: filtroPostoAssegnato === opt.v ? '#fff' : '#374151',
-                    borderColor: filtroPostoAssegnato === opt.v ? '#003DA5' : '#D1D5DB',
+                    borderColor: filtroPostoAssegnato === opt.v ? '#5B5FEF' : '#D1D5DB',
                   }}>{opt.label}</button>
               ))}
             </div>
-            <div style={{ width:'1px', height:'24px', background:'#E5E7EB' }} />
+            <div style={{ width:'1px', height:'24px', background:'#E8ECF4' }} />
             <div style={{ display:'flex', alignItems:'center', gap:'6px' }}>
               <span style={{ fontSize:'12px', color:'#6B7280', fontWeight:'600', whiteSpace:'nowrap' }}>Mail posto:</span>
               {[
@@ -1400,10 +1400,10 @@ export default function IscrittiPage() {
                 { v:'non_inviata', label:'Non inviata' },
               ].map(opt => (
                 <button key={opt.v} onClick={() => setFiltroMailPosto(opt.v)}
-                  style={{ padding:'5px 12px', borderRadius:'6px', border:'1px solid', fontSize:'12px', fontWeight:'600', cursor:'pointer', fontFamily:"'Outfit',sans-serif",
-                    background: filtroMailPosto === opt.v ? '#003DA5' : '#fff',
+                  style={{ padding:'5px 12px', borderRadius:'14px', border:'1px solid', fontSize:'12px', fontWeight:'600', cursor:'pointer', fontFamily:"'Inter',sans-serif",
+                    background: filtroMailPosto === opt.v ? '#5B5FEF' : '#fff',
                     color: filtroMailPosto === opt.v ? '#fff' : '#374151',
-                    borderColor: filtroMailPosto === opt.v ? '#003DA5' : '#D1D5DB',
+                    borderColor: filtroMailPosto === opt.v ? '#5B5FEF' : '#D1D5DB',
                   }}>{opt.label}</button>
               ))}
             </div>
@@ -1422,7 +1422,7 @@ export default function IscrittiPage() {
               value={searchTeatro}
               onChange={e => setSearchTeatro(e.target.value)}
               placeholder="Cerca per nome, cognome o email… (mostra anche gli accompagnatori collegati)"
-              style={{ width:'100%', boxSizing:'border-box', paddingLeft:'36px', paddingRight: searchTeatro ? '36px' : '12px', paddingTop:'9px', paddingBottom:'9px', border:'1px solid #D1D5DB', borderRadius:'8px', fontSize:'13px', fontFamily:"'Outfit',sans-serif", color:'#0A0A0A', outline:'none' }}
+              style={{ width:'100%', boxSizing:'border-box', paddingLeft:'36px', paddingRight: searchTeatro ? '36px' : '12px', paddingTop:'9px', paddingBottom:'9px', border:'1px solid #D1D5DB', borderRadius:'16px', fontSize:'13px', fontFamily:"'Inter',sans-serif", color:'#111827', outline:'none' }}
             />
             {searchTeatro && (
               <button onClick={() => setSearchTeatro('')}
@@ -1431,7 +1431,7 @@ export default function IscrittiPage() {
           </div>
 
           {/* Barra azioni invio */}
-          <div style={{ background:'#F9FAFB', border:'1px solid #E5E7EB', borderRadius:'10px', padding:'14px 16px', marginBottom:'16px' }}>
+          <div style={{ background:'#F9FAFB', border:'1px solid #E8ECF4', borderRadius:'14px', padding:'14px 16px', marginBottom:'16px' }}>
             <div style={{ display:'flex', gap:'10px', flexWrap:'wrap', alignItems:'center' }}>
               {/* Invio massivo a tutti */}
               <Btn variant="primary" onClick={() => setConfirmInvioTeatro({ ids: null })} disabled={invioPostoInCorso} size="md">
@@ -1475,7 +1475,7 @@ export default function IscrittiPage() {
 
           {/* Risultato dry run */}
           {dryRunRis && (
-            <div style={{ marginBottom:'14px', padding:'12px 18px', borderRadius:'8px', background: dryRunRis.error ? '#FEF2F2' : '#EFF6FF', border:`1px solid ${dryRunRis.error ? '#FECACA' : '#BFDBFE'}` }}>
+            <div style={{ marginBottom:'14px', padding:'12px 18px', borderRadius:'16px', background: dryRunRis.error ? '#FEF2F2' : '#EFF6FF', border:`1px solid ${dryRunRis.error ? '#FECACA' : '#BFDBFE'}` }}>
               <div style={{ display:'flex', justifyContent:'space-between', alignItems:'center' }}>
                 <p style={{ margin:0, fontSize:'13px', fontWeight:'700', color: dryRunRis.error ? '#DC2626' : '#1D4ED8' }}>
                   {dryRunRis.error ? `❌ ${dryRunRis.error}` : `📋 ${dryRunRis.count} iscritti riceverebbero la mail.`}
@@ -1488,7 +1488,7 @@ export default function IscrittiPage() {
 
           {/* Risultato invio */}
           {invioPostoRis && (
-            <div style={{ marginBottom:'14px', padding:'12px 18px', borderRadius:'8px', background: invioPostoRis.error ? '#FEF2F2' : '#F0FDF4', border:`1px solid ${invioPostoRis.error ? '#FECACA' : '#BBF7D0'}` }}>
+            <div style={{ marginBottom:'14px', padding:'12px 18px', borderRadius:'16px', background: invioPostoRis.error ? '#FEF2F2' : '#F0FDF4', border:`1px solid ${invioPostoRis.error ? '#FECACA' : '#BBF7D0'}` }}>
               <div style={{ display:'flex', justifyContent:'space-between', alignItems:'center' }}>
                 <p style={{ margin:0, fontSize:'13px', fontWeight:'700', color: invioPostoRis.error ? '#DC2626' : '#059669' }}>
                   {invioPostoRis.error ? `❌ ${invioPostoRis.error}` : `✅ ${invioPostoRis.sent} mail inviate su ${invioPostoRis.total}${invioPostoRis.failed > 0 ? ` · ${invioPostoRis.failed} fallite` : ''}`}
@@ -1506,7 +1506,7 @@ export default function IscrittiPage() {
             <div style={{ overflowX:'auto' }}>
               <table style={s.table}>
                 <thead>
-                  <tr style={{ background:'linear-gradient(90deg,#003DA5,#001a4d)' }}>
+                  <tr style={{ background:'linear-gradient(90deg,#5B5FEF,#3730A3)' }}>
                     <th style={{ padding:'10px 12px', background:'transparent', color:'#fff', width:'40px' }}>
                       <input type="checkbox"
                         checked={registrations.filter(r => r.numero_posto && r.email).length > 0 &&
@@ -1533,7 +1533,7 @@ export default function IscrittiPage() {
                             <input type="checkbox"
                               checked={selezionato}
                               onChange={() => toggleSelezioneTeatroReg(r.id)}
-                              style={{ cursor:'pointer', width:'16px', height:'16px', accentColor:'#003DA5' }}
+                              style={{ cursor:'pointer', width:'16px', height:'16px', accentColor:'#5B5FEF' }}
                             />
                           ) : (
                             <span title="Nessun posto o email mancante" style={{ color:'#D1D5DB', fontSize:'12px' }}>—</span>
@@ -1543,7 +1543,7 @@ export default function IscrittiPage() {
                           <p style={s.name}>{r.nome} {r.cognome}</p>
                           {r.ragione_sociale && <p style={s.sub}>{r.ragione_sociale}</p>}
                           {r.gruppo_id === r.id && (
-                            <span style={{ display:'inline-flex', alignItems:'center', gap:'3px', fontSize:'10px', fontWeight:'700', color:'#003DA5', background:'#EBF0FA', borderRadius:'999px', padding:'2px 7px', marginTop:'3px' }}>👥 Capogruppo</span>
+                            <span style={{ display:'inline-flex', alignItems:'center', gap:'3px', fontSize:'10px', fontWeight:'700', color:'#5B5FEF', background:'#EEEFFD', borderRadius:'999px', padding:'2px 7px', marginTop:'3px' }}>👥 Capogruppo</span>
                           )}
                           {r.referente_id && referentiMap[r.referente_id] && (
                             <span style={{ display:'inline-flex', alignItems:'center', gap:'3px', fontSize:'10px', fontWeight:'700', color:'#6B7280', background:'#F3F4F6', borderRadius:'999px', padding:'2px 7px', marginTop:'3px' }}>↩ {referentiMap[r.referente_id]}</span>
@@ -1562,7 +1562,7 @@ export default function IscrittiPage() {
                                 if (e.key === 'Enter') { e.target.blur(); salvaPosto(r.id, e.target.value) }
                                 if (e.key === 'Escape') setPostoEdit(p => ({ ...p, [r.id]: undefined }))
                               }}
-                              style={{ width:'110px', padding:'6px 10px', border:`1px solid ${postoError[r.id] ? '#DC2626' : '#D1D5DB'}`, borderRadius:'6px', fontSize:'13px', fontWeight:'700', color: r.numero_posto ? '#003DA5' : '#6B7280', fontFamily:"'Outfit',sans-serif" }}
+                              style={{ width:'110px', padding:'6px 10px', border:`1px solid ${postoError[r.id] ? '#DC2626' : '#D1D5DB'}`, borderRadius:'14px', fontSize:'13px', fontWeight:'700', color: r.numero_posto ? '#5B5FEF' : '#6B7280', fontFamily:"'Inter',sans-serif" }}
                               placeholder="es. Platea 1A"
                             />
                             {postoSaving[r.id] && <span style={{ fontSize:'12px', color:'#9CA3AF' }}>⏳</span>}
@@ -1583,7 +1583,7 @@ export default function IscrittiPage() {
                               onClick={() => inviaMailPosti(false, [r.id])}
                               disabled={invioPostoInCorso}
                               title="Invia mail posto a questo iscritto"
-                              style={{ background:'none', border:'1px solid #E5E7EB', borderRadius:'6px', padding:'5px 10px', cursor:'pointer', fontSize:'12px', color:'#374151', fontFamily:"'Outfit',sans-serif", fontWeight:'600', whiteSpace:'nowrap' }}>
+                              style={{ background:'none', border:'1px solid #E8ECF4', borderRadius:'14px', padding:'5px 10px', cursor:'pointer', fontSize:'12px', color:'#374151', fontFamily:"'Inter',sans-serif", fontWeight:'600', whiteSpace:'nowrap' }}>
                               📨 Invia
                             </button>
                           ) : (
@@ -1613,7 +1613,7 @@ export default function IscrittiPage() {
               <Search size={15} style={{ position:'absolute', left:'12px', top:'50%', transform:'translateY(-50%)', color:'#9CA3AF', pointerEvents:'none' }} />
               <input value={search} onChange={e => setSearch(e.target.value)}
                 placeholder="Cerca nome, cognome, email…"
-                style={{ width:'100%', boxSizing:'border-box', paddingLeft:'36px', paddingRight: search ? '36px' : '12px', paddingTop:'9px', paddingBottom:'9px', border:'1px solid #D1D5DB', borderRadius:'8px', fontSize:'13px', fontFamily:"'Outfit',sans-serif", color:'#0A0A0A', outline:'none' }}
+                style={{ width:'100%', boxSizing:'border-box', paddingLeft:'36px', paddingRight: search ? '36px' : '12px', paddingTop:'9px', paddingBottom:'9px', border:'1px solid #D1D5DB', borderRadius:'16px', fontSize:'13px', fontFamily:"'Inter',sans-serif", color:'#111827', outline:'none' }}
               />
               {search && (
                 <button onClick={() => setSearch('')}
@@ -1651,7 +1651,7 @@ export default function IscrittiPage() {
           <>
             {/* BANNER VERIFICA — sopra la tabella */}
             {verificaInfo && (
-              <div style={{ marginBottom:'14px', padding:'12px 18px', borderRadius:'8px',
+              <div style={{ marginBottom:'14px', padding:'12px 18px', borderRadius:'16px',
                 backgroundColor: verificaInfo.errore ? '#FEF2F2' : '#EFF6FF',
                 border: `1px solid ${verificaInfo.errore ? '#FECACA' : '#BFDBFE'}`,
                 display:'flex', alignItems:'center', justifyContent:'space-between', gap:'12px' }}>
@@ -1697,7 +1697,7 @@ export default function IscrittiPage() {
                           <p style={s.name}>{r.nome} {r.cognome}</p>
                           {r.ragione_sociale && <p style={s.sub}>{r.ragione_sociale}</p>}
                           {r.gruppo_id === r.id && (
-                            <span style={{ display:'inline-flex', alignItems:'center', gap:'3px', fontSize:'10px', fontWeight:'700', color:'#003DA5', background:'#EBF0FA', borderRadius:'999px', padding:'2px 7px', marginTop:'3px' }}>👥 Capogruppo</span>
+                            <span style={{ display:'inline-flex', alignItems:'center', gap:'3px', fontSize:'10px', fontWeight:'700', color:'#5B5FEF', background:'#EEEFFD', borderRadius:'999px', padding:'2px 7px', marginTop:'3px' }}>👥 Capogruppo</span>
                           )}
                           {r.referente_id && referentiMap[r.referente_id] && (
                             <span style={{ display:'inline-flex', alignItems:'center', gap:'3px', fontSize:'10px', fontWeight:'700', color:'#6B7280', background:'#F3F4F6', borderRadius:'999px', padding:'2px 7px', marginTop:'3px' }}>↩ {referentiMap[r.referente_id]}</span>
@@ -1705,7 +1705,7 @@ export default function IscrittiPage() {
                         </td>
                         <td style={s.td} className="col-hide-mobile"><span style={s.cell}>{r.email||'—'}</span></td>
                         <td style={s.td} className="col-hide-mobile"><span style={s.cell}>{getMestiere(r.mestiere_id)}</span></td>
-                        <td style={s.td} className="col-hide-mobile"><span style={{ fontSize:'12px', fontWeight:'700', color:'#003DA5', fontFamily:'monospace' }}>#{r.numero_iscrizione||'—'}</span></td>
+                        <td style={s.td} className="col-hide-mobile"><span style={{ fontSize:'12px', fontWeight:'700', color:'#5B5FEF', fontFamily:'monospace' }}>#{r.numero_iscrizione||'—'}</span></td>
                         <td style={s.td} className="col-hide-mobile"><span style={s.cell}>{formatDt(r.created_at)}</span></td>
                         <td style={s.td}><PresenzaBadge stato={r.stato}/></td>
                         {formFields.map(f => (
@@ -1764,11 +1764,11 @@ export default function IscrittiPage() {
                 </span>
                 <div style={{display:'flex',gap:'4px',alignItems:'center'}}>
                   <button onClick={()=>setPagina(1)} disabled={pagina===1}
-                    style={{padding:'6px 10px',border:'1px solid #E5E7EB',borderRadius:'6px',
+                    style={{padding:'6px 10px',border:'1px solid #E8ECF4',borderRadius:'14px',
                       backgroundColor:pagina===1?'#F9FAFB':'#fff',cursor:pagina===1?'default':'pointer',
                       fontSize:'13px',color:pagina===1?'#D1D5DB':'#374151'}}>«</button>
                   <button onClick={()=>setPagina(p=>Math.max(1,p-1))} disabled={pagina===1}
-                    style={{padding:'6px 12px',border:'1px solid #E5E7EB',borderRadius:'6px',
+                    style={{padding:'6px 12px',border:'1px solid #E8ECF4',borderRadius:'14px',
                       backgroundColor:pagina===1?'#F9FAFB':'#fff',cursor:pagina===1?'default':'pointer',
                       fontSize:'13px',color:pagina===1?'#D1D5DB':'#374151'}}>‹</button>
                   {[...Array(totalPages)].map((_,i)=>i+1).filter(p=>
@@ -1780,20 +1780,20 @@ export default function IscrittiPage() {
                     p==='…' ? <span key={`e${i}`} style={{padding:'6px 4px',fontSize:'13px',color:'#9CA3AF'}}>…</span>
                     : <button key={p} onClick={()=>setPagina(p)}
                         style={{padding:'6px 11px',border:'1px solid',
-                          borderColor:pagina===p?'#003DA5':'#E5E7EB',borderRadius:'6px',
-                          backgroundColor:pagina===p?'#003DA5':'#fff',
+                          borderColor:pagina===p?'#5B5FEF':'#E8ECF4',borderRadius:'14px',
+                          backgroundColor:pagina===p?'#5B5FEF':'#fff',
                           color:pagina===p?'#fff':'#374151',
                           fontWeight:pagina===p?'700':'400',
-                          cursor:'pointer',fontSize:'13px',fontFamily:"'Outfit',sans-serif"}}>
+                          cursor:'pointer',fontSize:'13px',fontFamily:"'Inter',sans-serif"}}>
                         {p}
                       </button>
                   )}
                   <button onClick={()=>setPagina(p=>Math.min(totalPages,p+1))} disabled={pagina===totalPages}
-                    style={{padding:'6px 12px',border:'1px solid #E5E7EB',borderRadius:'6px',
+                    style={{padding:'6px 12px',border:'1px solid #E8ECF4',borderRadius:'14px',
                       backgroundColor:pagina===totalPages?'#F9FAFB':'#fff',cursor:pagina===totalPages?'default':'pointer',
                       fontSize:'13px',color:pagina===totalPages?'#D1D5DB':'#374151'}}>›</button>
                   <button onClick={()=>setPagina(totalPages)} disabled={pagina===totalPages}
-                    style={{padding:'6px 10px',border:'1px solid #E5E7EB',borderRadius:'6px',
+                    style={{padding:'6px 10px',border:'1px solid #E8ECF4',borderRadius:'14px',
                       backgroundColor:pagina===totalPages?'#F9FAFB':'#fff',cursor:pagina===totalPages?'default':'pointer',
                       fontSize:'13px',color:pagina===totalPages?'#D1D5DB':'#374151'}}>»</button>
                 </div>
@@ -1840,7 +1840,7 @@ export default function IscrittiPage() {
               Stai per inviare l’email con il posto assegnato a{' '}
               <strong>{destinatari} {isTutti ? 'iscritti (tutti con posto e email)' : `selezionati`}</strong>.
             </div>
-            <div style={{ background:'#FEF3C7', border:'1px solid #FCD34D', borderRadius:'8px', padding:'10px 14px', fontSize:'13px', color:'#92400E', marginBottom:'24px', display:'flex', gap:'8px', alignItems:'flex-start' }}>
+            <div style={{ background:'#FEF3C7', border:'1px solid #FCD34D', borderRadius:'16px', padding:'10px 14px', fontSize:'13px', color:'#92400E', marginBottom:'24px', display:'flex', gap:'8px', alignItems:'flex-start' }}>
               <span style={{ fontSize:'16px', flexShrink:0 }}>⚠️</span>
               <span>Ogni destinatario riceverà una email con il proprio posto. Verifica che i posti siano stati assegnati correttamente prima di procedere.</span>
             </div>
@@ -1868,7 +1868,7 @@ export default function IscrittiPage() {
               <div>
                 <p style={{ fontSize:'11px', fontWeight:'700', color:'#6B7280', textTransform:'uppercase', letterSpacing:'.05em', margin:'0 0 5px' }}>Mittente</p>
                 <input
-                  style={{ width:'100%', padding:'8px 10px', border:'1.5px solid #E5E7EB', borderRadius:7, fontSize:13, boxSizing:'border-box', fontWeight:700 }}
+                  style={{ width:'100%', padding:'8px 10px', border:'1.5px solid #E8ECF4', borderRadius:7, fontSize:13, boxSizing:'border-box', fontWeight:700 }}
                   value={smsMittente}
                   maxLength={20}
                   onChange={e => setSmsMittente(e.target.value)}
@@ -1884,7 +1884,7 @@ export default function IscrittiPage() {
                   ].map(([v, label]) => (
                     <button key={v} onClick={() => inserisciVariabile(v)}
                       style={{ fontSize:11, fontWeight:600, padding:'3px 9px', borderRadius:20,
-                        background:'#EBF0FA', color:'#003DA5', border:'1px solid #C7D7F9', cursor:'pointer', fontFamily:'monospace' }}>
+                        background:'#EEEFFD', color:'#5B5FEF', border:'1px solid #C7D7F9', cursor:'pointer', fontFamily:'monospace' }}>
                       {'{{' + v + '}}'}
                     </button>
                   ))}
@@ -1895,8 +1895,8 @@ export default function IscrittiPage() {
               <div>
                 <p style={{ fontSize:'11px', fontWeight:'700', color:'#6B7280', textTransform:'uppercase', letterSpacing:'.05em', margin:'0 0 5px' }}>Testo SMS</p>
                 <textarea
-                  style={{ width:'100%', padding:'10px', border:'1.5px solid #E5E7EB', borderRadius:8,
-                    fontSize:13, minHeight:110, resize:'vertical', fontFamily:"'Outfit',sans-serif",
+                  style={{ width:'100%', padding:'10px', border:'1.5px solid #E8ECF4', borderRadius:8,
+                    fontSize:13, minHeight:110, resize:'vertical', fontFamily:"'Inter',sans-serif",
                     boxSizing:'border-box', outline:'none', lineHeight:1.5 }}
                   value={smsTesto}
                   onChange={e => setSmsTesto(e.target.value)}
@@ -1915,7 +1915,7 @@ export default function IscrittiPage() {
                     Anteprima
                   </p>
                   {smsAnteprimaIscritto && (
-                    <span style={{ fontSize:11, color:'#003DA5', fontWeight:600 }}>
+                    <span style={{ fontSize:11, color:'#5B5FEF', fontWeight:600 }}>
                       {smsAnteprimaIscritto.nome} {smsAnteprimaIscritto.cognome}
                     </span>
                   )}
@@ -1925,7 +1925,7 @@ export default function IscrittiPage() {
                     {smsMittente || 'MITTENTE'}
                   </div>
                   <div style={{ background:'#E8F5E9', borderRadius:'14px 14px 4px 14px', padding:'10px 13px',
-                    fontSize:13, lineHeight:1.5, color:'#0A0A0A', whiteSpace:'pre-wrap', wordBreak:'break-word',
+                    fontSize:13, lineHeight:1.5, color:'#111827', whiteSpace:'pre-wrap', wordBreak:'break-word',
                     minHeight:44, border:'1px solid #C8E6C9' }}>
                     {smsTesto ? getAnteprimaSms() : <span style={{ color:'#D1D5DB' }}>Il messaggio apparirà qui...</span>}
                   </div>
@@ -1936,7 +1936,7 @@ export default function IscrittiPage() {
               </div>
 
               {/* Riepilogo */}
-              <div style={{ background:'#F9FAFB', border:'1px solid #E5E7EB', borderRadius:10, padding:12 }}>
+              <div style={{ background:'#F9FAFB', border:'1px solid #E8ECF4', borderRadius:10, padding:12 }}>
                 <div style={{ display:'flex', flexDirection:'column', gap:4 }}>
                   {[
                     ['Destinatari', smsProva ? '1 (prova)' : getDestinatariCount()],
@@ -1956,7 +1956,7 @@ export default function IscrittiPage() {
 
               {/* Toggle prova */}
               <label style={{ display:'flex', alignItems:'center', gap:8, cursor:'pointer', padding:'8px 10px',
-                borderRadius:8, border:'1.5px solid ' + (smsProva ? '#059669' : '#E5E7EB'),
+                borderRadius:8, border:'1.5px solid ' + (smsProva ? '#059669' : '#E8ECF4'),
                 background: smsProva ? '#F0FDF4' : '#fff', fontSize:13, fontWeight: smsProva ? 700 : 400 }}>
                 <input type="checkbox" checked={smsProva} onChange={e => setSmsProva(e.target.checked)}
                   style={{ accentColor:'#059669' }}/>
@@ -1990,7 +1990,7 @@ export default function IscrittiPage() {
                         </button>
                       )}
                       <button onClick={toggleTuttiSmsSelezione}
-                        style={{ fontSize:11, color:'#003DA5', background:'none', border:'none', cursor:'pointer', fontWeight:600 }}>
+                        style={{ fontSize:11, color:'#5B5FEF', background:'none', border:'none', cursor:'pointer', fontWeight:600 }}>
                         {smsSelezione.size > 0 && smsSelezione.size === registrations.filter(r=>r.cellulare).length ? 'Deseleziona tutti' : 'Seleziona tutti'}
                       </button>
                     </div>
@@ -2001,12 +2001,12 @@ export default function IscrittiPage() {
                     value={smsListaSearch}
                     onChange={e => setSmsListaSearch(e.target.value)}
                     placeholder="Cerca per nome o cellulare..."
-                    style={{ width:'100%', padding:'8px 10px', border:'1.5px solid #E5E7EB', borderRadius:8,
+                    style={{ width:'100%', padding:'8px 10px', border:'1.5px solid #E8ECF4', borderRadius:8,
                       fontSize:13, boxSizing:'border-box', outline:'none' }}
                   />
 
                   {/* Lista iscritti con checkbox */}
-                  <div style={{ border:'1px solid #E5E7EB', borderRadius:8, overflowY:'auto', maxHeight:320 }}>
+                  <div style={{ border:'1px solid #E8ECF4', borderRadius:8, overflowY:'auto', maxHeight:320 }}>
                     {registrations
                       .filter(r => r.cellulare && (!smsListaSearch ||
                         (r.nome+' '+r.cognome+' '+(r.cellulare||'')).toLowerCase().includes(smsListaSearch.toLowerCase())))
@@ -2118,7 +2118,7 @@ export default function IscrittiPage() {
             ].map(([label, val])=>(
               <div key={label}>
                 <p style={{ fontSize:'11px', fontWeight:'600', color:'#9CA3AF', textTransform:'uppercase', margin:'0 0 3px' }}>{label}</p>
-                <p style={{ fontSize:'14px', color:'#0A0A0A', margin:0, fontWeight:'500' }}>{val||'—'}</p>
+                <p style={{ fontSize:'14px', color:'#111827', margin:0, fontWeight:'500' }}>{val||'—'}</p>
               </div>
             ))}
           </div>
@@ -2142,7 +2142,7 @@ export default function IscrittiPage() {
       )}
       {/* BANNER RISULTATO CERTIFICATI */}
       {invioRisultato && (
-        <div style={{ margin:'0 0 16px', padding:'14px 18px', borderRadius:'8px',
+        <div style={{ margin:'0 0 16px', padding:'14px 18px', borderRadius:'16px',
           backgroundColor: invioRisultato.error ? '#FEF2F2' : '#F0FDF4',
           border: `1px solid ${invioRisultato.error ? '#FECACA' : '#BBF7D0'}`,
           display:'flex', alignItems:'center', justifyContent:'space-between', gap:'12px' }}>
@@ -2163,7 +2163,7 @@ export default function IscrittiPage() {
           {importDone ? (
             <div style={{ textAlign:'center', padding:'24px 0' }}>
               <CheckCircle2 size={48} style={{ color:'#16A34A', marginBottom:'16px' }}/>
-              <p style={{ fontSize:'18px', fontWeight:'800', color:'#0A0A0A', margin:'0 0 8px' }}>
+              <p style={{ fontSize:'18px', fontWeight:'800', color:'#111827', margin:'0 0 8px' }}>
                 Importazione completata
               </p>
               <p style={{ fontSize:'14px', color:'#6B7280', margin:'0 0 24px' }}>
@@ -2181,10 +2181,10 @@ export default function IscrittiPage() {
                     Carica un file Excel (.xlsx) con le colonne: <strong>Nome, Cognome, Email</strong> (obbligatori),
                     Cellulare, Ragione Sociale, P.IVA, CAP (opzionali).
                   </p>
-                  <div style={{ border:'2px dashed #D1D5DB', borderRadius:'8px', padding:'32px', textAlign:'center',
+                  <div style={{ border:'2px dashed #D1D5DB', borderRadius:'16px', padding:'32px', textAlign:'center',
                     backgroundColor:'#FAFAFA', cursor:'pointer' }}
                     onClick={() => fileInputRef.current?.click()}
-                    onDragOver={e => { e.preventDefault(); e.currentTarget.style.borderColor='#003DA5' }}
+                    onDragOver={e => { e.preventDefault(); e.currentTarget.style.borderColor='#5B5FEF' }}
                     onDragLeave={e => e.currentTarget.style.borderColor='#D1D5DB'}
                     onDrop={e => { e.preventDefault(); e.currentTarget.style.borderColor='#D1D5DB';
                       const f = e.dataTransfer.files[0]; if (f) { const dt = new DataTransfer(); dt.items.add(f); fileInputRef.current.files = dt.files; handleFileImport({ target: fileInputRef.current }) } }}>
@@ -2196,7 +2196,7 @@ export default function IscrittiPage() {
                   </div>
                   <input ref={fileInputRef} type="file" accept=".xlsx,.xls" onChange={handleFileImport} style={{ display:'none' }}/>
                   <div style={{ marginTop:'16px', display:'flex', justifyContent:'space-between', alignItems:'center' }}>
-                    <button onClick={downloadTemplate} style={{ fontSize:'13px', color:'#003DA5', background:'none', border:'none', cursor:'pointer', fontWeight:'600', padding:0 }}>
+                    <button onClick={downloadTemplate} style={{ fontSize:'13px', color:'#5B5FEF', background:'none', border:'none', cursor:'pointer', fontWeight:'600', padding:0 }}>
                       ↓ Scarica template Excel
                     </button>
                     <Btn variant="ghost" onClick={resetImport}>Annulla</Btn>
@@ -2208,7 +2208,7 @@ export default function IscrittiPage() {
               {(importPreview.length > 0 || importErrors.length > 0) && (
                 <div>
                   {importErrors.length > 0 && (
-                    <div style={{ backgroundColor:'#FEF2F2', border:'1px solid #FECACA', borderRadius:'6px', padding:'12px 16px', marginBottom:'16px' }}>
+                    <div style={{ backgroundColor:'#FEF2F2', border:'1px solid #FECACA', borderRadius:'14px', padding:'12px 16px', marginBottom:'16px' }}>
                       <div style={{ display:'flex', alignItems:'center', gap:'8px', marginBottom:'8px' }}>
                         <AlertCircle size={16} style={{ color:'#DC2626' }}/>
                         <span style={{ fontSize:'13px', fontWeight:'700', color:'#DC2626' }}>{importErrors.length} righe con errori (verranno saltate)</span>
@@ -2223,21 +2223,21 @@ export default function IscrittiPage() {
                         <CheckCircle2 size={14} style={{ color:'#16A34A', verticalAlign:'middle', marginRight:'6px' }}/>
                         {importPreview.length} iscritti pronti per l&apos;importazione
                       </p>
-                      <div style={{ maxHeight:'260px', overflowY:'auto', border:'1px solid #E5E7EB', borderRadius:'6px' }}>
+                      <div style={{ maxHeight:'260px', overflowY:'auto', border:'1px solid #E8ECF4', borderRadius:'14px' }}>
                         <table style={{ width:'100%', borderCollapse:'collapse', fontSize:'13px' }}>
                           <thead>
-                            <tr style={{ backgroundColor:'#F9FAFB' }}>
+                            <tr style={{ backgroundColor:'#F7F8FC' }}>
                               {['Nome','Cognome','Email','Cellulare'].map(h => (
                                 <th key={h} style={{ padding:'8px 12px', textAlign:'left', fontSize:'11px', fontWeight:'600',
-                                  color:'#6B7280', textTransform:'uppercase', letterSpacing:'0.04em', borderBottom:'1px solid #E5E7EB' }}>{h}</th>
+                                  color:'#6B7280', textTransform:'uppercase', letterSpacing:'0.04em', borderBottom:'1px solid #E8ECF4' }}>{h}</th>
                               ))}
                             </tr>
                           </thead>
                           <tbody>
                             {importPreview.map((r,i) => (
                               <tr key={i} style={{ borderBottom:'1px solid #F3F4F6' }}>
-                                <td style={{ padding:'8px 12px', color:'#0A0A0A', fontWeight:'500' }}>{r.nome}</td>
-                                <td style={{ padding:'8px 12px', color:'#0A0A0A', fontWeight:'500' }}>{r.cognome}</td>
+                                <td style={{ padding:'8px 12px', color:'#111827', fontWeight:'500' }}>{r.nome}</td>
+                                <td style={{ padding:'8px 12px', color:'#111827', fontWeight:'500' }}>{r.cognome}</td>
                                 <td style={{ padding:'8px 12px', color:'#374151' }}>{r.email}</td>
                                 <td style={{ padding:'8px 12px', color:'#374151' }}>{r.cellulare||'—'}</td>
                               </tr>
@@ -2299,10 +2299,10 @@ export default function IscrittiPage() {
             )}
 
             {/* CAPOGRUPPO */}
-            <div style={{ borderTop:'1px solid #E5E7EB', paddingTop:'16px' }}>
+            <div style={{ borderTop:'1px solid #E8ECF4', paddingTop:'16px' }}>
               <p style={{ margin:'0 0 8px', fontSize:'13px', fontWeight:'700', color:'#374151', display:'flex', alignItems:'center', gap:'6px' }}><Link2 size={14}/> Capogruppo (opzionale)</p>
               {editCapogruppo ? (
-                <div style={{ display:'flex', alignItems:'center', gap:'10px', padding:'10px 14px', background:'#EFF6FF', border:'1px solid #BFDBFE', borderRadius:'8px' }}>
+                <div style={{ display:'flex', alignItems:'center', gap:'10px', padding:'10px 14px', background:'#EFF6FF', border:'1px solid #BFDBFE', borderRadius:'16px' }}>
                   <UserCheck size={16} style={{ color:'#2563EB', flexShrink:0 }}/>
                   <div style={{ flex:1 }}>
                     <p style={{ margin:0, fontSize:'14px', fontWeight:'700', color:'#1E40AF' }}>{editCapogruppo.nome} {editCapogruppo.cognome}</p>
@@ -2332,7 +2332,7 @@ export default function IscrittiPage() {
                     ).slice(0, 8)
                     if (risultati.length === 0) return <p style={{ margin:'8px 0 0', fontSize:'12px', color:'#9CA3AF' }}>Nessun iscritto trovato</p>
                     return (
-                      <div style={{ marginTop:'4px', border:'1px solid #E5E7EB', borderRadius:'8px', maxHeight:'200px', overflowY:'auto', background:'#fff' }}>
+                      <div style={{ marginTop:'4px', border:'1px solid #E8ECF4', borderRadius:'16px', maxHeight:'200px', overflowY:'auto', background:'#fff' }}>
                         {risultati.map(r => (
                           <button key={r.id} onClick={() => { setEditCapogruppo(r); setEditCapoSearch('') }}
                             style={{ display:'flex', alignItems:'center', gap:'10px', width:'100%', padding:'10px 14px', background:'none', border:'none', borderBottom:'1px solid #F3F4F6', cursor:'pointer', textAlign:'left', fontSize:'13px' }}
@@ -2340,7 +2340,7 @@ export default function IscrittiPage() {
                             onMouseLeave={e => e.currentTarget.style.background='none'}>
                             <Users size={14} style={{ color:'#9CA3AF', flexShrink:0 }}/>
                             <div style={{ flex:1 }}>
-                              <span style={{ fontWeight:'600', color:'#0A0A0A' }}>{r.nome} {r.cognome}</span>
+                              <span style={{ fontWeight:'600', color:'#111827' }}>{r.nome} {r.cognome}</span>
                               <span style={{ color:'#6B7280', marginLeft:'8px' }}>{r.email || r.cellulare || ''}</span>
                             </div>
                             {r.codice_iscrizione && <span style={{ fontSize:'11px', color:'#9CA3AF', fontFamily:'monospace' }}>{r.codice_iscrizione}</span>}
@@ -2353,8 +2353,8 @@ export default function IscrittiPage() {
               )}
             </div>
 
-                        {editError && <p style={{ margin:0, padding:'10px 14px', background:'#FEF2F2', border:'1px solid #FECACA', borderRadius:'8px', fontSize:'13px', color:'#DC2626', fontWeight:'600' }}>{editError}</p>}
-            <div style={{ display:'flex', gap:'10px', justifyContent:'flex-end', borderTop:'1px solid #E5E7EB', paddingTop:'16px' }}>
+                        {editError && <p style={{ margin:0, padding:'10px 14px', background:'#FEF2F2', border:'1px solid #FECACA', borderRadius:'16px', fontSize:'13px', color:'#DC2626', fontWeight:'600' }}>{editError}</p>}
+            <div style={{ display:'flex', gap:'10px', justifyContent:'flex-end', borderTop:'1px solid #E8ECF4', paddingTop:'16px' }}>
               <Btn variant="secondary" onClick={() => setEditModal(null)} size="md">Annulla</Btn>
               <Btn variant="primary" onClick={salvaEditIscritto} disabled={editSaving} size="md" style={{ fontWeight:'700' }}>
                 <Pencil size={16}/> {editSaving ? 'Salvataggio...' : 'Salva modifiche'}
@@ -2401,10 +2401,10 @@ export default function IscrittiPage() {
             )}
 
             {/* CAPOGRUPPO */}
-            <div style={{ borderTop:'1px solid #E5E7EB', paddingTop:'16px' }}>
+            <div style={{ borderTop:'1px solid #E8ECF4', paddingTop:'16px' }}>
               <p style={{ margin:'0 0 8px', fontSize:'13px', fontWeight:'700', color:'#374151', display:'flex', alignItems:'center', gap:'6px' }}><Link2 size={14}/> Collega a capogruppo (opzionale)</p>
               {addCapogruppo ? (
-                <div style={{ display:'flex', alignItems:'center', gap:'10px', padding:'10px 14px', background:'#EFF6FF', border:'1px solid #BFDBFE', borderRadius:'8px' }}>
+                <div style={{ display:'flex', alignItems:'center', gap:'10px', padding:'10px 14px', background:'#EFF6FF', border:'1px solid #BFDBFE', borderRadius:'16px' }}>
                   <UserCheck size={16} style={{ color:'#2563EB', flexShrink:0 }}/>
                   <div style={{ flex:1 }}>
                     <p style={{ margin:0, fontSize:'14px', fontWeight:'700', color:'#1E40AF' }}>{addCapogruppo.nome} {addCapogruppo.cognome}</p>
@@ -2433,7 +2433,7 @@ export default function IscrittiPage() {
                     ).slice(0, 8)
                     if (risultati.length === 0) return <p style={{ margin:'8px 0 0', fontSize:'12px', color:'#9CA3AF' }}>Nessun iscritto trovato</p>
                     return (
-                      <div style={{ marginTop:'4px', border:'1px solid #E5E7EB', borderRadius:'8px', maxHeight:'200px', overflowY:'auto', background:'#fff' }}>
+                      <div style={{ marginTop:'4px', border:'1px solid #E8ECF4', borderRadius:'16px', maxHeight:'200px', overflowY:'auto', background:'#fff' }}>
                         {risultati.map(r => (
                           <button key={r.id} onClick={() => { setAddCapogruppo(r); setAddCapoSearch('') }}
                             style={{ display:'flex', alignItems:'center', gap:'10px', width:'100%', padding:'10px 14px', background:'none', border:'none', borderBottom:'1px solid #F3F4F6', cursor:'pointer', textAlign:'left', fontSize:'13px' }}
@@ -2441,7 +2441,7 @@ export default function IscrittiPage() {
                             onMouseLeave={e => e.currentTarget.style.background='none'}>
                             <Users size={14} style={{ color:'#9CA3AF', flexShrink:0 }}/>
                             <div style={{ flex:1 }}>
-                              <span style={{ fontWeight:'600', color:'#0A0A0A' }}>{r.nome} {r.cognome}</span>
+                              <span style={{ fontWeight:'600', color:'#111827' }}>{r.nome} {r.cognome}</span>
                               <span style={{ color:'#6B7280', marginLeft:'8px' }}>{r.email || r.cellulare || ''}</span>
                             </div>
                             {r.codice_iscrizione && <span style={{ fontSize:'11px', color:'#9CA3AF', fontFamily:'monospace' }}>{r.codice_iscrizione}</span>}
@@ -2454,9 +2454,9 @@ export default function IscrittiPage() {
               )}
             </div>
 
-            {addError && <p style={{ margin:0, padding:'10px 14px', background:'#FEF2F2', border:'1px solid #FECACA', borderRadius:'8px', fontSize:'13px', color:'#DC2626', fontWeight:'600' }}>{addError}</p>}
+            {addError && <p style={{ margin:0, padding:'10px 14px', background:'#FEF2F2', border:'1px solid #FECACA', borderRadius:'16px', fontSize:'13px', color:'#DC2626', fontWeight:'600' }}>{addError}</p>}
 
-            <div style={{ display:'flex', gap:'10px', justifyContent:'flex-end', borderTop:'1px solid #E5E7EB', paddingTop:'16px' }}>
+            <div style={{ display:'flex', gap:'10px', justifyContent:'flex-end', borderTop:'1px solid #E8ECF4', paddingTop:'16px' }}>
               <Btn variant="secondary" onClick={() => setAddModal(false)} size="md">Annulla</Btn>
               <Btn variant="primary" onClick={salvaIscrittoManuale} disabled={addSaving} size="md" style={{ fontWeight:'700' }}>
                 <UserPlus size={16}/> {addSaving ? 'Salvataggio...' : 'Aggiungi iscritto'}
@@ -2473,23 +2473,23 @@ export default function IscrittiPage() {
 const s = {
   page: { width:'100%' },
   header: { display:'flex', alignItems:'flex-start', justifyContent:'space-between', marginBottom:'24px', flexWrap:'wrap', gap:'12px' },
-  title: { fontSize:'32px', fontWeight:'900', color:'#0A0A0A', letterSpacing:'-0.03em', margin:0 },
+  title: { fontSize:'32px', fontWeight:'900', color:'#111827', letterSpacing:'-0.03em', margin:0 },
   subtitle: { fontSize:'14px', color:'#6B7280', margin:'4px 0 0', fontWeight:'500' },
   filters: { display:'flex', gap:'12px', marginBottom:'16px', flexWrap:'wrap', alignItems:'center' },
   searchWrap: { position:'relative', flex:1, minWidth:'200px' },
   searchIcon: { position:'absolute', left:'12px', top:'50%', transform:'translateY(-50%)', color:'#9CA3AF' },
-  searchInput: { width:'100%', padding:'9px 12px 9px 36px', border:'1px solid #D1D5DB', borderRadius:'4px', fontSize:'14px', fontFamily:"'Outfit',sans-serif", outline:'none', boxSizing:'border-box' },
+  searchInput: { width:'100%', padding:'9px 12px 9px 36px', border:'1px solid #D1D5DB', borderRadius:'4px', fontSize:'14px', fontFamily:"'Inter',sans-serif", outline:'none', boxSizing:'border-box' },
   statsRow: { display:'flex', gap:'12px', marginBottom:'16px', flexWrap:'wrap' },
-  statCard: { backgroundColor:'#FFFFFF', border:'1px solid #E5E7EB', borderRadius:'6px', padding:'16px 20px', flex:1, minWidth:'110px', textAlign:'center' },
+  statCard: { backgroundColor:'#FFFFFF', border:'1px solid #E8ECF4', borderRadius:'14px', padding:'16px 20px', flex:1, minWidth:'110px', textAlign:'center' },
   statVal: (color) => ({ fontSize:'28px', fontWeight:'900', color, letterSpacing:'-0.03em', margin:'0 0 2px' }),
   statLabel: { fontSize:'12px', color:'#6B7280', margin:0, fontWeight:'500' },
-  card: { backgroundColor:'#FFFFFF', borderRadius:'6px', border:'1px solid #E5E7EB', overflow:'hidden' },
+  card: { backgroundColor:'#FFFFFF', borderRadius:'14px', border:'1px solid #E8ECF4', overflow:'hidden' },
   table: { width:'100%', borderCollapse:'collapse', fontSize:'14px' },
-  th: { padding:'10px 20px', textAlign:'left', fontSize:'11px', fontWeight:'600', color:'#6B7280', textTransform:'uppercase', letterSpacing:'0.06em', borderBottom:'1px solid #E5E7EB', whiteSpace:'nowrap', backgroundColor:'#FAFAFA' },
+  th: { padding:'10px 20px', textAlign:'left', fontSize:'11px', fontWeight:'600', color:'#6B7280', textTransform:'uppercase', letterSpacing:'0.06em', borderBottom:'1px solid #E8ECF4', whiteSpace:'nowrap', backgroundColor:'#FAFAFA' },
   tr: { transition:'background-color 0.1s' },
   td: { padding:'10px 12px', borderBottom:'1px solid #F3F4F6', verticalAlign:'middle' },
-  name: { fontWeight:'600', color:'#0A0A0A', margin:'0 0 2px', letterSpacing:'-0.01em' },
+  name: { fontWeight:'600', color:'#111827', margin:'0 0 2px', letterSpacing:'-0.01em' },
   sub: { fontSize:'12px', color:'#6B7280', margin:0 },
   cell: { color:'#374151', fontSize:'14px' },
-  iconBtn: { background:'none', border:'1px solid #E5E7EB', borderRadius:'4px', padding:'5px 7px', cursor:'pointer', color:'#6B7280', display:'flex', alignItems:'center' },
+  iconBtn: { background:'none', border:'1px solid #E8ECF4', borderRadius:'4px', padding:'5px 7px', cursor:'pointer', color:'#6B7280', display:'flex', alignItems:'center' },
 }

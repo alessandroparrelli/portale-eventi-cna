@@ -8,7 +8,7 @@ import { logAttivita } from '../../lib/activityLog'
 import { Modal, RuoloBadge, Field, Input, Select, Btn, EmptyState } from '../../components/ui'
 import { Users, Plus, Pencil, Trash2, ShieldCheck, Eye, EyeOff, Activity, Clock, ToggleLeft, ToggleRight, Settings } from 'lucide-react'
 
-const RUOLO_COL  = { admin:'#003DA5', supervisore:'#D97706', utente:'#6B7280' }
+const RUOLO_COL  = { admin:'#5B5FEF', supervisore:'#D97706', utente:'#6B7280' }
 const RUOLO_DESC_FALLBACK = {
   admin:       'Accesso completo: crea, modifica, elimina, gestisce utenti.',
   supervisore: 'Crea e modifica eventi. Non elimina né gestisce utenti.',
@@ -123,7 +123,7 @@ export default function UtentiPage() {
   if (!canManageUtenti) return (
     <div style={{ display:'flex', alignItems:'center', justifyContent:'center', minHeight:'60vh', flexDirection:'column', gap:'12px', textAlign:'center' }}>
       <ShieldCheck size={48} style={{ color:'#D1D5DB' }}/>
-      <p style={{ fontSize:'18px', fontWeight:'700', color:'#0A0A0A' }}>Accesso non autorizzato</p>
+      <p style={{ fontSize:'18px', fontWeight:'700', color:'#111827' }}>Accesso non autorizzato</p>
       <p style={{ fontSize:'14px', color:'#6B7280' }}>Non hai i permessi per gestire gli utenti.</p>
     </div>
   )
@@ -132,7 +132,7 @@ export default function UtentiPage() {
     <div style={{ width:'100%' }} className="admin-page">
       <div style={{ display:'flex', alignItems:'flex-start', justifyContent:'space-between', marginBottom:'20px', flexWrap:'wrap', gap:'12px' }}>
         <div>
-          <h1 style={{ fontSize:'32px', fontWeight:'900', color:'#0A0A0A', letterSpacing:'-.03em', margin:0 }}>Gestione Utenti</h1>
+          <h1 style={{ fontSize:'32px', fontWeight:'900', color:'#111827', letterSpacing:'-.03em', margin:0 }}>Gestione Utenti</h1>
           <p style={{ fontSize:'14px', color:'#6B7280', margin:'4px 0 0' }}>{users.length} utenti</p>
         </div>
         <div style={{ display:'flex', gap:'8px' }}>
@@ -141,7 +141,7 @@ export default function UtentiPage() {
         </div>
       </div>
 
-      <div style={{ backgroundColor:'#FFFFFF', borderRadius:'8px', border:'1px solid #E5E7EB', overflow:'hidden' }}>
+      <div style={{ backgroundColor:'#FFFFFF', borderRadius:'16px', border:'1px solid #E8ECF4', overflow:'hidden' }}>
         {loading ? (
           <p style={{ padding:'40px', textAlign:'center', color:'#9CA3AF', fontSize:'14px' }}>Caricamento…</p>
         ) : users.length === 0 ? (
@@ -150,7 +150,7 @@ export default function UtentiPage() {
           <table style={{ width:'100%', borderCollapse:'collapse', fontSize:'14px' }}>
             <thead>
               <tr>{['Utente','Ruolo','Stato','Azioni'].map(h=>(
-                <th key={h} style={{ padding:'10px 16px', textAlign:'left', fontSize:'11px', fontWeight:'600', color:'#6B7280', textTransform:'uppercase', letterSpacing:'.06em', borderBottom:'1px solid #E5E7EB', backgroundColor:'#FAFAFA' }}>{h}</th>
+                <th key={h} style={{ padding:'10px 16px', textAlign:'left', fontSize:'11px', fontWeight:'600', color:'#6B7280', textTransform:'uppercase', letterSpacing:'.06em', borderBottom:'1px solid #E8ECF4', backgroundColor:'#FAFAFA' }}>{h}</th>
               ))}</tr>
             </thead>
             <tbody>
@@ -164,10 +164,10 @@ export default function UtentiPage() {
                       <Av u={u}/>
                       <div>
                         <div style={{ display:'flex', alignItems:'center', gap:'6px' }}>
-                          <p style={{ fontWeight:'700', color:'#0A0A0A', margin:0, fontSize:'14px' }}>
+                          <p style={{ fontWeight:'700', color:'#111827', margin:0, fontSize:'14px' }}>
                             {u.nome&&u.cognome ? `${u.nome} ${u.cognome}` : u.username}
                           </p>
-                          {u.id===me?.id && <span style={{ fontSize:'10px', fontWeight:'700', backgroundColor:'#EBF0FA', color:'#003DA5', padding:'1px 7px', borderRadius:'10px' }}>Tu</span>}
+                          {u.id===me?.id && <span style={{ fontSize:'10px', fontWeight:'700', backgroundColor:'#EEEFFD', color:'#5B5FEF', padding:'1px 7px', borderRadius:'14px' }}>Tu</span>}
                         </div>
                         <p style={{ fontSize:'12px', color:'#6B7280', margin:'1px 0 0' }}>{u.email}</p>
                         {(u.nome||u.cognome) && <p style={{ fontSize:'11px', color:'#9CA3AF', margin:'1px 0 0' }}>@{u.username}</p>}
@@ -179,15 +179,15 @@ export default function UtentiPage() {
                   </td>
                   <td style={{ padding:'12px 16px', borderBottom:'1px solid #F3F4F6', verticalAlign:'middle' }}>
                     <button onClick={()=>u.id!==me?.id&&toggleAttivo(u)} disabled={u.id===me?.id}
-                      style={{ display:'flex', alignItems:'center', gap:'5px', background:'none', border:'none', cursor:u.id===me?.id?'default':'pointer', fontFamily:"'Outfit',sans-serif", fontSize:'13px', fontWeight:'600', color:u.attivo?'#16A34A':'#9CA3AF', opacity:u.id===me?.id?.5:1 }}>
+                      style={{ display:'flex', alignItems:'center', gap:'5px', background:'none', border:'none', cursor:u.id===me?.id?'default':'pointer', fontFamily:"'Inter',sans-serif", fontSize:'13px', fontWeight:'600', color:u.attivo?'#16A34A':'#9CA3AF', opacity:u.id===me?.id?.5:1 }}>
                       {u.attivo ? <ToggleRight size={20} style={{ color:'#16A34A' }}/> : <ToggleLeft size={20}/>}
                       {u.attivo ? 'Attivo' : 'Inattivo'}
                     </button>
                   </td>
                   <td style={{ padding:'12px 16px', borderBottom:'1px solid #F3F4F6', verticalAlign:'middle' }}>
                     <div style={{ display:'flex', gap:'5px' }}>
-                      <button style={{ background:'none', border:'1px solid #E5E7EB', borderRadius:'4px', padding:'5px 6px', cursor:'pointer', color:'#6B7280', display:'flex', alignItems:'center' }} title="Log" onClick={()=>openLog(u)}><Activity size={14}/></button>
-                      <button style={{ background:'none', border:'1px solid #E5E7EB', borderRadius:'4px', padding:'5px 6px', cursor:'pointer', color:'#6B7280', display:'flex', alignItems:'center' }} title="Modifica" onClick={()=>openEdit(u)}><Pencil size={14}/></button>
+                      <button style={{ background:'none', border:'1px solid #E8ECF4', borderRadius:'4px', padding:'5px 6px', cursor:'pointer', color:'#6B7280', display:'flex', alignItems:'center' }} title="Log" onClick={()=>openLog(u)}><Activity size={14}/></button>
+                      <button style={{ background:'none', border:'1px solid #E8ECF4', borderRadius:'4px', padding:'5px 6px', cursor:'pointer', color:'#6B7280', display:'flex', alignItems:'center' }} title="Modifica" onClick={()=>openEdit(u)}><Pencil size={14}/></button>
                       {u.id!==me?.id && <button style={{ background:'none', border:'1px solid #FECACA', borderRadius:'4px', padding:'5px 6px', cursor:'pointer', color:'#DC2626', display:'flex', alignItems:'center' }} title="Elimina" onClick={()=>{setCur(u);setModal('delete')}}><Trash2 size={14}/></button>}
                     </div>
                   </td>
@@ -202,7 +202,7 @@ export default function UtentiPage() {
       {(modal==='create'||modal==='edit') && (
         <Modal title={modal==='create'?'Nuovo utente':'Modifica utente'} onClose={()=>setModal(null)} width="500px">
           <div style={{ display:'flex', flexDirection:'column', gap:'13px' }}>
-            {errors.general && <div style={{ backgroundColor:'#FEF2F2', border:'1px solid #FECACA', borderRadius:'6px', padding:'10px 14px', fontSize:'13px', color:'#DC2626' }}>{errors.general}</div>}
+            {errors.general && <div style={{ backgroundColor:'#FEF2F2', border:'1px solid #FECACA', borderRadius:'14px', padding:'10px 14px', fontSize:'13px', color:'#DC2626' }}>{errors.general}</div>}
             <div style={{ display:'grid', gridTemplateColumns:'1fr 1fr', gap:'12px' }} className="grid-2col">
               <Field label="Nome"><Input value={cur.nome||''} onChange={e=>setCur(p=>({...p,nome:e.target.value}))} placeholder="Mario"/></Field>
               <Field label="Cognome"><Input value={cur.cognome||''} onChange={e=>setCur(p=>({...p,cognome:e.target.value}))} placeholder="Rossi"/></Field>
@@ -261,10 +261,10 @@ export default function UtentiPage() {
       {/* Modal log */}
       {modal==='log' && logUser && (
         <Modal title={`Log — ${logUser.username}`} onClose={()=>setModal(null)} width="520px">
-          <div style={{ display:'flex', alignItems:'center', gap:'10px', padding:'10px 14px', backgroundColor:'#F9FAFB', borderRadius:'8px', marginBottom:'14px' }}>
+          <div style={{ display:'flex', alignItems:'center', gap:'10px', padding:'10px 14px', backgroundColor:'#F7F8FC', borderRadius:'16px', marginBottom:'14px' }}>
             <Av u={logUser} size={40}/>
             <div>
-              <p style={{ fontSize:'14px', fontWeight:'700', color:'#0A0A0A', margin:0 }}>{logUser.nome&&logUser.cognome?`${logUser.nome} ${logUser.cognome}`:logUser.username}</p>
+              <p style={{ fontSize:'14px', fontWeight:'700', color:'#111827', margin:0 }}>{logUser.nome&&logUser.cognome?`${logUser.nome} ${logUser.cognome}`:logUser.username}</p>
               <p style={{ fontSize:'12px', color:'#6B7280', margin:'1px 0 0' }}>{logUser.email}</p>
             </div>
             <div style={{ marginLeft:'auto' }}><RuoloBadge ruolo={logUser.ruolo}/></div>
@@ -275,7 +275,7 @@ export default function UtentiPage() {
               {log.map((e,i)=>(
                 <div key={e.id} style={{ display:'flex', gap:'10px', alignItems:'center', padding:'9px 0', borderBottom:i<log.length-1?'1px solid #F3F4F6':'none' }}>
                   <span style={{ fontSize:'16px', flexShrink:0 }}>{LOG_ICONS[e.azione]||'🔹'}</span>
-                  <span style={{ flex:1, fontSize:'13px', fontWeight:'600', color:'#0A0A0A' }}>{LOG_LABELS[e.azione]||e.azione}</span>
+                  <span style={{ flex:1, fontSize:'13px', fontWeight:'600', color:'#111827' }}>{LOG_LABELS[e.azione]||e.azione}</span>
                   <span style={{ fontSize:'11px', color:'#9CA3AF', display:'flex', alignItems:'center', gap:'3px', flexShrink:0 }}>
                     <Clock size={11}/>{new Date(e.created_at).toLocaleString('it-IT',{day:'2-digit',month:'2-digit',hour:'2-digit',minute:'2-digit'})}
                   </span>
@@ -286,7 +286,7 @@ export default function UtentiPage() {
       )}
 
       {toast && (
-        <div style={{ position:'fixed', bottom:'24px', left:'50%', transform:'translateX(-50%)', zIndex:300, display:'flex', alignItems:'center', gap:'10px', backgroundColor:toast.type==='ok'?'#F0FDF4':'#FEF2F2', border:`1px solid ${toast.type==='ok'?'#86EFAC':'#FECACA'}`, borderRadius:'12px', padding:'14px 20px', boxShadow:'0 8px 32px rgba(0,0,0,.15)', fontFamily:"'Outfit',sans-serif", fontSize:'14px', fontWeight:'600', color:toast.type==='ok'?'#15803D':'#DC2626', whiteSpace:'nowrap' }}>
+        <div style={{ position:'fixed', bottom:'24px', left:'50%', transform:'translateX(-50%)', zIndex:300, display:'flex', alignItems:'center', gap:'10px', backgroundColor:toast.type==='ok'?'#F0FDF4':'#FEF2F2', border:`1px solid ${toast.type==='ok'?'#86EFAC':'#FECACA'}`, borderRadius:'16px', padding:'14px 20px', boxShadow:'0 8px 32px rgba(0,0,0,.15)', fontFamily:"'Inter',sans-serif", fontSize:'14px', fontWeight:'600', color:toast.type==='ok'?'#15803D':'#DC2626', whiteSpace:'nowrap' }}>
           {toast.type==='ok'?'✅':'❌'} {toast.msg}
           <button onClick={()=>setToast(null)} style={{ background:'none', border:'none', cursor:'pointer', color:'inherit', marginLeft:'8px', fontSize:'16px' }}>×</button>
         </div>

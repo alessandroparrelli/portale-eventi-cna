@@ -22,12 +22,12 @@ export default class ErrorBoundary extends Component {
           background: '#F9FAFB', fontFamily: 'Inter, sans-serif', padding: '24px'
         }}>
           <div style={{
-            background: '#fff', borderRadius: '12px', padding: '32px', maxWidth: '480px',
+            background: '#fff', borderRadius: '16px', padding: '32px', maxWidth: '480px',
             width: '100%', textAlign: 'center', boxShadow: '0 4px 24px rgba(0,0,0,0.08)',
-            border: '1px solid #E5E7EB'
+            border: '1px solid #E8ECF4'
           }}>
             <div style={{ fontSize: '40px', marginBottom: '16px' }}>⚠️</div>
-            <h2 style={{ fontSize: '18px', fontWeight: '800', color: '#0A0A0A', margin: '0 0 8px' }}>
+            <h2 style={{ fontSize: '18px', fontWeight: '800', color: '#111827', margin: '0 0 8px' }}>
               Si è verificato un errore
             </h2>
             <p style={{ fontSize: '13px', color: '#6B7280', margin: '0 0 20px', lineHeight: 1.6 }}>
@@ -37,8 +37,8 @@ export default class ErrorBoundary extends Component {
               <button
                 onClick={() => { this.setState({ hasError: false, error: null }); window.history.back() }}
                 style={{
-                  padding: '10px 20px', background: '#003DA5', color: '#fff', border: 'none',
-                  borderRadius: '8px', fontSize: '13px', fontWeight: '700', cursor: 'pointer',
+                  padding: '10px 20px', background: '#5B5FEF', color: '#fff', border: 'none',
+                  borderRadius: '16px', fontSize: '13px', fontWeight: '700', cursor: 'pointer',
                   fontFamily: 'Inter, sans-serif'
                 }}>
                 ← Torna indietro
@@ -47,7 +47,7 @@ export default class ErrorBoundary extends Component {
                 onClick={() => window.location.reload()}
                 style={{
                   padding: '10px 20px', background: '#fff', color: '#374151',
-                  border: '1px solid #E5E7EB', borderRadius: '8px', fontSize: '13px',
+                  border: '1px solid #E8ECF4', borderRadius: '16px', fontSize: '13px',
                   fontWeight: '600', cursor: 'pointer', fontFamily: 'Inter, sans-serif'
                 }}>
                 🔄 Ricarica pagina

@@ -30,16 +30,16 @@ export default class IframePreview extends Component {
       return (
         <div style={{ display:'flex', flexDirection:'column', alignItems:'center',
           justifyContent:'center', flex:1, minHeight:'300px', gap:'12px',
-          background:'#F9FAFB', borderRadius:'10px', border:'1px solid #E5E7EB' }}>
+          background:'#F9FAFB', borderRadius:'14px', border:'1px solid #E8ECF4' }}>
           <p style={{ fontSize:'14px', color:'#6B7280', margin:0 }}>
             L'anteprima non è disponibile in questo browser.
           </p>
           {fallbackUrl && (
             <a href={fallbackUrl} target="_blank" rel="noopener noreferrer"
               style={{ display:'inline-flex', alignItems:'center', gap:'6px',
-                padding:'8px 16px', backgroundColor:'#003DA5', color:'#fff',
-                borderRadius:'6px', textDecoration:'none', fontSize:'13px',
-                fontWeight:'700', fontFamily:"'Outfit',sans-serif" }}>
+                padding:'8px 16px', backgroundColor:'#5B5FEF', color:'#fff',
+                borderRadius:'14px', textDecoration:'none', fontSize:'13px',
+                fontWeight:'700', fontFamily:"'Inter',sans-serif" }}>
               Apri in nuova scheda ↗
             </a>
           )}

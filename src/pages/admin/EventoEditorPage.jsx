@@ -68,9 +68,9 @@ function newSection(tipo) {
     case 'stats':     return { ...base, items:[
       { numero:'100+', label:'Partecipanti' },
       { numero:'10',   label:'Relatori' },
-    ], colore_numeri:'#003DA5' }
-    case 'separatore':return { ...base, stile:'linea', colore:'#E5E7EB' }
-    case 'cta':       return { ...base, testo:'Iscriviti ora', link:'#form', colore_btn:'#003DA5', colore_testo:'#FFFFFF', titolo:'Partecipa all\'evento' }
+    ], colore_numeri:'#5B5FEF' }
+    case 'separatore':return { ...base, stile:'linea', colore:'#E8ECF4' }
+    case 'cta':       return { ...base, testo:'Iscriviti ora', link:'#form', colore_btn:'#5B5FEF', colore_testo:'#FFFFFF', titolo:'Partecipa all\'evento' }
     default:          return base
   }
 }
@@ -95,11 +95,11 @@ function AddSectionBar({ onAdd }) {
         style={{
           display:'flex', alignItems:'center', gap:'8px',
           width:'100%', padding:'12px 18px',
-          border:`2px dashed ${open ? '#003DA5' : '#D1D5DB'}`,
-          borderRadius:'8px', backgroundColor: open ? '#EBF0FA' : '#FAFAFA',
+          border:`2px dashed ${open ? '#5B5FEF' : '#D1D5DB'}`,
+          borderRadius:'16px', backgroundColor: open ? '#EEEFFD' : '#FAFAFA',
           cursor:'pointer', fontSize:'14px', fontWeight:'700',
-          color: open ? '#003DA5' : '#6B7280',
-          fontFamily:"'Outfit',sans-serif", justifyContent:'center',
+          color: open ? '#5B5FEF' : '#6B7280',
+          fontFamily:"'Inter',sans-serif", justifyContent:'center',
           transition:'all .15s',
         }}>
         <span style={{ fontSize:'18px', lineHeight:1 }}>{open ? '✕' : '+'}</span>
@@ -107,7 +107,7 @@ function AddSectionBar({ onAdd }) {
       </button>
       {open && (
         <div style={{
-          marginTop:'8px', border:'1px solid #E5E7EB', borderRadius:'10px',
+          marginTop:'8px', border:'1px solid #E8ECF4', borderRadius:'14px',
           backgroundColor:'#FFFFFF', overflow:'hidden',
           boxShadow:'0 4px 16px rgba(0,0,0,.08)',
         }}>
@@ -119,13 +119,13 @@ function AddSectionBar({ onAdd }) {
                 width:'100%', padding:'13px 18px',
                 border:'none', borderBottom:'1px solid #F3F4F6',
                 backgroundColor:'#FFF', cursor:'pointer',
-                fontFamily:"'Outfit',sans-serif", textAlign:'left',
+                fontFamily:"'Inter',sans-serif", textAlign:'left',
                 transition:'background-color .1s',
               }}
-              onMouseEnter={e => e.currentTarget.style.backgroundColor='#EBF0FA'}
+              onMouseEnter={e => e.currentTarget.style.backgroundColor='#EEEFFD'}
               onMouseLeave={e => e.currentTarget.style.backgroundColor='#FFF'}>
               <span style={{ fontSize:'20px', flexShrink:0 }}>{emoji}</span>
-              <span style={{ fontSize:'14px', fontWeight:'600', color:'#0A0A0A' }}>{label}</span>
+              <span style={{ fontSize:'14px', fontWeight:'600', color:'#111827' }}>{label}</span>
             </button>
           ))}
         </div>
@@ -154,21 +154,21 @@ function SectionInserter({ onAdd, label='+ Inserisci sezione qui' }) {
   return (
     <div style={{ position:'relative', display:'flex', justifyContent:'center', margin:'6px 0', zIndex:10 }}>
       <button onClick={e=>{e.stopPropagation();setOpen(!open)}}
-        style={{ display:'flex', alignItems:'center', gap:'5px', padding:'5px 16px', border:'1.5px dashed #FDA4AF', borderRadius:'20px', backgroundColor:open?'#EBF0FA':'#FFF', cursor:'pointer', fontSize:'12px', color:open?'#003DA5':'#6B7280', fontFamily:"'Outfit',sans-serif", fontWeight:'600', transition:'all .15s' }}
-        onMouseEnter={e=>{if(!open){e.currentTarget.style.borderColor='#003DA5';e.currentTarget.style.color='#003DA5'}}}
+        style={{ display:'flex', alignItems:'center', gap:'5px', padding:'5px 16px', border:'1.5px dashed #FDA4AF', borderRadius:'20px', backgroundColor:open?'#EEEFFD':'#FFF', cursor:'pointer', fontSize:'12px', color:open?'#5B5FEF':'#6B7280', fontFamily:"'Inter',sans-serif", fontWeight:'600', transition:'all .15s' }}
+        onMouseEnter={e=>{if(!open){e.currentTarget.style.borderColor='#5B5FEF';e.currentTarget.style.color='#5B5FEF'}}}
         onMouseLeave={e=>{if(!open){e.currentTarget.style.borderColor='#FDA4AF';e.currentTarget.style.color='#6B7280'}}}>
         ＋ {label.replace('+ ','')}
       </button>
       {open && (
         <>
           <div onClick={()=>setOpen(false)} style={{ position:'fixed', inset:0, zIndex:9 }}/>
-          <div style={{ position:'absolute', top:'100%', left:'50%', transform:'translateX(-50%)', marginTop:'6px', backgroundColor:'#FFF', border:'1px solid #E5E7EB', borderRadius:'10px', boxShadow:'0 8px 24px rgba(0,0,0,.12)', padding:'8px', zIndex:10, display:'grid', gridTemplateColumns:'1fr 1fr', gap:'4px', minWidth:'280px' }}>
+          <div style={{ position:'absolute', top:'100%', left:'50%', transform:'translateX(-50%)', marginTop:'6px', backgroundColor:'#FFF', border:'1px solid #E8ECF4', borderRadius:'14px', boxShadow:'0 8px 24px rgba(0,0,0,.12)', padding:'8px', zIndex:10, display:'grid', gridTemplateColumns:'1fr 1fr', gap:'4px', minWidth:'280px' }}>
             {TYPES.map(({ tipo, label, desc }) => (
               <button key={tipo} onClick={()=>{onAdd(tipo);setOpen(false)}}
-                style={{ display:'flex', flexDirection:'column', alignItems:'flex-start', padding:'10px 12px', border:'1px solid #E5E7EB', borderRadius:'8px', cursor:'pointer', backgroundColor:'#FFF', textAlign:'left', transition:'background-color .1s', fontFamily:"'Outfit',sans-serif" }}
-                onMouseEnter={e=>e.currentTarget.style.backgroundColor='#EBF0FA'}
+                style={{ display:'flex', flexDirection:'column', alignItems:'flex-start', padding:'10px 12px', border:'1px solid #E8ECF4', borderRadius:'16px', cursor:'pointer', backgroundColor:'#FFF', textAlign:'left', transition:'background-color .1s', fontFamily:"'Inter',sans-serif" }}
+                onMouseEnter={e=>e.currentTarget.style.backgroundColor='#EEEFFD'}
                 onMouseLeave={e=>e.currentTarget.style.backgroundColor='#FFF'}>
-                <span style={{ fontSize:'13px', fontWeight:'700', color:'#0A0A0A' }}>{label}</span>
+                <span style={{ fontSize:'13px', fontWeight:'700', color:'#111827' }}>{label}</span>
                 <span style={{ fontSize:'11px', color:'#9CA3AF', marginTop:'2px' }}>{desc}</span>
               </button>
             ))}
@@ -189,8 +189,8 @@ function SectionEditor({ sec, onChange, onDelete, onMoveUp, onMoveDown, isFirst,
       <div style={se.header}>
         <div style={{ display:'flex', alignItems:'center', gap:'10px' }}>
           <GripVertical size={16} style={{ color:'#9CA3AF' }}/>
-          <TypeIcon size={16} style={{ color:'#003DA5' }}/>
-          <span style={{ fontSize:'13px', fontWeight:'700', color:'#0A0A0A' }}>
+          <TypeIcon size={16} style={{ color:'#5B5FEF' }}/>
+          <span style={{ fontSize:'13px', fontWeight:'700', color:'#111827' }}>
             {SECTION_TYPES.find(t=>t.tipo===sec.tipo)?.label}
           </span>
         </div>
@@ -261,7 +261,7 @@ function SectionEditor({ sec, onChange, onDelete, onMoveUp, onMoveDown, isFirst,
                 </button>
               </div>
               {(sec.colonne||[]).map((col,i)=>(
-                <div key={i} style={{ backgroundColor:'#F9FAFB', borderRadius:'6px', padding:'12px', marginBottom:'8px', border:'1px solid #E5E7EB' }}>
+                <div key={i} style={{ backgroundColor:'#F7F8FC', borderRadius:'14px', padding:'12px', marginBottom:'8px', border:'1px solid #E8ECF4' }}>
                   <div style={{ display:'flex', gap:'8px', marginBottom:'8px' }}>
                     <input value={col.icona||''} onChange={e=>{const c=[...sec.colonne];c[i]={...c[i],icona:e.target.value};onChange({...sec,colonne:c})}}
                       style={{ ...se.smallInput, width:'50px' }} placeholder="✓"/>
@@ -272,7 +272,7 @@ function SectionEditor({ sec, onChange, onDelete, onMoveUp, onMoveDown, isFirst,
                   </div>
                   <textarea value={col.testo||''} onChange={e=>{const c=[...sec.colonne];c[i]={...c[i],testo:e.target.value};onChange({...sec,colonne:c})}}
                     rows={3} placeholder="Testo…"
-                    style={{ width:'100%', padding:'8px', border:'1px solid #D1D5DB', borderRadius:'4px', fontSize:'13px', fontFamily:"'Outfit',sans-serif", resize:'vertical' }}/>
+                    style={{ width:'100%', padding:'8px', border:'1px solid #D1D5DB', borderRadius:'4px', fontSize:'13px', fontFamily:"'Inter',sans-serif", resize:'vertical' }}/>
                 </div>
               ))}
             </>
@@ -282,7 +282,7 @@ function SectionEditor({ sec, onChange, onDelete, onMoveUp, onMoveDown, isFirst,
             <>
               <div style={{ display:'flex', gap:'10px', marginBottom:'10px' }}>
                 <label style={se.lbl}>Colore numeri</label>
-                <input type="color" value={sec.colore_numeri||'#003DA5'}
+                <input type="color" value={sec.colore_numeri||'#5B5FEF'}
                   onChange={e=>onChange({...sec,colore_numeri:e.target.value})} style={se.colorPick}/>
               </div>
               {(sec.items||[]).map((item,i)=>(
@@ -310,7 +310,7 @@ function SectionEditor({ sec, onChange, onDelete, onMoveUp, onMoveDown, isFirst,
                 <option value="wave">Onda</option>
               </select>
               <label style={{ ...se.lbl, marginLeft:'12px' }}>Colore</label>
-              <input type="color" value={sec.colore||'#E5E7EB'} onChange={e=>onChange({...sec,colore:e.target.value})} style={se.colorPick}/>
+              <input type="color" value={sec.colore||'#E8ECF4'} onChange={e=>onChange({...sec,colore:e.target.value})} style={se.colorPick}/>
             </div>
           )}
 
@@ -322,7 +322,7 @@ function SectionEditor({ sec, onChange, onDelete, onMoveUp, onMoveDown, isFirst,
               </div>
               <div style={se.row}>
                 <label style={se.lbl}>Colore bottone</label>
-                <input type="color" value={sec.colore_btn||'#003DA5'} onChange={e=>onChange({...sec,colore_btn:e.target.value})} style={se.colorPick}/>
+                <input type="color" value={sec.colore_btn||'#5B5FEF'} onChange={e=>onChange({...sec,colore_btn:e.target.value})} style={se.colorPick}/>
                 <label style={{ ...se.lbl, marginLeft:'12px' }}>Colore testo</label>
                 <input type="color" value={sec.colore_testo||'#FFFFFF'} onChange={e=>onChange({...sec,colore_testo:e.target.value})} style={se.colorPick}/>
               </div>
@@ -335,17 +335,17 @@ function SectionEditor({ sec, onChange, onDelete, onMoveUp, onMoveDown, isFirst,
 }
 
 const se = {
-  wrap:      { border:'1px solid #E5E7EB', borderRadius:'8px', marginBottom:'12px', overflow:'hidden' },
-  header:    { display:'flex', alignItems:'center', justifyContent:'space-between', padding:'10px 14px', backgroundColor:'#FAFAFA', borderBottom:'1px solid #E5E7EB', cursor:'pointer' },
+  wrap:      { border:'1px solid #E8ECF4', borderRadius:'16px', marginBottom:'12px', overflow:'hidden' },
+  header:    { display:'flex', alignItems:'center', justifyContent:'space-between', padding:'10px 14px', backgroundColor:'#FAFAFA', borderBottom:'1px solid #E8ECF4', cursor:'pointer' },
   body:      { padding:'16px' },
   row:       { display:'flex', alignItems:'center', gap:'8px', flexWrap:'wrap', marginBottom:'10px' },
   lbl:       { fontSize:'12px', fontWeight:'600', color:'#374151', whiteSpace:'nowrap' },
-  input:     { flex:1, padding:'7px 10px', border:'1px solid #D1D5DB', borderRadius:'4px', fontSize:'13px', fontFamily:"'Outfit',sans-serif", outline:'none' },
-  smallInput:{ padding:'5px 8px', border:'1px solid #D1D5DB', borderRadius:'4px', fontSize:'13px', fontFamily:"'Outfit',sans-serif", outline:'none', minWidth:'80px' },
-  select:    { padding:'5px 8px', border:'1px solid #D1D5DB', borderRadius:'4px', fontSize:'13px', fontFamily:"'Outfit',sans-serif", outline:'none' },
+  input:     { flex:1, padding:'7px 10px', border:'1px solid #D1D5DB', borderRadius:'4px', fontSize:'13px', fontFamily:"'Inter',sans-serif", outline:'none' },
+  smallInput:{ padding:'5px 8px', border:'1px solid #D1D5DB', borderRadius:'4px', fontSize:'13px', fontFamily:"'Inter',sans-serif", outline:'none', minWidth:'80px' },
+  select:    { padding:'5px 8px', border:'1px solid #D1D5DB', borderRadius:'4px', fontSize:'13px', fontFamily:"'Inter',sans-serif", outline:'none' },
   colorPick: { width:'32px', height:'28px', border:'1px solid #D1D5DB', borderRadius:'4px', cursor:'pointer', padding:'1px' },
-  iconBtn:   { background:'none', border:'1px solid #E5E7EB', borderRadius:'4px', padding:'3px 7px', cursor:'pointer', fontSize:'13px', color:'#6B7280' },
-  addBtn:    { background:'none', border:'1px dashed #003DA5', borderRadius:'4px', padding:'5px 12px', cursor:'pointer', fontSize:'12px', color:'#003DA5', fontFamily:"'Outfit',sans-serif", fontWeight:'600' },
+  iconBtn:   { background:'none', border:'1px solid #E8ECF4', borderRadius:'4px', padding:'3px 7px', cursor:'pointer', fontSize:'13px', color:'#6B7280' },
+  addBtn:    { background:'none', border:'1px dashed #5B5FEF', borderRadius:'4px', padding:'5px 12px', cursor:'pointer', fontSize:'12px', color:'#5B5FEF', fontFamily:"'Inter',sans-serif", fontWeight:'600' },
 }
 
 // ── PAGINA EDITOR COMPLETO ───────────────────────────────────
@@ -362,9 +362,9 @@ export default function EventoEditorPage() {
       teatro_abilitato:false, teatro_capienza:null, teatro_note:null,
       form_note:null,
       certificato_abilitato:false, certificato_titolo:null, certificato_invio_auto:true,
-      certificato_colore:'#003DA5', certificato_logo_url:null, certificato_firma_nome:null, certificato_firma_ruolo:null,
+      certificato_colore:'#5B5FEF', certificato_logo_url:null, certificato_firma_nome:null, certificato_firma_ruolo:null,
       certificato_template:'laterale', certificato_config:{},
-    colore_primario:'#003DA5', colore_sfondo:'#F4F5F7', tema:{},
+    colore_primario:'#5B5FEF', colore_sfondo:'#F4F5F7', tema:{},
     layout_hero:{ altezza:'380', overlay_opacita:'55', overlay_colore:'#000000', allineamento:'sinistra', titolo_colore:'#FFFFFF', titolo_dimensione:'clamp(26px,5vw,54px)', titolo_grassetto:true, titolo_maiuscolo:false },
     sezioni:[], mailup_blocchi:[], email_organizzatore:'', email_mittente:'', email_cc:'', nome_mittente:'',
   })
@@ -458,7 +458,7 @@ export default function EventoEditorPage() {
         teatro_abilitato:ev.teatro_abilitato||false, teatro_capienza:ev.teatro_capienza||null, teatro_note:ev.teatro_note||null,
         form_note:ev.form_note||null,
         certificato_abilitato:ev.certificato_abilitato||false, certificato_titolo:ev.certificato_titolo||null,
-        certificato_invio_auto:ev.certificato_invio_auto!==false, certificato_colore:ev.certificato_colore||'#003DA5',
+        certificato_invio_auto:ev.certificato_invio_auto!==false, certificato_colore:ev.certificato_colore||'#5B5FEF',
         certificato_logo_url:ev.certificato_logo_url||null, certificato_firma_nome:ev.certificato_firma_nome||null, certificato_firma_ruolo:ev.certificato_firma_ruolo||null,
         certificato_template:ev.certificato_template||'laterale', certificato_config:ev.certificato_config||{},
       descrizione_html:ev.descrizione_html||null,
@@ -649,10 +649,10 @@ export default function EventoEditorPage() {
                   <div style={{ display:'flex', gap:'8px', marginTop:'8px', alignItems:'center', flexWrap:'wrap' }}>
                     <button type="button"
                       onClick={() => updEvent(p => ({ ...p, sottotitolo_bold: !p.sottotitolo_bold }))}
-                      style={{ padding:'5px 12px', borderRadius:'6px', border:'1px solid',
-                        borderColor: event.sottotitolo_bold ? '#003DA5' : '#D1D5DB',
+                      style={{ padding:'5px 12px', borderRadius:'14px', border:'1px solid',
+                        borderColor: event.sottotitolo_bold ? '#5B5FEF' : '#D1D5DB',
                         background: event.sottotitolo_bold ? '#EFF6FF' : '#fff',
-                        color: event.sottotitolo_bold ? '#003DA5' : '#374151',
+                        color: event.sottotitolo_bold ? '#5B5FEF' : '#374151',
                         fontSize:'13px', fontWeight:'800', cursor:'pointer' }}>
                       <strong>B</strong> Grassetto
                     </button>
@@ -660,7 +660,7 @@ export default function EventoEditorPage() {
                       <span style={{ fontSize:'12px', color:'#6B7280', whiteSpace:'nowrap' }}>Dimensione:</span>
                       <button type="button" onClick={() => updEvent(p => ({ ...p, sottotitolo_size: Math.max(10, (p.sottotitolo_size||18)-1) }))}
                         style={{ width:'26px', height:'26px', border:'1px solid #D1D5DB', borderRadius:'5px', background:'#fff', cursor:'pointer', fontSize:'14px', fontWeight:'700' }}>−</button>
-                      <span style={{ fontSize:'13px', fontWeight:'700', color:'#003DA5', minWidth:'32px', textAlign:'center' }}>{event.sottotitolo_size||18}px</span>
+                      <span style={{ fontSize:'13px', fontWeight:'700', color:'#5B5FEF', minWidth:'32px', textAlign:'center' }}>{event.sottotitolo_size||18}px</span>
                       <button type="button" onClick={() => updEvent(p => ({ ...p, sottotitolo_size: Math.min(60, (p.sottotitolo_size||18)+1) }))}
                         style={{ width:'26px', height:'26px', border:'1px solid #D1D5DB', borderRadius:'5px', background:'#fff', cursor:'pointer', fontSize:'14px', fontWeight:'700' }}>+</button>
                     </div>
@@ -686,11 +686,11 @@ export default function EventoEditorPage() {
                       <button key={opt.v} type="button"
                         onClick={() => updEvent(p => ({ ...p, modalita: opt.v }))}
                         style={{ padding:'9px 18px', borderRadius:'7px', border:'1px solid',
-                          borderColor: event.modalita===opt.v ? '#003DA5' : '#D1D5DB',
+                          borderColor: event.modalita===opt.v ? '#5B5FEF' : '#D1D5DB',
                           backgroundColor: event.modalita===opt.v ? '#EFF6FF' : '#ffffff',
-                          color: event.modalita===opt.v ? '#003DA5' : '#374151',
+                          color: event.modalita===opt.v ? '#5B5FEF' : '#374151',
                           fontSize:'13px', fontWeight:'700', cursor:'pointer',
-                          fontFamily:"'Outfit',sans-serif", transition:'all 0.15s' }}>
+                          fontFamily:"'Inter',sans-serif", transition:'all 0.15s' }}>
                         {opt.l}
                       </button>
                     ))}
@@ -712,32 +712,32 @@ export default function EventoEditorPage() {
               {/* ── Certificati (rimanda al tab dedicato) ── */}
               <div style={{ gridColumn:'1/-1' }}>
                 <button type="button" onClick={()=>setActiveTab('certificato')}
-                  style={{ width:'100%', textAlign:'left', background:'#F9FAFB', border:'1px solid #E5E7EB', borderRadius:'10px',
+                  style={{ width:'100%', textAlign:'left', background:'#F9FAFB', border:'1px solid #E8ECF4', borderRadius:'14px',
                     padding:'16px', display:'flex', alignItems:'center', justifyContent:'space-between', gap:'12px', cursor:'pointer' }}>
                   <div>
-                    <p style={{ margin:'0 0 2px', fontSize:'14px', fontWeight:'700', color:'#0A0A0A' }}>🏆 Certificato di partecipazione</p>
+                    <p style={{ margin:'0 0 2px', fontSize:'14px', fontWeight:'700', color:'#111827' }}>🏆 Certificato di partecipazione</p>
                     <p style={{ margin:0, fontSize:'12px', color:'#9CA3AF' }}>
                       {event.certificato_abilitato ? 'Abilitato — modello, colori, testi e campi si configurano nel tab dedicato' : 'Vai al tab "Certificato" per abilitarlo e personalizzarlo'}
                     </p>
                   </div>
-                  <span style={{ fontSize:'13px', fontWeight:'700', color:'#003DA5', whiteSpace:'nowrap' }}>Apri editor →</span>
+                  <span style={{ fontSize:'13px', fontWeight:'700', color:'#5B5FEF', whiteSpace:'nowrap' }}>Apri editor →</span>
                 </button>
               </div>
 
               {/* ── Modalità teatro ── */}
               <div style={{ gridColumn:'1/-1' }}>
-                <div style={{ background: event.teatro_abilitato ? '#EFF6FF' : '#F9FAFB', border:`1px solid ${event.teatro_abilitato ? '#BFDBFE' : '#E5E7EB'}`, borderRadius:'10px', padding:'16px' }}>
+                <div style={{ background: event.teatro_abilitato ? '#EFF6FF' : '#F9FAFB', border:`1px solid ${event.teatro_abilitato ? '#BFDBFE' : '#E8ECF4'}`, borderRadius:'14px', padding:'16px' }}>
                   <div style={{ display:'flex', alignItems:'center', justifyContent:'space-between', gap:'16px', flexWrap:'wrap' }}>
                     <div>
-                      <p style={{ margin:'0 0 2px', fontSize:'14px', fontWeight:'700', color:'#0A0A0A' }}>🎭 Modalità teatro</p>
+                      <p style={{ margin:'0 0 2px', fontSize:'14px', fontWeight:'700', color:'#111827' }}>🎭 Modalità teatro</p>
                       <p style={{ margin:0, fontSize:'12px', color:'#6B7280' }}>
                         Attiva la gestione manuale dei posti a sedere con assegnazione numerica e conferma presenza via email.
                       </p>
                     </div>
                     <button type="button"
                       onClick={() => updEvent(p => ({ ...p, teatro_abilitato: !p.teatro_abilitato }))}
-                      style={{ flexShrink:0, padding:'8px 18px', borderRadius:'8px', border:'none', cursor:'pointer', fontSize:'13px', fontWeight:'700', fontFamily:"'Outfit',sans-serif",
-                        background: event.teatro_abilitato ? '#003DA5' : '#E5E7EB',
+                      style={{ flexShrink:0, padding:'8px 18px', borderRadius:'16px', border:'none', cursor:'pointer', fontSize:'13px', fontWeight:'700', fontFamily:"'Inter',sans-serif",
+                        background: event.teatro_abilitato ? '#5B5FEF' : '#E8ECF4',
                         color: event.teatro_abilitato ? '#fff' : '#374151' }}>
                       {event.teatro_abilitato ? '✓ Abilitato' : 'Abilita'}
                     </button>
@@ -763,7 +763,7 @@ export default function EventoEditorPage() {
               </div>
 
               {/* ── Note nel form di iscrizione ── */}
-              <div style={{ gridColumn:'1/-1', background:'#FFFBEB', border:'1px solid #FDE68A', borderRadius:'10px', padding:'16px', display:'flex', flexDirection:'column', gap:'8px' }}>
+              <div style={{ gridColumn:'1/-1', background:'#FFFBEB', border:'1px solid #FDE68A', borderRadius:'14px', padding:'16px', display:'flex', flexDirection:'column', gap:'8px' }}>
                 <p style={{ margin:0, fontSize:'12px', fontWeight:'700', color:'#92400E', textTransform:'uppercase', letterSpacing:'.06em' }}>⚠️ Avvisi nel modulo di iscrizione</p>
                 <p style={{ margin:0, fontSize:'12px', color:'#78350F', lineHeight:'1.5' }}>Testo mostrato nella box di registrazione, sopra i campi. Usa "a capo" per separare più avvisi.</p>
                 <textarea
@@ -771,12 +771,12 @@ export default function EventoEditorPage() {
                   onChange={e => updEvent(p => ({ ...p, form_note: e.target.value }))}
                   placeholder={"Es.\nInserite un indirizzo email corretto: riceverete il QR code all'indirizzo indicato.\nInserite un numero di cellulare valido.\nVerificate i vostri dati prima di confermare."}
                   rows={4}
-                  style={{ width:'100%', padding:'10px 12px', border:'1px solid #FCD34D', borderRadius:'6px', fontSize:'13px', fontFamily:"'Outfit',sans-serif", resize:'vertical', background:'#FFFFF5', color:'#0A0A0A', outline:'none', boxSizing:'border-box', lineHeight:'1.6' }}
+                  style={{ width:'100%', padding:'10px 12px', border:'1px solid #FCD34D', borderRadius:'14px', fontSize:'13px', fontFamily:"'Inter',sans-serif", resize:'vertical', background:'#FFFFF5', color:'#111827', outline:'none', boxSizing:'border-box', lineHeight:'1.6' }}
                 />
               </div>
 
               {/* ── Impostazioni email ── */}
-              <div style={{ gridColumn:'1/-1', background:'#F9FAFB', border:'1px solid #E5E7EB', borderRadius:'10px', padding:'16px', display:'flex', flexDirection:'column', gap:'12px' }}>
+              <div style={{ gridColumn:'1/-1', background:'#F9FAFB', border:'1px solid #E8ECF4', borderRadius:'14px', padding:'16px', display:'flex', flexDirection:'column', gap:'12px' }}>
                 <p style={{ margin:0, fontSize:'12px', fontWeight:'700', color:'#6B7280', textTransform:'uppercase', letterSpacing:'.06em' }}>Impostazioni email</p>
                 <div style={{ display:'grid', gridTemplateColumns:'1fr 1fr', gap:'12px' }}>
                   <Field label="Indirizzo mittente" hint="Default: marketing@cnaroma.it">
@@ -837,7 +837,7 @@ export default function EventoEditorPage() {
             <h2 style={p.panelTitle}>Immagine Hero</h2>
 
             {/* Logo header */}
-            <div style={{ marginBottom:'24px', padding:'16px', background:'#F9FAFB', border:'1px solid #E5E7EB', borderRadius:'10px' }}>
+            <div style={{ marginBottom:'24px', padding:'16px', background:'#F9FAFB', border:'1px solid #E8ECF4', borderRadius:'14px' }}>
               <p style={{ fontSize:'12px', fontWeight:'700', color:'#6B7280', textTransform:'uppercase', letterSpacing:'.06em', margin:'0 0 6px' }}>
                 🏷 Logo header
               </p>
@@ -860,24 +860,24 @@ export default function EventoEditorPage() {
                   <div style={{ display:'flex', gap:'6px' }}>
                     {[['trasparente','⬜ Nessuno'],['bianco','🤍 Bianco'],['colore_primario','🎨 Tema']].map(([v,l]) => (
                       <button key={v} onClick={()=>setH('logo_sfondo')(v)} style={{
-                        flex:1, padding:'6px 4px', border:`1px solid ${(event.layout_hero?.logo_sfondo||'trasparente')===v?'#003DA5':'#E5E7EB'}`,
-                        borderRadius:'6px', background:(event.layout_hero?.logo_sfondo||'trasparente')===v?'#EBF0FA':'#fff',
+                        flex:1, padding:'6px 4px', border:`1px solid ${(event.layout_hero?.logo_sfondo||'trasparente')===v?'#5B5FEF':'#E8ECF4'}`,
+                        borderRadius:'14px', background:(event.layout_hero?.logo_sfondo||'trasparente')===v?'#EEEFFD':'#fff',
                         cursor:'pointer', fontSize:'11px', fontWeight:'600',
-                        color:(event.layout_hero?.logo_sfondo||'trasparente')===v?'#003DA5':'#6B7280',
-                        fontFamily:"'Outfit',sans-serif"
+                        color:(event.layout_hero?.logo_sfondo||'trasparente')===v?'#5B5FEF':'#6B7280',
+                        fontFamily:"'Inter',sans-serif"
                       }}>{l}</button>
                     ))}
                   </div>
                 </Field>
               </div>
               {/* Anteprima logo live */}
-              <div style={{ marginTop:'10px', padding:'10px', background:'#1a1a2e', borderRadius:'8px', textAlign:'center' }}>
+              <div style={{ marginTop:'10px', padding:'10px', background:'#1a1a2e', borderRadius:'16px', textAlign:'center' }}>
                 <div style={{
                   background: (event.layout_hero?.logo_sfondo||'trasparente')==='bianco' ? '#fff'
-                            : (event.layout_hero?.logo_sfondo||'trasparente')==='colore_primario' ? (event.colore_primario||'#003DA5')
+                            : (event.layout_hero?.logo_sfondo||'trasparente')==='colore_primario' ? (event.colore_primario||'#5B5FEF')
                             : 'transparent',
                   padding: (event.layout_hero?.logo_sfondo && event.layout_hero?.logo_sfondo!=='trasparente') ? '5px 12px' : 0,
-                  borderRadius:'6px', display:'inline-flex', alignItems:'center'
+                  borderRadius:'14px', display:'inline-flex', alignItems:'center'
                 }}>
                   <img
                     src={event.logo_url || 'https://raw.githubusercontent.com/alessandroparrelli/fileappoggio/main/NUOVO-LOGO-CNA-ROMA-SOLO-ROMA.png'}
@@ -895,21 +895,21 @@ export default function EventoEditorPage() {
             </div>
 
             {/* Colore sfondo hero (visibile quando non c'è immagine) */}
-            <div style={{ marginBottom:'20px', padding:'14px 16px', background: event.immagine_hero ? '#F9FAFB' : '#EBF0FA', border:`1px solid ${event.immagine_hero ? '#E5E7EB' : '#FDA4AF'}`, borderRadius:'10px' }}>
-              <p style={{ fontSize:'12px', fontWeight:'700', color: event.immagine_hero ? '#9CA3AF' : '#003DA5', margin:'0 0 8px' }}>
+            <div style={{ marginBottom:'20px', padding:'14px 16px', background: event.immagine_hero ? '#F9FAFB' : '#EEEFFD', border:`1px solid ${event.immagine_hero ? '#E8ECF4' : '#FDA4AF'}`, borderRadius:'14px' }}>
+              <p style={{ fontSize:'12px', fontWeight:'700', color: event.immagine_hero ? '#9CA3AF' : '#5B5FEF', margin:'0 0 8px' }}>
                 🎨 Colore sfondo hero {!event.immagine_hero && <span style={{ fontWeight:'400', color:'#6B7280' }}>(nessuna immagine caricata — verrà usato questo colore)</span>}
               </p>
               <div style={{ display:'flex', alignItems:'center', gap:'10px' }}>
-                <input type="color" value={event.layout_hero?.hero_sfondo || '#003DA5'}
+                <input type="color" value={event.layout_hero?.hero_sfondo || '#5B5FEF'}
                   onChange={e => setH('hero_sfondo')(e.target.value)}
-                  style={{ width:'44px', height:'34px', border:'1px solid #D1D5DB', borderRadius:'6px', cursor:'pointer', padding:'2px' }}/>
-                <input value={event.layout_hero?.hero_sfondo || '#003DA5'}
+                  style={{ width:'44px', height:'34px', border:'1px solid #D1D5DB', borderRadius:'14px', cursor:'pointer', padding:'2px' }}/>
+                <input value={event.layout_hero?.hero_sfondo || '#5B5FEF'}
                   onChange={e => { if (/^#[0-9A-Fa-f]{0,6}$/.test(e.target.value)) setH('hero_sfondo')(e.target.value) }}
-                  style={{ flex:1, padding:'7px 10px', border:'1px solid #E5E7EB', borderRadius:'6px', fontSize:'13px', fontFamily:'monospace' }}/>
+                  style={{ flex:1, padding:'7px 10px', border:'1px solid #E8ECF4', borderRadius:'14px', fontSize:'13px', fontFamily:'monospace' }}/>
                 <div style={{ display:'flex', gap:'4px' }}>
-                  {[['#003DA5','Blu CNA'],['#0A1628','Notte'],['#1F2937','Grafite'],['#7C3AED','Viola'],['#DC2626','Rosso'],['#16A34A','Verde']].map(([c,l]) => (
+                  {[['#5B5FEF','Blu CNA'],['#0A1628','Notte'],['#1F2937','Grafite'],['#7C3AED','Viola'],['#DC2626','Rosso'],['#16A34A','Verde']].map(([c,l]) => (
                     <button key={c} type="button" onClick={() => setH('hero_sfondo')(c)}
-                      style={{ width:'28px', height:'28px', borderRadius:'6px', border: (event.layout_hero?.hero_sfondo||'#003DA5')===c ? '2px solid #003DA5' : '1px solid #D1D5DB', background:c, cursor:'pointer', padding:0, flexShrink:0 }}
+                      style={{ width:'28px', height:'28px', borderRadius:'14px', border: (event.layout_hero?.hero_sfondo||'#5B5FEF')===c ? '2px solid #5B5FEF' : '1px solid #D1D5DB', background:c, cursor:'pointer', padding:0, flexShrink:0 }}
                       title={l} />
                   ))}
                 </div>
@@ -935,16 +935,16 @@ export default function EventoEditorPage() {
                 <div style={{ display:'flex', alignItems:'center', gap:'10px' }}>
                   <input type="color" value={event.layout_hero?.overlay_colore||'#000000'}
                     onChange={e=>setH('overlay_colore')(e.target.value)}
-                    style={{ width:'44px', height:'34px', border:'1px solid #E5E7EB', borderRadius:'6px', cursor:'pointer', padding:'2px' }}/>
+                    style={{ width:'44px', height:'34px', border:'1px solid #E8ECF4', borderRadius:'14px', cursor:'pointer', padding:'2px' }}/>
                   <input value={event.layout_hero?.overlay_colore||'#000000'}
                     onChange={e=>setH('overlay_colore')(e.target.value)}
-                    style={{ flex:1, padding:'7px 10px', border:'1px solid #E5E7EB', borderRadius:'6px', fontSize:'13px', fontFamily:'monospace' }}/>
+                    style={{ flex:1, padding:'7px 10px', border:'1px solid #E8ECF4', borderRadius:'14px', fontSize:'13px', fontFamily:'monospace' }}/>
                   <button type="button" onClick={()=>setH('overlay_colore')('#000000')}
-                    style={{ padding:'6px 10px', border:'1px solid #E5E7EB', borderRadius:'6px', fontSize:'11px', cursor:'pointer', background:'#fff', color:'#6B7280', fontFamily:"'Outfit',sans-serif" }}>
+                    style={{ padding:'6px 10px', border:'1px solid #E8ECF4', borderRadius:'14px', fontSize:'11px', cursor:'pointer', background:'#fff', color:'#6B7280', fontFamily:"'Inter',sans-serif" }}>
                     ⬛ Nero
                   </button>
-                  <button type="button" onClick={()=>setH('overlay_colore')('#003DA5')}
-                    style={{ padding:'6px 10px', border:'1px solid #E5E7EB', borderRadius:'6px', fontSize:'11px', cursor:'pointer', background:'#EBF0FA', color:'#003DA5', fontFamily:"'Outfit',sans-serif" }}>
+                  <button type="button" onClick={()=>setH('overlay_colore')('#5B5FEF')}
+                    style={{ padding:'6px 10px', border:'1px solid #E8ECF4', borderRadius:'14px', fontSize:'11px', cursor:'pointer', background:'#EEEFFD', color:'#5B5FEF', fontFamily:"'Inter',sans-serif" }}>
                     🔵 BLU CNA
                   </button>
                 </div>
@@ -953,10 +953,10 @@ export default function EventoEditorPage() {
                 <div style={{ display:'flex', gap:'8px' }}>
                   {['sinistra','centro'].map(a=>(
                     <button key={a} onClick={()=>setH('allineamento')(a)}
-                      style={{ flex:1, padding:'8px', border:`1px solid ${event.layout_hero?.allineamento===a?'#003DA5':'#E5E7EB'}`,
-                        borderRadius:'6px', backgroundColor:event.layout_hero?.allineamento===a?'#EBF0FA':'#FFFFFF',
-                        cursor:'pointer', fontSize:'12px', fontWeight:'600', color:event.layout_hero?.allineamento===a?'#003DA5':'#6B7280',
-                        fontFamily:"'Outfit',sans-serif" }}>
+                      style={{ flex:1, padding:'8px', border:`1px solid ${event.layout_hero?.allineamento===a?'#5B5FEF':'#E8ECF4'}`,
+                        borderRadius:'14px', backgroundColor:event.layout_hero?.allineamento===a?'#EEEFFD':'#FFFFFF',
+                        cursor:'pointer', fontSize:'12px', fontWeight:'600', color:event.layout_hero?.allineamento===a?'#5B5FEF':'#6B7280',
+                        fontFamily:"'Inter',sans-serif" }}>
                       {a==='sinistra'?'◀ Sinistra':'▶ Centro'}
                     </button>
                   ))}
@@ -967,7 +967,7 @@ export default function EventoEditorPage() {
             {/* Testi hero */}
             <div style={{ marginTop:'16px', display:'grid', gridTemplateColumns:'1fr', gap:'12px' }}>
               <Field label="Titolo principale (H1)" hint="Uguale al titolo evento — modificalo dalla tab Info">
-                <div style={{ padding:'10px 14px', background:'#F9FAFB', border:'1px solid #E5E7EB', borderRadius:'8px', fontSize:'14px', color:'#9CA3AF', fontStyle:'italic' }}>
+                <div style={{ padding:'10px 14px', background:'#F9FAFB', border:'1px solid #E8ECF4', borderRadius:'16px', fontSize:'14px', color:'#9CA3AF', fontStyle:'italic' }}>
                   {event.titolo || 'Titolo evento…'}
                 </div>
               </Field>
@@ -981,7 +981,7 @@ export default function EventoEditorPage() {
             </div>
 
             {/* Stile titolo H1 */}
-            <div style={{ marginTop:'16px', padding:'16px', backgroundColor:'#F9FAFB', borderRadius:'8px', border:'1px solid #E5E7EB' }}>
+            <div style={{ marginTop:'16px', padding:'16px', backgroundColor:'#F7F8FC', borderRadius:'16px', border:'1px solid #E8ECF4' }}>
               <p style={{ fontSize:'12px', fontWeight:'700', color:'#6B7280', textTransform:'uppercase', letterSpacing:'.06em', margin:'0 0 12px' }}>Stile titolo principale (H1)</p>
               <div style={p.grid3}>
                 <Field label="Colore">
@@ -989,7 +989,7 @@ export default function EventoEditorPage() {
                     <input type="color"
                       value={/^#[0-9A-Fa-f]{6}$/.test(event.layout_hero?.titolo_colore||'') ? event.layout_hero?.titolo_colore : '#ffffff'}
                       onChange={e=>setH('titolo_colore')(e.target.value)}
-                      style={{ width:'40px', height:'34px', border:'1px solid #D1D5DB', borderRadius:'6px', cursor:'pointer', padding:'2px', flexShrink:0 }}/>
+                      style={{ width:'40px', height:'34px', border:'1px solid #D1D5DB', borderRadius:'14px', cursor:'pointer', padding:'2px', flexShrink:0 }}/>
                     <Input value={event.layout_hero?.titolo_colore||'#FFFFFF'}
                       onChange={e=>setH('titolo_colore')(e.target.value)} placeholder="#FFFFFF"/>
                   </div>
@@ -1006,21 +1006,21 @@ export default function EventoEditorPage() {
                 <Field label="Stile">
                   <div style={{ display:'flex', gap:'8px' }}>
                     <button onClick={()=>setH('titolo_grassetto')(event.layout_hero?.titolo_grassetto===false?true:false)}
-                      style={{ flex:1, padding:'7px', border:`1px solid ${event.layout_hero?.titolo_grassetto!==false?'#003DA5':'#E5E7EB'}`,
-                        borderRadius:'6px', backgroundColor:event.layout_hero?.titolo_grassetto!==false?'#EBF0FA':'#FFF',
-                        cursor:'pointer', fontSize:'13px', fontWeight:'800', fontFamily:"'Outfit',sans-serif",
-                        color:event.layout_hero?.titolo_grassetto!==false?'#003DA5':'#6B7280' }}>B</button>
+                      style={{ flex:1, padding:'7px', border:`1px solid ${event.layout_hero?.titolo_grassetto!==false?'#5B5FEF':'#E8ECF4'}`,
+                        borderRadius:'14px', backgroundColor:event.layout_hero?.titolo_grassetto!==false?'#EEEFFD':'#FFF',
+                        cursor:'pointer', fontSize:'13px', fontWeight:'800', fontFamily:"'Inter',sans-serif",
+                        color:event.layout_hero?.titolo_grassetto!==false?'#5B5FEF':'#6B7280' }}>B</button>
                     <button onClick={()=>setH('titolo_maiuscolo')(event.layout_hero?.titolo_maiuscolo?false:true)}
-                      style={{ flex:1, padding:'7px', border:`1px solid ${event.layout_hero?.titolo_maiuscolo?'#003DA5':'#E5E7EB'}`,
-                        borderRadius:'6px', backgroundColor:event.layout_hero?.titolo_maiuscolo?'#EBF0FA':'#FFF',
-                        cursor:'pointer', fontSize:'12px', fontWeight:'600', fontFamily:"'Outfit',sans-serif",
-                        color:event.layout_hero?.titolo_maiuscolo?'#003DA5':'#6B7280' }}>AA</button>
+                      style={{ flex:1, padding:'7px', border:`1px solid ${event.layout_hero?.titolo_maiuscolo?'#5B5FEF':'#E8ECF4'}`,
+                        borderRadius:'14px', backgroundColor:event.layout_hero?.titolo_maiuscolo?'#EEEFFD':'#FFF',
+                        cursor:'pointer', fontSize:'12px', fontWeight:'600', fontFamily:"'Inter',sans-serif",
+                        color:event.layout_hero?.titolo_maiuscolo?'#5B5FEF':'#6B7280' }}>AA</button>
                   </div>
                 </Field>
               </div>
 
               {/* Stile H2 */}
-              <div style={{ borderTop:'1px solid #E5E7EB', marginTop:'14px', paddingTop:'14px' }}>
+              <div style={{ borderTop:'1px solid #E8ECF4', marginTop:'14px', paddingTop:'14px' }}>
                 <p style={{ fontSize:'12px', fontWeight:'700', color:'#6B7280', textTransform:'uppercase', letterSpacing:'.06em', margin:'0 0 12px' }}>Stile secondo titolo (H2)</p>
                 <div style={p.grid3}>
                   <Field label="Colore">
@@ -1028,7 +1028,7 @@ export default function EventoEditorPage() {
                       <input type="color"
                         value={/^#[0-9A-Fa-f]{6}$/.test(event.layout_hero?.titolo2_colore||'') ? event.layout_hero?.titolo2_colore : '#ffffff'}
                         onChange={e=>setH('titolo2_colore')(e.target.value)}
-                        style={{ width:'40px', height:'34px', border:'1px solid #D1D5DB', borderRadius:'6px', cursor:'pointer', padding:'2px', flexShrink:0 }}/>
+                        style={{ width:'40px', height:'34px', border:'1px solid #D1D5DB', borderRadius:'14px', cursor:'pointer', padding:'2px', flexShrink:0 }}/>
                       <Input value={event.layout_hero?.titolo2_colore||''}
                         onChange={e=>setH('titolo2_colore')(e.target.value)} placeholder="#ffffff"/>
                     </div>
@@ -1044,10 +1044,10 @@ export default function EventoEditorPage() {
                   </Field>
                   <Field label="Stile">
                     <button onClick={()=>setH('titolo2_grassetto')(event.layout_hero?.titolo2_grassetto?false:true)}
-                      style={{ width:'100%', padding:'7px', border:`1px solid ${event.layout_hero?.titolo2_grassetto?'#003DA5':'#E5E7EB'}`,
-                        borderRadius:'6px', backgroundColor:event.layout_hero?.titolo2_grassetto?'#EBF0FA':'#FFF',
-                        cursor:'pointer', fontSize:'13px', fontWeight:'800', fontFamily:"'Outfit',sans-serif",
-                        color:event.layout_hero?.titolo2_grassetto?'#003DA5':'#6B7280' }}>B</button>
+                      style={{ width:'100%', padding:'7px', border:`1px solid ${event.layout_hero?.titolo2_grassetto?'#5B5FEF':'#E8ECF4'}`,
+                        borderRadius:'14px', backgroundColor:event.layout_hero?.titolo2_grassetto?'#EEEFFD':'#FFF',
+                        cursor:'pointer', fontSize:'13px', fontWeight:'800', fontFamily:"'Inter',sans-serif",
+                        color:event.layout_hero?.titolo2_grassetto?'#5B5FEF':'#6B7280' }}>B</button>
                   </Field>
                 </div>
               </div>
@@ -1116,7 +1116,7 @@ export default function EventoEditorPage() {
           <div style={p.panel}>
             <h2 style={p.panelTitle}>Codice embed</h2>
             {!event.slug || event.stato !== 'pubblicato' ? (
-              <div style={{backgroundColor:'#FEF3C7',border:'1px solid #FDE68A',borderRadius:'8px',padding:'16px 18px'}}>
+              <div style={{backgroundColor:'#FEF3C7',border:'1px solid #FDE68A',borderRadius:'16px',padding:'16px 18px'}}>
                 <p style={{fontSize:'14px',color:'#92400E',margin:0,fontWeight:'600'}}>
                   ⚠️ L&apos;evento deve essere <strong>pubblicato</strong> e avere uno <strong>slug</strong> per generare il codice embed.
                 </p>
@@ -1155,21 +1155,21 @@ export default function EventoEditorPage() {
               </div>
             ) : (
               <>
-                <div style={{ backgroundColor:'#F4F5F7', border:'1px solid #E5E7EB', borderRadius:'8px', padding:'10px 16px', marginBottom:'12px', display:'flex', alignItems:'center', justifyContent:'space-between', gap:'10px', flexShrink:0 }}>
+                <div style={{ backgroundColor:'#F4F5F7', border:'1px solid #E8ECF4', borderRadius:'16px', padding:'10px 16px', marginBottom:'12px', display:'flex', alignItems:'center', justifyContent:'space-between', gap:'10px', flexShrink:0 }}>
                   <div style={{ display:'flex', alignItems:'center', gap:'8px', flex:1, minWidth:0 }}>
-                    <span style={{ fontSize:'12px', color:'#9CA3AF', backgroundColor:'#fff', border:'1px solid #E5E7EB', borderRadius:'4px', padding:'4px 10px', fontFamily:'monospace', overflow:'hidden', textOverflow:'ellipsis', whiteSpace:'nowrap', flex:1 }}>
+                    <span style={{ fontSize:'12px', color:'#9CA3AF', backgroundColor:'#fff', border:'1px solid #E8ECF4', borderRadius:'4px', padding:'4px 10px', fontFamily:'monospace', overflow:'hidden', textOverflow:'ellipsis', whiteSpace:'nowrap', flex:1 }}>
                       {window.location.origin}/eventi/{event.slug}
                     </span>
                   </div>
                   <a href={`/eventi/${event.slug}`} target="_blank" rel="noopener noreferrer"
-                    style={{ display:'flex', alignItems:'center', gap:'6px', border:'1px solid #003DA5', color:'#003DA5', borderRadius:'6px', padding:'6px 14px', fontSize:'12px', fontWeight:'700', textDecoration:'none', fontFamily:"'Outfit',sans-serif", whiteSpace:'nowrap', flexShrink:0 }}>
+                    style={{ display:'flex', alignItems:'center', gap:'6px', border:'1px solid #5B5FEF', color:'#5B5FEF', borderRadius:'14px', padding:'6px 14px', fontSize:'12px', fontWeight:'700', textDecoration:'none', fontFamily:"'Inter',sans-serif", whiteSpace:'nowrap', flexShrink:0 }}>
                     Apri in nuova tab ↗
                   </a>
                 </div>
                 <IframePreview
                   iframeKey={event.slug}
                   src={`/eventi/${event.slug}`}
-                  style={{ flex:1, border:'none', borderRadius:'10px', minHeight:'600px', boxShadow:'0 1px 8px rgba(0,0,0,0.08)', display:'block', width:'100%' }}
+                  style={{ flex:1, border:'none', borderRadius:'14px', minHeight:'600px', boxShadow:'0 1px 8px rgba(0,0,0,0.08)', display:'block', width:'100%' }}
                   title="Anteprima landing page"
                   fallbackUrl={`/eventi/${event.slug}`}
                 />
@@ -1188,22 +1188,22 @@ export default function EventoEditorPage() {
 
 // Stili pagina
 const p = {
-  root:       { display:'flex', flexDirection:'column', height:'100vh', backgroundColor:'#F4F5F7', fontFamily:"'Outfit',sans-serif", overflow:'hidden' },
-  topBar:     { display:'flex', alignItems:'center', backgroundColor:'#FFFFFF', borderBottom:'1px solid #E5E7EB', padding:'0 24px', height:'60px', flexShrink:0, zIndex:10 },
-  backBtn:    { display:'flex', alignItems:'center', gap:'6px', background:'none', border:'1px solid #E5E7EB', borderRadius:'6px', padding:'7px 14px', cursor:'pointer', fontSize:'13px', fontWeight:'600', color:'#374151', fontFamily:"'Outfit',sans-serif", flexShrink:0 },
-  titleInput: { flex:1, border:'none', fontSize:'18px', fontWeight:'800', color:'#0A0A0A', letterSpacing:'-.02em', outline:'none', backgroundColor:'transparent', fontFamily:"'Outfit',sans-serif", minWidth:0 },
-  previewBtn: { display:'flex', alignItems:'center', gap:'6px', border:'1px solid #003DA5', color:'#003DA5', borderRadius:'6px', padding:'7px 14px', fontSize:'13px', fontWeight:'700', textDecoration:'none', fontFamily:"'Outfit',sans-serif" },
-  saveBtn:    { display:'flex', alignItems:'center', gap:'6px', backgroundColor:'#003DA5', color:'#FFFFFF', border:'none', borderRadius:'6px', padding:'8px 20px', cursor:'pointer', fontSize:'14px', fontWeight:'700', fontFamily:"'Outfit',sans-serif" },
-  tabBar:     { display:'flex', gap:'0', backgroundColor:'#FFFFFF', borderBottom:'1px solid #E5E7EB', padding:'0 24px', flexShrink:0, overflowX:'auto' },
-  tab:        { padding:'14px 18px', background:'none', border:'none', borderBottom:'2px solid transparent', cursor:'pointer', fontSize:'13px', fontFamily:"'Outfit',sans-serif", whiteSpace:'nowrap', transition:'color .15s' },
+  root:       { display:'flex', flexDirection:'column', height:'100vh', backgroundColor:'#F4F5F7', fontFamily:"'Inter',sans-serif", overflow:'hidden' },
+  topBar:     { display:'flex', alignItems:'center', backgroundColor:'#FFFFFF', borderBottom:'1px solid #E8ECF4', padding:'0 24px', height:'60px', flexShrink:0, zIndex:10 },
+  backBtn:    { display:'flex', alignItems:'center', gap:'6px', background:'none', border:'1px solid #E8ECF4', borderRadius:'14px', padding:'7px 14px', cursor:'pointer', fontSize:'13px', fontWeight:'600', color:'#374151', fontFamily:"'Inter',sans-serif", flexShrink:0 },
+  titleInput: { flex:1, border:'none', fontSize:'18px', fontWeight:'800', color:'#111827', letterSpacing:'-.02em', outline:'none', backgroundColor:'transparent', fontFamily:"'Inter',sans-serif", minWidth:0 },
+  previewBtn: { display:'flex', alignItems:'center', gap:'6px', border:'1px solid #5B5FEF', color:'#5B5FEF', borderRadius:'14px', padding:'7px 14px', fontSize:'13px', fontWeight:'700', textDecoration:'none', fontFamily:"'Inter',sans-serif" },
+  saveBtn:    { display:'flex', alignItems:'center', gap:'6px', backgroundColor:'#5B5FEF', color:'#FFFFFF', border:'none', borderRadius:'14px', padding:'8px 20px', cursor:'pointer', fontSize:'14px', fontWeight:'700', fontFamily:"'Inter',sans-serif" },
+  tabBar:     { display:'flex', gap:'0', backgroundColor:'#FFFFFF', borderBottom:'1px solid #E8ECF4', padding:'0 24px', flexShrink:0, overflowX:'auto' },
+  tab:        { padding:'14px 18px', background:'none', border:'none', borderBottom:'2px solid transparent', cursor:'pointer', fontSize:'13px', fontFamily:"'Inter',sans-serif", whiteSpace:'nowrap', transition:'color .15s' },
   content:    { flex:1, overflowY:'auto', padding:'24px' },
   panel:      { maxWidth:'860px', margin:'0 auto' },
-  panelTitle: { fontSize:'22px', fontWeight:'900', color:'#0A0A0A', letterSpacing:'-.03em', margin:'0 0 20px' },
+  panelTitle: { fontSize:'22px', fontWeight:'900', color:'#111827', letterSpacing:'-.03em', margin:'0 0 20px' },
   grid2:      { display:'grid', gridTemplateColumns:'1fr 1fr', gap:'16px', marginBottom:'16px' },
   grid3:      { display:'grid', gridTemplateColumns:'1fr 1fr 1fr', gap:'16px' },
-  sectionAdder:{ backgroundColor:'#FFFFFF', border:'1px solid #E5E7EB', borderRadius:'8px', padding:'16px', marginBottom:'16px' },
+  sectionAdder:{ backgroundColor:'#FFFFFF', border:'1px solid #E8ECF4', borderRadius:'16px', padding:'16px', marginBottom:'16px' },
   sectionLbl: { fontSize:'11px', fontWeight:'700', color:'#6B7280', textTransform:'uppercase', letterSpacing:'.06em', margin:'0 0 10px' },
-  addSecBtn:  { display:'flex', alignItems:'center', gap:'6px', padding:'8px 14px', border:'1px solid #E5E7EB', borderRadius:'6px', backgroundColor:'#FFFFFF', cursor:'pointer', fontSize:'12px', fontWeight:'600', color:'#374151', fontFamily:"'Outfit',sans-serif", transition:'border-color .15s' },
-  aiBox:      { backgroundColor:'#F8F4FF', border:'1px solid #E9D5FF', borderRadius:'10px', padding:'16px', marginBottom:'20px' },
+  addSecBtn:  { display:'flex', alignItems:'center', gap:'6px', padding:'8px 14px', border:'1px solid #E8ECF4', borderRadius:'14px', backgroundColor:'#FFFFFF', cursor:'pointer', fontSize:'12px', fontWeight:'600', color:'#374151', fontFamily:"'Inter',sans-serif", transition:'border-color .15s' },
+  aiBox:      { backgroundColor:'#F8F4FF', border:'1px solid #E9D5FF', borderRadius:'14px', padding:'16px', marginBottom:'20px' },
   aiLabel:    { display:'flex', alignItems:'center', gap:'6px', fontSize:'12px', fontWeight:'700', color:'#7C3AED', margin:'0 0 4px', textTransform:'uppercase', letterSpacing:'.04em' },
 }

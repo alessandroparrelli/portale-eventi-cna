@@ -27,18 +27,18 @@ export default function EventSelector({ eventi = [], value, onChange, label = 'E
               width: '100%',
               appearance: 'none',
               border: '1.5px solid #D1D5DB',
-              borderRadius: '8px',
+              borderRadius: '16px',
               padding: '9px 36px 9px 12px',
               fontSize: '14px',
               fontWeight: '600',
-              fontFamily: "'Outfit', sans-serif",
+              fontFamily: "'Inter', sans-serif",
               color: value ? '#0A0A0A' : '#9CA3AF',
               backgroundColor: '#fff',
               cursor: 'pointer',
               outline: 'none',
               transition: 'border-color .15s',
             }}
-            onFocus={e => (e.target.style.borderColor = '#003DA5')}
+            onFocus={e => (e.target.style.borderColor = '#5B5FEF')}
             onBlur={e => (e.target.style.borderColor = '#D1D5DB')}
           >
             <option value="">{placeholder}</option>
@@ -56,7 +56,7 @@ export default function EventSelector({ eventi = [], value, onChange, label = 'E
           {selected.data_inizio && (
             <div style={{ textAlign: 'center' }}>
               <p style={{ fontSize: '11px', color: '#9CA3AF', margin: '0 0 2px', fontWeight: '600', textTransform: 'uppercase', letterSpacing: '0.04em' }}>Data</p>
-              <p style={{ fontSize: '13px', fontWeight: '700', color: '#0A0A0A', margin: 0 }}>
+              <p style={{ fontSize: '13px', fontWeight: '700', color: '#111827', margin: 0 }}>
                 {new Date(selected.data_inizio).toLocaleDateString('it-IT', { day: '2-digit', month: 'short', year: 'numeric' })}
               </p>
             </div>

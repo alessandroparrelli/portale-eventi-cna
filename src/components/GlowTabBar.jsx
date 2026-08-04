@@ -37,7 +37,7 @@ function Tab({ t, isActive, color, onChange, mobile }) {
       style={{
         display: 'inline-flex', alignItems: 'center', gap: '6px',
         padding: mobile ? '7px 14px' : '8px 16px',
-        borderRadius: '10px', border: 'none',
+        borderRadius: '14px', border: 'none',
         cursor: 'pointer',
         fontSize: mobile ? '14px' : '13px',
         fontWeight: isActive ? '600' : '500',

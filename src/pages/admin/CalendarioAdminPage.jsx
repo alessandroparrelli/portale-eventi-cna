@@ -47,8 +47,8 @@ export default function CalendarioAdminPage() {
   }
 
   const iSt = {
-    width: '100%', padding: '9px 12px', border: '1px solid #D1D5DB', borderRadius: '6px',
-    fontSize: '14px', fontFamily: "'Outfit',sans-serif", outline: 'none', boxSizing: 'border-box', color: '#0A0A0A',
+    width: '100%', padding: '9px 12px', border: '1px solid #D1D5DB', borderRadius: '14px',
+    fontSize: '14px', fontFamily: "'Inter',sans-serif", outline: 'none', boxSizing: 'border-box', color: '#111827',
   }
 
   if (loading) return (
@@ -60,7 +60,7 @@ export default function CalendarioAdminPage() {
       {/* Header */}
       <div style={{ display: 'flex', alignItems: 'flex-start', justifyContent: 'space-between', marginBottom: '32px', flexWrap: 'wrap', gap: '12px' }}>
         <div>
-          <h1 style={{ fontSize: '32px', fontWeight: '900', color: '#0A0A0A', letterSpacing: '-0.03em', margin: 0 }}>
+          <h1 style={{ fontSize: '32px', fontWeight: '900', color: '#111827', letterSpacing: '-0.03em', margin: 0 }}>
             Calendario pubblico
           </h1>
           <p style={{ fontSize: '14px', color: '#6B7280', margin: '4px 0 0' }}>
@@ -70,8 +70,8 @@ export default function CalendarioAdminPage() {
         <div style={{ display: 'flex', gap: '10px', alignItems: 'center' }}>
           <a href="/calendario" target="_blank" rel="noopener noreferrer"
             style={{ display: 'flex', alignItems: 'center', gap: '6px', padding: '9px 16px',
-              border: '1px solid #E5E7EB', borderRadius: '6px', fontSize: '13px', fontWeight: '600',
-              color: '#374151', textDecoration: 'none', fontFamily: "'Outfit',sans-serif" }}>
+              border: '1px solid #E8ECF4', borderRadius: '14px', fontSize: '13px', fontWeight: '600',
+              color: '#374151', textDecoration: 'none', fontFamily: "'Inter',sans-serif" }}>
             <Eye size={15}/> Anteprima
           </a>
           <Btn variant="primary" onClick={save} disabled={saving} size="md">
@@ -112,22 +112,22 @@ export default function CalendarioAdminPage() {
             {cfg.logo_url && (
               <button onClick={() => upd('logo_url', '')}
                 style={{ marginTop: '8px', fontSize: '12px', color: '#DC2626', background: 'none',
-                  border: 'none', cursor: 'pointer', fontFamily: "'Outfit',sans-serif" }}>
+                  border: 'none', cursor: 'pointer', fontFamily: "'Inter',sans-serif" }}>
                 × Ripristina logo default
               </button>
             )}
           </Field>
           <Field label="Colore primario">
             <div style={{ display: 'flex', alignItems: 'center', gap: '12px' }}>
-              <input type="color" value={cfg.colore_primario || '#003DA5'}
+              <input type="color" value={cfg.colore_primario || '#5B5FEF'}
                 onChange={e => upd('colore_primario', e.target.value)}
-                style={{ width: '48px', height: '38px', border: '1px solid #D1D5DB', borderRadius: '6px', cursor: 'pointer', padding: '2px' }}/>
-              <Input value={cfg.colore_primario || '#003DA5'}
+                style={{ width: '48px', height: '38px', border: '1px solid #D1D5DB', borderRadius: '14px', cursor: 'pointer', padding: '2px' }}/>
+              <Input value={cfg.colore_primario || '#5B5FEF'}
                 onChange={e => upd('colore_primario', e.target.value)}
                 style={{ maxWidth: '140px' }}/>
-              <button onClick={() => upd('colore_primario', '#003DA5')}
+              <button onClick={() => upd('colore_primario', '#5B5FEF')}
                 style={{ fontSize: '12px', color: '#9CA3AF', background: 'none', border: 'none',
-                  cursor: 'pointer', fontFamily: "'Outfit',sans-serif" }}>
+                  cursor: 'pointer', fontFamily: "'Inter',sans-serif" }}>
                 Reset blu CNA
               </button>
             </div>
@@ -179,7 +179,7 @@ export default function CalendarioAdminPage() {
         </Section>
 
         {/* ── Anteprima link ── */}
-        <div style={{ backgroundColor: '#F8FAFF', border: '1px solid #BFDBFE', borderRadius: '10px', padding: '16px 20px',
+        <div style={{ backgroundColor: '#F8FAFF', border: '1px solid #BFDBFE', borderRadius: '14px', padding: '16px 20px',
           display: 'flex', alignItems: 'center', justifyContent: 'space-between', gap: '12px' }}>
           <div>
             <p style={{ fontSize: '13px', fontWeight: '700', color: '#1D4ED8', margin: '0 0 3px' }}>
@@ -191,8 +191,8 @@ export default function CalendarioAdminPage() {
           </div>
           <a href="/calendario" target="_blank" rel="noopener noreferrer"
             style={{ display: 'flex', alignItems: 'center', gap: '6px', padding: '9px 16px',
-              backgroundColor: '#003DA5', color: '#ffffff', borderRadius: '6px',
-              fontSize: '13px', fontWeight: '700', textDecoration: 'none', fontFamily: "'Outfit',sans-serif",
+              backgroundColor: '#5B5FEF', color: '#ffffff', borderRadius: '14px',
+              fontSize: '13px', fontWeight: '700', textDecoration: 'none', fontFamily: "'Inter',sans-serif",
               whiteSpace: 'nowrap', flexShrink: 0 }}>
             <ExternalLink size={14}/> Apri pagina
           </a>
@@ -205,8 +205,8 @@ export default function CalendarioAdminPage() {
 
 function Section({ title, icon, children }) {
   return (
-    <div style={{ backgroundColor: '#ffffff', border: '1px solid #E5E7EB', borderRadius: '10px', overflow: 'hidden' }}>
-      <div style={{ backgroundColor: '#FAFAFA', borderBottom: '1px solid #E5E7EB', padding: '14px 20px',
+    <div style={{ backgroundColor: '#ffffff', border: '1px solid #E8ECF4', borderRadius: '14px', overflow: 'hidden' }}>
+      <div style={{ backgroundColor: '#FAFAFA', borderBottom: '1px solid #E8ECF4', padding: '14px 20px',
         display: 'flex', alignItems: 'center', gap: '8px' }}>
         <span style={{ fontSize: '16px' }}>{icon}</span>
         <span style={{ fontSize: '13px', fontWeight: '700', color: '#374151', letterSpacing: '-0.01em' }}>{title}</span>
@@ -224,13 +224,13 @@ function Toggle({ label, hint, value, onChange }) {
       <div style={{ position: 'relative', width: '40px', height: '22px', flexShrink: 0, marginTop: '1px' }}
         onClick={() => onChange(!value)}>
         <div style={{ position: 'absolute', inset: 0, borderRadius: '999px', transition: 'background 0.2s',
-          backgroundColor: value ? '#003DA5' : '#D1D5DB' }}/>
+          backgroundColor: value ? '#5B5FEF' : '#D1D5DB' }}/>
         <div style={{ position: 'absolute', top: '3px', left: value ? '21px' : '3px', width: '16px', height: '16px',
           borderRadius: '50%', backgroundColor: '#ffffff', transition: 'left 0.2s',
           boxShadow: '0 1px 4px rgba(0,0,0,0.2)' }}/>
       </div>
       <div>
-        <p style={{ fontSize: '14px', fontWeight: '600', color: '#0A0A0A', margin: '0 0 2px' }}>{label}</p>
+        <p style={{ fontSize: '14px', fontWeight: '600', color: '#111827', margin: '0 0 2px' }}>{label}</p>
         {hint && <p style={{ fontSize: '12px', color: '#9CA3AF', margin: 0 }}>{hint}</p>}
       </div>
     </label>

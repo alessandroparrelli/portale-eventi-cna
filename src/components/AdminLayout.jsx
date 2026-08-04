@@ -5,7 +5,7 @@ import { useAuth } from '../hooks/useAuth'
 import { useRole } from '../hooks/useRole'
 import { supabase } from '../lib/supabase'
 
-const RUOLO_COLORS = { superadmin:'#9F1239', admin:'#003DA5', supervisore:'#BE123C', utente:'#6B7280' }
+const RUOLO_COLORS = { superadmin:'#5B5FEF', admin:'#5B5FEF', supervisore:'#7C4DFF', utente:'#6B7280' }
 const RUOLO_LABELS = { superadmin:'Super Admin', admin:'Admin', supervisore:'Supervisore', utente:'Utente' }
 
 function VerifiedBadge() {
@@ -61,7 +61,7 @@ function UserBox() {
       {/* Avatar */}
       <div style={{
         width: '32px', height: '32px', borderRadius: '50%', flexShrink: 0,
-        background: `linear-gradient(135deg,${roleColor},#003DA5)`,
+        background: `linear-gradient(135deg,${roleColor},#5B5FEF)`,
         display: 'flex', alignItems: 'center', justifyContent: 'center',
         overflow: 'hidden',
       }}>
@@ -74,7 +74,7 @@ function UserBox() {
       {/* Nome + badge */}
       <div style={{ display:'flex', flexDirection:'column', gap:'1px', minWidth:0 }}>
         <div style={{ display:'flex', alignItems:'center', gap:'4px' }}>
-          <span style={{ fontSize:'13px', fontWeight:'700', color:'#0A0A0A', whiteSpace:'nowrap', lineHeight:1, fontFamily:"'Inter',sans-serif" }}>
+          <span style={{ fontSize:'13px', fontWeight:'700', color:'#111827', whiteSpace:'nowrap', lineHeight:1, fontFamily:"'Inter',sans-serif" }}>
             {displayName}
           </span>
           {isVerified && <VerifiedBadge />}
@@ -124,8 +124,8 @@ export default function AdminLayout() {
           <div style={s.titleBlock} onClick={() => window.location.reload()} title="Ricarica pagina" role="button" tabIndex={0} style={{ ...s.titleBlock, cursor:'pointer' }}>
             <svg width="36" height="36" viewBox="0 0 40 40" fill="none" xmlns="http://www.w3.org/2000/svg">
               <polygon points="20,4 36,13 20,22 4,13" fill="#FB7185"/>
-              <polygon points="4,13 20,22 20,36 4,27" fill="#9F1239"/>
-              <polygon points="36,13 20,22 20,36 36,27" fill="#BE123C"/>
+              <polygon points="4,13 20,22 20,36 4,27" fill="#5B5FEF"/>
+              <polygon points="36,13 20,22 20,36 36,27" fill="#7C4DFF"/>
             </svg>
             <span style={s.pageTitle}>
               <span style={{ color:'#111111' }}>evently</span>
@@ -189,7 +189,7 @@ const s = {
   hamburger: {
     background: 'none', border: 'none', cursor: 'pointer',
     color: '#374151', display: 'flex', alignItems: 'center',
-    padding: '6px', borderRadius: '6px', flexShrink: 0,
+    padding: '6px', borderRadius: '14px', flexShrink: 0,
   },
   titleBlock: {
     display: 'flex',

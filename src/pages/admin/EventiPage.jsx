@@ -17,7 +17,7 @@ import {
 const EMPTY = {
   titolo:'', slug:'', descrizione:'', data_inizio:'', data_fine:'',
   luogo:'', capienza_max:'', stato:'bozza', immagine_hero:null,
-  colore_primario:'#003DA5', colore_sfondo:'#F4F5F7',
+  colore_primario:'#5B5FEF', colore_sfondo:'#F4F5F7',
   layout_hero:{ altezza:'340', overlay_opacita:'55', allineamento:'sinistra' },
 }
 
@@ -140,10 +140,10 @@ function EventEditor({ modal, cur, setCur, onSave, onClose, saving, errors }) {
                 <div style={{ display:'flex', gap:'8px' }}>
                   {['sinistra','centro'].map(a=>(
                     <button key={a} onClick={()=>setH('allineamento')(a)}
-                      style={{ flex:1, padding:'8px', border:`1px solid ${cur.layout_hero?.allineamento===a?'#003DA5':'#E5E7EB'}`,
-                        borderRadius:'6px', backgroundColor: cur.layout_hero?.allineamento===a?'#EBF0FA':'#FFFFFF',
-                        cursor:'pointer', fontSize:'12px', fontWeight:'600', color: cur.layout_hero?.allineamento===a?'#003DA5':'#6B7280',
-                        fontFamily:"'Outfit',sans-serif", display:'flex', alignItems:'center', justifyContent:'center', gap:'4px' }}>
+                      style={{ flex:1, padding:'8px', border:`1px solid ${cur.layout_hero?.allineamento===a?'#5B5FEF':'#E8ECF4'}`,
+                        borderRadius:'14px', backgroundColor: cur.layout_hero?.allineamento===a?'#EEEFFD':'#FFFFFF',
+                        cursor:'pointer', fontSize:'12px', fontWeight:'600', color: cur.layout_hero?.allineamento===a?'#5B5FEF':'#6B7280',
+                        fontFamily:"'Inter',sans-serif", display:'flex', alignItems:'center', justifyContent:'center', gap:'4px' }}>
                       {a==='sinistra' ? <AlignLeft size={14}/> : <AlignCenter size={14}/>} {a}
                     </button>
                   ))}
@@ -155,10 +155,10 @@ function EventEditor({ modal, cur, setCur, onSave, onClose, saving, errors }) {
             <div>
               <p style={{ fontSize:'12px', fontWeight:'600', color:'#6B7280', textTransform:'uppercase', letterSpacing:'.06em', margin:'0 0 8px' }}>Anteprima hero</p>
               <div style={{
-                borderRadius:'8px', overflow:'hidden', border:'1px solid #E5E7EB',
+                borderRadius:'16px', overflow:'hidden', border:'1px solid #E8ECF4',
                 height: `${Math.min(200, parseInt(cur.layout_hero?.altezza||'340')/1.7)}px`,
                 backgroundImage: cur.immagine_hero ? `url(${cur.immagine_hero})` : undefined,
-                background: cur.immagine_hero ? undefined : 'linear-gradient(135deg,#003DA5,#001a50)',
+                background: cur.immagine_hero ? undefined : 'linear-gradient(135deg,#5B5FEF,#001a50)',
                 backgroundSize:'cover', backgroundPosition:'center', position:'relative', display:'flex', alignItems:'flex-end'
               }}>
                 <div style={{ padding:'16px 20px', background:`rgba(0,0,0,${(cur.layout_hero?.overlay_opacita||55)/100})`,
@@ -179,13 +179,13 @@ function EventEditor({ modal, cur, setCur, onSave, onClose, saving, errors }) {
             <div style={ee.grid2}>
               <Field label="Colore primario">
                 <div style={{ display:'flex', alignItems:'center', gap:'10px' }}>
-                  <input type="color" value={cur.colore_primario||'#003DA5'}
+                  <input type="color" value={cur.colore_primario||'#5B5FEF'}
                     onChange={e=>setCur(p=>({...p,colore_primario:e.target.value}))}
-                    style={{ width:'44px', height:'38px', border:'1px solid #D1D5DB', borderRadius:'6px', cursor:'pointer', padding:'2px' }}/>
+                    style={{ width:'44px', height:'38px', border:'1px solid #D1D5DB', borderRadius:'14px', cursor:'pointer', padding:'2px' }}/>
                   <div style={{ flex:1 }}>
-                    <Input value={cur.colore_primario||'#003DA5'}
+                    <Input value={cur.colore_primario||'#5B5FEF'}
                       onChange={e=>setCur(p=>({...p,colore_primario:e.target.value}))}
-                      placeholder="#003DA5"/>
+                      placeholder="#5B5FEF"/>
                   </div>
                 </div>
               </Field>
@@ -193,7 +193,7 @@ function EventEditor({ modal, cur, setCur, onSave, onClose, saving, errors }) {
                 <div style={{ display:'flex', alignItems:'center', gap:'10px' }}>
                   <input type="color" value={cur.colore_sfondo||'#F4F5F7'}
                     onChange={e=>setCur(p=>({...p,colore_sfondo:e.target.value}))}
-                    style={{ width:'44px', height:'38px', border:'1px solid #D1D5DB', borderRadius:'6px', cursor:'pointer', padding:'2px' }}/>
+                    style={{ width:'44px', height:'38px', border:'1px solid #D1D5DB', borderRadius:'14px', cursor:'pointer', padding:'2px' }}/>
                   <div style={{ flex:1 }}>
                     <Input value={cur.colore_sfondo||'#F4F5F7'}
                       onChange={e=>setCur(p=>({...p,colore_sfondo:e.target.value}))}
@@ -208,7 +208,7 @@ function EventEditor({ modal, cur, setCur, onSave, onClose, saving, errors }) {
               <p style={{ fontSize:'12px', fontWeight:'600', color:'#6B7280', textTransform:'uppercase', letterSpacing:'.06em', margin:'0 0 10px' }}>Palette preimpostate</p>
               <div style={{ display:'flex', gap:'10px', flexWrap:'wrap' }}>
                 {[
-                  { nome:'CNA Roma',    primario:'#003DA5', sfondo:'#EBF0FA' },
+                  { nome:'CNA Roma',    primario:'#5B5FEF', sfondo:'#EEEFFD' },
                   { nome:'Verde',       primario:'#16A34A', sfondo:'#F0FDF4' },
                   { nome:'Rosso',       primario:'#DC2626', sfondo:'#FEF2F2' },
                   { nome:'Viola',       primario:'#7C3AED', sfondo:'#F5F3FF' },
@@ -217,12 +217,12 @@ function EventEditor({ modal, cur, setCur, onSave, onClose, saving, errors }) {
                 ].map(p=>(
                   <button key={p.nome} onClick={()=>setCur(c=>({...c,colore_primario:p.primario,colore_sfondo:p.sfondo}))}
                     style={{ display:'flex', alignItems:'center', gap:'8px', padding:'8px 14px',
-                      border:`2px solid ${cur.colore_primario===p.primario?p.primario:'#E5E7EB'}`,
-                      borderRadius:'8px', backgroundColor:'#FFFFFF', cursor:'pointer',
-                      fontFamily:"'Outfit',sans-serif", fontSize:'12px', fontWeight:'600', color:'#374151' }}>
+                      border:`2px solid ${cur.colore_primario===p.primario?p.primario:'#E8ECF4'}`,
+                      borderRadius:'16px', backgroundColor:'#FFFFFF', cursor:'pointer',
+                      fontFamily:"'Inter',sans-serif", fontSize:'12px', fontWeight:'600', color:'#374151' }}>
                     <span style={{ display:'flex', gap:'3px' }}>
                       <span style={{ width:'14px', height:'14px', borderRadius:'50%', backgroundColor:p.primario }}/>
-                      <span style={{ width:'14px', height:'14px', borderRadius:'50%', backgroundColor:p.sfondo, border:'1px solid #E5E7EB' }}/>
+                      <span style={{ width:'14px', height:'14px', borderRadius:'50%', backgroundColor:p.sfondo, border:'1px solid #E8ECF4' }}/>
                     </span>
                     {p.nome}
                   </button>
@@ -231,9 +231,9 @@ function EventEditor({ modal, cur, setCur, onSave, onClose, saving, errors }) {
             </div>
 
             {/* Anteprima colori */}
-            <div style={{ backgroundColor: cur.colore_sfondo||'#F4F5F7', borderRadius:'10px', padding:'20px', border:'1px solid #E5E7EB' }}>
+            <div style={{ backgroundColor: cur.colore_sfondo||'#F4F5F7', borderRadius:'14px', padding:'20px', border:'1px solid #E8ECF4' }}>
               <p style={{ fontSize:'11px', color:'#9CA3AF', margin:'0 0 12px', fontWeight:'600', textTransform:'uppercase' }}>Anteprima</p>
-              <button style={{ backgroundColor:cur.colore_primario||'#003DA5', color:'#FFFFFF', border:'none', borderRadius:'6px', padding:'10px 20px', fontSize:'14px', fontWeight:'700', fontFamily:"'Outfit',sans-serif", cursor:'default' }}>
+              <button style={{ backgroundColor:cur.colore_primario||'#5B5FEF', color:'#FFFFFF', border:'none', borderRadius:'14px', padding:'10px 20px', fontSize:'14px', fontWeight:'700', fontFamily:"'Inter',sans-serif", cursor:'default' }}>
                 Iscriviti ora →
               </button>
             </div>
@@ -275,15 +275,15 @@ function EventEditor({ modal, cur, setCur, onSave, onClose, saving, errors }) {
 }
 
 const ee = {
-  tabBar:   { display:'flex', gap:'0', borderBottom:'1px solid #E5E7EB', marginBottom:'4px' },
-  tab:      { padding:'10px 16px', background:'none', border:'none', borderBottom:'2px solid transparent', cursor:'pointer', fontSize:'13px', fontFamily:"'Outfit',sans-serif", letterSpacing:'-.01em', transition:'color .15s' },
+  tabBar:   { display:'flex', gap:'0', borderBottom:'1px solid #E8ECF4', marginBottom:'4px' },
+  tab:      { padding:'10px 16px', background:'none', border:'none', borderBottom:'2px solid transparent', cursor:'pointer', fontSize:'13px', fontFamily:"'Inter',sans-serif", letterSpacing:'-.01em', transition:'color .15s' },
   grid2:    { display:'grid', gridTemplateColumns:'1fr 1fr', gap:'14px' },
   grid3:    { display:'grid', gridTemplateColumns:'1fr 1fr 1fr', gap:'14px' },
-  errBox:   { backgroundColor:'#FEF2F2', border:'1px solid #FECACA', borderRadius:'6px', padding:'10px 14px', fontSize:'14px', color:'#DC2626', margin:'8px 0' },
+  errBox:   { backgroundColor:'#FEF2F2', border:'1px solid #FECACA', borderRadius:'14px', padding:'10px 14px', fontSize:'14px', color:'#DC2626', margin:'8px 0' },
   slugPfx:  { position:'absolute', left:'12px', top:'50%', transform:'translateY(-50%)', fontSize:'12px', color:'#9CA3AF', fontFamily:'monospace', pointerEvents:'none' },
-  footer:   { display:'flex', justifyContent:'space-between', alignItems:'center', marginTop:'16px', paddingTop:'16px', borderTop:'1px solid #E5E7EB' },
-  infoBlock:{ backgroundColor:'#EBF0FA', borderRadius:'8px', padding:'14px 16px' },
-  infoTitle:{ display:'flex', alignItems:'center', gap:'6px', fontSize:'12px', fontWeight:'700', color:'#003DA5', textTransform:'uppercase', letterSpacing:'.06em', margin:'0 0 6px' },
+  footer:   { display:'flex', justifyContent:'space-between', alignItems:'center', marginTop:'16px', paddingTop:'16px', borderTop:'1px solid #E8ECF4' },
+  infoBlock:{ backgroundColor:'#EEEFFD', borderRadius:'16px', padding:'14px 16px' },
+  infoTitle:{ display:'flex', alignItems:'center', gap:'6px', fontSize:'12px', fontWeight:'700', color:'#5B5FEF', textTransform:'uppercase', letterSpacing:'.06em', margin:'0 0 6px' },
 }
 
 /* ─── PAGINA PRINCIPALE ───────────────────────────────────────── */
@@ -345,7 +345,7 @@ export default function EventiPage() {
       data_fine:cur.data_fine||null, luogo:cur.luogo||null,
       capienza_max:cur.capienza_max?parseInt(cur.capienza_max):null,
       stato:cur.stato, immagine_hero:cur.immagine_hero||null,
-      colore_primario:cur.colore_primario||'#003DA5',
+      colore_primario:cur.colore_primario||'#5B5FEF',
       colore_sfondo:cur.colore_sfondo||'#F4F5F7',
       layout_hero:cur.layout_hero||EMPTY.layout_hero,
     }
@@ -473,7 +473,7 @@ export default function EventiPage() {
                         </button>
                         {/* Link pubblico */}
                         <button className="btn-pill btn-pill-ghost"
-                          style={{ color: ev.stato==='pubblicato'?'#003DA5':'#9CA3AF', borderColor: ev.stato==='pubblicato'?'#003DA5':'#D1D5DB' }}
+                          style={{ color: ev.stato==='pubblicato'?'#5B5FEF':'#9CA3AF', borderColor: ev.stato==='pubblicato'?'#5B5FEF':'#D1D5DB' }}
                           title="Link pubblico" onClick={()=>{setCopied(false);setLinkModal(ev)}}>
                           <Globe size={12}/>
                         </button>
@@ -512,7 +512,7 @@ export default function EventiPage() {
           <p style={{ fontSize:'14px', color:'#374151', margin:'0 0 8px' }}>
             Stai per eliminare <strong>«{cur.titolo}»</strong> con tutti i suoi iscritti.
           </p>
-          <div style={{ background:'#FEF2F2', border:'1px solid #FECACA', borderRadius:'8px', padding:'10px 14px', fontSize:'13px', color:'#DC2626', margin:'0 0 20px', display:'flex', gap:'8px', alignItems:'flex-start' }}>
+          <div style={{ background:'#FEF2F2', border:'1px solid #FECACA', borderRadius:'16px', padding:'10px 14px', fontSize:'13px', color:'#DC2626', margin:'0 0 20px', display:'flex', gap:'8px', alignItems:'flex-start' }}>
             <span style={{ fontSize:'16px', flexShrink:0 }}>🗑️</span>
             <span>Questa operazione è <strong>irreversibile</strong>. Verranno eliminati tutti gli iscritti, i dati di check-in e le configurazioni dell’evento.</span>
           </div>
@@ -525,7 +525,7 @@ export default function EventiPage() {
             value={deleteInput}
             onChange={e => setDeleteInput(e.target.value)}
             placeholder="Scrivi il nome esatto dell’evento…"
-            style={{ width:'100%', padding:'8px 12px', border:'1px solid #E5E7EB', borderRadius:'6px', fontSize:'14px', fontFamily:"'Outfit',sans-serif", boxSizing:'border-box', marginBottom:'20px', outline:'none' }}
+            style={{ width:'100%', padding:'8px 12px', border:'1px solid #E8ECF4', borderRadius:'14px', fontSize:'14px', fontFamily:"'Inter',sans-serif", boxSizing:'border-box', marginBottom:'20px', outline:'none' }}
             autoFocus
           />
           <div style={{ display:'flex', justifyContent:'flex-end', gap:'10px' }}>
@@ -551,16 +551,16 @@ export default function EventiPage() {
               <div>
                 <p style={{ fontSize:'12px', fontWeight:'600', color:'#6B7280', textTransform:'uppercase', letterSpacing:'.06em', margin:'0 0 8px' }}>URL evento</p>
                 <div style={{ display:'flex', gap:'8px' }}>
-                  <div style={{ flex:1, padding:'10px 14px', backgroundColor:'#F4F5F7', border:'1px solid #E5E7EB', borderRadius:'4px', fontSize:'13px', color:'#003DA5', fontFamily:'monospace', overflow:'hidden', textOverflow:'ellipsis', whiteSpace:'nowrap' }}>{url}</div>
+                  <div style={{ flex:1, padding:'10px 14px', backgroundColor:'#F4F5F7', border:'1px solid #E8ECF4', borderRadius:'4px', fontSize:'13px', color:'#5B5FEF', fontFamily:'monospace', overflow:'hidden', textOverflow:'ellipsis', whiteSpace:'nowrap' }}>{url}</div>
                   <button onClick={()=>copyLink(url)}
-                    style={{ display:'flex', alignItems:'center', gap:'6px', padding:'10px 14px', backgroundColor:copied?'#16A34A':'#003DA5', color:'#FFFFFF', border:'none', borderRadius:'4px', cursor:'pointer', fontSize:'13px', fontWeight:'700', fontFamily:"'Outfit',sans-serif", flexShrink:0, transition:'background-color .2s' }}>
+                    style={{ display:'flex', alignItems:'center', gap:'6px', padding:'10px 14px', backgroundColor:copied?'#16A34A':'#5B5FEF', color:'#FFFFFF', border:'none', borderRadius:'4px', cursor:'pointer', fontSize:'13px', fontWeight:'700', fontFamily:"'Inter',sans-serif", flexShrink:0, transition:'background-color .2s' }}>
                     {copied?<><ClipboardCheck size={14}/>Copiato!</>:<><Link2 size={14}/>Copia</>}
                   </button>
                 </div>
               </div>
               <div style={{ display:'flex', gap:'10px' }}>
                 <a href={url} target="_blank" rel="noopener noreferrer"
-                  style={{ display:'flex', alignItems:'center', gap:'6px', padding:'9px 16px', border:'1px solid #003DA5', color:'#003DA5', borderRadius:'4px', fontSize:'13px', fontWeight:'700', textDecoration:'none', fontFamily:"'Outfit',sans-serif" }}>
+                  style={{ display:'flex', alignItems:'center', gap:'6px', padding:'9px 16px', border:'1px solid #5B5FEF', color:'#5B5FEF', borderRadius:'4px', fontSize:'13px', fontWeight:'700', textDecoration:'none', fontFamily:"'Inter',sans-serif" }}>
                   <ExternalLink size={14}/> Apri
                 </a>
                 <Btn variant="ghost" onClick={()=>setLinkModal(null)}>Chiudi</Btn>
@@ -576,23 +576,23 @@ export default function EventiPage() {
 const s = {
   page:    { width:'100%' },
   header:  { display:'flex', alignItems:'flex-start', justifyContent:'space-between', marginBottom:'24px', flexWrap:'wrap', gap:'12px' },
-  title:   { fontSize:'32px', fontWeight:'900', color:'#0A0A0A', letterSpacing:'-.03em', margin:0 },
+  title:   { fontSize:'32px', fontWeight:'900', color:'#111827', letterSpacing:'-.03em', margin:0 },
   sub:     { fontSize:'14px', color:'#6B7280', margin:'4px 0 0', fontWeight:'500' },
   filters: { display:'flex', gap:'12px', marginBottom:'20px', flexWrap:'wrap' },
   swrap:   { position:'relative', flex:1, minWidth:'200px' },
   sicon:   { position:'absolute', left:'12px', top:'50%', transform:'translateY(-50%)', color:'#9CA3AF' },
-  sinput:  { width:'100%', padding:'9px 12px 9px 36px', border:'1px solid #D1D5DB', borderRadius:'4px', fontSize:'14px', fontFamily:"'Outfit',sans-serif", outline:'none', boxSizing:'border-box' },
-  card:    { backgroundColor:'#FFFFFF', borderRadius:'6px', border:'1px solid #E5E7EB', overflow:'hidden' },
+  sinput:  { width:'100%', padding:'9px 12px 9px 36px', border:'1px solid #D1D5DB', borderRadius:'4px', fontSize:'14px', fontFamily:"'Inter',sans-serif", outline:'none', boxSizing:'border-box' },
+  card:    { backgroundColor:'#FFFFFF', borderRadius:'14px', border:'1px solid #E8ECF4', overflow:'hidden' },
   center:  { padding:'48px', textAlign:'center', color:'#9CA3AF', fontSize:'14px' },
   table:   { width:'100%', borderCollapse:'collapse', fontSize:'14px' },
-  th:      { padding:'10px 16px', textAlign:'left', fontSize:'11px', fontWeight:'600', color:'#6B7280', textTransform:'uppercase', letterSpacing:'.06em', borderBottom:'1px solid #E5E7EB', whiteSpace:'nowrap', backgroundColor:'#FAFAFA' },
+  th:      { padding:'10px 16px', textAlign:'left', fontSize:'11px', fontWeight:'600', color:'#6B7280', textTransform:'uppercase', letterSpacing:'.06em', borderBottom:'1px solid #E8ECF4', whiteSpace:'nowrap', backgroundColor:'#FAFAFA' },
   tr:      { transition:'background-color .1s' },
   td:      { padding:'12px 16px', borderBottom:'1px solid #F3F4F6', verticalAlign:'middle' },
-  codice:  { fontSize:'11px', fontWeight:'700', color:'#003DA5', backgroundColor:'#EBF0FA', padding:'2px 7px', borderRadius:'4px', fontFamily:'monospace', whiteSpace:'nowrap' },
+  codice:  { fontSize:'11px', fontWeight:'700', color:'#5B5FEF', backgroundColor:'#EEEFFD', padding:'2px 7px', borderRadius:'4px', fontFamily:'monospace', whiteSpace:'nowrap' },
   thumb:   { width:'48px', height:'36px', objectFit:'cover', borderRadius:'4px', flexShrink:0 },
   thumbPh: { width:'48px', height:'36px', backgroundColor:'#F3F4F6', borderRadius:'4px', display:'flex', alignItems:'center', justifyContent:'center', flexShrink:0 },
-  evTitle: { fontWeight:'600', color:'#0A0A0A', margin:'0 0 2px', letterSpacing:'-.01em' },
+  evTitle: { fontWeight:'600', color:'#111827', margin:'0 0 2px', letterSpacing:'-.01em' },
   evSlug:  { fontSize:'11px', color:'#9CA3AF', margin:0, fontFamily:'monospace' },
   cell:    { color:'#374151', fontSize:'14px' },
-  iconBtn: { background:'none', border:'1px solid #E5E7EB', borderRadius:'4px', padding:'5px 6px', cursor:'pointer', color:'#6B7280', display:'flex', alignItems:'center' },
+  iconBtn: { background:'none', border:'1px solid #E8ECF4', borderRadius:'4px', padding:'5px 6px', cursor:'pointer', color:'#6B7280', display:'flex', alignItems:'center' },
 }

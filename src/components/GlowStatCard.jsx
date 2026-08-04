@@ -53,7 +53,7 @@ export default function GlowStatCard({ icon, label, value, sub, palette = 'blue'
       }}
     >
       <div style={{
-        width: '40px', height: '40px', borderRadius: '12px',
+        width: '40px', height: '40px', borderRadius: '16px',
         backgroundColor: p.bg,
         display: 'flex', alignItems: 'center', justifyContent: 'center',
         color: p.accent, flexShrink: 0,

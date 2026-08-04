@@ -149,24 +149,24 @@ export default function SmsPage() {
 
   // ── Stili ────────────────────────────────────────────────────────
   const s = {
-    page: { padding: '0', fontFamily: 'Inter, sans-serif', color: '#0A0A0A' },
+    page: { padding: '0', fontFamily: 'Inter, sans-serif', color: '#111827' },
     header: { marginBottom: 24 },
-    title: { fontSize: 22, fontWeight: 900, color: '#003DA5', letterSpacing: '-0.04em', margin: '0 0 4px' },
+    title: { fontSize: 22, fontWeight: 900, color: '#5B5FEF', letterSpacing: '-0.04em', margin: '0 0 4px' },
     sub: { color: '#6B7280', fontSize: 13 },
     tabs: { display: 'flex', gap: 8, marginBottom: 24 },
     tab: (active) => ({
       padding: '8px 20px', borderRadius: 8, border: 'none', cursor: 'pointer', fontWeight: 600,
-      fontSize: 13, background: active ? '#003DA5' : '#F3F4F6', color: active ? '#fff' : '#6B7280',
+      fontSize: 13, background: active ? '#5B5FEF' : '#F3F4F6', color: active ? '#fff' : '#6B7280',
       transition: 'all .15s',
     }),
-    card: { background: '#fff', border: '1px solid #E5E7EB', borderRadius: 12, padding: 20, marginBottom: 16 },
+    card: { background: '#fff', border: '1px solid #E8ECF4', borderRadius: 12, padding: 20, marginBottom: 16 },
     label: { fontSize: 12, fontWeight: 700, color: '#6B7280', textTransform: 'uppercase', letterSpacing: '.05em', marginBottom: 6, display: 'block' },
-    select: { width: '100%', padding: '10px 12px', borderRadius: 8, border: '1.5px solid #E5E7EB', fontSize: 14, outline: 'none', color: '#0A0A0A' },
-    input: { width: '100%', padding: '10px 12px', borderRadius: 8, border: '1.5px solid #E5E7EB', fontSize: 14, outline: 'none', color: '#0A0A0A', boxSizing: 'border-box' },
-    textarea: { width: '100%', padding: '12px', borderRadius: 8, border: '1.5px solid #E5E7EB', fontSize: 14, outline: 'none', resize: 'vertical', minHeight: 100, fontFamily: 'Inter, sans-serif', boxSizing: 'border-box' },
+    select: { width: '100%', padding: '10px 12px', borderRadius: 8, border: '1.5px solid #E8ECF4', fontSize: 14, outline: 'none', color: '#111827' },
+    input: { width: '100%', padding: '10px 12px', borderRadius: 8, border: '1.5px solid #E8ECF4', fontSize: 14, outline: 'none', color: '#111827', boxSizing: 'border-box' },
+    textarea: { width: '100%', padding: '12px', borderRadius: 8, border: '1.5px solid #E8ECF4', fontSize: 14, outline: 'none', resize: 'vertical', minHeight: 100, fontFamily: 'Inter, sans-serif', boxSizing: 'border-box' },
     charCount: (over) => ({ fontSize: 12, color: over ? '#DC2626' : '#6B7280', textAlign: 'right', marginTop: 4 }),
     btnPrimary: { background: '#059669', color: '#fff', border: 'none', borderRadius: 8, padding: '12px 28px', fontSize: 14, fontWeight: 700, cursor: 'pointer', display: 'flex', alignItems: 'center', gap: 8 },
-    btnDisabled: { background: '#E5E7EB', color: '#9CA3AF', border: 'none', borderRadius: 8, padding: '12px 28px', fontSize: 14, fontWeight: 700, cursor: 'not-allowed' },
+    btnDisabled: { background: '#E8ECF4', color: '#9CA3AF', border: 'none', borderRadius: 8, padding: '12px 28px', fontSize: 14, fontWeight: 700, cursor: 'not-allowed' },
     alert: (ok) => ({ background: ok ? '#ECFDF5' : '#FEF2F2', border: `1px solid ${ok ? '#6EE7B7' : '#FECACA'}`, borderRadius: 8, padding: '12px 16px', fontSize: 13, color: ok ? '#065F46' : '#991B1B', marginTop: 12 }),
     grid: { display: 'grid', gridTemplateColumns: '1fr 1fr', gap: 16 },
     row: (selected) => ({
@@ -270,7 +270,7 @@ export default function SmsPage() {
                 <span style={s.label}>Destinatari</span>
                 <button
                   onClick={toggleTutti}
-                  style={{ fontSize: 12, color: '#003DA5', background: 'none', border: 'none', cursor: 'pointer', fontWeight: 600 }}
+                  style={{ fontSize: 12, color: '#5B5FEF', background: 'none', border: 'none', cursor: 'pointer', fontWeight: 600 }}
                 >
                   {iscrittiVisibili.every(r => selezione.includes(r.id)) ? 'Deseleziona tutti' : 'Seleziona tutti'}
                 </button>
@@ -313,7 +313,7 @@ export default function SmsPage() {
         <div style={s.card}>
           <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: 16 }}>
             <span style={s.label}>Ultimi 200 invii</span>
-            <button onClick={caricaLog} style={{ fontSize: 12, color: '#003DA5', background: 'none', border: 'none', cursor: 'pointer', fontWeight: 600 }}>
+            <button onClick={caricaLog} style={{ fontSize: 12, color: '#5B5FEF', background: 'none', border: 'none', cursor: 'pointer', fontWeight: 600 }}>
               Aggiorna
             </button>
           </div>
@@ -328,7 +328,7 @@ export default function SmsPage() {
                 <thead>
                   <tr style={{ background: '#F9FAFB' }}>
                     {['Data','Destinatario','Cellulare','Evento','Messaggio','Stato'].map(h => (
-                      <th key={h} style={{ padding: '8px 12px', textAlign: 'left', fontWeight: 700, color: '#374151', borderBottom: '1px solid #E5E7EB', whiteSpace: 'nowrap' }}>{h}</th>
+                      <th key={h} style={{ padding: '8px 12px', textAlign: 'left', fontWeight: 700, color: '#374151', borderBottom: '1px solid #E8ECF4', whiteSpace: 'nowrap' }}>{h}</th>
                     ))}
                   </tr>
                 </thead>

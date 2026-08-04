@@ -10,11 +10,11 @@ const SOCIAL_META = {
   whatsapp:  { label:'Canale WhatsApp',placeholder:'https://whatsapp.com/channel/...',            color:'#25D366' },
   youtube:   { label:'YouTube',        placeholder:'https://youtube.com/@cnaroma',                color:'#FF0000' },
   tiktok:    { label:'TikTok',         placeholder:'https://tiktok.com/@cnaroma',                 color:'#000000' },
-  website:   { label:'Sito internet',  placeholder:'https://www.cnaroma.it',                      color:'#003DA5' },
+  website:   { label:'Sito internet',  placeholder:'https://www.cnaroma.it',                      color:'#5B5FEF' },
 }
 
-const sF = { fontFamily:"'Outfit',sans-serif" }
-const inp = { ...sF, fontSize:'14px', padding:'9px 12px', border:'1px solid #D1D5DB', borderRadius:'8px', outline:'none', backgroundColor:'#fff', color:'#0A0A0A', width:'100%', boxSizing:'border-box' }
+const sF = { fontFamily:"'Inter',sans-serif" }
+const inp = { ...sF, fontSize:'14px', padding:'9px 12px', border:'1px solid #D1D5DB', borderRadius:'16px', outline:'none', backgroundColor:'#fff', color:'#111827', width:'100%', boxSizing:'border-box' }
 
 export default function SocialPage() {
   const [rows, setRows]       = useState([])
@@ -58,7 +58,7 @@ export default function SocialPage() {
   return (
     <div style={{ maxWidth:'680px', margin:'0 auto', padding:'32px 24px 64px' }}>
       <div style={{ marginBottom:'28px' }}>
-        <h1 style={{ ...sF, margin:'0 0 6px', fontSize:'22px', fontWeight:'900', color:'#0A0A0A', letterSpacing:'-.03em' }}>
+        <h1 style={{ ...sF, margin:'0 0 6px', fontSize:'22px', fontWeight:'900', color:'#111827', letterSpacing:'-.03em' }}>
           Configurazione Social
         </h1>
         <p style={{ ...sF, margin:0, fontSize:'14px', color:'#6B7280', lineHeight:'1.6' }}>
@@ -74,8 +74,8 @@ export default function SocialPage() {
             <div key={row.chiave} style={{
               display:'flex', alignItems:'center', gap:'14px',
               padding:'14px 16px', backgroundColor:'#fff',
-              border:`1.5px solid ${row.attivo && row.valore?.trim() ? meta.color + '40' : '#E5E7EB'}`,
-              borderRadius:'10px', transition:'border-color .15s',
+              border:`1.5px solid ${row.attivo && row.valore?.trim() ? meta.color + '40' : '#E8ECF4'}`,
+              borderRadius:'14px', transition:'border-color .15s',
             }}>
               {/* Toggle attivo */}
               <div
@@ -113,7 +113,7 @@ export default function SocialPage() {
 
       {/* Anteprima */}
       {anteprima.length > 0 && (
-        <div style={{ marginBottom:'28px', padding:'20px', backgroundColor:'#F4F5F7', borderRadius:'12px', textAlign:'center' }}>
+        <div style={{ marginBottom:'28px', padding:'20px', backgroundColor:'#F4F5F7', borderRadius:'16px', textAlign:'center' }}>
           <p style={{ ...sF, margin:'0 0 12px', fontSize:'12px', fontWeight:'700', color:'#9CA3AF', textTransform:'uppercase', letterSpacing:'.06em' }}>
             Anteprima footer
           </p>
@@ -126,15 +126,15 @@ export default function SocialPage() {
         <button
           onClick={salva}
           disabled={saving}
-          style={{ ...sF, padding:'11px 28px', backgroundColor: saved ? '#16A34A' : '#003DA5', color:'#fff', border:'none', borderRadius:'8px', fontSize:'14px', fontWeight:'700', cursor: saving ? 'not-allowed' : 'pointer', opacity: saving ? .7 : 1, transition:'background .2s' }}>
+          style={{ ...sF, padding:'11px 28px', backgroundColor: saved ? '#16A34A' : '#5B5FEF', color:'#fff', border:'none', borderRadius:'16px', fontSize:'14px', fontWeight:'700', cursor: saving ? 'not-allowed' : 'pointer', opacity: saving ? .7 : 1, transition:'background .2s' }}>
           {saving ? 'Salvataggio…' : saved ? '✓ Salvato' : 'Salva configurazione'}
         </button>
         {saved && <span style={{ ...sF, fontSize:'13px', color:'#16A34A', fontWeight:'600' }}>Le modifiche sono attive su tutte le pagine</span>}
       </div>
 
       {/* Info */}
-      <div style={{ marginTop:'32px', padding:'16px 20px', backgroundColor:'#EBF0FA', border:'1px solid #FDA4AF', borderRadius:'10px' }}>
-        <p style={{ ...sF, margin:'0 0 6px', fontSize:'13px', fontWeight:'800', color:'#003DA5' }}>Dove vengono mostrati i social?</p>
+      <div style={{ marginTop:'32px', padding:'16px 20px', backgroundColor:'#EEEFFD', border:'1px solid #FDA4AF', borderRadius:'14px' }}>
+        <p style={{ ...sF, margin:'0 0 6px', fontSize:'13px', fontWeight:'800', color:'#5B5FEF' }}>Dove vengono mostrati i social?</p>
         <ul style={{ ...sF, margin:0, paddingLeft:'18px', fontSize:'13px', color:'#374151', lineHeight:'2' }}>
           <li>Footer di tutte le <strong>pagine evento</strong> pubbliche</li>
           <li>Footer di tutte le <strong>landing page</strong></li>

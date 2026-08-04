@@ -71,7 +71,7 @@ export function StatoBadge({ stato }) {
 
 // ---- BADGE RUOLO ----
 const RUOLO_COLORS = {
-  admin:       { bg: '#EBF0FA', text: '#003DA5' },
+  admin:       { bg: '#EEEFFD', text: '#5B5FEF' },
   supervisore: { bg: '#FEF3C7', text: '#D97706' },
   utente:      { bg: '#F3F4F6', text: '#6B7280' },
 }
@@ -118,7 +118,7 @@ export function PresenzaBadge({ stato }) {
 export function Field({ label, required, error, children }) {
   return (
     <div style={{ display:'flex', flexDirection:'column', gap:'5px' }}>
-      <label style={{ fontSize:'13px', fontWeight:'500', color:'#0A0A0A' }}>
+      <label style={{ fontSize:'13px', fontWeight:'500', color:'#111827' }}>
         {label}{required && <span style={{ color:'#DC2626' }}> *</span>}
       </label>
       {children}
@@ -132,9 +132,9 @@ export function Input({ value, onChange, placeholder, type='text', disabled=fals
     <input
       type={type} value={value} onChange={onChange} placeholder={placeholder} disabled={disabled}
       style={{ padding:'9px 12px', border:'1px solid #E8ECF4', borderRadius:'4px',
-        fontSize:'14px', fontFamily:"'Inter',sans-serif", color:'#0A0A0A', outline:'none',
+        fontSize:'14px', fontFamily:"'Inter',sans-serif", color:'#111827', outline:'none',
         backgroundColor: disabled ? '#F9FAFB' : '#FFFFFF', ...style }}
-      onFocus={e => !disabled && (e.target.style.borderColor='#003DA5')}
+      onFocus={e => !disabled && (e.target.style.borderColor='#5B5FEF')}
       onBlur={e => (e.target.style.borderColor='#D1D5DB')}
     />
   )
@@ -144,9 +144,9 @@ export function Select({ value, onChange, children, disabled=false }) {
   return (
     <select value={value} onChange={onChange} disabled={disabled}
       style={{ padding:'9px 12px', border:'1px solid #E8ECF4', borderRadius:'4px',
-        fontSize:'14px', fontFamily:"'Inter',sans-serif", color:'#0A0A0A', outline:'none',
+        fontSize:'14px', fontFamily:"'Inter',sans-serif", color:'#111827', outline:'none',
         backgroundColor: disabled ? '#F9FAFB' : '#FFFFFF', cursor: disabled ? 'not-allowed' : 'pointer' }}
-      onFocus={e => !disabled && (e.target.style.borderColor='#003DA5')}
+      onFocus={e => !disabled && (e.target.style.borderColor='#5B5FEF')}
       onBlur={e => (e.target.style.borderColor='#D1D5DB')}>
       {children}
     </select>
@@ -157,9 +157,9 @@ export function Textarea({ value, onChange, placeholder, rows=4 }) {
   return (
     <textarea value={value} onChange={onChange} placeholder={placeholder} rows={rows}
       style={{ padding:'9px 12px', border:'1px solid #E8ECF4', borderRadius:'4px',
-        fontSize:'14px', fontFamily:"'Inter',sans-serif", color:'#0A0A0A', outline:'none',
+        fontSize:'14px', fontFamily:"'Inter',sans-serif", color:'#111827', outline:'none',
         resize:'vertical' }}
-      onFocus={e => (e.target.style.borderColor='#003DA5')}
+      onFocus={e => (e.target.style.borderColor='#5B5FEF')}
       onBlur={e => (e.target.style.borderColor='#D1D5DB')} />
   )
 }
@@ -174,9 +174,9 @@ export function Btn({ onClick, children, variant='primary', size='md', disabled=
   }
   const variants = {
     primary:   { backgroundColor:'#5B5FEF', color:'#FFFFFF' },
-    secondary: { backgroundColor:'transparent', color:'#003DA5', border:'1px solid #003DA5' },
+    secondary: { backgroundColor:'transparent', color:'#5B5FEF', border:'1px solid #5B5FEF' },
     danger:    { backgroundColor:'#DC2626', color:'#FFFFFF' },
-    ghost:     { backgroundColor:'transparent', color:'#6B7280', border:'1px solid #E5E7EB' },
+    ghost:     { backgroundColor:'transparent', color:'#6B7280', border:'1px solid #E8ECF4' },
   }
   return <button onClick={!disabled ? onClick : undefined} style={{ ...base, ...variants[variant], ...style }}>{children}</button>
 }
@@ -184,23 +184,23 @@ export function Btn({ onClick, children, variant='primary', size='md', disabled=
 // ---- EMPTY STATE ----
 const EMPTY_ILLUSTRATIONS = {
   CalendarDays: (
-    <svg width="72" height="72" viewBox="0 0 72 72" fill="none"><rect x="8" y="16" width="56" height="48" rx="8" fill="#EBF0FA" stroke="#003DA5" strokeWidth="1.5" strokeDasharray="4 3"/><rect x="8" y="16" width="56" height="15" rx="8" fill="#003DA5" opacity="0.1"/><line x1="8" y1="31" x2="64" y2="31" stroke="#003DA5" strokeWidth="1" opacity="0.25"/><rect x="20" y="8" width="6" height="14" rx="3" fill="#003DA5" opacity="0.45"/><rect x="46" y="8" width="6" height="14" rx="3" fill="#003DA5" opacity="0.45"/><rect x="16" y="40" width="10" height="9" rx="3" fill="#003DA5" opacity="0.15"/><rect x="31" y="40" width="10" height="9" rx="3" fill="#003DA5" opacity="0.15"/><rect x="46" y="40" width="10" height="9" rx="3" fill="#003DA5" opacity="0.15"/><rect x="16" y="52" width="10" height="9" rx="3" fill="#003DA5" opacity="0.08"/><rect x="31" y="52" width="10" height="9" rx="3" fill="#003DA5" opacity="0.15"/></svg>
+    <svg width="72" height="72" viewBox="0 0 72 72" fill="none"><rect x="8" y="16" width="56" height="48" rx="8" fill="#EEEFFD" stroke="#5B5FEF" strokeWidth="1.5" strokeDasharray="4 3"/><rect x="8" y="16" width="56" height="15" rx="8" fill="#5B5FEF" opacity="0.1"/><line x1="8" y1="31" x2="64" y2="31" stroke="#5B5FEF" strokeWidth="1" opacity="0.25"/><rect x="20" y="8" width="6" height="14" rx="3" fill="#5B5FEF" opacity="0.45"/><rect x="46" y="8" width="6" height="14" rx="3" fill="#5B5FEF" opacity="0.45"/><rect x="16" y="40" width="10" height="9" rx="3" fill="#5B5FEF" opacity="0.15"/><rect x="31" y="40" width="10" height="9" rx="3" fill="#5B5FEF" opacity="0.15"/><rect x="46" y="40" width="10" height="9" rx="3" fill="#5B5FEF" opacity="0.15"/><rect x="16" y="52" width="10" height="9" rx="3" fill="#5B5FEF" opacity="0.08"/><rect x="31" y="52" width="10" height="9" rx="3" fill="#5B5FEF" opacity="0.15"/></svg>
   ),
   Users: (
-    <svg width="72" height="72" viewBox="0 0 72 72" fill="none"><circle cx="36" cy="26" r="14" fill="#EBF0FA" stroke="#003DA5" strokeWidth="1.5" strokeDasharray="4 3"/><circle cx="36" cy="26" r="7" fill="#003DA5" opacity="0.18"/><path d="M12 64c0-13.255 10.745-24 24-24s24 10.745 24 24" stroke="#003DA5" strokeWidth="1.5" strokeDasharray="4 3" strokeLinecap="round" fill="none"/></svg>
+    <svg width="72" height="72" viewBox="0 0 72 72" fill="none"><circle cx="36" cy="26" r="14" fill="#EEEFFD" stroke="#5B5FEF" strokeWidth="1.5" strokeDasharray="4 3"/><circle cx="36" cy="26" r="7" fill="#5B5FEF" opacity="0.18"/><path d="M12 64c0-13.255 10.745-24 24-24s24 10.745 24 24" stroke="#5B5FEF" strokeWidth="1.5" strokeDasharray="4 3" strokeLinecap="round" fill="none"/></svg>
   ),
   Mail: (
-    <svg width="72" height="72" viewBox="0 0 72 72" fill="none"><rect x="8" y="20" width="56" height="38" rx="8" fill="#EBF0FA" stroke="#003DA5" strokeWidth="1.5" strokeDasharray="4 3"/><path d="M8 28l28 18 28-18" stroke="#003DA5" strokeWidth="1.5" opacity="0.45" fill="none"/></svg>
+    <svg width="72" height="72" viewBox="0 0 72 72" fill="none"><rect x="8" y="20" width="56" height="38" rx="8" fill="#EEEFFD" stroke="#5B5FEF" strokeWidth="1.5" strokeDasharray="4 3"/><path d="M8 28l28 18 28-18" stroke="#5B5FEF" strokeWidth="1.5" opacity="0.45" fill="none"/></svg>
   ),
   MessageSquare: (
-    <svg width="72" height="72" viewBox="0 0 72 72" fill="none"><rect x="8" y="12" width="56" height="40" rx="8" fill="#EBF0FA" stroke="#003DA5" strokeWidth="1.5" strokeDasharray="4 3"/><path d="M20 60l8-8h36a8 8 0 0 0 0-16H20" stroke="#003DA5" strokeWidth="1.5" strokeDasharray="4 3" strokeLinecap="round" fill="none" opacity="0.5"/><line x1="20" y1="28" x2="52" y2="28" stroke="#003DA5" strokeWidth="1.5" strokeLinecap="round" opacity="0.35"/><line x1="20" y1="38" x2="44" y2="38" stroke="#003DA5" strokeWidth="1.5" strokeLinecap="round" opacity="0.35"/></svg>
+    <svg width="72" height="72" viewBox="0 0 72 72" fill="none"><rect x="8" y="12" width="56" height="40" rx="8" fill="#EEEFFD" stroke="#5B5FEF" strokeWidth="1.5" strokeDasharray="4 3"/><path d="M20 60l8-8h36a8 8 0 0 0 0-16H20" stroke="#5B5FEF" strokeWidth="1.5" strokeDasharray="4 3" strokeLinecap="round" fill="none" opacity="0.5"/><line x1="20" y1="28" x2="52" y2="28" stroke="#5B5FEF" strokeWidth="1.5" strokeLinecap="round" opacity="0.35"/><line x1="20" y1="38" x2="44" y2="38" stroke="#5B5FEF" strokeWidth="1.5" strokeLinecap="round" opacity="0.35"/></svg>
   ),
   Activity: (
-    <svg width="72" height="72" viewBox="0 0 72 72" fill="none"><rect x="8" y="8" width="56" height="56" rx="8" fill="#EBF0FA" stroke="#003DA5" strokeWidth="1.5" strokeDasharray="4 3"/><polyline points="14,44 24,28 34,48 44,20 54,36 60,36" stroke="#003DA5" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" fill="none" opacity="0.5"/></svg>
+    <svg width="72" height="72" viewBox="0 0 72 72" fill="none"><rect x="8" y="8" width="56" height="56" rx="8" fill="#EEEFFD" stroke="#5B5FEF" strokeWidth="1.5" strokeDasharray="4 3"/><polyline points="14,44 24,28 34,48 44,20 54,36 60,36" stroke="#5B5FEF" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" fill="none" opacity="0.5"/></svg>
   ),
 }
 const EMPTY_DEFAULT_ICON = (
-  <svg width="72" height="72" viewBox="0 0 72 72" fill="none"><rect x="18" y="12" width="36" height="48" rx="6" fill="#EBF0FA" stroke="#003DA5" strokeWidth="1.5" strokeDasharray="4 3"/><line x1="26" y1="28" x2="46" y2="28" stroke="#003DA5" strokeWidth="1.5" strokeLinecap="round" opacity="0.4"/><line x1="26" y1="38" x2="46" y2="38" stroke="#003DA5" strokeWidth="1.5" strokeLinecap="round" opacity="0.4"/><line x1="26" y1="48" x2="38" y2="48" stroke="#003DA5" strokeWidth="1.5" strokeLinecap="round" opacity="0.4"/></svg>
+  <svg width="72" height="72" viewBox="0 0 72 72" fill="none"><rect x="18" y="12" width="36" height="48" rx="6" fill="#EEEFFD" stroke="#5B5FEF" strokeWidth="1.5" strokeDasharray="4 3"/><line x1="26" y1="28" x2="46" y2="28" stroke="#5B5FEF" strokeWidth="1.5" strokeLinecap="round" opacity="0.4"/><line x1="26" y1="38" x2="46" y2="38" stroke="#5B5FEF" strokeWidth="1.5" strokeLinecap="round" opacity="0.4"/><line x1="26" y1="48" x2="38" y2="48" stroke="#5B5FEF" strokeWidth="1.5" strokeLinecap="round" opacity="0.4"/></svg>
 )
 
 export function EmptyState({ icon: Icon, title, desc, action }) {
@@ -209,7 +209,7 @@ export function EmptyState({ icon: Icon, title, desc, action }) {
   return (
     <div style={{ padding:'64px 32px', textAlign:'center', display:'flex', flexDirection:'column', alignItems:'center', gap:'4px' }}>
       <div style={{ marginBottom:'12px', opacity:0.9 }}>{illustration}</div>
-      <p style={{ fontSize:'16px', fontWeight:'700', color:'#0A0A0A', margin:'0 0 6px', letterSpacing:'-0.02em' }}>{title}</p>
+      <p style={{ fontSize:'16px', fontWeight:'700', color:'#111827', margin:'0 0 6px', letterSpacing:'-0.02em' }}>{title}</p>
       <p style={{ fontSize:'14px', color:'#6B7280', margin:'0 0 20px' }}>{desc}</p>
       {action}
     </div>
@@ -224,8 +224,8 @@ const modal = {
     boxShadow:'0 20px 60px rgba(0,0,0,0.15)', display:'flex', flexDirection:'column',
     maxHeight:'90vh', overflow:'hidden' },
   header: { display:'flex', alignItems:'center', justifyContent:'space-between',
-    padding:'20px 24px', borderBottom:'1px solid #E5E7EB', flexShrink:0 },
-  title: { fontSize:'18px', fontWeight:'700', color:'#0A0A0A', letterSpacing:'-0.02em', margin:0 },
+    padding:'20px 24px', borderBottom:'1px solid #E8ECF4', flexShrink:0 },
+  title: { fontSize:'18px', fontWeight:'700', color:'#111827', letterSpacing:'-0.02em', margin:0 },
   closeBtn: { background:'none', border:'none', cursor:'pointer', color:'#6B7280', display:'flex',
     alignItems:'center', padding:'4px' },
   body: { padding:'24px', overflowY:'auto' },

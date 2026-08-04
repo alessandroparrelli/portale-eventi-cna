@@ -20,7 +20,7 @@ function OfflineBanner() {
   }, [])
   if (!offline) return null
   return (
-    <div style={{ backgroundColor:'#FEF3C7', border:'1px solid #FCD34D', borderRadius:'8px', padding:'10px 14px', marginBottom:'14px', display:'flex', alignItems:'center', gap:'10px' }}>
+    <div style={{ backgroundColor:'#FEF3C7', border:'1px solid #FCD34D', borderRadius:'16px', padding:'10px 14px', marginBottom:'14px', display:'flex', alignItems:'center', gap:'10px' }}>
       <WifiOff size={16} style={{ color:'#D97706', flexShrink:0 }} />
       <p style={{ fontSize:'13px', fontWeight:'600', color:'#92400E', margin:0 }}>
         Modalità offline — i check-in verranno sincronizzati quando torni online.
@@ -383,7 +383,7 @@ export default function CheckinPage() {
       {!selectedEvento && (
         <div style={s.emptyHero}>
           <QrCode size={64} style={{ color: '#D1D5DB', marginBottom: '16px' }} />
-          <p style={{ fontSize: '20px', fontWeight: '800', color: '#0A0A0A', margin: '0 0 8px', letterSpacing: '-.02em' }}>
+          <p style={{ fontSize: '20px', fontWeight: '800', color: '#111827', margin: '0 0 8px', letterSpacing: '-.02em' }}>
             Seleziona un evento
           </p>
           <p style={{ fontSize: '14px', color: '#6B7280', margin: 0 }}>
@@ -395,17 +395,17 @@ export default function CheckinPage() {
       {selectedEvento && (
         <>
           <div style={{ display:'flex', gap:'6px', marginBottom:'8px', alignItems:'stretch' }}>
-            <div style={{ flex:1, display:'flex', alignItems:'center', gap:'8px', background:'linear-gradient(135deg,#059669,#10b981)', borderRadius:'8px', padding:'9px 12px' }}>
+            <div style={{ flex:1, display:'flex', alignItems:'center', gap:'8px', background:'linear-gradient(135deg,#059669,#10b981)', borderRadius:'16px', padding:'9px 12px' }}>
               <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="#fff" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round"><circle cx="12" cy="12" r="10"/><polyline points="9 12 11 14 15 10"/></svg>
               <span style={{ fontSize:'22px', fontWeight:'900', color:'#fff', letterSpacing:'-0.03em', lineHeight:1 }}>{presenti.length}</span>
               <span style={{ fontSize:'11px', fontWeight:'700', color:'rgba(255,255,255,.85)', textTransform:'uppercase', letterSpacing:'0.04em', lineHeight:1.2 }}>Presenti</span>
             </div>
-            <div style={{ flex:1, display:'flex', alignItems:'center', gap:'8px', background:'linear-gradient(135deg,#b45309,#d97706)', borderRadius:'8px', padding:'9px 12px' }}>
+            <div style={{ flex:1, display:'flex', alignItems:'center', gap:'8px', background:'linear-gradient(135deg,#b45309,#d97706)', borderRadius:'16px', padding:'9px 12px' }}>
               <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="#fff" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round"><circle cx="12" cy="12" r="10"/><polyline points="12 6 12 12 16 14"/></svg>
               <span style={{ fontSize:'22px', fontWeight:'900', color:'#fff', letterSpacing:'-0.03em', lineHeight:1 }}>{nonPresenti}</span>
               <span style={{ fontSize:'11px', fontWeight:'700', color:'rgba(255,255,255,.85)', textTransform:'uppercase', letterSpacing:'0.04em', lineHeight:1.2 }}>In attesa</span>
             </div>
-            <div style={{ display:'flex', alignItems:'center', gap:'6px', background:'linear-gradient(135deg,#0e7490,#0891b2)', borderRadius:'8px', padding:'9px 10px', flexShrink:0 }}>
+            <div style={{ display:'flex', alignItems:'center', gap:'6px', background:'linear-gradient(135deg,#0e7490,#0891b2)', borderRadius:'16px', padding:'9px 10px', flexShrink:0 }}>
               <span style={{ fontSize:'20px', fontWeight:'900', color:'#fff', letterSpacing:'-0.03em', lineHeight:1 }}>{pct}%</span>
               <button onClick={loadPresenti} disabled={loadingP}
                 style={{ background:'rgba(255,255,255,.25)', border:'none', borderRadius:'5px', cursor:'pointer', padding:'5px', display:'flex', alignItems:'center', color:'#fff' }}>
@@ -413,7 +413,7 @@ export default function CheckinPage() {
               </button>
             </div>
           </div>
-          <div style={{ height:'3px', backgroundColor:'#E5E7EB', borderRadius:'2px', marginBottom:'12px', overflow:'hidden' }}>
+          <div style={{ height:'3px', backgroundColor:'#E8ECF4', borderRadius:'2px', marginBottom:'12px', overflow:'hidden' }}>
             <div style={{ width:`${pct}%`, height:'100%', background:'linear-gradient(90deg,#059669,#10b981)', borderRadius:'2px', transition:'width .5s' }}/>
           </div>
 
@@ -468,7 +468,7 @@ export default function CheckinPage() {
               <div style={s.presentiList}>
                 {presenti.map((p, i) => {
                   const initials = `${p.nome?.[0] || ''}${p.cognome?.[0] || ''}`.toUpperCase()
-                  const colors   = ['#003DA5','#16A34A','#D97706','#7C3AED','#DC2626','#0891B2']
+                  const colors   = ['#5B5FEF','#16A34A','#D97706','#7C3AED','#DC2626','#0891B2']
                   const bg       = colors[i % colors.length]
                   const isWalkin = p.stato === 'walk-in'
                   return (
@@ -516,14 +516,14 @@ export default function CheckinPage() {
               <Search size={16} style={{ position:'absolute', left:'12px', top:'50%', transform:'translateY(-50%)', color:'#9CA3AF' }} />
               <input value={searchLista} onChange={e => setSearchLista(e.target.value)}
                 placeholder="Cerca per nome, cognome o azienda…" autoFocus
-                style={{ width:'100%', padding:'10px 12px 10px 36px', border:'1px solid #E5E7EB', borderRadius:'8px', fontSize:'14px', fontFamily:"'Outfit',sans-serif", outline:'none', boxSizing:'border-box' }} />
+                style={{ width:'100%', padding:'10px 12px 10px 36px', border:'1px solid #E8ECF4', borderRadius:'16px', fontSize:'14px', fontFamily:"'Inter',sans-serif", outline:'none', boxSizing:'border-box' }} />
             </div>
             <div style={{ display:'flex', gap:'8px' }}>
-              {[{ label:'Totale', val:iscritti.length, color:'#003DA5' },
+              {[{ label:'Totale', val:iscritti.length, color:'#5B5FEF' },
                 { label:'Presenti', val:iscritti.filter(r => r.presente).length, color:'#16A34A' },
                 { label:'Attesa', val:iscritti.filter(r => !r.presente).length, color:'#D97706' }
               ].map(stat => (
-                <div key={stat.label} style={{ flex:1, background:'#F9FAFB', borderRadius:'8px', padding:'8px 10px', textAlign:'center', border:'1px solid #E5E7EB' }}>
+                <div key={stat.label} style={{ flex:1, background:'#F9FAFB', borderRadius:'16px', padding:'8px 10px', textAlign:'center', border:'1px solid #E8ECF4' }}>
                   <p style={{ fontSize:'18px', fontWeight:'900', color:stat.color, margin:0, letterSpacing:'-.02em' }}>{stat.val}</p>
                   <p style={{ fontSize:'11px', color:'#6B7280', margin:0, fontWeight:'600' }}>{stat.label}</p>
                 </div>
@@ -534,7 +534,7 @@ export default function CheckinPage() {
                 <p style={{ color:'#9CA3AF', fontSize:'14px' }}>Caricamento…</p>
               </div>
             ) : (
-              <div style={{ flex:1, overflowY:'auto', borderRadius:'8px', border:'1px solid #E5E7EB' }}>
+              <div style={{ flex:1, overflowY:'auto', borderRadius:'16px', border:'1px solid #E8ECF4' }}>
                 {filteredIscritti.length === 0 ? (
                   <p style={{ padding:'24px', textAlign:'center', color:'#9CA3AF', fontSize:'14px' }}>Nessun risultato</p>
                 ) : filteredIscritti.map(r => {
@@ -551,9 +551,9 @@ export default function CheckinPage() {
                           : r.presente ? <CheckCircle2 size={18} color="#fff" /> : null}
                       </button>
                       <div style={{ flex:1, minWidth:0 }}>
-                        <p style={{ fontSize:'14px', fontWeight:'700', color:'#0A0A0A', margin:0, letterSpacing:'-.01em' }}>{r.cognome} {r.nome}</p>
+                        <p style={{ fontSize:'14px', fontWeight:'700', color:'#111827', margin:0, letterSpacing:'-.01em' }}>{r.cognome} {r.nome}</p>
                         {r.ragione_sociale && <p style={{ fontSize:'12px', color:'#6B7280', margin:'1px 0 0', overflow:'hidden', textOverflow:'ellipsis', whiteSpace:'nowrap' }}>{r.ragione_sociale}</p>}
-                        {r.numero_posto && <p style={{ fontSize:'11px', color:'#003DA5', margin:'2px 0 0', fontWeight:'700' }}>🪑 {r.numero_posto}</p>}
+                        {r.numero_posto && <p style={{ fontSize:'11px', color:'#5B5FEF', margin:'2px 0 0', fontWeight:'700' }}>🪑 {r.numero_posto}</p>}
                       </div>
                       <div style={{ textAlign:'right', flexShrink:0 }}>
                         {r.presente ? (
@@ -586,7 +586,7 @@ export default function CheckinPage() {
                 display:'flex', alignItems:'center', gap:'8px',
                 background:'#0A0A0A', border:'none', borderRadius:'24px',
                 color:'#fff', padding:'10px 18px', fontSize:'15px', fontWeight:'700',
-                fontFamily:"'Outfit',sans-serif", cursor:'pointer',
+                fontFamily:"'Inter',sans-serif", cursor:'pointer',
                 boxShadow:'0 2px 12px rgba(0,0,0,.4)',
                 letterSpacing:'-.01em',
               }}>
@@ -610,8 +610,8 @@ export default function CheckinPage() {
                 <button onClick={confermaCheckinDaTicket} disabled={!!checkingId} style={{
                   width:'100%', padding:'16px',
                   background: checkingId ? '#9CA3AF' : 'linear-gradient(135deg,#16A34A,#15803D)',
-                  color:'#fff', border:'none', borderRadius:'12px',
-                  fontSize:'17px', fontWeight:'800', fontFamily:"'Outfit',sans-serif",
+                  color:'#fff', border:'none', borderRadius:'16px',
+                  fontSize:'17px', fontWeight:'800', fontFamily:"'Inter',sans-serif",
                   cursor: checkingId ? 'default' : 'pointer',
                   display:'flex', alignItems:'center', justifyContent:'center', gap:10,
                 }}>
@@ -644,7 +644,7 @@ export default function CheckinPage() {
               <Field label="Partita IVA *" error={walkinErrors.partita_iva}><Input value={walkin.partita_iva || ''} onChange={e => setWalkin(p => ({ ...p, partita_iva: e.target.value }))} placeholder="12345670015" /></Field>
               <Field label="Categoria professionale *" error={walkinErrors.mestiere_id}>
                 <select value={walkin.mestiere_id || ''} onChange={e => setWalkin(p => ({ ...p, mestiere_id: e.target.value }))}
-                  style={{ width:'100%', padding:'10px 12px', border:`1px solid ${walkinErrors.mestiere_id ? '#DC2626' : '#D1D5DB'}`, borderRadius:'6px', fontSize:'16px', fontFamily:"'Outfit',sans-serif", outline:'none', backgroundColor:'#FFF', appearance:'none' }}>
+                  style={{ width:'100%', padding:'10px 12px', border:`1px solid ${walkinErrors.mestiere_id ? '#DC2626' : '#D1D5DB'}`, borderRadius:'14px', fontSize:'16px', fontFamily:"'Inter',sans-serif", outline:'none', backgroundColor:'#FFF', appearance:'none' }}>
                   <option value="">— Seleziona categoria —</option>
                   {mestieri.map(m => <option key={m.id} value={m.id}>{m.nome}</option>)}
                 </select>
@@ -666,18 +666,18 @@ const s = {
   page:           { maxWidth: '700px', margin: '0 auto' },
   eventSelector:  { marginBottom: '16px' },
   emptyHero:      { display: 'flex', flexDirection: 'column', alignItems: 'center', justifyContent: 'center', padding: '80px 24px', textAlign: 'center' },
-  scanCard:       { backgroundColor: '#FFFFFF', border: '1px solid #E5E7EB', borderRadius: '12px', overflow: 'hidden', marginBottom: '12px' },
+  scanCard:       { backgroundColor: '#FFFFFF', border: '1px solid #E8ECF4', borderRadius: '16px', overflow: 'hidden', marginBottom: '12px' },
   scanPlaceholder:{ display: 'flex', flexDirection: 'column', alignItems: 'center', justifyContent: 'center', padding: '32px 24px' },
-  bigBtn:         { width: '100%', display: 'flex', alignItems: 'center', justifyContent: 'center', gap: '10px', background: '#003DA5', color: '#FFFFFF', border: 'none', borderRadius: '8px', padding: '15px', fontSize: '16px', fontWeight: '800', fontFamily: "'Outfit',sans-serif", cursor: 'pointer', letterSpacing: '-.01em' },
+  bigBtn:         { width: '100%', display: 'flex', alignItems: 'center', justifyContent: 'center', gap: '10px', background: '#5B5FEF', color: '#FFFFFF', border: 'none', borderRadius: '16px', padding: '15px', fontSize: '16px', fontWeight: '800', fontFamily: "'Inter',sans-serif", cursor: 'pointer', letterSpacing: '-.01em' },
   actionsRow:     { display: 'grid', gridTemplateColumns: '1fr 1fr 1fr', gap: '10px', marginBottom: '16px' },
-  actionBtn:      { display: 'flex', alignItems: 'center', justifyContent: 'center', gap: '7px', backgroundColor: '#EBF0FA', color: '#003DA5', border: '1px solid #FDA4AF', borderRadius: '10px', padding: '13px 8px', fontSize: '13px', fontWeight: '700', fontFamily: "'Outfit',sans-serif", cursor: 'pointer' },
-  presentiSection:{ backgroundColor: '#FFFFFF', border: '1px solid #E5E7EB', borderRadius: '12px', overflow: 'hidden' },
-  presentiHeader: { display: 'flex', alignItems: 'center', justifyContent: 'space-between', padding: '13px 18px', borderBottom: '1px solid #E5E7EB' },
-  presentiTitle:  { fontSize: '14px', fontWeight: '700', color: '#0A0A0A', letterSpacing: '-.01em', margin: 0 },
+  actionBtn:      { display: 'flex', alignItems: 'center', justifyContent: 'center', gap: '7px', backgroundColor: '#EEEFFD', color: '#5B5FEF', border: '1px solid #FDA4AF', borderRadius: '14px', padding: '13px 8px', fontSize: '13px', fontWeight: '700', fontFamily: "'Inter',sans-serif", cursor: 'pointer' },
+  presentiSection:{ backgroundColor: '#FFFFFF', border: '1px solid #E8ECF4', borderRadius: '16px', overflow: 'hidden' },
+  presentiHeader: { display: 'flex', alignItems: 'center', justifyContent: 'space-between', padding: '13px 18px', borderBottom: '1px solid #E8ECF4' },
+  presentiTitle:  { fontSize: '14px', fontWeight: '700', color: '#111827', letterSpacing: '-.01em', margin: 0 },
   presentiList:   { maxHeight: '360px', overflowY: 'auto' },
   presentiItem:   { display: 'flex', alignItems: 'center', gap: '12px', padding: '11px 18px', borderBottom: '1px solid #F3F4F6' },
   pAvatar:        { width: '36px', height: '36px', borderRadius: '50%', color: '#FFF', display: 'flex', alignItems: 'center', justifyContent: 'center', fontSize: '14px', fontWeight: '700', flexShrink: 0 },
-  pName:          { fontSize: '14px', fontWeight: '600', color: '#0A0A0A', margin: 0, letterSpacing: '-.01em' },
+  pName:          { fontSize: '14px', fontWeight: '600', color: '#111827', margin: 0, letterSpacing: '-.01em' },
   pSub:           { fontSize: '12px', color: '#6B7280', margin: '1px 0 0' },
   pTime:          { fontSize: '12px', color: '#9CA3AF', margin: '2px 0 0', display: 'flex', alignItems: 'center', gap: '4px' },
   pEmpty:         { padding: '28px', textAlign: 'center', color: '#9CA3AF', fontSize: '14px', margin: 0 },

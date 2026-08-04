@@ -5,7 +5,7 @@ import { useRole } from '../../hooks/useRole'
 import { Field, Input, Btn } from '../../components/ui'
 import { Camera, Eye, EyeOff, Save, CheckCircle2, AlertCircle, Clock, Loader2 } from 'lucide-react'
 
-const RUOLO_COL = { admin:'#003DA5', supervisore:'#D97706', utente:'#6B7280' }
+const RUOLO_COL = { admin:'#5B5FEF', supervisore:'#D97706', utente:'#6B7280' }
 
 function Toast({ msg, type, onClose }) {
   useEffect(() => { const t = setTimeout(onClose, 3500); return () => clearTimeout(t) }, [])
@@ -15,9 +15,9 @@ function Toast({ msg, type, onClose }) {
       zIndex:999, display:'flex', alignItems:'center', gap:'10px',
       backgroundColor: type==='ok' ? '#F0FDF4' : '#FEF2F2',
       border:`1.5px solid ${type==='ok' ? '#86EFAC' : '#FECACA'}`,
-      borderRadius:'12px', padding:'14px 22px',
+      borderRadius:'16px', padding:'14px 22px',
       boxShadow:'0 8px 32px rgba(0,0,0,.18)',
-      fontFamily:"'Outfit',sans-serif", fontSize:'14px', fontWeight:'700',
+      fontFamily:"'Inter',sans-serif", fontSize:'14px', fontWeight:'700',
       color: type==='ok' ? '#15803D' : '#DC2626', whiteSpace:'nowrap',
     }}>
       {type==='ok' ? <CheckCircle2 size={18}/> : <AlertCircle size={18}/>}
@@ -28,10 +28,10 @@ function Toast({ msg, type, onClose }) {
 
 function Card({ title, icon, children }) {
   return (
-    <div style={{ backgroundColor:'#FFFFFF', border:'1px solid #E5E7EB', borderRadius:'12px', marginBottom:'16px', overflow:'hidden' }}>
+    <div style={{ backgroundColor:'#FFFFFF', border:'1px solid #E8ECF4', borderRadius:'16px', marginBottom:'16px', overflow:'hidden' }}>
       <div style={{ padding:'14px 20px', borderBottom:'1px solid #F3F4F6', backgroundColor:'#FAFAFA', display:'flex', alignItems:'center', gap:'8px' }}>
         <span style={{ fontSize:'16px' }}>{icon}</span>
-        <h3 style={{ margin:0, fontSize:'14px', fontWeight:'700', color:'#0A0A0A' }}>{title}</h3>
+        <h3 style={{ margin:0, fontSize:'14px', fontWeight:'700', color:'#111827' }}>{title}</h3>
       </div>
       <div style={{ padding:'20px' }}>{children}</div>
     </div>
@@ -163,15 +163,15 @@ export default function ProfiloPage() {
   }
 
   return (
-    <div style={{ maxWidth:'520px', margin:'0 auto', fontFamily:"'Outfit',sans-serif", width:'100%', boxSizing:'border-box' }}>
+    <div style={{ maxWidth:'520px', margin:'0 auto', fontFamily:"'Inter',sans-serif", width:'100%', boxSizing:'border-box' }}>
 
       {/* ── HEADER PROFILO ── */}
-      <div style={{ backgroundColor:'#FFFFFF', border:'1px solid #E5E7EB', borderRadius:'12px', padding:'20px', marginBottom:'16px', display:'flex', alignItems:'center', gap:'16px' }}>
+      <div style={{ backgroundColor:'#FFFFFF', border:'1px solid #E8ECF4', borderRadius:'16px', padding:'20px', marginBottom:'16px', display:'flex', alignItems:'center', gap:'16px' }}>
         {/* Avatar */}
         <div style={{ position:'relative', flexShrink:0, cursor:'pointer' }} onClick={() => fileRef.current?.click()}>
           <div style={{
             width:'72px', height:'72px', borderRadius:'50%',
-            backgroundColor: RUOLO_COL[ruolo]||'#003DA5',
+            backgroundColor: RUOLO_COL[ruolo]||'#5B5FEF',
             overflow:'hidden', display:'flex', alignItems:'center',
             justifyContent:'center', fontSize:'26px', fontWeight:'900', color:'#FFF',
             border:'3px solid #FFF', boxShadow:'0 2px 12px rgba(0,0,0,.12)',
@@ -182,7 +182,7 @@ export default function ProfiloPage() {
                 ? <img src={avatarUrl} alt="" style={{ width:'100%', height:'100%', objectFit:'cover' }}/>
                 : initials}
           </div>
-          <div style={{ position:'absolute', bottom:0, right:0, width:'22px', height:'22px', borderRadius:'50%', backgroundColor:'#003DA5', border:'2px solid #FFF', display:'flex', alignItems:'center', justifyContent:'center' }}>
+          <div style={{ position:'absolute', bottom:0, right:0, width:'22px', height:'22px', borderRadius:'50%', backgroundColor:'#5B5FEF', border:'2px solid #FFF', display:'flex', alignItems:'center', justifyContent:'center' }}>
             <Camera size={11} style={{ color:'#FFF' }}/>
           </div>
         </div>
@@ -190,7 +190,7 @@ export default function ProfiloPage() {
 
         {/* Info */}
         <div style={{ flex:1, minWidth:0 }}>
-          <h2 style={{ fontSize:'18px', fontWeight:'900', color:'#0A0A0A', margin:'0 0 2px', letterSpacing:'-.02em' }}>{displayName}</h2>
+          <h2 style={{ fontSize:'18px', fontWeight:'900', color:'#111827', margin:'0 0 2px', letterSpacing:'-.02em' }}>{displayName}</h2>
           <p style={{ fontSize:'13px', color:'#6B7280', margin:'0 0 6px', overflow:'hidden', textOverflow:'ellipsis', whiteSpace:'nowrap' }}>{email}</p>
           <span style={{ fontSize:'11px', fontWeight:'700', backgroundColor:(RUOLO_COL[ruolo]||'#6B7280')+'20', color:RUOLO_COL[ruolo]||'#6B7280', padding:'3px 10px', borderRadius:'20px', textTransform:'capitalize' }}>
             {ruolo}
@@ -213,7 +213,7 @@ export default function ProfiloPage() {
         </Field>
         <div style={{ marginTop:'12px' }}>
           <label style={{ fontSize:'13px', fontWeight:'600', color:'#374151', display:'block', marginBottom:'4px' }}>Email</label>
-          <div style={{ padding:'10px 12px', backgroundColor:'#F9FAFB', border:'1px solid #E5E7EB', borderRadius:'6px', fontSize:'14px', color:'#9CA3AF' }}>{email}</div>
+          <div style={{ padding:'10px 12px', backgroundColor:'#F7F8FC', border:'1px solid #E8ECF4', borderRadius:'14px', fontSize:'14px', color:'#9CA3AF' }}>{email}</div>
           <p style={{ fontSize:'11px', color:'#9CA3AF', margin:'3px 0 0' }}>Non modificabile</p>
         </div>
         <div style={{ display:'flex', justifyContent:'flex-end', marginTop:'16px' }}>

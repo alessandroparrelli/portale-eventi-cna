@@ -91,7 +91,7 @@ function AzioniBadges({ logs, small }) {
           {n > 1 && (
             <span style={{
               position:'absolute', top:'-5px', right:'-5px',
-              background:'#003DA5', color:'#fff', borderRadius:'10px',
+              background:'#5B5FEF', color:'#fff', borderRadius:'14px',
               fontSize:'9px', fontWeight:'800', padding:'1px 4px', lineHeight:'1.2',
               minWidth:'14px', textAlign:'center'
             }}>{n}</span>
@@ -147,7 +147,7 @@ function OpRow({ log }) {
       </td>
       <td style={{ ...s.tdL3, color:'#374151', fontSize:'12px' }}>
         {log.evento_titolo && (
-          <span style={{ fontWeight:'600', color:'#003DA5', marginRight:'6px' }}>
+          <span style={{ fontWeight:'600', color:'#5B5FEF', marginRight:'6px' }}>
             {log.evento_titolo}
           </span>
         )}
@@ -161,7 +161,7 @@ function OpRow({ log }) {
             {devIcon && <span style={{ marginRight:'4px' }}>{devIcon}</span>}
             {[meta.browser, meta.os].filter(Boolean).join(' · ')}
           </span>
-        ) : <span style={{ color:'#E5E7EB' }}>—</span>}
+        ) : <span style={{ color:'#E8ECF4' }}>—</span>}
       </td>
       {/* Geo + IP */}
       <td style={s.tdL3}>
@@ -170,7 +170,7 @@ function OpRow({ log }) {
           {log.ip_address && (
             <p style={{ fontSize:'10px', color:'#9CA3AF', fontFamily:'monospace', margin:0 }}>{log.ip_address}</p>
           )}
-          {!geo && !log.ip_address && <span style={{ color:'#E5E7EB' }}>—</span>}
+          {!geo && !log.ip_address && <span style={{ color:'#E8ECF4' }}>—</span>}
         </div>
       </td>
     </tr>
@@ -248,10 +248,10 @@ function UserDayRow({ utenteNome, sessions, defaultOpen }) {
             {open
               ? <ChevronDown size={15} style={{ color:'#9CA3AF', flexShrink:0 }} />
               : <ChevronRight size={15} style={{ color:'#9CA3AF', flexShrink:0 }} />}
-            <div style={{ width:'30px', height:'30px', borderRadius:'50%', backgroundColor:'#EBF0FA', display:'flex', alignItems:'center', justifyContent:'center', flexShrink:0 }}>
-              <User size={15} style={{ color:'#003DA5' }} />
+            <div style={{ width:'30px', height:'30px', borderRadius:'50%', backgroundColor:'#EEEFFD', display:'flex', alignItems:'center', justifyContent:'center', flexShrink:0 }}>
+              <User size={15} style={{ color:'#5B5FEF' }} />
             </div>
-            <span style={{ fontSize:'14px', fontWeight:'700', color:'#0A0A0A' }}>{utenteNome}</span>
+            <span style={{ fontSize:'14px', fontWeight:'700', color:'#111827' }}>{utenteNome}</span>
           </div>
         </td>
         {/* Riepilogo azioni */}
@@ -447,16 +447,16 @@ export default function ActivityLogPage() {
 const s = {
   page:       { width:'100%' },
   header:     { display:'flex', justifyContent:'space-between', alignItems:'flex-start', marginBottom:'24px', gap:'12px', flexWrap:'wrap' },
-  title:      { fontSize:'32px', fontWeight:'900', color:'#0A0A0A', letterSpacing:'-0.03em', margin:0 },
+  title:      { fontSize:'32px', fontWeight:'900', color:'#111827', letterSpacing:'-0.03em', margin:0 },
   sub:        { fontSize:'14px', color:'#6B7280', margin:'4px 0 0', fontWeight:'500' },
-  refreshBtn: { display:'flex', alignItems:'center', gap:'6px', border:'1px solid #E5E7EB', backgroundColor:'#fff', borderRadius:'6px', padding:'8px 14px', fontSize:'13px', fontWeight:'600', cursor:'pointer', fontFamily:"'Outfit',sans-serif", color:'#374151' },
-  input:      { border:'1px solid #D1D5DB', borderRadius:'6px', padding:'9px 12px', fontSize:'13px', fontFamily:"'Outfit',sans-serif", color:'#0A0A0A', backgroundColor:'#fff', outline:'none' },
-  tableCard:  { backgroundColor:'#fff', borderRadius:'8px', border:'1px solid #E5E7EB', overflow:'hidden' },
+  refreshBtn: { display:'flex', alignItems:'center', gap:'6px', border:'1px solid #E8ECF4', backgroundColor:'#fff', borderRadius:'14px', padding:'8px 14px', fontSize:'13px', fontWeight:'600', cursor:'pointer', fontFamily:"'Inter',sans-serif", color:'#374151' },
+  input:      { border:'1px solid #D1D5DB', borderRadius:'14px', padding:'9px 12px', fontSize:'13px', fontFamily:"'Inter',sans-serif", color:'#111827', backgroundColor:'#fff', outline:'none' },
+  tableCard:  { backgroundColor:'#fff', borderRadius:'16px', border:'1px solid #E8ECF4', overflow:'hidden' },
   table:      { width:'100%', borderCollapse:'collapse', fontSize:'13px' },
   emptyState: { padding:'64px 32px', textAlign:'center', display:'flex', flexDirection:'column', alignItems:'center' },
   // Day header
   dayHeader:  { display:'flex', alignItems:'baseline', gap:'12px', marginBottom:'8px', paddingLeft:'2px' },
-  dayLabel:   { fontSize:'15px', fontWeight:'800', color:'#0A0A0A', letterSpacing:'-0.02em' },
+  dayLabel:   { fontSize:'15px', fontWeight:'800', color:'#111827', letterSpacing:'-0.02em' },
   dayMeta:    { fontSize:'12px', color:'#9CA3AF', fontWeight:'500' },
   // L1 — utente
   trUser:     { borderBottom:'1px solid #F3F4F6', transition:'background-color 0.1s' },
