@@ -321,21 +321,25 @@ export default function Sidebar({ mobileOpen, onMobileClose, isMobile }) {
                   />
                 )
               ))}
-              {group.label === 'Amministrazione' && (
-                <button
-                  onClick={() => signOut()}
-                  title={isCollapsed ? 'Esci' : undefined}
-                  style={{ ...st.logoutBtn, justifyContent: isCollapsed ? 'center' : undefined, padding: isCollapsed ? '7px' : '7px 10px' }}
-                  onMouseEnter={e => e.currentTarget.style.backgroundColor='#FEF2F2'}
-                  onMouseLeave={e => e.currentTarget.style.backgroundColor='transparent'}>
-                  {icons.logout()}
-                  {!isCollapsed && <span className="logout-label">Esci dall'app</span>}
-                </button>
-              )}
+
             </div>
           ))}
 
         </nav>
+
+        {/* Bottone Esci — subito sotto il menu, sempre visibile */}
+        <div style={{ padding:'6px 10px 8px', flexShrink:0 }}>
+          <div style={{ height:'1px', background:'#F3F4F6', marginBottom:'6px' }}/>
+          <button
+            onClick={() => signOut()}
+            title={isCollapsed ? 'Esci' : undefined}
+            style={{ ...st.logoutBtn, justifyContent: isCollapsed ? 'center' : undefined, padding: isCollapsed ? '7px' : '7px 10px' }}
+            onMouseEnter={e => e.currentTarget.style.backgroundColor='#FEF2F2'}
+            onMouseLeave={e => e.currentTarget.style.backgroundColor='transparent'}>
+            {icons.logout()}
+            {!isCollapsed && <span className="logout-label">Esci dall'app</span>}
+          </button>
+        </div>
 
       </aside>
     </>

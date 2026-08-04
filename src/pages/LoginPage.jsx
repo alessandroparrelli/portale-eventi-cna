@@ -6,14 +6,14 @@ const CNA_LOGO = 'https://raw.githubusercontent.com/alessandroparrelli/fileappog
 // Icone SVG inline colorate
 function IconUser() {
   return (
-    <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="#003DA5" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+    <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="#5B5FEF" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
       <circle cx="12" cy="8" r="4"/><path d="M4 20c0-4 3.6-7 8-7s8 3 8 7"/>
     </svg>
   )
 }
 function IconLock() {
   return (
-    <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="#003DA5" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+    <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="#5B5FEF" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
       <rect x="3" y="11" width="18" height="11" rx="2"/><path d="M7 11V7a5 5 0 0 1 10 0v4"/>
     </svg>
   )
@@ -71,20 +71,34 @@ export default function LoginPage() {
         {/* Wordmark eventlypro — grande */}
         <div style={s.logoWrap}>
           <div style={{ display:'flex', alignItems:'center', gap:'14px' }}>
-            <svg width="52" height="52" viewBox="0 0 40 40" fill="none" xmlns="http://www.w3.org/2000/svg">
-              <polygon points="20,4 36,13 20,22 4,13" fill="#FB7185"/>
-              <polygon points="4,13 20,22 20,36 4,27" fill="#9F1239"/>
-              <polygon points="36,13 20,22 20,36 36,27" fill="#BE123C"/>
+            <svg width="56" height="56" viewBox="0 0 56 56" fill="none" xmlns="http://www.w3.org/2000/svg">
+              <defs>
+                <linearGradient id="tg" x1="6" y1="6" x2="50" y2="30" gradientUnits="userSpaceOnUse">
+                  <stop offset="0%" stopColor="#F87171"/>
+                  <stop offset="100%" stopColor="#FB923C"/>
+                </linearGradient>
+                <linearGradient id="lg" x1="6" y1="18" x2="28" y2="50" gradientUnits="userSpaceOnUse">
+                  <stop offset="0%" stopColor="#6366F1"/>
+                  <stop offset="100%" stopColor="#4338CA"/>
+                </linearGradient>
+                <linearGradient id="rg" x1="50" y1="18" x2="28" y2="50" gradientUnits="userSpaceOnUse">
+                  <stop offset="0%" stopColor="#818CF8"/>
+                  <stop offset="100%" stopColor="#6366F1"/>
+                </linearGradient>
+              </defs>
+              <polygon points="28,5 51,18 28,31 5,18" fill="url(#tg)"/>
+              <polygon points="5,18 28,31 28,51 5,38" fill="url(#lg)"/>
+              <polygon points="51,18 28,31 28,51 51,38" fill="url(#rg)"/>
             </svg>
             <div style={{ display:'flex', alignItems:'baseline', lineHeight:1 }}>
-              <span style={{ fontFamily:"'Outfit',sans-serif", fontWeight:800, fontSize:42, letterSpacing:'-0.04em', color:'#111111' }}>evently</span>
-              <span style={{ fontFamily:"'Outfit',sans-serif", fontWeight:800, fontSize:42, letterSpacing:'-0.04em', color:'#003DA5' }}>pro</span>
+              <span style={{ fontFamily:"'Inter',sans-serif", fontWeight:800, fontSize:42, letterSpacing:'-0.04em', color:'#111827' }}>evently</span>
+              <span style={{ fontFamily:"'Inter',sans-serif", fontWeight:800, fontSize:42, letterSpacing:'-0.04em', color:'#C2410C' }}>pro</span>
             </div>
           </div>
         </div>
 
         {/* Tagline */}
-        <p style={{ fontFamily:"'Outfit',sans-serif", fontSize:'12px', color:'#9CA3AF', textAlign:'center', margin:'4px 0 24px', letterSpacing:'0.01em' }}>
+        <p style={{ fontFamily:"'Inter',sans-serif", fontSize:'12px', color:'#9CA3AF', textAlign:'center', margin:'4px 0 24px', letterSpacing:'0.01em' }}>
           Portale di gestione eventi sviluppato dalla CNA di Roma
         </p>
 
@@ -106,7 +120,7 @@ export default function LoginPage() {
                 required
                 autoComplete="username"
                 style={s.input}
-                onFocus={e => e.target.style.borderColor = '#003DA5'}
+                onFocus={e => e.target.style.borderColor = '#5B5FEF'}
                 onBlur={e => e.target.style.borderColor = '#D1D5DB'}
               />
             </div>
@@ -125,7 +139,7 @@ export default function LoginPage() {
                 required
                 autoComplete="current-password"
                 style={{ ...s.input, paddingRight: '44px' }}
-                onFocus={e => e.target.style.borderColor = '#003DA5'}
+                onFocus={e => e.target.style.borderColor = '#5B5FEF'}
                 onBlur={e => e.target.style.borderColor = '#D1D5DB'}
               />
               <button type="button" onClick={() => setShowPwd(!showPwd)} style={s.eyeBtn}>
@@ -160,7 +174,7 @@ const s = {
     display: 'flex', flexDirection: 'column',
     alignItems: 'center', justifyContent: 'center',
     padding: '24px',
-    fontFamily: "'Outfit', sans-serif",
+    fontFamily: "'Inter', sans-serif",
   },
   card: {
     backgroundColor: '#FFFFFF',
@@ -178,7 +192,7 @@ const s = {
     letterSpacing: '-0.04em',
     margin: '0 0 6px',
     textAlign: 'center',
-    fontFamily: "'Outfit', sans-serif",
+    fontFamily: "'Inter', sans-serif",
   },
   subtitle_old_UNUSED: {
     fontSize: '14px',
@@ -187,7 +201,7 @@ const s = {
     color: '#6B7280',
     margin: '0 0 28px',
     textAlign: 'center',
-    fontFamily: "'Outfit', sans-serif",
+    fontFamily: "'Inter', sans-serif",
   },
   form: { display: 'flex', flexDirection: 'column', gap: '20px' },
   field: { display: 'flex', flexDirection: 'column', gap: '6px' },
@@ -203,7 +217,7 @@ const s = {
     border: '1.5px solid #D1D5DB',
     borderRadius: '20px',
     fontSize: '16px',
-    fontFamily: "'Outfit', sans-serif",
+    fontFamily: "'Inter', sans-serif",
     color: '#0A0A0A',
     outline: 'none',
     transition: 'border-color 0.15s',
@@ -222,12 +236,12 @@ const s = {
   },
   submitBtn: {
     display: 'flex', alignItems: 'center', justifyContent: 'center', gap: '8px',
-    background: 'linear-gradient(135deg, #003DA5, #BE123C)',
+    background: 'linear-gradient(135deg, #5B5FEF, #7C4DFF)',
     color: '#FFFFFF', border: 'none', borderRadius: '20px',
     padding: '13px 24px', fontSize: '15px', fontWeight: '700',
-    fontFamily: "'Outfit', sans-serif",
+    fontFamily: "'Inter', sans-serif",
     cursor: 'pointer', letterSpacing: '-0.01em',
-    boxShadow: '0 4px 14px rgba(0,61,165,.30)',
+    boxShadow: '0 4px 14px rgba(91,95,239,.35)',
     transition: 'opacity .15s',
     marginTop: '4px',
   },
