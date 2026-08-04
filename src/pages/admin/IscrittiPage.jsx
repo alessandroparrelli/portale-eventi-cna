@@ -8,6 +8,7 @@ import GlowTableHead from '../../components/GlowTableHead'
 import GlowStatCard from '../../components/GlowStatCard'
 import { Modal, PresenzaBadge, Field, Input, Select, Btn, EmptyState } from '../../components/ui'
 import { Users, Search, Download, Upload, Eye, Trash2, UserCheck, AlertCircle, CheckCircle2, X, MapPin, Ticket, RefreshCw, MessageSquare, UserPlus, Link2, Pencil } from 'lucide-react'
+import DeleteConfirmModal from '../../components/DeleteConfirmModal'
 import * as XLSX from 'xlsx'
 import ExcelJS from 'exceljs/dist/exceljs.min.js'
 import { logAttivita } from '../../lib/activityLog'
@@ -2128,18 +2129,13 @@ export default function IscrittiPage() {
         </Modal>
       )}
 
-      {/* MODAL DELETE */}
-      {delConfirm && (
-        <Modal title="Elimina iscritto" onClose={()=>setDelConfirm(null)} width="420px">
-          <p style={{ fontSize:'14px', color:'#374151', marginBottom:'20px' }}>
-            Sei sicuro di voler eliminare la registrazione di <strong>{delConfirm.nome} {delConfirm.cognome}</strong>? L'operazione non è reversibile.
-          </p>
-          <div style={{ display:'flex', justifyContent:'flex-end', gap:'10px' }}>
-            <Btn variant="ghost" onClick={()=>setDelConfirm(null)}>Annulla</Btn>
-            <Btn variant="danger" onClick={deleteReg}>Elimina</Btn>
-          </div>
-        </Modal>
-      )}
+      <DeleteConfirmModal
+        isOpen={!!delConfirm}
+        onClose={()=>setDelConfirm(null)}
+        onConfirm={deleteReg}
+        title="Elimina iscritto"
+        description={delConfirm ? `Stai per eliminare la registrazione di ${[delConfirm.nome, delConfirm.cognome].filter(Boolean).join(' ')}. Verranno eliminati anche eventuali accompagnatori associati.` : ''}
+      />
       {/* BANNER RISULTATO CERTIFICATI */}
       {invioRisultato && (
         <div style={{ margin:'0 0 16px', padding:'14px 18px', borderRadius:'16px',

@@ -7,6 +7,7 @@ import { adminApi } from '../../lib/adminApi'
 import { logAttivita } from '../../lib/activityLog'
 import { Modal, RuoloBadge, Field, Input, Select, Btn, EmptyState } from '../../components/ui'
 import { Users, Plus, Pencil, Trash2, ShieldCheck, Eye, EyeOff, Activity, Clock, ToggleLeft, ToggleRight, Settings } from 'lucide-react'
+import DeleteConfirmModal from '../../components/DeleteConfirmModal'
 
 const RUOLO_COL  = { admin:'#5B5FEF', supervisore:'#D97706', utente:'#6B7280' }
 const RUOLO_DESC_FALLBACK = {
@@ -246,17 +247,14 @@ export default function UtentiPage() {
         </Modal>
       )}
 
-      {/* Modal delete */}
-      {modal==='delete' && (
-        <Modal title="Elimina utente" onClose={()=>setModal(null)} width="420px">
-          <p style={{ fontSize:'14px', color:'#374151', margin:'0 0 8px' }}>Elimina <strong>{cur.username}</strong> ({cur.email})?</p>
-          <p style={{ fontSize:'13px', color:'#DC2626', margin:'0 0 24px' }}>Operazione irreversibile.</p>
-          <div style={{ display:'flex', justifyContent:'flex-end', gap:'10px' }}>
-            <Btn variant="ghost" onClick={()=>setModal(null)}>Annulla</Btn>
-            <Btn variant="danger" onClick={deleteUser} disabled={saving}>{saving?'Elimino…':'Elimina'}</Btn>
-          </div>
-        </Modal>
-      )}
+      <DeleteConfirmModal
+        isOpen={modal==='delete' && !!cur}
+        onClose={()=>setModal(null)}
+        onConfirm={deleteUser}
+        loading={saving}
+        title="Elimina utente"
+        description={`Stai per eliminare l'utente ${cur?.username} (${cur?.email}). Questa operazione non può essere annullata.`}
+      />
 
       {/* Modal log */}
       {modal==='log' && logUser && (

@@ -1,4 +1,5 @@
 import { useState, useEffect } from 'react'
+import DeleteConfirmModal from '../../components/DeleteConfirmModal'
 import { useNavigate } from 'react-router-dom'
 import { supabase } from '../../lib/supabase'
 
@@ -14,6 +15,8 @@ export default function LandingPageListPage() {
   const [counts,  setCounts]  = useState({})
   const [loading, setLoading] = useState(true)
   const [search,  setSearch]  = useState('')
+  const [delTarget, setDelTarget] = useState(null)  // { id, titolo }
+  const [delLoading, setDelLoading] = useState(false)
 
   useEffect(() => { load() }, [])
 
@@ -38,8 +41,17 @@ export default function LandingPageListPage() {
   }
 
   async function elimina(id) {
-    if (!window.confirm('Eliminare questa landing page e tutti i contatti raccolti?')) return
-    await supabase.from('landing_pages').delete().eq('id', id)
+    // Apre il modal di conferma — vedi DeleteConfirmModal
+    const page = pages.find(p => p.id === id)
+    setDelTarget(page || { id, titolo: 'questa landing page' })
+  }
+
+  async function confirmElimina() {
+    if (!delTarget) return
+    setDelLoading(true)
+    await supabase.from('landing_pages').delete().eq('id', delTarget.id)
+    setDelLoading(false)
+    setDelTarget(null)
     load()
   }
 
@@ -172,6 +184,14 @@ export default function LandingPageListPage() {
           })}
         </div>
       )}
+      <DeleteConfirmModal
+        isOpen={!!delTarget}
+        onClose={() => setDelTarget(null)}
+        onConfirm={confirmElimina}
+        loading={delLoading}
+        title="Elimina landing page"
+        description={delTarget ? ('Stai per eliminare ' + (delTarget.titolo||'questa landing page') + '. Verranno eliminati anche tutti i contatti raccolti.') : ''}
+      />
     </div>
   )
 }

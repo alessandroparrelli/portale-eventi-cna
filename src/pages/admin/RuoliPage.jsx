@@ -6,6 +6,7 @@ import { useRole } from '../../hooks/useRole'
 import { logAttivita } from '../../lib/activityLog'
 import { Modal, Field, Input, Btn, EmptyState } from '../../components/ui'
 import { ShieldCheck, Plus, Pencil, Trash2, Lock, ArrowLeft } from 'lucide-react'
+import DeleteConfirmModal from '../../components/DeleteConfirmModal'
 
 const SEZIONI = [
   { key:'dashboard',  label:'Dashboard' },
@@ -249,19 +250,14 @@ export default function RuoliPage() {
         </Modal>
       )}
 
-      {/* Modal elimina */}
-      {modal==='delete' && (
-        <Modal title="Elimina ruolo" onClose={()=>setModal(null)} width="420px">
-          {errors.general && <div style={{ backgroundColor:'#FEF2F2', border:'1px solid #FECACA', borderRadius:'20px', padding:'10px 14px', fontSize:'13px', color:'#DC2626', marginBottom:'16px' }}>{errors.general}</div>}
-          <p style={{ fontSize:'14px', color:'#374151', lineHeight:1.6, margin:'0 0 20px' }}>
-            Eliminare il ruolo <strong>{cur.nome}</strong>?
-          </p>
-          <div style={{ display:'flex', justifyContent:'flex-end', gap:'10px' }}>
-            <Btn variant="ghost" onClick={()=>setModal(null)}>Annulla</Btn>
-            <Btn onClick={deleteRole} disabled={saving} style={{ backgroundColor:'#DC2626' }}>{saving?'Elimino…':'Elimina'}</Btn>
-          </div>
-        </Modal>
-      )}
+      <DeleteConfirmModal
+        isOpen={modal==='delete' && !!cur}
+        onClose={()=>{ setModal(null); setErrors({}) }}
+        onConfirm={deleteRole}
+        loading={saving}
+        title="Elimina ruolo"
+        description={`Stai per eliminare il ruolo "${cur?.nome}". Assicurati che nessun utente abbia ancora questo ruolo prima di procedere.`}
+      />
     </div>
   )
 }
