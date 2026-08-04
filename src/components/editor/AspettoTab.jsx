@@ -51,7 +51,7 @@ function ColorPicker({ label, value, onChange, hint }) {
         <input
           type="color" value={value}
           onChange={e => onChange(e.target.value)}
-          style={{ width: '40px', height: '34px', border: '1px solid #D1D5DB', borderRadius: '6px', cursor: 'pointer', padding: '2px', flexShrink: 0 }}
+          style={{ width: '40px', height: '34px', border: '1px solid #D1D5DB', borderRadius: '20px', cursor: 'pointer', padding: '2px', flexShrink: 0 }}
         />
         <input
           type="text" value={value}
@@ -68,7 +68,7 @@ function ColorPicker({ label, value, onChange, hint }) {
 function Sezione({ title, icon, children, defaultOpen = false }) {
   const [open, setOpen] = useState(defaultOpen)
   return (
-    <div style={{ border: '1px solid #E5E7EB', borderRadius: '10px', overflow: 'hidden', marginBottom: '10px' }}>
+    <div style={{ border: '1px solid #E5E7EB', borderRadius: '20px', overflow: 'hidden', marginBottom: '10px' }}>
       <button
         type="button"
         onClick={() => setOpen(o => !o)}
@@ -142,7 +142,7 @@ function Anteprima({ tema, logoUrl, titolo }) {
   })()
 
   return (
-    <div style={{ border: '1px solid #E5E7EB', borderRadius: '12px', overflow: 'hidden', background: t.sfondo_pagina, boxShadow: '0 2px 12px rgba(0,0,0,.06)', position: 'relative' }}>
+    <div style={{ border: '1px solid #E5E7EB', borderRadius: '20px', overflow: 'hidden', background: t.sfondo_pagina, boxShadow: '0 2px 12px rgba(0,0,0,.06)', position: 'relative' }}>
       {patternSvg && <div style={{ position:'absolute', inset:0, backgroundImage:patternSvg, backgroundSize:'cover', backgroundPosition:'top right', pointerEvents:'none', zIndex:0 }} />}
       {/* Header */}
       <div style={{
@@ -151,7 +151,7 @@ function Anteprima({ tema, logoUrl, titolo }) {
         padding: '10px 16px',
         display: 'flex', alignItems: 'center',
       }}>
-        <div style={{ background: logoBg, padding: logoBg !== 'transparent' ? '4px 8px' : 0, borderRadius: '4px' }}>
+        <div style={{ background: logoBg, padding: logoBg !== 'transparent' ? '4px 8px' : 0, borderRadius: '20px' }}>
           <img
             src={logoUrl || 'https://raw.githubusercontent.com/alessandroparrelli/fileappoggio/main/NUOVO-LOGO-CNA-ROMA-SOLO-ROMA.png'}
             alt="logo" style={{ height: `${Math.min(logoHeight, 56)}px`, maxWidth: '180px', objectFit: 'contain', display: 'block' }}
@@ -241,7 +241,7 @@ export default function AspettoTab({ event, setEvent }) {
           </div>
           <button
             type="button" onClick={resetTema}
-            style={{ display: 'flex', alignItems: 'center', gap: '6px', background: '#FEF2F2', border: '1px solid #FECACA', color: '#DC2626', borderRadius: '8px', padding: '7px 13px', fontSize: '12px', fontWeight: '700', fontFamily: "'Outfit',sans-serif", cursor: 'pointer' }}
+            style={{ display: 'flex', alignItems: 'center', gap: '6px', background: '#FEF2F2', border: '1px solid #FECACA', color: '#DC2626', borderRadius: '20px', padding: '7px 13px', fontSize: '12px', fontWeight: '700', fontFamily: "'Outfit',sans-serif", cursor: 'pointer' }}
           >
             <RotateCcw size={13} /> Reset
           </button>
@@ -258,7 +258,7 @@ export default function AspettoTab({ event, setEvent }) {
                   style={{
                     display: 'flex', alignItems: 'center', gap: '6px',
                     padding: '7px 12px', border: `2px solid ${attiva ? pl.primario : '#E5E7EB'}`,
-                    borderRadius: '8px', background: attiva ? '#F0F4FF' : '#fff',
+                    borderRadius: '20px', background: attiva ? '#F0F4FF' : '#fff',
                     cursor: 'pointer', fontSize: '12px', fontWeight: '600',
                     color: attiva ? pl.primario : '#374151', fontFamily: "'Outfit',sans-serif",
                     transition: 'all .15s',
@@ -357,7 +357,7 @@ export default function AspettoTab({ event, setEvent }) {
             <div style={{ display: 'flex', gap: '8px', marginTop: '6px' }}>
               {[['nessuno', '✕ Nessuno'], ['pallini', '● Pallini sparsi'], ['pallini_angolo', '◔ Pallini angolo']].map(([v, l]) => (
                 <button key={v} type="button" onClick={() => setT('sfondo_pattern', v)}
-                  style={{ flex: 1, padding: '9px 8px', border: `1.5px solid ${(tema.sfondo_pattern || 'nessuno') === v ? '#003DA5' : '#E5E7EB'}`, borderRadius: '8px', background: (tema.sfondo_pattern || 'nessuno') === v ? '#EBF0FA' : '#fff', fontSize: '12px', fontWeight: '700', color: (tema.sfondo_pattern || 'nessuno') === v ? '#003DA5' : '#374151', cursor: 'pointer', fontFamily: "'Outfit',sans-serif" }}>
+                  style={{ flex: 1, padding: '9px 8px', border: `1.5px solid ${(tema.sfondo_pattern || 'nessuno') === v ? '#003DA5' : '#E5E7EB'}`, borderRadius: '20px', background: (tema.sfondo_pattern || 'nessuno') === v ? '#EBF0FA' : '#fff', fontSize: '12px', fontWeight: '700', color: (tema.sfondo_pattern || 'nessuno') === v ? '#003DA5' : '#374151', cursor: 'pointer', fontFamily: "'Outfit',sans-serif" }}>
                   {l}
                 </button>
               ))}
@@ -396,7 +396,7 @@ export default function AspettoTab({ event, setEvent }) {
                     if (v === '') { setT('sfondo_footer', ''); setT('testo_footer', '#6B7280') }
                     else { setT('sfondo_footer', '#003DA5'); setT('testo_footer', '#ffffff') }
                   }}
-                    style={{ flex: 1, padding: '9px 8px', border: `1.5px solid ${isActive ? '#003DA5' : '#E5E7EB'}`, borderRadius: '8px', background: isActive ? '#EBF0FA' : '#fff', fontSize: '12px', fontWeight: '700', color: isActive ? '#003DA5' : '#374151', cursor: 'pointer', fontFamily: "'Outfit',sans-serif" }}>
+                    style={{ flex: 1, padding: '9px 8px', border: `1.5px solid ${isActive ? '#003DA5' : '#E5E7EB'}`, borderRadius: '20px', background: isActive ? '#EBF0FA' : '#fff', fontSize: '12px', fontWeight: '700', color: isActive ? '#003DA5' : '#374151', cursor: 'pointer', fontFamily: "'Outfit',sans-serif" }}>
                     {l}
                   </button>
                 )
@@ -426,7 +426,7 @@ export default function AspettoTab({ event, setEvent }) {
                     if (v === 'same') setEvent(p => ({ ...p, footer_logo_url: '' }))
                     else setEvent(p => ({ ...p, footer_logo_url: p.footer_logo_url || 'PENDING' }))
                   }}
-                    style={{ flex: 1, padding: '9px 8px', border: `1.5px solid ${isActive ? '#003DA5' : '#E5E7EB'}`, borderRadius: '8px', background: isActive ? '#EBF0FA' : '#fff', fontSize: '12px', fontWeight: '700', color: isActive ? '#003DA5' : '#374151', cursor: 'pointer', fontFamily: "'Outfit',sans-serif" }}>
+                    style={{ flex: 1, padding: '9px 8px', border: `1.5px solid ${isActive ? '#003DA5' : '#E5E7EB'}`, borderRadius: '20px', background: isActive ? '#EBF0FA' : '#fff', fontSize: '12px', fontWeight: '700', color: isActive ? '#003DA5' : '#374151', cursor: 'pointer', fontFamily: "'Outfit',sans-serif" }}>
                     {l}
                   </button>
                 )
@@ -448,7 +448,7 @@ export default function AspettoTab({ event, setEvent }) {
               footer_modalita: 'ricco',
               footer_html: '<p style="text-align:center;font-family:Inter,sans-serif;font-weight:700;font-size:14px;margin:0 0 12px">👉 Insieme è meglio 👈</p><p style="text-align:center;font-family:Inter,sans-serif;font-size:13px;line-height:1.7;margin:0"><strong>CNA di Roma</strong><br/>Via Cristoforo Colombo, 283/A, 00147 Roma<br/>Tel. 06570151 • Email info@cnaroma.it</p>',
             }))
-          }} style={{ width: '100%', padding: '9px 14px', border: '1.5px solid #003DA5', borderRadius: '8px', background: '#EBF0FA', color: '#003DA5', fontSize: '12px', fontWeight: '700', cursor: 'pointer', fontFamily: "'Outfit',sans-serif", display: 'flex', alignItems: 'center', justifyContent: 'center', gap: '6px' }}>
+          }} style={{ width: '100%', padding: '9px 14px', border: '1.5px solid #003DA5', borderRadius: '20px', background: '#EBF0FA', color: '#003DA5', fontSize: '12px', fontWeight: '700', cursor: 'pointer', fontFamily: "'Outfit',sans-serif", display: 'flex', alignItems: 'center', justifyContent: 'center', gap: '6px' }}>
             ↩ Ripristina footer di default
           </button>
 
@@ -459,7 +459,7 @@ export default function AspettoTab({ event, setEvent }) {
               {[['semplice', '✏️ Testo semplice'], ['ricco', '🖊 Editor ricco']].map(([v, l]) => (
                 <button key={v} type="button"
                   onClick={() => setEvent(p => ({ ...p, footer_modalita: v }))}
-                  style={{ flex: 1, padding: '9px 8px', border: `1.5px solid ${(event.footer_modalita || 'semplice') === v ? '#003DA5' : '#E5E7EB'}`, borderRadius: '8px', background: (event.footer_modalita || 'semplice') === v ? '#EBF0FA' : '#fff', fontSize: '12px', fontWeight: '700', color: (event.footer_modalita || 'semplice') === v ? '#003DA5' : '#374151', cursor: 'pointer', fontFamily: "'Outfit',sans-serif" }}>
+                  style={{ flex: 1, padding: '9px 8px', border: `1.5px solid ${(event.footer_modalita || 'semplice') === v ? '#003DA5' : '#E5E7EB'}`, borderRadius: '20px', background: (event.footer_modalita || 'semplice') === v ? '#EBF0FA' : '#fff', fontSize: '12px', fontWeight: '700', color: (event.footer_modalita || 'semplice') === v ? '#003DA5' : '#374151', cursor: 'pointer', fontFamily: "'Outfit',sans-serif" }}>
                   {l}
                 </button>
               ))}
@@ -478,7 +478,7 @@ export default function AspettoTab({ event, setEvent }) {
             ) : (
               <div>
                 <p style={sHint}>Editor ricco — puoi inserire testo formattato, loghi, link, immagini. Il logo dell'evento viene comunque mostrato in cima al footer.</p>
-                <div style={{ marginTop: '8px', border: '1px solid #E5E7EB', borderRadius: '8px', overflow: 'hidden' }}>
+                <div style={{ marginTop: '8px', border: '1px solid #E5E7EB', borderRadius: '20px', overflow: 'hidden' }}>
                   <RichEditor
                     value={event.footer_html || ''}
                     onChange={v => setEvent(p => ({ ...p, footer_html: v }))}
@@ -503,7 +503,7 @@ export default function AspettoTab({ event, setEvent }) {
             <div style={{ display: 'flex', gap: '8px', marginTop: '6px' }}>
               {[['pieno', '▬ Pieno'], ['contorno', '□ Contorno'], ['pill', '( Pill )']].map(([v, l]) => (
                 <button key={v} type="button" onClick={() => setT('btn_stile', v)}
-                  style={{ flex: 1, padding: '9px 8px', border: `1.5px solid ${tema.btn_stile === v ? '#003DA5' : '#E5E7EB'}`, borderRadius: '8px', background: tema.btn_stile === v ? '#EBF0FA' : '#fff', fontSize: '12px', fontWeight: '700', color: tema.btn_stile === v ? '#003DA5' : '#374151', cursor: 'pointer', fontFamily: "'Outfit',sans-serif" }}
+                  style={{ flex: 1, padding: '9px 8px', border: `1.5px solid ${tema.btn_stile === v ? '#003DA5' : '#E5E7EB'}`, borderRadius: '20px', background: tema.btn_stile === v ? '#EBF0FA' : '#fff', fontSize: '12px', fontWeight: '700', color: tema.btn_stile === v ? '#003DA5' : '#374151', cursor: 'pointer', fontFamily: "'Outfit',sans-serif" }}
                 >{l}</button>
               ))}
             </div>
@@ -537,6 +537,6 @@ export default function AspettoTab({ event, setEvent }) {
 }
 
 const sLabel = { fontSize: '12px', fontWeight: '700', color: '#374151', display: 'block' }
-const sInput = { width: '100%', padding: '8px 10px', border: '1px solid #D1D5DB', borderRadius: '6px', fontSize: '14px', boxSizing: 'border-box', outline: 'none', backgroundColor: '#fff' }
+const sInput = { width: '100%', padding: '8px 10px', border: '1px solid #D1D5DB', borderRadius: '20px', fontSize: '14px', boxSizing: 'border-box', outline: 'none', backgroundColor: '#fff' }
 const sHint  = { fontSize: '11px', color: '#9CA3AF', margin: '3px 0 0', lineHeight: '1.4' }
 const sGrid  = { display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '12px' }

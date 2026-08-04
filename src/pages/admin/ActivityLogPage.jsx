@@ -91,7 +91,7 @@ function AzioniBadges({ logs, small }) {
           {n > 1 && (
             <span style={{
               position:'absolute', top:'-5px', right:'-5px',
-              background:'#5B5FEF', color:'#fff', borderRadius:'14px',
+              background:'#5B5FEF', color:'#fff', borderRadius:'20px',
               fontSize:'9px', fontWeight:'800', padding:'1px 4px', lineHeight:'1.2',
               minWidth:'14px', textAlign:'center'
             }}>{n}</span>
@@ -449,8 +449,8 @@ const s = {
   header:     { display:'flex', justifyContent:'space-between', alignItems:'flex-start', marginBottom:'24px', gap:'12px', flexWrap:'wrap' },
   title:      { fontSize:'32px', fontWeight:'900', color:'#111827', letterSpacing:'-0.03em', margin:0 },
   sub:        { fontSize:'14px', color:'#6B7280', margin:'4px 0 0', fontWeight:'500' },
-  refreshBtn: { display:'flex', alignItems:'center', gap:'6px', border:'1px solid #E8ECF4', backgroundColor:'#fff', borderRadius:'14px', padding:'8px 14px', fontSize:'13px', fontWeight:'600', cursor:'pointer', fontFamily:"'Inter',sans-serif", color:'#374151' },
-  input:      { border:'1px solid #D1D5DB', borderRadius:'14px', padding:'9px 12px', fontSize:'13px', fontFamily:"'Inter',sans-serif", color:'#111827', backgroundColor:'#fff', outline:'none' },
+  refreshBtn: { display:'flex', alignItems:'center', gap:'6px', border:'1px solid #E8ECF4', backgroundColor:'#fff', borderRadius:'20px', padding:'8px 14px', fontSize:'13px', fontWeight:'600', cursor:'pointer', fontFamily:"'Inter',sans-serif", color:'#374151' },
+  input:      { border:'1px solid #D1D5DB', borderRadius:'20px', padding:'9px 12px', fontSize:'13px', fontFamily:"'Inter',sans-serif", color:'#111827', backgroundColor:'#fff', outline:'none' },
   tableCard:  { backgroundColor:'#fff', borderRadius:'16px', border:'1px solid #E8ECF4', overflow:'hidden' },
   table:      { width:'100%', borderCollapse:'collapse', fontSize:'13px' },
   emptyState: { padding:'64px 32px', textAlign:'center', display:'flex', flexDirection:'column', alignItems:'center' },

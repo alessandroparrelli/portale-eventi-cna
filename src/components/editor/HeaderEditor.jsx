@@ -167,7 +167,7 @@ function LogoPicker({ value, onChange }) {
         const sel = value === logo.url || (!value && logo.isDefault)
         return (
           <button key={i} type="button" onClick={() => onChange(logo.isDefault ? '' : logo.url)}
-            style={{ border:`2px solid ${sel ? BLU : '#E5E7EB'}`, borderRadius:'7px', background: sel ? '#EBF0FA' : '#fff', padding:'5px', cursor:'pointer', display:'flex', flexDirection:'column', alignItems:'center', gap:'3px' }}>
+            style={{ border:`2px solid ${sel ? BLU : '#E5E7EB'}`, borderRadius:'20px', background: sel ? '#EBF0FA' : '#fff', padding:'5px', cursor:'pointer', display:'flex', flexDirection:'column', alignItems:'center', gap:'3px' }}>
             <img src={logo.url} alt={logo.name} style={{ height:'32px', width:'100%', objectFit:'contain' }}
               onError={e => e.target.style.opacity = '0.3'}/>
             <span style={{ fontSize:'8px', color: sel ? BLU : '#6B7280', textAlign:'center', lineHeight:1.2, fontWeight: sel ? '700' : '400', overflow:'hidden', textOverflow:'ellipsis', whiteSpace:'nowrap', maxWidth:'100%' }}>
@@ -187,7 +187,7 @@ function ColorPicker({ label, value, onChange, defaultValue }) {
       <label style={lbl}>{label}</label>
       <div style={{ display:'flex', gap:'6px', alignItems:'center' }}>
         <input type="color" value={value||defaultValue||'#000000'} onChange={e=>onChange(e.target.value)}
-          style={{ width:'30px', height:'24px', border:'1px solid #E5E7EB', borderRadius:'4px', cursor:'pointer', padding:'1px', flexShrink:0 }}/>
+          style={{ width:'30px', height:'24px', border:'1px solid #E5E7EB', borderRadius:'20px', cursor:'pointer', padding:'1px', flexShrink:0 }}/>
         <input value={value||defaultValue||''} onChange={e=>onChange(e.target.value)}
           style={{ ...inp, padding:'4px 7px', fontSize:'11px', fontFamily:'monospace', flex:1 }}/>
         {defaultValue && value !== defaultValue && (
@@ -219,7 +219,7 @@ function AlignPicker({ value, onChange }) {
       <div style={{ display:'flex', gap:'3px' }}>
         {[['left',<AlignLeft size={12}/>],['center',<AlignCenter size={12}/>],['right',<AlignRight size={12}/>]].map(([v,ic])=>(
           <button key={v} type="button" onClick={()=>onChange(v)}
-            style={{ flex:1, padding:'5px', border:`1px solid ${value===v?BLU:'#E5E7EB'}`, borderRadius:'5px', cursor:'pointer', background:value===v?'#EBF0FA':'#fff', color:value===v?BLU:'#9CA3AF', display:'flex', alignItems:'center', justifyContent:'center' }}>
+            style={{ flex:1, padding:'5px', border:`1px solid ${value===v?BLU:'#E5E7EB'}`, borderRadius:'20px', cursor:'pointer', background:value===v?'#EBF0FA':'#fff', color:value===v?BLU:'#9CA3AF', display:'flex', alignItems:'center', justifyContent:'center' }}>
             {ic}
           </button>
         ))}
@@ -240,7 +240,7 @@ export default function HeaderEditor({ config, onChange, defaultExpanded = false
   // Mini-preview nell'header collapsato
   const miniPreview = (
     <div style={{
-      background: c.sfondo, borderRadius:'4px', padding:'3px 10px',
+      background: c.sfondo, borderRadius:'20px', padding:'3px 10px',
       display:'flex', alignItems:'center', gap:'6px', maxWidth:'200px',
     }}>
       {(c.logo_url || DEFAULT_LOGO) && (
@@ -266,7 +266,7 @@ export default function HeaderEditor({ config, onChange, defaultExpanded = false
   ]
 
   return (
-    <div style={{ background:'#fff', border:'1px solid #E5E7EB', borderRadius:'8px', overflow:'hidden' }}>
+    <div style={{ background:'#fff', border:'1px solid #E5E7EB', borderRadius:'20px', overflow:'hidden' }}>
       {/* Header collapsible */}
       <button type="button" onClick={()=>setExpanded(!expanded)}
         style={{ width:'100%', padding:'9px 14px', display:'flex', alignItems:'center', gap:'8px', background:'none', border:'none', cursor:'pointer', fontFamily:"'Outfit',sans-serif" }}>
@@ -285,7 +285,7 @@ export default function HeaderEditor({ config, onChange, defaultExpanded = false
               background: c.hero_bg_image
                 ? `linear-gradient(rgba(0,0,0,0.45),rgba(0,0,0,0.45)),url('${c.hero_bg_image}') center/cover no-repeat`
                 : c.sfondo,
-              borderRadius:'6px', overflow:'hidden',
+              borderRadius:'20px', overflow:'hidden',
               padding: `${c.padding_v}px ${c.padding_h}px`,
               display:'flex', flexDirection: c.layout==='stacked'?'column':'row',
               alignItems: c.layout==='stacked'?'center': c.layout==='center'?'center':'flex-start',
@@ -339,7 +339,7 @@ export default function HeaderEditor({ config, onChange, defaultExpanded = false
                     <button key={l.value} type="button" onClick={()=>set('layout', l.value)}
                       style={{
                         flex:1, padding:'8px 6px', border:`1.5px solid ${c.layout===l.value?BLU:'#E5E7EB'}`,
-                        borderRadius:'6px', cursor:'pointer', textAlign:'center',
+                        borderRadius:'20px', cursor:'pointer', textAlign:'center',
                         background: c.layout===l.value ? '#EBF0FA' : '#fff',
                         fontFamily:"'Outfit',sans-serif",
                       }}>
@@ -370,18 +370,18 @@ export default function HeaderEditor({ config, onChange, defaultExpanded = false
                 <div style={{ display:'flex', alignItems:'center', gap:'6px', marginBottom:'6px' }}>
                   <label style={{ ...lbl, margin:0 }}>Logo</label>
                   <button type="button" onClick={()=>setShowLogoPicker(!showLogoPicker)}
-                    style={{ fontSize:'10px', padding:'2px 8px', border:'1px solid #E5E7EB', borderRadius:'4px', cursor:'pointer', background:showLogoPicker?BLU:'#fff', color:showLogoPicker?'#fff':'#374151', fontFamily:'Inter,sans-serif' }}>
+                    style={{ fontSize:'10px', padding:'2px 8px', border:'1px solid #E5E7EB', borderRadius:'20px', cursor:'pointer', background:showLogoPicker?BLU:'#fff', color:showLogoPicker?'#fff':'#374151', fontFamily:'Inter,sans-serif' }}>
                     {showLogoPicker ? '✕ chiudi' : '📂 scegli logo'}
                   </button>
                   {c.logo_url && (
                     <button type="button" onClick={()=>set('logo_url','')}
-                      style={{ fontSize:'10px', padding:'2px 8px', border:'1px solid #FEE2E2', borderRadius:'4px', cursor:'pointer', background:'#FFF5F5', color:'#DC2626', fontFamily:'Inter,sans-serif' }}>
+                      style={{ fontSize:'10px', padding:'2px 8px', border:'1px solid #FEE2E2', borderRadius:'20px', cursor:'pointer', background:'#FFF5F5', color:'#DC2626', fontFamily:'Inter,sans-serif' }}>
                       ✕ rimuovi
                     </button>
                   )}
                 </div>
                 {showLogoPicker && (
-                  <div style={{ border:'1px solid #E5E7EB', borderRadius:'8px', padding:'8px', maxHeight:'200px', overflowY:'auto' }}>
+                  <div style={{ border:'1px solid #E5E7EB', borderRadius:'20px', padding:'8px', maxHeight:'200px', overflowY:'auto' }}>
                     <LogoPicker value={c.logo_url} onChange={url=>{ set('logo_url', url); setShowLogoPicker(false) }}/>
                   </div>
                 )}
@@ -431,7 +431,7 @@ export default function HeaderEditor({ config, onChange, defaultExpanded = false
               <div>
                 <label style={lbl}>Immagine di sfondo (opzionale)</label>
                 {c.hero_bg_image ? (
-                  <div style={{ position:'relative', borderRadius:'6px', overflow:'hidden', marginBottom:'4px', height:'60px' }}>
+                  <div style={{ position:'relative', borderRadius:'20px', overflow:'hidden', marginBottom:'4px', height:'60px' }}>
                     <img src={c.hero_bg_image} style={{ width:'100%', height:'100%', objectFit:'cover', display:'block' }} alt="sfondo"/>
                     <button onClick={()=>set('hero_bg_image','')}
                       style={{ position:'absolute', top:'4px', right:'4px', background:'rgba(0,0,0,0.6)', border:'none', borderRadius:'50%', width:'20px', height:'20px', cursor:'pointer', display:'flex', alignItems:'center', justifyContent:'center', color:'#fff', fontSize:'12px' }}>
@@ -442,7 +442,7 @@ export default function HeaderEditor({ config, onChange, defaultExpanded = false
                   <div style={{ display:'flex', gap:'4px', flexWrap:'wrap' }}>
                     {heroImageUrl && (
                       <button type="button" onClick={()=>set('hero_bg_image', heroImageUrl)}
-                        style={{ padding:'4px 10px', background:'#EBF0FA', border:'1px solid #BFDBFE', borderRadius:'5px', cursor:'pointer', fontSize:'10px', color:BLU, fontFamily:"'Outfit',sans-serif", fontWeight:'600', display:'flex', alignItems:'center', gap:'4px' }}>
+                        style={{ padding:'4px 10px', background:'#EBF0FA', border:'1px solid #BFDBFE', borderRadius:'20px', cursor:'pointer', fontSize:'10px', color:BLU, fontFamily:"'Outfit',sans-serif", fontWeight:'600', display:'flex', alignItems:'center', gap:'4px' }}>
                         Usa immagine evento
                       </button>
                     )}
@@ -469,7 +469,7 @@ export default function HeaderEditor({ config, onChange, defaultExpanded = false
                   ].map(p=>(
                     <button key={p.color} type="button" onClick={()=>set('sfondo',p.color)}
                       style={{
-                        width:'32px', height:'24px', borderRadius:'4px', cursor:'pointer',
+                        width:'32px', height:'24px', borderRadius:'20px', cursor:'pointer',
                         border:`2px solid ${c.sfondo===p.color?BLU:'#E5E7EB'}`,
                         background:p.color, position:'relative',
                       }}
@@ -490,5 +490,5 @@ export default function HeaderEditor({ config, onChange, defaultExpanded = false
 }
 
 // ─── Stili condivisi ──────────────────────────────────────────────────────────
-const inp = { width:'100%', padding:'7px 10px', border:'1px solid #E5E7EB', borderRadius:'6px', fontSize:'12px', fontFamily:"'Outfit',sans-serif", outline:'none', color:NERO, background:'#fff', boxSizing:'border-box' }
+const inp = { width:'100%', padding:'7px 10px', border:'1px solid #E5E7EB', borderRadius:'20px', fontSize:'12px', fontFamily:"'Outfit',sans-serif", outline:'none', color:NERO, background:'#fff', boxSizing:'border-box' }
 const lbl = { display:'block', fontSize:'10px', fontWeight:'800', color:'#9CA3AF', textTransform:'uppercase', letterSpacing:'.07em', marginBottom:'4px' }

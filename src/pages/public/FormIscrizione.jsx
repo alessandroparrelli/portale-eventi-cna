@@ -14,7 +14,7 @@ function Inp({ label, required, value, onChange, type = 'text', placeholder, err
         style={{
           padding: '10px 12px',
           border: `1px solid ${error ? '#DC2626' : '#D1D5DB'}`,
-          borderRadius: '6px', fontSize: '14px',
+          borderRadius: '20px', fontSize: '14px',
           fontFamily: "'Outfit',sans-serif", outline: 'none',
           boxSizing: 'border-box', width: '100%', minWidth: 0,
         }}
@@ -93,7 +93,7 @@ function PersonaForm({ idx, dati, onChange, errors, campi, mestieri, isAccompagn
   return (
     <div style={{
       border: `1px solid ${isAccompagnatore ? '#E5E7EB' : (color || '#005AC9')}`,
-      borderRadius: '10px', padding: '16px', marginBottom: '16px',
+      borderRadius: '20px', padding: '16px', marginBottom: '16px',
       background: isAccompagnatore ? '#FAFAFA' : (bg || '#EEF4FF'),
       overflow: 'hidden',
     }}>
@@ -130,7 +130,7 @@ function PersonaForm({ idx, dati, onChange, errors, campi, mestieri, isAccompagn
                   style={{
                     padding: '10px 12px',
                     border: `1px solid ${err ? '#DC2626' : '#D1D5DB'}`,
-                    borderRadius: '6px', fontSize: '14px',
+                    borderRadius: '20px', fontSize: '14px',
                     fontFamily: "'Outfit',sans-serif", outline: 'none', backgroundColor: '#FFF',
                   }}
                 >
@@ -168,7 +168,7 @@ function PersonaForm({ idx, dati, onChange, errors, campi, mestieri, isAccompagn
                 </label>
                 <select value={val} onChange={set} style={{
                   padding: '10px 12px', border: `1px solid ${err ? '#DC2626' : '#D1D5DB'}`,
-                  borderRadius: '6px', fontSize: '14px', fontFamily: "'Outfit',sans-serif",
+                  borderRadius: '20px', fontSize: '14px', fontFamily: "'Outfit',sans-serif",
                   outline: 'none', backgroundColor: '#FFF',
                 }}>
                   <option value="">— Seleziona —</option>
@@ -188,7 +188,7 @@ function PersonaForm({ idx, dati, onChange, errors, campi, mestieri, isAccompagn
                 </label>
                 <input type="date" value={val} onChange={set} style={{
                   padding: '10px 12px', border: `1px solid ${err ? '#DC2626' : '#D1D5DB'}`,
-                  borderRadius: '6px', fontSize: '14px', fontFamily: "'Outfit',sans-serif",
+                  borderRadius: '20px', fontSize: '14px', fontFamily: "'Outfit',sans-serif",
                   outline: 'none', width: '100%', boxSizing: 'border-box',
                 }} />
                 {err && <span style={{ fontSize: '12px', color: '#DC2626' }}>{err}</span>}
@@ -383,10 +383,10 @@ export default function FormIscrizione({ event, onSuccess, tema = {} }) {
       {errGen && <div style={s.errBox}>{errGen}</div>}
 
       {postiPerUtente > 1 && (
-        <div style={{ background: brandBg, border:`2px solid ${brandColor}`, borderRadius:'14px', padding:'18px 20px', marginBottom:'24px', boxShadow:`0 2px 12px ${brandColor}22` }}>
+        <div style={{ background: brandBg, border:`2px solid ${brandColor}`, borderRadius:'20px', padding:'18px 20px', marginBottom:'24px', boxShadow:`0 2px 12px ${brandColor}22` }}>
           <div style={{ display:'flex', alignItems:'center', justifyContent:'space-between', gap:'12px' }}>
             <div style={{ display:'flex', alignItems:'center', gap:'10px' }}>
-              <div style={{ background: brandColor, borderRadius:'10px', padding:'8px', display:'flex', alignItems:'center', justifyContent:'center', flexShrink:0 }}>
+              <div style={{ background: brandColor, borderRadius:'20px', padding:'8px', display:'flex', alignItems:'center', justifyContent:'center', flexShrink:0 }}>
                 <Users size={20} style={{ color:'#fff' }} />
               </div>
               <div>
@@ -421,7 +421,7 @@ export default function FormIscrizione({ event, onSuccess, tema = {} }) {
         <div key={idx} style={{ position:'relative' }}>
           {idx > 0 && (
             <button type="button" onClick={() => removePersona(idx)}
-              style={{ position:'absolute', top:'16px', right:'16px', zIndex:1, background:'#FEF2F2', border:'1px solid #FECACA', borderRadius:'6px', padding:'4px 10px', fontSize:'12px', color:'#DC2626', fontWeight:'600', cursor:'pointer', fontFamily:"'Outfit',sans-serif" }}>
+              style={{ position:'absolute', top:'16px', right:'16px', zIndex:1, background:'#FEF2F2', border:'1px solid #FECACA', borderRadius:'20px', padding:'4px 10px', fontSize:'12px', color:'#DC2626', fontWeight:'600', cursor:'pointer', fontFamily:"'Outfit',sans-serif" }}>
               Rimuovi
             </button>
           )}
@@ -466,6 +466,6 @@ const defaultCampi = [
 
 const s = {
   grid: { display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(140px, 1fr))', gap: '12px' },
-  errBox: { backgroundColor:'#FEF2F2', border:'1px solid #FECACA', borderRadius:'6px', padding:'10px 14px', fontSize:'14px', color:'#DC2626', marginBottom:'12px' },
-  submitBtn: { marginTop:'8px', display:'flex', alignItems:'center', justifyContent:'center', gap:'8px', backgroundColor:'#003DA5', color:'#FFFFFF', border:'none', borderRadius:'6px', padding:'14px 24px', fontSize:'15px', fontWeight:'700', fontFamily:"'Outfit',sans-serif", cursor:'pointer', letterSpacing:'-0.01em', transition:'opacity 0.15s' },
+  errBox: { backgroundColor:'#FEF2F2', border:'1px solid #FECACA', borderRadius:'20px', padding:'10px 14px', fontSize:'14px', color:'#DC2626', marginBottom:'12px' },
+  submitBtn: { marginTop:'8px', display:'flex', alignItems:'center', justifyContent:'center', gap:'8px', backgroundColor:'#003DA5', color:'#FFFFFF', border:'none', borderRadius:'20px', padding:'14px 24px', fontSize:'15px', fontWeight:'700', fontFamily:"'Outfit',sans-serif", cursor:'pointer', letterSpacing:'-0.01em', transition:'opacity 0.15s' },
 }

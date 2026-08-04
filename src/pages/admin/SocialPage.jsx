@@ -75,7 +75,7 @@ export default function SocialPage() {
               display:'flex', alignItems:'center', gap:'14px',
               padding:'14px 16px', backgroundColor:'#fff',
               border:`1.5px solid ${row.attivo && row.valore?.trim() ? meta.color + '40' : '#E8ECF4'}`,
-              borderRadius:'14px', transition:'border-color .15s',
+              borderRadius:'20px', transition:'border-color .15s',
             }}>
               {/* Toggle attivo */}
               <div
@@ -126,14 +126,14 @@ export default function SocialPage() {
         <button
           onClick={salva}
           disabled={saving}
-          style={{ ...sF, padding:'11px 28px', backgroundColor: saved ? '#16A34A' : '#5B5FEF', color:'#fff', border:'none', borderRadius:'16px', fontSize:'14px', fontWeight:'700', cursor: saving ? 'not-allowed' : 'pointer', opacity: saving ? .7 : 1, transition:'background .2s' }}>
+          style={{ ...sF, padding:'11px 28px', backgroundColor: saved ? '#16A34A' : '#5B5FEF', color:'#fff', border:'none', borderRadius:'20px', fontSize:'14px', fontWeight:'700', cursor: saving ? 'not-allowed' : 'pointer', opacity: saving ? .7 : 1, transition:'background .2s' }}>
           {saving ? 'Salvataggio…' : saved ? '✓ Salvato' : 'Salva configurazione'}
         </button>
         {saved && <span style={{ ...sF, fontSize:'13px', color:'#16A34A', fontWeight:'600' }}>Le modifiche sono attive su tutte le pagine</span>}
       </div>
 
       {/* Info */}
-      <div style={{ marginTop:'32px', padding:'16px 20px', backgroundColor:'#EEEFFD', border:'1px solid #FDA4AF', borderRadius:'14px' }}>
+      <div style={{ marginTop:'32px', padding:'16px 20px', backgroundColor:'#EEEFFD', border:'1px solid #FDA4AF', borderRadius:'20px' }}>
         <p style={{ ...sF, margin:'0 0 6px', fontSize:'13px', fontWeight:'800', color:'#5B5FEF' }}>Dove vengono mostrati i social?</p>
         <ul style={{ ...sF, margin:0, paddingLeft:'18px', fontSize:'13px', color:'#374151', lineHeight:'2' }}>
           <li>Footer di tutte le <strong>pagine evento</strong> pubbliche</li>

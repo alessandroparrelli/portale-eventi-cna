@@ -164,7 +164,7 @@ const s = {
   },
   card: {
     backgroundColor: '#FFFFFF',
-    borderRadius: '12px',
+    borderRadius: '20px',
     padding: '48px 40px',
     width: '100%', maxWidth: '420px',
     boxShadow: '0 1px 3px rgba(0,0,0,0.07), 0 8px 32px rgba(0,61,165,0.10)',
@@ -201,7 +201,7 @@ const s = {
     width: '100%',
     padding: '10px 14px 10px 40px',
     border: '1.5px solid #D1D5DB',
-    borderRadius: '8px',
+    borderRadius: '20px',
     fontSize: '16px',
     fontFamily: "'Outfit', sans-serif",
     color: '#0A0A0A',
@@ -217,13 +217,13 @@ const s = {
   },
   errorBox: {
     backgroundColor: '#FEF2F2', border: '1px solid #FECACA',
-    borderRadius: '6px', padding: '10px 14px',
+    borderRadius: '20px', padding: '10px 14px',
     fontSize: '13px', color: '#DC2626', fontWeight: '500',
   },
   submitBtn: {
     display: 'flex', alignItems: 'center', justifyContent: 'center', gap: '8px',
     background: 'linear-gradient(135deg, #003DA5, #BE123C)',
-    color: '#FFFFFF', border: 'none', borderRadius: '8px',
+    color: '#FFFFFF', border: 'none', borderRadius: '20px',
     padding: '13px 24px', fontSize: '15px', fontWeight: '700',
     fontFamily: "'Outfit', sans-serif",
     cursor: 'pointer', letterSpacing: '-0.01em',

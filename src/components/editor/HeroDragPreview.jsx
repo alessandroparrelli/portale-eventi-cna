@@ -89,7 +89,7 @@ export default function HeroDragPreview({ event, setH }) {
         onPointerUp={onPointerUp}
         style={{
           position: 'relative',
-          borderRadius: '10px',
+          borderRadius: '20px',
           overflow: 'hidden',
           border: `2px solid ${dragging ? '#003DA5' : '#E5E7EB'}`,
           height: `${altezza}px`,

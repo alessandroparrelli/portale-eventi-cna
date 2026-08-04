@@ -167,7 +167,7 @@ export default function UtentiPage() {
                           <p style={{ fontWeight:'700', color:'#111827', margin:0, fontSize:'14px' }}>
                             {u.nome&&u.cognome ? `${u.nome} ${u.cognome}` : u.username}
                           </p>
-                          {u.id===me?.id && <span style={{ fontSize:'10px', fontWeight:'700', backgroundColor:'#EEEFFD', color:'#5B5FEF', padding:'1px 7px', borderRadius:'14px' }}>Tu</span>}
+                          {u.id===me?.id && <span style={{ fontSize:'10px', fontWeight:'700', backgroundColor:'#EEEFFD', color:'#5B5FEF', padding:'1px 7px', borderRadius:'20px' }}>Tu</span>}
                         </div>
                         <p style={{ fontSize:'12px', color:'#6B7280', margin:'1px 0 0' }}>{u.email}</p>
                         {(u.nome||u.cognome) && <p style={{ fontSize:'11px', color:'#9CA3AF', margin:'1px 0 0' }}>@{u.username}</p>}
@@ -186,9 +186,9 @@ export default function UtentiPage() {
                   </td>
                   <td style={{ padding:'12px 16px', borderBottom:'1px solid #F3F4F6', verticalAlign:'middle' }}>
                     <div style={{ display:'flex', gap:'5px' }}>
-                      <button style={{ background:'none', border:'1px solid #E8ECF4', borderRadius:'4px', padding:'5px 6px', cursor:'pointer', color:'#6B7280', display:'flex', alignItems:'center' }} title="Log" onClick={()=>openLog(u)}><Activity size={14}/></button>
-                      <button style={{ background:'none', border:'1px solid #E8ECF4', borderRadius:'4px', padding:'5px 6px', cursor:'pointer', color:'#6B7280', display:'flex', alignItems:'center' }} title="Modifica" onClick={()=>openEdit(u)}><Pencil size={14}/></button>
-                      {u.id!==me?.id && <button style={{ background:'none', border:'1px solid #FECACA', borderRadius:'4px', padding:'5px 6px', cursor:'pointer', color:'#DC2626', display:'flex', alignItems:'center' }} title="Elimina" onClick={()=>{setCur(u);setModal('delete')}}><Trash2 size={14}/></button>}
+                      <button style={{ background:'none', border:'1px solid #E8ECF4', borderRadius:'20px', padding:'5px 6px', cursor:'pointer', color:'#6B7280', display:'flex', alignItems:'center' }} title="Log" onClick={()=>openLog(u)}><Activity size={14}/></button>
+                      <button style={{ background:'none', border:'1px solid #E8ECF4', borderRadius:'20px', padding:'5px 6px', cursor:'pointer', color:'#6B7280', display:'flex', alignItems:'center' }} title="Modifica" onClick={()=>openEdit(u)}><Pencil size={14}/></button>
+                      {u.id!==me?.id && <button style={{ background:'none', border:'1px solid #FECACA', borderRadius:'20px', padding:'5px 6px', cursor:'pointer', color:'#DC2626', display:'flex', alignItems:'center' }} title="Elimina" onClick={()=>{setCur(u);setModal('delete')}}><Trash2 size={14}/></button>}
                     </div>
                   </td>
                 </tr>
@@ -202,7 +202,7 @@ export default function UtentiPage() {
       {(modal==='create'||modal==='edit') && (
         <Modal title={modal==='create'?'Nuovo utente':'Modifica utente'} onClose={()=>setModal(null)} width="500px">
           <div style={{ display:'flex', flexDirection:'column', gap:'13px' }}>
-            {errors.general && <div style={{ backgroundColor:'#FEF2F2', border:'1px solid #FECACA', borderRadius:'14px', padding:'10px 14px', fontSize:'13px', color:'#DC2626' }}>{errors.general}</div>}
+            {errors.general && <div style={{ backgroundColor:'#FEF2F2', border:'1px solid #FECACA', borderRadius:'20px', padding:'10px 14px', fontSize:'13px', color:'#DC2626' }}>{errors.general}</div>}
             <div style={{ display:'grid', gridTemplateColumns:'1fr 1fr', gap:'12px' }} className="grid-2col">
               <Field label="Nome"><Input value={cur.nome||''} onChange={e=>setCur(p=>({...p,nome:e.target.value}))} placeholder="Mario"/></Field>
               <Field label="Cognome"><Input value={cur.cognome||''} onChange={e=>setCur(p=>({...p,cognome:e.target.value}))} placeholder="Rossi"/></Field>

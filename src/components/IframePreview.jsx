@@ -30,7 +30,7 @@ export default class IframePreview extends Component {
       return (
         <div style={{ display:'flex', flexDirection:'column', alignItems:'center',
           justifyContent:'center', flex:1, minHeight:'300px', gap:'12px',
-          background:'#F9FAFB', borderRadius:'14px', border:'1px solid #E8ECF4' }}>
+          background:'#F9FAFB', borderRadius:'20px', border:'1px solid #E8ECF4' }}>
           <p style={{ fontSize:'14px', color:'#6B7280', margin:0 }}>
             L'anteprima non è disponibile in questo browser.
           </p>
@@ -38,7 +38,7 @@ export default class IframePreview extends Component {
             <a href={fallbackUrl} target="_blank" rel="noopener noreferrer"
               style={{ display:'inline-flex', alignItems:'center', gap:'6px',
                 padding:'8px 16px', backgroundColor:'#5B5FEF', color:'#fff',
-                borderRadius:'14px', textDecoration:'none', fontSize:'13px',
+                borderRadius:'20px', textDecoration:'none', fontSize:'13px',
                 fontWeight:'700', fontFamily:"'Inter',sans-serif" }}>
               Apri in nuova scheda ↗
             </a>

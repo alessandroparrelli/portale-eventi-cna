@@ -170,7 +170,7 @@ export default function DashboardPage() {
                 <div key={ev.id} style={{ display:'flex', alignItems:'center', gap:'14px', padding:'12px 20px', borderBottom:'1px solid #F9FAFB', cursor:'default', transition:'background .12s' }}
                   onMouseEnter={e=>e.currentTarget.style.background='#FAFBFE'}
                   onMouseLeave={e=>e.currentTarget.style.background='transparent'}>
-                  <div style={{ width:'36px', height:'36px', borderRadius:'14px', background:'#EEEFFD', display:'flex', alignItems:'center', justifyContent:'center', flexShrink:0 }}>
+                  <div style={{ width:'36px', height:'36px', borderRadius:'20px', background:'#EEEFFD', display:'flex', alignItems:'center', justifyContent:'center', flexShrink:0 }}>
                     <CalendarDays size={16} style={{color:P}}/>
                   </div>
                   <div style={{ flex:1, minWidth:0 }}>
@@ -217,7 +217,7 @@ export default function DashboardPage() {
             <CalendarDays size={40} style={{color:'#D1D5DB',marginBottom:'12px'}}/>
             <p style={{fontSize:'18px',fontWeight:'700',color:'#111827',margin:'0 0 6px',letterSpacing:'-0.02em'}}>Nessun evento ancora</p>
             <p style={{fontSize:'14px',color:'#6B7280',margin:'0 0 16px'}}>Crea il tuo primo evento per iniziare</p>
-            <button onClick={()=>navigate('/admin/eventi/nuovo/editor')} style={{ display:'flex',alignItems:'center',gap:'7px',background:P,color:'#fff',border:'none',borderRadius:'16px',padding:'10px 20px',fontSize:'14px',fontWeight:'600',fontFamily:"'Inter',sans-serif",cursor:'pointer' }}>
+            <button onClick={()=>navigate('/admin/eventi/nuovo/editor')} style={{ display:'flex',alignItems:'center',gap:'7px',background:P,color:'#fff',border:'none',borderRadius:'20px',padding:'10px 20px',fontSize:'14px',fontWeight:'600',fontFamily:"'Inter',sans-serif",cursor:'pointer' }}>
               <Plus size={16}/> Crea evento
             </button>
           </div>
@@ -236,7 +236,7 @@ export default function DashboardPage() {
                   <div style={{ display:'flex', alignItems:'flex-start', justifyContent:'space-between', gap:'8px', marginBottom:'12px' }}>
                     <div style={{ minWidth:0 }}>
                       <p style={{ fontWeight:'600', fontSize:'13px', color:'#111827', margin:'0 0 4px', lineHeight:1.4, overflow:'hidden', display:'-webkit-box', WebkitLineClamp:2, WebkitBoxOrient:'vertical' }}>{ev.titolo}</p>
-                      <span style={{ fontSize:'10px', fontWeight:'600', color:P, background:'#EEEFFD', padding:'1px 7px', borderRadius:'14px', fontFamily:'monospace' }}>
+                      <span style={{ fontSize:'10px', fontWeight:'600', color:P, background:'#EEEFFD', padding:'1px 7px', borderRadius:'20px', fontFamily:'monospace' }}>
                         EVT-{String(ev.codice||0).padStart(4,'0')}
                       </span>
                     </div>
@@ -264,7 +264,7 @@ export default function DashboardPage() {
 
                   <div style={{ display:'flex', alignItems:'center', justifyContent:'space-between', marginTop:'auto' }}>
                     <span style={{ fontSize:'11px', color:'#9CA3AF' }}>{presRate!=null ? `${presRate}% presenti` : 'Nessun check-in'}</span>
-                    <button onClick={()=>navigate('/admin/eventi')} style={{ background:'none', border:`1px solid ${P}30`, color:P, borderRadius:'16px', padding:'4px 12px', fontSize:'12px', fontWeight:'600', fontFamily:"'Inter',sans-serif", cursor:'pointer' }}>
+                    <button onClick={()=>navigate('/admin/eventi')} style={{ background:'none', border:`1px solid ${P}30`, color:P, borderRadius:'20px', padding:'4px 12px', fontSize:'12px', fontWeight:'600', fontFamily:"'Inter',sans-serif", cursor:'pointer' }}>
                       Gestisci
                     </button>
                   </div>

@@ -93,7 +93,7 @@ function Btn({ children, title, active, onClick, disabled, danger }) {
       style={{ minWidth:'28px', height:'30px', padding:'0 6px', border:'none',
         background: active ? '#EBF0FA' : 'transparent',
         color: active ? '#003DA5' : disabled ? '#D1D5DB' : danger ? '#DC2626' : '#374151',
-        borderRadius:'5px', cursor: disabled ? 'not-allowed' : 'pointer',
+        borderRadius:'20px', cursor: disabled ? 'not-allowed' : 'pointer',
         fontSize:'12px', fontWeight: active ? '700' : '500',
         display:'flex', alignItems:'center', justifyContent:'center', gap:'3px',
         fontFamily:"'Outfit',sans-serif", transition:'background .1s, color .1s', flexShrink:0,
@@ -220,7 +220,7 @@ function ColorPicker({ label = 'A', title = 'Colore testo', editor: ed, isHighli
         onMouseDown={saveSel}
         onChange={e => applyColor(e.target.value)}
         onInput={e => applyColor(e.target.value)}
-        style={{ width:'32px', height:'28px', border:'1px solid #D1D5DB', borderRadius:'5px', cursor:'pointer', padding:'2px', display:'block', backgroundColor:'#fff' }}
+        style={{ width:'32px', height:'28px', border:'1px solid #D1D5DB', borderRadius:'20px', cursor:'pointer', padding:'2px', display:'block', backgroundColor:'#fff' }}
       />
     </div>
   )
@@ -422,10 +422,10 @@ export default function RichEditor({ value, onChange, placeholder = 'Scrivi quiâ
           </button>
           {showFontPicker && (
             <div style={{ position:'absolute', top:'34px', left:0, zIndex:400, background:'#fff', border:'1px solid #E5E7EB',
-              borderRadius:'10px', padding:'6px', boxShadow:'0 12px 40px rgba(0,0,0,.14)', width:'200px', maxHeight:'300px', overflowY:'auto' }}>
+              borderRadius:'20px', padding:'6px', boxShadow:'0 12px 40px rgba(0,0,0,.14)', width:'200px', maxHeight:'300px', overflowY:'auto' }}>
               {FONTS.map(f => (
                 <button key={f.value} type="button" onClick={() => { editor.chain().focus().setFontFamily(f.value).run(); setShowFontPicker(false) }}
-                  style={{ display:'block', width:'100%', textAlign:'left', padding:'7px 10px', border:'none', borderRadius:'6px', cursor:'pointer',
+                  style={{ display:'block', width:'100%', textAlign:'left', padding:'7px 10px', border:'none', borderRadius:'20px', cursor:'pointer',
                     fontSize:'13px', fontFamily: f.value, background: curFont === f.value ? '#EFF6FF' : 'transparent',
                     color: curFont === f.value ? '#003DA5' : '#374151', fontWeight: curFont === f.value ? '700' : '400' }}
                   onMouseEnter={e => { if(curFont !== f.value) e.currentTarget.style.background='#F3F4F6' }}
@@ -557,7 +557,7 @@ export default function RichEditor({ value, onChange, placeholder = 'Scrivi quiâ
                   return <div key={i} onMouseEnter={() => setTableHover({r,c})}
                     onClick={() => { editor.chain().focus().insertTable({rows:r,cols:c,withHeaderRow:true}).run(); setShowTablePicker(false) }}
                     style={{ width:'20px', height:'20px', border:`1.5px solid ${sel?'#003DA5':'#D1D5DB'}`,
-                      backgroundColor:sel?'#EBF0FA':'#FFF', borderRadius:'2px', cursor:'pointer', transition:'all .1s' }}/>
+                      backgroundColor:sel?'#EBF0FA':'#FFF', borderRadius:'20px', cursor:'pointer', transition:'all .1s' }}/>
                 })}
               </div>
               {editor.isActive('table') && (
@@ -603,7 +603,7 @@ export default function RichEditor({ value, onChange, placeholder = 'Scrivi quiâ
             <button type="button"
               onClick={() => { setShowVarPicker(!showVarPicker); setShowTablePicker(false); setShowSpecial(false) }}
               style={{ height:'30px', padding:'0 10px', border:'1px solid #FDA4AF', background: showVarPicker ? '#EBF0FA' : '#F8FAFF',
-                borderRadius:'5px', cursor:'pointer', fontSize:'12px', fontWeight:'700', color:'#003DA5',
+                borderRadius:'20px', cursor:'pointer', fontSize:'12px', fontWeight:'700', color:'#003DA5',
                 fontFamily:"'Outfit',sans-serif", display:'flex', alignItems:'center', gap:'4px', flexShrink:0 }}>
               {'{ }'} Variabili
             </button>
@@ -611,7 +611,7 @@ export default function RichEditor({ value, onChange, placeholder = 'Scrivi quiâ
               <div style={{ ...st.picker, width:'230px', right:0, left:'auto' }}>
                 <p style={st.pickerTitle}>Inserisci al cursore</p>
                 <button onClick={insertQr}
-                  style={{ ...st.specialBtn, background:'#F0FDF4', color:'#166534', fontWeight:'700', borderRadius:'6px', marginBottom:'6px' }}
+                  style={{ ...st.specialBtn, background:'#F0FDF4', color:'#166534', fontWeight:'700', borderRadius:'20px', marginBottom:'6px' }}
                   onMouseEnter={e => e.currentTarget.style.background='#DCFCE7'}
                   onMouseLeave={e => e.currentTarget.style.background='#F0FDF4'}>
                   ðŸ“± QR Code iscritto
@@ -642,7 +642,7 @@ export default function RichEditor({ value, onChange, placeholder = 'Scrivi quiâ
           {['left','center','right'].map(a =>
             <button key={a} type="button" onClick={() => updateImageAttr('data-align', a)}
               style={{ padding:'3px 9px', border:`1px solid ${selectedImg.attrs?.['data-align']===a?'#003DA5':'#E5E7EB'}`,
-                borderRadius:'4px', background:selectedImg.attrs?.['data-align']===a?'#EBF0FA':'#FFF',
+                borderRadius:'20px', background:selectedImg.attrs?.['data-align']===a?'#EBF0FA':'#FFF',
                 cursor:'pointer', fontSize:'12px', fontWeight:'600', color:selectedImg.attrs?.['data-align']===a?'#003DA5':'#6B7280',
                 fontFamily:"'Outfit',sans-serif" }}>
               {a==='left'?'â—€':a==='center'?'â– ':'â–¶'}
@@ -653,7 +653,7 @@ export default function RichEditor({ value, onChange, placeholder = 'Scrivi quiâ
           {[['small','Piccola'],['medium','Media'],['large','Piena']].map(([sz,label]) =>
             <button key={sz} type="button" onClick={() => updateImageAttr('data-size', sz)}
               style={{ padding:'3px 9px', border:`1px solid ${selectedImg.attrs?.['data-size']===sz?'#003DA5':'#E5E7EB'}`,
-                borderRadius:'4px', background:selectedImg.attrs?.['data-size']===sz?'#EBF0FA':'#FFF',
+                borderRadius:'20px', background:selectedImg.attrs?.['data-size']===sz?'#EBF0FA':'#FFF',
                 cursor:'pointer', fontSize:'12px', fontWeight:'600', color:selectedImg.attrs?.['data-size']===sz?'#003DA5':'#6B7280',
                 fontFamily:"'Outfit',sans-serif" }}>
               {label}
@@ -661,7 +661,7 @@ export default function RichEditor({ value, onChange, placeholder = 'Scrivi quiâ
           )}
           <Sep/>
           <button onClick={() => { editor.chain().focus().deleteSelection().run(); setSelectedImg(null) }}
-            style={{ padding:'3px 8px', border:'1px solid #FECACA', borderRadius:'4px', background:'#FEF2F2', cursor:'pointer', fontSize:'12px', color:'#DC2626', fontFamily:"'Outfit',sans-serif", fontWeight:'600' }}>
+            style={{ padding:'3px 8px', border:'1px solid #FECACA', borderRadius:'20px', background:'#FEF2F2', cursor:'pointer', fontSize:'12px', color:'#DC2626', fontFamily:"'Outfit',sans-serif", fontWeight:'600' }}>
             âœ• Elimina
           </button>
         </div>
@@ -706,12 +706,12 @@ const TableIcon        = () => <svg width="13" height="13" viewBox="0 0 24 24" f
 const ClearIcon        = () => <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2"><path d="M8 3h11l-4 9"/><path d="M3 21l18-18"/><line x1="6" y1="15" x2="6" y2="21"/><line x1="9" y1="21" x2="3" y2="21"/></svg>
 
 const st = {
-  wrap:       { border:'1px solid #D1D5DB', borderRadius:'10px', overflow:'visible', background:'#FFF', fontFamily:"'Outfit',sans-serif", position:'relative', zIndex:1 },
+  wrap:       { border:'1px solid #D1D5DB', borderRadius:'20px', overflow:'visible', background:'#FFF', fontFamily:"'Outfit',sans-serif", position:'relative', zIndex:1 },
   row:        { display:'flex', flexWrap:'wrap', gap:'2px', padding:'5px 8px', borderBottom:'1px solid #E5E7EB', background:'#FAFAFA', alignItems:'center', overflow:'visible', position:'relative' },
-  sel:        { height:'30px', padding:'0 6px', border:'1px solid #E5E7EB', borderRadius:'5px', fontSize:'12px', fontFamily:"'Outfit',sans-serif", background:'#FFF', cursor:'pointer', color:'#374151' },
-  smallBtn:   { width:'24px', height:'30px', border:'1px solid #E5E7EB', borderRadius:'5px', background:'#FFF', cursor:'pointer', fontSize:'16px', fontWeight:'700', fontFamily:"'Outfit',sans-serif", display:'flex', alignItems:'center', justifyContent:'center', flexShrink:0, color:'#374151' },
-  picker:     { position:'absolute', top:'34px', left:0, background:'#FFF', border:'1px solid #E5E7EB', borderRadius:'10px', padding:'12px', zIndex:400, boxShadow:'0 8px 32px rgba(0,0,0,.12)', minWidth:'180px' },
+  sel:        { height:'30px', padding:'0 6px', border:'1px solid #E5E7EB', borderRadius:'20px', fontSize:'12px', fontFamily:"'Outfit',sans-serif", background:'#FFF', cursor:'pointer', color:'#374151' },
+  smallBtn:   { width:'24px', height:'30px', border:'1px solid #E5E7EB', borderRadius:'20px', background:'#FFF', cursor:'pointer', fontSize:'16px', fontWeight:'700', fontFamily:"'Outfit',sans-serif", display:'flex', alignItems:'center', justifyContent:'center', flexShrink:0, color:'#374151' },
+  picker:     { position:'absolute', top:'34px', left:0, background:'#FFF', border:'1px solid #E5E7EB', borderRadius:'20px', padding:'12px', zIndex:400, boxShadow:'0 8px 32px rgba(0,0,0,.12)', minWidth:'180px' },
   pickerTitle:{ fontSize:'11px', fontWeight:'700', color:'#6B7280', textTransform:'uppercase', letterSpacing:'.05em', margin:'0 0 8px' },
-  tblBtn:     { fontSize:'11px', padding:'3px 7px', border:'1px solid #E5E7EB', borderRadius:'4px', cursor:'pointer', background:'#FFF', fontFamily:"'Outfit',sans-serif", fontWeight:'600' },
-  specialBtn: { display:'block', width:'100%', textAlign:'left', padding:'6px 8px', border:'none', borderRadius:'5px', cursor:'pointer', fontSize:'12px', fontFamily:"'Outfit',sans-serif", background:'transparent', color:'#374151', marginBottom:'1px' },
+  tblBtn:     { fontSize:'11px', padding:'3px 7px', border:'1px solid #E5E7EB', borderRadius:'20px', cursor:'pointer', background:'#FFF', fontFamily:"'Outfit',sans-serif", fontWeight:'600' },
+  specialBtn: { display:'block', width:'100%', textAlign:'left', padding:'6px 8px', border:'none', borderRadius:'20px', cursor:'pointer', fontSize:'12px', fontFamily:"'Outfit',sans-serif", background:'transparent', color:'#374151', marginBottom:'1px' },
 }

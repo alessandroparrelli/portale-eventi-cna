@@ -89,7 +89,7 @@ function PostoCard({ numero_posto }) {
   const len = (numero_posto || '').length
   const fs = len > 8 ? '28px' : len > 5 ? '38px' : len > 3 ? '50px' : '64px'
   return (
-    <div style={{ background: 'linear-gradient(135deg,#003DA5,#BE123C)', borderRadius: '14px', padding: '24px 32px', marginBottom: '20px', width: '100%', boxSizing: 'border-box' }}>
+    <div style={{ background: 'linear-gradient(135deg,#003DA5,#BE123C)', borderRadius: '20px', padding: '24px 32px', marginBottom: '20px', width: '100%', boxSizing: 'border-box' }}>
       <p style={{ margin: '0 0 6px', fontSize: '11px', fontWeight: '700', color: 'rgba(255,255,255,0.7)', textTransform: 'uppercase', letterSpacing: '.1em' }}>Il tuo posto</p>
       <p style={{ margin: 0, fontSize: fs, fontWeight: '900', color: '#fff', lineHeight: 1.1, letterSpacing: '-0.02em' }}>{numero_posto}</p>
     </div>
@@ -99,10 +99,10 @@ function PostoCard({ numero_posto }) {
 function QrBlock({ qr_code }) {
   if (!qr_code) return null
   return (
-    <div style={{ marginBottom: '20px', padding: '20px', background: '#F9FAFB', borderRadius: '12px', border: '1px solid #E5E7EB' }}>
+    <div style={{ marginBottom: '20px', padding: '20px', background: '#F9FAFB', borderRadius: '20px', border: '1px solid #E5E7EB' }}>
       <p style={{ margin: '0 0 12px', fontSize: '12px', fontWeight: '600', color: '#6B7280', textTransform: 'uppercase', letterSpacing: '.06em' }}>QR code di accesso</p>
       <img src={QR_API(qr_code, 180)} alt="QR code" width={180} height={180}
-        style={{ display: 'block', margin: '0 auto', borderRadius: '8px' }} />
+        style={{ display: 'block', margin: '0 auto', borderRadius: '20px' }} />
       <p style={{ margin: '10px 0 0', fontSize: '11px', color: '#9CA3AF', fontFamily: 'monospace' }}>{qr_code}</p>
     </div>
   )
@@ -111,7 +111,7 @@ function QrBlock({ qr_code }) {
 function InfoEvento({ data }) {
   if (!data.data_inizio && !data.luogo) return null
   return (
-    <div style={{ marginBottom: '20px', background: '#F9FAFB', borderRadius: '12px', padding: '16px 20px', textAlign: 'left', border: '1px solid #E5E7EB' }}>
+    <div style={{ marginBottom: '20px', background: '#F9FAFB', borderRadius: '20px', padding: '16px 20px', textAlign: 'left', border: '1px solid #E5E7EB' }}>
       {data.data_inizio && (
         <div style={{ display: 'flex', gap: '12px', alignItems: 'flex-start', marginBottom: data.luogo ? '12px' : 0 }}>
           <span style={{ fontSize: '20px', flexShrink: 0 }}>📅</span>
@@ -155,13 +155,13 @@ function CalendarioButtons({ data }) {
       <div style={{ display: 'flex', gap: '8px', flexWrap: 'wrap', justifyContent: 'center' }}>
         {ics && (
           <a href={ics} download={`${(data.evento || 'evento').replace(/\s+/g, '-')}.ics`}
-            style={{ display: 'inline-flex', alignItems: 'center', gap: '7px', padding: '10px 18px', background: BLU, color: '#fff', borderRadius: '8px', textDecoration: 'none', fontSize: '13px', fontWeight: '700', fontFamily: "'Outfit',Arial,sans-serif" }}>
+            style={{ display: 'inline-flex', alignItems: 'center', gap: '7px', padding: '10px 18px', background: BLU, color: '#fff', borderRadius: '20px', textDecoration: 'none', fontSize: '13px', fontWeight: '700', fontFamily: "'Outfit',Arial,sans-serif" }}>
             <span style={{ fontSize: '16px' }}>📥</span> Apple / Outlook
           </a>
         )}
         {gcal && (
           <a href={gcal} target="_blank" rel="noopener noreferrer"
-            style={{ display: 'inline-flex', alignItems: 'center', gap: '7px', padding: '10px 18px', background: '#fff', color: '#374151', border: '1.5px solid #E5E7EB', borderRadius: '8px', textDecoration: 'none', fontSize: '13px', fontWeight: '700', fontFamily: "'Outfit',Arial,sans-serif" }}>
+            style={{ display: 'inline-flex', alignItems: 'center', gap: '7px', padding: '10px 18px', background: '#fff', color: '#374151', border: '1.5px solid #E5E7EB', borderRadius: '20px', textDecoration: 'none', fontSize: '13px', fontWeight: '700', fontFamily: "'Outfit',Arial,sans-serif" }}>
             <span style={{ fontSize: '16px' }}>📅</span> Google Calendar
           </a>
         )}

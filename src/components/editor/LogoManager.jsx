@@ -158,8 +158,8 @@ export default function LogoManager({
     <div>
       {/* Logo/immagine corrente (solo in modalità logo, non compact) */}
       {!compact && folder === 'loghi' && (
-        <div style={{ display:'flex', alignItems:'center', gap:'16px', padding:'12px 14px', background:'#F9FAFB', border:'1px solid #E5E7EB', borderRadius:'10px', marginBottom:'16px' }}>
-          <div style={{ width:'120px', height:'52px', flexShrink:0, display:'flex', alignItems:'center', justifyContent:'center', background:'#fff', borderRadius:'6px', border:'1px solid #E5E7EB', padding:'6px' }}>
+        <div style={{ display:'flex', alignItems:'center', gap:'16px', padding:'12px 14px', background:'#F9FAFB', border:'1px solid #E5E7EB', borderRadius:'20px', marginBottom:'16px' }}>
+          <div style={{ width:'120px', height:'52px', flexShrink:0, display:'flex', alignItems:'center', justifyContent:'center', background:'#fff', borderRadius:'20px', border:'1px solid #E5E7EB', padding:'6px' }}>
             <img src={selected} alt="Logo selezionato" style={{ maxWidth:'100%', maxHeight:'100%', objectFit:'contain' }} onError={e => { e.target.style.display='none' }} />
           </div>
           <div style={{ flex:1 }}>
@@ -185,24 +185,24 @@ export default function LogoManager({
           {deleteMode ? (
             <>
               <button onClick={tuttiSelezionati ? deselTutti : selTutti}
-                style={{ display:'flex', alignItems:'center', gap:'5px', fontSize:'11px', fontWeight:'700', color:'#374151', background:'#F3F4F6', border:'1px solid #E5E7EB', borderRadius:'6px', padding:'5px 10px', cursor:'pointer', fontFamily:"'Outfit',sans-serif" }}>
+                style={{ display:'flex', alignItems:'center', gap:'5px', fontSize:'11px', fontWeight:'700', color:'#374151', background:'#F3F4F6', border:'1px solid #E5E7EB', borderRadius:'20px', padding:'5px 10px', cursor:'pointer', fontFamily:"'Outfit',sans-serif" }}>
                 {tuttiSelezionati ? <CheckSquare size={13}/> : <Square size={13}/>}
                 {tuttiSelezionati ? 'Deseleziona tutti' : 'Seleziona tutti'}
               </button>
               <button onClick={eliminaSelezionati} disabled={selezionati.size === 0 || deleting}
-                style={{ display:'flex', alignItems:'center', gap:'5px', fontSize:'11px', fontWeight:'700', color:'#fff', background: selezionati.size === 0 ? '#D1D5DB' : '#DC2626', border:'none', borderRadius:'6px', padding:'5px 10px', cursor: selezionati.size === 0 ? 'not-allowed' : 'pointer', fontFamily:"'Outfit',sans-serif" }}>
+                style={{ display:'flex', alignItems:'center', gap:'5px', fontSize:'11px', fontWeight:'700', color:'#fff', background: selezionati.size === 0 ? '#D1D5DB' : '#DC2626', border:'none', borderRadius:'20px', padding:'5px 10px', cursor: selezionati.size === 0 ? 'not-allowed' : 'pointer', fontFamily:"'Outfit',sans-serif" }}>
                 {deleting ? <Loader2 size={12} style={{ animation:'spin .7s linear infinite' }}/> : <Trash2 size={12}/>}
                 {deleting ? 'Eliminazione…' : `Elimina${selezionati.size > 0 ? ` (${selezionati.size})` : ''}`}
               </button>
               <button onClick={() => { setDeleteMode(false); setSelezionati(new Set()); setDeleteErr('') }}
-                style={{ fontSize:'11px', fontWeight:'700', color:'#6B7280', background:'#fff', border:'1px solid #E5E7EB', borderRadius:'6px', padding:'5px 10px', cursor:'pointer', fontFamily:"'Outfit',sans-serif" }}>
+                style={{ fontSize:'11px', fontWeight:'700', color:'#6B7280', background:'#fff', border:'1px solid #E5E7EB', borderRadius:'20px', padding:'5px 10px', cursor:'pointer', fontFamily:"'Outfit',sans-serif" }}>
                 Annulla
               </button>
             </>
           ) : (
             eliminabili.length > 0 && (
               <button onClick={() => setDeleteMode(true)}
-                style={{ display:'flex', alignItems:'center', gap:'5px', fontSize:'11px', fontWeight:'700', color:'#DC2626', background:'#FEF2F2', border:'1px solid #FECACA', borderRadius:'6px', padding:'5px 10px', cursor:'pointer', fontFamily:"'Outfit',sans-serif" }}>
+                style={{ display:'flex', alignItems:'center', gap:'5px', fontSize:'11px', fontWeight:'700', color:'#DC2626', background:'#FEF2F2', border:'1px solid #FECACA', borderRadius:'20px', padding:'5px 10px', cursor:'pointer', fontFamily:"'Outfit',sans-serif" }}>
                 <Trash2 size={12}/> Gestisci
               </button>
             )
@@ -218,7 +218,7 @@ export default function LogoManager({
           <Loader2 size={16} style={{ animation:'spin .8s linear infinite' }}/> Caricamento…
         </div>
       ) : loghi.length === 0 ? (
-        <div style={{ padding:'20px', textAlign:'center', color:'#9CA3AF', fontSize:'12px', border:'1px dashed #E5E7EB', borderRadius:'8px', marginBottom:'12px' }}>
+        <div style={{ padding:'20px', textAlign:'center', color:'#9CA3AF', fontSize:'12px', border:'1px dashed #E5E7EB', borderRadius:'20px', marginBottom:'12px' }}>
           Nessuna immagine ancora caricata in questa galleria
         </div>
       ) : (
@@ -233,11 +233,11 @@ export default function LogoManager({
                   if (!deleteMode) onChange(logo.isDefault ? null : logo.url)
                 }} title={logo.name}
                 style={{ position:'relative', border:`2px solid ${deleteMode && isChecked ? '#DC2626' : isSelected && !deleteMode ? '#003DA5' : '#E5E7EB'}`,
-                  borderRadius:'10px', background: deleteMode && isChecked ? '#FEF2F2' : '#fff', padding:'10px 8px', cursor: logo.isDefault && deleteMode ? 'default' : 'pointer',
+                  borderRadius:'20px', background: deleteMode && isChecked ? '#FEF2F2' : '#fff', padding:'10px 8px', cursor: logo.isDefault && deleteMode ? 'default' : 'pointer',
                   display:'flex', flexDirection:'column', alignItems:'center', gap:'6px',
                   boxShadow: isSelected && !deleteMode ? '0 0 0 3px rgba(0,61,165,.15)' : 'none', opacity: logo.isDefault && deleteMode ? 0.5 : 1 }}>
                 {showCheck && (
-                  <div style={{ position:'absolute', top:'4px', left:'4px', width:'18px', height:'18px', borderRadius:'4px',
+                  <div style={{ position:'absolute', top:'4px', left:'4px', width:'18px', height:'18px', borderRadius:'20px',
                     background: isChecked ? '#DC2626' : '#fff', border:`2px solid ${isChecked ? '#DC2626' : '#D1D5DB'}`,
                     display:'flex', alignItems:'center', justifyContent:'center' }}>
                     {isChecked && <Check size={11} color="#fff" strokeWidth={3}/>}
@@ -268,13 +268,13 @@ export default function LogoManager({
       )}
 
       {/* Upload */}
-      <div style={{ border:'1px dashed #D1D5DB', borderRadius:'10px', padding:'14px 16px', background:'#FAFAFA' }}>
+      <div style={{ border:'1px dashed #D1D5DB', borderRadius:'20px', padding:'14px 16px', background:'#FAFAFA' }}>
         <p style={{ fontSize:'12px', fontWeight:'700', color:'#374151', margin:'0 0 6px', textTransform:'uppercase', letterSpacing:'.05em' }}>{uploadHeading}</p>
         <p style={{ fontSize:'12px', color:'#9CA3AF', margin:'0 0 10px' }}>PNG, JPG, SVG o WebP · max 2MB</p>
         <input ref={fileRef} type="file" accept="image/png,image/jpeg,image/svg+xml,image/webp" style={{ display:'none' }}
           onChange={e => { handleUpload(e.target.files[0]); e.target.value = '' }}/>
         <button onClick={() => fileRef.current?.click()} disabled={uploading}
-          style={{ display:'flex', alignItems:'center', gap:'8px', background: uploading ? '#E5E7EB' : '#003DA5', color:'#fff', border:'none', borderRadius:'8px', padding:'9px 16px', fontSize:'13px', fontWeight:'700', fontFamily:"'Outfit',sans-serif", cursor: uploading ? 'not-allowed' : 'pointer' }}>
+          style={{ display:'flex', alignItems:'center', gap:'8px', background: uploading ? '#E5E7EB' : '#003DA5', color:'#fff', border:'none', borderRadius:'20px', padding:'9px 16px', fontSize:'13px', fontWeight:'700', fontFamily:"'Outfit',sans-serif", cursor: uploading ? 'not-allowed' : 'pointer' }}>
           {uploading ? <><Loader2 size={15} style={{ animation:'spin .8s linear infinite' }}/> Caricamento…</> : <><Upload size={15}/> Scegli file</>}
         </button>
         {uploadErr && <p style={{ fontSize:'12px', color:'#DC2626', margin:'8px 0 0' }}>{uploadErr}</p>}

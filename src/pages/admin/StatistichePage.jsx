@@ -11,7 +11,7 @@ import * as XLSX from 'xlsx'
 
 function StatCard({ icon: Icon, label, value, color='#5B5FEF', sub, iconClass }) {
   return (
-    <div className="glow-card" style={{ backgroundColor:'#FFFFFF', border:'1px solid #E8ECF4', borderRadius:'14px', padding:'18px', display:'flex', gap:'14px', alignItems:'center' }}>
+    <div className="glow-card" style={{ backgroundColor:'#FFFFFF', border:'1px solid #E8ECF4', borderRadius:'20px', padding:'18px', display:'flex', gap:'14px', alignItems:'center' }}>
       <div className={iconClass||'icon-badge-blue'} style={{ width:'44px', height:'44px', display:'flex', alignItems:'center', justifyContent:'center', flexShrink:0 }}>
         <Icon size={20}/>
       </div>
@@ -41,8 +41,8 @@ function BarMini({ label, value, max, color='#5B5FEF' }) {
   return (
     <div style={{ display:'flex', alignItems:'center', gap:'10px', marginBottom:'8px' }}>
       <span style={{ fontSize:'13px', color:'#374151', width:'110px', flexShrink:0, overflow:'hidden', textOverflow:'ellipsis', whiteSpace:'nowrap' }}>{label}</span>
-      <div style={{ flex:1, height:'8px', backgroundColor:'#F3F4F6', borderRadius:'4px', overflow:'hidden' }}>
-        <div style={{ width:`${pct}%`, height:'100%', background:`linear-gradient(90deg,${color},${color}cc)`, borderRadius:'4px', transition:'width 0.5s' }}/>
+      <div style={{ flex:1, height:'8px', backgroundColor:'#F3F4F6', borderRadius:'20px', overflow:'hidden' }}>
+        <div style={{ width:`${pct}%`, height:'100%', background:`linear-gradient(90deg,${color},${color}cc)`, borderRadius:'20px', transition:'width 0.5s' }}/>
       </div>
       <span style={{ fontSize:'13px', fontWeight:'700', color:'#111827', width:'36px', textAlign:'right' }}>{value}</span>
       <span style={{ fontSize:'11px', color:'#9CA3AF', width:'30px' }}>{pct}%</span>
@@ -463,8 +463,8 @@ export default function StatistichePage() {
                               <Star key={i} size={13} fill={i<stars?'#F59E0B':'none'} style={{ color:i<stars?'#F59E0B':'#D1D5DB' }}/>
                             ))}
                           </div>
-                          <div style={{ flex:1, height:'8px', backgroundColor:'#F3F4F6', borderRadius:'4px', overflow:'hidden' }}>
-                            <div style={{ width:`${survey.length>0?Math.round((cnt/survey.length)*100):0}%`, height:'100%', background:'linear-gradient(90deg,#F59E0B,#FCD34D)', borderRadius:'4px', transition:'width 0.5s' }}/>
+                          <div style={{ flex:1, height:'8px', backgroundColor:'#F3F4F6', borderRadius:'20px', overflow:'hidden' }}>
+                            <div style={{ width:`${survey.length>0?Math.round((cnt/survey.length)*100):0}%`, height:'100%', background:'linear-gradient(90deg,#F59E0B,#FCD34D)', borderRadius:'20px', transition:'width 0.5s' }}/>
                           </div>
                           <span style={{ fontSize:'13px', color:'#6B7280', width:'24px' }}>{cnt}</span>
                         </div>
@@ -501,7 +501,7 @@ export default function StatistichePage() {
               <button
                 onClick={exportPartecipanti}
                 disabled={exportingXlsx || utenti.length === 0}
-                style={{ display:'flex', alignItems:'center', gap:'6px', backgroundColor: exportingXlsx ? '#9CA3AF' : '#16A34A', color:'#fff', border:'none', borderRadius:'16px', padding:'9px 14px', fontSize:'13px', fontWeight:'700', cursor: exportingXlsx ? 'default' : 'pointer', fontFamily:"'Inter',sans-serif", whiteSpace:'nowrap', flexShrink:0 }}>
+                style={{ display:'flex', alignItems:'center', gap:'6px', backgroundColor: exportingXlsx ? '#9CA3AF' : '#16A34A', color:'#fff', border:'none', borderRadius:'20px', padding:'9px 14px', fontSize:'13px', fontWeight:'700', cursor: exportingXlsx ? 'default' : 'pointer', fontFamily:"'Inter',sans-serif", whiteSpace:'nowrap', flexShrink:0 }}>
                 <Download size={15}/>
                 {exportingXlsx ? 'Esportazione…' : 'Esporta Excel'}
               </button>
@@ -510,7 +510,7 @@ export default function StatistichePage() {
             {loadingUtenti ? (
               <p style={{ color:'#9CA3AF', textAlign:'center', padding:'40px', fontSize:'14px' }}>Caricamento…</p>
             ) : (
-              <div style={{ backgroundColor:'#fff', borderRadius:'14px', border:'1px solid #E8ECF4', overflow:'hidden' }}>
+              <div style={{ backgroundColor:'#fff', borderRadius:'20px', border:'1px solid #E8ECF4', overflow:'hidden' }}>
                 <table style={{ width:'100%', borderCollapse:'collapse', fontSize:'13px' }}>
                   <GlowTableHead columns={[
                     { label:'Partecipante', color:'blue' },
@@ -570,7 +570,7 @@ export default function StatistichePage() {
           {/* Cronologia partecipante selezionato */}
           {selectedUtente && (
             <div>
-              <div style={{ backgroundColor:'#fff', borderRadius:'14px', border:'1px solid #E8ECF4', padding:'20px', marginBottom:'16px' }}>
+              <div style={{ backgroundColor:'#fff', borderRadius:'20px', border:'1px solid #E8ECF4', padding:'20px', marginBottom:'16px' }}>
                 <div style={{ display:'flex', alignItems:'center', gap:'12px', marginBottom:'16px' }}>
                   <div style={{ width:44, height:44, borderRadius:'50%', background:'linear-gradient(135deg,#5B5FEF,#BE123C)', display:'flex', alignItems:'center', justifyContent:'center' }}>
                     <span style={{ fontSize:'16px', fontWeight:'800', color:'#fff' }}>
@@ -596,7 +596,7 @@ export default function StatistichePage() {
               </div>
 
               {/* Timeline cronologia */}
-              <div style={{ backgroundColor:'#fff', borderRadius:'14px', border:'1px solid #E8ECF4', overflow:'hidden' }}>
+              <div style={{ backgroundColor:'#fff', borderRadius:'20px', border:'1px solid #E8ECF4', overflow:'hidden' }}>
                 <div style={{ padding:'16px 20px', borderBottom:'1px solid #E8ECF4' }}>
                   <h3 style={{ fontSize:'14px', fontWeight:'700', color:'#111827', margin:0 }}>Cronologia partecipazioni</h3>
                 </div>
@@ -634,7 +634,7 @@ export default function StatistichePage() {
                               {r.presente ? '✓ Presente' : r.stato || 'iscritto'}
                             </span>
                             {r.codice_iscrizione && (
-                              <span style={{ fontSize:'10px', fontFamily:'monospace', color:'#9CA3AF', padding:'2px 6px', backgroundColor:'#F3F4F6', borderRadius:'4px' }}>
+                              <span style={{ fontSize:'10px', fontFamily:'monospace', color:'#9CA3AF', padding:'2px 6px', backgroundColor:'#F3F4F6', borderRadius:'20px' }}>
                                 {r.codice_iscrizione}
                               </span>
                             )}
@@ -660,7 +660,7 @@ const s = {
   title: { fontSize:'32px', fontWeight:'900', color:'#111827', letterSpacing:'-0.03em', margin:0 },
   subtitle: { fontSize:'14px', color:'#6B7280', margin:'4px 0 0', fontWeight:'500' },
   statsGrid: { display:'grid', gridTemplateColumns:'repeat(auto-fit,minmax(180px,1fr))', gap:'12px' },
-  section: { backgroundColor:'#FFFFFF', border:'1px solid #E8ECF4', borderRadius:'14px', padding:'20px' },
+  section: { backgroundColor:'#FFFFFF', border:'1px solid #E8ECF4', borderRadius:'20px', padding:'20px' },
   sectionTitle: { fontSize:'15px', fontWeight:'700', color:'#111827', letterSpacing:'-0.02em', margin:'0 0 16px' },
   th: { padding:'10px 14px', textAlign:'left', borderBottom:'1px solid #E8ECF4', backgroundColor:'#FAFAFA', fontWeight:'normal' },
   td: { padding:'11px 14px', verticalAlign:'middle' },

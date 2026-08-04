@@ -71,7 +71,7 @@ export default function LandingPageListPage() {
           <h1 style={{ fontSize:'22px', fontWeight:'800', color:'#111827', margin:0, letterSpacing:'-0.03em' }}>Landing Page</h1>
           <p style={{ fontSize:'13px', color:'#6B7280', margin:'4px 0 0' }}>Pagine di marketing per raccogliere contatti</p>
         </div>
-        <button onClick={crea} style={{ background:'#5B5FEF', color:'#fff', border:'none', borderRadius:'16px', padding:'10px 20px', fontFamily:'Inter,sans-serif', fontSize:'13px', fontWeight:'700', cursor:'pointer', display:'flex', alignItems:'center', gap:'6px' }}>
+        <button onClick={crea} style={{ background:'#5B5FEF', color:'#fff', border:'none', borderRadius:'20px', padding:'10px 20px', fontFamily:'Inter,sans-serif', fontSize:'13px', fontWeight:'700', cursor:'pointer', display:'flex', alignItems:'center', gap:'6px' }}>
           <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5"><path d="M12 5v14M5 12h14"/></svg>
           Nuova Landing Page
         </button>
@@ -86,7 +86,7 @@ export default function LandingPageListPage() {
             { label:'Bozze',           val: pages.filter(p=>p.stato==='bozza').length,         color:'#F59E0B' },
             { label:'Contatti totali', val: totContatti,                                        color:'#5B5FEF' },
           ].map(k => (
-            <div key={k.label} style={{ background:'#fff', border:'1px solid #E8ECF4', borderRadius:'14px', padding:'12px 14px' }}>
+            <div key={k.label} style={{ background:'#fff', border:'1px solid #E8ECF4', borderRadius:'20px', padding:'12px 14px' }}>
               <span style={{ fontSize:'22px', fontWeight:'800', color:k.color, letterSpacing:'-.03em', display:'block' }}>{k.val}</span>
               <span style={{ fontSize:'10px', color:'#9CA3AF', fontWeight:'700', textTransform:'uppercase', letterSpacing:'.04em' }}>{k.label}</span>
             </div>
@@ -131,7 +131,7 @@ export default function LandingPageListPage() {
                   <tr key={p.id} style={{ borderBottom: i < filtered.length-1 ? '1px solid #F3F4F6' : 'none' }}>
                     <td style={tdSt}><span style={{ fontWeight:'600', color:'#111827', fontSize:'14px' }}>{p.titolo}</span></td>
                     <td style={tdSt}><span style={{ fontSize:'12px', color:'#6B7280', fontFamily:'monospace' }}>/lp/{p.slug}</span></td>
-                    <td style={tdSt}><span style={{ background:sc.bg, color:sc.color, borderRadius:'4px', padding:'3px 8px', fontSize:'12px', fontWeight:'600' }}>{sc.label}</span></td>
+                    <td style={tdSt}><span style={{ background:sc.bg, color:sc.color, borderRadius:'20px', padding:'3px 8px', fontSize:'12px', fontWeight:'600' }}>{sc.label}</span></td>
                     <td style={{ ...tdSt, textAlign:'center' }}><span style={{ fontWeight:'700', fontSize:'14px', color: n>0?'#5B5FEF':'#9CA3AF' }}>{n>0?n:'—'}</span></td>
                     <td style={{ ...tdSt, color:'#9CA3AF', fontSize:'13px' }}>{new Date(p.created_at).toLocaleDateString('it-IT',{day:'2-digit',month:'short',year:'numeric'})}</td>
                     <td style={{ ...tdSt, textAlign:'right' }}>
@@ -158,7 +158,7 @@ export default function LandingPageListPage() {
                     <p style={{ margin:0, fontWeight:'700', fontSize:'15px', color:'#111827' }}>{p.titolo}</p>
                     <p style={{ margin:'3px 0 0', fontSize:'11px', color:'#9CA3AF', fontFamily:'monospace' }}>/lp/{p.slug}</p>
                   </div>
-                  <span style={{ background:sc.bg, color:sc.color, borderRadius:'4px', padding:'3px 8px', fontSize:'12px', fontWeight:'600', flexShrink:0, marginLeft:'8px' }}>{sc.label}</span>
+                  <span style={{ background:sc.bg, color:sc.color, borderRadius:'20px', padding:'3px 8px', fontSize:'12px', fontWeight:'600', flexShrink:0, marginLeft:'8px' }}>{sc.label}</span>
                 </div>
                 <div style={{ display:'flex', alignItems:'center', justifyContent:'space-between' }}>
                   <div style={{ display:'flex', gap:'16px', fontSize:'12px', color:'#9CA3AF' }}>
@@ -204,4 +204,4 @@ function Azioni({ p, navigate, elimina, compact }) {
 
 const thSt = { padding:'10px 16px', textAlign:'left', fontSize:'11px', fontWeight:'700', color:'#6B7280', textTransform:'uppercase', letterSpacing:'0.05em' }
 const tdSt = { padding:'13px 16px', verticalAlign:'middle' }
-const btnB = (bg, color) => ({ background:bg, color, borderRadius:'14px', padding:'6px', border:'none', cursor:'pointer', display:'flex', alignItems:'center', justifyContent:'center' })
+const btnB = (bg, color) => ({ background:bg, color, borderRadius:'20px', padding:'6px', border:'none', cursor:'pointer', display:'flex', alignItems:'center', justifyContent:'center' })

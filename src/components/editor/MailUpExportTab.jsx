@@ -699,14 +699,14 @@ i,em{font-style:italic;}
 
 /* ── UI helpers ───────────────────────────────────────────────────── */
 const sF = { fontFamily:"'Outfit',sans-serif" }
-const sInput = { ...sF, fontSize:'13px', padding:'7px 10px', border:'1px solid #D1D5DB', borderRadius:'6px', outline:'none', backgroundColor:'#FFFFFF', color:'#0A0A0A', width:'100%', boxSizing:'border-box' }
+const sInput = { ...sF, fontSize:'13px', padding:'7px 10px', border:'1px solid #D1D5DB', borderRadius:'20px', outline:'none', backgroundColor:'#FFFFFF', color:'#0A0A0A', width:'100%', boxSizing:'border-box' }
 function Lbl({ children }) { return <span style={{ ...sF, fontSize:'11px', fontWeight:'700', color:'#6B7280', display:'block', marginBottom:'4px', textTransform:'uppercase', letterSpacing:'.05em' }}>{children}</span> }
 function Fld({ label, width, children }) { return <div style={{ display:'flex', flexDirection:'column', width:width||'auto', flex:width?'none':'1', minWidth:'100px' }}><Lbl>{label}</Lbl>{children}</div> }
 function Row({ children }) { return <div style={{ display:'flex', gap:'12px', flexWrap:'wrap', alignItems:'flex-end' }}>{children}</div> }
 function Toggle({ label, value, onChange }) {
   return (
     <label style={{ display:'flex', alignItems:'center', gap:'8px', cursor:'pointer', userSelect:'none' }}>
-      <div onClick={() => onChange(!value)} style={{ width:'36px', height:'20px', borderRadius:'10px', flexShrink:0, backgroundColor:value?'#003DA5':'#D1D5DB', position:'relative', cursor:'pointer', transition:'background .2s' }}>
+      <div onClick={() => onChange(!value)} style={{ width:'36px', height:'20px', borderRadius:'20px', flexShrink:0, backgroundColor:value?'#003DA5':'#D1D5DB', position:'relative', cursor:'pointer', transition:'background .2s' }}>
         <div style={{ position:'absolute', top:'2px', left:value?'18px':'2px', width:'16px', height:'16px', borderRadius:'50%', backgroundColor:'#fff', transition:'left .2s' }} />
       </div>
       <span style={{ ...sF, fontSize:'13px', color:'#374151' }}>{label}</span>
@@ -818,7 +818,7 @@ export default function MailUpExportTab({ event, setEvent }) {
         </p>
       </div>
 
-      <div style={{ display:'flex', alignItems:'center', gap:'8px', padding:'9px 12px', backgroundColor:'#F4F5F7', borderRadius:'8px', marginBottom:'20px', border:'1px solid #E5E7EB' }}>
+      <div style={{ display:'flex', alignItems:'center', gap:'8px', padding:'9px 12px', backgroundColor:'#F4F5F7', borderRadius:'20px', marginBottom:'20px', border:'1px solid #E5E7EB' }}>
         <ExternalLink size={13} style={{ color:'#9CA3AF', flexShrink:0 }}/>
         <a href={eventUrl} target="_blank" rel="noopener noreferrer" style={{ ...sF, fontSize:'12px', color:'#003DA5', textDecoration:'none', overflow:'hidden', textOverflow:'ellipsis', whiteSpace:'nowrap' }}>{eventUrl}</a>
       </div>
@@ -837,7 +837,7 @@ export default function MailUpExportTab({ event, setEvent }) {
             {sezioni.length > 0 && blocchi.length > 0 && (
               <button type="button"
                 onClick={() => { if (window.confirm(`Sovrascrivere i ${blocchi.length} blocchi email con i ${sezioni.length} blocchi del Contenuto?`)) importaDaContenuto() }}
-                style={{ ...sF, padding:'9px 16px', backgroundColor:'#003DA5', color:'#fff', border:'none', borderRadius:'8px', fontSize:'14px', fontWeight:'700', cursor:'pointer', display:'flex', alignItems:'center', gap:'6px', boxShadow:'0 2px 6px rgba(0,61,165,0.35)', letterSpacing:'-0.01em', whiteSpace:'nowrap' }}>
+                style={{ ...sF, padding:'9px 16px', backgroundColor:'#003DA5', color:'#fff', border:'none', borderRadius:'20px', fontSize:'14px', fontWeight:'700', cursor:'pointer', display:'flex', alignItems:'center', gap:'6px', boxShadow:'0 2px 6px rgba(0,61,165,0.35)', letterSpacing:'-0.01em', whiteSpace:'nowrap' }}>
                 ↺ Reimporta da Contenuto
               </button>
             )}
@@ -850,7 +850,7 @@ export default function MailUpExportTab({ event, setEvent }) {
       </div>
 
       {/* Opzioni */}
-      <div style={{ border:'1px solid #E5E7EB', borderRadius:'10px', marginBottom:'16px', overflow:'hidden' }}>
+      <div style={{ border:'1px solid #E5E7EB', borderRadius:'20px', marginBottom:'16px', overflow:'hidden' }}>
         <button type="button" onClick={() => setShowOpts(o=>!o)}
           style={{ width:'100%', display:'flex', alignItems:'center', justifyContent:'space-between', padding:'12px 16px', backgroundColor:'#F9FAFB', border:'none', cursor:'pointer', borderBottom:showOpts?'1px solid #E5E7EB':'none' }}>
           <span style={{ ...sF, fontSize:'13px', fontWeight:'800', color:'#374151', display:'flex', alignItems:'center', gap:'7px' }}>
@@ -911,11 +911,11 @@ export default function MailUpExportTab({ event, setEvent }) {
       </div>
 
       {/* Tasto Salva dedicato MailUp */}
-      <div style={{ display:'flex', alignItems:'center', gap:'12px', padding:'14px 18px', backgroundColor: saveOk ? '#F0FDF4' : '#EBF0FA', border:`1px solid ${saveOk?'#86EFAC':'#FDA4AF'}`, borderRadius:'10px', marginBottom:'16px' }}>
+      <div style={{ display:'flex', alignItems:'center', gap:'12px', padding:'14px 18px', backgroundColor: saveOk ? '#F0FDF4' : '#EBF0FA', border:`1px solid ${saveOk?'#86EFAC':'#FDA4AF'}`, borderRadius:'20px', marginBottom:'16px' }}>
         <button
           onClick={salvaMailup}
           disabled={saving}
-          style={{ ...sF, display:'flex', alignItems:'center', gap:'8px', padding:'11px 24px', borderRadius:'8px', border:'none', backgroundColor: saveOk ? '#16A34A' : '#003DA5', color:'#fff', fontSize:'14px', fontWeight:'800', cursor: saving ? 'not-allowed' : 'pointer', opacity: saving ? .7 : 1, flexShrink:0 }}>
+          style={{ ...sF, display:'flex', alignItems:'center', gap:'8px', padding:'11px 24px', borderRadius:'20px', border:'none', backgroundColor: saveOk ? '#16A34A' : '#003DA5', color:'#fff', fontSize:'14px', fontWeight:'800', cursor: saving ? 'not-allowed' : 'pointer', opacity: saving ? .7 : 1, flexShrink:0 }}>
           {saving ? '⏳ Salvataggio…' : saveOk ? '✓ Salvato!' : '💾 Salva blocchi MailUp'}
         </button>
         <span style={{ ...sF, fontSize:'12px', color: saveOk ? '#15803D' : '#6B7280', lineHeight:'1.4' }}>
@@ -926,7 +926,7 @@ export default function MailUpExportTab({ event, setEvent }) {
       </div>
 
       {/* Peso */}
-      <div style={{ display:'flex', alignItems:'center', gap:'8px', padding:'9px 12px', borderRadius:'8px', marginBottom:'14px', backgroundColor:sizeError?'#FEF2F2':sizeWarn?'#FFFBEB':'#F0FDF4', border:`1px solid ${sizeError?'#FECACA':sizeWarn?'#FDE68A':'#BBF7D0'}` }}>
+      <div style={{ display:'flex', alignItems:'center', gap:'8px', padding:'9px 12px', borderRadius:'20px', marginBottom:'14px', backgroundColor:sizeError?'#FEF2F2':sizeWarn?'#FFFBEB':'#F0FDF4', border:`1px solid ${sizeError?'#FECACA':sizeWarn?'#FDE68A':'#BBF7D0'}` }}>
         {(sizeWarn||sizeError) && <AlertTriangle size={13} style={{ color:sizeError?'#DC2626':'#D97706', flexShrink:0 }}/>}
         <span style={{ ...sF, fontSize:'13px', fontWeight:'700', color:sizeError?'#DC2626':sizeWarn?'#92400E':'#15803D' }}>
           Peso HTML: {sizeKb} KB{sizeOk?' — ✓ ottimale':sizeWarn?' — vicino al limite Gmail 102 KB':' — ⚠ supera 102 KB'}
@@ -935,17 +935,17 @@ export default function MailUpExportTab({ event, setEvent }) {
 
       {/* Azioni */}
       <div style={{ display:'flex', gap:'10px', marginBottom:'20px', flexWrap:'wrap' }}>
-        <button onClick={copyHtml} style={{ ...sF, display:'flex', alignItems:'center', gap:'7px', padding:'10px 20px', borderRadius:'8px', border:'none', backgroundColor:copied?'#16A34A':'#003DA5', color:'#fff', fontSize:'14px', fontWeight:'700', cursor:'pointer' }}>
+        <button onClick={copyHtml} style={{ ...sF, display:'flex', alignItems:'center', gap:'7px', padding:'10px 20px', borderRadius:'20px', border:'none', backgroundColor:copied?'#16A34A':'#003DA5', color:'#fff', fontSize:'14px', fontWeight:'700', cursor:'pointer' }}>
           {copied?<Check size={15}/>:<Copy size={15}/>} {copied?'Copiato!':'Copia HTML'}
         </button>
         <a href={`data:text/html;charset=utf-8,${encodeURIComponent(html)}`} download={`email-${event.slug}.html`}
-          style={{ ...sF, display:'flex', alignItems:'center', gap:'7px', padding:'10px 20px', borderRadius:'8px', border:'1px solid #D1D5DB', color:'#374151', fontSize:'14px', fontWeight:'600', textDecoration:'none', backgroundColor:'#fff' }}>
+          style={{ ...sF, display:'flex', alignItems:'center', gap:'7px', padding:'10px 20px', borderRadius:'20px', border:'1px solid #D1D5DB', color:'#374151', fontSize:'14px', fontWeight:'600', textDecoration:'none', backgroundColor:'#fff' }}>
           ↓ Scarica .html
         </a>
       </div>
 
       {/* Istruzioni */}
-      <div style={{ backgroundColor:'#EBF0FA', border:'1px solid #FDA4AF', borderRadius:'10px', padding:'14px 18px', marginBottom:'20px' }}>
+      <div style={{ backgroundColor:'#EBF0FA', border:'1px solid #FDA4AF', borderRadius:'20px', padding:'14px 18px', marginBottom:'20px' }}>
         <p style={{ ...sF, margin:'0 0 6px', fontSize:'13px', fontWeight:'800', color:'#003DA5' }}>Come importare in MailUp</p>
         <ol style={{ ...sF, margin:0, paddingLeft:'16px', fontSize:'13px', color:'#374151', lineHeight:'1.9' }}>
           <li>Vai su <strong>Messaggi → Email → Nuovo messaggio</strong></li>
@@ -957,22 +957,22 @@ export default function MailUpExportTab({ event, setEvent }) {
       </div>
 
       {/* Anteprima */}
-      <div style={{ border:'1px solid #E5E7EB', borderRadius:'10px', overflow:'hidden', marginBottom:'20px' }}>
+      <div style={{ border:'1px solid #E5E7EB', borderRadius:'20px', overflow:'hidden', marginBottom:'20px' }}>
         <div style={{ padding:'9px 14px', backgroundColor:'#F9FAFB', borderBottom:'1px solid #E5E7EB' }}>
           <span style={{ ...sF, fontSize:'11px', fontWeight:'700', color:'#9CA3AF', textTransform:'uppercase', letterSpacing:'.07em' }}>Anteprima — {opts.larghezza}px</span>
         </div>
         <div style={{ overflowX:'auto', backgroundColor:'#F0F0F0', padding:'24px', display:'flex', justifyContent:'center' }}>
           <iframe srcDoc={html} title="Anteprima email MailUp"
-            style={{ width:`${opts.larghezza}px`, minHeight:'500px', border:'1px solid #E5E7EB', borderRadius:'4px', display:'block', backgroundColor:'#fff' }}
+            style={{ width:`${opts.larghezza}px`, minHeight:'500px', border:'1px solid #E5E7EB', borderRadius:'20px', display:'block', backgroundColor:'#fff' }}
             sandbox="allow-same-origin"/>
         </div>
       </div>
 
       {/* Sorgente */}
-      <div style={{ border:'1px solid #E5E7EB', borderRadius:'10px', overflow:'hidden' }}>
+      <div style={{ border:'1px solid #E5E7EB', borderRadius:'20px', overflow:'hidden' }}>
         <div style={{ padding:'9px 14px', backgroundColor:'#F9FAFB', borderBottom:'1px solid #E5E7EB', display:'flex', alignItems:'center', justifyContent:'space-between' }}>
           <span style={{ ...sF, fontSize:'11px', fontWeight:'700', color:'#9CA3AF', textTransform:'uppercase', letterSpacing:'.07em' }}>Codice sorgente</span>
-          <button onClick={copyHtml} style={{ ...sF, display:'flex', alignItems:'center', gap:'5px', padding:'4px 10px', border:'1px solid #D1D5DB', borderRadius:'5px', backgroundColor:'#fff', cursor:'pointer', fontSize:'12px', fontWeight:'600', color:'#374151' }}>
+          <button onClick={copyHtml} style={{ ...sF, display:'flex', alignItems:'center', gap:'5px', padding:'4px 10px', border:'1px solid #D1D5DB', borderRadius:'20px', backgroundColor:'#fff', cursor:'pointer', fontSize:'12px', fontWeight:'600', color:'#374151' }}>
             {copied?<Check size={11}/>:<Copy size={11}/>} Copia
           </button>
         </div>

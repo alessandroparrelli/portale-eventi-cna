@@ -189,7 +189,7 @@ const s = {
   hamburger: {
     background: 'none', border: 'none', cursor: 'pointer',
     color: '#374151', display: 'flex', alignItems: 'center',
-    padding: '6px', borderRadius: '14px', flexShrink: 0,
+    padding: '6px', borderRadius: '20px', flexShrink: 0,
   },
   titleBlock: {
     display: 'flex',

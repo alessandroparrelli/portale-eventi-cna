@@ -37,7 +37,7 @@ function Tab({ t, isActive, color, onChange, mobile }) {
       style={{
         display: 'inline-flex', alignItems: 'center', gap: '6px',
         padding: mobile ? '7px 14px' : '8px 16px',
-        borderRadius: '14px', border: 'none',
+        borderRadius: '20px', border: 'none',
         cursor: 'pointer',
         fontSize: mobile ? '14px' : '13px',
         fontWeight: isActive ? '600' : '500',
@@ -67,7 +67,7 @@ export default function GlowTabBar({ tabs = [], active, onChange }) {
         gap: mobile ? '2px' : '4px',
         padding: mobile ? '4px' : '4px',
         background: '#F0F2F7',
-        borderRadius: '14px',
+        borderRadius: '20px',
         marginBottom: mobile ? '14px' : '20px',
         flexWrap: 'nowrap',
         overflowX: mobile ? 'auto' : 'visible',

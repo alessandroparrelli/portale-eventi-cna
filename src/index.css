@@ -91,12 +91,12 @@ header img { display: block; }
 .btn-pill-violet { background: var(--secondary); color: #fff; }
 
 /* ── Icon badges ────────────────────────────────────────── */
-.icon-badge-blue   { background: #EEEFFD; color: var(--primary); border-radius: 10px; }
-.icon-badge-green  { background: #DCFCE7; color: #16A34A; border-radius: 10px; }
-.icon-badge-violet { background: #F3EEFF; color: var(--secondary); border-radius: 10px; }
-.icon-badge-amber  { background: #FEF3C7; color: #D97706; border-radius: 10px; }
-.icon-badge-red    { background: #FEE2E2; color: var(--danger); border-radius: 10px; }
-.icon-badge-cyan   { background: #E0F2FE; color: #0891B2; border-radius: 10px; }
+.icon-badge-blue   { background: #EEEFFD; color: var(--primary); border-radius: 20px; }
+.icon-badge-green  { background: #DCFCE7; color: #16A34A; border-radius: 20px; }
+.icon-badge-violet { background: #F3EEFF; color: var(--secondary); border-radius: 20px; }
+.icon-badge-amber  { background: #FEF3C7; color: #D97706; border-radius: 20px; }
+.icon-badge-red    { background: #FEE2E2; color: var(--danger); border-radius: 20px; }
+.icon-badge-cyan   { background: #E0F2FE; color: #0891B2; border-radius: 20px; }
 
 /* ── Glow card hover ────────────────────────────────────── */
 .glow-card { transition: box-shadow .2s ease, transform .15s ease; }

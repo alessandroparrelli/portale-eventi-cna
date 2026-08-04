@@ -132,7 +132,7 @@ function GrigliaEditor({ block, onChange }) {
         ))}
       </div>
       {(block.cols||[]).map((col,i)=>(
-        <div key={i} style={{border:'1px solid #E5E7EB',borderRadius:'8px',padding:'12px',display:'flex',flexDirection:'column',gap:'8px'}}>
+        <div key={i} style={{border:'1px solid #E5E7EB',borderRadius:'20px',padding:'12px',display:'flex',flexDirection:'column',gap:'8px'}}>
           <div style={{display:'flex',gap:'8px',alignItems:'center'}}>
             <IconPicker
               value={col.icona||''}
@@ -174,12 +174,12 @@ function ImmagineEditor({ block, onChange }) {
       <ImageUploader value={block.src||null} onChange={url=>onChange({...block,src:url||''})} />
       <div style={{display:'flex',gap:'6px'}}>
         {[['left','◀ Sin'],['center','■ Ctr'],['right','▶ Dex']].map(([v,l])=>(
-          <button key={v} onClick={()=>onChange({...block,align:v})} style={{flex:1,padding:'7px',border:`1px solid ${(block.align||'center')===v?'#003DA5':'#E5E7EB'}`,borderRadius:'6px',background:(block.align||'center')===v?'#EBF0FA':'#fff',cursor:'pointer',fontSize:'12px',fontWeight:'600',fontFamily:"'Outfit',sans-serif",color:(block.align||'center')===v?'#003DA5':'#6B7280'}}>{l}</button>
+          <button key={v} onClick={()=>onChange({...block,align:v})} style={{flex:1,padding:'7px',border:`1px solid ${(block.align||'center')===v?'#003DA5':'#E5E7EB'}`,borderRadius:'20px',background:(block.align||'center')===v?'#EBF0FA':'#fff',cursor:'pointer',fontSize:'12px',fontWeight:'600',fontFamily:"'Outfit',sans-serif",color:(block.align||'center')===v?'#003DA5':'#6B7280'}}>{l}</button>
         ))}
       </div>
       <div style={{display:'flex',gap:'6px'}}>
         {[['small','33%'],['medium','60%'],['large','100%']].map(([v,l])=>(
-          <button key={v} onClick={()=>onChange({...block,size:v})} style={{flex:1,padding:'7px',border:`1px solid ${(block.size||'large')===v?'#003DA5':'#E5E7EB'}`,borderRadius:'6px',background:(block.size||'large')===v?'#EBF0FA':'#fff',cursor:'pointer',fontSize:'12px',fontWeight:'600',fontFamily:"'Outfit',sans-serif",color:(block.size||'large')===v?'#003DA5':'#6B7280'}}>{l}</button>
+          <button key={v} onClick={()=>onChange({...block,size:v})} style={{flex:1,padding:'7px',border:`1px solid ${(block.size||'large')===v?'#003DA5':'#E5E7EB'}`,borderRadius:'20px',background:(block.size||'large')===v?'#EBF0FA':'#fff',cursor:'pointer',fontSize:'12px',fontWeight:'600',fontFamily:"'Outfit',sans-serif",color:(block.size||'large')===v?'#003DA5':'#6B7280'}}>{l}</button>
         ))}
       </div>
       <input value={block.didascalia||''} onChange={e=>onChange({...block,didascalia:e.target.value})} placeholder="Didascalia opzionale" style={inp} />
@@ -196,7 +196,7 @@ function BannerEditor({ block, onChange }) {
         <label style={lb}>Stile banner</label>
         <div style={{display:'flex',gap:'6px',flexWrap:'wrap'}}>
           {stili.map(([v,l,bg,color])=>(
-            <button key={v} onClick={()=>onChange({...block,stile:v})} style={{padding:'6px 12px',border:`1px solid ${color}`,borderRadius:'6px',background:bg,color,fontWeight:'700',fontSize:'12px',cursor:'pointer',fontFamily:"'Outfit',sans-serif"}}>{l}</button>
+            <button key={v} onClick={()=>onChange({...block,stile:v})} style={{padding:'6px 12px',border:`1px solid ${color}`,borderRadius:'20px',background:bg,color,fontWeight:'700',fontSize:'12px',cursor:'pointer',fontFamily:"'Outfit',sans-serif"}}>{l}</button>
           ))}
         </div>
       </div>
@@ -208,7 +208,7 @@ function TimelineEditor({ block, onChange }) {
   return (
     <div style={{ padding:'16px', display:'flex', flexDirection:'column', gap:'10px' }}>
       {(block.items||[]).map((item,i)=>(
-        <div key={i} style={{border:'1px solid #E5E7EB',borderRadius:'8px',padding:'12px',display:'flex',flexDirection:'column',gap:'6px'}}>
+        <div key={i} style={{border:'1px solid #E5E7EB',borderRadius:'20px',padding:'12px',display:'flex',flexDirection:'column',gap:'6px'}}>
           <div style={{display:'flex',gap:'6px',alignItems:'center'}}>
             <input value={item.anno||''} onChange={e=>{const items=[...block.items];items[i]={...items[i],anno:e.target.value};onChange({...block,items})}} placeholder="2024" style={{...inp,width:'80px'}} />
             <input value={item.titolo||''} onChange={e=>{const items=[...block.items];items[i]={...items[i],titolo:e.target.value};onChange({...block,items})}} placeholder="Titolo step" style={{...inp,flex:1}} />
@@ -226,7 +226,7 @@ function AccordionEditor({ block, onChange }) {
   return (
     <div style={{ padding:'16px', display:'flex', flexDirection:'column', gap:'10px' }}>
       {(block.items||[]).map((item,i)=>(
-        <div key={i} style={{border:'1px solid #E5E7EB',borderRadius:'8px',padding:'12px',display:'flex',flexDirection:'column',gap:'6px'}}>
+        <div key={i} style={{border:'1px solid #E5E7EB',borderRadius:'20px',padding:'12px',display:'flex',flexDirection:'column',gap:'6px'}}>
           <div style={{display:'flex',gap:'6px'}}>
             <input value={item.domanda||''} onChange={e=>{const items=[...block.items];items[i]={...items[i],domanda:e.target.value};onChange({...block,items})}} placeholder="Domanda / Titolo" style={{...inp,flex:1,fontWeight:'700'}} />
             <button onClick={()=>onChange({...block,items:block.items.filter((_,j)=>j!==i)})} style={btnDel}>✕</button>
@@ -256,7 +256,7 @@ function TestimonialEditor({ block, onChange }) {
   return (
     <div style={{ padding:'16px', display:'flex', flexDirection:'column', gap:'10px' }}>
       {(block.items||[]).map((item,i)=>(
-        <div key={i} style={{border:'1px solid #E5E7EB',borderRadius:'8px',padding:'12px',display:'flex',flexDirection:'column',gap:'6px'}}>
+        <div key={i} style={{border:'1px solid #E5E7EB',borderRadius:'20px',padding:'12px',display:'flex',flexDirection:'column',gap:'6px'}}>
           <div style={{display:'flex',gap:'6px',justifyContent:'flex-end'}}>
             <button onClick={()=>onChange({...block,items:block.items.filter((_,j)=>j!==i)})} style={btnDel}>✕</button>
           </div>
@@ -352,7 +352,7 @@ function ProgrammaEditor({ block, onChange }) {
   return (
     <div style={{ padding: '16px', display: 'flex', flexDirection: 'column', gap: '14px' }}>
       {/* Impostazioni generali */}
-      <div style={{ display: 'flex', gap: '12px', flexWrap: 'wrap', padding: '12px', background: '#F9FAFB', borderRadius: '8px', border: '1px solid #E5E7EB' }}>
+      <div style={{ display: 'flex', gap: '12px', flexWrap: 'wrap', padding: '12px', background: '#F9FAFB', borderRadius: '20px', border: '1px solid #E5E7EB' }}>
         <div>
           <label style={lb}>Titolo sezione</label>
           <input value={block.titolo || 'Programma'} onChange={e => onChange({ ...block, titolo: e.target.value })} style={{ ...inp, width: '160px' }} />
@@ -360,17 +360,17 @@ function ProgrammaEditor({ block, onChange }) {
             <div style={{ display: 'flex', gap: '8px', alignItems: 'flex-end' }}>
             <div>
               <label style={lb}>Colore sessioni</label>
-              <input type="color" value={block.colore_titoli || '#E91E8C'} onChange={e => onChange({ ...block, colore_titoli: e.target.value })} style={{ width: '36px', height: '36px', border: 'none', cursor: 'pointer', borderRadius: '4px' }} />
+              <input type="color" value={block.colore_titoli || '#E91E8C'} onChange={e => onChange({ ...block, colore_titoli: e.target.value })} style={{ width: '36px', height: '36px', border: 'none', cursor: 'pointer', borderRadius: '20px' }} />
             </div>
             <div>
               <label style={lb}>Colore orari</label>
-              <input type="color" value={block.colore_orari || '#003DA5'} onChange={e => onChange({ ...block, colore_orari: e.target.value })} style={{ width: '36px', height: '36px', border: 'none', cursor: 'pointer', borderRadius: '4px' }} />
+              <input type="color" value={block.colore_orari || '#003DA5'} onChange={e => onChange({ ...block, colore_orari: e.target.value })} style={{ width: '36px', height: '36px', border: 'none', cursor: 'pointer', borderRadius: '20px' }} />
             </div>
           </div>
         </div>
 
         {/* ── Cornice ── */}
-        <div style={{ padding: '12px', background: '#F9FAFB', borderRadius: '8px', border: '1px solid #E5E7EB', display: 'flex', flexDirection: 'column', gap: '10px' }}>
+        <div style={{ padding: '12px', background: '#F9FAFB', borderRadius: '20px', border: '1px solid #E5E7EB', display: 'flex', flexDirection: 'column', gap: '10px' }}>
           <label style={{ ...lb, marginBottom: 0 }}>Cornice</label>
           <div style={{ display: 'flex', gap: '8px', flexWrap: 'wrap', alignItems: 'flex-end' }}>
             <div style={{ flex: '1 1 120px' }}>
@@ -385,7 +385,7 @@ function ProgrammaEditor({ block, onChange }) {
             </div>
             <div>
               <label style={lb}>Colore</label>
-              <input type="color" value={block.cornice_colore || '#D1D5DB'} onChange={e => onChange({ ...block, cornice_colore: e.target.value })} style={{ width: '36px', height: '36px', border: 'none', cursor: 'pointer', borderRadius: '4px' }} />
+              <input type="color" value={block.cornice_colore || '#D1D5DB'} onChange={e => onChange({ ...block, cornice_colore: e.target.value })} style={{ width: '36px', height: '36px', border: 'none', cursor: 'pointer', borderRadius: '20px' }} />
             </div>
             <div style={{ flex: '1 1 100px' }}>
               <label style={lb}>Spessore: <strong>{block.cornice_spessore || 1.5}px</strong></label>
@@ -399,18 +399,18 @@ function ProgrammaEditor({ block, onChange }) {
         </div>
 
         {/* ── Sfondo ── */}
-        <div style={{ padding: '12px', background: '#F9FAFB', borderRadius: '8px', border: '1px solid #E5E7EB', display: 'flex', flexDirection: 'column', gap: '10px' }}>
+        <div style={{ padding: '12px', background: '#F9FAFB', borderRadius: '20px', border: '1px solid #E5E7EB', display: 'flex', flexDirection: 'column', gap: '10px' }}>
           <label style={{ ...lb, marginBottom: 0 }}>Sfondo box</label>
           <div style={{ display: 'flex', gap: '8px', alignItems: 'center', flexWrap: 'wrap' }}>
             {['#ffffff','#EBF0FA','#FFF0F7','#F9FAFB','#FFF8E6','#E8F5E9','#003DA5','#0A0A0A'].map(c => (
               <button key={c} type="button" onClick={() => onChange({ ...block, sfondo: c })} style={{
-                width: '28px', height: '28px', borderRadius: '6px', border: `2px solid ${(block.sfondo || '#ffffff') === c ? '#003DA5' : '#E5E7EB'}`,
+                width: '28px', height: '28px', borderRadius: '20px', border: `2px solid ${(block.sfondo || '#ffffff') === c ? '#003DA5' : '#E5E7EB'}`,
                 background: c, cursor: 'pointer', padding: 0, flexShrink: 0,
               }} title={c} />
             ))}
             <div style={{ display: 'flex', alignItems: 'center', gap: '6px', marginLeft: '4px' }}>
               <label style={{ ...lb, marginBottom: 0 }}>Custom</label>
-              <input type="color" value={block.sfondo || '#ffffff'} onChange={e => onChange({ ...block, sfondo: e.target.value })} style={{ width: '36px', height: '28px', border: 'none', cursor: 'pointer', borderRadius: '4px' }} />
+              <input type="color" value={block.sfondo || '#ffffff'} onChange={e => onChange({ ...block, sfondo: e.target.value })} style={{ width: '36px', height: '28px', border: 'none', cursor: 'pointer', borderRadius: '20px' }} />
               <span style={{ fontSize: '11px', color: '#9CA3AF' }}>{block.sfondo || '#ffffff'}</span>
             </div>
           </div>
@@ -419,7 +419,7 @@ function ProgrammaEditor({ block, onChange }) {
       {/* Lista voci */}
       <div style={{ display: 'flex', flexDirection: 'column', gap: '8px' }}>
         {(block.voci || []).map((voce, i) => (
-          <div key={voce.id || i} style={{ border: '1px solid #E5E7EB', borderRadius: '8px', background: '#fff', overflow: 'hidden' }}>
+          <div key={voce.id || i} style={{ border: '1px solid #E5E7EB', borderRadius: '20px', background: '#fff', overflow: 'hidden' }}>
             {/* Header voce */}
             <div style={{ display: 'flex', alignItems: 'center', gap: '8px', padding: '8px 12px', background: '#F9FAFB', borderBottom: '1px solid #E5E7EB' }}>
               <span style={{ fontSize: '12px', fontWeight: '700', color: '#6B7280', flex: 1 }}>{tipoLabel[voce.tipo] || voce.tipo}</span>
@@ -519,7 +519,7 @@ function CaroselloEditor({ block, onChange }) {
         <div style={{ display:'flex', gap:'8px' }}>
           {[['1:1','Quadrato'],['4:5','Portrait'],['16:9','Landscape']].map(([v,l])=>(
             <button key={v} type="button" onClick={()=>onChange({...block,rapporto:v})}
-              style={{ flex:1, padding:'7px 4px', border:`1px solid ${(block.rapporto||'1:1')===v?'#003DA5':'#E5E7EB'}`, borderRadius:'6px', background:(block.rapporto||'1:1')===v?'#EBF0FA':'#fff', cursor:'pointer', fontSize:'12px', fontWeight:'600', color:(block.rapporto||'1:1')===v?'#003DA5':'#6B7280', fontFamily:"'Outfit',sans-serif" }}>
+              style={{ flex:1, padding:'7px 4px', border:`1px solid ${(block.rapporto||'1:1')===v?'#003DA5':'#E5E7EB'}`, borderRadius:'20px', background:(block.rapporto||'1:1')===v?'#EBF0FA':'#fff', cursor:'pointer', fontSize:'12px', fontWeight:'600', color:(block.rapporto||'1:1')===v?'#003DA5':'#6B7280', fontFamily:"'Outfit',sans-serif" }}>
               {l}
             </button>
           ))}
@@ -530,12 +530,12 @@ function CaroselloEditor({ block, onChange }) {
         <label style={{ fontSize:'12px', fontWeight:'700', color:'#6B7280', textTransform:'uppercase', letterSpacing:'.06em', display:'block', marginBottom:'6px' }}>Immagini ({(block.immagini||[]).length})</label>
         <div style={{ display:'flex', flexDirection:'column', gap:'8px' }}>
           {(block.immagini||[]).map((img,i)=>(
-            <div key={i} style={{ display:'flex', gap:'8px', alignItems:'flex-start', background:'#F9FAFB', borderRadius:'8px', padding:'8px 10px' }}>
+            <div key={i} style={{ display:'flex', gap:'8px', alignItems:'flex-start', background:'#F9FAFB', borderRadius:'20px', padding:'8px 10px' }}>
               {/* Anteprima o dropzone */}
               <div
                 onClick={() => fileRefs.current[i]?.click()}
                 style={{
-                  width:'64px', height:'64px', flexShrink:0, borderRadius:'8px',
+                  width:'64px', height:'64px', flexShrink:0, borderRadius:'20px',
                   border: img.src ? 'none' : '2px dashed #D1D5DB',
                   background: img.src ? 'transparent' : '#F3F4F6',
                   cursor:'pointer', overflow:'hidden', position:'relative',
@@ -632,7 +632,7 @@ function Block({ block, index, total, onChange, onDelete, onMoveUp, onMoveDown }
   const typeInfo = BLOCK_TYPES.find(t=>t.tipo===block.tipo) || { label:block.tipo }
   const blockIcon = BLOCK_ICONS[block.tipo]
   return (
-    <div style={{ border:'1.5px solid #E5E7EB', borderRadius:'10px', overflow:'hidden', marginBottom:'8px', background:'#fff' }}>
+    <div style={{ border:'1.5px solid #E5E7EB', borderRadius:'20px', overflow:'hidden', marginBottom:'8px', background:'#fff' }}>
       <div style={{ display:'flex', alignItems:'center', gap:'8px', padding:'10px 14px', background:'#FAFAFA', borderBottom:collapsed?'none':'1px solid #E5E7EB', cursor:'pointer' }} onClick={()=>setCollapsed(c=>!c)}>
         <span style={{ display:'flex', alignItems:'center', width:'20px', height:'20px', flexShrink:0 }}>{blockIcon}</span>
         <span style={{flex:1,fontSize:'13px',fontWeight:'700',color:'#374151'}}>{typeInfo.label}
@@ -682,7 +682,7 @@ export default function BlockEditor({ blocks = [], onChange }) {
   return (
     <div>
       {blocks.length===0&&(
-        <div style={{textAlign:'center',padding:'32px',border:'2px dashed #E5E7EB',borderRadius:'10px',color:'#9CA3AF',marginBottom:'12px'}}>
+        <div style={{textAlign:'center',padding:'32px',border:'2px dashed #E5E7EB',borderRadius:'20px',color:'#9CA3AF',marginBottom:'12px'}}>
           <p style={{margin:'0 0 4px',fontSize:'15px',fontWeight:'600'}}>Nessun blocco</p>
           <p style={{margin:0,fontSize:'13px'}}>Aggiungi il primo blocco qui sotto</p>
         </div>
@@ -697,7 +697,7 @@ export default function BlockEditor({ blocks = [], onChange }) {
           display:'flex',alignItems:'center',justifyContent:'center',gap:'8px',
           width:'100%',padding:'13px',
           border:`2px dashed ${showAddMenu?'#003DA5':'#D1D5DB'}`,
-          borderRadius:'8px',background:showAddMenu?'#EBF0FA':'#FAFAFA',
+          borderRadius:'20px',background:showAddMenu?'#EBF0FA':'#FAFAFA',
           cursor:'pointer',fontSize:'14px',fontWeight:'700',
           color:showAddMenu?'#003DA5':'#6B7280',fontFamily:"'Outfit',sans-serif",transition:'all .15s',
         }}>
@@ -707,7 +707,7 @@ export default function BlockEditor({ blocks = [], onChange }) {
         {showAddMenu && createPortal(
           <div style={{ position:'fixed', inset:0, zIndex:9999, display:'flex', alignItems:'center', justifyContent:'center', background:'rgba(0,0,0,.45)', backdropFilter:'blur(2px)' }}
             onClick={e=>{ if(e.target===e.currentTarget) setShowAddMenu(false) }}>
-            <div style={{ background:'#fff', borderRadius:'14px', width:'360px', maxWidth:'90vw', maxHeight:'80vh', overflowY:'auto', boxShadow:'0 20px 60px rgba(0,0,0,.2)' }}>
+            <div style={{ background:'#fff', borderRadius:'20px', width:'360px', maxWidth:'90vw', maxHeight:'80vh', overflowY:'auto', boxShadow:'0 20px 60px rgba(0,0,0,.2)' }}>
               <div style={{ position:'sticky', top:0, background:'#fff', borderBottom:'1px solid #E5E7EB', padding:'14px 18px', display:'flex', alignItems:'center', justifyContent:'space-between', borderRadius:'14px 14px 0 0', zIndex:1 }}>
                 <span style={{ fontSize:'14px', fontWeight:'800', color:'#0A0A0A' }}>Aggiungi blocco</span>
                 <button onClick={()=>setShowAddMenu(false)} style={{ background:'none', border:'none', cursor:'pointer', fontSize:'20px', color:'#6B7280', lineHeight:1, padding:'2px 6px' }}>✕</button>
@@ -743,7 +743,7 @@ export default function BlockEditor({ blocks = [], onChange }) {
 }
 
 const lb     = { fontSize:'12px', fontWeight:'600', color:'#6B7280', display:'block', marginBottom:'4px' }
-const inp    = { width:'100%', padding:'8px 12px', border:'1px solid #E5E7EB', borderRadius:'6px', fontSize:'14px', fontFamily:"'Outfit',sans-serif", outline:'none', boxSizing:'border-box' }
-const btnAdd = { padding:'8px 14px', border:'1px solid #E5E7EB', borderRadius:'6px', cursor:'pointer', fontSize:'13px', fontFamily:"'Outfit',sans-serif", fontWeight:'600', background:'#F9FAFB', color:'#374151' }
-const btnDel = { width:'28px', height:'28px', border:'1px solid #FECACA', borderRadius:'6px', cursor:'pointer', background:'#FEF2F2', color:'#DC2626', fontSize:'12px', display:'flex', alignItems:'center', justifyContent:'center', flexShrink:0 }
-const btnIcon= { background:'none', border:'1px solid #E5E7EB', borderRadius:'5px', cursor:'pointer', width:'26px', height:'26px', display:'flex', alignItems:'center', justifyContent:'center', fontSize:'13px', color:'#6B7280', flexShrink:0 }
+const inp    = { width:'100%', padding:'8px 12px', border:'1px solid #E5E7EB', borderRadius:'20px', fontSize:'14px', fontFamily:"'Outfit',sans-serif", outline:'none', boxSizing:'border-box' }
+const btnAdd = { padding:'8px 14px', border:'1px solid #E5E7EB', borderRadius:'20px', cursor:'pointer', fontSize:'13px', fontFamily:"'Outfit',sans-serif", fontWeight:'600', background:'#F9FAFB', color:'#374151' }
+const btnDel = { width:'28px', height:'28px', border:'1px solid #FECACA', borderRadius:'20px', cursor:'pointer', background:'#FEF2F2', color:'#DC2626', fontSize:'12px', display:'flex', alignItems:'center', justifyContent:'center', flexShrink:0 }
+const btnIcon= { background:'none', border:'1px solid #E5E7EB', borderRadius:'20px', cursor:'pointer', width:'26px', height:'26px', display:'flex', alignItems:'center', justifyContent:'center', fontSize:'13px', color:'#6B7280', flexShrink:0 }

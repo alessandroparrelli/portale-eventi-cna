@@ -191,7 +191,7 @@ export function IconPicker({ value, color = '#003DA5', onChangeIcon, onChangeCol
         onClick={() => setOpen(o => !o)}
         style={{
           display:'flex', alignItems:'center', gap:'8px',
-          padding:'8px 12px', border:'1px solid #E5E7EB', borderRadius:'8px',
+          padding:'8px 12px', border:'1px solid #E5E7EB', borderRadius:'20px',
           background:'#fff', cursor:'pointer', fontFamily:'Inter,sans-serif',
           fontSize:'13px', color:'#374151', fontWeight:'600',
         }}
@@ -209,7 +209,7 @@ export function IconPicker({ value, color = '#003DA5', onChangeIcon, onChangeCol
       {open && createPortal(
         <div ref={panelRef} style={{
           position:'absolute', top: pos.top, left: pos.left, zIndex:9999,
-          background:'#fff', border:'1px solid #E5E7EB', borderRadius:'12px',
+          background:'#fff', border:'1px solid #E5E7EB', borderRadius:'20px',
           boxShadow:'0 8px 32px rgba(0,0,0,0.12)', padding:'14px',
           width:'280px', maxHeight:'360px', overflowY:'auto',
         }}>
@@ -238,7 +238,7 @@ export function IconPicker({ value, color = '#003DA5', onChangeIcon, onChangeCol
                 title={icon.label}
                 style={{
                   display:'flex', alignItems:'center', justifyContent:'center',
-                  width:'36px', height:'36px', borderRadius:'6px',
+                  width:'36px', height:'36px', borderRadius:'20px',
                   border: value === icon.id ? `2px solid ${color}` : '1px solid transparent',
                   background: value === icon.id ? color+'15' : '#F9FAFB',
                   cursor:'pointer', color, transition:'all .12s',
@@ -255,7 +255,7 @@ export function IconPicker({ value, color = '#003DA5', onChangeIcon, onChangeCol
 
           {/* Nessuna icona */}
           <button type="button" onClick={() => { onChangeIcon(''); setOpen(false) }}
-            style={{ marginTop:'8px', width:'100%', padding:'7px', border:'1px dashed #E5E7EB', borderRadius:'6px', background:'#fff', cursor:'pointer', fontSize:'12px', color:'#9CA3AF', fontFamily:'Inter,sans-serif' }}>
+            style={{ marginTop:'8px', width:'100%', padding:'7px', border:'1px dashed #E5E7EB', borderRadius:'20px', background:'#fff', cursor:'pointer', fontSize:'12px', color:'#9CA3AF', fontFamily:'Inter,sans-serif' }}>
             Nessuna icona
           </button>
         </div>,

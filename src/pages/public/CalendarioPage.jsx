@@ -175,7 +175,7 @@ export default function CalendarioPage() {
             <a href={cfg.url_cta} target="_blank" rel="noopener noreferrer" className="cal-navbar-cta"
               style={{display:'flex',alignItems:'center',gap:'8px',flexShrink:0,
                 fontSize:'13px',fontWeight:'700',color:color,backgroundColor:'#ffffff',
-                textDecoration:'none',padding:'10px 18px',borderRadius:'8px',
+                textDecoration:'none',padding:'10px 18px',borderRadius:'20px',
                 whiteSpace:'nowrap',boxShadow:'0 2px 12px rgba(0,0,0,0.25)',transition:'box-shadow 0.15s'}}
               onMouseEnter={e=>e.currentTarget.style.boxShadow='0 4px 20px rgba(0,0,0,0.35)'}
               onMouseLeave={e=>e.currentTarget.style.boxShadow='0 2px 12px rgba(0,0,0,0.25)'}>
@@ -219,7 +219,7 @@ export default function CalendarioPage() {
                 style={{textDecoration:'none',display:'block',marginBottom:'14px'}}>
                 <div className='cal-featured-box' style={{backgroundColor:'rgba(255,255,255,0.09)',
                   backdropFilter:'blur(12px)',border:'1px solid rgba(255,255,255,0.18)',
-                  borderRadius:'14px',padding:'22px',transition:'background 0.2s'}}
+                  borderRadius:'20px',padding:'22px',transition:'background 0.2s'}}
                   onMouseEnter={e=>{e.currentTarget.style.backgroundColor='rgba(255,255,255,0.16)'}}
                   onMouseLeave={e=>{e.currentTarget.style.backgroundColor='rgba(255,255,255,0.09)'}}>
                   <p className='cal-hero-label' style={{fontSize:'11px',fontWeight:'800',color:'#60A5FA',
@@ -254,7 +254,7 @@ export default function CalendarioPage() {
                   <div style={{display:'flex',gap:'7px',flex:1}}>
                     {featured.map((_,i) => (
                       <button key={i} onClick={e=>{e.preventDefault();setSlide(i)}}
-                        style={{height:'4px',flex:i===safeSlide?3:1,borderRadius:'2px',border:'none',cursor:'pointer',
+                        style={{height:'4px',flex:i===safeSlide?3:1,borderRadius:'20px',border:'none',cursor:'pointer',
                           backgroundColor:i===slide?'#ffffff':'rgba(255,255,255,0.3)',
                           transition:'all 0.35s',padding:0}}/>
                     ))}
@@ -365,7 +365,7 @@ export default function CalendarioPage() {
             {/* Abbonamento live — si aggiorna automaticamente */}
             <a href="webcal://hnkhckcclgabunkqfmrz.supabase.co/functions/v1/calendario-ics"
               className='cal-ics-btn' style={{display:'flex',alignItems:'center',gap:'10px',padding:'13px 20px',
-                backgroundColor:'#003DA5',color:'#ffffff',borderRadius:'8px',
+                backgroundColor:'#003DA5',color:'#ffffff',borderRadius:'20px',
                 fontSize:'14px',fontWeight:'700',textDecoration:'none',fontFamily:"'Outfit',sans-serif",
                 lineHeight:'1.35'}}>
               <svg width="20" height="20" viewBox="0 0 24 24" fill="none" strokeWidth="2" strokeLinecap="round" style={{flexShrink:0}}>
@@ -415,14 +415,14 @@ export default function CalendarioPage() {
               </div>
               <div style={{display:'flex',gap:'8px',alignItems:'center',flexWrap:'wrap'}}>
                 {/* Tab tutti/prossimi/passati */}
-                <div style={{display:'flex',gap:'2px',backgroundColor:'#F3F4F6',borderRadius:'10px',padding:'3px'}}>
+                <div style={{display:'flex',gap:'2px',backgroundColor:'#F3F4F6',borderRadius:'20px',padding:'3px'}}>
                   {[
                     {k:'tutti',    l:'Tutti',              n:eventi.length,  c:color},
                     {k:'prossimi', l:'In programma',       n:nProssimi,      c:'#059669'},
                     {k:'passati',  l:'Passati',            n:nPassati,       c:'#6B7280'},
                   ].map(t=>(
                     <button key={t.k} onClick={()=>setTabEventi(t.k)}
-                      style={{padding:'8px 14px',borderRadius:'7px',border:'none',cursor:'pointer',
+                      style={{padding:'8px 14px',borderRadius:'20px',border:'none',cursor:'pointer',
                         fontFamily:"'Outfit',sans-serif",fontSize:'13px',fontWeight:'700',transition:'all 0.15s',
                         backgroundColor:tabEventi===t.k?'#ffffff':'transparent',
                         color:tabEventi===t.k?t.c:'#9CA3AF',
@@ -539,7 +539,7 @@ function EventCard({evento,index,color}) {
     ? '0 1px 12px rgba(0,0,0,0.7)'
     : '0 1px 6px rgba(255,255,255,0.8)'
   return (
-    <a href={`/eventi/${evento.slug}`} style={{textDecoration:'none',display:'block',borderRadius:'14px',
+    <a href={`/eventi/${evento.slug}`} style={{textDecoration:'none',display:'block',borderRadius:'20px',
       overflow:'hidden',border:'1px solid #E5E7EB',backgroundColor:'#ffffff',transition:'all 0.2s',
       animation:`fadeUp 0.35s ease ${Math.min(index,5)*0.07}s both`}}
       onMouseEnter={e=>{e.currentTarget.style.transform='translateY(-4px)';e.currentTarget.style.boxShadow='0 12px 40px rgba(0,0,0,0.1)';e.currentTarget.style.borderColor=c}}
@@ -578,7 +578,7 @@ function EventCard({evento,index,color}) {
           )}
         </div>
         <div style={{position:'absolute',top:'13px',left:'13px',backgroundColor:'#ffffff',
-          borderRadius:'10px',padding:'7px 11px',boxShadow:'0 4px 14px rgba(0,0,0,0.14)',textAlign:'center',minWidth:'46px'}}>
+          borderRadius:'20px',padding:'7px 11px',boxShadow:'0 4px 14px rgba(0,0,0,0.14)',textAlign:'center',minWidth:'46px'}}>
           <div style={{fontSize:'20px',fontWeight:'900',letterSpacing:'-0.04em',color:NERO,lineHeight:1}}>
             {String(d.getDate()).padStart(2,'0')}
           </div>
@@ -587,7 +587,7 @@ function EventCard({evento,index,color}) {
           </div>
         </div>
         <div style={{position:'absolute',top:'13px',right:'13px',backgroundColor:past?'rgba(0,0,0,0.65)':c,
-          borderRadius:'6px',padding:'4px 10px',fontSize:'11px',fontWeight:'700',
+          borderRadius:'20px',padding:'4px 10px',fontSize:'11px',fontWeight:'700',
           color:past?'rgba(255,255,255,0.75)':'#ffffff'}}>
           {past?'Concluso':'Disponibile'}
         </div>
@@ -619,7 +619,7 @@ function LandingCard({landing,index}) {
   const titleColor = imgDark ? '#ffffff' : '#0A0A0A'
   const titleShadow = imgDark ? '0 1px 12px rgba(0,0,0,0.7)' : '0 1px 6px rgba(255,255,255,0.8)'
   return (
-    <a href={`/lp/${landing.slug}`} style={{textDecoration:'none',display:'block',borderRadius:'14px',
+    <a href={`/lp/${landing.slug}`} style={{textDecoration:'none',display:'block',borderRadius:'20px',
       overflow:'hidden',border:'1px solid #E5E7EB',backgroundColor:'#ffffff',transition:'all 0.2s',
       animation:`fadeUp 0.35s ease ${Math.min(index,5)*0.07}s both`}}
       onMouseEnter={e=>{e.currentTarget.style.transform='translateY(-4px)';e.currentTarget.style.boxShadow='0 12px 40px rgba(0,0,0,0.1)';e.currentTarget.style.borderColor='#7C3AED'}}
@@ -638,7 +638,7 @@ function LandingCard({landing,index}) {
             : 'linear-gradient(to bottom, transparent 25%, rgba(255,255,255,0.65) 100%)'
         }}/>
         <div style={{position:'absolute',top:'13px',right:'13px',backgroundColor:'#7C3AED',
-          borderRadius:'6px',padding:'4px 10px',fontSize:'11px',fontWeight:'700',color:'#ffffff'}}>
+          borderRadius:'20px',padding:'4px 10px',fontSize:'11px',fontWeight:'700',color:'#ffffff'}}>
           Mestiere
         </div>
         <div style={{position:'absolute',bottom:0,left:0,right:0,padding:'12px 14px 14px'}}>
@@ -746,7 +746,7 @@ function SearchBox({value,onChange,color,placeholder}) {
       <circle cx="11" cy="11" r="8"/><line x1="21" y1="21" x2="16.65" y2="16.65"/>
     </svg>
     <input value={value} onChange={e=>onChange(e.target.value)} placeholder={placeholder}
-      style={{padding:'9px 12px 9px 34px',border:'1px solid #E5E7EB',borderRadius:'8px',fontSize:'13px',
+      style={{padding:'9px 12px 9px 34px',border:'1px solid #E5E7EB',borderRadius:'20px',fontSize:'13px',
         fontFamily:"'Outfit',sans-serif",outline:'none',width:'200px',color:NERO,boxSizing:'border-box'}}
       onFocus={e=>e.target.style.borderColor=color}
       onBlur={e=>e.target.style.borderColor='#E5E7EB'}/>

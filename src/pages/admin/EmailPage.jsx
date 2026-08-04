@@ -136,7 +136,7 @@ function ImageDropZone({ value, onChange, label='Immagine' }) {
         <div onDragOver={e=>{e.preventDefault();setDrag(true)}} onDragLeave={()=>setDrag(false)}
           onDrop={e=>{e.preventDefault();setDrag(false);handleFile(e.dataTransfer.files[0])}}
           onClick={()=>ref.current?.click()}
-          style={{ border:`2px dashed ${drag?BLU:'#D1D5DB'}`, borderRadius:'7px', padding:'12px', textAlign:'center', cursor:'pointer', background:drag?'#EEEFFD':'#FAFAFA', marginBottom:'5px' }}>
+          style={{ border:`2px dashed ${drag?BLU:'#D1D5DB'}`, borderRadius:'20px', padding:'12px', textAlign:'center', cursor:'pointer', background:drag?'#EEEFFD':'#FAFAFA', marginBottom:'5px' }}>
           <input ref={ref} type="file" accept="image/*" style={{ display:'none' }} onChange={e=>handleFile(e.target.files[0])}/>
           {uploading ? <div style={{ display:'flex',alignItems:'center',justifyContent:'center',gap:'5px',fontSize:'11px',color:'#6B7280' }}><Loader2 size={13} style={{animation:'spin 1s linear infinite'}}/>Caricamento...</div>
             : <><Upload size={14} style={{color:'#9CA3AF',marginBottom:'3px'}}/><p style={{margin:0,fontSize:'11px',color:'#6B7280'}}>Trascina o clicca</p></>}
@@ -153,7 +153,7 @@ function BlockProps({ block, onChange }) {
     <div style={{marginBottom:'8px'}}>
       <label style={lbl}>{label}</label>
       <div style={{display:'flex',gap:'6px',alignItems:'center'}}>
-        <input type="color" value={block[key]||def} onChange={e=>set(key,e.target.value)} style={{width:'30px',height:'24px',border:'1px solid #E8ECF4',borderRadius:'4px',cursor:'pointer',padding:'1px',flexShrink:0}}/>
+        <input type="color" value={block[key]||def} onChange={e=>set(key,e.target.value)} style={{width:'30px',height:'24px',border:'1px solid #E8ECF4',borderRadius:'20px',cursor:'pointer',padding:'1px',flexShrink:0}}/>
         <input value={block[key]||def} onChange={e=>set(key,e.target.value)} style={{...inp,padding:'4px 7px',fontSize:'11px',fontFamily:'monospace',flex:1}}/>
       </div>
     </div>
@@ -172,7 +172,7 @@ function BlockProps({ block, onChange }) {
       <label style={lbl}>Allineamento</label>
       <div style={{display:'flex',gap:'3px'}}>
         {[['left',<AlignLeft size={12}/>],['center',<AlignCenter size={12}/>],['right',<AlignRight size={12}/>]].map(([v,ic])=>(
-          <button key={v} onClick={()=>set(key,v)} style={{flex:1,padding:'5px',border:`1px solid ${block[key]===v?BLU:'#E8ECF4'}`,borderRadius:'5px',cursor:'pointer',background:block[key]===v?'#EEEFFD':'#fff',color:block[key]===v?BLU:'#9CA3AF',display:'flex',alignItems:'center',justifyContent:'center'}}>{ic}</button>
+          <button key={v} onClick={()=>set(key,v)} style={{flex:1,padding:'5px',border:`1px solid ${block[key]===v?BLU:'#E8ECF4'}`,borderRadius:'20px',cursor:'pointer',background:block[key]===v?'#EEEFFD':'#fff',color:block[key]===v?BLU:'#9CA3AF',display:'flex',alignItems:'center',justifyContent:'center'}}>{ic}</button>
         ))}
       </div>
     </div>
@@ -198,7 +198,7 @@ function BlockProps({ block, onChange }) {
       <div style={{marginBottom:'8px'}}>
         <label style={lbl}>Larghezza</label>
         <div style={{display:'flex',flexWrap:'wrap',gap:'4px'}}>
-          {['100%','75%','50%','200px','300px'].map(w=><button key={w} onClick={()=>set('larghezza',w)} style={{padding:'3px 7px',border:`1px solid ${block.larghezza===w?BLU:'#E8ECF4'}`,borderRadius:'4px',cursor:'pointer',fontSize:'10px',background:block.larghezza===w?BLU:'#fff',color:block.larghezza===w?'#fff':'#374151',fontFamily:'monospace'}}>{w}</button>)}
+          {['100%','75%','50%','200px','300px'].map(w=><button key={w} onClick={()=>set('larghezza',w)} style={{padding:'3px 7px',border:`1px solid ${block.larghezza===w?BLU:'#E8ECF4'}`,borderRadius:'20px',cursor:'pointer',fontSize:'10px',background:block.larghezza===w?BLU:'#fff',color:block.larghezza===w?'#fff':'#374151',fontFamily:'monospace'}}>{w}</button>)}
         </div>
       </div>
       {numField('Radius','radius',0,'px',0,24)}{alignField()}
@@ -382,14 +382,14 @@ export default function EmailPage() {
             const isSel = selected===t.key
             return (
               <button key={t.key} type="button" onClick={()=>{ setSelected(t.key); setViewMode('blocchi') }}
-                style={{ display:'flex', alignItems:'center', gap:'5px', padding:'6px 12px', borderRadius:'7px', border:'none', cursor:'pointer', background:isSel?BLU:'#F3F4F6', color:isSel?'#fff':'#6B7280', fontFamily:"'Inter',sans-serif", fontSize:'12px', fontWeight:isSel?'700':'500', transition:'all .12s' }}>
+                style={{ display:'flex', alignItems:'center', gap:'5px', padding:'6px 12px', borderRadius:'20px', border:'none', cursor:'pointer', background:isSel?BLU:'#F3F4F6', color:isSel?'#fff':'#6B7280', fontFamily:"'Inter',sans-serif", fontSize:'12px', fontWeight:isSel?'700':'500', transition:'all .12s' }}>
                 <span style={{fontSize:'13px'}}>{t.icon}</span> {t.label}
               </button>
             )
           })}
         </div>
         <button type="button" onClick={save} disabled={saving}
-          style={{ display:'flex', alignItems:'center', gap:'4px', padding:'7px 18px', borderRadius:'7px', border:'none', cursor:'pointer', fontFamily:"'Inter',sans-serif", background:saved?'#16A34A':BLU, color:'#fff', fontWeight:'700', fontSize:'12px', transition:'background .2s', flexShrink:0 }}>
+          style={{ display:'flex', alignItems:'center', gap:'4px', padding:'7px 18px', borderRadius:'20px', border:'none', cursor:'pointer', fontFamily:"'Inter',sans-serif", background:saved?'#16A34A':BLU, color:'#fff', fontWeight:'700', fontSize:'12px', transition:'background .2s', flexShrink:0 }}>
           {saved ? <><CheckCircle size={13}/>Salvato</> : saving ? <><Loader2 size={13} style={{animation:'spin 1s linear infinite'}}/>Salvo...</> : <><Save size={13}/>Salva template</>}
         </button>
       </div>
@@ -404,7 +404,7 @@ export default function EmailPage() {
             <input value={current.oggetto||''} onChange={e=>update('oggetto',e.target.value)}
               style={{...inp, fontSize:'12px', fontWeight:'600', marginBottom:'6px'}} placeholder="Oggetto..."/>
             <div onClick={()=>setSelectedBlock('header')}
-              style={{ display:'flex', alignItems:'center', gap:'6px', padding:'7px 10px', borderRadius:'16px', border:`2px solid ${selectedBlock==='header'?BLU:'#E8ECF4'}`, background:selectedBlock==='header'?'#EEEFFD':'#fff', cursor:'pointer' }}>
+              style={{ display:'flex', alignItems:'center', gap:'6px', padding:'7px 10px', borderRadius:'20px', border:`2px solid ${selectedBlock==='header'?BLU:'#E8ECF4'}`, background:selectedBlock==='header'?'#EEEFFD':'#fff', cursor:'pointer' }}>
               <span style={{ fontSize:'13px' }}>&#9881;</span>
               <span style={{ fontSize:'12px', fontWeight:'600', color:selectedBlock==='header'?BLU:'#374151', flex:1 }}>Intestazione email</span>
               <div style={{ background:headerConfig.sfondo||BLU, borderRadius:'3px', width:'20px', height:'14px', flexShrink:0 }}/>
@@ -412,7 +412,7 @@ export default function EmailPage() {
             {/* Variabili */}
             <div style={{ marginTop:'6px' }}>
               <button type="button" onClick={()=>setShowVars(!showVars)}
-                style={{ width:'100%', padding:'6px 8px', display:'flex', alignItems:'center', justifyContent:'space-between', background:'#F9FAFB', border:'1px solid #E8ECF4', borderRadius:'7px', cursor:'pointer', fontFamily:"'Inter',sans-serif" }}>
+                style={{ width:'100%', padding:'6px 8px', display:'flex', alignItems:'center', justifyContent:'space-between', background:'#F9FAFB', border:'1px solid #E8ECF4', borderRadius:'20px', cursor:'pointer', fontFamily:"'Inter',sans-serif" }}>
                 <span style={{ fontSize:'10px', fontWeight:'800', color:'#6B7280', textTransform:'uppercase', letterSpacing:'.07em' }}>{'{ } Variabili'}</span>
                 <ChevronRight size={11} style={{ color:'#9CA3AF', transform:showVars?'rotate(90deg)':'none', transition:'transform .15s' }}/>
               </button>
@@ -420,7 +420,7 @@ export default function EmailPage() {
                 <div style={{ padding:'6px 0 2px', display:'flex', flexWrap:'wrap', gap:'3px' }}>
                   {VARIABILI.map(v=>(
                     <button key={v} type="button" onClick={()=>navigator.clipboard.writeText(v)} title="Copia"
-                      style={{ padding:'2px 6px', background:'#EEEFFD', border:'1px solid #BFDBFE', borderRadius:'4px', cursor:'pointer', fontSize:'9px', color:'#1d4ed8', fontFamily:'monospace' }}>
+                      style={{ padding:'2px 6px', background:'#EEEFFD', border:'1px solid #BFDBFE', borderRadius:'20px', cursor:'pointer', fontSize:'9px', color:'#1d4ed8', fontFamily:'monospace' }}>
                       {v}
                     </button>
                   ))}
@@ -440,7 +440,7 @@ export default function EmailPage() {
               const dh2 = !isSel ? dragHandlers(i) : {}
               return (
                 <div key={b.id||i} {...dh2} onClick={()=>setSelectedBlock(isSel?null:i)}
-                  style={{ display:'flex', alignItems:'center', gap:'6px', padding:'7px 8px', borderRadius:'7px', border:`1.5px solid ${isSel?BLU:'#E8ECF4'}`, background:isSel?'#EEEFFD':'#fff', cursor:'pointer', transition:'all .1s', flexShrink:0 }}>
+                  style={{ display:'flex', alignItems:'center', gap:'6px', padding:'7px 8px', borderRadius:'20px', border:`1.5px solid ${isSel?BLU:'#E8ECF4'}`, background:isSel?'#EEEFFD':'#fff', cursor:'pointer', transition:'all .1s', flexShrink:0 }}>
                   <GripVertical size={11} style={{ color:'#D1D5DB', cursor:'grab', flexShrink:0 }}/>
                   <span style={{ color:isSel?BLU:'#6B7280', display:'flex', flexShrink:0 }}>{info.icon}</span>
                   <span style={{ fontSize:'11px', fontWeight:'600', color:isSel?BLU:'#374151', flex:1, overflow:'hidden', textOverflow:'ellipsis', whiteSpace:'nowrap' }}>{info.label}</span>
@@ -458,7 +458,7 @@ export default function EmailPage() {
             <div style={{ display:'flex', flexWrap:'wrap', gap:'3px' }}>
               {BLOCK_TYPES.map(bt=>(
                 <button key={bt.tipo} type="button" onClick={()=>addBlock(bt.tipo)}
-                  style={{ display:'flex', alignItems:'center', gap:'3px', padding:'3px 6px', background:'#F3F4F6', border:'none', borderRadius:'5px', cursor:'pointer', fontSize:'10px', color:'#374151', fontFamily:"'Inter',sans-serif" }}>
+                  style={{ display:'flex', alignItems:'center', gap:'3px', padding:'3px 6px', background:'#F3F4F6', border:'none', borderRadius:'20px', cursor:'pointer', fontSize:'10px', color:'#374151', fontFamily:"'Inter',sans-serif" }}>
                   <span style={{ color:BLU }}>{bt.icon}</span>{bt.label}
                 </button>
               ))}
@@ -493,7 +493,7 @@ export default function EmailPage() {
                 <div style={{ display:'flex', flexWrap:'wrap', gap:'4px' }}>
                   {VARIABILI.map(v=>(
                     <button key={v} type="button" onClick={()=>navigator.clipboard.writeText(v)}
-                      style={{ padding:'3px 8px', background:'#EEEFFD', border:'1px solid #BFDBFE', borderRadius:'4px', cursor:'pointer', fontSize:'10px', color:'#1d4ed8', fontFamily:'monospace' }}>
+                      style={{ padding:'3px 8px', background:'#EEEFFD', border:'1px solid #BFDBFE', borderRadius:'20px', cursor:'pointer', fontSize:'10px', color:'#1d4ed8', fontFamily:'monospace' }}>
                       {v}
                     </button>
                   ))}
@@ -534,7 +534,7 @@ export default function EmailPage() {
           ) : <>
             <div style={{ padding:'8px 12px', borderBottom:'1px solid #E8ECF4', display:'flex', alignItems:'center', gap:'8px', background:'#FAFBFC', flexShrink:0 }}>
               <span style={{ fontSize:'12px', fontWeight:'700', color:NERO, flex:1 }}>Anteprima</span>
-              <span style={{ fontSize:'9px', color:'#9CA3AF', background:'#F3F4F6', padding:'2px 6px', borderRadius:'4px' }}>dati di esempio</span>
+              <span style={{ fontSize:'9px', color:'#9CA3AF', background:'#F3F4F6', padding:'2px 6px', borderRadius:'20px' }}>dati di esempio</span>
               <div style={{ display:'flex', border:'1px solid #E8ECF4', borderRadius:'5px', overflow:'hidden' }}>
                 {[['desktop',<Monitor size={11}/>],['mobile',<Smartphone size={11}/>]].map(([d,ic])=>(
                   <button key={d} type="button" onClick={()=>setPreviewDevice(d)}
@@ -560,6 +560,6 @@ export default function EmailPage() {
   )
 }
 
-const inp = { width:'100%', padding:'7px 10px', border:'1px solid #E8ECF4', borderRadius:'14px', fontSize:'12px', fontFamily:"'Inter',sans-serif", outline:'none', color:'#111827', background:'#fff', boxSizing:'border-box' }
+const inp = { width:'100%', padding:'7px 10px', border:'1px solid #E8ECF4', borderRadius:'20px', fontSize:'12px', fontFamily:"'Inter',sans-serif", outline:'none', color:'#111827', background:'#fff', boxSizing:'border-box' }
 const lbl = { display:'block', fontSize:'10px', fontWeight:'800', color:'#9CA3AF', textTransform:'uppercase', letterSpacing:'.07em', marginBottom:'4px' }
-const btnTiny = { padding:'3px 4px', background:'#fff', border:'1px solid #E8ECF4', borderRadius:'4px', cursor:'pointer', display:'flex', alignItems:'center', justifyContent:'center', color:'#374151' }
+const btnTiny = { padding:'3px 4px', background:'#fff', border:'1px solid #E8ECF4', borderRadius:'20px', cursor:'pointer', display:'flex', alignItems:'center', justifyContent:'center', color:'#374151' }

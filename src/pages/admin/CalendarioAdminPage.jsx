@@ -47,7 +47,7 @@ export default function CalendarioAdminPage() {
   }
 
   const iSt = {
-    width: '100%', padding: '9px 12px', border: '1px solid #D1D5DB', borderRadius: '14px',
+    width: '100%', padding: '9px 12px', border: '1px solid #D1D5DB', borderRadius: '20px',
     fontSize: '14px', fontFamily: "'Inter',sans-serif", outline: 'none', boxSizing: 'border-box', color: '#111827',
   }
 
@@ -70,7 +70,7 @@ export default function CalendarioAdminPage() {
         <div style={{ display: 'flex', gap: '10px', alignItems: 'center' }}>
           <a href="/calendario" target="_blank" rel="noopener noreferrer"
             style={{ display: 'flex', alignItems: 'center', gap: '6px', padding: '9px 16px',
-              border: '1px solid #E8ECF4', borderRadius: '14px', fontSize: '13px', fontWeight: '600',
+              border: '1px solid #E8ECF4', borderRadius: '20px', fontSize: '13px', fontWeight: '600',
               color: '#374151', textDecoration: 'none', fontFamily: "'Inter',sans-serif" }}>
             <Eye size={15}/> Anteprima
           </a>
@@ -121,7 +121,7 @@ export default function CalendarioAdminPage() {
             <div style={{ display: 'flex', alignItems: 'center', gap: '12px' }}>
               <input type="color" value={cfg.colore_primario || '#5B5FEF'}
                 onChange={e => upd('colore_primario', e.target.value)}
-                style={{ width: '48px', height: '38px', border: '1px solid #D1D5DB', borderRadius: '14px', cursor: 'pointer', padding: '2px' }}/>
+                style={{ width: '48px', height: '38px', border: '1px solid #D1D5DB', borderRadius: '20px', cursor: 'pointer', padding: '2px' }}/>
               <Input value={cfg.colore_primario || '#5B5FEF'}
                 onChange={e => upd('colore_primario', e.target.value)}
                 style={{ maxWidth: '140px' }}/>
@@ -179,7 +179,7 @@ export default function CalendarioAdminPage() {
         </Section>
 
         {/* ── Anteprima link ── */}
-        <div style={{ backgroundColor: '#F8FAFF', border: '1px solid #BFDBFE', borderRadius: '14px', padding: '16px 20px',
+        <div style={{ backgroundColor: '#F8FAFF', border: '1px solid #BFDBFE', borderRadius: '20px', padding: '16px 20px',
           display: 'flex', alignItems: 'center', justifyContent: 'space-between', gap: '12px' }}>
           <div>
             <p style={{ fontSize: '13px', fontWeight: '700', color: '#1D4ED8', margin: '0 0 3px' }}>
@@ -191,7 +191,7 @@ export default function CalendarioAdminPage() {
           </div>
           <a href="/calendario" target="_blank" rel="noopener noreferrer"
             style={{ display: 'flex', alignItems: 'center', gap: '6px', padding: '9px 16px',
-              backgroundColor: '#5B5FEF', color: '#ffffff', borderRadius: '14px',
+              backgroundColor: '#5B5FEF', color: '#ffffff', borderRadius: '20px',
               fontSize: '13px', fontWeight: '700', textDecoration: 'none', fontFamily: "'Inter',sans-serif",
               whiteSpace: 'nowrap', flexShrink: 0 }}>
             <ExternalLink size={14}/> Apri pagina
@@ -205,7 +205,7 @@ export default function CalendarioAdminPage() {
 
 function Section({ title, icon, children }) {
   return (
-    <div style={{ backgroundColor: '#ffffff', border: '1px solid #E8ECF4', borderRadius: '14px', overflow: 'hidden' }}>
+    <div style={{ backgroundColor: '#ffffff', border: '1px solid #E8ECF4', borderRadius: '20px', overflow: 'hidden' }}>
       <div style={{ backgroundColor: '#FAFAFA', borderBottom: '1px solid #E8ECF4', padding: '14px 20px',
         display: 'flex', alignItems: 'center', gap: '8px' }}>
         <span style={{ fontSize: '16px' }}>{icon}</span>

@@ -153,7 +153,7 @@ export default function RuoliPage() {
       </div>
 
       {toast && (
-        <div style={{ marginBottom:'16px', padding:'10px 14px', borderRadius:'14px', fontSize:'13px', fontWeight:'600',
+        <div style={{ marginBottom:'16px', padding:'10px 14px', borderRadius:'20px', fontSize:'13px', fontWeight:'600',
           backgroundColor: toast.type==='ok' ? '#F0FDF4' : '#FEF2F2', color: toast.type==='ok' ? '#16A34A' : '#DC2626' }}>
           {toast.msg}
         </div>
@@ -187,8 +187,8 @@ export default function RuoliPage() {
                   </td>
                   <td style={{ padding:'12px 16px', borderBottom:'1px solid #F3F4F6', verticalAlign:'middle' }}>
                     <div style={{ display:'flex', gap:'5px' }}>
-                      <button style={{ background:'none', border:'1px solid #E8ECF4', borderRadius:'4px', padding:'5px 6px', cursor:'pointer', color:'#6B7280', display:'flex', alignItems:'center' }} title="Modifica permessi" onClick={()=>openEdit(r)}><Pencil size={14}/></button>
-                      {!r.is_sistema && <button style={{ background:'none', border:'1px solid #FECACA', borderRadius:'4px', padding:'5px 6px', cursor:'pointer', color:'#DC2626', display:'flex', alignItems:'center' }} title="Elimina" onClick={()=>{setCur(r);setErrors({});setModal('delete')}}><Trash2 size={14}/></button>}
+                      <button style={{ background:'none', border:'1px solid #E8ECF4', borderRadius:'20px', padding:'5px 6px', cursor:'pointer', color:'#6B7280', display:'flex', alignItems:'center' }} title="Modifica permessi" onClick={()=>openEdit(r)}><Pencil size={14}/></button>
+                      {!r.is_sistema && <button style={{ background:'none', border:'1px solid #FECACA', borderRadius:'20px', padding:'5px 6px', cursor:'pointer', color:'#DC2626', display:'flex', alignItems:'center' }} title="Elimina" onClick={()=>{setCur(r);setErrors({});setModal('delete')}}><Trash2 size={14}/></button>}
                     </div>
                   </td>
                 </tr>
@@ -202,7 +202,7 @@ export default function RuoliPage() {
       {(modal==='create'||modal==='edit') && (
         <Modal title={modal==='create'?'Nuovo ruolo':`Permessi — ${cur.nome}`} onClose={()=>setModal(null)} width="640px">
           <div style={{ display:'flex', flexDirection:'column', gap:'13px' }}>
-            {errors.general && <div style={{ backgroundColor:'#FEF2F2', border:'1px solid #FECACA', borderRadius:'14px', padding:'10px 14px', fontSize:'13px', color:'#DC2626' }}>{errors.general}</div>}
+            {errors.general && <div style={{ backgroundColor:'#FEF2F2', border:'1px solid #FECACA', borderRadius:'20px', padding:'10px 14px', fontSize:'13px', color:'#DC2626' }}>{errors.general}</div>}
             {modal==='create' && (
               <Field label="Nome ruolo" required error={errors.nome}>
                 <Input value={cur.nome} onChange={e=>{setCur(p=>({...p,nome:e.target.value}));setErrors(p=>({...p,nome:''}))}} placeholder="es. marketing"/>
@@ -252,7 +252,7 @@ export default function RuoliPage() {
       {/* Modal elimina */}
       {modal==='delete' && (
         <Modal title="Elimina ruolo" onClose={()=>setModal(null)} width="420px">
-          {errors.general && <div style={{ backgroundColor:'#FEF2F2', border:'1px solid #FECACA', borderRadius:'14px', padding:'10px 14px', fontSize:'13px', color:'#DC2626', marginBottom:'16px' }}>{errors.general}</div>}
+          {errors.general && <div style={{ backgroundColor:'#FEF2F2', border:'1px solid #FECACA', borderRadius:'20px', padding:'10px 14px', fontSize:'13px', color:'#DC2626', marginBottom:'16px' }}>{errors.general}</div>}
           <p style={{ fontSize:'14px', color:'#374151', lineHeight:1.6, margin:'0 0 20px' }}>
             Eliminare il ruolo <strong>{cur.nome}</strong>?
           </p>

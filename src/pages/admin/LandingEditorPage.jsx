@@ -172,17 +172,17 @@ export default function LandingEditorPage() {
           <p style={{ margin:0, fontSize:'11px', color:'#9CA3AF' }}>/lp/{data.slug}</p>
         </div>
         <select value={data.stato} onChange={e => upd('stato', e.target.value)}
-          style={{ padding:'6px 10px', border:'1px solid #E8ECF4', borderRadius:'14px', fontSize:'13px', fontFamily:'Inter,sans-serif', outline:'none', cursor:'pointer' }}>
+          style={{ padding:'6px 10px', border:'1px solid #E8ECF4', borderRadius:'20px', fontSize:'13px', fontFamily:'Inter,sans-serif', outline:'none', cursor:'pointer' }}>
           {STATO_OPTS.map(o => <option key={o.value} value={o.value}>{o.label}</option>)}
         </select>
         {data.stato === 'pubblicata' && (
-          <a href={publicUrl} target="_blank" rel="noreferrer" style={{ fontSize:'12px', color:'#5B5FEF', textDecoration:'none', display:'flex', alignItems:'center', gap:'4px', background:'#EFF6FF', padding:'6px 10px', borderRadius:'14px', fontWeight:'600' }}>
+          <a href={publicUrl} target="_blank" rel="noreferrer" style={{ fontSize:'12px', color:'#5B5FEF', textDecoration:'none', display:'flex', alignItems:'center', gap:'4px', background:'#EFF6FF', padding:'6px 10px', borderRadius:'20px', fontWeight:'600' }}>
             <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2"><path d="M18 13v6a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2V8a2 2 0 0 1 2-2h6"/><polyline points="15 3 21 3 21 9"/><line x1="10" y1="14" x2="21" y2="3"/></svg>
             Vedi
           </a>
         )}
         <button onClick={save} disabled={saving} style={{
-          background: saved ? '#059669' : '#5B5FEF', color:'#fff', border:'none', borderRadius:'16px',
+          background: saved ? '#059669' : '#5B5FEF', color:'#fff', border:'none', borderRadius:'20px',
           padding:'8px 18px', fontFamily:'Inter,sans-serif', fontSize:'13px', fontWeight:'700',
           cursor:'pointer', minWidth:'80px', transition:'background .2s'
         }}>
@@ -228,7 +228,7 @@ export default function LandingEditorPage() {
               </Field>
 
               {/* ── Impostazioni email ── */}
-              <div style={{ background:'#F9FAFB', border:'1px solid #E8ECF4', borderRadius:'14px', padding:'16px', display:'flex', flexDirection:'column', gap:'12px' }}>
+              <div style={{ background:'#F9FAFB', border:'1px solid #E8ECF4', borderRadius:'20px', padding:'16px', display:'flex', flexDirection:'column', gap:'12px' }}>
                 <p style={{ margin:0, fontSize:'12px', fontWeight:'700', color:'#6B7280', textTransform:'uppercase', letterSpacing:'.06em' }}>Impostazioni email</p>
                 <div style={{ display:'grid', gridTemplateColumns:'1fr 1fr', gap:'12px' }}>
                   <Field label="Indirizzo mittente" hint="Default: marketing@cnaroma.it">
@@ -255,7 +255,7 @@ export default function LandingEditorPage() {
             <div style={{ display:'flex', flexDirection:'column', gap:'20px' }}>
 
               {/* Logo */}
-              <div style={{ padding:'16px', background:'#F9FAFB', border:'1px solid #E8ECF4', borderRadius:'14px' }}>
+              <div style={{ padding:'16px', background:'#F9FAFB', border:'1px solid #E8ECF4', borderRadius:'20px' }}>
                 <p style={{ fontSize:'12px', fontWeight:'700', color:'#6B7280', textTransform:'uppercase', letterSpacing:'.06em', margin:'0 0 10px' }}>
                   🏷 Logo header
                 </p>
@@ -274,7 +274,7 @@ export default function LandingEditorPage() {
                                 : (lh.logo_sfondo||'trasparente')==='colore_primario' ? (data.tema?.colore_primario||'#5B5FEF')
                                 : 'transparent',
                       padding: (lh.logo_sfondo && lh.logo_sfondo!=='trasparente') ? '5px 12px' : 0,
-                      borderRadius:'14px', display:'inline-flex', alignItems:'center'
+                      borderRadius:'20px', display:'inline-flex', alignItems:'center'
                     }}>
                       <img
                         src={data.logo_url || 'https://raw.githubusercontent.com/alessandroparrelli/fileappoggio/main/NUOVO-LOGO-CNA-ROMA-SOLO-ROMA.png'}
@@ -296,7 +296,7 @@ export default function LandingEditorPage() {
                         <button key={v} onClick={() => setH('logo_sfondo')(v)} style={{
                           flex:1, padding:'8px 6px',
                           border:`1px solid ${(lh.logo_sfondo||'trasparente')===v?'#5B5FEF':'#E8ECF4'}`,
-                          borderRadius:'14px',
+                          borderRadius:'20px',
                           background:(lh.logo_sfondo||'trasparente')===v?'#EEEFFD':'#fff',
                           cursor:'pointer', fontSize:'12px', fontWeight:'600',
                           fontFamily:'Inter,sans-serif',
@@ -327,10 +327,10 @@ export default function LandingEditorPage() {
                 <div style={{ display:'flex', alignItems:'center', gap:'8px' }}>
                   <input type="color" value={lh.hero_sfondo || '#5B5FEF'}
                     onChange={setH('hero_sfondo')}
-                    style={{ width:'38px', height:'32px', border:'1px solid #D1D5DB', borderRadius:'14px', cursor:'pointer', padding:'2px' }}/>
+                    style={{ width:'38px', height:'32px', border:'1px solid #D1D5DB', borderRadius:'20px', cursor:'pointer', padding:'2px' }}/>
                   {[['#5B5FEF','Blu'],['#0A1628','Notte'],['#1F2937','Grafite'],['#7C3AED','Viola'],['#DC2626','Rosso']].map(([c,l]) => (
                     <button key={c} type="button" onClick={() => setH('hero_sfondo')(c)}
-                      style={{ width:'26px', height:'26px', borderRadius:'14px', border:(lh.hero_sfondo||'#5B5FEF')===c?'2px solid #5B5FEF':'1px solid #D1D5DB', background:c, cursor:'pointer', padding:0 }}
+                      style={{ width:'26px', height:'26px', borderRadius:'20px', border:(lh.hero_sfondo||'#5B5FEF')===c?'2px solid #5B5FEF':'1px solid #D1D5DB', background:c, cursor:'pointer', padding:0 }}
                       title={l} />
                   ))}
                 </div>
@@ -353,7 +353,7 @@ export default function LandingEditorPage() {
                     {['sinistra','centro'].map(a => (
                       <button key={a} onClick={() => setH('allineamento')(a)} style={{
                         flex:1, padding:'8px 6px', border:`1px solid ${lh.allineamento===a?'#5B5FEF':'#E8ECF4'}`,
-                        borderRadius:'14px', background:lh.allineamento===a?'#EEEFFD':'#fff',
+                        borderRadius:'20px', background:lh.allineamento===a?'#EEEFFD':'#fff',
                         cursor:'pointer', fontSize:'12px', fontWeight:'600', fontFamily:'Inter,sans-serif',
                         color:lh.allineamento===a?'#5B5FEF':'#6B7280'
                       }}>
@@ -376,7 +376,7 @@ export default function LandingEditorPage() {
               </Field>
 
               {/* Stile titoli */}
-              <div style={{ padding:'16px', background:'#F9FAFB', border:'1px solid #E8ECF4', borderRadius:'14px' }}>
+              <div style={{ padding:'16px', background:'#F9FAFB', border:'1px solid #E8ECF4', borderRadius:'20px' }}>
                 <p style={{ fontSize:'12px', fontWeight:'700', color:'#6B7280', textTransform:'uppercase', letterSpacing:'.06em', margin:'0 0 14px' }}>Stile titolo principale (H1)</p>
                 <div style={{ display:'grid', gridTemplateColumns:'1fr 1fr 1fr', gap:'12px' }}>
                   <Field label="Colore">
@@ -384,7 +384,7 @@ export default function LandingEditorPage() {
                       <input type="color"
                         value={/^#[0-9A-Fa-f]{6}$/.test(lh.titolo_colore||'') ? lh.titolo_colore : '#ffffff'}
                         onChange={e => setH('titolo_colore')(e.target.value)}
-                        style={{ width:'40px', height:'34px', border:'1px solid #D1D5DB', borderRadius:'14px', cursor:'pointer', padding:'2px', flexShrink:0 }} />
+                        style={{ width:'40px', height:'34px', border:'1px solid #D1D5DB', borderRadius:'20px', cursor:'pointer', padding:'2px', flexShrink:0 }} />
                       <input value={lh.titolo_colore||'#ffffff'}
                         onChange={e => setH('titolo_colore')(e.target.value)}
                         style={{ ...iSt, flex:1, fontSize:'12px' }} />
@@ -403,13 +403,13 @@ export default function LandingEditorPage() {
                     <div style={{ display:'flex', gap:'6px' }}>
                       <button onClick={() => setH('titolo_grassetto')(lh.titolo_grassetto === false ? true : false)} style={{
                         flex:1, padding:'7px', border:`1px solid ${lh.titolo_grassetto!==false?'#5B5FEF':'#E8ECF4'}`,
-                        borderRadius:'14px', background:lh.titolo_grassetto!==false?'#EEEFFD':'#fff',
+                        borderRadius:'20px', background:lh.titolo_grassetto!==false?'#EEEFFD':'#fff',
                         cursor:'pointer', fontSize:'14px', fontWeight:'800', fontFamily:'Inter,sans-serif',
                         color:lh.titolo_grassetto!==false?'#5B5FEF':'#6B7280'
                       }}>B</button>
                       <button onClick={() => setH('titolo_maiuscolo')(lh.titolo_maiuscolo ? false : true)} style={{
                         flex:1, padding:'7px', border:`1px solid ${lh.titolo_maiuscolo?'#5B5FEF':'#E8ECF4'}`,
-                        borderRadius:'14px', background:lh.titolo_maiuscolo?'#EEEFFD':'#fff',
+                        borderRadius:'20px', background:lh.titolo_maiuscolo?'#EEEFFD':'#fff',
                         cursor:'pointer', fontSize:'12px', fontWeight:'600', fontFamily:'Inter,sans-serif',
                         color:lh.titolo_maiuscolo?'#5B5FEF':'#6B7280'
                       }}>AA</button>
@@ -425,7 +425,7 @@ export default function LandingEditorPage() {
                         <input type="color"
                           value={/^#[0-9A-Fa-f]{6}$/.test(lh.titolo2_colore||'') ? lh.titolo2_colore : '#ffffff'}
                           onChange={e => setH('titolo2_colore')(e.target.value)}
-                          style={{ width:'40px', height:'34px', border:'1px solid #D1D5DB', borderRadius:'14px', cursor:'pointer', padding:'2px', flexShrink:0 }} />
+                          style={{ width:'40px', height:'34px', border:'1px solid #D1D5DB', borderRadius:'20px', cursor:'pointer', padding:'2px', flexShrink:0 }} />
                         <input value={lh.titolo2_colore||''}
                           onChange={e => setH('titolo2_colore')(e.target.value)}
                           placeholder="#ffffff" style={{ ...iSt, flex:1, fontSize:'12px' }} />
@@ -444,7 +444,7 @@ export default function LandingEditorPage() {
                       <div style={{ display:'flex', gap:'6px' }}>
                         <button onClick={() => setH('titolo2_grassetto')(lh.titolo2_grassetto ? false : true)} style={{
                           flex:1, padding:'7px', border:`1px solid ${lh.titolo2_grassetto?'#5B5FEF':'#E8ECF4'}`,
-                          borderRadius:'14px', background:lh.titolo2_grassetto?'#EEEFFD':'#fff',
+                          borderRadius:'20px', background:lh.titolo2_grassetto?'#EEEFFD':'#fff',
                           cursor:'pointer', fontSize:'14px', fontWeight:'800', fontFamily:'Inter,sans-serif',
                           color:lh.titolo2_grassetto?'#5B5FEF':'#6B7280'
                         }}>B</button>
@@ -607,7 +607,7 @@ function FormTab({ data, upd, editingField, setEditingField }) {
                     onChange={() => toggleStd(f.key)}
                     style={{ width:'15px', height:'15px', accentColor:'#5B5FEF', cursor:f.required?'default':'pointer', flexShrink:0 }} />
                   <span style={{ fontSize:'14px', color:(enabled||f.required)?'#0A0A0A':'#9CA3AF', flex:1 }}>{f.label}</span>
-                  <span style={{ fontSize:'11px', color:'#9CA3AF', background:'#F3F4F6', padding:'2px 7px', borderRadius:'4px' }}>{f.tipo}</span>
+                  <span style={{ fontSize:'11px', color:'#9CA3AF', background:'#F3F4F6', padding:'2px 7px', borderRadius:'20px' }}>{f.tipo}</span>
                   {f.required && <span style={{ fontSize:'11px', color:'#9CA3AF', fontStyle:'italic' }}>obbligatorio</span>}
                 </div>
               )
@@ -631,7 +631,7 @@ function FormTab({ data, upd, editingField, setEditingField }) {
           <div style={{ display:'flex', alignItems:'center', justifyContent:'space-between', marginBottom:'10px' }}>
             <p style={{ fontSize:'13px', fontWeight:'700', color:'#374151', margin:0 }}>Campi personalizzati</p>
             <button onClick={addCustom} style={{
-              background:'#5B5FEF', color:'#fff', border:'none', borderRadius:'14px',
+              background:'#5B5FEF', color:'#fff', border:'none', borderRadius:'20px',
               padding:'7px 14px', fontFamily:'Inter,sans-serif', fontSize:'12px', fontWeight:'700', cursor:'pointer',
               display:'flex', alignItems:'center', gap:'5px'
             }}>
@@ -658,7 +658,7 @@ function FormTab({ data, upd, editingField, setEditingField }) {
                     <div style={{ display:'flex', alignItems:'center', gap:'8px', padding:'10px 14px', background:isEditing?'#EFF6FF':'#FAFAFA', cursor:'pointer' }}
                       onClick={() => setEditingField(isEditing ? null : { index: idx, field: f })}>
                       <span style={{ flex:1, fontSize:'13px', fontWeight:'700', color: isEditing?'#5B5FEF':'#374151' }}>{f.label}</span>
-                      <span style={{ fontSize:'11px', background:'#E8ECF4', color:'#6B7280', padding:'2px 8px', borderRadius:'4px' }}>
+                      <span style={{ fontSize:'11px', background:'#E8ECF4', color:'#6B7280', padding:'2px 8px', borderRadius:'20px' }}>
                         {FIELD_TYPES.find(t=>t.value===f.tipo)?.label || f.tipo}
                       </span>
                       {!f.required && (
@@ -740,7 +740,7 @@ function FieldEditor({ field, onSave, onCancel }) {
             <p style={{ margin:0, fontSize:'12px', fontWeight:'700', color:'#374151' }}>
               {f.tipo === 'select' ? 'Voci del menu' : 'Opzioni di scelta'}
             </p>
-            <button onClick={addOpzione} style={{ background:'#F3F4F6', border:'none', borderRadius:'5px', padding:'5px 10px', fontSize:'12px', fontWeight:'600', color:'#374151', cursor:'pointer', fontFamily:'Inter,sans-serif' }}>
+            <button onClick={addOpzione} style={{ background:'#F3F4F6', border:'none', borderRadius:'20px', padding:'5px 10px', fontSize:'12px', fontWeight:'600', color:'#374151', cursor:'pointer', fontFamily:'Inter,sans-serif' }}>
               + Aggiungi opzione
             </button>
           </div>
@@ -772,7 +772,7 @@ function FieldEditor({ field, onSave, onCancel }) {
                 <div style={{ display:'flex', flexWrap:'wrap', gap:'8px' }}>
                   {f.opzioni.map(o => (
                     <div key={o.value} style={{
-                      padding:'7px 14px', border:'1px solid #E8ECF4', borderRadius:'14px',
+                      padding:'7px 14px', border:'1px solid #E8ECF4', borderRadius:'20px',
                       fontSize:'13px', fontWeight:'600', color:'#374151', background:'#fff'
                     }}>{o.label}</div>
                   ))}
@@ -784,10 +784,10 @@ function FieldEditor({ field, onSave, onCancel }) {
       )}
 
       <div style={{ display:'flex', gap:'8px', justifyContent:'flex-end', paddingTop:'4px', borderTop:'1px solid #F3F4F6' }}>
-        <button onClick={onCancel} style={{ padding:'8px 16px', border:'1px solid #E8ECF4', borderRadius:'14px', background:'#fff', fontSize:'13px', fontWeight:'600', color:'#374151', cursor:'pointer', fontFamily:'Inter,sans-serif' }}>
+        <button onClick={onCancel} style={{ padding:'8px 16px', border:'1px solid #E8ECF4', borderRadius:'20px', background:'#fff', fontSize:'13px', fontWeight:'600', color:'#374151', cursor:'pointer', fontFamily:'Inter,sans-serif' }}>
           Annulla
         </button>
-        <button onClick={() => onSave(f)} style={{ padding:'8px 16px', border:'none', borderRadius:'14px', background:'#5B5FEF', fontSize:'13px', fontWeight:'700', color:'#fff', cursor:'pointer', fontFamily:'Inter,sans-serif' }}>
+        <button onClick={() => onSave(f)} style={{ padding:'8px 16px', border:'none', borderRadius:'20px', background:'#5B5FEF', fontSize:'13px', fontWeight:'700', color:'#fff', cursor:'pointer', fontFamily:'Inter,sans-serif' }}>
           Conferma
         </button>
       </div>
@@ -807,4 +807,4 @@ function Field({ label, hint, children }) {
 }
 
 const iSt = { width:'100%', boxSizing:'border-box', padding:'10px 12px', border:'1px solid #E8ECF4', borderRadius:'16px', fontSize:'14px', fontFamily:'Inter,sans-serif', outline:'none', color:'#111827', background:'#fff' }
-const btnIco = { background:'none', border:'1px solid #E8ECF4', borderRadius:'5px', cursor:'pointer', width:'26px', height:'26px', display:'flex', alignItems:'center', justifyContent:'center', fontSize:'12px', color:'#6B7280', flexShrink:0 }
+const btnIco = { background:'none', border:'1px solid #E8ECF4', borderRadius:'20px', cursor:'pointer', width:'26px', height:'26px', display:'flex', alignItems:'center', justifyContent:'center', fontSize:'12px', color:'#6B7280', flexShrink:0 }

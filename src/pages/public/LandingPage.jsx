@@ -184,7 +184,7 @@ function ModalConferma({ reg, event, onClose }) {
 
         {/* Codice iscrizione */}
         {reg.codice_iscrizione && (
-          <div style={{ background:'#EBF0FA', border:'1px solid #FDA4AF', borderRadius:'8px', padding:'10px 16px', marginBottom:'14px', textAlign:'center' }}>
+          <div style={{ background:'#EBF0FA', border:'1px solid #FDA4AF', borderRadius:'20px', padding:'10px 16px', marginBottom:'14px', textAlign:'center' }}>
             <p style={{ fontSize:'11px', color:'#6B7280', margin:'0 0 3px', fontWeight:'700', textTransform:'uppercase', letterSpacing:'.06em' }}>Codice iscrizione</p>
             <code style={{ fontSize:'18px', fontWeight:'900', color:'#003DA5', letterSpacing:'.05em', fontFamily:'monospace' }}>
               {reg.codice_iscrizione}
@@ -221,7 +221,7 @@ function ModalConferma({ reg, event, onClose }) {
           </div>
         )}
         {event.teatro_abilitato && (
-          <div style={{ background:'#FFF7ED', border:'1px solid #FED7AA', borderRadius:'10px', padding:'16px 20px', marginBottom:'14px', textAlign:'center' }}>
+          <div style={{ background:'#FFF7ED', border:'1px solid #FED7AA', borderRadius:'20px', padding:'16px 20px', marginBottom:'14px', textAlign:'center' }}>
             <svg width="28" height="28" viewBox="0 0 24 24" fill="none" style={{ margin:'0 0 8px' }} xmlns="http://www.w3.org/2000/svg">
               <path d="M2 9a1 1 0 0 1 1-1h18a1 1 0 0 1 1 1v2a2 2 0 0 0 0 4v2a1 1 0 0 1-1 1H3a1 1 0 0 1-1-1v-2a2 2 0 0 0 0-4V9Z" stroke="#C2410C" strokeWidth="1.8" fill="#FED7AA"/>
               <line x1="9" y1="8" x2="9" y2="16" stroke="#C2410C" strokeWidth="1.5" strokeDasharray="2 2"/>
@@ -244,16 +244,16 @@ function ModalConferma({ reg, event, onClose }) {
         )}
         <div style={{ display:'flex',gap:'10px',justifyContent:'center',marginBottom:'12px',flexWrap:'wrap' }}>
           <button onClick={addToCalendar}
-            style={{ display:'flex',alignItems:'center',gap:'8px',color:'#FFFFFF',backgroundColor:calAdded?'#16A34A':'#003DA5',border:'none',borderRadius:'8px',padding:'12px 18px',fontSize:'14px',fontWeight:'700',fontFamily:"'Outfit',sans-serif",cursor:'pointer' }}>
+            style={{ display:'flex',alignItems:'center',gap:'8px',color:'#FFFFFF',backgroundColor:calAdded?'#16A34A':'#003DA5',border:'none',borderRadius:'20px',padding:'12px 18px',fontSize:'14px',fontWeight:'700',fontFamily:"'Outfit',sans-serif",cursor:'pointer' }}>
             📅 {calAdded ? '✓ Aggiunto' : 'Aggiungi al calendario'}
           </button>
           {reg.codice_iscrizione && (
             <a href={`/iscrizione/${reg.codice_iscrizione}`} target="_blank" rel="noopener noreferrer"
-              style={{ display:'flex',alignItems:'center',gap:'8px',color:'#003DA5',backgroundColor:'transparent',border:'1px solid #003DA5',borderRadius:'8px',padding:'12px 18px',fontSize:'14px',fontWeight:'700',fontFamily:"'Outfit',sans-serif",cursor:'pointer',textDecoration:'none' }}>
+              style={{ display:'flex',alignItems:'center',gap:'8px',color:'#003DA5',backgroundColor:'transparent',border:'1px solid #003DA5',borderRadius:'20px',padding:'12px 18px',fontSize:'14px',fontWeight:'700',fontFamily:"'Outfit',sans-serif",cursor:'pointer',textDecoration:'none' }}>
               🔍 Verifica iscrizione
             </a>
           )}
-          <button onClick={onClose} style={{ padding:'12px 18px',backgroundColor:'transparent',border:'1px solid #E5E7EB',borderRadius:'8px',fontSize:'14px',fontWeight:'600',fontFamily:"'Outfit',sans-serif",cursor:'pointer',color:'#6B7280' }}>Chiudi</button>
+          <button onClick={onClose} style={{ padding:'12px 18px',backgroundColor:'transparent',border:'1px solid #E5E7EB',borderRadius:'20px',fontSize:'14px',fontWeight:'600',fontFamily:"'Outfit',sans-serif",cursor:'pointer',color:'#6B7280' }}>Chiudi</button>
         </div>
         <p style={{ fontSize:'11px',color:'#9CA3AF',lineHeight:'1.5',margin:0 }}>{event.teatro_abilitato ? 'Riceverai una email quando il tuo posto sarà assegnato.' : 'Riceverai anche una email di conferma con il QR Code.'}</p>
       </div>
@@ -436,7 +436,7 @@ export default function LandingPage() {
                         : (lh.logo_sfondo || tema.logo_bg) === 'bianco' ? '#FFFFFF'
                         : 'transparent',
               padding: (lh.logo_sfondo || tema.logo_bg) && (lh.logo_sfondo || tema.logo_bg) !== 'trasparente' ? '6px 14px' : 0,
-              borderRadius: '8px',
+              borderRadius: '20px',
               display: 'inline-flex', alignItems: 'center',
             }}>
               <img
@@ -590,7 +590,7 @@ export default function LandingPage() {
 
         {/* ── INFO EVENTO + PULSANTI CALENDARIO/MAPPA ── */}
         {(event.data_inizio || event.luogo) && (
-          <div style={{ marginBottom:'24px', padding:'20px', backgroundColor: tema.sfondo_sezioni || '#F4F5F7', borderRadius:'12px' }}>
+          <div style={{ marginBottom:'24px', padding:'20px', backgroundColor: tema.sfondo_sezioni || '#F4F5F7', borderRadius:'20px' }}>
             {event.data_inizio && (
               <div style={{ display:'flex', alignItems:'center', gap:'10px', marginBottom: event.luogo ? '12px' : '0' }}>
                 <Calendar size={18} style={{ color: tema.colore_primario || '#003DA5', flexShrink:0 }}/>
@@ -644,7 +644,7 @@ export default function LandingPage() {
                 padding:'12px 16px', backgroundColor:'#FFFFFF',
                 border:`1.5px solid ${tema.colore_primario || '#003DA5'}`,
                 color: tema.colore_primario || '#003DA5',
-                borderRadius:'10px', fontSize:'13px', fontWeight:'700',
+                borderRadius:'20px', fontSize:'13px', fontWeight:'700',
                 fontFamily:"'Outfit',sans-serif", cursor:'pointer',
               }}>
                 <Calendar size={16}/>
@@ -657,7 +657,7 @@ export default function LandingPage() {
                   padding:'12px 16px', backgroundColor:'#FFFFFF',
                   border:`1.5px solid ${tema.colore_primario || '#003DA5'}`,
                   color: tema.colore_primario || '#003DA5',
-                  borderRadius:'10px', fontSize:'13px', fontWeight:'700',
+                  borderRadius:'20px', fontSize:'13px', fontWeight:'700',
                   fontFamily:"'Outfit',sans-serif", cursor:'pointer', textDecoration:'none',
                 }}>
                   <MapPin size={16}/>
@@ -703,7 +703,7 @@ export default function LandingPage() {
             <h3 style={s.formTitle}>Modulo di iscrizione</h3>
           {/* Avvisi / raccomandazioni configurabili dall'admin */}
           {event?.form_note && (
-            <div style={{ marginBottom:'20px', background:'#FFFBEB', border:'1px solid #FDE68A', borderRadius:'10px', padding:'14px 16px' }}>
+            <div style={{ marginBottom:'20px', background:'#FFFBEB', border:'1px solid #FDE68A', borderRadius:'20px', padding:'14px 16px' }}>
               <p style={{ margin:'0 0 8px', fontSize:'12px', fontWeight:'700', color:'#92400E', textTransform:'uppercase', letterSpacing:'.06em' }}>⚠️ Informazioni importanti</p>
               <div style={{ display:'flex', flexDirection:'column', gap:'6px' }}>
                 {event.form_note.split('\n').map((riga, i) => riga.trim() && (
@@ -801,16 +801,16 @@ const s = {
   // actionRow: rimosso — layout semplificato con pulsante singolo
   // actionBtn / actionBtnPrimary: stili generati inline in base al tema
   // CTA box
-  ctaSection:  { backgroundColor:'#EBF0FA', borderRadius:'12px', padding:'24px', marginBottom:'24px' },
+  ctaSection:  { backgroundColor:'#EBF0FA', borderRadius:'20px', padding:'24px', marginBottom:'24px' },
   ctaRow:      { display:'flex', alignItems:'center', justifyContent:'space-between', gap:'16px', flexWrap:'wrap' },
   ctaTitle:    { fontSize:'18px', fontWeight:'900', color:'#0A0A0A', letterSpacing:'-.02em', margin:'0 0 4px' },
   ctaSub:      { fontSize:'13px', color:'#4B5563', margin:0, lineHeight:'1.5' },
   // ctaBtn: stile generato inline
-  formWrap:    { backgroundColor:'#FFFFFF', border:'1px solid #E5E7EB', borderRadius:'12px', padding:'24px', marginBottom:'32px' },
+  formWrap:    { backgroundColor:'#FFFFFF', border:'1px solid #E5E7EB', borderRadius:'20px', padding:'24px', marginBottom:'32px' },
   formTitle:   { fontSize:'18px', fontWeight:'800', color:'#0A0A0A', letterSpacing:'-.02em', margin:'0 0 20px' },
   // Mappa
   mapSection:  { marginTop:'32px', paddingBottom:'8px' },
-  mapWrap:     { height:'320px', borderRadius:'12px', overflow:'hidden', border:'1px solid #E5E7EB', marginBottom:'10px' },
+  mapWrap:     { height:'320px', borderRadius:'20px', overflow:'hidden', border:'1px solid #E5E7EB', marginBottom:'10px' },
   mapLink:     { display:'inline-flex', alignItems:'center', gap:'6px', fontSize:'13px', color:'#003DA5', fontWeight:'600', textDecoration:'none' },
   // Footer
   footer:      { borderTop:'1px solid #E5E7EB', padding:'20px 24px', textAlign:'center', fontSize:'12px', color:'#9CA3AF', marginTop:'40px' },
@@ -822,11 +822,11 @@ const mc = {
   iconWrap: { margin:'0 auto 14px', width:'64px', height:'64px' },
   title:    { fontSize:'20px', fontWeight:'900', color:'#0A0A0A', letterSpacing:'-.03em', margin:'0 0 6px' },
   sub:      { fontSize:'13px', color:'#6B7280', lineHeight:'1.6', margin:'0 0 16px' },
-  qrBox:    { backgroundColor:'#F4F5F7', borderRadius:'12px', padding:'16px', marginBottom:'14px', display:'flex', flexDirection:'column', alignItems:'center', gap:'8px' },
+  qrBox:    { backgroundColor:'#F4F5F7', borderRadius:'20px', padding:'16px', marginBottom:'14px', display:'flex', flexDirection:'column', alignItems:'center', gap:'8px' },
   qrLabel:  { fontSize:'11px', fontWeight:'700', color:'#6B7280', textTransform:'uppercase', letterSpacing:'.07em', margin:0 },
   qrImg:    { width:'180px', height:'180px', imageRendering:'pixelated', border:'none', background:'transparent' },
-  qrCode:   { fontSize:'11px', fontFamily:'monospace', color:'#003DA5', fontWeight:'700', letterSpacing:'.04em', backgroundColor:'#EBF0FA', padding:'3px 8px', borderRadius:'4px', margin:0 },
-  dlBtn:    { background:'none', border:'1px solid #003DA5', color:'#003DA5', borderRadius:'6px', padding:'6px 14px', fontSize:'12px', fontWeight:'700', fontFamily:"'Outfit',sans-serif", cursor:'pointer' },
-  infoBox:  { backgroundColor:'#EBF0FA', borderRadius:'8px', padding:'10px 14px', marginBottom:'16px', display:'flex', flexDirection:'column', gap:'6px', textAlign:'left' },
+  qrCode:   { fontSize:'11px', fontFamily:'monospace', color:'#003DA5', fontWeight:'700', letterSpacing:'.04em', backgroundColor:'#EBF0FA', padding:'3px 8px', borderRadius:'20px', margin:0 },
+  dlBtn:    { background:'none', border:'1px solid #003DA5', color:'#003DA5', borderRadius:'20px', padding:'6px 14px', fontSize:'12px', fontWeight:'700', fontFamily:"'Outfit',sans-serif", cursor:'pointer' },
+  infoBox:  { backgroundColor:'#EBF0FA', borderRadius:'20px', padding:'10px 14px', marginBottom:'16px', display:'flex', flexDirection:'column', gap:'6px', textAlign:'left' },
   infoRow:  { display:'flex', alignItems:'center', gap:'8px', fontSize:'12px', color:'#374151', fontWeight:'500' },
 }

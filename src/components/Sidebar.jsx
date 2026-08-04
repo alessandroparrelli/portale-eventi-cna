@@ -259,7 +259,7 @@ export default function Sidebar({ mobileOpen, onMobileClose, isMobile }) {
             <button
               onClick={toggleCollapse}
               title={isCollapsed ? 'Espandi sidebar' : 'Comprimi sidebar'}
-              style={{ background:'none', border:'1px solid #E8ECF4', borderRadius:'14px', cursor:'pointer', padding:'5px 6px', display:'flex', alignItems:'center', color:'#9CA3AF', transition:'color .15s, background .15s' }}
+              style={{ background:'none', border:'1px solid #E8ECF4', borderRadius:'20px', cursor:'pointer', padding:'5px 6px', display:'flex', alignItems:'center', color:'#9CA3AF', transition:'color .15s, background .15s' }}
               onMouseEnter={e => { e.currentTarget.style.backgroundColor='#F3F4F6'; e.currentTarget.style.color='#374151' }}
               onMouseLeave={e => { e.currentTarget.style.backgroundColor='transparent'; e.currentTarget.style.color='#9CA3AF' }}
             >
@@ -284,7 +284,7 @@ export default function Sidebar({ mobileOpen, onMobileClose, isMobile }) {
                   background: group.color + '10',
                   margin:'8px 0 2px',
                   padding:'4px 8px',
-                  borderRadius:'14px',
+                  borderRadius:'20px',
                   display:'flex', alignItems:'center', gap:'6px',
                 }}>
                   <span style={{ width:'6px', height:'6px', borderRadius:'50%', background: group.color, flexShrink:0, display:'inline-block' }}/>
@@ -358,13 +358,13 @@ const st = {
     padding:'12px 14px 8px', borderBottom:'1px solid #F3F4F6', flexShrink:0,
   },
   closeBtn: {
-    background:'none', border:'1px solid #E8ECF4', borderRadius:'14px',
+    background:'none', border:'1px solid #E8ECF4', borderRadius:'20px',
     cursor:'pointer', padding:'5px', display:'flex', alignItems:'center',
   },
   userCard: {
     display:'flex', alignItems:'center', gap:'10px',
     margin:'10px 10px 4px', padding:'10px 12px',
-    borderRadius:'14px', border:'1px solid transparent',
+    borderRadius:'20px', border:'1px solid transparent',
     textDecoration:'none', transition:'all .15s', flexShrink:0,
   },
   avatar: {
@@ -396,7 +396,7 @@ const st = {
     position:'relative', minHeight:'34px',
   },
   iconWrap: {
-    width:'26px', height:'26px', borderRadius:'14px', flexShrink:0,
+    width:'26px', height:'26px', borderRadius:'20px', flexShrink:0,
     display:'flex', alignItems:'center', justifyContent:'center',
     transition:'background .15s',
   },
@@ -413,7 +413,7 @@ const st = {
     display:'flex', alignItems:'center', gap:'9px',
     padding:'7px 10px', width:'100%',
     background:'none', border:'none',
-    borderRadius:'16px', cursor:'pointer',
+    borderRadius:'20px', cursor:'pointer',
     fontSize:'13px', fontFamily:"'Inter',sans-serif",
     color:'#DC2626', fontWeight:'600',
     transition:'background-color .12s',

@@ -119,7 +119,7 @@ function compactBtn(bg, color) {
 function fullBtn(bg, color) {
   return {
     display: 'inline-flex', alignItems: 'center', gap: '7px',
-    padding: '10px 18px', borderRadius: '8px', border: 'none',
+    padding: '10px 18px', borderRadius: '20px', border: 'none',
     background: bg, color,
     fontSize: '14px', fontWeight: '700',
     fontFamily: "'Outfit', sans-serif", cursor: 'pointer',

@@ -72,7 +72,7 @@ export function AnimatedNumber({ target }) {
 export function AccordionItem({ domanda, risposta, cp }) {
   const [open, setOpen] = useState(false)
   return (
-    <div style={{ border: '1px solid #E5E7EB', borderRadius: '10px', overflow: 'hidden', marginBottom: '8px' }}>
+    <div style={{ border: '1px solid #E5E7EB', borderRadius: '20px', overflow: 'hidden', marginBottom: '8px' }}>
       <button onClick={() => setOpen(o => !o)} style={{
         width: '100%', display: 'flex', alignItems: 'center', justifyContent: 'space-between',
         padding: '16px 20px', background: open ? '#EBF0FA' : '#fff', border: 'none',
@@ -109,7 +109,7 @@ export function Countdown({ data, titolo, messaggio_scaduto, cp }) {
   }, [data])
 
   if (!data) return (
-    <div style={{ textAlign: 'center', padding: '32px', background: '#F9FAFB', borderRadius: '12px', color: '#9CA3AF', fontSize: '14px' }}>
+    <div style={{ textAlign: 'center', padding: '32px', background: '#F9FAFB', borderRadius: '20px', color: '#9CA3AF', fontSize: '14px' }}>
       ⏱ Countdown — imposta una data nell'editor
     </div>
   )
@@ -188,7 +188,7 @@ export default function BlockRenderer({ block, cp = '#003DA5', formTarget = '#lp
         {cols.map((col, i) => (
           <Animate key={i} animation="fadeup" delay={i * 80}>
             <div
-              style={{ background: '#fff', border: '1px solid #E5E7EB', borderRadius: '12px', padding: '22px', height: '100%', boxSizing: 'border-box', transition: 'box-shadow .2s, transform .2s' }}
+              style={{ background: '#fff', border: '1px solid #E5E7EB', borderRadius: '20px', padding: '22px', height: '100%', boxSizing: 'border-box', transition: 'box-shadow .2s, transform .2s' }}
               onMouseEnter={e => { e.currentTarget.style.boxShadow = `0 8px 24px ${cp}20`; e.currentTarget.style.transform = 'translateY(-2px)' }}
               onMouseLeave={e => { e.currentTarget.style.boxShadow = 'none'; e.currentTarget.style.transform = 'translateY(0)' }}
             >
@@ -208,7 +208,7 @@ export default function BlockRenderer({ block, cp = '#003DA5', formTarget = '#lp
       <Animate animation="fadeup">
         <div style={{ display: 'grid', gridTemplateColumns: `repeat(auto-fit, minmax(min(100%, ${colonne === 1 ? '100%' : colonne === 3 ? '150px' : '210px'}), 1fr))`, gap: '10px', marginBottom: '24px' }}>
           {(block.items || []).map((item, i) => (
-            <div key={i} style={{ display: 'flex', alignItems: 'center', gap: '10px', padding: '12px 14px', background: '#fff', border: '1px solid #E5E7EB', borderRadius: '8px' }}>
+            <div key={i} style={{ display: 'flex', alignItems: 'center', gap: '10px', padding: '12px 14px', background: '#fff', border: '1px solid #E5E7EB', borderRadius: '20px' }}>
               <IconDisplay iconId={item.icona||'check'} color={item.icona_colore||block.colore||cp} size={20} />
               <span style={{ fontSize: '14px', color: '#374151', fontWeight: '500' }}>{item.testo}</span>
             </div>
@@ -247,7 +247,7 @@ export default function BlockRenderer({ block, cp = '#003DA5', formTarget = '#lp
     const c = configs[block.stile || 'info'] || configs.info
     return (
       <Animate animation="slidein">
-        <div style={{ background: c.bg, border: `1px solid ${c.border}`, borderRadius: '10px', padding: '16px 20px', marginBottom: '16px', display: 'flex', alignItems: 'flex-start', gap: '12px' }}>
+        <div style={{ background: c.bg, border: `1px solid ${c.border}`, borderRadius: '20px', padding: '16px 20px', marginBottom: '16px', display: 'flex', alignItems: 'flex-start', gap: '12px' }}>
           {block.icona && <span style={{ fontSize: '18px', flexShrink: 0 }}>{block.icona}</span>}
           <p style={{ margin: 0, fontSize: '14px', color: c.color, lineHeight: '1.6', fontWeight: '500' }}>{block.testo}</p>
         </div>
@@ -292,7 +292,7 @@ export default function BlockRenderer({ block, cp = '#003DA5', formTarget = '#lp
     return (
       <Animate animation="fadein">
         <div style={{ marginBottom: '24px' }}>
-          <div style={{ position: 'relative', paddingBottom: '56.25%', height: 0, borderRadius: '12px', overflow: 'hidden', boxShadow: '0 8px 32px rgba(0,0,0,0.15)' }}>
+          <div style={{ position: 'relative', paddingBottom: '56.25%', height: 0, borderRadius: '20px', overflow: 'hidden', boxShadow: '0 8px 32px rgba(0,0,0,0.15)' }}>
             <iframe src={embed} style={{ position: 'absolute', top: 0, left: 0, width: '100%', height: '100%', border: 'none' }} allowFullScreen title="video" />
           </div>
           {block.didascalia && <p style={{ fontSize: '13px', color: '#9CA3AF', textAlign: 'center', marginTop: '8px', fontStyle: 'italic' }}>{block.didascalia}</p>}
@@ -306,7 +306,7 @@ export default function BlockRenderer({ block, cp = '#003DA5', formTarget = '#lp
       <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(min(100%, 270px), 1fr))', gap: '16px', marginBottom: '24px' }}>
         {(block.items || []).map((item, i) => (
           <Animate key={i} animation="fadeup" delay={i * 100}>
-            <div style={{ background: '#fff', border: '1px solid #E5E7EB', borderRadius: '12px', padding: '22px', position: 'relative' }}>
+            <div style={{ background: '#fff', border: '1px solid #E5E7EB', borderRadius: '20px', padding: '22px', position: 'relative' }}>
               <span style={{ fontSize: '36px', color: cp, opacity: .12, position: 'absolute', top: '10px', left: '18px', lineHeight: 1, fontFamily: 'serif' }}>"</span>
               <p style={{ fontSize: '14px', color: '#374151', lineHeight: '1.7', margin: '0 0 14px', position: 'relative', zIndex: 1, fontStyle: 'italic' }}>{item.testo}</p>
               <div style={{ display: 'flex', alignItems: 'center', gap: '10px' }}>
@@ -339,7 +339,7 @@ export default function BlockRenderer({ block, cp = '#003DA5', formTarget = '#lp
     return (
       <Animate animation="fadein">
         <div style={{ marginBottom: '16px', textAlign: align }}>
-          {block.src && <img src={block.src} alt={block.didascalia || ''} style={{ maxWidth: maxW, width: '100%', display: 'inline-block', borderRadius: '8px' }} />}
+          {block.src && <img src={block.src} alt={block.didascalia || ''} style={{ maxWidth: maxW, width: '100%', display: 'inline-block', borderRadius: '20px' }} />}
           {block.didascalia && <p style={{ fontSize: '13px', color: '#9CA3AF', marginTop: '8px', fontStyle: 'italic' }}>{block.didascalia}</p>}
         </div>
       </Animate>
@@ -555,7 +555,7 @@ function CaroselloBlock({ block }) {
           )}
 
           {/* Immagine principale */}
-          <div style={{ position: 'relative', borderRadius: '12px', overflow: 'hidden', background: '#000' }}>
+          <div style={{ position: 'relative', borderRadius: '20px', overflow: 'hidden', background: '#000' }}>
             <div style={{ position: 'relative', paddingBottom: ratio }}>
               <img
                 src={imgs[current].src}
@@ -566,7 +566,7 @@ function CaroselloBlock({ block }) {
 
             {/* Counter */}
             {imgs.length > 1 && (
-              <div style={{ position:'absolute', top:'10px', right:'12px', background:'rgba(0,0,0,.55)', color:'#fff', fontSize:'12px', fontWeight:'600', padding:'3px 8px', borderRadius:'10px', backdropFilter:'blur(4px)' }}>
+              <div style={{ position:'absolute', top:'10px', right:'12px', background:'rgba(0,0,0,.55)', color:'#fff', fontSize:'12px', fontWeight:'600', padding:'3px 8px', borderRadius:'20px', backdropFilter:'blur(4px)' }}>
                 {current + 1} / {imgs.length}
               </div>
             )}
@@ -591,7 +591,7 @@ function CaroselloBlock({ block }) {
         {imgs.length > 1 && (
           <div style={{ display:'flex', justifyContent:'center', gap:'6px', marginTop:'10px' }}>
             {imgs.map((_, i) => (
-              <button key={i} onClick={() => setCurrent(i)} style={{ width: i === current ? '20px' : '8px', height:'8px', borderRadius:'4px', background: i === current ? '#0A0A0A' : '#D1D5DB', border:'none', cursor:'pointer', transition:'all .2s', padding:0 }} />
+              <button key={i} onClick={() => setCurrent(i)} style={{ width: i === current ? '20px' : '8px', height:'8px', borderRadius:'20px', background: i === current ? '#0A0A0A' : '#D1D5DB', border:'none', cursor:'pointer', transition:'all .2s', padding:0 }} />
             ))}
           </div>
         )}
@@ -600,7 +600,7 @@ function CaroselloBlock({ block }) {
         {imgs.length > 1 && (
           <div style={{ display:'flex', gap:'6px', marginTop:'8px', overflowX:'auto', paddingBottom:'4px' }}>
             {imgs.map((img, i) => (
-              <button key={i} onClick={() => setCurrent(i)} style={{ flexShrink:0, width:'52px', height:'52px', borderRadius:'6px', overflow:'hidden', border:`2px solid ${i === current ? '#0A0A0A' : 'transparent'}`, padding:0, cursor:'pointer', transition:'border-color .2s' }}>
+              <button key={i} onClick={() => setCurrent(i)} style={{ flexShrink:0, width:'52px', height:'52px', borderRadius:'20px', overflow:'hidden', border:`2px solid ${i === current ? '#0A0A0A' : 'transparent'}`, padding:0, cursor:'pointer', transition:'border-color .2s' }}>
                 <img src={img.src} alt="" style={{ width:'100%', height:'100%', objectFit:'cover' }} />
               </button>
             ))}
@@ -662,7 +662,7 @@ function SocialBlock({ block, cp }) {
 
         {/* Embed post social */}
         {block.url_post && block.tipo_social !== 'condivisione' && embedUrl() && (
-          <div style={{ marginBottom:'20px', borderRadius:'12px', overflow:'hidden', border:'1px solid #E5E7EB', maxWidth:'540px', margin:'0 auto 20px' }}>
+          <div style={{ marginBottom:'20px', borderRadius:'20px', overflow:'hidden', border:'1px solid #E5E7EB', maxWidth:'540px', margin:'0 auto 20px' }}>
             <iframe
               src={embedUrl()}
               style={{ width:'100%', minHeight: block.tipo_social === 'instagram' ? '540px' : '400px', border:'none', display:'block' }}
@@ -680,13 +680,13 @@ function SocialBlock({ block, cp }) {
             <div style={{ display:'flex', flexWrap:'wrap', gap:'8px', justifyContent:'center' }}>
               {shareButtons.map((btn, i) => (
                 btn.href
-                  ? <a key={i} href={btn.href} target="_blank" rel="noreferrer" style={{ display:'flex', alignItems:'center', gap:'7px', padding:'9px 16px', background:btn.color+'15', border:`1px solid ${btn.color}30`, borderRadius:'8px', textDecoration:'none', fontSize:'13px', fontWeight:'700', color:btn.color, transition:'all .15s', fontFamily:"'Outfit',sans-serif" }}
+                  ? <a key={i} href={btn.href} target="_blank" rel="noreferrer" style={{ display:'flex', alignItems:'center', gap:'7px', padding:'9px 16px', background:btn.color+'15', border:`1px solid ${btn.color}30`, borderRadius:'20px', textDecoration:'none', fontSize:'13px', fontWeight:'700', color:btn.color, transition:'all .15s', fontFamily:"'Outfit',sans-serif" }}
                       onMouseEnter={e=>{e.currentTarget.style.background=btn.color+'25'}}
                       onMouseLeave={e=>{e.currentTarget.style.background=btn.color+'15'}}>
                       <span style={{ width:'18px', height:'18px', flexShrink:0 }}>{btn.icon}</span>
                       {btn.label}
                     </a>
-                  : <button key={i} type="button" onClick={btn.onClick} style={{ display:'flex', alignItems:'center', gap:'7px', padding:'9px 16px', background:btn.color+'15', border:`1px solid ${btn.color}30`, borderRadius:'8px', fontSize:'13px', fontWeight:'700', color:btn.color, cursor:'pointer', fontFamily:"'Outfit',sans-serif", transition:'all .15s' }}
+                  : <button key={i} type="button" onClick={btn.onClick} style={{ display:'flex', alignItems:'center', gap:'7px', padding:'9px 16px', background:btn.color+'15', border:`1px solid ${btn.color}30`, borderRadius:'20px', fontSize:'13px', fontWeight:'700', color:btn.color, cursor:'pointer', fontFamily:"'Outfit',sans-serif", transition:'all .15s' }}
                       onMouseEnter={e=>{e.currentTarget.style.background=btn.color+'25'}}
                       onMouseLeave={e=>{e.currentTarget.style.background=btn.color+'15'}}>
                       <span style={{ width:'18px', height:'18px', flexShrink:0 }}>{btn.icon}</span>

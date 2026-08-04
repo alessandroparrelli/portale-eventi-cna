@@ -10,7 +10,7 @@ const PUSH_URL = 'https://hnkhckcclgabunkqfmrz.supabase.co/functions/v1/web-push
 function StatCard({ icon: Icon, label, value, sub, color = BLU }) {
   return (
     <div style={{ backgroundColor: '#fff', border: '1px solid #E8ECF4', borderRadius: '16px', padding: '20px 24px', display: 'flex', gap: '16px', alignItems: 'flex-start' }}>
-      <div style={{ width: '44px', height: '44px', borderRadius: '14px', backgroundColor: color + '14', display: 'flex', alignItems: 'center', justifyContent: 'center', flexShrink: 0 }}>
+      <div style={{ width: '44px', height: '44px', borderRadius: '20px', backgroundColor: color + '14', display: 'flex', alignItems: 'center', justifyContent: 'center', flexShrink: 0 }}>
         <Icon size={20} style={{ color }} />
       </div>
       <div>
@@ -206,7 +206,7 @@ export default function AnaliticsPage() {
       {pushModal && (
         <div style={{ position: 'fixed', inset: 0, backgroundColor: 'rgba(0,0,0,0.5)', zIndex: 1000,
           display: 'flex', alignItems: 'center', justifyContent: 'center', padding: '24px' }}>
-          <div style={{ backgroundColor: '#fff', borderRadius: '14px', padding: '32px', width: '100%', maxWidth: '480px',
+          <div style={{ backgroundColor: '#fff', borderRadius: '20px', padding: '32px', width: '100%', maxWidth: '480px',
             boxShadow: '0 24px 64px rgba(0,0,0,0.2)', fontFamily: "'Inter',sans-serif" }}>
             <h3 style={{ fontSize: '20px', fontWeight: '900', color: '#111827', margin: '0 0 4px', letterSpacing: '-0.02em' }}>
               Invia notifica push
@@ -233,21 +233,21 @@ export default function AnaliticsPage() {
                 <div>
                   <label style={{ fontSize: '12px', fontWeight: '700', color: '#374151', display: 'block', marginBottom: '6px' }}>Titolo</label>
                   <input value={pushForm.title} onChange={e => setPushForm(f => ({ ...f, title: e.target.value }))}
-                    style={{ width: '100%', padding: '9px 12px', border: '1px solid #D1D5DB', borderRadius: '14px',
+                    style={{ width: '100%', padding: '9px 12px', border: '1px solid #D1D5DB', borderRadius: '20px',
                       fontSize: '14px', fontFamily: "'Inter',sans-serif", outline: 'none', boxSizing: 'border-box' }}/>
                 </div>
                 <div>
                   <label style={{ fontSize: '12px', fontWeight: '700', color: '#374151', display: 'block', marginBottom: '6px' }}>Messaggio</label>
                   <textarea value={pushForm.body} onChange={e => setPushForm(f => ({ ...f, body: e.target.value }))}
                     rows={3} placeholder="Es. Nuovo evento disponibile: iscriviti ora!"
-                    style={{ width: '100%', padding: '9px 12px', border: '1px solid #D1D5DB', borderRadius: '14px',
+                    style={{ width: '100%', padding: '9px 12px', border: '1px solid #D1D5DB', borderRadius: '20px',
                       fontSize: '14px', fontFamily: "'Inter',sans-serif", outline: 'none', resize: 'vertical', boxSizing: 'border-box' }}/>
                 </div>
                 <div>
                   <label style={{ fontSize: '12px', fontWeight: '700', color: '#374151', display: 'block', marginBottom: '6px' }}>URL destinazione</label>
                   <input value={pushForm.url} onChange={e => setPushForm(f => ({ ...f, url: e.target.value }))}
                     placeholder="/calendario"
-                    style={{ width: '100%', padding: '9px 12px', border: '1px solid #D1D5DB', borderRadius: '14px',
+                    style={{ width: '100%', padding: '9px 12px', border: '1px solid #D1D5DB', borderRadius: '20px',
                       fontSize: '14px', fontFamily: "'Inter',sans-serif", outline: 'none', boxSizing: 'border-box' }}/>
                 </div>
                 <div style={{ display: 'flex', gap: '10px', justifyContent: 'flex-end', paddingTop: '8px' }}>

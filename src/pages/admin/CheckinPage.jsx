@@ -408,7 +408,7 @@ export default function CheckinPage() {
             <div style={{ display:'flex', alignItems:'center', gap:'6px', background:'linear-gradient(135deg,#0e7490,#0891b2)', borderRadius:'16px', padding:'9px 10px', flexShrink:0 }}>
               <span style={{ fontSize:'20px', fontWeight:'900', color:'#fff', letterSpacing:'-0.03em', lineHeight:1 }}>{pct}%</span>
               <button onClick={loadPresenti} disabled={loadingP}
-                style={{ background:'rgba(255,255,255,.25)', border:'none', borderRadius:'5px', cursor:'pointer', padding:'5px', display:'flex', alignItems:'center', color:'#fff' }}>
+                style={{ background:'rgba(255,255,255,.25)', border:'none', borderRadius:'20px', cursor:'pointer', padding:'5px', display:'flex', alignItems:'center', color:'#fff' }}>
                 <RefreshCw size={12} style={{ animation: loadingP ? 'spin .8s linear infinite' : 'none' }}/>
               </button>
             </div>
@@ -480,7 +480,7 @@ export default function CheckinPage() {
                         {p.checkin_at && (
                           <p style={s.pTime}>
                             {new Date(p.checkin_at).toLocaleTimeString('it-IT',{hour:'2-digit',minute:'2-digit'})}
-                            {isWalkin && <span style={{ marginLeft:'6px', fontSize:'10px', background:'#F3E8FF', color:'#7C3AED', padding:'1px 5px', borderRadius:'4px', fontWeight:'700' }}>WALK-IN</span>}
+                            {isWalkin && <span style={{ marginLeft:'6px', fontSize:'10px', background:'#F3E8FF', color:'#7C3AED', padding:'1px 5px', borderRadius:'20px', fontWeight:'700' }}>WALK-IN</span>}
                           </p>
                         )}
                       </div>
@@ -610,7 +610,7 @@ export default function CheckinPage() {
                 <button onClick={confermaCheckinDaTicket} disabled={!!checkingId} style={{
                   width:'100%', padding:'16px',
                   background: checkingId ? '#9CA3AF' : 'linear-gradient(135deg,#16A34A,#15803D)',
-                  color:'#fff', border:'none', borderRadius:'16px',
+                  color:'#fff', border:'none', borderRadius:'20px',
                   fontSize:'17px', fontWeight:'800', fontFamily:"'Inter',sans-serif",
                   cursor: checkingId ? 'default' : 'pointer',
                   display:'flex', alignItems:'center', justifyContent:'center', gap:10,
@@ -644,7 +644,7 @@ export default function CheckinPage() {
               <Field label="Partita IVA *" error={walkinErrors.partita_iva}><Input value={walkin.partita_iva || ''} onChange={e => setWalkin(p => ({ ...p, partita_iva: e.target.value }))} placeholder="12345670015" /></Field>
               <Field label="Categoria professionale *" error={walkinErrors.mestiere_id}>
                 <select value={walkin.mestiere_id || ''} onChange={e => setWalkin(p => ({ ...p, mestiere_id: e.target.value }))}
-                  style={{ width:'100%', padding:'10px 12px', border:`1px solid ${walkinErrors.mestiere_id ? '#DC2626' : '#D1D5DB'}`, borderRadius:'14px', fontSize:'16px', fontFamily:"'Inter',sans-serif", outline:'none', backgroundColor:'#FFF', appearance:'none' }}>
+                  style={{ width:'100%', padding:'10px 12px', border:`1px solid ${walkinErrors.mestiere_id ? '#DC2626' : '#D1D5DB'}`, borderRadius:'20px', fontSize:'16px', fontFamily:"'Inter',sans-serif", outline:'none', backgroundColor:'#FFF', appearance:'none' }}>
                   <option value="">— Seleziona categoria —</option>
                   {mestieri.map(m => <option key={m.id} value={m.id}>{m.nome}</option>)}
                 </select>
@@ -670,7 +670,7 @@ const s = {
   scanPlaceholder:{ display: 'flex', flexDirection: 'column', alignItems: 'center', justifyContent: 'center', padding: '32px 24px' },
   bigBtn:         { width: '100%', display: 'flex', alignItems: 'center', justifyContent: 'center', gap: '10px', background: '#5B5FEF', color: '#FFFFFF', border: 'none', borderRadius: '16px', padding: '15px', fontSize: '16px', fontWeight: '800', fontFamily: "'Inter',sans-serif", cursor: 'pointer', letterSpacing: '-.01em' },
   actionsRow:     { display: 'grid', gridTemplateColumns: '1fr 1fr 1fr', gap: '10px', marginBottom: '16px' },
-  actionBtn:      { display: 'flex', alignItems: 'center', justifyContent: 'center', gap: '7px', backgroundColor: '#EEEFFD', color: '#5B5FEF', border: '1px solid #FDA4AF', borderRadius: '14px', padding: '13px 8px', fontSize: '13px', fontWeight: '700', fontFamily: "'Inter',sans-serif", cursor: 'pointer' },
+  actionBtn:      { display: 'flex', alignItems: 'center', justifyContent: 'center', gap: '7px', backgroundColor: '#EEEFFD', color: '#5B5FEF', border: '1px solid #FDA4AF', borderRadius: '20px', padding: '13px 8px', fontSize: '13px', fontWeight: '700', fontFamily: "'Inter',sans-serif", cursor: 'pointer' },
   presentiSection:{ backgroundColor: '#FFFFFF', border: '1px solid #E8ECF4', borderRadius: '16px', overflow: 'hidden' },
   presentiHeader: { display: 'flex', alignItems: 'center', justifyContent: 'space-between', padding: '13px 18px', borderBottom: '1px solid #E8ECF4' },
   presentiTitle:  { fontSize: '14px', fontWeight: '700', color: '#111827', letterSpacing: '-.01em', margin: 0 },

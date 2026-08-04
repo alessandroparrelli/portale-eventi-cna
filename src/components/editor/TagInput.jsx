@@ -46,7 +46,7 @@ export default function TagInput({ value = [], onChange }) {
   return (
     <div style={{ position: 'relative' }}>
       <div style={{ display: 'flex', flexWrap: 'wrap', gap: '6px', padding: '8px 10px',
-        border: '1px solid #D1D5DB', borderRadius: '6px', backgroundColor: '#ffffff',
+        border: '1px solid #D1D5DB', borderRadius: '20px', backgroundColor: '#ffffff',
         minHeight: '42px', cursor: 'text', alignItems: 'center' }}
         onClick={() => document.getElementById('tag-input-field')?.focus()}>
         {value.map(tag => (
@@ -76,7 +76,7 @@ export default function TagInput({ value = [], onChange }) {
       {/* Suggerimenti */}
       {showSug && filtered.length > 0 && (
         <div style={{ position: 'absolute', top: '100%', left: 0, right: 0, zIndex: 50,
-          backgroundColor: '#ffffff', border: '1px solid #E5E7EB', borderRadius: '8px',
+          backgroundColor: '#ffffff', border: '1px solid #E5E7EB', borderRadius: '20px',
           boxShadow: '0 8px 24px rgba(0,0,0,0.1)', marginTop: '4px', overflow: 'hidden' }}>
           <p style={{ fontSize: '10px', fontWeight: '700', color: '#9CA3AF', textTransform: 'uppercase',
             letterSpacing: '0.06em', padding: '8px 12px 4px', margin: 0 }}>

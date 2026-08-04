@@ -48,7 +48,7 @@ export default function CertificatoPage() {
             <p style={{ margin: '2px 0 0', fontSize: '12px', color: '#9CA3AF' }}>Codice verifica: <strong style={{ fontFamily: 'monospace' }}>{codice}</strong></p>
           </div>
           <a href={downloadUrl} target="_blank" rel="noopener noreferrer"
-            style={{ padding: '10px 20px', backgroundColor: '#003DA5', color: '#fff', border: 'none', borderRadius: '8px',
+            style={{ padding: '10px 20px', backgroundColor: '#003DA5', color: '#fff', border: 'none', borderRadius: '20px',
               fontSize: '14px', fontWeight: '700', cursor: 'pointer', fontFamily: "'Outfit',sans-serif", textDecoration: 'none' }}>
             ⬇ Scarica PDF
           </a>
@@ -58,7 +58,7 @@ export default function CertificatoPage() {
         <iframe
           src={pdfUrl}
           title="Certificato di partecipazione"
-          style={{ width: '100%', height: '75vh', minHeight: '520px', border: '1px solid #E5E7EB', borderRadius: '10px', background: '#fff' }}
+          style={{ width: '100%', height: '75vh', minHeight: '520px', border: '1px solid #E5E7EB', borderRadius: '20px', background: '#fff' }}
         />
       </div>
     </div>

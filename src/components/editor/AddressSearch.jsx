@@ -131,7 +131,7 @@ export default function AddressSearch({ value, onChange }) {
       <div style={{
         display: 'flex', alignItems: 'center',
         border: `1.5px solid ${open ? '#003DA5' : selected ? '#16A34A' : '#D1D5DB'}`,
-        borderRadius: '8px', background: '#fff',
+        borderRadius: '20px', background: '#fff',
         overflow: 'hidden', transition: 'border-color .15s',
       }}>
         <div style={{ padding: '0 10px', color: selected ? '#16A34A' : '#9CA3AF', flexShrink: 0 }}>
@@ -164,7 +164,7 @@ export default function AddressSearch({ value, onChange }) {
       {open && results.length > 0 && (
         <div style={{
           position: 'absolute', top: 'calc(100% + 4px)', left: 0, right: 0,
-          background: '#fff', border: '1px solid #E5E7EB', borderRadius: '8px',
+          background: '#fff', border: '1px solid #E5E7EB', borderRadius: '20px',
           boxShadow: '0 8px 24px rgba(0,0,0,.12)', zIndex: 999,
           maxHeight: '280px', overflowY: 'auto',
         }}>
@@ -209,7 +209,7 @@ export default function AddressSearch({ value, onChange }) {
         <div style={{
           marginTop: '6px', padding: '8px 12px',
           background: '#F0FDF4', border: '1px solid #86EFAC',
-          borderRadius: '6px', display: 'flex', alignItems: 'center', gap: '8px',
+          borderRadius: '20px', display: 'flex', alignItems: 'center', gap: '8px',
         }}>
           <MapPin size={13} style={{ color: '#16A34A', flexShrink: 0 }} />
           <p style={{ fontSize: '12px', color: '#166534', margin: 0, fontWeight: '500' }}>

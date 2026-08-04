@@ -133,12 +133,12 @@ export default function ImageUploader({ value, onChange }) {
       {/* Preview o dropzone */}
       {/* Preview immagine attuale */}
       {value && !changing && (
-        <div style={{ position:'relative', borderRadius:'10px', overflow:'hidden', border:'1px solid #E5E7EB' }}>
+        <div style={{ position:'relative', borderRadius:'20px', overflow:'hidden', border:'1px solid #E5E7EB' }}>
           <img src={value} alt="hero" style={{ width:'100%', height:'220px', objectFit:'cover', display:'block' }} />
           <button onClick={() => onChange(null)} style={{
             position:'absolute', top:'10px', right:'10px',
             background:'rgba(0,0,0,.65)', color:'#fff', border:'none',
-            borderRadius:'6px', padding:'6px 8px', cursor:'pointer',
+            borderRadius:'20px', padding:'6px 8px', cursor:'pointer',
             display:'flex', alignItems:'center', gap:'4px', fontSize:'12px'
           }}>
             <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5"><path d="M18 6L6 18M6 6l12 12"/></svg>
@@ -147,7 +147,7 @@ export default function ImageUploader({ value, onChange }) {
           <button onClick={() => setChanging(true)} style={{
             position:'absolute', top:'10px', left:'10px',
             background:'rgba(0,0,0,.65)', color:'#fff', border:'none',
-            borderRadius:'6px', padding:'6px 8px', cursor:'pointer',
+            borderRadius:'20px', padding:'6px 8px', cursor:'pointer',
             display:'flex', alignItems:'center', gap:'4px', fontSize:'12px'
           }}>
             <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2"><path d="M11 4H4a2 2 0 0 0-2 2v14a2 2 0 0 0 2 2h14a2 2 0 0 0 2-2v-7"/><path d="M18.5 2.5a2.121 2.121 0 0 1 3 3L12 15l-4 1 1-4 9.5-9.5z"/></svg>
@@ -167,7 +167,7 @@ export default function ImageUploader({ value, onChange }) {
             style={{
               border: `2px dashed ${dragOver ? '#003DA5' : '#D1D5DB'}`,
               background: dragOver ? '#EBF0FA' : '#FAFAFA',
-              borderRadius:'10px', padding:'32px 24px', textAlign:'center',
+              borderRadius:'20px', padding:'32px 24px', textAlign:'center',
               cursor:'pointer', transition:'all .15s',
               display:'flex', flexDirection:'column', alignItems:'center',
             }}
@@ -188,7 +188,7 @@ export default function ImageUploader({ value, onChange }) {
             )}
           </div>
           {changing && (
-            <button onClick={() => setChanging(false)} style={{ alignSelf:'center', background:'none', border:'1px solid #E5E7EB', borderRadius:'6px', padding:'4px 12px', cursor:'pointer', fontSize:'12px', color:'#6B7280', fontFamily:'Inter,sans-serif' }}>
+            <button onClick={() => setChanging(false)} style={{ alignSelf:'center', background:'none', border:'1px solid #E5E7EB', borderRadius:'20px', padding:'4px 12px', cursor:'pointer', fontSize:'12px', color:'#6B7280', fontFamily:'Inter,sans-serif' }}>
               ✕ Annulla cambio
             </button>
           )}
@@ -198,7 +198,7 @@ export default function ImageUploader({ value, onChange }) {
       <input ref={ref} type="file" accept="image/*" style={{ display:'none' }} onChange={e => handleFile(e.target.files[0])} />
 
       {/* Ricerca AI */}
-      <div style={{ background:'#F8F4FF', border:'1px solid #E9D5FF', borderRadius:'10px', padding:'14px 16px' }}>
+      <div style={{ background:'#F8F4FF', border:'1px solid #E9D5FF', borderRadius:'20px', padding:'14px 16px' }}>
         <p style={{ display:'flex', alignItems:'center', gap:'6px', fontSize:'12px', fontWeight:'700', color:'#7C3AED', margin:'0 0 6px', textTransform:'uppercase', letterSpacing:'.04em' }}>
           <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2"><path d="M12 2l3.09 6.26L22 9.27l-5 4.87 1.18 6.88L12 17.77l-6.18 3.25L7 14.14 2 9.27l6.91-1.01L12 2z"/></svg>
           Cerca con AI
@@ -214,7 +214,7 @@ export default function ImageUploader({ value, onChange }) {
             placeholder="es. artigiani al lavoro, convegno Roma, sala conferenze moderna"
             style={{
               flex:1, padding:'10px 14px', border:'1px solid #D8B4FE',
-              borderRadius:'8px', fontSize:'14px', fontFamily:'Inter,sans-serif',
+              borderRadius:'20px', fontSize:'14px', fontFamily:'Inter,sans-serif',
               outline:'none', background:'#fff'
             }}
           />
@@ -223,7 +223,7 @@ export default function ImageUploader({ value, onChange }) {
             disabled={searching || !prompt.trim()}
             style={{
               padding:'10px 16px', background:'#7C3AED', color:'#fff',
-              border:'none', borderRadius:'8px', cursor:'pointer',
+              border:'none', borderRadius:'20px', cursor:'pointer',
               display:'flex', alignItems:'center', gap:'6px',
               fontSize:'13px', fontWeight:'700', fontFamily:'Inter,sans-serif',
               opacity: searching || !prompt.trim() ? .6 : 1,
@@ -241,7 +241,7 @@ export default function ImageUploader({ value, onChange }) {
 
       {/* Gallery risultati */}
       {images.length > 0 && (
-        <div style={{ border:'1px solid #E5E7EB', borderRadius:'10px', overflow:'hidden' }}>
+        <div style={{ border:'1px solid #E5E7EB', borderRadius:'20px', overflow:'hidden' }}>
           {/* Header gallery */}
           <div style={{ display:'flex', alignItems:'center', justifyContent:'space-between', padding:'10px 14px', background:'#F9FAFB', borderBottom:'1px solid #E5E7EB' }}>
             <span style={{ fontSize:'12px', fontWeight:'700', color:'#374151' }}>
@@ -292,7 +292,7 @@ export default function ImageUploader({ value, onChange }) {
           {hasMore && (
             <div style={{ padding:'12px', textAlign:'center', borderTop:'1px solid #E5E7EB' }}>
               <button onClick={() => search(false)} disabled={loadingMore} style={{
-                background:'none', border:'1px solid #D8B4FE', borderRadius:'8px',
+                background:'none', border:'1px solid #D8B4FE', borderRadius:'20px',
                 padding:'8px 20px', cursor:'pointer', fontSize:'13px', fontWeight:'600',
                 color:'#7C3AED', fontFamily:'Inter,sans-serif',
                 display:'inline-flex', alignItems:'center', gap:'6px',

@@ -213,7 +213,7 @@ export default function ProfiloPage() {
         </Field>
         <div style={{ marginTop:'12px' }}>
           <label style={{ fontSize:'13px', fontWeight:'600', color:'#374151', display:'block', marginBottom:'4px' }}>Email</label>
-          <div style={{ padding:'10px 12px', backgroundColor:'#F7F8FC', border:'1px solid #E8ECF4', borderRadius:'14px', fontSize:'14px', color:'#9CA3AF' }}>{email}</div>
+          <div style={{ padding:'10px 12px', backgroundColor:'#F7F8FC', border:'1px solid #E8ECF4', borderRadius:'20px', fontSize:'14px', color:'#9CA3AF' }}>{email}</div>
           <p style={{ fontSize:'11px', color:'#9CA3AF', margin:'3px 0 0' }}>Non modificabile</p>
         </div>
         <div style={{ display:'flex', justifyContent:'flex-end', marginTop:'16px' }}>

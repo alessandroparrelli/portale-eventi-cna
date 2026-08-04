@@ -30,7 +30,7 @@ export default function PwaInstallBanner() {
 
   // iOS: mostra istruzioni manuali
   if (isIos) return (
-    <div style={{ backgroundColor: '#EFF6FF', border: '1px solid #BFDBFE', borderRadius: '14px',
+    <div style={{ backgroundColor: '#EFF6FF', border: '1px solid #BFDBFE', borderRadius: '20px',
       padding: '14px 16px', marginBottom: '16px', fontFamily: "'Inter',sans-serif" }}>
       <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'flex-start' }}>
         <div style={{ display: 'flex', gap: '10px', alignItems: 'flex-start' }}>
@@ -54,7 +54,7 @@ export default function PwaInstallBanner() {
   if (!prompt) return null
 
   return (
-    <div style={{ backgroundColor: '#EFF6FF', border: '1px solid #BFDBFE', borderRadius: '14px',
+    <div style={{ backgroundColor: '#EFF6FF', border: '1px solid #BFDBFE', borderRadius: '20px',
       padding: '14px 16px', marginBottom: '16px', fontFamily: "'Inter',sans-serif",
       display: 'flex', alignItems: 'center', justifyContent: 'space-between', gap: '12px' }}>
       <div style={{ display: 'flex', gap: '10px', alignItems: 'center' }}>
@@ -65,12 +65,12 @@ export default function PwaInstallBanner() {
         </div>
       </div>
       <div style={{ display: 'flex', gap: '8px', flexShrink: 0 }}>
-        <button onClick={dismiss} style={{ padding: '7px 12px', border: '1px solid #BFDBFE', borderRadius: '14px',
+        <button onClick={dismiss} style={{ padding: '7px 12px', border: '1px solid #BFDBFE', borderRadius: '20px',
           backgroundColor: '#fff', color: '#6B7280', fontSize: '12px', fontWeight: '600',
           cursor: 'pointer', fontFamily: "'Inter',sans-serif" }}>
           Dopo
         </button>
-        <button onClick={install} style={{ padding: '7px 14px', border: 'none', borderRadius: '14px',
+        <button onClick={install} style={{ padding: '7px 14px', border: 'none', borderRadius: '20px',
           backgroundColor: '#5B5FEF', color: '#fff', fontSize: '12px', fontWeight: '700',
           cursor: 'pointer', fontFamily: "'Inter',sans-serif" }}>
           Installa

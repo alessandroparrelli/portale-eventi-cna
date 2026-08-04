@@ -88,7 +88,7 @@ export default function QuestionarioTab({ eventoId }) {
   return (
     <div>
       {/* Info banner */}
-      <div style={{ backgroundColor:'#EFF6FF', border:'1px solid #BFDBFE', borderRadius:'8px', padding:'14px 18px', marginBottom:'24px', display:'flex', alignItems:'flex-start', gap:'12px' }}>
+      <div style={{ backgroundColor:'#EFF6FF', border:'1px solid #BFDBFE', borderRadius:'20px', padding:'14px 18px', marginBottom:'24px', display:'flex', alignItems:'flex-start', gap:'12px' }}>
         <span style={{ fontSize:'20px' }}>ℹ️</span>
         <div>
           <p style={{ fontSize:'13px', fontWeight:'700', color:'#1D4ED8', margin:'0 0 4px' }}>
@@ -120,7 +120,7 @@ export default function QuestionarioTab({ eventoId }) {
       {loading ? (
         <p style={{ color:'#9CA3AF', fontSize:'14px' }}>Caricamento…</p>
       ) : domande.length === 0 ? (
-        <div style={{ border:'2px dashed #E5E7EB', borderRadius:'8px', padding:'40px', textAlign:'center' }}>
+        <div style={{ border:'2px dashed #E5E7EB', borderRadius:'20px', padding:'40px', textAlign:'center' }}>
           <p style={{ fontSize:'32px', margin:'0 0 12px' }}>⭐</p>
           <p style={{ fontSize:'15px', fontWeight:'700', color:'#374151', margin:'0 0 6px' }}>Nessuna domanda extra</p>
           <p style={{ fontSize:'13px', color:'#9CA3AF', margin:'0 0 20px' }}>
@@ -131,7 +131,7 @@ export default function QuestionarioTab({ eventoId }) {
       ) : (
         <div style={{ display:'flex', flexDirection:'column', gap:'8px' }}>
           {domande.map((d, i) => (
-            <div key={d.id} style={{ backgroundColor:'#FFFFFF', border:'1px solid #E5E7EB', borderRadius:'8px',
+            <div key={d.id} style={{ backgroundColor:'#FFFFFF', border:'1px solid #E5E7EB', borderRadius:'20px',
               padding:'14px 16px', display:'flex', alignItems:'center', gap:'12px',
               opacity: d.attivo ? 1 : 0.5 }}>
               <GripVertical size={16} style={{ color:'#D1D5DB', flexShrink:0, cursor:'grab' }}/>
@@ -140,11 +140,11 @@ export default function QuestionarioTab({ eventoId }) {
                   {d.testo}
                 </p>
                 <div style={{ display:'flex', gap:'8px', alignItems:'center' }}>
-                  <span style={{ fontSize:'11px', backgroundColor:'#F3F4F6', color:'#6B7280', borderRadius:'4px', padding:'2px 8px', fontWeight:'600' }}>
+                  <span style={{ fontSize:'11px', backgroundColor:'#F3F4F6', color:'#6B7280', borderRadius:'20px', padding:'2px 8px', fontWeight:'600' }}>
                     {TIPI.find(t=>t.value===d.tipo)?.label || d.tipo}
                   </span>
                   {d.obbligatorio && (
-                    <span style={{ fontSize:'11px', backgroundColor:'#FEF2F2', color:'#DC2626', borderRadius:'4px', padding:'2px 8px', fontWeight:'600' }}>
+                    <span style={{ fontSize:'11px', backgroundColor:'#FEF2F2', color:'#DC2626', borderRadius:'20px', padding:'2px 8px', fontWeight:'600' }}>
                       Obbligatoria
                     </span>
                   )}
@@ -152,19 +152,19 @@ export default function QuestionarioTab({ eventoId }) {
               </div>
               <div style={{ display:'flex', gap:'6px', flexShrink:0, alignItems:'center' }}>
                 <button onClick={() => toggleAttivo(d)}
-                  style={{ background:'none', border:'1px solid #E5E7EB', borderRadius:'4px', padding:'5px 10px',
+                  style={{ background:'none', border:'1px solid #E5E7EB', borderRadius:'20px', padding:'5px 10px',
                     fontSize:'11px', fontWeight:'600', cursor:'pointer', color: d.attivo ? '#059669' : '#9CA3AF' }}>
                   {d.attivo ? 'Attiva' : 'Disattiva'}
                 </button>
                 <button onClick={() => openEdit(d)}
-                  style={{ background:'none', border:'1px solid #E5E7EB', borderRadius:'4px', padding:'5px 8px', cursor:'pointer', color:'#6B7280', display:'flex', alignItems:'center' }}>
+                  style={{ background:'none', border:'1px solid #E5E7EB', borderRadius:'20px', padding:'5px 8px', cursor:'pointer', color:'#6B7280', display:'flex', alignItems:'center' }}>
                   <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
                     <path d="M11 4H4a2 2 0 0 0-2 2v14a2 2 0 0 0 2 2h14a2 2 0 0 0 2-2v-7"/>
                     <path d="M18.5 2.5a2.121 2.121 0 0 1 3 3L12 15l-4 1 1-4 9.5-9.5z"/>
                   </svg>
                 </button>
                 <button onClick={() => deleteDomanda(d.id)}
-                  style={{ background:'none', border:'1px solid #FCA5A5', borderRadius:'4px', padding:'5px 8px', cursor:'pointer', color:'#DC2626', display:'flex', alignItems:'center' }}>
+                  style={{ background:'none', border:'1px solid #FCA5A5', borderRadius:'20px', padding:'5px 8px', cursor:'pointer', color:'#DC2626', display:'flex', alignItems:'center' }}>
                   <Trash2 size={14}/>
                 </button>
               </div>
@@ -193,7 +193,7 @@ export default function QuestionarioTab({ eventoId }) {
                 <div style={{ display:'flex', flexDirection:'column', gap:'6px', marginBottom:'8px' }}>
                   {form.opzioni.map(op => (
                     <div key={op} style={{ display:'flex', alignItems:'center', gap:'8px', backgroundColor:'#F9FAFB',
-                      border:'1px solid #E5E7EB', borderRadius:'6px', padding:'8px 12px' }}>
+                      border:'1px solid #E5E7EB', borderRadius:'20px', padding:'8px 12px' }}>
                       <span style={{ flex:1, fontSize:'14px', color:'#374151' }}>{op}</span>
                       <button onClick={() => removeOpzione(op)} style={{ background:'none', border:'none', cursor:'pointer', color:'#DC2626', display:'flex' }}>
                         <Trash2 size={14}/>

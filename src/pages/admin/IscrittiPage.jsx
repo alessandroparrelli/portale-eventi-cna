@@ -1384,7 +1384,7 @@ export default function IscrittiPage() {
                 { v:'senza_posto', label:'Senza posto' },
               ].map(opt => (
                 <button key={opt.v} onClick={() => setFiltroPostoAssegnato(opt.v)}
-                  style={{ padding:'5px 12px', borderRadius:'14px', border:'1px solid', fontSize:'12px', fontWeight:'600', cursor:'pointer', fontFamily:"'Inter',sans-serif",
+                  style={{ padding:'5px 12px', borderRadius:'20px', border:'1px solid', fontSize:'12px', fontWeight:'600', cursor:'pointer', fontFamily:"'Inter',sans-serif",
                     background: filtroPostoAssegnato === opt.v ? '#5B5FEF' : '#fff',
                     color: filtroPostoAssegnato === opt.v ? '#fff' : '#374151',
                     borderColor: filtroPostoAssegnato === opt.v ? '#5B5FEF' : '#D1D5DB',
@@ -1400,7 +1400,7 @@ export default function IscrittiPage() {
                 { v:'non_inviata', label:'Non inviata' },
               ].map(opt => (
                 <button key={opt.v} onClick={() => setFiltroMailPosto(opt.v)}
-                  style={{ padding:'5px 12px', borderRadius:'14px', border:'1px solid', fontSize:'12px', fontWeight:'600', cursor:'pointer', fontFamily:"'Inter',sans-serif",
+                  style={{ padding:'5px 12px', borderRadius:'20px', border:'1px solid', fontSize:'12px', fontWeight:'600', cursor:'pointer', fontFamily:"'Inter',sans-serif",
                     background: filtroMailPosto === opt.v ? '#5B5FEF' : '#fff',
                     color: filtroMailPosto === opt.v ? '#fff' : '#374151',
                     borderColor: filtroMailPosto === opt.v ? '#5B5FEF' : '#D1D5DB',
@@ -1431,7 +1431,7 @@ export default function IscrittiPage() {
           </div>
 
           {/* Barra azioni invio */}
-          <div style={{ background:'#F9FAFB', border:'1px solid #E8ECF4', borderRadius:'14px', padding:'14px 16px', marginBottom:'16px' }}>
+          <div style={{ background:'#F9FAFB', border:'1px solid #E8ECF4', borderRadius:'20px', padding:'14px 16px', marginBottom:'16px' }}>
             <div style={{ display:'flex', gap:'10px', flexWrap:'wrap', alignItems:'center' }}>
               {/* Invio massivo a tutti */}
               <Btn variant="primary" onClick={() => setConfirmInvioTeatro({ ids: null })} disabled={invioPostoInCorso} size="md">
@@ -1562,7 +1562,7 @@ export default function IscrittiPage() {
                                 if (e.key === 'Enter') { e.target.blur(); salvaPosto(r.id, e.target.value) }
                                 if (e.key === 'Escape') setPostoEdit(p => ({ ...p, [r.id]: undefined }))
                               }}
-                              style={{ width:'110px', padding:'6px 10px', border:`1px solid ${postoError[r.id] ? '#DC2626' : '#D1D5DB'}`, borderRadius:'14px', fontSize:'13px', fontWeight:'700', color: r.numero_posto ? '#5B5FEF' : '#6B7280', fontFamily:"'Inter',sans-serif" }}
+                              style={{ width:'110px', padding:'6px 10px', border:`1px solid ${postoError[r.id] ? '#DC2626' : '#D1D5DB'}`, borderRadius:'20px', fontSize:'13px', fontWeight:'700', color: r.numero_posto ? '#5B5FEF' : '#6B7280', fontFamily:"'Inter',sans-serif" }}
                               placeholder="es. Platea 1A"
                             />
                             {postoSaving[r.id] && <span style={{ fontSize:'12px', color:'#9CA3AF' }}>⏳</span>}
@@ -1583,7 +1583,7 @@ export default function IscrittiPage() {
                               onClick={() => inviaMailPosti(false, [r.id])}
                               disabled={invioPostoInCorso}
                               title="Invia mail posto a questo iscritto"
-                              style={{ background:'none', border:'1px solid #E8ECF4', borderRadius:'14px', padding:'5px 10px', cursor:'pointer', fontSize:'12px', color:'#374151', fontFamily:"'Inter',sans-serif", fontWeight:'600', whiteSpace:'nowrap' }}>
+                              style={{ background:'none', border:'1px solid #E8ECF4', borderRadius:'20px', padding:'5px 10px', cursor:'pointer', fontSize:'12px', color:'#374151', fontFamily:"'Inter',sans-serif", fontWeight:'600', whiteSpace:'nowrap' }}>
                               📨 Invia
                             </button>
                           ) : (
@@ -1764,11 +1764,11 @@ export default function IscrittiPage() {
                 </span>
                 <div style={{display:'flex',gap:'4px',alignItems:'center'}}>
                   <button onClick={()=>setPagina(1)} disabled={pagina===1}
-                    style={{padding:'6px 10px',border:'1px solid #E8ECF4',borderRadius:'14px',
+                    style={{padding:'6px 10px',border:'1px solid #E8ECF4',borderRadius:'20px',
                       backgroundColor:pagina===1?'#F9FAFB':'#fff',cursor:pagina===1?'default':'pointer',
                       fontSize:'13px',color:pagina===1?'#D1D5DB':'#374151'}}>«</button>
                   <button onClick={()=>setPagina(p=>Math.max(1,p-1))} disabled={pagina===1}
-                    style={{padding:'6px 12px',border:'1px solid #E8ECF4',borderRadius:'14px',
+                    style={{padding:'6px 12px',border:'1px solid #E8ECF4',borderRadius:'20px',
                       backgroundColor:pagina===1?'#F9FAFB':'#fff',cursor:pagina===1?'default':'pointer',
                       fontSize:'13px',color:pagina===1?'#D1D5DB':'#374151'}}>‹</button>
                   {[...Array(totalPages)].map((_,i)=>i+1).filter(p=>
@@ -1780,7 +1780,7 @@ export default function IscrittiPage() {
                     p==='…' ? <span key={`e${i}`} style={{padding:'6px 4px',fontSize:'13px',color:'#9CA3AF'}}>…</span>
                     : <button key={p} onClick={()=>setPagina(p)}
                         style={{padding:'6px 11px',border:'1px solid',
-                          borderColor:pagina===p?'#5B5FEF':'#E8ECF4',borderRadius:'14px',
+                          borderColor:pagina===p?'#5B5FEF':'#E8ECF4',borderRadius:'20px',
                           backgroundColor:pagina===p?'#5B5FEF':'#fff',
                           color:pagina===p?'#fff':'#374151',
                           fontWeight:pagina===p?'700':'400',
@@ -1789,11 +1789,11 @@ export default function IscrittiPage() {
                       </button>
                   )}
                   <button onClick={()=>setPagina(p=>Math.min(totalPages,p+1))} disabled={pagina===totalPages}
-                    style={{padding:'6px 12px',border:'1px solid #E8ECF4',borderRadius:'14px',
+                    style={{padding:'6px 12px',border:'1px solid #E8ECF4',borderRadius:'20px',
                       backgroundColor:pagina===totalPages?'#F9FAFB':'#fff',cursor:pagina===totalPages?'default':'pointer',
                       fontSize:'13px',color:pagina===totalPages?'#D1D5DB':'#374151'}}>›</button>
                   <button onClick={()=>setPagina(totalPages)} disabled={pagina===totalPages}
-                    style={{padding:'6px 10px',border:'1px solid #E8ECF4',borderRadius:'14px',
+                    style={{padding:'6px 10px',border:'1px solid #E8ECF4',borderRadius:'20px',
                       backgroundColor:pagina===totalPages?'#F9FAFB':'#fff',cursor:pagina===totalPages?'default':'pointer',
                       fontSize:'13px',color:pagina===totalPages?'#D1D5DB':'#374151'}}>»</button>
                 </div>
@@ -2208,7 +2208,7 @@ export default function IscrittiPage() {
               {(importPreview.length > 0 || importErrors.length > 0) && (
                 <div>
                   {importErrors.length > 0 && (
-                    <div style={{ backgroundColor:'#FEF2F2', border:'1px solid #FECACA', borderRadius:'14px', padding:'12px 16px', marginBottom:'16px' }}>
+                    <div style={{ backgroundColor:'#FEF2F2', border:'1px solid #FECACA', borderRadius:'20px', padding:'12px 16px', marginBottom:'16px' }}>
                       <div style={{ display:'flex', alignItems:'center', gap:'8px', marginBottom:'8px' }}>
                         <AlertCircle size={16} style={{ color:'#DC2626' }}/>
                         <span style={{ fontSize:'13px', fontWeight:'700', color:'#DC2626' }}>{importErrors.length} righe con errori (verranno saltate)</span>
@@ -2223,7 +2223,7 @@ export default function IscrittiPage() {
                         <CheckCircle2 size={14} style={{ color:'#16A34A', verticalAlign:'middle', marginRight:'6px' }}/>
                         {importPreview.length} iscritti pronti per l&apos;importazione
                       </p>
-                      <div style={{ maxHeight:'260px', overflowY:'auto', border:'1px solid #E8ECF4', borderRadius:'14px' }}>
+                      <div style={{ maxHeight:'260px', overflowY:'auto', border:'1px solid #E8ECF4', borderRadius:'20px' }}>
                         <table style={{ width:'100%', borderCollapse:'collapse', fontSize:'13px' }}>
                           <thead>
                             <tr style={{ backgroundColor:'#F7F8FC' }}>
@@ -2478,12 +2478,12 @@ const s = {
   filters: { display:'flex', gap:'12px', marginBottom:'16px', flexWrap:'wrap', alignItems:'center' },
   searchWrap: { position:'relative', flex:1, minWidth:'200px' },
   searchIcon: { position:'absolute', left:'12px', top:'50%', transform:'translateY(-50%)', color:'#9CA3AF' },
-  searchInput: { width:'100%', padding:'9px 12px 9px 36px', border:'1px solid #D1D5DB', borderRadius:'4px', fontSize:'14px', fontFamily:"'Inter',sans-serif", outline:'none', boxSizing:'border-box' },
+  searchInput: { width:'100%', padding:'9px 12px 9px 36px', border:'1px solid #D1D5DB', borderRadius:'20px', fontSize:'14px', fontFamily:"'Inter',sans-serif", outline:'none', boxSizing:'border-box' },
   statsRow: { display:'flex', gap:'12px', marginBottom:'16px', flexWrap:'wrap' },
-  statCard: { backgroundColor:'#FFFFFF', border:'1px solid #E8ECF4', borderRadius:'14px', padding:'16px 20px', flex:1, minWidth:'110px', textAlign:'center' },
+  statCard: { backgroundColor:'#FFFFFF', border:'1px solid #E8ECF4', borderRadius:'20px', padding:'16px 20px', flex:1, minWidth:'110px', textAlign:'center' },
   statVal: (color) => ({ fontSize:'28px', fontWeight:'900', color, letterSpacing:'-0.03em', margin:'0 0 2px' }),
   statLabel: { fontSize:'12px', color:'#6B7280', margin:0, fontWeight:'500' },
-  card: { backgroundColor:'#FFFFFF', borderRadius:'14px', border:'1px solid #E8ECF4', overflow:'hidden' },
+  card: { backgroundColor:'#FFFFFF', borderRadius:'20px', border:'1px solid #E8ECF4', overflow:'hidden' },
   table: { width:'100%', borderCollapse:'collapse', fontSize:'14px' },
   th: { padding:'10px 20px', textAlign:'left', fontSize:'11px', fontWeight:'600', color:'#6B7280', textTransform:'uppercase', letterSpacing:'0.06em', borderBottom:'1px solid #E8ECF4', whiteSpace:'nowrap', backgroundColor:'#FAFAFA' },
   tr: { transition:'background-color 0.1s' },
@@ -2491,5 +2491,5 @@ const s = {
   name: { fontWeight:'600', color:'#111827', margin:'0 0 2px', letterSpacing:'-0.01em' },
   sub: { fontSize:'12px', color:'#6B7280', margin:0 },
   cell: { color:'#374151', fontSize:'14px' },
-  iconBtn: { background:'none', border:'1px solid #E8ECF4', borderRadius:'4px', padding:'5px 7px', cursor:'pointer', color:'#6B7280', display:'flex', alignItems:'center' },
+  iconBtn: { background:'none', border:'1px solid #E8ECF4', borderRadius:'20px', padding:'5px 7px', cursor:'pointer', color:'#6B7280', display:'flex', alignItems:'center' },
 }

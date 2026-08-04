@@ -116,7 +116,7 @@ function FormContatti({ lp, tema }) {
   const btnR = tema.btn_stile==='pill'?'999px':(tema.btn_raggio||'8')+'px'
 
   if (submitted) return (
-    <div style={{background:'#D1FAE5',border:'1px solid #6EE7B7',borderRadius:'12px',padding:'32px',textAlign:'center'}}>
+    <div style={{background:'#D1FAE5',border:'1px solid #6EE7B7',borderRadius:'20px',padding:'32px',textAlign:'center'}}>
       <svg width="40" height="40" viewBox="0 0 24 24" fill="none" stroke="#059669" strokeWidth="2" style={{marginBottom:'12px'}}><path d="M22 11.08V12a10 10 0 1 1-5.93-9.14"/><polyline points="22 4 12 14.01 9 11.01"/></svg>
       <p style={{fontSize:'16px',fontWeight:'700',color:'#065F46',margin:'0 0 4px'}}>Grazie!</p>
       <p style={{fontSize:'14px',color:'#059669',margin:0}}>{lp.form_messaggio_conferma||'Ti ricontatteremo presto.'}</p>
@@ -150,7 +150,7 @@ function FormContatti({ lp, tema }) {
           {(f.opzioni||[]).map(o=>(
             <button type="button" key={o.value} onClick={()=>setVal(f.key,o.value)} style={{
               padding:'8px 16px',border:`1.5px solid ${val===o.value?cp:'#D1D5DB'}`,
-              borderRadius:'8px',background:val===o.value?cp:'#fff',
+              borderRadius:'20px',background:val===o.value?cp:'#fff',
               color:val===o.value?'#fff':'#374151',fontSize:'13px',fontWeight:'600',
               cursor:'pointer',fontFamily:'Inter,sans-serif',transition:'all .15s'
             }}>{o.label}</button>
@@ -168,7 +168,7 @@ function FormContatti({ lp, tema }) {
               return (
                 <button type="button" key={o.value} onClick={()=>toggleMulti(f.key,o.value)} style={{
                   padding:'8px 16px',border:`1.5px solid ${on?cp:'#D1D5DB'}`,
-                  borderRadius:'8px',background:on?cp:'#fff',
+                  borderRadius:'20px',background:on?cp:'#fff',
                   color:on?'#fff':'#374151',fontSize:'13px',fontWeight:'600',
                   cursor:'pointer',fontFamily:'Inter,sans-serif',transition:'all .15s',
                   display:'flex',alignItems:'center',gap:'6px'
@@ -223,7 +223,7 @@ function FormContatti({ lp, tema }) {
 
 
 const lbSt = { display:'block', fontSize:'13px', fontWeight:'600', color:'#374151', marginBottom:'6px' }
-const iSt  = { width:'100%', boxSizing:'border-box', padding:'11px 14px', border:'1px solid #E5E7EB', borderRadius:'8px', fontSize:'15px', fontFamily:'Inter,sans-serif', outline:'none', color:'#0A0A0A' }
+const iSt  = { width:'100%', boxSizing:'border-box', padding:'11px 14px', border:'1px solid #E5E7EB', borderRadius:'20px', fontSize:'15px', fontFamily:'Inter,sans-serif', outline:'none', color:'#0A0A0A' }
 
 // ── Pagina pubblica ───────────────────────────────────────────────
 export default function LandingPagePublic() {
@@ -358,7 +358,7 @@ export default function LandingPagePublic() {
                       : lh.logo_sfondo==='colore_primario' ? cp
                       : 'transparent',
             padding: lh.logo_sfondo && lh.logo_sfondo !== 'trasparente' ? '5px 12px' : 0,
-            borderRadius: '6px',
+            borderRadius: '20px',
             display: 'inline-flex', alignItems: 'center',
           }}>
             <img src={logoSrc} alt="CNA Roma" style={{height:logoAltezza+'px',objectFit:'contain',display:'block'}} />

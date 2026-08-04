@@ -43,11 +43,11 @@ QR Code: ${pageUrl}
   return (
     <div style={{ display:'flex', gap:'8px', justifyContent:'center', flexWrap:'wrap', marginTop:'12px' }}>
       <button onClick={saveQR} disabled={saving}
-        style={{ display:'flex', alignItems:'center', gap:'6px', backgroundColor:'#003DA5', color:'#fff', border:'none', borderRadius:'8px', padding:'10px 16px', fontSize:'13px', fontWeight:'700', cursor:'pointer', fontFamily:"'Outfit',sans-serif", opacity:saving?0.7:1 }}>
+        style={{ display:'flex', alignItems:'center', gap:'6px', backgroundColor:'#003DA5', color:'#fff', border:'none', borderRadius:'20px', padding:'10px 16px', fontSize:'13px', fontWeight:'700', cursor:'pointer', fontFamily:"'Outfit',sans-serif", opacity:saving?0.7:1 }}>
         <Download size={15}/> {saved ? '✓ Salvato!' : saving ? '…' : 'Salva QR'}
       </button>
       <button onClick={shareWhatsApp}
-        style={{ display:'flex', alignItems:'center', gap:'6px', backgroundColor:'#25D366', color:'#fff', border:'none', borderRadius:'8px', padding:'10px 16px', fontSize:'13px', fontWeight:'700', cursor:'pointer', fontFamily:"'Outfit',sans-serif" }}>
+        style={{ display:'flex', alignItems:'center', gap:'6px', backgroundColor:'#25D366', color:'#fff', border:'none', borderRadius:'20px', padding:'10px 16px', fontSize:'13px', fontWeight:'700', cursor:'pointer', fontFamily:"'Outfit',sans-serif" }}>
         <Share2 size={15}/> Invia su WhatsApp
       </button>
     </div>
@@ -59,7 +59,7 @@ function CertificatoBtn({ registrationId }) {
     <a href={`https://hnkhckcclgabunkqfmrz.supabase.co/functions/v1/genera-certificato?registration_id=${registrationId}`}
       target="_blank" rel="noopener noreferrer"
       style={{ display:'inline-flex', alignItems:'center', gap:'6px', backgroundColor:'#F59E0B', color:'#fff',
-        borderRadius:'8px', padding:'10px 16px', fontSize:'13px', fontWeight:'700',
+        borderRadius:'20px', padding:'10px 16px', fontSize:'13px', fontWeight:'700',
         textDecoration:'none', fontFamily:"'Outfit',sans-serif", marginTop:'12px' }}>
       🏆 Scarica certificato di partecipazione
     </a>
@@ -85,10 +85,10 @@ function QRCodeDisplay({ value }) {
   return (
     <div style={{ display:'flex', flexDirection:'column', alignItems:'center', gap:'8px' }}>
       {dataUrl
-        ? <img src={dataUrl} alt="QR Code check-in" width={220} height={220} style={{ borderRadius:'8px', border:'1px solid #E5E7EB' }}/>
+        ? <img src={dataUrl} alt="QR Code check-in" width={220} height={220} style={{ borderRadius:'20px', border:'1px solid #E5E7EB' }}/>
         : err
           ? <p style={{ fontSize:'13px', color:'#DC2626' }}>Errore generazione QR</p>
-          : <div style={{ width:220, height:220, borderRadius:'8px', border:'1px solid #E5E7EB', display:'flex', alignItems:'center', justifyContent:'center', backgroundColor:'#F9FAFB' }}>
+          : <div style={{ width:220, height:220, borderRadius:'20px', border:'1px solid #E5E7EB', display:'flex', alignItems:'center', justifyContent:'center', backgroundColor:'#F9FAFB' }}>
               <div style={{ width:28, height:28, border:'3px solid #E5E7EB', borderTopColor:'#003DA5', borderRadius:'50%', animation:'qrspin .8s linear infinite' }}/>
             </div>
       }
@@ -172,7 +172,7 @@ export default function Iscrizione() {
       <div style={{ maxWidth:'640px', margin:'0 auto', padding:'40px 24px' }}>
 
         {/* Search form — sempre visibile */}
-        <div style={{ backgroundColor:'#ffffff', borderRadius:'10px', border:'1px solid #E5E7EB', padding:'24px', marginBottom:'24px' }}>
+        <div style={{ backgroundColor:'#ffffff', borderRadius:'20px', border:'1px solid #E5E7EB', padding:'24px', marginBottom:'24px' }}>
           <h1 style={{ fontSize:'22px', fontWeight:'900', color:'#0A0A0A', letterSpacing:'-0.03em', margin:'0 0 6px' }}>
             Verifica la tua iscrizione
           </h1>
@@ -185,7 +185,7 @@ export default function Iscrizione() {
               onChange={e => setSearchInput(e.target.value.toUpperCase())}
               placeholder="EVT-AACCCC-NNNN"
               style={{
-                flex:1, border:'1px solid #D1D5DB', borderRadius:'6px', padding:'10px 14px',
+                flex:1, border:'1px solid #D1D5DB', borderRadius:'20px', padding:'10px 14px',
                 fontSize:'16px', fontFamily:"'Outfit',sans-serif", fontWeight:'600',
                 letterSpacing:'0.05em', outline:'none', color:'#0A0A0A'
               }}
@@ -194,7 +194,7 @@ export default function Iscrizione() {
               type="submit"
               disabled={searching || !searchInput.trim()}
               style={{
-                backgroundColor: primaryColor, color:'#fff', border:'none', borderRadius:'6px',
+                backgroundColor: primaryColor, color:'#fff', border:'none', borderRadius:'20px',
                 padding:'10px 20px', fontSize:'14px', fontWeight:'700', cursor:'pointer',
                 fontFamily:"'Outfit',sans-serif", opacity: searching ? 0.7 : 1
               }}
@@ -212,7 +212,7 @@ export default function Iscrizione() {
         )}
 
         {error && !loading && (
-          <div style={{ backgroundColor:'#FEF2F2', border:'1px solid #FECACA', borderRadius:'10px', padding:'20px', display:'flex', gap:'14px', alignItems:'flex-start' }}>
+          <div style={{ backgroundColor:'#FEF2F2', border:'1px solid #FECACA', borderRadius:'20px', padding:'20px', display:'flex', gap:'14px', alignItems:'flex-start' }}>
             <XCircle size={22} style={{ color:'#DC2626', flexShrink:0, marginTop:'1px' }} />
             <div>
               <p style={{ fontSize:'15px', fontWeight:'700', color:'#DC2626', margin:'0 0 4px' }}>Iscrizione non trovata</p>
@@ -227,7 +227,7 @@ export default function Iscrizione() {
             <div style={{
               backgroundColor: reg.presente ? '#F0FDF4' : '#EFF6FF',
               border: `1px solid ${reg.presente ? '#86EFAC' : '#BFDBFE'}`,
-              borderRadius:'10px', padding:'16px 20px', marginBottom:'16px',
+              borderRadius:'20px', padding:'16px 20px', marginBottom:'16px',
               display:'flex', gap:'12px', alignItems:'center'
             }}>
               {reg.presente
@@ -247,7 +247,7 @@ export default function Iscrizione() {
             </div>
 
             {/* Card evento */}
-            <div style={{ backgroundColor:'#ffffff', borderRadius:'10px', border:'1px solid #E5E7EB', overflow:'hidden', marginBottom:'16px' }}>
+            <div style={{ backgroundColor:'#ffffff', borderRadius:'20px', border:'1px solid #E5E7EB', overflow:'hidden', marginBottom:'16px' }}>
               {event.immagine_hero && (
                 <div style={{ height:'140px', backgroundImage:`url(${event.immagine_hero})`, backgroundSize:'cover', backgroundPosition:'center', position:'relative' }}>
                   <div style={{ position:'absolute', inset:0, backgroundColor:'rgba(0,0,0,0.45)' }} />
@@ -287,7 +287,7 @@ export default function Iscrizione() {
             {/* Dati partecipante + QR */}
             <div style={{ display:'grid', gridTemplateColumns:'1fr 1fr', gap:'16px', marginBottom:'16px' }}>
               {/* Dati */}
-              <div style={{ backgroundColor:'#ffffff', borderRadius:'10px', border:'1px solid #E5E7EB', padding:'20px' }}>
+              <div style={{ backgroundColor:'#ffffff', borderRadius:'20px', border:'1px solid #E5E7EB', padding:'20px' }}>
                 <p style={{ fontSize:'11px', fontWeight:'700', color:'#9CA3AF', textTransform:'uppercase', letterSpacing:'0.06em', margin:'0 0 14px' }}>Dati iscritto</p>
                 <div style={{ display:'flex', flexDirection:'column', gap:'10px' }}>
                   {(reg.nome || reg.cognome) && (
@@ -322,7 +322,7 @@ export default function Iscrizione() {
               </div>
 
               {/* QR */}
-              <div style={{ backgroundColor:'#ffffff', borderRadius:'10px', border:'1px solid #E5E7EB', padding:'20px', display:'flex', flexDirection:'column', alignItems:'center', justifyContent:'center' }}>
+              <div style={{ backgroundColor:'#ffffff', borderRadius:'20px', border:'1px solid #E5E7EB', padding:'20px', display:'flex', flexDirection:'column', alignItems:'center', justifyContent:'center' }}>
                 <p style={{ fontSize:'11px', fontWeight:'700', color:'#9CA3AF', textTransform:'uppercase', letterSpacing:'0.06em', margin:'0 0 14px' }}>QR Code check-in</p>
                 {reg.qr_code
                   ? <>

@@ -165,7 +165,7 @@ export default function QuestionarioPage() {
               {q.tipo === 'testo' && (
                 <textarea value={answers[q.id]||''} onChange={e=>setAnswer(q.id,e.target.value)}
                   placeholder="La tua risposta…" rows={3}
-                  style={{ width:'100%', padding:'12px', border:'1px solid #D1D5DB', borderRadius:'6px',
+                  style={{ width:'100%', padding:'12px', border:'1px solid #D1D5DB', borderRadius:'20px',
                     fontSize:'14px', fontFamily:"'Outfit',sans-serif", outline:'none', resize:'vertical', boxSizing:'border-box', marginTop:'6px' }}
                   onFocus={e=>(e.target.style.borderColor='#003DA5')}
                   onBlur={e=>(e.target.style.borderColor='#D1D5DB')}/>
@@ -179,7 +179,7 @@ export default function QuestionarioPage() {
             <textarea value={commento} onChange={e=>setCommento(e.target.value)}
               placeholder="Cosa hai apprezzato di più? Cosa miglioreresti?"
               rows={4}
-              style={{ width:'100%', padding:'12px', border:'1px solid #D1D5DB', borderRadius:'6px',
+              style={{ width:'100%', padding:'12px', border:'1px solid #D1D5DB', borderRadius:'20px',
                 fontSize:'14px', fontFamily:"'Outfit',sans-serif", outline:'none', resize:'vertical', boxSizing:'border-box' }}
               onFocus={e=>(e.target.style.borderColor='#003DA5')}
               onBlur={e=>(e.target.style.borderColor='#D1D5DB')}/>
@@ -226,7 +226,7 @@ function ScalaNumero({ value, onChange }) {
     <div style={{ display:'flex', gap:'6px', flexWrap:'wrap', marginTop:'8px' }}>
       {[1,2,3,4,5,6,7,8,9,10].map(n=>(
         <button key={n} type="button" onClick={()=>onChange(n)}
-          style={{ width:'40px', height:'40px', borderRadius:'6px', border:'1px solid',
+          style={{ width:'40px', height:'40px', borderRadius:'20px', border:'1px solid',
             borderColor: value===n?'#003DA5':'#D1D5DB',
             backgroundColor: value===n?'#003DA5':'#FFFFFF',
             color: value===n?'#FFFFFF':'#374151',
@@ -244,12 +244,12 @@ const s = {
   center: { minHeight:'100vh', display:'flex', flexDirection:'column', alignItems:'center', justifyContent:'center',
     backgroundColor:'#F4F5F7', fontFamily:"'Outfit',sans-serif", padding:'24px' },
   header: { backgroundColor:'#FFFFFF', borderBottom:'2px solid #003DA5', display:'flex', alignItems:'center', justifyContent:'center', padding:'16px 24px' },
-  card: { maxWidth:'520px', margin:'40px auto', backgroundColor:'#FFFFFF', borderRadius:'12px', padding:'40px', boxShadow:'0 4px 24px rgba(0,0,0,0.08)' },
+  card: { maxWidth:'520px', margin:'40px auto', backgroundColor:'#FFFFFF', borderRadius:'20px', padding:'40px', boxShadow:'0 4px 24px rgba(0,0,0,0.08)' },
   title: { fontSize:'26px', fontWeight:'900', color:'#0A0A0A', letterSpacing:'-0.03em', margin:'0 0 6px', textAlign:'center' },
   eventName: { fontSize:'14px', color:'#003DA5', fontWeight:'600', textAlign:'center', margin:'0 0 16px' },
   greeting: { fontSize:'15px', color:'#374151', textAlign:'center', margin:'0 0 8px', lineHeight:'1.5' },
   fieldLabel: { fontSize:'13px', fontWeight:'600', color:'#0A0A0A', margin:'0 0 4px' },
   submitBtn: { display:'flex', alignItems:'center', justifyContent:'center', gap:'8px', backgroundColor:'#003DA5', color:'#FFFFFF',
-    border:'none', borderRadius:'6px', padding:'14px 24px', fontSize:'15px', fontWeight:'700',
+    border:'none', borderRadius:'20px', padding:'14px 24px', fontSize:'15px', fontWeight:'700',
     fontFamily:"'Outfit',sans-serif", cursor:'pointer', letterSpacing:'-0.01em', transition:'opacity 0.15s' },
 }

@@ -71,7 +71,7 @@ export default function LandingContactsPage() {
           style={{ flex:1, minWidth:'200px', padding:'10px 14px', border:'1px solid #E8ECF4', borderRadius:'16px', fontSize:'14px', fontFamily:'Inter,sans-serif', outline:'none' }}
         />
         <button onClick={exportXlsx} disabled={contacts.length === 0} style={{
-          background:'#059669', color:'#fff', border:'none', borderRadius:'16px',
+          background:'#059669', color:'#fff', border:'none', borderRadius:'20px',
           padding:'10px 18px', fontFamily:'Inter,sans-serif', fontSize:'13px',
           fontWeight:'700', cursor:'pointer', display:'flex', alignItems:'center', gap:'6px',
           opacity: contacts.length === 0 ? .5 : 1

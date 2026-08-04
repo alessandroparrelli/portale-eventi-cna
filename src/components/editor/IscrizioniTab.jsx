@@ -14,7 +14,7 @@ function Toggle({ on, onChange, disabled }) {
       disabled={disabled}
       aria-checked={on}
       style={{
-        width: '38px', height: '20px', borderRadius: '10px',
+        width: '38px', height: '20px', borderRadius: '20px',
         border: 'none', flexShrink: 0,
         background: on ? '#003DA5' : '#D1D5DB',
         cursor: disabled ? 'not-allowed' : 'pointer',
@@ -100,7 +100,7 @@ function RigaCampoExtra({ campo, onChange, onDelete }) {
 
   return (
     <div style={{
-      border: '1px solid #E5E7EB', borderRadius: '8px',
+      border: '1px solid #E5E7EB', borderRadius: '20px',
       padding: '12px', marginBottom: '8px', background: '#FAFAFA',
     }}>
       <div style={{ display: 'grid', gridTemplateColumns: '1fr 130px 32px', gap: '8px', alignItems: 'end', marginBottom: '8px' }}>
@@ -121,7 +121,7 @@ function RigaCampoExtra({ campo, onChange, onDelete }) {
         </div>
         <button
           type="button" onClick={onDelete}
-          style={{ background: '#FEF2F2', border: '1px solid #FECACA', borderRadius: '6px', padding: '6px', cursor: 'pointer', display: 'flex', alignItems: 'center' }}
+          style={{ background: '#FEF2F2', border: '1px solid #FECACA', borderRadius: '20px', padding: '6px', cursor: 'pointer', display: 'flex', alignItems: 'center' }}
         >
           <Trash2 size={14} style={{ color: '#DC2626' }} />
         </button>
@@ -315,7 +315,7 @@ export default function IscrizioniTab({ event, setEvent, eventId }) {
             style={{
               display: 'flex', alignItems: 'center', gap: '6px',
               background: saved ? '#16A34A' : '#003DA5',
-              color: '#fff', border: 'none', borderRadius: '8px',
+              color: '#fff', border: 'none', borderRadius: '20px',
               padding: '9px 16px', fontSize: '13px', fontWeight: '700',
               fontFamily: "'Outfit',sans-serif", cursor: saving ? 'not-allowed' : 'pointer',
               transition: 'background .2s', flexShrink: 0,
@@ -327,7 +327,7 @@ export default function IscrizioniTab({ event, setEvent, eventId }) {
       </div>
 
       {errore && (
-        <div style={{ background: '#FEF2F2', border: '1px solid #FECACA', borderRadius: '8px', padding: '10px 14px', fontSize: '13px', color: '#DC2626', marginBottom: '16px' }}>
+        <div style={{ background: '#FEF2F2', border: '1px solid #FECACA', borderRadius: '20px', padding: '10px 14px', fontSize: '13px', color: '#DC2626', marginBottom: '16px' }}>
           ⚠ {errore}
         </div>
       )}
@@ -345,7 +345,7 @@ export default function IscrizioniTab({ event, setEvent, eventId }) {
           gap:'16px', flexWrap:'wrap',
           backgroundColor: event?.tema?.cta_bg || '#EEF4FF',
           border: `2px solid ${event?.tema?.colore_primario || '#005AC9'}22`,
-          borderRadius:'12px', padding:'16px 20px', marginBottom:'16px',
+          borderRadius:'20px', padding:'16px 20px', marginBottom:'16px',
         }}>
           <div style={{ flex:1, minWidth:'160px' }}>
             <div style={{ fontSize:'14px', fontWeight:'800', color: event?.tema?.heading_colore || '#0A0A0A', marginBottom:'3px' }}>
@@ -358,7 +358,7 @@ export default function IscrizioniTab({ event, setEvent, eventId }) {
           <div style={{
             background: event?.tema?.colore_pulsanti || '#005AC9',
             color: event?.tema?.colore_testo_btn || '#FFFFFF',
-            borderRadius:'8px', padding:'9px 18px',
+            borderRadius:'20px', padding:'9px 18px',
             fontSize:'13px', fontWeight:'700',
             fontFamily:"'Outfit',sans-serif", whiteSpace:'nowrap',
             flexShrink:0,
@@ -377,7 +377,7 @@ export default function IscrizioniTab({ event, setEvent, eventId }) {
                 type="color"
                 value={event?.tema?.cta_bg || '#EEF4FF'}
                 onChange={e => setEvent(ev => ({ ...ev, tema: { ...(ev.tema||{}), cta_bg: e.target.value } }))}
-                style={{ width:'36px', height:'36px', border:'1px solid #E5E7EB', borderRadius:'6px', padding:'2px', cursor:'pointer', background:'none' }}
+                style={{ width:'36px', height:'36px', border:'1px solid #E5E7EB', borderRadius:'20px', padding:'2px', cursor:'pointer', background:'none' }}
               />
               <input
                 type="text"
@@ -401,7 +401,7 @@ export default function IscrizioniTab({ event, setEvent, eventId }) {
                 type="color"
                 value={event?.tema?.colore_pulsanti || '#005AC9'}
                 onChange={e => setEvent(ev => ({ ...ev, tema: { ...(ev.tema||{}), colore_pulsanti: e.target.value } }))}
-                style={{ width:'36px', height:'36px', border:'1px solid #E5E7EB', borderRadius:'6px', padding:'2px', cursor:'pointer', background:'none' }}
+                style={{ width:'36px', height:'36px', border:'1px solid #E5E7EB', borderRadius:'20px', padding:'2px', cursor:'pointer', background:'none' }}
               />
               <input
                 type="text"
@@ -425,7 +425,7 @@ export default function IscrizioniTab({ event, setEvent, eventId }) {
                 type="color"
                 value={event?.tema?.colore_testo_btn || '#FFFFFF'}
                 onChange={e => setEvent(ev => ({ ...ev, tema: { ...(ev.tema||{}), colore_testo_btn: e.target.value } }))}
-                style={{ width:'36px', height:'36px', border:'1px solid #E5E7EB', borderRadius:'6px', padding:'2px', cursor:'pointer', background:'none' }}
+                style={{ width:'36px', height:'36px', border:'1px solid #E5E7EB', borderRadius:'20px', padding:'2px', cursor:'pointer', background:'none' }}
               />
               <input
                 type="text"
@@ -493,7 +493,7 @@ export default function IscrizioniTab({ event, setEvent, eventId }) {
           </div>
         </div>
 
-        <div style={{ display: 'flex', gap: '20px', flexWrap: 'wrap', marginTop: '12px', padding: '10px 12px', background: '#F9FAFB', borderRadius: '8px' }}>
+        <div style={{ display: 'flex', gap: '20px', flexWrap: 'wrap', marginTop: '12px', padding: '10px 12px', background: '#F9FAFB', borderRadius: '20px' }}>
           <div>
             <span style={sStat}>CAPIENZA</span>
             <span style={sVal}>{event.capienza_max ? event.capienza_max.toLocaleString('it-IT') : '∞'}</span>
@@ -598,7 +598,7 @@ const spinStyle = {
 }
 
 const sCard = {
-  background: '#fff', border: '1px solid #E5E7EB', borderRadius: '10px',
+  background: '#fff', border: '1px solid #E5E7EB', borderRadius: '20px',
   marginBottom: '14px', padding: '14px',
 }
 const sCardTitle = {
@@ -608,7 +608,7 @@ const sCardTitle = {
 const sLabel = { display: 'block', fontSize: '12px', fontWeight: '700', color: '#374151', marginBottom: '4px' }
 const sInput = {
   width: '100%', padding: '8px 10px',
-  border: '1px solid #D1D5DB', borderRadius: '6px',
+  border: '1px solid #D1D5DB', borderRadius: '20px',
   fontSize: '13px', fontFamily: "'Outfit',sans-serif",
   outline: 'none', boxSizing: 'border-box', backgroundColor: '#fff',
 }

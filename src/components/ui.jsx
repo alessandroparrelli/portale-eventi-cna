@@ -131,7 +131,7 @@ export function Input({ value, onChange, placeholder, type='text', disabled=fals
   return (
     <input
       type={type} value={value} onChange={onChange} placeholder={placeholder} disabled={disabled}
-      style={{ padding:'9px 12px', border:'1px solid #E8ECF4', borderRadius:'4px',
+      style={{ padding:'9px 12px', border:'1px solid #E8ECF4', borderRadius:'20px',
         fontSize:'14px', fontFamily:"'Inter',sans-serif", color:'#111827', outline:'none',
         backgroundColor: disabled ? '#F9FAFB' : '#FFFFFF', ...style }}
       onFocus={e => !disabled && (e.target.style.borderColor='#5B5FEF')}
@@ -143,7 +143,7 @@ export function Input({ value, onChange, placeholder, type='text', disabled=fals
 export function Select({ value, onChange, children, disabled=false }) {
   return (
     <select value={value} onChange={onChange} disabled={disabled}
-      style={{ padding:'9px 12px', border:'1px solid #E8ECF4', borderRadius:'4px',
+      style={{ padding:'9px 12px', border:'1px solid #E8ECF4', borderRadius:'20px',
         fontSize:'14px', fontFamily:"'Inter',sans-serif", color:'#111827', outline:'none',
         backgroundColor: disabled ? '#F9FAFB' : '#FFFFFF', cursor: disabled ? 'not-allowed' : 'pointer' }}
       onFocus={e => !disabled && (e.target.style.borderColor='#5B5FEF')}
@@ -156,7 +156,7 @@ export function Select({ value, onChange, children, disabled=false }) {
 export function Textarea({ value, onChange, placeholder, rows=4 }) {
   return (
     <textarea value={value} onChange={onChange} placeholder={placeholder} rows={rows}
-      style={{ padding:'9px 12px', border:'1px solid #E8ECF4', borderRadius:'4px',
+      style={{ padding:'9px 12px', border:'1px solid #E8ECF4', borderRadius:'20px',
         fontSize:'14px', fontFamily:"'Inter',sans-serif", color:'#111827', outline:'none',
         resize:'vertical' }}
       onFocus={e => (e.target.style.borderColor='#5B5FEF')}
@@ -166,7 +166,7 @@ export function Textarea({ value, onChange, placeholder, rows=4 }) {
 
 // ---- BTN ----
 export function Btn({ onClick, children, variant='primary', size='md', disabled=false, style={} }) {
-  const base = { display:'flex', alignItems:'center', gap:'6px', border:'none', borderRadius:'4px',
+  const base = { display:'flex', alignItems:'center', gap:'6px', border:'none', borderRadius:'20px',
     fontFamily:"'Inter',sans-serif", fontWeight:'700', cursor: disabled ? 'not-allowed' : 'pointer',
     transition:'opacity 0.15s', opacity: disabled ? 0.6 : 1, whiteSpace:'nowrap',
     padding: size==='sm' ? '6px 12px' : size==='lg' ? '12px 24px' : '9px 16px',

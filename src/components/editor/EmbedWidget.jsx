@@ -42,7 +42,7 @@ export default function EmbedWidget({ url, titolo }) {
   return (
     <div style={{ fontFamily: "'Outfit',sans-serif" }}>
       {/* Info banner */}
-      <div style={{ backgroundColor: '#EFF6FF', border: '1px solid #BFDBFE', borderRadius: '8px',
+      <div style={{ backgroundColor: '#EFF6FF', border: '1px solid #BFDBFE', borderRadius: '20px',
         padding: '14px 18px', marginBottom: '24px', display: 'flex', gap: '12px' }}>
         <span style={{ fontSize: '20px', flexShrink: 0 }}>🔗</span>
         <div>
@@ -62,13 +62,13 @@ export default function EmbedWidget({ url, titolo }) {
           letterSpacing: '0.06em', margin: '0 0 6px' }}>URL pagina pubblica</p>
         <div style={{ display: 'flex', gap: '8px', alignItems: 'center' }}>
           <div style={{ flex: 1, padding: '9px 12px', backgroundColor: '#F9FAFB', border: '1px solid #E5E7EB',
-            borderRadius: '6px', fontSize: '13px', color: '#374151', fontFamily: 'monospace',
+            borderRadius: '20px', fontSize: '13px', color: '#374151', fontFamily: 'monospace',
             overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap' }}>
             {url}
           </div>
           <a href={url} target="_blank" rel="noopener noreferrer"
             style={{ flexShrink: 0, padding: '9px 14px', backgroundColor: '#ffffff', border: '1px solid #E5E7EB',
-              borderRadius: '6px', fontSize: '13px', fontWeight: '600', color: '#374151',
+              borderRadius: '20px', fontSize: '13px', fontWeight: '600', color: '#374151',
               textDecoration: 'none', fontFamily: "'Outfit',sans-serif", whiteSpace: 'nowrap' }}>
             Apri ↗
           </a>
@@ -82,7 +82,7 @@ export default function EmbedWidget({ url, titolo }) {
         <div style={{ display: 'flex', gap: '8px', flexWrap: 'wrap' }}>
           {PRESETS.map(pr => (
             <button key={pr.id} onClick={() => setPreset(pr.id)}
-              style={{ padding: '10px 16px', borderRadius: '8px', border: '1px solid',
+              style={{ padding: '10px 16px', borderRadius: '20px', border: '1px solid',
                 borderColor: preset === pr.id ? '#003DA5' : '#E5E7EB',
                 backgroundColor: preset === pr.id ? '#EFF6FF' : '#ffffff',
                 color: preset === pr.id ? '#003DA5' : '#374151',
@@ -95,7 +95,7 @@ export default function EmbedWidget({ url, titolo }) {
             </button>
           ))}
           <button onClick={() => setPreset('custom')}
-            style={{ padding: '10px 16px', borderRadius: '8px', border: '1px solid',
+            style={{ padding: '10px 16px', borderRadius: '20px', border: '1px solid',
               borderColor: preset === 'custom' ? '#003DA5' : '#E5E7EB',
               backgroundColor: preset === 'custom' ? '#EFF6FF' : '#ffffff',
               color: preset === 'custom' ? '#003DA5' : '#374151',
@@ -114,13 +114,13 @@ export default function EmbedWidget({ url, titolo }) {
             <label style={{ display: 'flex', flexDirection: 'column', gap: '4px', flex: 1 }}>
               <span style={{ fontSize: '12px', fontWeight: '600', color: '#6B7280' }}>Larghezza (px)</span>
               <input type="number" value={customW} onChange={e => setCustomW(Number(e.target.value))}
-                style={{ padding: '8px 12px', border: '1px solid #D1D5DB', borderRadius: '6px',
+                style={{ padding: '8px 12px', border: '1px solid #D1D5DB', borderRadius: '20px',
                   fontSize: '14px', fontFamily: "'Outfit',sans-serif", outline: 'none', width: '100%', boxSizing: 'border-box' }}/>
             </label>
             <label style={{ display: 'flex', flexDirection: 'column', gap: '4px', flex: 1 }}>
               <span style={{ fontSize: '12px', fontWeight: '600', color: '#6B7280' }}>Altezza (px)</span>
               <input type="number" value={customH} onChange={e => setCustomH(Number(e.target.value))}
-                style={{ padding: '8px 12px', border: '1px solid #D1D5DB', borderRadius: '6px',
+                style={{ padding: '8px 12px', border: '1px solid #D1D5DB', borderRadius: '20px',
                   fontSize: '14px', fontFamily: "'Outfit',sans-serif", outline: 'none', width: '100%', boxSizing: 'border-box' }}/>
             </label>
           </div>
@@ -138,14 +138,14 @@ export default function EmbedWidget({ url, titolo }) {
             letterSpacing: '0.06em', margin: 0 }}>Codice HTML da incollare</p>
           <div style={{ display: 'flex', gap: '8px' }}>
             <button onClick={() => setShowPreview(!showPreview)}
-              style={{ padding: '6px 12px', border: '1px solid #E5E7EB', borderRadius: '6px',
+              style={{ padding: '6px 12px', border: '1px solid #E5E7EB', borderRadius: '20px',
                 backgroundColor: showPreview ? '#F3F4F6' : '#ffffff',
                 fontSize: '12px', fontWeight: '600', color: '#374151',
                 cursor: 'pointer', fontFamily: "'Outfit',sans-serif" }}>
               {showPreview ? 'Nascondi preview' : 'Mostra preview'}
             </button>
             <button onClick={copy}
-              style={{ padding: '6px 16px', border: 'none', borderRadius: '6px',
+              style={{ padding: '6px 16px', border: 'none', borderRadius: '20px',
                 backgroundColor: copied ? '#059669' : '#003DA5',
                 fontSize: '12px', fontWeight: '700', color: '#ffffff',
                 cursor: 'pointer', fontFamily: "'Outfit',sans-serif", transition: 'background 0.2s',
@@ -170,7 +170,7 @@ export default function EmbedWidget({ url, titolo }) {
         </div>
 
         <pre style={{ backgroundColor: '#0F172A', color: '#E2E8F0', padding: '16px 18px',
-          borderRadius: '8px', fontSize: '12px', lineHeight: '1.7', margin: 0,
+          borderRadius: '20px', fontSize: '12px', lineHeight: '1.7', margin: 0,
           overflowX: 'auto', whiteSpace: 'pre-wrap', wordBreak: 'break-all',
           fontFamily: "'JetBrains Mono','Fira Code','Courier New',monospace" }}>
           {code}
@@ -182,13 +182,13 @@ export default function EmbedWidget({ url, titolo }) {
         <div>
           <p style={{ fontSize: '12px', fontWeight: '700', color: '#6B7280', textTransform: 'uppercase',
             letterSpacing: '0.06em', margin: '0 0 10px' }}>Anteprima embed</p>
-          <div style={{ border: '1px solid #E5E7EB', borderRadius: '10px', overflow: 'hidden',
+          <div style={{ border: '1px solid #E5E7EB', borderRadius: '20px', overflow: 'hidden',
             backgroundColor: '#F9FAFB', padding: '16px' }}>
               <iframe
                 src={url}
                 width={typeof w === 'string' ? '100%' : Math.min(w, 700)}
                 height={h}
-                style={{ border: 'none', borderRadius: '8px', boxShadow: '0 4px 24px rgba(0,0,0,0.12)',
+                style={{ border: 'none', borderRadius: '20px', boxShadow: '0 4px 24px rgba(0,0,0,0.12)',
                   display: 'block', maxWidth: '100%' }}
                 title={titolo || 'Preview'}
                 loading="lazy"
@@ -202,7 +202,7 @@ export default function EmbedWidget({ url, titolo }) {
       )}
 
       {/* Istruzioni piattaforme */}
-      <div style={{ backgroundColor: '#F9FAFB', border: '1px solid #E5E7EB', borderRadius: '8px',
+      <div style={{ backgroundColor: '#F9FAFB', border: '1px solid #E5E7EB', borderRadius: '20px',
         padding: '16px 18px', marginTop: '20px' }}>
         <p style={{ fontSize: '12px', fontWeight: '700', color: '#374151', margin: '0 0 10px' }}>
           Come inserirlo nel tuo sito

@@ -80,7 +80,7 @@ export function AuthProvider({ children }) {
           <span>⚠️ Sessione scaduta — le modifiche non vengono salvate. Fai login di nuovo.</span>
           <button
             onClick={() => { window.location.href = '/login' }}
-            style={{ padding: '6px 16px', backgroundColor: '#fff', color: '#DC2626', border: 'none', borderRadius: '6px', fontWeight: '700', cursor: 'pointer', fontFamily: "'Inter',sans-serif", fontSize: '13px' }}>
+            style={{ padding: '6px 16px', backgroundColor: '#fff', color: '#DC2626', border: 'none', borderRadius: '20px', fontWeight: '700', cursor: 'pointer', fontFamily: "'Inter',sans-serif", fontSize: '13px' }}>
             Login →
           </button>
         </div>
