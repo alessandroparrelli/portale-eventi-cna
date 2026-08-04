@@ -1,13 +1,9 @@
 import { useEffect, useRef, useState, useCallback } from 'react'
-import {
-  Award, Eye, Download, Loader2, Type, Square, Minus, Circle as CircleIcon,
-  QrCode, Image as ImageIcon, Copy, Trash2, ChevronUp, ChevronDown,
-  Bold, Italic, LayoutTemplate, Underline, Upload, X, ChevronRight,
-  Save, BookOpen, Search, Plus, Pencil, CheckCircle, ExternalLink,
-} from 'lucide-react'
 import { Field, Input } from '../ui'
 import LogoManager from './LogoManager'
 import { supabase, getFreshJwt } from '../../lib/supabase'
+import { Award, Bold, BookOpen, CheckCircle, ChevronDown, ChevronRight, ChevronUp, Circle as CircleIcon, Copy, Download, ExternalLink, Eye, Image as ImageIcon, Italic, LayoutTemplate, Loader2, Minus, Pencil, Plus, QrCode, Save, Search, Square, Trash2, Type, Underline, Upload, X } from '../SFIcon'
+
 
 const CERT_FN = 'https://hnkhckcclgabunkqfmrz.supabase.co/functions/v1/genera-certificato'
 const PAGE_W = 842, PAGE_H = 595

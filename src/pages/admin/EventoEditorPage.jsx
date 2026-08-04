@@ -27,11 +27,6 @@ import LogoManager from '../../components/editor/LogoManager'
 import AddressSearch from '../../components/editor/AddressSearch'
 import HeroDragPreview from '../../components/editor/HeroDragPreview'
 import IframePreview from '../../components/IframePreview'
-import {
-  Save, ArrowLeft, Eye, Plus, Trash2, GripVertical,
-  Type, Image, Grid3x3,
-  Hash, Minus, MousePointerClick, AlignLeft, AlignCenter, Wand2, Loader2,
-} from 'lucide-react'
 import { Field, Input, Select, Btn, StatoBadge } from '../../components/ui'
 import EventEmailTab from '../../components/editor/EventEmailTab'
 import CertificatoEditorTab from '../../components/editor/CertificatoEditorTab'
@@ -43,6 +38,8 @@ import MailUpExportTab from '../../components/editor/MailUpExportTab'
 import TagInput from '../../components/editor/TagInput'
 import EmbedWidget from '../../components/editor/EmbedWidget'
 import GlowTabBar from '../../components/GlowTabBar'
+import { AlignCenter, AlignLeft, ArrowLeft, Eye, Grid3x3, GripVertical, Hash, Image, Loader2, Minus, MousePointerClick, Plus, Save, Trash2, Type, Wand2 } from '../../components/SFIcon'
+
 
 const toSlug = s => s.toLowerCase().normalize('NFD').replace(/[\u0300-\u036f]/g,'')
   .replace(/[^a-z0-9]+/g,'-').replace(/^-|-$/g,'')

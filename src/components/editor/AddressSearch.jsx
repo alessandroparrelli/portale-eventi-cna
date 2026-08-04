@@ -1,5 +1,5 @@
 import { useEffect, useRef, useState } from 'react'
-import { MapPin, Search, Loader2, X } from 'lucide-react'
+import { Loader2, MapPin, Search, X } from '../SFIcon'
 
 /* ─── Formatta risultato Nominatim in indirizzo completo ────────── */
 function formatAddress(r) {

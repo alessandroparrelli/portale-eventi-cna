@@ -1,7 +1,7 @@
 import { useEffect, useState } from 'react'
 import { supabase } from '../../lib/supabase'
 import { Btn, Field, Input, Select, Modal } from '../ui'
-import { Plus, Trash2, GripVertical, Eye, ExternalLink } from 'lucide-react'
+import { ExternalLink, Eye, GripVertical, Plus, Trash2 } from '../SFIcon'
 
 const TIPI = [
   { value: 'stelle',  label: '⭐ Stelle (1-5)' },

@@ -7,13 +7,7 @@ import { usePageTitle } from '../../hooks/usePageTitle'
 import { supabase } from '../../lib/supabase'
 import RichEditor from '../../components/editor/RichEditor'
 import HeaderEditor, { mergeHeaderConfig, buildFullEmailHtml, DEFAULT_HEADER_CONFIG } from '../../components/editor/HeaderEditor'
-import {
-  Mail, Save, CheckCircle, Code2, Layers, Image as ImageIcon, Type,
-  AlignLeft, AlignCenter, AlignRight, Square, Star, Zap, Minus,
-  Columns, LayoutTemplate, ChevronUp, ChevronDown, Trash2, GripVertical, MapPin,
-  Upload, X, Loader2, Smartphone, Monitor, ChevronRight,
-  PanelRightClose, PanelRightOpen,
-} from 'lucide-react'
+import { AlignCenter, AlignLeft, AlignRight, CheckCircle, ChevronDown, ChevronRight, ChevronUp, Code2, Columns, GripVertical, Image as ImageIcon, Layers, LayoutTemplate, Loader2, Mail, MapPin, Minus, Monitor, PanelRightClose, PanelRightOpen, Save, Smartphone, Square, Star, Trash2, Type, Upload, X, Zap } from '../../components/SFIcon'
 
 const BLU = '#003DA5'
 const NERO = '#0A0A0A'

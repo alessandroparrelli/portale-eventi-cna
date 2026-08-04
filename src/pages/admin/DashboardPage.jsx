@@ -4,9 +4,7 @@ import { useNavigate } from 'react-router-dom'
 import { supabase } from '../../lib/supabase'
 import GlowTabBar from '../../components/GlowTabBar'
 import GlowStatCard from '../../components/GlowStatCard'
-import {
-  CalendarDays, Clock, Plus, ArrowRight
-} from 'lucide-react'
+import { ArrowRight, CalendarDays, Clock, Plus } from '../../components/SFIcon'
 
 const STATUS_LABELS = { bozza:'Bozza', pubblicato:'Pubblicato', chiuso:'Chiuso', archiviato:'Archiviato' }
 const STATUS_COLORS = {

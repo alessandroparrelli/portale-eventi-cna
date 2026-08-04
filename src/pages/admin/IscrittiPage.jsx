@@ -7,11 +7,12 @@ import { useAuth } from '../../hooks/useAuth'
 import GlowTableHead from '../../components/GlowTableHead'
 import GlowStatCard from '../../components/GlowStatCard'
 import { Modal, PresenzaBadge, Field, Input, Select, Btn, EmptyState } from '../../components/ui'
-import { Users, Search, Download, Upload, Eye, Trash2, UserCheck, AlertCircle, CheckCircle2, X, MapPin, Ticket, RefreshCw, MessageSquare, UserPlus, Link2, Pencil } from 'lucide-react'
 import * as XLSX from 'xlsx'
 import ExcelJS from 'exceljs/dist/exceljs.min.js'
 import { logAttivita } from '../../lib/activityLog'
 import EventSelector from '../../components/EventSelector'
+import { AlertCircle, CheckCircle2, Download, Eye, Link2, MapPin, MessageSquare, Pencil, RefreshCw, Search, Ticket, Trash2, Upload, UserCheck, UserPlus, Users, X } from '../../components/SFIcon'
+
 
 function formatDt(ts) {
   if (!ts) return '—'

@@ -6,15 +6,10 @@ import React, { useEffect, useState, useRef } from 'react'
 import { useNavigate, useParams } from 'react-router-dom'
 import { supabase } from '../../lib/supabase'
 import { logAttivita } from '../../lib/activityLog'
-import {
-  ArrowLeft, Save, Loader2, Mail, Code2, Layers, Trash2,
-  GripVertical, ChevronUp, ChevronDown, Send, Image as ImageIcon, Type,
-  AlignLeft, AlignCenter, AlignRight, Smartphone, Monitor, Minus, Square,
-  Columns, LayoutTemplate, Upload, X, Check, RotateCcw, Zap, Star,
-  Eye as EyeIcon, PanelRightClose, PanelRightOpen, ChevronRight, MapPin,
-} from 'lucide-react'
 import RichEditor from '../../components/editor/RichEditor'
 import HeaderEditor, { mergeHeaderConfig, buildFullEmailHtml, DEFAULT_HEADER_CONFIG } from '../../components/editor/HeaderEditor'
+import { AlignCenter, AlignLeft, AlignRight, ArrowLeft, Check, ChevronDown, ChevronRight, ChevronUp, Code2, Columns, Eye as EyeIcon, GripVertical, Image as ImageIcon, Layers, LayoutTemplate, Loader2, Mail, MapPin, Minus, Monitor, PanelRightClose, PanelRightOpen, RotateCcw, Save, Send, Smartphone, Square, Star, Trash2, Type, Upload, X, Zap } from '../../components/SFIcon'
+
 
 const BLU = '#003DA5'
 const NERO = '#0A0A0A'

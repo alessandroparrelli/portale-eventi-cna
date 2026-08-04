@@ -1,6 +1,6 @@
 import { useState, useEffect } from 'react'
 import { supabase } from '../../lib/supabase'
-import { Loader2, User, Users } from 'lucide-react'
+import { Loader2, User, Users } from '../../components/SFIcon'
 
 /* ─── Input generico ─── */
 function Inp({ label, required, value, onChange, type = 'text', placeholder, error }) {

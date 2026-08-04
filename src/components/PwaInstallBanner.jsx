@@ -1,5 +1,5 @@
 import { useEffect, useState } from 'react'
-import { Download, X } from 'lucide-react'
+import { Download, X } from './SFIcon'
 
 export default function PwaInstallBanner() {
   const [prompt, setPrompt] = useState(null)

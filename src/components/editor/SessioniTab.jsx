@@ -1,6 +1,7 @@
 import { useState } from 'react'
-import { Plus, Trash2, Clock, MapPin, Users, GripVertical, ChevronDown, ChevronUp, Calendar } from 'lucide-react'
 import { Field, Input, Btn } from '../ui'
+import { Calendar, ChevronDown, ChevronUp, Clock, GripVertical, MapPin, Plus, Trash2, Users } from '../SFIcon'
+
 
 function newSessione() {
   return {

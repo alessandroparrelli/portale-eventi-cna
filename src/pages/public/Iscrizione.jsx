@@ -1,7 +1,7 @@
 import { useEffect, useState } from 'react'
 import { useParams, useNavigate } from 'react-router-dom'
 import { supabase } from '../../lib/supabase'
-import { CalendarDays, MapPin, User, Mail, Phone, CheckCircle2, XCircle, Clock, ArrowLeft, Download, Share2 } from 'lucide-react'
+import { ArrowLeft, CalendarDays, CheckCircle2, Clock, Download, Mail, MapPin, Phone, Share2, User, XCircle } from '../../components/SFIcon'
 
 const CNA_LOGO = 'https://raw.githubusercontent.com/alessandroparrelli/fileappoggio/main/NUOVO-LOGO-CNA-ROMA-SOLO-ROMA.png'
 

@@ -2,12 +2,13 @@ import { useEffect, useState } from 'react'
 import { usePageTitle } from '../../hooks/usePageTitle'
 import { supabase } from '../../lib/supabase'
 import { Select, Field, EmptyState } from '../../components/ui'
-import { BarChart2, Star, TrendingUp, Users, CheckCircle2, UserX, UserCheck, Search, Calendar, Award, Clock, ArrowRight, Download } from 'lucide-react'
 import EventSelector from '../../components/EventSelector'
 import GlowTabBar from '../../components/GlowTabBar'
 import GlowStatCard from '../../components/GlowStatCard'
 import GlowTableHead from '../../components/GlowTableHead'
 import * as XLSX from 'xlsx'
+import { ArrowRight, Award, BarChart2, Calendar, CheckCircle2, Clock, Download, Search, Star, TrendingUp, UserCheck, UserX, Users } from '../../components/SFIcon'
+
 
 function StatCard({ icon: Icon, label, value, color='#003DA5', sub, iconClass }) {
   return (

@@ -78,6 +78,11 @@ textarea {
 header img { display: block; }
 
 /* ── Badge stato: animazione pulse ──────────────────── */
+@keyframes spin {
+  from { transform: rotate(0deg); }
+  to   { transform: rotate(360deg); }
+}
+
 @keyframes stato-pulse {
   0%, 100% { transform: scale(1);   opacity: 0.35; }
   50%       { transform: scale(2.2); opacity: 0;    }
