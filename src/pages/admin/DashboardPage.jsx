@@ -17,23 +17,86 @@ const STATUS_COLORS = {
 
 function WeeklyChart({ data }) {
   if (!data?.length) return null
+
+  const W = 520, H = 180
+  const padL = 36, padR = 12, padT = 12, padB = 28
+  const cW = W - padL - padR
+  const cH = H - padT - padB
+
   const max = Math.max(...data.map(d => d.count), 1)
+  const rounded = Math.ceil(max / 30) * 30 || 30
+  const gridLines = [0, rounded * 0.33, rounded * 0.66, rounded].map(v => Math.round(v))
+
+  // coordinate punti
+  const pts = data.map((d, i) => ({
+    x: padL + (i / (data.length - 1)) * cW,
+    y: padT + cH - (d.count / rounded) * cH,
+    v: d.count,
+    l: d.label,
+  }))
+
+  // Curva catmull-rom -> cubic bezier
+  function catmullToBezier(points) {
+    if (points.length < 2) return ''
+    let d = ""
+    for (let i = 0; i < points.length - 1; i++) {
+      const p0 = points[Math.max(i - 1, 0)]
+      const p1 = points[i]
+      const p2 = points[i + 1]
+      const p3 = points[Math.min(i + 2, points.length - 1)]
+      const cp1x = p1.x + (p2.x - p0.x) / 6
+      const cp1y = p1.y + (p2.y - p0.y) / 6
+      const cp2x = p2.x - (p3.x - p1.x) / 6
+      const cp2y = p2.y - (p3.y - p1.y) / 6
+      if (i === 0) d += `M ${p1.x} ${p1.y} `
+      d += `C ${cp1x} ${cp1y} ${cp2x} ${cp2y} ${p2.x} ${p2.y} `
+    }
+    return d
+  }
+
+  const linePath = catmullToBezier(pts)
+  const areaPath = linePath
+    + ` L ${pts[pts.length-1].x} ${padT + cH} L ${pts[0].x} ${padT + cH} Z`
+
   return (
-    <div style={{ display:'flex', alignItems:'flex-end', gap:'6px', height:'64px', padding:'0 4px' }}>
-      {data.map((d, i) => (
-        <div key={i} style={{ flex:1, display:'flex', flexDirection:'column', alignItems:'center', gap:'4px' }}>
-          <div style={{
-            width:'100%', borderRadius:'6px 6px 0 0',
-            background: i === data.length-1
-              ? `linear-gradient(180deg, ${P}, #7C4DFF)`
-              : `${P}${Math.round((0.25 + (i/data.length)*0.5)*255).toString(16).padStart(2,'0')}`,
-            height:`${Math.max((d.count/max)*52, d.count>0?6:2)}px`,
-            transition:'height 0.4s cubic-bezier(.4,0,.2,1)',
-          }} title={`${d.label}: ${d.count}`}/>
-          <span style={{ fontSize:'10px', color:'#9CA3AF', fontWeight:'500' }}>{d.label}</span>
-        </div>
+    <svg viewBox={`0 0 ${W} ${H}`} style={{ width:'100%', height:'auto', overflow:'visible' }}>
+      <defs>
+        <linearGradient id="areaGrad" x1="0" y1="0" x2="0" y2="1">
+          <stop offset="0%" stopColor="#5B5FEF" stopOpacity="0.18"/>
+          <stop offset="100%" stopColor="#5B5FEF" stopOpacity="0.03"/>
+        </linearGradient>
+      </defs>
+
+      {/* Griglia orizzontale */}
+      {gridLines.map((v, i) => {
+        const y = padT + cH - (v / rounded) * cH
+        return (
+          <g key={i}>
+            <line x1={padL} y1={y} x2={W - padR} y2={y}
+              stroke="#E8ECF4" strokeWidth="1" strokeDasharray={i === 0 ? 'none' : 'none'}/>
+            <text x={padL - 6} y={y + 4} textAnchor="end"
+              fontSize="10" fill="#9CA3AF" fontFamily="Inter,sans-serif">{v}</text>
+          </g>
+        )
+      })}
+
+      {/* Area fill */}
+      <path d={areaPath} fill="url(#areaGrad)"/>
+
+      {/* Linea curva */}
+      <path d={linePath} fill="none" stroke="#5B5FEF" strokeWidth="2.5"
+        strokeLinecap="round" strokeLinejoin="round"/>
+
+      {/* Label asse X */}
+      {pts.map((p, i) => (
+        <text key={i} x={p.x} y={H - 4} textAnchor="middle"
+          fontSize="11" fill="#9CA3AF" fontFamily="Inter,sans-serif">{p.l}</text>
       ))}
-    </div>
+
+      {/* Dot interattivo sull ultimo punto */}
+      <circle cx={pts[pts.length-1].x} cy={pts[pts.length-1].y} r="4"
+        fill="#5B5FEF" stroke="#fff" strokeWidth="2"/>
+    </svg>
   )
 }
 
@@ -145,13 +208,13 @@ export default function DashboardPage() {
           <div style={{ display:'flex', alignItems:'center', justifyContent:'space-between', padding:'18px 20px 14px' }}>
             <h2 style={{ fontSize:'14px', fontWeight:'600', color:'#111827', margin:0 }}>Iscrizioni — 7 giorni</h2>
           </div>
-          <div style={{ padding:'0 20px 20px' }}>
+          <div style={{ padding:'4px 16px 16px' }}>
             {weeklyData.some(d=>d.count>0)
               ? <WeeklyChart data={weeklyData}/>
               : <p style={{ color:'#9CA3AF', fontSize:'13px', textAlign:'center', padding:'16px 0' }}>Nessuna iscrizione nell'ultima settimana</p>
             }
-            <p style={{ fontSize:'12px', color:'#9CA3AF', margin:'10px 0 0', textAlign:'right' }}>
-              Totale: <strong style={{color:P}}>{weeklyData.reduce((a,d)=>a+d.count,0)}</strong>
+            <p style={{ fontSize:'12px', color:'#9CA3AF', margin:'6px 0 0', textAlign:'right', fontFamily:"'Inter',sans-serif" }}>
+              Totale settimana: <strong style={{color:P}}>{weeklyData.reduce((a,d)=>a+d.count,0)}</strong>
             </p>
           </div>
         </div>
