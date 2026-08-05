@@ -288,14 +288,14 @@ export default function Sidebar({ mobileOpen, onMobileClose, isMobile }) {
               {!isCollapsed && (
                 <p style={{
                   ...st.groupLabel,
-                  color: group.color,
-                  background: group.color + '10',
                   margin:'8px 0 2px',
                   padding:'4px 8px',
                   borderRadius:'20px',
                   display:'flex', alignItems:'center', gap:'6px',
+                  background:'linear-gradient(90deg, #EEF0FD 0%, #F3F0FF 100%)',
+                  color:'#111111',
                 }}>
-                  <span style={{ width:'6px', height:'6px', borderRadius:'50%', background: group.color, flexShrink:0, display:'inline-block' }}/>
+                  <span style={{ width:'6px', height:'6px', borderRadius:'50%', background:'#5B5FEF', flexShrink:0, display:'inline-block' }}/>
                   {group.label}
                 </p>
               )}
