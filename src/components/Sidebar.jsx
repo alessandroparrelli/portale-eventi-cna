@@ -261,23 +261,36 @@ export default function Sidebar({ mobileOpen, onMobileClose, isMobile }) {
           </div>
         )}
 
-        {/* Toggle collassa — solo desktop */}
+        {/* Toggle collassa — solo desktop: tab sottile sul bordo destro */}
         {!isMobile && (
-          <div style={{ display:'flex', justifyContent: isCollapsed ? 'center' : 'flex-end', padding: isCollapsed ? '10px 0' : '10px 10px 0', flexShrink:0 }}>
-            <button
-              onClick={toggleCollapse}
-              title={isCollapsed ? 'Espandi sidebar' : 'Comprimi sidebar'}
-              style={{ background:'none', border:'1px solid #E8ECF4', borderRadius:'20px', cursor:'pointer', padding:'5px 6px', display:'flex', alignItems:'center', color:'#9CA3AF', transition:'color .15s, background .15s' }}
-              onMouseEnter={e => { e.currentTarget.style.backgroundColor='#F3F4F6'; e.currentTarget.style.color='#374151' }}
-              onMouseLeave={e => { e.currentTarget.style.backgroundColor='transparent'; e.currentTarget.style.color='#9CA3AF' }}
-            >
-              {isCollapsed ? (
-                <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round"><path d="M13 17l5-5-5-5M6 17l5-5-5-5"/></svg>
-              ) : (
-                <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round"><path d="M11 17l-5-5 5-5M18 17l-5-5 5-5"/></svg>
-              )}
-            </button>
-          </div>
+          <button
+            onClick={toggleCollapse}
+            title={isCollapsed ? 'Espandi sidebar' : 'Comprimi sidebar'}
+            style={{
+              position:'absolute', top:'50%', right:0,
+              transform:'translateY(-50%)',
+              width:'14px', height:'40px',
+              background:'#E8ECF4', border:'none',
+              borderRadius:'0 6px 6px 0',
+              cursor:'pointer', padding:0,
+              display:'flex', alignItems:'center', justifyContent:'center',
+              color:'#9CA3AF', opacity:0,
+              transition:'opacity .15s, background .15s, color .15s',
+              zIndex:10,
+            }}
+            onMouseEnter={e => { e.currentTarget.style.opacity='1'; e.currentTarget.style.background='#D1D5DB'; e.currentTarget.style.color='#374151' }}
+            onMouseLeave={e => { e.currentTarget.style.opacity='0' }}
+          >
+            {isCollapsed ? (
+              <svg width="8" height="12" viewBox="0 0 8 12" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+                <polyline points="2,2 6,6 2,10"/>
+              </svg>
+            ) : (
+              <svg width="8" height="12" viewBox="0 0 8 12" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+                <polyline points="6,2 2,6 6,10"/>
+              </svg>
+            )}
+          </button>
         )}
 
         {/* NAVIGAZIONE */}
