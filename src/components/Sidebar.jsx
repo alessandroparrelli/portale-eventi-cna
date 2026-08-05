@@ -112,7 +112,7 @@ function HoverNavLink({ to, end, onClick, activeColor, iconKey, label, activeDot
         <>
           <div style={{
             ...iconWrap,
-            backgroundColor: isActive ? activeColor : hovered ? '#E8ECF4' : '#F3F4F6',
+            backgroundColor: isActive ? activeColor : hovered ? '#E8ECF4' : 'transparent',
           }}>
             {icons[iconKey]?.(isActive ? '#fff' : ICON_INACTIVE)}
           </div>
@@ -261,36 +261,33 @@ export default function Sidebar({ mobileOpen, onMobileClose, isMobile }) {
           </div>
         )}
 
-        {/* Toggle collassa — solo desktop: tab sottile sul bordo destro */}
+        {/* Toggle collassa — solo desktop: freccia inline discreta in fondo */}
         {!isMobile && (
-          <button
-            onClick={toggleCollapse}
-            title={isCollapsed ? 'Espandi sidebar' : 'Comprimi sidebar'}
-            style={{
-              position:'absolute', top:'50%', right:0,
-              transform:'translateY(-50%)',
-              width:'14px', height:'40px',
-              background:'#E8ECF4', border:'none',
-              borderRadius:'0 6px 6px 0',
-              cursor:'pointer', padding:0,
-              display:'flex', alignItems:'center', justifyContent:'center',
-              color:'#9CA3AF', opacity:0,
-              transition:'opacity .15s, background .15s, color .15s',
-              zIndex:10,
-            }}
-            onMouseEnter={e => { e.currentTarget.style.opacity='1'; e.currentTarget.style.background='#D1D5DB'; e.currentTarget.style.color='#374151' }}
-            onMouseLeave={e => { e.currentTarget.style.opacity='0' }}
-          >
-            {isCollapsed ? (
-              <svg width="8" height="12" viewBox="0 0 8 12" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
-                <polyline points="2,2 6,6 2,10"/>
-              </svg>
-            ) : (
-              <svg width="8" height="12" viewBox="0 0 8 12" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
-                <polyline points="6,2 2,6 6,10"/>
-              </svg>
-            )}
-          </button>
+          <div style={{ padding: isCollapsed ? '6px 0' : '0 10px 6px', flexShrink:0, display:'flex', justifyContent: isCollapsed ? 'center' : 'flex-end' }}>
+            <button
+              onClick={toggleCollapse}
+              title={isCollapsed ? 'Espandi sidebar' : 'Comprimi sidebar'}
+              style={{
+                background:'none', border:'none', borderRadius:'6px',
+                cursor:'pointer', padding:'4px 6px',
+                display:'flex', alignItems:'center', justifyContent:'center',
+                color:'#C4C4C4',
+                transition:'color .15s',
+              }}
+              onMouseEnter={e => e.currentTarget.style.color='#6B7280'}
+              onMouseLeave={e => e.currentTarget.style.color='#C4C4C4'}
+            >
+              {isCollapsed ? (
+                <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+                  <polyline points="13 17 18 12 13 7"/><polyline points="6 17 11 12 6 7"/>
+                </svg>
+              ) : (
+                <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+                  <polyline points="11 17 6 12 11 7"/><polyline points="18 17 13 12 18 7"/>
+                </svg>
+              )}
+            </button>
+          </div>
         )}
 
         {/* NAVIGAZIONE */}
