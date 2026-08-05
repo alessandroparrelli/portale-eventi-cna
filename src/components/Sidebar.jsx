@@ -314,7 +314,7 @@ export default function Sidebar({ mobileOpen, onMobileClose, isMobile }) {
         </nav>
 
         {/* Bottone Esci */}
-        <div style={{ padding:'6px 10px 8px', flexShrink:0 }}>
+        <div style={{ padding:'6px 10px 8px', flexShrink:0, marginTop:'auto' }}>
           <div style={{ height:'1px', background:'#F3F4F6', marginBottom:'6px' }}/>
           <button
             onClick={() => signOut()}
@@ -353,7 +353,7 @@ const st = {
   },
   nav: {
     flex:1, padding:'6px 10px 4px', display:'flex',
-    flexDirection:'column', gap:0, overflowY:'auto',
+    flexDirection:'column', gap:0, overflowY:'visible',
   },
   group: { marginBottom:'4px' },
   groupLabel: {
