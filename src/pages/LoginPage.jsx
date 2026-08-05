@@ -68,31 +68,31 @@ export default function LoginPage() {
     <div style={s.page}>
       <div style={s.card}>
 
-        {/* Wordmark eventlypro — grande */}
+        {/* Wordmark cnaeventi — grande */}
         <div style={s.logoWrap}>
-          <div style={{ display:'flex', alignItems:'center', gap:'14px' }}>
-            <svg width="56" height="56" viewBox="0 0 56 56" fill="none" xmlns="http://www.w3.org/2000/svg">
+          <div style={{ display:'flex', alignItems:'center', gap:'16px' }}>
+            <svg width="60" height="60" viewBox="0 0 56 56" fill="none" xmlns="http://www.w3.org/2000/svg">
               <defs>
-                <linearGradient id="tg" x1="6" y1="6" x2="50" y2="30" gradientUnits="userSpaceOnUse">
-                  <stop offset="0%" stopColor="#F87171"/>
-                  <stop offset="100%" stopColor="#FB923C"/>
+                <linearGradient id="ltop" x1="5" y1="5" x2="51" y2="18" gradientUnits="userSpaceOnUse">
+                  <stop offset="0%" stopColor="#003DA5"/>
+                  <stop offset="100%" stopColor="#1a5abf"/>
                 </linearGradient>
-                <linearGradient id="lg" x1="6" y1="18" x2="28" y2="50" gradientUnits="userSpaceOnUse">
-                  <stop offset="0%" stopColor="#6366F1"/>
+                <linearGradient id="lleft" x1="5" y1="18" x2="28" y2="51" gradientUnits="userSpaceOnUse">
+                  <stop offset="0%" stopColor="#5B5FEF"/>
                   <stop offset="100%" stopColor="#4338CA"/>
                 </linearGradient>
-                <linearGradient id="rg" x1="50" y1="18" x2="28" y2="50" gradientUnits="userSpaceOnUse">
-                  <stop offset="0%" stopColor="#818CF8"/>
-                  <stop offset="100%" stopColor="#6366F1"/>
+                <linearGradient id="lright" x1="51" y1="18" x2="28" y2="51" gradientUnits="userSpaceOnUse">
+                  <stop offset="0%" stopColor="#7C4DFF"/>
+                  <stop offset="100%" stopColor="#5B5FEF"/>
                 </linearGradient>
               </defs>
-              <polygon points="28,5 51,18 28,31 5,18" fill="url(#tg)"/>
-              <polygon points="5,18 28,31 28,51 5,38" fill="url(#lg)"/>
-              <polygon points="51,18 28,31 28,51 51,38" fill="url(#rg)"/>
+              <polygon points="28,5 51,18 28,31 5,18" fill="url(#ltop)"/>
+              <polygon points="5,18 28,31 28,51 5,38" fill="url(#lleft)"/>
+              <polygon points="51,18 28,31 28,51 51,38" fill="url(#lright)"/>
             </svg>
             <div style={{ display:'flex', alignItems:'baseline', lineHeight:1 }}>
-              <span style={{ fontFamily:"'Inter',sans-serif", fontWeight:800, fontSize:42, letterSpacing:'-0.04em', color:'#111827' }}>evently</span>
-              <span style={{ fontFamily:"'Inter',sans-serif", fontWeight:800, fontSize:42, letterSpacing:'-0.04em', color:'#C2410C' }}>pro</span>
+              <span style={{ fontFamily:"'Inter',sans-serif", fontWeight:800, fontSize:42, letterSpacing:'-0.04em', color:'#111827' }}>cna</span>
+              <span style={{ fontFamily:"'Inter',sans-serif", fontWeight:800, fontSize:42, letterSpacing:'-0.04em', color:'#5B5FEF' }}>eventi</span>
             </div>
           </div>
         </div>

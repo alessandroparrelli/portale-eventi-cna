@@ -119,17 +119,31 @@ export default function AdminLayout() {
           </button>
         )}
 
-        {/* Centro: wordmark eventlypro */}
+        {/* Centro: wordmark cnaeventi */}
         <div className="admin-header-center" style={{ display:'flex', alignItems:'center', gap:0 }}>
           <div style={s.titleBlock} onClick={() => window.location.reload()} title="Ricarica pagina" role="button" tabIndex={0} style={{ ...s.titleBlock, cursor:'pointer' }}>
             <svg width="36" height="36" viewBox="0 0 40 40" fill="none" xmlns="http://www.w3.org/2000/svg">
-              <polygon points="20,4 36,13 20,22 4,13" fill="#FB7185"/>
-              <polygon points="4,13 20,22 20,36 4,27" fill="#5B5FEF"/>
-              <polygon points="36,13 20,22 20,36 36,27" fill="#7C4DFF"/>
+              <defs>
+                <linearGradient id="ht" x1="4" y1="4" x2="36" y2="13" gradientUnits="userSpaceOnUse">
+                  <stop offset="0%" stopColor="#003DA5"/>
+                  <stop offset="100%" stopColor="#1a5abf"/>
+                </linearGradient>
+                <linearGradient id="hl" x1="4" y1="13" x2="20" y2="36" gradientUnits="userSpaceOnUse">
+                  <stop offset="0%" stopColor="#5B5FEF"/>
+                  <stop offset="100%" stopColor="#4338CA"/>
+                </linearGradient>
+                <linearGradient id="hr" x1="36" y1="13" x2="20" y2="36" gradientUnits="userSpaceOnUse">
+                  <stop offset="0%" stopColor="#7C4DFF"/>
+                  <stop offset="100%" stopColor="#5B5FEF"/>
+                </linearGradient>
+              </defs>
+              <polygon points="20,4 36,13 20,22 4,13" fill="url(#ht)"/>
+              <polygon points="4,13 20,22 20,36 4,27" fill="url(#hl)"/>
+              <polygon points="36,13 20,22 20,36 36,27" fill="url(#hr)"/>
             </svg>
             <span style={s.pageTitle}>
-              <span style={{ color:'#111111' }}>evently</span>
-              <span style={{ color:'#C0392B' }}>pro</span>
+              <span style={{ color:'#111111' }}>cna</span>
+              <span style={{ color:'#5B5FEF' }}>eventi</span>
             </span>
           </div>
         </div>
@@ -154,7 +168,7 @@ export default function AdminLayout() {
           alt="CNA Roma" style={{ height:'14px', objectFit:'contain', flexShrink:0, opacity:0.45 }}
         />
         <span style={s.footerText}>
-          eventlypro © 2026, software di gestione marketing ed eventi sviluppato da CNA di Roma
+          cnaeventi © 2026, software di gestione marketing ed eventi sviluppato da CNA di Roma
         </span>
       </footer>
     </div>
