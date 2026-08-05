@@ -91,8 +91,8 @@ export default function LoginPage() {
               <polygon points="51,18 28,31 28,51 51,38" fill="url(#lright)"/>
             </svg>
             <div style={{ display:'flex', alignItems:'baseline', lineHeight:1 }}>
-              <span style={{ fontFamily:"'Inter',sans-serif", fontWeight:800, fontSize:42, letterSpacing:'-0.04em', color:'#111827' }}>cna</span>
-              <span style={{ fontFamily:"'Inter',sans-serif", fontWeight:800, fontSize:42, letterSpacing:'-0.04em', color:'#5B5FEF' }}>eventi</span>
+              <span style={{ fontFamily:"'Inter',sans-serif", fontWeight:900, fontSize:42, letterSpacing:'-0.05em', color:'#111827', fontVariationSettings:"'wght' 900" }}>cna</span>
+              <span style={{ fontFamily:"'Inter',sans-serif", fontWeight:900, fontSize:42, letterSpacing:'-0.05em', color:'#5B5FEF', fontVariationSettings:"'wght' 900" }}>eventi</span>
             </div>
           </div>
         </div>

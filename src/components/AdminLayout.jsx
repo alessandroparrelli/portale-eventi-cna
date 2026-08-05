@@ -214,10 +214,11 @@ const s = {
   },
   pageTitle: {
     fontSize: '28px',
-    fontWeight: '800',
+    fontWeight: '900',
     color: '#111111',
-    letterSpacing: '-0.04em',
+    letterSpacing: '-0.05em',
     fontFamily: "'Inter', sans-serif",
+    fontVariationSettings: "'wght' 900",
     lineHeight: 1,
     whiteSpace: 'nowrap',
   },
