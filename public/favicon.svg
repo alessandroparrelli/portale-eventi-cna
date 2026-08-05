@@ -1,6 +1,28 @@
-<svg width="32" height="32" viewBox="0 0 32 32" xmlns="http://www.w3.org/2000/svg">
-  <rect width="32" height="32" rx="7" fill="#130510"/>
-  <polygon points="16,4 28,10.5 16,17 4,10.5" fill="#FB7185"/>
-  <polygon points="28,10.5 28,21.5 16,28 16,17" fill="#BE123C"/>
-  <polygon points="4,10.5 16,17 16,28 4,21.5" fill="#9F1239"/>
+<?xml version="1.0" encoding="utf-8"?>
+<svg xmlns="http://www.w3.org/2000/svg" xmlns:xlink="http://www.w3.org/1999/xlink"
+     viewBox="0 0 1000 1000" width="1000" height="1000">
+  <defs>
+    <linearGradient id="g1" gradientUnits="userSpaceOnUse" x1="219.1702" y1="963.5833" x2="409.9843" y2="963.5833" gradientTransform="matrix(3 0 0 -3 -2 3244)">
+      <stop offset="0" stop-color="#002D7A"/>
+      <stop offset="1" stop-color="#1A5ABF"/>
+    </linearGradient>
+    <linearGradient id="g2" gradientUnits="userSpaceOnUse" x1="266.8737" y1="963.5833" x2="266.8737" y2="853.4167" gradientTransform="matrix(3 0 0 -3 -2 3244)">
+      <stop offset="0" stop-color="#5B5FEF"/>
+      <stop offset="1" stop-color="#3730A3"/>
+    </linearGradient>
+    <linearGradient id="g3" gradientUnits="userSpaceOnUse" x1="362.2808" y1="963.5833" x2="362.2808" y2="853.4167" gradientTransform="matrix(3 0 0 -3 -2 3244)">
+      <stop offset="0" stop-color="#7C4DFF"/>
+      <stop offset="1" stop-color="#5B5FEF"/>
+    </linearGradient>
+  </defs>
+  <!-- Cubo originale 1920x1080 scalato e centrato in 1000x1000 -->
+  <!-- bbox cubo: x 655.51-1227.95 (w=572.44), y 188-849 (h=661) -->
+  <!-- scale per fit in 760px (76% di 1000): 760/661 = 1.1498 -->
+  <!-- ma limitiamo per width: 760/572.44 = 1.328 → usiamo min → 1.1498 -->
+  <!-- translated: tx = (1000 - 572.44*1.1498)/2 - 655.51*1.1498 -->
+  <g transform="translate(500,500) scale(1.1498) translate(-941.73,-518.5)">
+    <polygon points="941.73,188 1227.95,353.25 941.73,518.5 655.51,353.25" fill="url(#g1)"/>
+    <polygon points="655.51,353.25 941.73,518.5 941.73,849 655.51,683.75" fill="url(#g2)"/>
+    <polygon points="1227.95,353.25 1227.95,683.75 941.73,849 941.73,518.5" fill="url(#g3)"/>
+  </g>
 </svg>

@@ -1,8 +1,8 @@
-const CACHE = 'ep-portale-v5'
+const CACHE = 'cnaeventi-v1'
 
 // Percorsi che non vanno MAI cachati (icone, manifest — devono essere sempre freschi)
 const NO_CACHE = ['/manifest.json', '/favicon.ico', '/favicon.svg', '/favicon-32.png']
-const NO_CACHE_PREFIX = ['/ep-', '/icon-', '/apple-touch']
+const NO_CACHE_PREFIX = ['/cn-', '/ep-', '/icon-', '/apple-touch']
 
 self.addEventListener('install', () => {
   self.skipWaiting()
@@ -58,10 +58,10 @@ self.addEventListener('fetch', e => {
 self.addEventListener('push', e => {
   const data = e.data?.json() || {}
   e.waitUntil(
-    self.registration.showNotification(data.title || 'eventlypro', {
+    self.registration.showNotification(data.title || 'cnaeventi', {
       body: data.body || '',
-      icon: data.icon || '/ep-icon-192-a0826b3f.png',
-      badge: '/ep-icon-192-a0826b3f.png',
+      icon: data.icon || '/cn-icon-192.png',
+      badge: '/cn-icon-192.png',
       data: { url: data.url || '/' }
     })
   )

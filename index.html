@@ -5,9 +5,9 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, minimum-scale=1.0, user-scalable=no, viewport-fit=cover" />
 
     <!-- Titolo e descrizione -->
-    <title>eventlypro</title>
+    <title>cnaeventi</title>
     <meta name="description" content="Portale di gestione eventi CNA Roma" />
-    <meta name="application-name" content="eventlypro" />
+    <meta name="application-name" content="cnaeventi" />
 
     <!-- Favicon browser -->
     <link rel="icon" type="image/x-icon"   href="/favicon.ico" />
@@ -15,36 +15,30 @@
     <link rel="icon" type="image/svg+xml"  href="/favicon.svg" />
 
     <!-- Apple (salvataggio su iPhone/iPad) -->
-    <link rel="apple-touch-icon" href="/ep-touch-icon-a500e321.png" />
+    <link rel="apple-touch-icon" href="/cn-touch-icon.png" />
     <meta name="apple-mobile-web-app-capable" content="yes" />
-    <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent" />
-    <meta name="apple-mobile-web-app-title" content="eventlypro" />
+    <meta name="apple-mobile-web-app-status-bar-style" content="default" />
+    <meta name="apple-mobile-web-app-title" content="cnaeventi" />
 
     <!-- PWA manifest (Android + Chrome) -->
     <link rel="manifest" href="/manifest.json" />
-    <meta name="theme-color" content="#E11D48" />
+    <meta name="theme-color" content="#003DA5" />
 
     <!-- Windows tile -->
-    <meta name="msapplication-TileImage" content="/ep-icon-144-3cc92025.png" />
-    <meta name="msapplication-TileColor" content="#E11D48" />
+    <meta name="msapplication-TileImage" content="/cn-icon-144.png" />
+    <meta name="msapplication-TileColor" content="#003DA5" />
 
     <!-- Open Graph -->
-    <meta property="og:title"       content="eventlypro" />
+    <meta property="og:title"       content="cnaeventi" />
     <meta property="og:description" content="Portale di gestione eventi CNA Roma" />
-    <meta property="og:image"       content="/icon-512.png" />
+    <meta property="og:image"       content="/cn-icon-512.png" />
   </head>
   <body>
     <div id="root"></div>
     <script>
-      // Self-heal eseguito PRIMA di qualsiasi bundle JS, indipendente da
-      // React/Vite. Se questo file HTML viene servito da una cache vecchia
-      // (SW corrotto, cache Safari aggressiva), questo script gira comunque
-      // perché è inline qui dentro, non in un file .js separato che potrebbe
-      // essere a sua volta cachato. Confronta una versione salvata in
-      // localStorage con BUILD_STAMP: se diversa, pulisce tutto e ricarica
-      // UNA sola volta prima di montare l'app React.
+      // Forza aggiornamento cache/SW quando cambia BUILD_STAMP
       (function () {
-        var BUILD_STAMP = '2026-06-30-fix-css-conflict-v2';
+        var BUILD_STAMP = '2026-08-05-cnaeventi-rebrand';
         try {
           var saved = localStorage.getItem('cna-build-stamp');
           if (saved === BUILD_STAMP) return;
@@ -67,15 +61,10 @@
           Promise.all(cleanup).finally(function () {
             localStorage.setItem('cna-build-stamp', BUILD_STAMP);
             if (saved) {
-              // C'era una versione precedente diversa: ricarica per
-              // garantire che il bundle JS fresco venga scaricato.
               window.location.reload();
             }
           });
-        } catch (e) {
-          // Ambiente senza supporto storage/cache: nessun self-heal possibile,
-          // ma l'app prosegue comunque a caricarsi normalmente.
-        }
+        } catch (e) {}
       })();
     </script>
     <script type="module" src="/src/main.jsx"></script>

@@ -11,7 +11,7 @@ ReactDOM.createRoot(document.getElementById('root')).render(
 
 // Versione build corrente — bump questo valore se in futuro serve forzare
 // di nuovo una pulizia totale lato client (cache + SW) per tutti gli utenti.
-const BUILD_VERSION = 'v6-cnaeventi'
+const BUILD_VERSION = 'v7-cnaeventi-icons'
 
 // Self-heal: se la versione salvata in localStorage non corrisponde a
 // quella corrente, ripuliamo TUTTE le cache del browser e tutti i Service
