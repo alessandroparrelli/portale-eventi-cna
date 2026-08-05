@@ -505,6 +505,22 @@ export default function EventoEditorPage() {
         setSaving(false)
         return
       }
+      // Se il teatro viene abilitato, assicura che esista la riga email posto_teatro
+      if (payload.teatro_abilitato) {
+        const { data: existingTpl } = await supabase.from('email_templates')
+          .select('id').eq('event_id', id).eq('tipo', 'posto_teatro').maybeSingle()
+        if (!existingTpl) {
+          const { data: defTpl } = await supabase.from('email_templates_default')
+            .select('oggetto, corpo_html, blocchi_json').eq('tipo', 'posto_teatro').maybeSingle()
+          await supabase.from('email_templates').insert({
+            event_id: id, tipo: 'posto_teatro',
+            oggetto: defTpl?.oggetto || 'Il tuo posto per {{nome_evento}}',
+            corpo_html: defTpl?.corpo_html || '',
+            blocchi_json: defTpl?.blocchi_json || null,
+            attivo: true, personalizzato: false,
+          })
+        }
+      }
       logAttivita('evento_modificato', { eventoId: id, eventoTitolo: payload.titolo })
     }
     setSaving(false); setSaved(true); setTimeout(()=>setSaved(false),2500)

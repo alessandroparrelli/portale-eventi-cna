@@ -36,12 +36,13 @@ const BLOCK_TYPES = [
   { tipo:'separatore',label:'Separatore',  icon:<Minus size={13}/>,          cat:'layout' },
   { tipo:'spazio',    label:'Spazio',      icon:<span style={{fontSize:'12px'}}></span>, cat:'layout' },
   { tipo:'mappa',     label:'Mappa',       icon:<MapPin size={13}/>,         cat:'evento' },
+  { tipo:'posto_display', label:'Numero posto', icon:<span style={{fontSize:'12px'}}>&#127919;</span>, cat:'evento' },
 ]
 
 const VARIABILI = [
   '{{nome}}','{{cognome}}','{{ragione_sociale}}','{{email}}',
   '{{nome_evento}}','{{data_evento}}','{{luogo_evento}}',
-  '{{qr_code}}','{{link_landing}}','{{link_questionario}}','{{data_iscrizione}}'
+  '{{qr_code}}','{{link_landing}}','{{link_questionario}}','{{data_iscrizione}}','{{numero_posto}}'
 ]
 
 const PREVIEW_DATA_BASE = {
@@ -51,6 +52,7 @@ const PREVIEW_DATA_BASE = {
   '{{luogo_evento}}':'Palazzo dei Congressi, Roma',
   '{{qr_code}}':'QR-MARCO2026','{{link_landing}}':'#','{{link_questionario}}':'#',
   '{{data_iscrizione}}': new Date().toLocaleDateString('it-IT'),
+  '{{numero_posto}}': 'Curva Sud, Settore 18AS, Posto 9S',
 }
 
 //  Block defaults 
@@ -67,6 +69,7 @@ function blockDefaults(tipo) {
     separatore: { colore:'#E5E7EB', spessore:1, spazio:24 },
     spazio:     { altezza:32 },
     mappa:      { indirizzo:'{{luogo_evento}}', testo:'Come raggiungerci', zoom:15, altezza:200 },
+    posto_display: { testo:'Il tuo posto' },
   }
   return { tipo, id:`b_${Date.now()}_${Math.random().toString(36).slice(2,7)}`, ...(map[tipo]||{}) }
 }
@@ -103,6 +106,11 @@ function blocchiToHtml(blocchi) {
         const h       = b.altezza || 200
         const mapUrl  = `https://www.google.com/maps/search/?api=1&query=${addrEnc}`
         return `<table role="presentation" width="100%" cellpadding="0" cellspacing="0" border="0" style="margin:0 0 20px;border-radius:10px;overflow:hidden;border:1.5px solid #E5E7EB"><tr><td><a href="${mapUrl}" target="_blank" rel="noopener" style="display:block;text-decoration:none"><table role="presentation" width="100%" cellpadding="0" cellspacing="0" border="0"><tr><td align="center" valign="middle" height="${h}" style="background:#EFF6FF;padding:20px;text-align:center"><div>&#x1F5FA;&#xFE0F;</div><p style="margin:8px 0 0;font-size:14px;color:#1D4ED8;font-weight:700;font-family:Inter,Arial,sans-serif">Clicca per aprire la mappa</p></td></tr><tr><td style="padding:14px 18px;background:#ffffff;border-top:2px solid #DBEAFE"><table role="presentation" width="100%" cellpadding="0" cellspacing="0" border="0"><tr><td width="30" valign="middle" style="font-size:22px;padding-right:12px">&#x1F4CD;</td><td valign="middle"><p style="margin:0 0 2px;font-size:14px;font-weight:700;color:#0A0A0A;font-family:Inter,Arial,sans-serif">${b.testo||'Come raggiungerci'}</p><p style="margin:0;font-size:12px;color:#374151;font-family:Inter,Arial,sans-serif">${addr}</p></td><td width="100" align="right" valign="middle"><span style="font-size:11px;font-weight:700;color:#003DA5;font-family:Inter,Arial,sans-serif;border:1.5px solid #BFDBFE;padding:5px 10px;border-radius:6px;white-space:nowrap">Apri Maps &#8594;</span></td></tr></table></td></tr></table></a></td></tr></table>`
+      }
+      if (b.tipo === 'posto_display') {
+        const posto = '{{numero_posto}}'
+        const label = b.testo || 'Il tuo posto'
+        return `<table width="100%" cellpadding="0" cellspacing="0" border="0" style="margin-bottom:16px"><tr><td align="center" bgcolor="#003DA5" style="background:#003DA5;border-radius:12px;padding:28px 24px;text-align:center"><p style="margin:0 0 8px;font-size:12px;font-weight:700;color:rgba(255,255,255,0.75);text-transform:uppercase;letter-spacing:.08em;font-family:Inter,Arial,sans-serif">${label}</p><p style="margin:0;font-size:28px;font-weight:900;color:#ffffff;font-family:Inter,Arial,sans-serif;line-height:1.2;word-break:break-word">${posto}</p></td></tr></table>`
       }
       return ''
     } catch(e) { console.error('blocco error', b?.tipo, e); return '' }
@@ -320,6 +328,16 @@ function BlockProps({ block, onChange }) {
         Nella mail: immagine statica cliccabile, apre Google Maps
       </p>
     </>
+    case 'posto_display': return <>
+      <div style={{ marginBottom:'8px' }}>
+        <label style={lbl}>Etichetta sopra il posto</label>
+        <input value={block.testo||''} onChange={e=>set('testo',e.target.value)} style={inp}
+          placeholder="Il tuo posto"/>
+      </div>
+      <p style={{ fontSize:'10px', color:'#9CA3AF', margin:'4px 0 0', fontStyle:'italic' }}>
+        Mostra il numero posto assegnato all{'\''}iscritto (<code style={{fontSize:'10px'}}>{'{{numero_posto}}'}</code>) in un box blu evidenziato
+      </p>
+    </>
     default: return null
   }
 }
@@ -461,17 +479,16 @@ export default function EventEmailTab({ eventoId }) {
     const bodyHtml = editorMode==='html' ? current.corpo_html : blocchiToHtml(currBlocchi)
     const hc = mergeHeaderConfig(headerConfig)
     await supabase.from('email_templates')
-      .update({
+      .upsert({
+        event_id: eventoId, tipo: selected,
         oggetto: current.oggetto, corpo_html: bodyHtml,
         blocchi_json: JSON.stringify(currBlocchi),
         header_config: hc,
-        // Backward compat: scrivi anche nei vecchi campi
         logo_url: hc.logo_url||null, header_colore: hc.sfondo||null,
         header_titolo: hc.titolo||null, logo_altezza: hc.logo_altezza||null,
         titolo_size: hc.titolo_size||null,
         personalizzato: true, updated_at: new Date().toISOString(),
-      })
-      .eq('event_id', eventoId).eq('tipo', selected)
+      }, { onConflict: 'event_id,tipo' })
     setSaving(false); setSaved(true); setTimeout(()=>setSaved(false), 2500)
   }
 
