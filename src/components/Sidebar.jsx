@@ -321,21 +321,23 @@ export default function Sidebar({ mobileOpen, onMobileClose, isMobile }) {
             </div>
           ))}
 
+          {/* Esci — subito dopo i gruppi, dentro il nav */}
+          <div style={{ marginTop:'6px' }}>
+            <div style={{ height:'1px', background:'#F3F4F6', margin:'4px 0' }}/>
+            <button
+              onClick={() => signOut()}
+              title={isCollapsed ? 'Esci' : undefined}
+              style={{ ...st.logoutBtn, justifyContent: isCollapsed ? 'center' : undefined, padding: isCollapsed ? '7px' : '7px 10px' }}
+              onMouseEnter={e => e.currentTarget.style.backgroundColor='#FEF2F2'}
+              onMouseLeave={e => e.currentTarget.style.backgroundColor='transparent'}>
+              {icons.logout()}
+              {!isCollapsed && <span className="logout-label">Esci dall'app</span>}
+            </button>
+          </div>
+
         </nav>
 
-        {/* Bottone Esci */}
-        <div style={{ padding:'6px 10px 8px', flexShrink:0, marginTop:'auto' }}>
-          <div style={{ height:'1px', background:'#F3F4F6', marginBottom:'6px' }}/>
-          <button
-            onClick={() => signOut()}
-            title={isCollapsed ? 'Esci' : undefined}
-            style={{ ...st.logoutBtn, justifyContent: isCollapsed ? 'center' : undefined, padding: isCollapsed ? '7px' : '7px 10px' }}
-            onMouseEnter={e => e.currentTarget.style.backgroundColor='#FEF2F2'}
-            onMouseLeave={e => e.currentTarget.style.backgroundColor='transparent'}>
-            {icons.logout()}
-            {!isCollapsed && <span className="logout-label">Esci dall'app</span>}
-          </button>
-        </div>
+        {/* Toggle collapse */}
 
       </aside>
     </>
@@ -362,8 +364,8 @@ const st = {
     cursor:'pointer', padding:'6px', display:'flex', alignItems:'center',
   },
   nav: {
-    flex:1, padding:'6px 10px 4px', display:'flex',
-    flexDirection:'column', gap:0, overflowY:'visible',
+    padding:'6px 10px 4px', display:'flex',
+    flexDirection:'column', gap:0,
   },
   group: { marginBottom:'4px' },
   groupLabel: {
