@@ -58,7 +58,7 @@ export default function SocialPage() {
   return (
     <div style={{ maxWidth:'680px', margin:'0 auto', padding:'32px 24px 64px' }}>
       <div style={{ marginBottom:'28px' }}>
-        <h1 style={{ ...sF, margin:'0 0 6px', fontSize:'22px', fontWeight:'900', color:'#111827', letterSpacing:'-.03em' }}>
+        <h1 style={{ ...sF, margin:'0 0 6px', fontSize:'22px', fontWeight:'900', color:'#111827', letterSpacing:'-.03em', fontVariationSettings:"'wght' 900" }}>
           Configurazione Social
         </h1>
         <p style={{ ...sF, margin:0, fontSize:'14px', color:'#6B7280', lineHeight:'1.6' }}>

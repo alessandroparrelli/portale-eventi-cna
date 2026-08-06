@@ -447,7 +447,7 @@ export default function ActivityLogPage() {
 const s = {
   page:       { width:'100%' },
   header:     { display:'flex', justifyContent:'space-between', alignItems:'flex-start', marginBottom:'24px', gap:'12px', flexWrap:'wrap' },
-  title:      { fontSize:'32px', fontWeight:'900', color:'#111827', letterSpacing:'-0.03em', margin:0 },
+  title:      { fontSize:'32px', fontWeight:'900', color:'#111827', letterSpacing:'-0.03em', margin:0, fontFamily:"'Inter', sans-serif", fontVariationSettings:"'wght' 900" },
   sub:        { fontSize:'14px', color:'#6B7280', margin:'4px 0 0', fontWeight:'500' },
   refreshBtn: { display:'flex', alignItems:'center', gap:'6px', border:'1px solid #E8ECF4', backgroundColor:'#fff', borderRadius:'20px', padding:'8px 14px', fontSize:'13px', fontWeight:'600', cursor:'pointer', fontFamily:"'Inter',sans-serif", color:'#374151' },
   input:      { border:'1px solid #D1D5DB', borderRadius:'20px', padding:'9px 12px', fontSize:'13px', fontFamily:"'Inter',sans-serif", color:'#111827', backgroundColor:'#fff', outline:'none' },

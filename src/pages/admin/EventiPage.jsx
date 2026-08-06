@@ -576,7 +576,7 @@ export default function EventiPage() {
 const s = {
   page:    { width:'100%' },
   header:  { display:'flex', alignItems:'flex-start', justifyContent:'space-between', marginBottom:'24px', flexWrap:'wrap', gap:'12px' },
-  title:   { fontSize:'32px', fontWeight:'900', color:'#111827', letterSpacing:'-.03em', margin:0 },
+  title:   { fontSize:'32px', fontWeight:'900', color:'#111827', letterSpacing:'-.03em', margin:0, fontFamily:"'Inter', sans-serif", fontVariationSettings:"'wght' 900" },
   sub:     { fontSize:'14px', color:'#6B7280', margin:'4px 0 0', fontWeight:'500' },
   filters: { display:'flex', gap:'12px', marginBottom:'20px', flexWrap:'wrap' },
   swrap:   { position:'relative', flex:1, minWidth:'200px' },

@@ -147,7 +147,7 @@ export default function RuoliPage() {
           <Link to="/admin/utenti" style={{ display:'inline-flex', alignItems:'center', gap:'4px', fontSize:'13px', color:'#6B7280', textDecoration:'none', marginBottom:'6px' }}>
             <ArrowLeft size={14}/> Utenti
           </Link>
-          <h1 style={{ fontSize:'32px', fontWeight:'900', color:'#111827', letterSpacing:'-.03em', margin:0 }}>Gestione Ruoli</h1>
+          <h1 style={{ fontSize:'32px', fontWeight:'900', color:'#111827', letterSpacing:'-.03em', margin:0, fontFamily:"'Inter', sans-serif", fontVariationSettings:"'wght' 900" }}>Gestione Ruoli</h1>
           <p style={{ fontSize:'14px', color:'#6B7280', margin:'4px 0 0' }}>{roles.length} ruoli — definisci cosa può vedere e fare ogni ruolo per sezione</p>
         </div>
         <Btn onClick={openCreate}><Plus size={18}/> Nuovo ruolo</Btn>

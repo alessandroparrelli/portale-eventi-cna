@@ -80,7 +80,7 @@ export default function LandingPageListPage() {
       {/* Header */}
       <div className="lp-header-row" style={{ display:'flex', alignItems:'center', justifyContent:'space-between', marginBottom:'20px', flexWrap:'wrap', gap:'12px' }}>
         <div>
-          <h1 style={{ fontSize:'22px', fontWeight:'800', color:'#111827', margin:0, letterSpacing:'-0.03em' }}>Landing Page</h1>
+          <h1 style={{ fontSize:'22px', fontWeight:'900', color:'#111827', margin:0, letterSpacing:'-0.03em', fontFamily:"'Inter', sans-serif", fontVariationSettings:"'wght' 900" }}>Landing Page</h1>
           <p style={{ fontSize:'13px', color:'#6B7280', margin:'4px 0 0' }}>Pagine di marketing per raccogliere contatti</p>
         </div>
         <button onClick={crea} style={{ background:'#5B5FEF', color:'#fff', border:'none', borderRadius:'20px', padding:'10px 20px', fontFamily:'Inter,sans-serif', fontSize:'13px', fontWeight:'700', cursor:'pointer', display:'flex', alignItems:'center', gap:'6px' }}>

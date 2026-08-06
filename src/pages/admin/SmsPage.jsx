@@ -151,7 +151,7 @@ export default function SmsPage() {
   const s = {
     page: { padding: '0', fontFamily: 'Inter, sans-serif', color: '#111827' },
     header: { marginBottom: 24 },
-    title: { fontSize: 22, fontWeight: 900, color: '#5B5FEF', letterSpacing: '-0.04em', margin: '0 0 4px' },
+    title: { fontSize: 22, fontWeight: 900, color: '#5B5FEF', letterSpacing: '-0.04em', margin: '0 0 4px', fontVariationSettings: "'wght' 900" },
     sub: { color: '#6B7280', fontSize: 13 },
     tabs: { display: 'flex', gap: 8, marginBottom: 24 },
     tab: (active) => ({

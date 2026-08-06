@@ -167,7 +167,7 @@ export default function DashboardPage() {
       {/* Header */}
       <div style={{ display:'flex', alignItems:'flex-start', justifyContent:'space-between', marginBottom:'28px', flexWrap:'wrap', gap:'12px' }} className="page-header-row">
         <div>
-          <h1 style={{ fontSize:'30px', fontWeight:'700', color:'#111827', letterSpacing:'-0.03em', margin:0 }}>Dashboard</h1>
+          <h1 style={{ fontSize:'30px', fontWeight:'900', color:'#111827', letterSpacing:'-0.03em', margin:0, fontFamily:"'Inter', sans-serif", fontVariationSettings:"'wght' 900" }}>Dashboard</h1>
           <p style={{ fontSize:'14px', color:'#6B7280', margin:'4px 0 0', fontWeight:'400', textTransform:'capitalize' }}>
             {new Date().toLocaleDateString('it-IT',{weekday:'long',day:'numeric',month:'long',year:'numeric'})}
           </p>

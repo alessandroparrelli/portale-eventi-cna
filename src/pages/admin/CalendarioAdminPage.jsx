@@ -60,7 +60,7 @@ export default function CalendarioAdminPage() {
       {/* Header */}
       <div style={{ display: 'flex', alignItems: 'flex-start', justifyContent: 'space-between', marginBottom: '32px', flexWrap: 'wrap', gap: '12px' }}>
         <div>
-          <h1 style={{ fontSize: '32px', fontWeight: '900', color: '#111827', letterSpacing: '-0.03em', margin: 0 }}>
+          <h1 style={{ fontSize: '32px', fontWeight: '900', color: '#111827', letterSpacing: '-0.03em', margin: 0, fontFamily: "'Inter', sans-serif", fontVariationSettings: "'wght' 900" }}>
             Calendario pubblico
           </h1>
           <p style={{ fontSize: '14px', color: '#6B7280', margin: '4px 0 0' }}>

@@ -133,7 +133,7 @@ export default function UtentiPage() {
     <div style={{ width:'100%' }} className="admin-page">
       <div style={{ display:'flex', alignItems:'flex-start', justifyContent:'space-between', marginBottom:'20px', flexWrap:'wrap', gap:'12px' }}>
         <div>
-          <h1 style={{ fontSize:'32px', fontWeight:'900', color:'#111827', letterSpacing:'-.03em', margin:0 }}>Gestione Utenti</h1>
+          <h1 style={{ fontSize:'32px', fontWeight:'900', color:'#111827', letterSpacing:'-.03em', margin:0, fontFamily:"'Inter', sans-serif", fontVariationSettings:"'wght' 900" }}>Gestione Utenti</h1>
           <p style={{ fontSize:'14px', color:'#6B7280', margin:'4px 0 0' }}>{users.length} utenti</p>
         </div>
         <div style={{ display:'flex', gap:'8px' }}>

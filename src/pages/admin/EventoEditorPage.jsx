@@ -1214,7 +1214,7 @@ const p = {
   tab:        { padding:'14px 18px', background:'none', border:'none', borderBottom:'2px solid transparent', cursor:'pointer', fontSize:'13px', fontFamily:"'Inter',sans-serif", whiteSpace:'nowrap', transition:'color .15s' },
   content:    { flex:1, overflowY:'auto', padding:'24px' },
   panel:      { maxWidth:'860px', margin:'0 auto' },
-  panelTitle: { fontSize:'22px', fontWeight:'900', color:'#111827', letterSpacing:'-.03em', margin:'0 0 20px' },
+  panelTitle: { fontSize:'22px', fontWeight:'900', color:'#111827', letterSpacing:'-.03em', margin:'0 0 20px', fontFamily:"'Inter', sans-serif", fontVariationSettings:"'wght' 900" },
   grid2:      { display:'grid', gridTemplateColumns:'1fr 1fr', gap:'16px', marginBottom:'16px' },
   grid3:      { display:'grid', gridTemplateColumns:'1fr 1fr 1fr', gap:'16px' },
   sectionAdder:{ backgroundColor:'#FFFFFF', border:'1px solid #E8ECF4', borderRadius:'16px', padding:'16px', marginBottom:'16px' },

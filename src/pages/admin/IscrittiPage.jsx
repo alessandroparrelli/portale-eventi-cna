@@ -2469,7 +2469,7 @@ export default function IscrittiPage() {
 const s = {
   page: { width:'100%' },
   header: { display:'flex', alignItems:'flex-start', justifyContent:'space-between', marginBottom:'24px', flexWrap:'wrap', gap:'12px' },
-  title: { fontSize:'32px', fontWeight:'900', color:'#111827', letterSpacing:'-0.03em', margin:0 },
+  title: { fontSize:'32px', fontWeight:'900', color:'#111827', letterSpacing:'-0.03em', margin:0, fontFamily:"'Inter', sans-serif", fontVariationSettings:"'wght' 900" },
   subtitle: { fontSize:'14px', color:'#6B7280', margin:'4px 0 0', fontWeight:'500' },
   filters: { display:'flex', gap:'12px', marginBottom:'16px', flexWrap:'wrap', alignItems:'center' },
   searchWrap: { position:'relative', flex:1, minWidth:'200px' },

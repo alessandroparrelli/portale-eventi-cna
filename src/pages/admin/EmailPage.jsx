@@ -368,7 +368,7 @@ export default function EmailPage() {
       <div style={{ padding:'16px 32px 12px', flexShrink:0 }}>
         <div style={{ display:'flex', alignItems:'center', gap:'10px', marginBottom:'3px' }}>
           <Mail size={20} color={BLU}/>
-          <h1 style={{ fontSize:'24px', fontWeight:'900', color:NERO, letterSpacing:'-0.03em', margin:0 }}>Template Email</h1>
+          <h1 style={{ fontSize:'24px', fontWeight:'900', color:NERO, letterSpacing:'-0.03em', margin:0, fontFamily:"'Inter', sans-serif", fontVariationSettings:"'wght' 900" }}>Template Email</h1>
         </div>
         <p style={{ fontSize:'12px', color:'#6B7280', margin:0 }}>
           Template di default copiati automaticamente ad ogni nuovo evento. Personalizzali per ogni evento dalla scheda <strong>Email</strong> nell'editor evento.
