@@ -158,7 +158,7 @@ export default function LoginPage() {
       </div>
 
       <div style={{ display:'flex', flexDirection:'column', alignItems:'center', gap:'8px', marginTop:'24px' }}>
-        <img src={CNA_LOGO} alt="CNA Roma" style={{ height:'28px', objectFit:'contain', opacity:0.9, filter:'brightness(0) invert(1)' }} />
+        <img src="https://customer31551.img.musvc2.net/static/31551/images/1/CNARoma%20NEGATIVO%20COLORE%20SOLO%20ROMA.png" alt="CNA Roma" style={{ height:'32px', objectFit:'contain' }} />
         <p style={s.footer}>© {new Date().getFullYear()} CNA Roma — Area Riservata</p>
       </div>
 
