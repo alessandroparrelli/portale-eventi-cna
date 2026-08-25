@@ -142,12 +142,12 @@ function richToEmail(html, cp) {
     // <!--MUH--> marker impedisce al regex dei paragrafi di ri-processare questo tag
     return '<!--MUH--><p style="' + styles.join(';') + ';">' + cleanInner + '</p>'
   }
-  h = h.replace(/<h1([^>]*)>([\s\S]*?)<\/h1>/gi, (_, a, i) => convertHeading(a, i, '26px'))
-  h = h.replace(/<h2([^>]*)>([\s\S]*?)<\/h2>/gi, (_, a, i) => convertHeading(a, i, '22px'))
-  h = h.replace(/<h3([^>]*)>([\s\S]*?)<\/h3>/gi, (_, a, i) => convertHeading(a, i, '18px'))
-  h = h.replace(/<h4([^>]*)>([\s\S]*?)<\/h4>/gi, (_, a, i) => convertHeading(a, i, '15px'))
-  h = h.replace(/<h5([^>]*)>([\s\S]*?)<\/h5>/gi, (_, a, i) => convertHeading(a, i, '15px'))
-  h = h.replace(/<h6([^>]*)>([\s\S]*?)<\/h6>/gi, (_, a, i) => convertHeading(a, i, '15px'))
+  h = h.replace(/<h1([^>]*)>([\s\S]*?)<\/h1>/gi, (_, a, i) => convertHeading(a, i, '30px'))
+  h = h.replace(/<h2([^>]*)>([\s\S]*?)<\/h2>/gi, (_, a, i) => convertHeading(a, i, '24px'))
+  h = h.replace(/<h3([^>]*)>([\s\S]*?)<\/h3>/gi, (_, a, i) => convertHeading(a, i, '20px'))
+  h = h.replace(/<h4([^>]*)>([\s\S]*?)<\/h4>/gi, (_, a, i) => convertHeading(a, i, '17px'))
+  h = h.replace(/<h5([^>]*)>([\s\S]*?)<\/h5>/gi, (_, a, i) => convertHeading(a, i, '17px'))
+  h = h.replace(/<h6([^>]*)>([\s\S]*?)<\/h6>/gi, (_, a, i) => convertHeading(a, i, '17px'))
 
   // 7. Liste — con font-family e mso-line-height-rule
   // Strip inner <p> tags that TipTap wraps li content in (would create invalid nested <p>)
@@ -159,12 +159,12 @@ function richToEmail(html, cp) {
   }
   h = h.replace(/<ul[^>]*>([\s\S]*?)<\/ul>/gi, (_, items) =>
     items.replace(/<li[^>]*>([\s\S]*?)<\/li>/gi, (__, li) =>
-      '<p style="margin:0 0 5px 0;padding:0 0 0 16px;font-size:15px;color:#374151;line-height:1.6;font-family:' + F + ';mso-line-height-rule:exactly;">&#8226;&nbsp;' + cleanLiContent(li) + '</p>'))
+      '<p style="margin:0 0 5px 0;padding:0 0 0 16px;font-size:16px;color:#374151;line-height:1.65;font-family:' + F + ';mso-line-height-rule:exactly;">&#8226;&nbsp;' + cleanLiContent(li) + '</p>'))
   h = h.replace(/<ol[^>]*>([\s\S]*?)<\/ol>/gi, (_, items) => {
     let n = 0
     return items.replace(/<li[^>]*>([\s\S]*?)<\/li>/gi, (__, li) => {
       n++
-      return '<p style="margin:0 0 5px 0;padding:0 0 0 16px;font-size:15px;color:#374151;line-height:1.6;font-family:' + F + ';mso-line-height-rule:exactly;">' + n + '.&nbsp;' + cleanLiContent(li) + '</p>'
+      return '<p style="margin:0 0 5px 0;padding:0 0 0 16px;font-size:16px;color:#374151;line-height:1.65;font-family:' + F + ';mso-line-height-rule:exactly;">' + n + '.&nbsp;' + cleanLiContent(li) + '</p>'
     })
   })
 
@@ -172,7 +172,7 @@ function richToEmail(html, cp) {
   function convertPara(st, inner) {
     const alMatch = st.match(/text-align:\s*(left|center|right|justify)/i)
     const alStyle = alMatch ? 'text-align:' + alMatch[1] + ';' : ''
-    return '<p style="margin:0 0 10px 0;padding:0;font-size:15px;color:#374151;line-height:1.75;font-family:' + F + ';mso-line-height-rule:exactly;' + alStyle + '">' + inner + '</p>'
+    return '<p style="margin:0 0 10px 0;padding:0;font-size:16px;color:#333333;line-height:1.7;font-family:' + F + ';mso-line-height-rule:exactly;' + alStyle + '">' + inner + '</p>'
   }
   // Paragrafi con style — ma NON quelli preceduti dal marker <!--MUH-->
   h = h.replace(/(?<!<!--MUH-->)<p\s+style="([^"]*)">([\s\S]*?)<\/p>/gi, (_, st, inner) => convertPara(st, inner))
@@ -234,8 +234,8 @@ function buildHtml(ev, url, blocchi, opts, socialLinks) {
         style="height:${logoH}px;display:inline-block;border:0;${align==='center'?'margin:0 auto 16px;':'margin-bottom:16px;'}" />
     </a>
     <p style="margin:0 0 8px 0;padding:0;font-size:${titoloSize};font-weight:bold;color:${titoloColore};font-family:${F};text-align:${align};line-height:1.1;mso-line-height-rule:exactly;${lh.titolo_maiuscolo?'text-transform:uppercase;':''}">${esc(ev.titolo)}</p>
-    ${lh.titolo2?`<p style="margin:0 0 8px 0;padding:0;font-size:17px;color:#FFFFFF;font-family:${F};text-align:${align};">${esc(lh.titolo2)}</p>`:''}
-    ${ev.sottotitolo?`<p style="margin:0;padding:0;font-size:15px;color:#FFFFFF;font-family:${F};text-align:${align};">${esc(ev.sottotitolo)}</p>`:''}`
+    ${lh.titolo2?`<p style="margin:0 0 8px 0;padding:0;font-size:18px;color:#FFFFFF;font-family:${F};text-align:${align};">${esc(lh.titolo2)}</p>`:''}
+    ${ev.sottotitolo?`<p style="margin:0;padding:0;font-size:16px;color:#FFFFFF;font-family:${F};text-align:${align};">${esc(ev.sottotitolo)}</p>`:''}`
 
   const heroRow = heroImg ? `
   <!--[if gte mso 9]>
@@ -293,8 +293,8 @@ function buildHtml(ev, url, blocchi, opts, socialLinks) {
       } else if (b.tipo === 'titolo') {
         const al = b.allineamento || 'center'
         out += row(`
-          <p style="margin:0 0 6px 0;padding:0;font-size:24px;font-weight:bold;color:#0A0A0A;font-family:${F};text-align:${al};">${esc(b.testo)}</p>
-          ${b.sottotitolo?`<p style="margin:0;padding:0;font-size:15px;color:#6B7280;font-family:${F};text-align:${al};">${esc(b.sottotitolo)}</p>`:''}`)
+          <p style="margin:0 0 6px 0;padding:0;font-size:28px;font-weight:bold;color:#0A0A0A;font-family:${F};text-align:${al};">${esc(b.testo)}</p>
+          ${b.sottotitolo?`<p style="margin:0;padding:0;font-size:16px;color:#4B5563;font-family:${F};text-align:${al};">${esc(b.sottotitolo)}</p>`:''}`)
 
       } else if (b.tipo === 'immagine' && b.src) {
         const al = b.align || 'center'
@@ -305,7 +305,7 @@ function buildHtml(ev, url, blocchi, opts, socialLinks) {
                 <img src="${esc(b.src)}" alt="${esc(b.didascalia||'')}"
                   style="display:block;max-width:100%;border:0;" />
               </a>
-              ${b.didascalia?`<p style="margin:6px 0 0;padding:0;font-size:12px;color:#9CA3AF;font-family:${F};text-align:${al};">${esc(b.didascalia)}</p>`:''}
+              ${b.didascalia?`<p style="margin:6px 0 0;padding:0;font-size:13px;color:#9CA3AF;font-family:${F};text-align:${al};">${esc(b.didascalia)}</p>`:''}
             </td></tr>
           </table>`)
 
@@ -320,7 +320,7 @@ function buildHtml(ev, url, blocchi, opts, socialLinks) {
             <tr>${its.map(it=>`
               <td width="${cw}%" align="center" style="text-align:center;">
                 <p style="margin:0 0 4px;padding:0;font-size:36px;font-weight:bold;color:${b.colore||cp};font-family:${F};">${esc(it.num||it.numero)}</p>
-                <p style="margin:0;padding:0;font-size:11px;color:#6B7280;font-family:${F};text-transform:uppercase;">${esc(it.label)}</p>
+                <p style="margin:0;padding:0;font-size:12px;color:#6B7280;font-family:${F};text-transform:uppercase;">${esc(it.label)}</p>
               </td>`).join('')}
             </tr>
           </table>`)
@@ -333,8 +333,8 @@ function buildHtml(ev, url, blocchi, opts, socialLinks) {
               <td width="${Math.floor(100/cols.length)}%" valign="top" style="padding:6px;">
                 <table width="100%" cellpadding="14" cellspacing="0" border="0" style="border:1px solid #E5E7EB;">
                   <tr><td>
-                    ${c.titolo?`<p style="margin:0 0 5px;padding:0;font-size:14px;font-weight:bold;color:#0A0A0A;font-family:${F};">${esc(c.titolo)}</p>`:''}
-                    ${c.testo?`<p style="margin:0;padding:0;font-size:13px;color:#6B7280;font-family:${F};">${esc(c.testo)}</p>`:''}
+                    ${c.titolo?`<p style="margin:0 0 5px;padding:0;font-size:15px;font-weight:bold;color:#0A0A0A;font-family:${F};">${esc(c.titolo)}</p>`:''}
+                    ${c.testo?`<p style="margin:0;padding:0;font-size:14px;color:#6B7280;font-family:${F};">${esc(c.testo)}</p>`:''}
                   </td></tr>
                 </table>
               </td>`).join('')}
@@ -348,7 +348,7 @@ function buildHtml(ev, url, blocchi, opts, socialLinks) {
             <tr>${its.map(it=>`
               <td width="50%" valign="top" style="padding:4px;">
                 <table width="100%" cellpadding="10" cellspacing="0" border="0" style="border:1px solid #E5E7EB;">
-                  <tr><td style="font-size:13px;color:#374151;font-family:${F};">&#10003;&nbsp;${esc(it.testo)}</td></tr>
+                  <tr><td style="font-size:14px;color:#374151;font-family:${F};">&#10003;&nbsp;${esc(it.testo)}</td></tr>
                 </table>
               </td>`).join('')}
             </tr>
@@ -364,7 +364,7 @@ function buildHtml(ev, url, blocchi, opts, socialLinks) {
         const cfg = cfgs[b.stile||'info']||cfgs.info
         out += `<tr><td style="padding:8px ${PAD}px;">
           <table width="100%" cellpadding="14" cellspacing="0" border="0" bgcolor="${cfg.bg}" style="border:1px solid ${cfg.border};background-color:${cfg.bg};">
-            <tr><td style="font-size:14px;color:${cfg.color};font-family:${F};">${b.icona?`${esc(b.icona)} `:''}${esc(b.testo)}</td></tr>
+            <tr><td style="font-size:15px;color:${cfg.color};font-family:${F};">${b.icona?`${esc(b.icona)} `:''}${esc(b.testo)}</td></tr>
           </table>
         </td></tr>`
 
@@ -375,17 +375,17 @@ function buildHtml(ev, url, blocchi, opts, socialLinks) {
         out += row(`
           <table width="100%" cellpadding="0" cellspacing="0" border="0">
             <tr><td align="center" style="padding:16px 0;text-align:center;">
-              ${b.titolo?`<p style="margin:0 0 14px;padding:0;font-size:20px;font-weight:bold;color:#0A0A0A;font-family:${F};mso-line-height-rule:exactly;">${esc(b.titolo)}</p>`:''}
+              ${b.titolo?`<p style="margin:0 0 14px;padding:0;font-size:22px;font-weight:bold;color:#0A0A0A;font-family:${F};mso-line-height-rule:exactly;">${esc(b.titolo)}</p>`:''}
               <!--[if mso]>
               <v:roundrect xmlns:v="urn:schemas-microsoft-com:vml" href="${esc(url)}" style="height:46px;v-text-anchor:middle;width:220px;" arcsize="0%" fillcolor="${bb}" strokecolor="${b.colore||cp}" strokeweight="${b.stile==='contorno'?'2px':'0'}">
-                <w:anchorlock/><center style="color:${bc};font-family:Arial,sans-serif;font-size:15px;font-weight:bold;">${esc(b.testo_btn||b.testo||'Iscriviti')}</center>
+                <w:anchorlock/><center style="color:${bc};font-family:Arial,sans-serif;font-size:16px;font-weight:bold;">${esc(b.testo_btn||b.testo||'Iscriviti')}</center>
               </v:roundrect>
               <![endif]-->
               <!--[if !mso]><!-->
               <table cellpadding="0" cellspacing="0" border="0" style="margin:0 auto;">
                 <tr>
                   <td align="center" bgcolor="${bb}" style="background-color:${bb};padding:14px 32px;${bdr}">
-                    <a href="${esc(url)}" style="color:${bc};font-size:15px;font-weight:bold;text-decoration:none;font-family:${F};display:block;mso-line-height-rule:exactly;">${esc(b.testo_btn||b.testo||'Iscriviti')}</a>
+                    <a href="${esc(url)}" style="color:${bc};font-size:16px;font-weight:bold;text-decoration:none;font-family:${F};display:block;mso-line-height-rule:exactly;">${esc(b.testo_btn||b.testo||'Iscriviti')}</a>
                   </td>
                 </tr>
               </table>
@@ -404,8 +404,8 @@ function buildHtml(ev, url, blocchi, opts, socialLinks) {
                 </table>
               </td>
               <td valign="top" style="padding-top:4px;">
-                <p style="margin:0 0 4px;padding:0;font-size:14px;font-weight:bold;color:#0A0A0A;font-family:${F};">${esc(it.titolo)}</p>
-                <p style="margin:0;padding:0;font-size:13px;color:#6B7280;font-family:${F};">${esc(it.testo)}</p>
+                <p style="margin:0 0 4px;padding:0;font-size:15px;font-weight:bold;color:#0A0A0A;font-family:${F};">${esc(it.titolo)}</p>
+                <p style="margin:0;padding:0;font-size:14px;color:#6B7280;font-family:${F};">${esc(it.testo)}</p>
               </td>
             </tr>
           </table>`).join(''))
@@ -415,8 +415,8 @@ function buildHtml(ev, url, blocchi, opts, socialLinks) {
         out += row(its.map(it=>`
           <table width="100%" cellpadding="12" cellspacing="0" border="0" style="margin-bottom:8px;border:1px solid #E5E7EB;background-color:#F9FAFB;">
             <tr><td>
-              <p style="margin:0 0 6px;padding:0;font-size:14px;font-weight:bold;color:${cp};font-family:${F};">${esc(it.domanda)}</p>
-              <p style="margin:0;padding:0;font-size:13px;color:#374151;font-family:${F};">${esc(it.risposta)}</p>
+              <p style="margin:0 0 6px;padding:0;font-size:15px;font-weight:bold;color:${cp};font-family:${F};">${esc(it.domanda)}</p>
+              <p style="margin:0;padding:0;font-size:14px;color:#374151;font-family:${F};">${esc(it.risposta)}</p>
             </td></tr>
           </table>`).join(''))
 
@@ -428,9 +428,9 @@ function buildHtml(ev, url, blocchi, opts, socialLinks) {
               <td width="${Math.floor(100/its.length)}%" valign="top" style="padding:6px;">
                 <table width="100%" cellpadding="16" cellspacing="0" border="0" style="border:1px solid #E5E7EB;">
                   <tr><td>
-                    <p style="margin:0 0 10px;padding:0;font-size:13px;color:#374151;font-family:${F};font-style:italic;">&ldquo;${esc(it.testo)}&rdquo;</p>
-                    <p style="margin:0;padding:0;font-size:13px;font-weight:bold;color:#0A0A0A;font-family:${F};">${esc(it.nome)}</p>
-                    ${it.ruolo?`<p style="margin:2px 0 0;padding:0;font-size:12px;color:#9CA3AF;font-family:${F};">${esc(it.ruolo)}</p>`:''}
+                    <p style="margin:0 0 10px;padding:0;font-size:14px;color:#374151;font-family:${F};font-style:italic;">&ldquo;${esc(it.testo)}&rdquo;</p>
+                    <p style="margin:0;padding:0;font-size:14px;font-weight:bold;color:#0A0A0A;font-family:${F};">${esc(it.nome)}</p>
+                    ${it.ruolo?`<p style="margin:2px 0 0;padding:0;font-size:13px;color:#9CA3AF;font-family:${F};">${esc(it.ruolo)}</p>`:''}
                   </td></tr>
                 </table>
               </td>`).join('')}
@@ -448,7 +448,7 @@ function buildHtml(ev, url, blocchi, opts, socialLinks) {
                     alt="${esc(b.didascalia||'Video')}" width="${W-PAD*2}"
                     style="display:block;max-width:100%;border:0;" />
                 </a>
-                <p style="margin:6px 0 0;padding:0;font-size:13px;color:${cp};font-family:${F};">&#9654; Guarda il video</p>
+                <p style="margin:6px 0 0;padding:0;font-size:14px;color:${cp};font-family:${F};">&#9654; Guarda il video</p>
               </td></tr>
             </table>`)
         }
@@ -463,7 +463,7 @@ function buildHtml(ev, url, blocchi, opts, socialLinks) {
                   <img src="${esc(imgs[0].src)}" alt="${esc(imgs[0].didascalia||'')}"
                     width="${W-PAD*2}" style="display:block;max-width:100%;border:0;" />
                 </a>
-                ${imgs.length>1?`<p style="margin:6px 0 0;padding:0;font-size:12px;color:#9CA3AF;font-family:${F};">+${imgs.length-1} immagini sul sito</p>`:''}
+                ${imgs.length>1?`<p style="margin:6px 0 0;padding:0;font-size:13px;color:#9CA3AF;font-family:${F};">+${imgs.length-1} immagini sul sito</p>`:''}
               </td></tr>
             </table>`)
         }
@@ -483,7 +483,7 @@ function buildHtml(ev, url, blocchi, opts, socialLinks) {
 
         // Titolo sezione programma
         if (b.titolo) {
-          progHtml += `<p style="margin:0 0 16px 0;padding:0;font-size:18px;font-weight:bold;color:#0A0A0A;font-family:${F};mso-line-height-rule:exactly;">${esc(b.titolo)}</p>`
+          progHtml += `<p style="margin:0 0 16px 0;padding:0;font-size:20px;font-weight:bold;color:#0A0A0A;font-family:${F};mso-line-height-rule:exactly;">${esc(b.titolo)}</p>`
         }
 
         for (const v of voci) {
@@ -492,10 +492,10 @@ function buildHtml(ev, url, blocchi, opts, socialLinks) {
               <table width="100%" cellpadding="0" cellspacing="0" border="0" style="margin-bottom:6px;">
                 <tr>
                   <td width="90" valign="top" style="padding-right:12px;padding-top:2px;">
-                    <p style="margin:0;padding:0;font-size:13px;font-weight:bold;color:${cOra};font-family:${F};white-space:nowrap;">${esc(v.orario||'')}</p>
+                    <p style="margin:0;padding:0;font-size:14px;font-weight:bold;color:${cOra};font-family:${F};white-space:nowrap;">${esc(v.orario||'')}</p>
                   </td>
                   <td valign="top">
-                    <p style="margin:0;padding:0;font-size:14px;color:#374151;font-family:${F};">${esc(v.testo||'')}</p>
+                    <p style="margin:0;padding:0;font-size:15px;color:#374151;font-family:${F};">${esc(v.testo||'')}</p>
                   </td>
                 </tr>
               </table>`
@@ -510,8 +510,8 @@ function buildHtml(ev, url, blocchi, opts, socialLinks) {
             if (v.tipo === 'modera') {
               // modera ha nome/ruolo direttamente sulla voce, non in relatori[]
               const labelModera = `<p style="margin:0 0 4px 0;padding:0;font-size:11px;font-weight:bold;color:#9CA3AF;font-family:${F};text-transform:uppercase;letter-spacing:0.05em;">Modera</p>`
-              const nomeModera = v.nome ? `<p style="margin:0;padding:0;font-size:13px;font-weight:bold;color:#0A0A0A;font-family:${F};">${esc(v.nome)}</p>` : ''
-              const ruoloModera = v.ruolo ? `<p style="margin:0;padding:0;font-size:12px;color:#6B7280;font-family:${F};">${esc(v.ruolo)}</p>` : ''
+              const nomeModera = v.nome ? `<p style="margin:0;padding:0;font-size:14px;font-weight:bold;color:#0A0A0A;font-family:${F};">${esc(v.nome)}</p>` : ''
+              const ruoloModera = v.ruolo ? `<p style="margin:0;padding:0;font-size:13px;color:#6B7280;font-family:${F};">${esc(v.ruolo)}</p>` : ''
               contenutoHtml = labelModera + nomeModera + ruoloModera
             } else {
               // sessione / intermezzo: titolo + lista relatori
@@ -522,14 +522,14 @@ function buildHtml(ev, url, blocchi, opts, socialLinks) {
                   return `<table width="100%" cellpadding="0" cellspacing="0" border="0" style="margin-top:6px;">
                     <tr>
                       <td valign="top">
-                        ${r.nome ? `<p style="margin:0;padding:0;font-size:13px;font-weight:bold;color:#0A0A0A;font-family:${F};">${esc(r.nome)}</p>` : ''}
-                        ${r.ruolo ? `<p style="margin:0;padding:0;font-size:12px;color:#6B7280;font-family:${F};">${esc(r.ruolo)}</p>` : ''}
+                        ${r.nome ? `<p style="margin:0;padding:0;font-size:14px;font-weight:bold;color:#0A0A0A;font-family:${F};">${esc(r.nome)}</p>` : ''}
+                        ${r.ruolo ? `<p style="margin:0;padding:0;font-size:13px;color:#6B7280;font-family:${F};">${esc(r.ruolo)}</p>` : ''}
                       </td>
                     </tr>
                   </table>`
                 }).filter(Boolean).join('')
               }
-              const titoloHtml = v.titolo ? `<p style="margin:0 0 ${relatori.length ? '6px' : '0'} 0;padding:0;font-size:14px;font-weight:bold;color:${colSess};font-family:${F};">${esc(v.titolo)}</p>` : ''
+              const titoloHtml = v.titolo ? `<p style="margin:0 0 ${relatori.length ? '6px' : '0'} 0;padding:0;font-size:16px;font-weight:bold;color:${colSess};font-family:${F};">${esc(v.titolo)}</p>` : ''
               contenutoHtml = titoloHtml + relatoriHtml
             }
 
@@ -564,8 +564,8 @@ function buildHtml(ev, url, blocchi, opts, socialLinks) {
   // Dopo la conversione, forzo tutti i color inline a bianco (il footer ha sempre sfondo scuro)
   const footerContentRaw = ev.footer_html
     ? richToEmail(ev.footer_html, footerText)
-    : `<p style="margin:0 0 12px;padding:0;font-size:14px;font-weight:bold;color:${footerText};font-family:${F};text-align:center;">&#x1F449; Insieme &egrave; meglio &#x1F448;</p>` +
-      `<p style="margin:0;padding:0;font-size:13px;color:${footerText};font-family:${F};text-align:center;line-height:1.7;mso-line-height-rule:exactly;">` +
+    : `<p style="margin:0 0 12px;padding:0;font-size:15px;font-weight:bold;color:${footerText};font-family:${F};text-align:center;">&#x1F449; Insieme &egrave; meglio &#x1F448;</p>` +
+      `<p style="margin:0;padding:0;font-size:14px;color:${footerText};font-family:${F};text-align:center;line-height:1.7;mso-line-height-rule:exactly;">` +
       `<strong>CNA di Roma</strong><br/>Via Cristoforo Colombo, 283/A, 00147 Roma<br/>Tel. 06570151 &bull; Email info@cnaroma.it</p>`
   const footerContent = footerContentRaw
     .replace(/color\s*:\s*#[0-9a-fA-F]{3,6}/g, `color:${footerText}`)
@@ -581,7 +581,7 @@ function buildHtml(ev, url, blocchi, opts, socialLinks) {
         </a>
         ${footerContent}
         ${socialLinksEmailHtml(socialLinks, cp, F, footerText)}
-        <p style="margin:12px 0 0;padding:0;font-size:11px;font-family:${F};">
+        <p style="margin:12px 0 0;padding:0;font-size:12px;font-family:${F};">
           <a href="${esc(url)}" style="color:${footerText};text-decoration:underline;">Visualizza la pagina dell&apos;evento</a>
         </p>
       </td>
@@ -628,14 +628,14 @@ i,em{font-style:italic;}
   <tr><td bgcolor="#FFFFFF" align="center" style="padding:20px ${PAD}px;text-align:center;background-color:#FFFFFF;">
     <!--[if mso]>
     <v:roundrect xmlns:v="urn:schemas-microsoft-com:vml" href="${esc(url)}" style="height:44px;v-text-anchor:middle;width:240px;" arcsize="15%" fillcolor="${ctaBg}" stroke="false">
-      <w:anchorlock/><center style="color:${ctaColor};font-family:Arial,sans-serif;font-size:15px;font-weight:bold;">Partecipa all&apos;evento &rsaquo;</center>
+      <w:anchorlock/><center style="color:${ctaColor};font-family:Arial,sans-serif;font-size:16px;font-weight:bold;">Partecipa all&apos;evento &rsaquo;</center>
     </v:roundrect>
     <![endif]-->
     <!--[if !mso]><!-->
     <table cellpadding="0" cellspacing="0" border="0" style="margin:0 auto;">
       <tr>
         <td align="center" bgcolor="${ctaBg}" style="background-color:${ctaBg};padding:12px 40px;border-radius:${ctaRadius}px;">
-          <a href="${esc(url)}" style="color:${ctaColor};font-size:14px;font-weight:bold;text-decoration:none;font-family:${F};display:block;">Partecipa all&apos;evento &rsaquo;</a>
+          <a href="${esc(url)}" style="color:${ctaColor};font-size:16px;font-weight:bold;text-decoration:none;font-family:${F};display:block;">Partecipa all&apos;evento &rsaquo;</a>
         </td>
       </tr>
     </table>
@@ -647,15 +647,15 @@ i,em{font-style:italic;}
   ${(dataTesto || ev.luogo) && opts.mostraDataLuogo ? `
   <tr><td bgcolor="#F4F5F7" style="padding:20px ${PAD}px;background-color:#F4F5F7;">
     <table width="100%" cellpadding="0" cellspacing="0" border="0">
-      ${dataTesto?`<tr><td style="font-size:14px;font-weight:bold;color:#0A0A0A;font-family:${F};padding-bottom:8px;">&#128197; ${dataTesto}</td></tr>`:''}
-      ${ev.luogo?`<tr><td style="font-size:14px;font-weight:bold;color:#0A0A0A;font-family:${F};padding-bottom:14px;">&#128205; ${esc(ev.luogo)}</td></tr>`:''}
+      ${dataTesto?`<tr><td style="font-size:15px;font-weight:bold;color:#0A0A0A;font-family:${F};padding-bottom:8px;">&#128197; ${dataTesto}</td></tr>`:''}
+      ${ev.luogo?`<tr><td style="font-size:15px;font-weight:bold;color:#0A0A0A;font-family:${F};padding-bottom:14px;">&#128205; ${esc(ev.luogo)}</td></tr>`:''}
       <tr><td>
         <table cellpadding="0" cellspacing="0" border="0"><tr>
           <td align="center" style="border:1.5px solid ${cp};border-radius:8px;padding:10px 18px;">
-            <a href="https://calendar.google.com/calendar/render?action=TEMPLATE&text=${encodeURIComponent(ev.titolo)}${ev.data_inizio?'&dates='+new Date(ev.data_inizio).toISOString().replace(/[-:]/g,'').replace(/\.\d{3}/,'')+'/'+(ev.data_fine?new Date(ev.data_fine).toISOString().replace(/[-:]/g,'').replace(/\.\d{3}/,''):new Date(ev.data_inizio).toISOString().replace(/[-:]/g,'').replace(/\.\d{3}/,'')):''}${ev.luogo?'&location='+encodeURIComponent(ev.luogo):''}" target="_blank" style="color:${cp};font-size:12px;font-weight:bold;text-decoration:none;font-family:${F};">&#128197; Aggiungi al calendario</a>
+            <a href="https://calendar.google.com/calendar/render?action=TEMPLATE&text=${encodeURIComponent(ev.titolo)}${ev.data_inizio?'&dates='+new Date(ev.data_inizio).toISOString().replace(/[-:]/g,'').replace(/\.\d{3}/,'')+'/'+(ev.data_fine?new Date(ev.data_fine).toISOString().replace(/[-:]/g,'').replace(/\.\d{3}/,''):new Date(ev.data_inizio).toISOString().replace(/[-:]/g,'').replace(/\.\d{3}/,'')):''}${ev.luogo?'&location='+encodeURIComponent(ev.luogo):''}" target="_blank" style="color:${cp};font-size:13px;font-weight:bold;text-decoration:none;font-family:${F};">&#128197; Aggiungi al calendario</a>
           </td>
           ${ev.luogo?`<td width="10"></td><td align="center" style="border:1.5px solid ${cp};border-radius:8px;padding:10px 18px;">
-            <a href="https://maps.google.com/?q=${encodeURIComponent(ev.luogo)}" target="_blank" style="color:${cp};font-size:12px;font-weight:bold;text-decoration:none;font-family:${F};">&#128205; Mappa dell&apos;evento</a>
+            <a href="https://maps.google.com/?q=${encodeURIComponent(ev.luogo)}" target="_blank" style="color:${cp};font-size:13px;font-weight:bold;text-decoration:none;font-family:${F};">&#128205; Mappa dell&apos;evento</a>
           </td>`:''}
         </tr></table>
       </td></tr>
@@ -666,20 +666,20 @@ i,em{font-style:italic;}
   <tr><td bgcolor="#EBF0FA" style="padding:20px ${PAD}px;background-color:#EBF0FA;">
     <table width="100%" cellpadding="0" cellspacing="0" border="0"><tr>
       <td valign="middle" style="padding-right:12px;">
-        <p style="margin:0 0 3px;padding:0;font-size:15px;font-weight:bold;color:#0A0A0A;font-family:${F};">Partecipa all&apos;evento</p>
-        <p style="margin:0;padding:0;font-size:13px;color:#374151;font-family:${F};">Registrazione gratuita &mdash; ricevi il QR Code per l&apos;ingresso.</p>
+        <p style="margin:0 0 3px;padding:0;font-size:16px;font-weight:bold;color:#0A0A0A;font-family:${F};">Partecipa all&apos;evento</p>
+        <p style="margin:0;padding:0;font-size:14px;color:#374151;font-family:${F};">Registrazione gratuita &mdash; ricevi il QR Code per l&apos;ingresso.</p>
       </td>
       <td align="right" valign="middle" width="150" style="white-space:nowrap;">
         <!--[if mso]>
         <v:roundrect xmlns:v="urn:schemas-microsoft-com:vml" href="${esc(url)}" style="height:40px;v-text-anchor:middle;width:140px;" arcsize="0%" fillcolor="${ctaBg}" stroke="false">
-          <w:anchorlock/><center style="color:${ctaColor};font-family:Arial,sans-serif;font-size:13px;font-weight:bold;">Iscriviti ora &rsaquo;</center>
+          <w:anchorlock/><center style="color:${ctaColor};font-family:Arial,sans-serif;font-size:14px;font-weight:bold;">Iscriviti ora &rsaquo;</center>
         </v:roundrect>
         <![endif]-->
         <!--[if !mso]><!-->
         <table cellpadding="0" cellspacing="0" border="0">
           <tr>
             <td align="center" bgcolor="${ctaBg}" style="background-color:${ctaBg};padding:11px 20px;">
-              <a href="${esc(url)}" style="color:${ctaColor};font-size:13px;font-weight:bold;text-decoration:none;font-family:${F};display:block;">Iscriviti ora &rsaquo;</a>
+              <a href="${esc(url)}" style="color:${ctaColor};font-size:14px;font-weight:bold;text-decoration:none;font-family:${F};display:block;">Iscriviti ora &rsaquo;</a>
             </td>
           </tr>
         </table>
