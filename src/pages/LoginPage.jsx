@@ -158,7 +158,9 @@ export default function LoginPage() {
       </div>
 
       <div style={{ display:'flex', flexDirection:'column', alignItems:'center', gap:'8px', marginTop:'24px' }}>
-        <img src="https://customer31551.img.musvc2.net/static/31551/images/1/CNARoma%20NEGATIVO%20COLORE%20SOLO%20ROMA.png" alt="CNA Roma" style={{ height:'32px', objectFit:'contain' }} />
+        <div style={{ backgroundColor:'#FFFFFF', borderRadius:'10px', padding:'6px 14px', display:'flex', alignItems:'center' }}>
+          <img src={CNA_LOGO} alt="CNA Roma" style={{ height:'22px', objectFit:'contain' }} />
+        </div>
         <p style={s.footer}>© {new Date().getFullYear()} CNA Roma — Area Riservata</p>
       </div>
 
@@ -170,7 +172,7 @@ export default function LoginPage() {
 const s = {
   page: {
     minHeight: '100vh',
-    background: 'linear-gradient(135deg, #3730A3 0%, #5B5FEF 50%, #7C4DFF 100%)',
+    background: 'linear-gradient(135deg, var(--primary, #5B5FEF), var(--secondary, #7C4DFF))',
     display: 'flex', flexDirection: 'column',
     alignItems: 'center', justifyContent: 'center',
     padding: '24px',
@@ -181,7 +183,7 @@ const s = {
     borderRadius: '20px',
     padding: '48px 40px',
     width: '100%', maxWidth: '420px',
-    boxShadow: '0 4px 24px rgba(0,0,0,0.18), 0 1px 3px rgba(0,0,0,0.10)',
+    boxShadow: '0 1px 3px rgba(0,0,0,0.07), 0 8px 32px rgba(91,95,239,0.25)',
   },
   logoWrap: { display: 'flex', justifyContent: 'center', marginBottom: '0px' },
   divider: { height: '1px', backgroundColor: '#E5E7EB', marginBottom: '28px' },
@@ -245,5 +247,5 @@ const s = {
     transition: 'opacity .15s',
     marginTop: '4px',
   },
-  footer: { margin: 0, fontSize: '12px', color: 'rgba(255,255,255,0.65)', textAlign: 'center' },
+  footer: { margin: 0, fontSize: '12px', color: 'rgba(255,255,255,0.85)', textAlign: 'center' },
 }
