@@ -46,9 +46,10 @@ const BLOCK_TYPES = [
 // ─── Variabili ─────────────────────────────────────────────────────────────────
 const VARIABILI = [
   '{{nome}}','{{cognome}}','{{ragione_sociale}}','{{email}}',
+  '{{cellulare}}','{{partita_iva}}','{{cap}}',
   '{{nome_evento}}','{{data_evento}}','{{luogo_evento}}',
   '{{qr_code}}','{{link_landing}}','{{link_questionario}}',
-  '{{data_iscrizione}}','{{numero_posto}}','{{link_conferma}}',
+  '{{data_iscrizione}}','{{codice_iscrizione}}','{{numero_posto}}','{{link_conferma}}',
 ]
 
 const PREVIEW_DATA = {
@@ -57,8 +58,10 @@ const PREVIEW_DATA = {
   '{{nome_evento}}':'Forum Artigiani Roma 2026',
   '{{data_evento}}':'Venerdì 25 settembre 2026, ore 09:30',
   '{{luogo_evento}}':'Palazzo dei Congressi, Roma',
+  '{{cellulare}}':'333 1234567','{{partita_iva}}':'12345670015','{{cap}}':'00100',
   '{{qr_code}}':'QR-MARCO2026','{{link_landing}}':'#','{{link_questionario}}':'#',
   '{{data_iscrizione}}': new Date().toLocaleDateString('it-IT'),
+  '{{codice_iscrizione}}':'EVT-2026-M1B2',
   '{{numero_posto}}':'Platea 14A','{{link_conferma}}':'#',
 }
 
