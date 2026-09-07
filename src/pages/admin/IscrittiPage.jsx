@@ -13,6 +13,7 @@ import * as XLSX from 'xlsx'
 import ExcelJS from 'exceljs/dist/exceljs.min.js'
 import { logAttivita } from '../../lib/activityLog'
 import EventSelector from '../../components/EventSelector'
+import MappaPostiTeatro from '../../components/MappaPostiTeatro'
 
 function formatDt(ts) {
   if (!ts) return '—'
@@ -1340,7 +1341,7 @@ export default function IscrittiPage() {
       {/* TAB SWITCHER — visibile solo se teatro abilitato */}
       {selectedEvento && teatroAbilitato && (
         <div style={{ display:'flex', gap:'6px', marginBottom:'20px', background:'#F1F5F9', borderRadius:'16px', padding:'5px' }}>
-          {[{ id:'iscritti', label:'👥 Iscritti' }, { id:'teatro', label:'🎭 Gestione posti' }].map(tab => (
+          {[{ id:'iscritti', label:'👥 Iscritti' }, { id:'teatro', label:'🎭 Gestione posti' }, { id:'mappa', label:'🗺️ Mappa posti' }].map(tab => (
             <button key={tab.id} onClick={() => setTabAttivo(tab.id)}
               style={{
                 flex:1, padding:'11px 24px', border:'none', cursor:'pointer',
@@ -1603,6 +1604,11 @@ export default function IscrittiPage() {
             {registrations.length === 0 && <div style={{ padding:'48px', textAlign:'center', color:'#9CA3AF', fontSize:'14px' }}>Nessun iscritto per questo evento</div>}
           </div>
         </div>
+      )}
+
+      {/* TAB MAPPA POSTI — assegnazione visuale su piantina */}
+      {selectedEvento && teatroAbilitato && tabAttivo === 'mappa' && (
+        <MappaPostiTeatro registrations={registrations} eventId={selectedEvento} onReload={loadRegs} />
       )}
 
       {/* STAT CARDS + TABELLA — solo tab iscritti */}
