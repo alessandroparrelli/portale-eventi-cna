@@ -59,7 +59,8 @@ function plateaPos(seats) {
       const xOff = -(centerGap/2 + j * seatW)
       pos[s.id] = { x: cx + xOff, y: cy - Math.sqrt(Math.max(1, r*r - xOff*xOff)) }
     })
-    const cEw = cE.length * seatW
+    // For rows with no central seats (e.g. 10a), align laterals with adjacent row's laterals
+    const cEw = cE.length > 0 ? cE.length * seatW : 12 * seatW  // 12 = row 10 central even count
     lE.forEach((s, j) => {
       const xOff = -(centerGap/2 + cEw + latSep + j * seatW)
       pos[s.id] = { x: cx + xOff, y: cy - Math.sqrt(Math.max(1, r*r - xOff*xOff)) }
@@ -72,7 +73,7 @@ function plateaPos(seats) {
       const xOff = centerGap/2 + j * seatW
       pos[s.id] = { x: cx + xOff, y: cy - Math.sqrt(Math.max(1, r*r - xOff*xOff)) }
     })
-    const cOw = cO.length * seatW
+    const cOw = cO.length > 0 ? cO.length * seatW : 12 * seatW
     lO.forEach((s, j) => {
       const xOff = centerGap/2 + cOw + latSep + j * seatW
       pos[s.id] = { x: cx + xOff, y: cy - Math.sqrt(Math.max(1, r*r - xOff*xOff)) }
@@ -115,7 +116,7 @@ export default function MappaPostiTeatro({ registrations, eventId, onReload }) {
 
   const saveSeat = useCallback(async (id,posto) => {
     const {error} = await supabase.from('registrations').update({numero_posto:posto}).eq('id',id)
-    if(error){showToast('Errore: '+error.message,false);return false} return true
+    if(error){console.error('saveSeat error:',error);showToast('Errore: '+error.message,false);return false} return true
   },[showToast])
 
   const handleAssign = useCallback(async (seat) => {
