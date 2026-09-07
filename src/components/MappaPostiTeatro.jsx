@@ -36,62 +36,46 @@ function genPalchi() {
 // ── Platea positions: even LEFT desc, odd RIGHT asc, like real theater ──
 function plateaPos(seats) {
   const pos = {}
-  const cx = 550, cy = 1500, baseR = 720, gap = 33
+  const cx = 550, cy = 1500, baseR = 720, rowGap = 36
   const rowIdx = {}; PL.forEach(([f],i) => rowIdx[f]=i)
   const bySeat = {}; seats.forEach(s => { if(!bySeat[s.fila]) bySeat[s.fila]=[]; bySeat[s.fila].push(s) })
 
   Object.entries(bySeat).forEach(([fila, rs]) => {
     const i = rowIdx[fila]
-    const r = baseR + i * gap
+    const r = baseR + i * rowGap
     const latThresh = LAT[fila] || 99
 
-    // Split into even (left) and odd (right)
-    const evens = rs.filter(s=>s.numero%2===0).sort((a,b)=>b.numero-a.numero) // desc: highest even = leftmost
-    const odds = rs.filter(s=>s.numero%2===1).sort((a,b)=>a.numero-b.numero) // asc: 1 = center-right
+    const evens = rs.filter(s=>s.numero%2===0)
+    const odds = rs.filter(s=>s.numero%2===1)
 
-    // Place left half (even, going from left edge toward center)
-    const nL = evens.length
-    // Place right half (odd, going from center toward right edge)
-    const nR = odds.length
+    const seatW = 18       // px between seats within a section
+    const centerGap = 44   // wide center aisle for row numbers
+    const latSep = 30      // wide gap between central and lateral sections
 
-    const seatW = 17 // px between seats
-    const centerGap = 14 // gap between halves
-    const latGap = 8 // gap before lateral seats
-
-    // Left half: rightmost even (2) is closest to center
-    evens.forEach((s, j) => {
-      const distFromCenter = (nL - j - 1) // 0 = closest to center
-      const isLat = s.numero >= latThresh
-      const centralCount = evens.filter(e => e.numero < latThresh).length
-      let xOff
-      if (!isLat) {
-        xOff = -(centerGap/2 + (nL - j - 1) * seatW) // removed: just offset from center
-        // Recalc: position from center going left
-        const posInCentral = evens.filter(e => e.numero < latThresh).sort((a,b)=>a.numero-b.numero).indexOf(s)
-        xOff = -(centerGap/2 + posInCentral * seatW)
-      } else {
-        const latIdx = evens.filter(e => e.numero >= latThresh).sort((a,b)=>b.numero-a.numero).indexOf(s)
-        const centralWidth = centralCount * seatW
-        xOff = -(centerGap/2 + centralWidth + latGap + latIdx * seatW)
-      }
-      const angle = Math.atan2(-xOff, r) // negative because left side
-      pos[s.id] = { x: cx + xOff, y: cy - Math.sqrt(r*r - xOff*xOff) }
+    // Left half: even numbers. Central sorted asc (2,4,6..), placed right-to-left from center
+    const cE = evens.filter(e => e.numero < latThresh).sort((a,b)=>a.numero-b.numero)
+    const lE = evens.filter(e => e.numero >= latThresh).sort((a,b)=>b.numero-a.numero)
+    cE.forEach((s, j) => {
+      const xOff = -(centerGap/2 + j * seatW)
+      pos[s.id] = { x: cx + xOff, y: cy - Math.sqrt(Math.max(1, r*r - xOff*xOff)) }
+    })
+    const cEw = cE.length * seatW
+    lE.forEach((s, j) => {
+      const xOff = -(centerGap/2 + cEw + latSep + j * seatW)
+      pos[s.id] = { x: cx + xOff, y: cy - Math.sqrt(Math.max(1, r*r - xOff*xOff)) }
     })
 
-    // Right half: first odd (1) is closest to center
-    odds.forEach((s, j) => {
-      const isLat = s.numero >= latThresh
-      const centralCount = odds.filter(e => e.numero < latThresh).length
-      let xOff
-      if (!isLat) {
-        const posInCentral = odds.filter(e => e.numero < latThresh).sort((a,b)=>a.numero-b.numero).indexOf(s)
-        xOff = centerGap/2 + posInCentral * seatW
-      } else {
-        const latIdx = odds.filter(e => e.numero >= latThresh).sort((a,b)=>a.numero-b.numero).indexOf(s)
-        const centralWidth = centralCount * seatW
-        xOff = centerGap/2 + centralWidth + latGap + latIdx * seatW
-      }
-      pos[s.id] = { x: cx + xOff, y: cy - Math.sqrt(Math.max(0, r*r - xOff*xOff)) }
+    // Right half: odd numbers. Central sorted asc (1,3,5..), placed left-to-right from center
+    const cO = odds.filter(e => e.numero < latThresh).sort((a,b)=>a.numero-b.numero)
+    const lO = odds.filter(e => e.numero >= latThresh).sort((a,b)=>a.numero-b.numero)
+    cO.forEach((s, j) => {
+      const xOff = centerGap/2 + j * seatW
+      pos[s.id] = { x: cx + xOff, y: cy - Math.sqrt(Math.max(1, r*r - xOff*xOff)) }
+    })
+    const cOw = cO.length * seatW
+    lO.forEach((s, j) => {
+      const xOff = centerGap/2 + cOw + latSep + j * seatW
+      pos[s.id] = { x: cx + xOff, y: cy - Math.sqrt(Math.max(1, r*r - xOff*xOff)) }
     })
   })
   return pos
@@ -235,7 +219,7 @@ export default function MappaPostiTeatro({ registrations, eventId, onReload }) {
         const rowY = centerSeats.length ? centerSeats.reduce((a,c)=>a+c.y,0)/centerSeats.length : seats.reduce((a,c)=>a+c.y,0)/seats.length
         return <g key={f}>
           {/* Row label in center */}
-          <text x={550} y={rowY+4} textAnchor="middle" fontSize={9} fontWeight={800} fill="#DC2626" fontFamily="Inter,sans-serif">{f}</text>
+          <text x={550} y={rowY+5} textAnchor="middle" fontSize={12} fontWeight={900} fill="#DC2626" fontFamily="Inter,sans-serif">{f}</text>
           {seats.map(({s,x,y})=><Dot key={s.id} seat={s} x={x} y={y}/>)}
         </g>
       })}
