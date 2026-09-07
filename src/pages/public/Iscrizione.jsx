@@ -117,11 +117,18 @@ export default function Iscrizione() {
     setLoading(true)
     setError(null)
     try {
-      const { data: regs } = await supabase
-        .from('registrations')
-        .select('*')
-        .ilike('codice_iscrizione', cod.trim())
-        .limit(1)
+      const trimmed = cod.trim()
+      // Try UUID lookup first (for unique links), then codice_iscrizione
+      const isUuid = /^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$/i.test(trimmed)
+      let regs
+      if (isUuid) {
+        const { data } = await supabase.from('registrations').select('*').eq('id', trimmed).limit(1)
+        regs = data
+      }
+      if (!regs || regs.length === 0) {
+        const { data } = await supabase.from('registrations').select('*').ilike('codice_iscrizione', trimmed).limit(1)
+        regs = data
+      }
 
       if (!regs || regs.length === 0) {
         setError('Nessuna iscrizione trovata con questo codice.')
