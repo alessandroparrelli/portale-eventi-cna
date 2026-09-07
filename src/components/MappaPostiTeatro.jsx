@@ -335,71 +335,96 @@ export default function MappaPostiTeatro({ registrations, eventId, onReload }) {
 
       {/* Right panel */}
       <div style={{width:370,borderLeft:`1px solid ${C.brd}`,background:'#fff',display:'flex',flexDirection:'column',flexShrink:0}}>
-        <div style={{padding:'12px 14px 8px',borderBottom:`1px solid ${C.brd}`}}>
-          <input value={search} onChange={e=>setSearch(e.target.value)} placeholder="🔍 Cerca nome, azienda, email…"
-            style={{width:'100%',padding:'9px 14px',borderRadius:10,border:`1px solid ${C.brd}`,fontSize:13,outline:'none',boxSizing:'border-box',fontFamily:"'Inter',sans-serif"}}/>
-          <div style={{display:'flex',gap:5,marginTop:8}}>
-            {[['all',`Tutti (${stats.tot})`],['unassigned',`Senza (${stats.u})`],['assigned',`Con (${stats.a})`]].map(([k,l])=>
-              <button key={k} onClick={()=>setFilter(k)} style={{padding:'4px 10px',borderRadius:14,border:`1px solid ${filter===k?C.pri:C.brd}`,
-                background:filter===k?C.pri:'#fff',color:filter===k?'#fff':C.txt,fontSize:11,cursor:'pointer',fontWeight:600,fontFamily:"'Inter',sans-serif"}}>{l}</button>
+        {/* Search + filters header */}
+        <div style={{padding:'14px 16px 12px',background:'linear-gradient(to bottom,#fff,#fafbfd)',borderBottom:`1px solid ${C.brd}`}}>
+          {/* Search */}
+          <div style={{position:'relative'}}>
+            <span style={{position:'absolute',left:12,top:'50%',transform:'translateY(-50%)',fontSize:14,color:'#9CA3AF',pointerEvents:'none'}}>🔍</span>
+            <input value={search} onChange={e=>setSearch(e.target.value)} placeholder="Cerca nome, azienda, email…"
+              style={{width:'100%',padding:'10px 14px 10px 36px',borderRadius:12,border:`1.5px solid ${search?C.pri:C.brd}`,fontSize:13,outline:'none',
+                boxSizing:'border-box',fontFamily:"'Inter',sans-serif",transition:'border-color .2s',background:'#fff'}}/>
+            {search && <button onClick={()=>setSearch('')} style={{position:'absolute',right:10,top:'50%',transform:'translateY(-50%)',
+              background:'none',border:'none',cursor:'pointer',color:'#9CA3AF',fontSize:16,padding:0,lineHeight:1}}>×</button>}
+          </div>
+          {/* Filter pills + sort in one row */}
+          <div style={{display:'flex',alignItems:'center',gap:6,marginTop:10}}>
+            {[['all','Tutti',stats.tot,'#6B7280'],['unassigned','Senza',stats.u,'#f59e0b'],['assigned','Con',stats.a,'#22c55e']].map(([k,l,v,c])=>
+              <button key={k} onClick={()=>setFilter(k)} style={{
+                padding:'5px 10px',borderRadius:20,border:filter===k?'none':`1.5px solid ${C.brd}`,
+                background:filter===k?'linear-gradient(90deg,#5B5FEF,#3730A3)':'#fff',
+                color:filter===k?'#fff':C.txt,fontSize:11,cursor:'pointer',fontWeight:700,fontFamily:"'Inter',sans-serif",
+                display:'flex',alignItems:'center',gap:4,transition:'all .2s',boxShadow:filter===k?'0 2px 8px rgba(91,95,239,.3)':'none'
+              }}>{l} <span style={{
+                background:filter===k?'rgba(255,255,255,.25)':c+'20',color:filter===k?'#fff':c,
+                padding:'1px 6px',borderRadius:10,fontSize:10,fontWeight:800,minWidth:16,textAlign:'center'
+              }}>{v}</span></button>
             )}
           </div>
-          <div style={{marginTop:8}}>
+          {/* Sort row */}
+          <div style={{display:'flex',alignItems:'center',gap:8,marginTop:10}}>
+            <span style={{fontSize:11,color:C.mut,fontWeight:600,whiteSpace:'nowrap'}}>Ordina:</span>
             <select value={sort} onChange={e=>setSort(e.target.value)} style={{
-              width:'100%',padding:'7px 10px',borderRadius:10,border:`1px solid ${C.brd}`,
-              fontSize:12,color:C.txt,fontFamily:"'Inter',sans-serif",fontWeight:600,
-              background:'#fff',cursor:'pointer',outline:'none',appearance:'auto'
+              flex:1,padding:'6px 10px',borderRadius:10,border:`1.5px solid ${C.brd}`,
+              fontSize:11,color:C.txt,fontFamily:"'Inter',sans-serif",fontWeight:600,
+              background:'#fff',cursor:'pointer',outline:'none'
             }}>
-              <optgroup label="Cognome">
-                <option value="cognome_asc">Cognome A→Z</option>
-                <option value="cognome_desc">Cognome Z→A</option>
-              </optgroup>
-              <optgroup label="Nome">
-                <option value="nome_asc">Nome A→Z</option>
-                <option value="nome_desc">Nome Z→A</option>
-              </optgroup>
-              <optgroup label="Azienda">
-                <option value="azienda_asc">Azienda A→Z</option>
-                <option value="azienda_desc">Azienda Z→A</option>
-              </optgroup>
-              <optgroup label="Data iscrizione">
-                <option value="data_asc">Data più vecchia</option>
-                <option value="data_desc">Data più recente</option>
-              </optgroup>
-              <optgroup label="Email">
-                <option value="email_asc">Email A→Z</option>
-                <option value="email_desc">Email Z→A</option>
-              </optgroup>
-              <optgroup label="Posto">
-                <option value="posto_asc">Posto assegnato A→Z</option>
-                <option value="posto_desc">Posto assegnato Z→A</option>
-              </optgroup>
+              <option value="data_desc">📅 Più recenti</option>
+              <option value="data_asc">📅 Più vecchi</option>
+              <option value="cognome_asc">🔤 Cognome A→Z</option>
+              <option value="cognome_desc">🔤 Cognome Z→A</option>
+              <option value="nome_asc">🔤 Nome A→Z</option>
+              <option value="nome_desc">🔤 Nome Z→A</option>
+              <option value="azienda_asc">🏢 Azienda A→Z</option>
+              <option value="azienda_desc">🏢 Azienda Z→A</option>
+              <option value="email_asc">📧 Email A→Z</option>
+              <option value="posto_asc">🪑 Posto A→Z</option>
+              <option value="posto_desc">🪑 Posto Z→A</option>
             </select>
           </div>
+          {/* Results count */}
+          <div style={{marginTop:8,fontSize:11,color:C.mut,fontWeight:500}}>
+            {filtered.length === stats.tot ? `${filtered.length} iscritti` : `${filtered.length} di ${stats.tot} iscritti`}
+          </div>
         </div>
+        {/* List */}
         <div style={{flex:1,overflowY:'auto'}}>
           {filtered.map(r=>{
             const isSel=selP?.id===r.id
+            const hasPosto = !!r.numero_posto
             return <div key={r.id} onClick={()=>isSel?setSelP(null):setSelP(r)} style={{
-              padding:'9px 14px',borderBottom:`1px solid ${C.brd}`,cursor:'pointer',
-              background:isSel?'#eef2ff':'transparent',borderLeft:isSel?`3px solid ${C.pri}`:'3px solid transparent'}}>
-              <div style={{display:'flex',alignItems:'center',gap:6}}>
-                <div style={{width:8,height:8,borderRadius:'50%',background:r.numero_posto?C.free:'#f59e0b',flexShrink:0}}/>
-                <span style={{fontWeight:700,fontSize:13,color:C.txt,fontFamily:"'Inter',sans-serif"}}>{r.cognome} {r.nome}</span>
+              padding:'10px 16px',borderBottom:`1px solid #f1f5f9`,cursor:'pointer',
+              background:isSel?'#eef2ff':hasPosto?'#f0fdf4':'transparent',
+              borderLeft:isSel?`3px solid ${C.pri}`:'3px solid transparent',
+              transition:'background .15s'}}>
+              <div style={{display:'flex',alignItems:'center',gap:8}}>
+                <div style={{width:10,height:10,borderRadius:'50%',background:hasPosto?C.free:'#f59e0b',flexShrink:0,
+                  boxShadow:hasPosto?'0 0 0 2px #dcfce7':'0 0 0 2px #fef3c7'}}/>
+                <span style={{fontWeight:700,fontSize:13.5,color:C.txt,fontFamily:"'Inter',sans-serif",flex:1}}>{r.cognome} {r.nome}</span>
               </div>
-              {r.ragione_sociale && <div style={{fontSize:11,color:C.mut,marginLeft:14,marginTop:1}}>{r.ragione_sociale}</div>}
-              {r.gruppo_id===r.id && <div style={{marginLeft:14,marginTop:3}}><span style={{display:'inline-flex',alignItems:'center',gap:4,padding:'2px 8px',borderRadius:10,background:'#dcfce7',color:'#166534',fontSize:10,fontWeight:700}}>👥 Capogruppo</span></div>}
-              {r.referente_id && r.referente_id!==r.id && refMap[r.referente_id] && <div style={{marginLeft:14,marginTop:3}}><span style={{display:'inline-flex',alignItems:'center',gap:4,padding:'2px 8px',borderRadius:10,background:'#f0fdf4',color:'#166534',fontSize:10,fontWeight:600,border:'1px solid #bbf7d0'}}>↩ {refMap[r.referente_id]}</span></div>}
-              {r.numero_posto ? <div style={{fontSize:11,color:C.free,fontWeight:700,marginLeft:14,marginTop:3,display:'flex',alignItems:'center',gap:4}}>
-                🪑 {r.numero_posto}
+              {r.ragione_sociale && <div style={{fontSize:11.5,color:'#64748b',marginLeft:18,marginTop:2,fontWeight:500}}>{r.ragione_sociale}</div>}
+              {/* Badges row */}
+              {(r.gruppo_id===r.id || (r.referente_id && r.referente_id!==r.id && refMap[r.referente_id])) &&
+                <div style={{marginLeft:18,marginTop:4,display:'flex',gap:4,flexWrap:'wrap'}}>
+                  {r.gruppo_id===r.id && <span style={{display:'inline-flex',alignItems:'center',gap:3,padding:'2px 8px',borderRadius:10,
+                    background:'linear-gradient(135deg,#dcfce7,#d1fae5)',color:'#166534',fontSize:10,fontWeight:700,letterSpacing:'-.01em'}}>👥 Capogruppo</span>}
+                  {r.referente_id && r.referente_id!==r.id && refMap[r.referente_id] && <span style={{display:'inline-flex',alignItems:'center',gap:3,
+                    padding:'2px 8px',borderRadius:10,background:'#f0fdf4',color:'#166534',fontSize:10,fontWeight:600,border:'1px solid #bbf7d0'}}>↩ {refMap[r.referente_id]}</span>}
+                </div>
+              }
+              {/* Seat status */}
+              {hasPosto ? <div style={{fontSize:11.5,marginLeft:18,marginTop:5,display:'flex',alignItems:'center',gap:6}}>
+                <span style={{background:'#dcfce7',color:'#166534',padding:'3px 10px',borderRadius:8,fontWeight:700,fontSize:11,letterSpacing:'-.01em'}}>🪑 {r.numero_posto}</span>
                 <button onClick={e=>{e.stopPropagation();if(confirm(`Rimuovere posto a ${r.nome} ${r.cognome}?`))saveSeat(r.id,null).then(ok=>{if(ok){showToast('Rimosso');onReload?.()}})}}
-                  style={{marginLeft:'auto',padding:'2px 8px',borderRadius:8,border:'1px solid #fca5a5',background:'#fff0f0',color:C.occ,fontSize:10,cursor:'pointer',fontWeight:600}}>✕</button>
-              </div> : <div style={{fontSize:11,color:isSel?C.pri:'#f59e0b',fontWeight:isSel?700:500,marginLeft:14,marginTop:3}}>
-                {isSel?'👆 Clicca un posto sulla mappa...':'Senza posto'}
+                  style={{marginLeft:'auto',padding:'3px 10px',borderRadius:8,border:'none',background:'#fef2f2',color:'#dc2626',fontSize:10,cursor:'pointer',fontWeight:700,transition:'background .15s'}}>✕ Rimuovi</button>
+              </div> : <div style={{fontSize:11.5,fontWeight:600,marginLeft:18,marginTop:5,
+                color:isSel?C.pri:'#d97706'}}>
+                {isSel?'👆 Clicca un posto sulla mappa...':'Senza posto — clicca per selezionare'}
               </div>}
             </div>
           })}
-          {!filtered.length && <div style={{padding:24,textAlign:'center',color:C.mut,fontSize:13}}>Nessun risultato</div>}
+          {!filtered.length && <div style={{padding:32,textAlign:'center',color:C.mut,fontSize:13}}>
+            <div style={{fontSize:28,marginBottom:6}}>🔍</div>Nessun risultato
+          </div>}
         </div>
       </div>
     </div>
