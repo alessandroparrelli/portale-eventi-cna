@@ -75,24 +75,27 @@ function QRCodeDisplay({ value }) {
     setDataUrl(null); setErr(false)
     import('qrcode').then(QRCode => {
       QRCode.toDataURL(value, {
-        width: 220,
+        width: 280,
         margin: 2,
         color: { dark: '#0A0A0A', light: '#FFFFFF' },
       }).then(url => setDataUrl(url)).catch(() => setErr(true))
     }).catch(() => setErr(true))
   }, [value])
 
+  // Fallback: URL diretto qrserver.com (funziona sempre)
+  const fallbackUrl = `https://api.qrserver.com/v1/create-qr-code/?size=280x280&format=png&data=${encodeURIComponent(value)}`
+
   return (
     <div style={{ display:'flex', flexDirection:'column', alignItems:'center', gap:'8px' }}>
       {dataUrl
-        ? <img src={dataUrl} alt="QR Code check-in" width={220} height={220} style={{ borderRadius:'20px', border:'1px solid #E5E7EB' }}/>
+        ? <img src={dataUrl} alt="QR Code check-in" width={240} height={240} style={{ borderRadius:'20px', border:'1px solid #E5E7EB' }}/>
         : err
-          ? <p style={{ fontSize:'13px', color:'#DC2626' }}>Errore generazione QR</p>
-          : <div style={{ width:220, height:220, borderRadius:'20px', border:'1px solid #E5E7EB', display:'flex', alignItems:'center', justifyContent:'center', backgroundColor:'#F9FAFB' }}>
+          ? <img src={fallbackUrl} alt="QR Code check-in" width={240} height={240} style={{ borderRadius:'20px', border:'1px solid #E5E7EB' }}/>
+          : <div style={{ width:240, height:240, borderRadius:'20px', border:'1px solid #E5E7EB', display:'flex', alignItems:'center', justifyContent:'center', backgroundColor:'#F9FAFB' }}>
               <div style={{ width:28, height:28, border:'3px solid #E5E7EB', borderTopColor:'#003DA5', borderRadius:'50%', animation:'qrspin .8s linear infinite' }}/>
             </div>
       }
-      <p style={{ fontSize:'11px', color:'#9CA3AF', margin:0, fontFamily:'monospace', letterSpacing:'0.05em' }}>{value}</p>
+      <p style={{ fontSize:'12px', color:'#9CA3AF', margin:0, fontFamily:'monospace', letterSpacing:'0.05em' }}>{value}</p>
       <style>{`@keyframes qrspin{to{transform:rotate(360deg)}}`}</style>
     </div>
   )
@@ -259,7 +262,7 @@ export default function Iscrizione() {
                 <div style={{ height:'140px', backgroundImage:`url(${event.immagine_hero})`, backgroundSize:'cover', backgroundPosition:'center', position:'relative' }}>
                   <div style={{ position:'absolute', inset:0, backgroundColor:'rgba(0,0,0,0.45)' }} />
                   <div style={{ position:'absolute', bottom:'16px', left:'16px', right:'16px' }}>
-                    <img src={logoUrl} alt="Logo" style={{ height:'28px', objectFit:'contain', filter:'brightness(0) invert(1)', marginBottom:'8px' }} />
+                    <img src={logoUrl} alt="Logo" style={{ height:'44px', objectFit:'contain', filter:'brightness(0) invert(1)', marginBottom:'10px' }} />
                     <h2 style={{ color:'#fff', fontSize:'18px', fontWeight:'900', letterSpacing:'-0.02em', margin:0, lineHeight:'1.2' }}>{event.titolo}</h2>
                   </div>
                 </div>
