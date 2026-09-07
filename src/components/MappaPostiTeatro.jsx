@@ -155,6 +155,7 @@ export default function MappaPostiTeatro({ registrations, eventId, onReload }) {
   const resetT = useCallback(() => setTransform({x:0,y:0,s:1}),[])
   const onWheel = useCallback(e => {
     e.preventDefault()
+    setTip(null)
     const d = e.deltaY > 0 ? -0.12 : 0.12
     setTransform(t => {
       const ns = Math.max(0.3, Math.min(6, t.s + d))
@@ -167,6 +168,7 @@ export default function MappaPostiTeatro({ registrations, eventId, onReload }) {
     })
   },[])
   const onMD = useCallback(e => {
+    setTip(null)
     if(e.button===0) dragRef.current = {sx:e.clientX-transform.x, sy:e.clientY-transform.y}
   },[transform])
   const onMM = useCallback(e => { if(dragRef.current) setTransform(t=>({...t,x:e.clientX-dragRef.current.sx,y:e.clientY-dragRef.current.sy})) },[])
@@ -187,14 +189,20 @@ export default function MappaPostiTeatro({ registrations, eventId, onReload }) {
   const onTE = useCallback(()=>{dragRef.current=null;lastTouchRef.current=null},[])
 
   // ── Seat dot ──
+  const tipTimer = useRef(null)
   const Dot = useCallback(({seat,x,y,r=6}) => {
     const occ=seatToReg[seat.id], isSel=selP&&occ?.id===selP.id
     const fill = isSel?C.sel:occ?C.occ:selP?C.free:'#94a3b8'
     return <circle cx={x} cy={y} r={r} fill={fill} stroke={occ?'#fff':'#cbd5e1'} strokeWidth={0.8}
       style={{cursor:'pointer',transition:'fill .15s'}}
-      onMouseEnter={e=>{const rc=mapRef.current?.getBoundingClientRect();setTip({x:e.clientX-(rc?.left||0),y:e.clientY-(rc?.top||0),seat,occ})}}
-      onMouseLeave={()=>setTip(null)}
-      onClick={e=>{e.stopPropagation();handleAssign(seat)}} />
+      onMouseEnter={e=>{
+        clearTimeout(tipTimer.current)
+        const rc=mapRef.current?.getBoundingClientRect()
+        setTip({x:e.clientX-(rc?.left||0),y:e.clientY-(rc?.top||0),seat,occ})
+        tipTimer.current=setTimeout(()=>setTip(null),3000)
+      }}
+      onMouseLeave={()=>{clearTimeout(tipTimer.current);tipTimer.current=setTimeout(()=>setTip(null),100)}}
+      onClick={e=>{e.stopPropagation();setTip(null);handleAssign(seat)}} />
   },[seatToReg,selP,handleAssign])
 
   // ── Platea SVG ──
