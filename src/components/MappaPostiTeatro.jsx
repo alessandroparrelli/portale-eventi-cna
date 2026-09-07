@@ -146,6 +146,13 @@ export default function MappaPostiTeatro({ registrations, eventId, onReload }) {
     setSaving(false)
   },[selP,seatToReg,regToSeat,saving,saveSeat,showToast,onReload])
 
+  // Map id→name for capogruppo/referente
+  const refMap = useMemo(() => {
+    const m = {}
+    registrations.forEach(r => { if(r.gruppo_id===r.id) m[r.id]=`${r.nome||''} ${r.cognome||''}`.trim() })
+    return m
+  },[registrations])
+
   const filtered = useMemo(() => {
     let l = registrations
     if(filter==='assigned') l=l.filter(r=>r.numero_posto)
@@ -339,6 +346,8 @@ export default function MappaPostiTeatro({ registrations, eventId, onReload }) {
                 <span style={{fontWeight:700,fontSize:13,color:C.txt,fontFamily:"'Inter',sans-serif"}}>{r.cognome} {r.nome}</span>
               </div>
               {r.ragione_sociale && <div style={{fontSize:11,color:C.mut,marginLeft:14,marginTop:1}}>{r.ragione_sociale}</div>}
+              {r.gruppo_id===r.id && <div style={{marginLeft:14,marginTop:3}}><span style={{display:'inline-flex',alignItems:'center',gap:4,padding:'2px 8px',borderRadius:10,background:'#dcfce7',color:'#166534',fontSize:10,fontWeight:700}}>👥 Capogruppo</span></div>}
+              {r.referente_id && r.referente_id!==r.id && refMap[r.referente_id] && <div style={{marginLeft:14,marginTop:3}}><span style={{display:'inline-flex',alignItems:'center',gap:4,padding:'2px 8px',borderRadius:10,background:'#f0fdf4',color:'#166534',fontSize:10,fontWeight:600,border:'1px solid #bbf7d0'}}>↩ {refMap[r.referente_id]}</span></div>}
               {r.numero_posto ? <div style={{fontSize:11,color:C.free,fontWeight:700,marginLeft:14,marginTop:3,display:'flex',alignItems:'center',gap:4}}>
                 🪑 {r.numero_posto}
                 <button onClick={e=>{e.stopPropagation();if(confirm(`Rimuovere posto a ${r.nome} ${r.cognome}?`))saveSeat(r.id,null).then(ok=>{if(ok){showToast('Rimosso');onReload?.()}})}}
