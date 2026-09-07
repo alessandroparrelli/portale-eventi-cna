@@ -90,7 +90,7 @@ export default function MappaPostiTeatro({ registrations, eventId, onReload }) {
   const [piano, setPiano] = useState(1)
   const [search, setSearch] = useState('')
   const [filter, setFilter] = useState('all')
-  const [sort, setSort] = useState('cognome_asc') // sort key
+  const [sort, setSort] = useState('data_desc') // sort key
   const [tip, setTip] = useState(null)
   const [toast, setToast] = useState(null)
   const [saving, setSaving] = useState(false)
