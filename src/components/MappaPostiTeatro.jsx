@@ -9,7 +9,7 @@ const PL = [
   ['16',1,16],['17',1,18],['18',1,18],['19',1,18],['20',1,14]
 ]
 // Lateral threshold: seats >= this number are lateral
-const LAT = {'1':99,'2':19,'3':21,'4':21,'5':23,'6':23,'7':25,'8':23,'9':25,'10':25,'10a':0,'11':25,'12':25,'13':25,'14':21,'15':19,'16':99,'17':99,'18':99,'19':99,'20':99}
+const LAT = {'1':99,'2':19,'3':21,'4':21,'5':23,'6':23,'7':25,'8':23,'9':25,'10':25,'10a':1,'11':25,'12':25,'13':25,'14':21,'15':19,'16':99,'17':99,'18':99,'19':99,'20':99}
 
 const PP = {1:4,2:4,3:4,4:4,5:4,6:4,7:4,8:4,9:4,10:5,11:5,12:6,13:6,14:6,15:6,16:6,17:6}
 const PIANI = [1,2,3,4]
@@ -43,7 +43,7 @@ function plateaPos(seats) {
   Object.entries(bySeat).forEach(([fila, rs]) => {
     const i = rowIdx[fila]
     const r = baseR + i * rowGap
-    const latThresh = LAT[fila] || 99
+    const latThresh = fila in LAT ? LAT[fila] : 99
 
     const evens = rs.filter(s=>s.numero%2===0)
     const odds = rs.filter(s=>s.numero%2===1)
