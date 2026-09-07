@@ -90,6 +90,7 @@ export default function MappaPostiTeatro({ registrations, eventId, onReload }) {
   const [piano, setPiano] = useState(1)
   const [search, setSearch] = useState('')
   const [filter, setFilter] = useState('all')
+  const [sort, setSort] = useState('cognome_asc') // sort key
   const [tip, setTip] = useState(null)
   const [toast, setToast] = useState(null)
   const [saving, setSaving] = useState(false)
@@ -139,12 +140,28 @@ export default function MappaPostiTeatro({ registrations, eventId, onReload }) {
   },[registrations])
 
   const filtered = useMemo(() => {
-    let l = registrations
+    let l = [...registrations]
     if(filter==='assigned') l=l.filter(r=>r.numero_posto)
     else if(filter==='unassigned') l=l.filter(r=>!r.numero_posto)
     if(search){const q=search.toLowerCase(); l=l.filter(r=>`${r.nome} ${r.cognome} ${r.ragione_sociale||''} ${r.email||''} ${r.numero_posto||''}`.toLowerCase().includes(q))}
+    // Sort
+    const [sk, sd] = sort.split('_')
+    const dir = sd === 'desc' ? -1 : 1
+    l.sort((a, b) => {
+      let va, vb
+      if (sk === 'cognome') { va = (a.cognome||'').toLowerCase(); vb = (b.cognome||'').toLowerCase() }
+      else if (sk === 'nome') { va = (a.nome||'').toLowerCase(); vb = (b.nome||'').toLowerCase() }
+      else if (sk === 'azienda') { va = (a.ragione_sociale||'').toLowerCase(); vb = (b.ragione_sociale||'').toLowerCase() }
+      else if (sk === 'data') { va = a.created_at||''; vb = b.created_at||'' }
+      else if (sk === 'posto') { va = a.numero_posto||'zzz'; vb = b.numero_posto||'zzz' }
+      else if (sk === 'email') { va = (a.email||'').toLowerCase(); vb = (b.email||'').toLowerCase() }
+      else { va = ''; vb = '' }
+      if (va < vb) return -1 * dir
+      if (va > vb) return 1 * dir
+      return 0
+    })
     return l
-  },[registrations,filter,search])
+  },[registrations,filter,search,sort])
 
   const stats = useMemo(() => {
     const a = registrations.filter(r=>r.numero_posto).length
@@ -326,6 +343,38 @@ export default function MappaPostiTeatro({ registrations, eventId, onReload }) {
               <button key={k} onClick={()=>setFilter(k)} style={{padding:'4px 10px',borderRadius:14,border:`1px solid ${filter===k?C.pri:C.brd}`,
                 background:filter===k?C.pri:'#fff',color:filter===k?'#fff':C.txt,fontSize:11,cursor:'pointer',fontWeight:600,fontFamily:"'Inter',sans-serif"}}>{l}</button>
             )}
+          </div>
+          <div style={{marginTop:8}}>
+            <select value={sort} onChange={e=>setSort(e.target.value)} style={{
+              width:'100%',padding:'7px 10px',borderRadius:10,border:`1px solid ${C.brd}`,
+              fontSize:12,color:C.txt,fontFamily:"'Inter',sans-serif",fontWeight:600,
+              background:'#fff',cursor:'pointer',outline:'none',appearance:'auto'
+            }}>
+              <optgroup label="Cognome">
+                <option value="cognome_asc">Cognome A→Z</option>
+                <option value="cognome_desc">Cognome Z→A</option>
+              </optgroup>
+              <optgroup label="Nome">
+                <option value="nome_asc">Nome A→Z</option>
+                <option value="nome_desc">Nome Z→A</option>
+              </optgroup>
+              <optgroup label="Azienda">
+                <option value="azienda_asc">Azienda A→Z</option>
+                <option value="azienda_desc">Azienda Z→A</option>
+              </optgroup>
+              <optgroup label="Data iscrizione">
+                <option value="data_asc">Data più vecchia</option>
+                <option value="data_desc">Data più recente</option>
+              </optgroup>
+              <optgroup label="Email">
+                <option value="email_asc">Email A→Z</option>
+                <option value="email_desc">Email Z→A</option>
+              </optgroup>
+              <optgroup label="Posto">
+                <option value="posto_asc">Posto assegnato A→Z</option>
+                <option value="posto_desc">Posto assegnato Z→A</option>
+              </optgroup>
+            </select>
           </div>
         </div>
         <div style={{flex:1,overflowY:'auto'}}>
