@@ -307,22 +307,7 @@ export default function MappaPostiTeatro({ registrations, eventId, onReload }) {
   },[piano,paSeats,Dot])
 
   // Map wrapper with zoom/pan
-  const MapWrap = useCallback(({children}) =>
-    <div ref={mapRef} style={{flex:1,overflow:'hidden',position:'relative',background:'#f8fafc',touchAction:'none'}}
-      onWheel={onWheel} onMouseDown={onMD} onMouseMove={onMM} onMouseUp={onMU} onMouseLeave={onMU}
-      onTouchStart={onTS} onTouchMove={onTM} onTouchEnd={onTE}>
-      <div style={{width:'100%',height:'100%',transform:`translate(${transform.x}px,${transform.y}px) scale(${transform.s})`,transformOrigin:'0 0',willChange:'transform'}}>
-        {children}
-      </div>
-      {tip && <div style={{position:'absolute',left:Math.min(tip.x+14,(mapRef.current?.offsetWidth||600)-280),top:tip.y-50,
-        background:'#1e293b',color:'#fff',padding:'8px 12px',borderRadius:10,fontSize:12,whiteSpace:'nowrap',pointerEvents:'none',zIndex:100,
-        boxShadow:'0 4px 16px rgba(0,0,0,.35)',fontFamily:"'Inter',sans-serif"}}>
-        <div style={{fontWeight:700}}>{tip.seat.label}</div>
-        {tip.occ ? <div style={{color:'#fca5a5'}}>✦ {tip.occ.cognome} {tip.occ.nome}{tip.occ.ragione_sociale?` — ${tip.occ.ragione_sociale}`:''}</div>
-          : <div style={{color:'#86efac'}}>🟢 Disponibile</div>}
-      </div>}
-    </div>
-  ,[onWheel,onMD,onMM,onMU,onTS,onTM,onTE,transform,tip])
+
 
   return <div style={{background:C.bg,borderRadius:16,border:`1px solid ${C.brd}`,overflow:'hidden'}}>
     {/* Stats */}
@@ -361,7 +346,20 @@ export default function MappaPostiTeatro({ registrations, eventId, onReload }) {
 
     {/* Main */}
     <div style={{display:'flex',height:'calc(100vh - 340px)',minHeight:500}}>
-      <MapWrap>{view==='platea'?PlateaSVG:PalchiSVG}</MapWrap>
+      <div ref={mapRef} style={{flex:1,overflow:'hidden',position:'relative',background:'#f8fafc',touchAction:'none'}}
+        onWheel={onWheel} onMouseDown={onMD} onMouseMove={onMM} onMouseUp={onMU} onMouseLeave={onMU}
+        onTouchStart={onTS} onTouchMove={onTM} onTouchEnd={onTE}>
+        <div style={{width:'100%',height:'100%',transform:`translate(${transform.x}px,${transform.y}px) scale(${transform.s})`,transformOrigin:'0 0',willChange:'transform'}}>
+          {view==='platea'?PlateaSVG:PalchiSVG}
+        </div>
+        {tip && <div style={{position:'absolute',left:Math.min(tip.x+14,(mapRef.current?.offsetWidth||600)-280),top:tip.y-50,
+          background:'#1e293b',color:'#fff',padding:'8px 12px',borderRadius:10,fontSize:12,whiteSpace:'nowrap',pointerEvents:'none',zIndex:100,
+          boxShadow:'0 4px 16px rgba(0,0,0,.35)',fontFamily:"'Inter',sans-serif"}}>
+          <div style={{fontWeight:700}}>{tip.seat.label}</div>
+          {tip.occ ? <div style={{color:'#fca5a5'}}>✦ {tip.occ.cognome} {tip.occ.nome}{tip.occ.ragione_sociale?` — ${tip.occ.ragione_sociale}`:''}</div>
+            : <div style={{color:'#86efac'}}>🟢 Disponibile</div>}
+        </div>}
+      </div>
 
       {/* Right panel */}
       <div style={{width:370,borderLeft:`1px solid ${C.brd}`,background:'#fff',display:'flex',flexDirection:'column',flexShrink:0}}>
