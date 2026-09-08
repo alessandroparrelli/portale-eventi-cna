@@ -1,4 +1,4 @@
-const CACHE = 'cnaeventi-v1'
+const CACHE = 'cnaeventi-v2'
 
 // Percorsi che non vanno MAI cachati (icone, manifest — devono essere sempre freschi)
 const NO_CACHE = ['/manifest.json', '/favicon.ico', '/favicon.svg', '/favicon-32.png']
