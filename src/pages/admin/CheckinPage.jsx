@@ -188,6 +188,7 @@ export default function CheckinPage() {
   const [processing,     setProcessing]    = useState(false)
   const [iscritti,       setIscritti]      = useState([])
   const [searchLista,    setSearchLista]   = useState('')
+  const [filterLista,    setFilterLista]   = useState('tutti') // 'tutti' | 'presenti' | 'attesa'
   const [loadingLista,   setLoadingLista]  = useState(false)
   const [checkingId,     setCheckingId]    = useState(null)
   const [ticketReg,      setTicketReg]     = useState(null)
@@ -360,11 +361,14 @@ export default function CheckinPage() {
   const nonPresenti  = totali - presenti.length
 
   const filteredIscritti = (() => {
+    let list = iscritti
+    if (filterLista === 'presenti') list = list.filter(r => r.presente)
+    else if (filterLista === 'attesa') list = list.filter(r => !r.presente)
     const q = searchLista.toLowerCase()
-    if (!q) return iscritti
+    if (!q) return list
     const match = r => r.nome?.toLowerCase().includes(q) || r.cognome?.toLowerCase().includes(q) || r.ragione_sociale?.toLowerCase().includes(q)
-    const gruppiMatch = new Set(iscritti.filter(r => match(r) && r.gruppo_id).map(r => r.gruppo_id))
-    return iscritti.filter(r => match(r) || (r.gruppo_id && gruppiMatch.has(r.gruppo_id)))
+    const gruppiMatch = new Set(list.filter(r => match(r) && r.gruppo_id).map(r => r.gruppo_id))
+    return list.filter(r => match(r) || (r.gruppo_id && gruppiMatch.has(r.gruppo_id)))
   })()
 
   return (
@@ -510,7 +514,7 @@ export default function CheckinPage() {
       )}
 
       {listaModal && (
-        <Modal title="Lista iscritti" onClose={() => { setListaModal(false); setSearchLista('') }} width="600px">
+        <Modal title="Lista iscritti" onClose={() => { setListaModal(false); setSearchLista(''); setFilterLista('tutti') }} width="600px">
           <div style={{ display:'flex', flexDirection:'column', gap:'12px', height:'70vh', maxHeight:'600px' }}>
             <div style={{ position:'relative' }}>
               <Search size={16} style={{ position:'absolute', left:'12px', top:'50%', transform:'translateY(-50%)', color:'#9CA3AF' }} />
@@ -519,15 +523,21 @@ export default function CheckinPage() {
                 style={{ width:'100%', padding:'10px 12px 10px 36px', border:'1px solid #E8ECF4', borderRadius:'16px', fontSize:'14px', fontFamily:"'Inter',sans-serif", outline:'none', boxSizing:'border-box' }} />
             </div>
             <div style={{ display:'flex', gap:'8px' }}>
-              {[{ label:'Totale', val:iscritti.length, color:'#5B5FEF' },
-                { label:'Presenti', val:iscritti.filter(r => r.presente).length, color:'#16A34A' },
-                { label:'Attesa', val:iscritti.filter(r => !r.presente).length, color:'#D97706' }
-              ].map(stat => (
-                <div key={stat.label} style={{ flex:1, background:'#F9FAFB', borderRadius:'16px', padding:'8px 10px', textAlign:'center', border:'1px solid #E8ECF4' }}>
-                  <p style={{ fontSize:'18px', fontWeight:'900', color:stat.color, margin:0, letterSpacing:'-.02em' }}>{stat.val}</p>
-                  <p style={{ fontSize:'11px', color:'#6B7280', margin:0, fontWeight:'600' }}>{stat.label}</p>
-                </div>
-              ))}
+              {[{ label:'Totale', val:iscritti.length, color:'#5B5FEF', key:'tutti' },
+                { label:'Presenti', val:iscritti.filter(r => r.presente).length, color:'#16A34A', key:'presenti' },
+                { label:'Attesa', val:iscritti.filter(r => !r.presente).length, color:'#D97706', key:'attesa' }
+              ].map(stat => {
+                const active = filterLista === stat.key
+                return (
+                  <div key={stat.label} onClick={() => setFilterLista(active ? 'tutti' : stat.key)}
+                    style={{ flex:1, background: active ? stat.color : '#F9FAFB', borderRadius:'16px', padding:'8px 10px', textAlign:'center',
+                      border: active ? 'none' : '1px solid #E8ECF4', cursor:'pointer', transition:'all .2s',
+                      boxShadow: active ? `0 2px 10px ${stat.color}40` : 'none' }}>
+                    <p style={{ fontSize:'18px', fontWeight:'900', color: active ? '#fff' : stat.color, margin:0, letterSpacing:'-.02em' }}>{stat.val}</p>
+                    <p style={{ fontSize:'11px', color: active ? 'rgba(255,255,255,.85)' : '#6B7280', margin:0, fontWeight:'600' }}>{stat.label}</p>
+                  </div>
+                )
+              })}
             </div>
             {loadingLista ? (
               <div style={{ flex:1, display:'flex', alignItems:'center', justifyContent:'center' }}>
