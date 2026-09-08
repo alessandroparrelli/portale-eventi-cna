@@ -250,7 +250,7 @@ export default function MappaPostiTeatro({ registrations, eventId, onReload }) {
       }}
       onMouseLeave={()=>{clearTimeout(tipTimer.current);tipTimer.current=setTimeout(()=>setTip(null),100)}}
       onClick={e=>{e.stopPropagation();setTip(null);handleSeatClick(seat)}} />
-  },[seatToReg,selP,handleAssign])
+  },[seatToReg,selP,handleSeatClick])
 
   // ── Platea SVG ──
   const PlateaSVG = useMemo(() => {
