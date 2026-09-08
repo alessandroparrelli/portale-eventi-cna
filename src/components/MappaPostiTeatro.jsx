@@ -94,6 +94,7 @@ export default function MappaPostiTeatro({ registrations, eventId, onReload }) {
   const [tip, setTip] = useState(null)
   const [toast, setToast] = useState(null)
   const [saving, setSaving] = useState(false)
+  const [confirmModal, setConfirmModal] = useState(null) // {person, seat}
   const mapRef = useRef(null)
 
   // Zoom/pan state
@@ -120,17 +121,35 @@ export default function MappaPostiTeatro({ registrations, eventId, onReload }) {
     if(error){console.error('saveSeat error:',error);showToast('Errore: '+error.message,false);return false} return true
   },[showToast])
 
-  const handleAssign = useCallback(async (seat) => {
+  const handleSeatClick = useCallback((seat) => {
+    // Ignore if we were dragging
+    if(dragRef.current?.dragging) return
     if(saving) return
     const occ = seatToReg[seat.id]
-    if(occ && !selP){ if(confirm(`Rimuovere ${occ.nome} ${occ.cognome} da ${seat.label}?`)){ setSaving(true); if(await saveSeat(occ.id,null)){showToast(`Liberato: ${seat.label}`);onReload?.()} setSaving(false) } return }
-    if(!selP){showToast('Seleziona un iscritto dalla lista',false);return}
-    if(occ){showToast(`Occupato da ${occ.nome} ${occ.cognome}`,false);return}
+    if(occ && !selP){
+      // Click occupied seat without selection → ask to remove
+      setConfirmModal({type:'remove', person:occ, seat})
+      return
+    }
+    if(!selP){showToast('Seleziona un iscritto dalla lista a destra',false);return}
+    if(occ){showToast(`Posto già occupato da ${occ.nome} ${occ.cognome}`,false);return}
+    // Open confirmation modal
+    setConfirmModal({type:'assign', person:selP, seat})
+  },[selP,seatToReg,saving,showToast])
+
+  const doConfirm = useCallback(async () => {
+    if(!confirmModal) return
     setSaving(true)
-    if(regToSeat[selP.id]) await saveSeat(selP.id,null)
-    if(await saveSeat(selP.id,seat.label)){showToast(`${selP.cognome} ${selP.nome} → ${seat.label}`);setSelP(null);onReload?.()}
+    const {type, person, seat} = confirmModal
+    if(type==='remove'){
+      if(await saveSeat(person.id,null)){showToast(`Posto liberato: ${seat.label}`);onReload?.()}
+    } else {
+      if(regToSeat[person.id]) await saveSeat(person.id,null)
+      if(await saveSeat(person.id,seat.label)){showToast(`${person.cognome} ${person.nome} → ${seat.label}`);setSelP(null);onReload?.()}
+    }
+    setConfirmModal(null)
     setSaving(false)
-  },[selP,seatToReg,regToSeat,saving,saveSeat,showToast,onReload])
+  },[confirmModal,saveSeat,regToSeat,showToast,onReload])
 
   // Map id→name for capogruppo/referente
   const refMap = useMemo(() => {
@@ -186,9 +205,14 @@ export default function MappaPostiTeatro({ registrations, eventId, onReload }) {
   },[])
   const onMD = useCallback(e => {
     setTip(null)
-    if(e.button===0) dragRef.current = {sx:e.clientX-transform.x, sy:e.clientY-transform.y}
+    if(e.button===0) dragRef.current = {sx:e.clientX-transform.x, sy:e.clientY-transform.y, ox:e.clientX, oy:e.clientY, dragging:false}
   },[transform])
-  const onMM = useCallback(e => { if(dragRef.current) setTransform(t=>({...t,x:e.clientX-dragRef.current.sx,y:e.clientY-dragRef.current.sy})) },[])
+  const onMM = useCallback(e => {
+    if(!dragRef.current) return
+    const dx=e.clientX-dragRef.current.ox, dy=e.clientY-dragRef.current.oy
+    if(!dragRef.current.dragging && Math.abs(dx)+Math.abs(dy)>4) dragRef.current.dragging=true
+    if(dragRef.current.dragging) setTransform(t=>({...t,x:e.clientX-dragRef.current.sx,y:e.clientY-dragRef.current.sy}))
+  },[])
   const onMU = useCallback(() => { dragRef.current=null },[])
   // Touch zoom
   const onTS = useCallback(e => {
@@ -219,7 +243,7 @@ export default function MappaPostiTeatro({ registrations, eventId, onReload }) {
         tipTimer.current=setTimeout(()=>setTip(null),3000)
       }}
       onMouseLeave={()=>{clearTimeout(tipTimer.current);tipTimer.current=setTimeout(()=>setTip(null),100)}}
-      onClick={e=>{e.stopPropagation();setTip(null);handleAssign(seat)}} />
+      onClick={e=>{e.stopPropagation();setTip(null);handleSeatClick(seat)}} />
   },[seatToReg,selP,handleAssign])
 
   // ── Platea SVG ──
@@ -429,7 +453,40 @@ export default function MappaPostiTeatro({ registrations, eventId, onReload }) {
       </div>
     </div>
 
-    {toast && <div style={{position:'fixed',bottom:24,left:'50%',transform:'translateX(-50%)',background:toast.ok?'#065f46':'#991b1b',color:'#fff',
+    {/* Confirmation modal */}
+    {confirmModal && <div style={{position:'fixed',inset:0,background:'rgba(0,0,0,.5)',zIndex:10000,display:'flex',alignItems:'center',justifyContent:'center'}}
+      onClick={()=>setConfirmModal(null)}>
+      <div onClick={e=>e.stopPropagation()} style={{background:'#fff',borderRadius:20,padding:'28px 32px',maxWidth:420,width:'90%',boxShadow:'0 20px 60px rgba(0,0,0,.3)',fontFamily:"'Inter',sans-serif"}}>
+        <h3 style={{margin:'0 0 16px',fontSize:18,fontWeight:800,color:'#1e293b'}}>
+          {confirmModal.type==='assign' ? '✅ Conferma assegnazione' : '⚠️ Rimuovi posto'}
+        </h3>
+        <div style={{background:'#f8fafc',borderRadius:12,padding:'16px 20px',marginBottom:20}}>
+          <p style={{margin:'0 0 8px',fontSize:15,fontWeight:700,color:'#1e293b'}}>
+            {confirmModal.person.cognome} {confirmModal.person.nome}
+          </p>
+          {confirmModal.person.ragione_sociale && <p style={{margin:'0 0 8px',fontSize:13,color:'#6B7280'}}>{confirmModal.person.ragione_sociale}</p>}
+          <div style={{background:'#003DA5',borderRadius:8,padding:'10px 16px',textAlign:'center',marginTop:8}}>
+            <p style={{margin:0,fontSize:11,color:'rgba(255,255,255,.7)',textTransform:'uppercase',letterSpacing:'.06em',fontWeight:700}}>
+              {confirmModal.type==='assign' ? 'POSTO DA ASSEGNARE' : 'POSTO DA RIMUOVERE'}
+            </p>
+            <p style={{margin:'4px 0 0',fontSize:20,fontWeight:900,color:'#fff'}}>{confirmModal.seat.label}</p>
+          </div>
+        </div>
+        <div style={{display:'flex',gap:10}}>
+          <button onClick={()=>setConfirmModal(null)} style={{flex:1,padding:'12px',borderRadius:12,border:'1.5px solid #E8ECF4',background:'#fff',color:'#6B7280',fontSize:14,fontWeight:700,cursor:'pointer',fontFamily:"'Inter',sans-serif"}}>
+            Annulla
+          </button>
+          <button onClick={doConfirm} disabled={saving} style={{flex:1,padding:'12px',borderRadius:12,border:'none',
+            background:confirmModal.type==='assign'?'linear-gradient(90deg,#5B5FEF,#3730A3)':'#DC2626',
+            color:'#fff',fontSize:14,fontWeight:700,cursor:'pointer',fontFamily:"'Inter',sans-serif",
+            opacity:saving?.6:1}}>
+            {saving ? '...' : confirmModal.type==='assign' ? '✓ Assegna posto' : '✕ Rimuovi posto'}
+          </button>
+        </div>
+      </div>
+    </div>}
+
+        {toast && <div style={{position:'fixed',bottom:24,left:'50%',transform:'translateX(-50%)',background:toast.ok?'#065f46':'#991b1b',color:'#fff',
       padding:'12px 24px',borderRadius:14,fontSize:14,fontWeight:700,boxShadow:'0 6px 24px rgba(0,0,0,.35)',zIndex:9999,fontFamily:"'Inter',sans-serif"}}>
       {toast.ok?'✓':'✕'} {toast.m}
     </div>}
