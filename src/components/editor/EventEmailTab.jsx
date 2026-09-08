@@ -70,11 +70,12 @@ function blockDefaults(tipo) {
     hero:       { titolo:'{{nome_evento}}', sottotitolo:'Ti aspettiamo!', bg:BLU, coloreTesto:'#ffffff', padding:48, src:'' },
     colonne:    { sinistra:'<p>Colonna sinistra</p>', destra:'<p>Colonna destra</p>', gap:24 },
     info_box:   { bg:'#F0F7FF', bordo:'#BFDBFE', radius:10 },
-    qr:         { testo:'Il tuo QR code di accesso', size:160 },
+    qr:         { testo:'IL TUO QR CODE DI ACCESSO', size:180, bg:'#003DA5', colore_testo:'#ffffff', colore_label:'rgba(255,255,255,0.7)', colore_codice:'rgba(255,255,255,0.5)', radius:12, padding:28, mostra_link:true, testo_link:'\uD83C\uDFAB Vedi registrazione e QR Code', colore_link:'#ffffff' },
     separatore: { colore:'#E5E7EB', spessore:1, spazio:24 },
     spazio:     { altezza:32 },
     mappa:      { indirizzo:'{{luogo_evento}}', testo:'Come raggiungerci', zoom:15, altezza:200 },
     posto_display: { testo:'Il tuo posto' },
+    link_registrazione: { testo:'\uD83C\uDFAB Vedi il tuo biglietto e QR Code', colore:'#003DA5', testocolore:'#ffffff', radius:10, size:15 },
   }
   return { tipo, id:`b_${Date.now()}_${Math.random().toString(36).slice(2,7)}`, ...(map[tipo]||{}) }
 }
@@ -315,8 +316,21 @@ function BlockProps({ block, onChange }) {
       {numField('Radius','radius',10,'px',0,24)}
     </>
     case 'qr': return <>
-      <div style={{ marginBottom:'8px' }}><label style={lbl}>Testo sopra</label><input value={block.testo||''} onChange={e=>set('testo',e.target.value)} style={inp}/></div>
-      {numField('Dimensione QR','size',160,'px',80,240)}
+      <div style={{marginBottom:'8px'}}><label style={lbl}>Label sopra QR</label><input value={block.testo||''} onChange={e=>set('testo',e.target.value)} style={inp} placeholder="IL TUO QR CODE"/></div>
+      {numField('Dimensione QR','size',180,'px',80,280)}
+      <div style={{display:'flex',gap:'8px',marginBottom:'8px'}}>{colorField('Sfondo box','bg','#003DA5')}{colorField('Testo posto','colore_testo','#ffffff')}</div>
+      <div style={{display:'flex',gap:'8px',marginBottom:'8px'}}>{colorField('Label','colore_label','rgba(255,255,255,0.7)')}{colorField('Codice','colore_codice','rgba(255,255,255,0.5)')}</div>
+      <div style={{display:'flex',gap:'8px',marginBottom:'8px'}}>{numField('Raggio','radius',12,'px',0,24)}{numField('Padding','padding',28,'px',12,48)}</div>
+      <div style={{marginBottom:'8px'}}><label style={lbl}>Mostra link</label><select value={block.mostra_link===false?'no':'si'} onChange={e=>set('mostra_link',e.target.value==='si')} style={inp}><option value="si">S\u00ec</option><option value="no">No</option></select></div>
+      {block.mostra_link!==false && <>
+        <div style={{marginBottom:'8px'}}><label style={lbl}>Testo link</label><input value={block.testo_link||''} onChange={e=>set('testo_link',e.target.value)} style={inp}/></div>
+        {colorField('Colore link','colore_link','#ffffff')}
+      </>}
+    </>
+    case 'link_registrazione': return <>
+      <div style={{marginBottom:'8px'}}><label style={lbl}>Testo pulsante</label><input value={block.testo||''} onChange={e=>set('testo',e.target.value)} style={inp}/></div>
+      <div style={{display:'flex',gap:'8px',marginBottom:'8px'}}>{colorField('Sfondo','colore','#003DA5')}{colorField('Testo','testocolore','#ffffff')}</div>
+      <div style={{display:'flex',gap:'8px'}}>{numField('Font','size',15,'px',12,22)}{numField('Raggio','radius',10,'px',0,24)}</div>
     </>
     case 'separatore': return <>
       {colorField('Colore linea','colore','#E5E7EB')}
