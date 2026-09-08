@@ -313,6 +313,44 @@ export default function Iscrizione() {
               </div>
             </div>
 
+            {/* Aggiungi al calendario */}
+            {event.data_inizio && (
+              <div style={{ marginBottom:'16px' }}>
+                <button onClick={() => {
+                  const pad = n => String(n).padStart(2,'0')
+                  const fmtIcs = d => { const dt = new Date(d); return dt.getUTCFullYear().toString() + pad(dt.getUTCMonth()+1) + pad(dt.getUTCDate()) + 'T' + pad(dt.getUTCHours()) + pad(dt.getUTCMinutes()) + '00Z' }
+                  const start = fmtIcs(event.data_inizio)
+                  const end = event.data_fine ? fmtIcs(event.data_fine) : fmtIcs(new Date(new Date(event.data_inizio).getTime() + 2*3600000))
+                  const title = event.titolo || 'Evento CNA Roma'
+                  const loc = (event.luogo || '').replace(/,/g, '\\,')
+                  const desc = reg.numero_posto ? `Posto: ${reg.numero_posto}\\nCodice: ${reg.codice_iscrizione}` : `Codice: ${reg.codice_iscrizione}`
+                  const ics = [
+                    'BEGIN:VCALENDAR','VERSION:2.0','PRODID:-//CNA Roma//Eventi//IT','CALSCALE:GREGORIAN','METHOD:PUBLISH',
+                    'BEGIN:VEVENT',
+                    `DTSTART:${start}`,`DTEND:${end}`,
+                    `SUMMARY:${title}`,`LOCATION:${loc}`,`DESCRIPTION:${desc}`,
+                    `URL:${window.location.href}`,
+                    'STATUS:CONFIRMED',`UID:${reg.id}@cnaeventi`,
+                    'END:VEVENT','END:VCALENDAR'
+                  ].join('\r\n')
+                  const blob = new Blob([ics], { type: 'text/calendar;charset=utf-8' })
+                  const url = URL.createObjectURL(blob)
+                  const a = document.createElement('a'); a.href = url; a.download = `${title.replace(/[^a-zA-Z0-9]/g,'_')}.ics`; a.click()
+                  URL.revokeObjectURL(url)
+                }} style={{
+                  width:'100%', display:'flex', alignItems:'center', justifyContent:'center', gap:'10px',
+                  padding:'14px 20px', borderRadius:'16px', border:'1.5px solid #E5E7EB', background:'#fff',
+                  cursor:'pointer', fontSize:'14px', fontWeight:'700', color:'#0A0A0A', fontFamily:"'Outfit',sans-serif",
+                  transition:'all .15s'
+                }}>
+                  <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="#003DA5" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+                    <rect x="3" y="4" width="18" height="18" rx="2" ry="2"/><line x1="16" y1="2" x2="16" y2="6"/><line x1="8" y1="2" x2="8" y2="6"/><line x1="3" y1="10" x2="21" y2="10"/><line x1="12" y1="14" x2="12" y2="18"/><line x1="10" y1="16" x2="14" y2="16"/>
+                  </svg>
+                  Aggiungi al calendario
+                </button>
+              </div>
+            )}
+
             {/* Dati partecipante + QR */}
             <div style={{ display:'grid', gridTemplateColumns:'1fr 1fr', gap:'16px', marginBottom:'16px' }}>
               {/* Dati */}
