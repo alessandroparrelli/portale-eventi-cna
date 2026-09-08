@@ -67,6 +67,7 @@ export default function IscrittiPage() {
   const [detail, setDetail] = useState(null)
   const [formFields, setFormFields] = useState([]) // campi extra dell'evento
   const [delConfirm, setDelConfirm] = useState(null)
+  const [sendingEmail, setSendingEmail] = useState(null) // id of reg being sent
   const { canManage } = useRole()
   const canDelete = canManage('iscritti')
   const [importModal, setImportModal] = useState(false)
@@ -462,6 +463,20 @@ export default function IscrittiPage() {
       return true
     })
   })()
+
+  async function inviaEmailConferma(reg) {
+    if (sendingEmail) return
+    setSendingEmail(reg.id)
+    try {
+      const { error } = await supabase.functions.invoke('send-event-email', { body: { tipo: 'conferma_iscrizione', iscrizione_id: reg.id } })
+      if (error) throw error
+      // Show a quick visual feedback
+      alert(`✅ Email di conferma inviata a ${reg.email}`)
+    } catch (e) {
+      alert(`❌ Errore invio email: ${e.message || e}`)
+    }
+    setSendingEmail(null)
+  }
 
   async function deleteReg() {
     await supabase.from('registrations').delete().eq('id', delConfirm.id)
@@ -1750,6 +1765,18 @@ export default function IscrittiPage() {
                               </button>
                             )}
 
+                            {r.email && (
+                              <button 
+                                style={{...s.iconBtn, color: sendingEmail === r.id ? '#9CA3AF' : '#059669'}} 
+                                title={`Invia email conferma a ${r.email}`} 
+                                disabled={sendingEmail === r.id}
+                                onClick={(e)=>{e.stopPropagation();inviaEmailConferma(r)}}>
+                                {sendingEmail === r.id 
+                                  ? <RefreshCw size={15} style={{animation:'spin 1s linear infinite'}}/>
+                                  : <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><rect x="2" y="4" width="20" height="16" rx="2"/><path d="M22 7l-10 6L2 7"/></svg>
+                                }
+                              </button>
+                            )}
                             {canDelete && (
                               <button style={{...s.iconBtn, color:'#DC2626'}} title="Elimina" onClick={()=>setDelConfirm(r)}>
                                 <Trash2 size={15}/>
