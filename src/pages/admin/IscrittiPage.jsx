@@ -1112,6 +1112,8 @@ export default function IscrittiPage() {
       .replace(/{{data}}/g, dataEvento)
       .replace(/{{ora}}/g, oraEvento)
       .replace(/{{luogo}}/g, eventoDettagli?.luogo || '')
+      .replace(/{{numero_posto}}/g, iscritto?.numero_posto || '')
+      .replace(/{{link_registrazione}}/g, iscritto?.id ? `https://portale-eventi-cna.vercel.app/iscrizione/${iscritto.id}` : '')
   }
 
   function inserisciVariabile(variabile) {
@@ -1131,12 +1133,12 @@ export default function IscrittiPage() {
     } else if (smsSelezione.size > 0) {
       destinatari = [...smsSelezione].map(id => {
         const r = registrations.find(x => x.id === id)
-        return r ? { registrazione_id: r.id, telefono: r.cellulare, nome: r.nome, cognome: r.cognome } : null
+        return r ? { registrazione_id: r.id, id: r.id, telefono: r.cellulare, nome: r.nome, cognome: r.cognome, numero_posto: r.numero_posto } : null
       }).filter(Boolean).filter(d => d.telefono)
     } else {
       destinatari = registrations
         .filter(r => r.cellulare)
-        .map(r => ({ registrazione_id: r.id, telefono: r.cellulare, nome: r.nome, cognome: r.cognome }))
+        .map(r => ({ registrazione_id: r.id, id: r.id, telefono: r.cellulare, nome: r.nome, cognome: r.cognome, numero_posto: r.numero_posto }))
     }
 
     // Personalizza messaggio per ogni destinatario
@@ -1147,7 +1149,7 @@ export default function IscrittiPage() {
 
     // Per l'API, ogni messaggio e' gia' personalizzato — li inviamo individualmente se diversi
     // Se il testo non ha variabili personali, batch unico
-    const hasPersonalVars = smsTesto.includes('{{nome}}') || smsTesto.includes('{{cognome}}') || smsTesto.includes('{{nome_completo}}')
+    const hasPersonalVars = smsTesto.includes('{{nome}}') || smsTesto.includes('{{cognome}}') || smsTesto.includes('{{nome_completo}}') || smsTesto.includes('{{link_registrazione}}') || smsTesto.includes('{{numero_posto}}')
 
     try {
       const { data: { session } } = await supabase.auth.getSession()
@@ -1227,7 +1229,7 @@ export default function IscrittiPage() {
   }
 
   function getAnteprimaSms() {
-    if (smsProva) return interpolaSms(smsTesto, { nome: 'Mario', cognome: 'Rossi' })
+    if (smsProva) return interpolaSms(smsTesto, { nome: 'Mario', cognome: 'Rossi', id: 'esempio-uuid', numero_posto: 'Platea Fila 1 Posto 1' })
     if (smsAnteprimaIscritto) return interpolaSms(smsTesto, smsAnteprimaIscritto)
     const primoId = [...smsSelezione][0]
     const primo = primoId ? registrations.find(r => r.id === primoId) : registrations.find(r => r.cellulare)
@@ -1887,7 +1889,8 @@ export default function IscrittiPage() {
                 <p style={{ fontSize:'11px', fontWeight:'700', color:'#6B7280', textTransform:'uppercase', letterSpacing:'.05em', margin:'0 0 6px' }}>Inserisci variabile</p>
                 <div style={{ display:'flex', flexWrap:'wrap', gap:5 }}>
                   {[['nome','Nome'],['cognome','Cognome'],['nome_completo','Nome completo'],
-                    ['evento','Evento'],['data','Data'],['ora','Ora'],['luogo','Luogo']
+                    ['evento','Evento'],['data','Data'],['ora','Ora'],['luogo','Luogo'],
+                    ['numero_posto','Posto'],['link_registrazione','Link registrazione']
                   ].map(([v, label]) => (
                     <button key={v} onClick={() => inserisciVariabile(v)}
                       style={{ fontSize:11, fontWeight:600, padding:'3px 9px', borderRadius:20,
