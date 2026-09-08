@@ -261,6 +261,14 @@ export default function Iscrizione() {
               </div>
             </div>
 
+            {/* Posto assegnato */}
+            {reg.numero_posto && (
+              <div style={{ background:'#003DA5', borderRadius:'20px', padding:'22px 28px', marginBottom:'16px', textAlign:'center' }}>
+                <p style={{ margin:'0 0 6px', fontSize:'11px', fontWeight:'700', color:'rgba(255,255,255,0.7)', textTransform:'uppercase', letterSpacing:'0.08em' }}>IL TUO POSTO</p>
+                <p style={{ margin:0, fontSize: reg.numero_posto.length > 20 ? '20px' : '26px', fontWeight:'900', color:'#fff', lineHeight:'1.2', letterSpacing:'-0.02em' }}>{reg.numero_posto}</p>
+              </div>
+            )}
+
             {/* Card evento */}
             <div style={{ backgroundColor:'#ffffff', borderRadius:'20px', border:'1px solid #E5E7EB', overflow:'hidden', marginBottom:'16px' }}>
               {event.immagine_hero && (
