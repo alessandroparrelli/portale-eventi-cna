@@ -41,6 +41,7 @@ const BLOCK_TYPES = [
   { tipo:'separatore', label:'Separatore',   icon:<Minus size={13}/>,          cat:'layout' },
   { tipo:'spazio',     label:'Spazio',       icon:<span style={{fontSize:'12px'}}>↕</span>, cat:'layout' },
   { tipo:'mappa',      label:'Mappa',        icon:<MapPin size={13}/>,         cat:'evento' },
+  { tipo:'link_registrazione', label:'Link Registrazione', icon:<span style={{fontSize:'12px'}}>🎫</span>, cat:'evento' },
 ]
 
 // ─── Variabili ─────────────────────────────────────────────────────────────────
@@ -85,6 +86,7 @@ function blockDefaults(tipo) {
     separatore: { colore:'#E8ECF4', spessore:1, spazio:24 },
     spazio:     { altezza:32 },
     mappa:      { indirizzo:'{{luogo_evento}}', testo:'Come raggiungerci', zoom:15, altezza:200 },
+    link_registrazione: { testo:'🎫 Vedi il tuo biglietto e QR Code', colore:'#003DA5', testocolore:'#ffffff', radius:10, size:15 },
   }
   return { tipo, id:`b_${Date.now()}_${Math.random().toString(36).slice(2,7)}`, ...(map[tipo]||{}) }
 }
@@ -106,6 +108,10 @@ function blocchiToHtml(blocchi) {
         const qrImg = `<img src="https://api.qrserver.com/v1/create-qr-code/?size=${sz}x${sz}&format=png&data=QR-ESEMPIO-ANTEPRIMA" alt="QR Code" width="${sz}" height="${sz}" style="display:block;margin:0 auto;border-radius:8px;background:#fff;padding:4px" />`
         const linkHtml = b.mostra_link!==false ? `<div style="margin-top:20px;padding-top:16px;border-top:1px solid rgba(255,255,255,0.15)"><a href="#" style="color:${b.colore_link||'#ffffff'};font-size:14px;font-weight:700;text-decoration:none;font-family:Inter,Arial,sans-serif">${b.testo_link||'🎫 Vedi registrazione e QR Code'}</a></div>` : ''
         return `<div style="background:${qbg};border-radius:${qr}px;padding:${qp}px;margin:0 0 20px;text-align:center"><p style="font-size:12px;font-weight:700;color:${qlb};text-transform:uppercase;letter-spacing:.06em;margin:0 0 16px;font-family:Inter,Arial,sans-serif">${b.testo||'IL TUO QR CODE'}</p>${qrImg}<p style="font-size:${b.size_testo||20}px;font-weight:900;color:${qtx};margin:14px 0 0;font-family:Inter,Arial,sans-serif">{{numero_posto}}</p><p style="font-size:11px;color:${qcd};margin:8px 0 0;font-family:monospace;letter-spacing:.04em">{{qr_code}}</p>${linkHtml}</div>`
+      }
+      if (b.tipo==='link_registrazione') {
+        const lbg=b.colore||'#003DA5', ltx=b.testocolore||'#ffffff', lr=b.radius||10
+        return `<table width="100%" cellpadding="0" cellspacing="0" border="0" style="margin:0 0 20px"><tr><td align="center"><table cellpadding="0" cellspacing="0" border="0"><tr><td align="center" bgcolor="${lbg}" style="background:${lbg};border-radius:${lr}px;padding:16px 40px"><a href="{{link_iscrizione}}" style="color:${ltx};text-decoration:none;font-family:Inter,Arial,sans-serif;font-size:${b.size||15}px;font-weight:800;display:block">${b.testo||'🎫 Vedi il tuo biglietto e QR Code'}</a></td></tr></table></td></tr></table>`
       }
       if (b.tipo==='separatore') return `<div style="padding:${b.spazio||24}px 0"><hr style="border:none;border-top:${b.spessore||1}px solid ${b.colore||'#E8ECF4'};margin:0"/></div>`
       if (b.tipo==='spazio') return `<div style="height:${b.altezza||32}px"></div>`
@@ -269,6 +275,17 @@ function BlockProps({ block, onChange }) {
       </div>
       <div style={{marginBottom:'8px'}}><label style={lbl}>Testo sotto mappa</label><input value={block.testo||''} onChange={e=>set('testo',e.target.value)} style={inp} placeholder="Come raggiungerci"/></div>
       {numField('Altezza mappa','altezza',200,'px',120,400)}
+    </>
+    case 'link_registrazione': return <>
+      <div style={{marginBottom:'8px'}}><label style={lbl}>Testo pulsante</label><input value={block.testo||''} onChange={e=>set('testo',e.target.value)} style={inp} placeholder="🎫 Vedi il tuo biglietto e QR Code"/></div>
+      <div style={{display:'flex',gap:'8px',marginBottom:'8px'}}>
+        {colorField('Sfondo','colore','#003DA5')}
+        {colorField('Testo','testocolore','#ffffff')}
+      </div>
+      <div style={{display:'flex',gap:'8px'}}>
+        {numField('Font','size',15,'px',12,22)}
+        {numField('Raggio','radius',10,'px',0,24)}
+      </div>
     </>
     default: return null
   }
@@ -584,6 +601,7 @@ export default function EmailEditorPage() {
                         {b.tipo==='colonne'&&'Layout 2 colonne'}
                         {b.tipo==='info_box'&&'Data e luogo evento'}
                         {b.tipo==='qr'&&'QR Code accesso'}
+                        {b.tipo==='link_registrazione'&&(b.testo||'Link Registrazione')}
                         {b.tipo==='separatore'&&'Separatore'}
                         {b.tipo==='spazio'&&(b.altezza||32)+'px'}
                         {b.tipo==='mappa'&&(b.indirizzo||'Indirizzo mappa')}
