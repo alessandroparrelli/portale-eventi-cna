@@ -141,6 +141,9 @@ export default function Iscrizione() {
 
       const r = regs[0]
       setReg(r)
+      // Show the QR code or codice in the search input (not the raw UUID)
+      if (r.qr_code) setSearchInput(r.qr_code)
+      else if (r.codice_iscrizione) setSearchInput(r.codice_iscrizione)
 
       const { data: ev } = await supabase
         .from('events')
@@ -259,10 +262,10 @@ export default function Iscrizione() {
             {/* Card evento */}
             <div style={{ backgroundColor:'#ffffff', borderRadius:'20px', border:'1px solid #E5E7EB', overflow:'hidden', marginBottom:'16px' }}>
               {event.immagine_hero && (
-                <div style={{ height:'140px', backgroundImage:`url(${event.immagine_hero})`, backgroundSize:'cover', backgroundPosition:'center', position:'relative' }}>
+                <div style={{ height:'200px', backgroundImage:`url(${event.immagine_hero})`, backgroundSize:'cover', backgroundPosition:'center', position:'relative' }}>
                   <div style={{ position:'absolute', inset:0, backgroundColor:'rgba(0,0,0,0.45)' }} />
                   <div style={{ position:'absolute', bottom:'16px', left:'16px', right:'16px' }}>
-                    <img src={logoUrl} alt="Logo" style={{ height:'44px', objectFit:'contain', filter:'brightness(0) invert(1)', marginBottom:'10px' }} />
+                    <img src={logoUrl} alt="Logo" style={{ height:'52px', objectFit:'contain', marginBottom:'10px', background:'rgba(255,255,255,.9)', padding:'4px 12px', borderRadius:'8px' }} />
                     <h2 style={{ color:'#fff', fontSize:'18px', fontWeight:'900', letterSpacing:'-0.02em', margin:0, lineHeight:'1.2' }}>{event.titolo}</h2>
                   </div>
                 </div>
@@ -303,7 +306,7 @@ export default function Iscrizione() {
                   {(reg.nome || reg.cognome) && (
                     <div style={{ display:'flex', gap:'10px', alignItems:'center' }}>
                       <User size={15} style={{ color:'#6B7280', flexShrink:0 }} />
-                      <p style={{ fontSize:'14px', fontWeight:'600', color:'#0A0A0A', margin:0 }}>{[reg.nome, reg.cognome].filter(Boolean).join(' ')}</p>
+                      <p style={{ fontSize:'18px', fontWeight:'800', color:'#0A0A0A', margin:0, letterSpacing:'-0.01em' }}>{[reg.nome, reg.cognome].filter(Boolean).join(' ')}</p>
                     </div>
                   )}
                   {reg.ragione_sociale && (
@@ -327,7 +330,11 @@ export default function Iscrizione() {
                 </div>
                 <div style={{ marginTop:'14px', paddingTop:'14px', borderTop:'1px solid #F3F4F6' }}>
                   <p style={{ fontSize:'11px', color:'#9CA3AF', margin:'0 0 4px' }}>Codice iscrizione</p>
-                  <p style={{ fontSize:'13px', fontFamily:'monospace', fontWeight:'700', color:'#003DA5', margin:0, letterSpacing:'0.05em' }}>{reg.codice_iscrizione}</p>
+                  <p style={{ fontSize:'13px', fontFamily:'monospace', fontWeight:'700', color:'#003DA5', margin:'0 0 10px', letterSpacing:'0.05em' }}>{reg.codice_iscrizione}</p>
+                  {reg.qr_code && <>
+                    <p style={{ fontSize:'11px', color:'#9CA3AF', margin:'0 0 4px' }}>Codice QR Code</p>
+                    <p style={{ fontSize:'13px', fontFamily:'monospace', fontWeight:'700', color:'#059669', margin:0, letterSpacing:'0.05em' }}>{reg.qr_code}</p>
+                  </>}
                 </div>
               </div>
 
