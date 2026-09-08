@@ -37,7 +37,13 @@ function genPalchi() {
 function plateaPos(seats) {
   const pos = {}
   const cx = 550, cy = 1500, baseR = 720, rowGap = 36
-  const rowIdx = {}; PL.forEach(([f],i) => rowIdx[f]=i)
+  // Custom row indices: 10a at 9.6 (between 10 and 11), rows 11+ shifted by 0.6
+  const rowIdx = {}
+  PL.forEach(([f],i) => {
+    if(i <= 9) rowIdx[f] = i            // rows 1-10: indices 0-9
+    else if(f === '10a') rowIdx[f] = 9.6 // 10a: between 10 and 11
+    else rowIdx[f] = i + 0.6            // rows 11-20: shifted down
+  })
   const bySeat = {}; seats.forEach(s => { if(!bySeat[s.fila]) bySeat[s.fila]=[]; bySeat[s.fila].push(s) })
 
   Object.entries(bySeat).forEach(([fila, rs]) => {
