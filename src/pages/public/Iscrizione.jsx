@@ -262,10 +262,10 @@ export default function Iscrizione() {
             {/* Card evento */}
             <div style={{ backgroundColor:'#ffffff', borderRadius:'20px', border:'1px solid #E5E7EB', overflow:'hidden', marginBottom:'16px' }}>
               {event.immagine_hero && (
-                <div style={{ height:'200px', backgroundImage:`url(${event.immagine_hero})`, backgroundSize:'cover', backgroundPosition:'center', position:'relative' }}>
+                <div style={{ height:'220px', backgroundImage:`url(${event.immagine_hero})`, backgroundSize:'cover', backgroundPosition:'center', position:'relative' }}>
                   <div style={{ position:'absolute', inset:0, backgroundColor:'rgba(0,0,0,0.45)' }} />
                   <div style={{ position:'absolute', bottom:'16px', left:'16px', right:'16px' }}>
-                    <img src={logoUrl} alt="Logo" style={{ height:'52px', objectFit:'contain', marginBottom:'10px', background:'rgba(255,255,255,.9)', padding:'4px 12px', borderRadius:'8px' }} />
+                    <img src={logoUrl} alt="Logo" style={{ height:'52px', objectFit:'contain', marginBottom:'10px', opacity:0.95 }} />
                     <h2 style={{ color:'#fff', fontSize:'18px', fontWeight:'900', letterSpacing:'-0.02em', margin:0, lineHeight:'1.2' }}>{event.titolo}</h2>
                   </div>
                 </div>

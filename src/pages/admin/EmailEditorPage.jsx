@@ -81,7 +81,7 @@ function blockDefaults(tipo) {
     hero:       { titolo:'{{nome_evento}}', sottotitolo:'Ti aspettiamo!', bg:BLU, coloreTesto:'#ffffff', padding:48, src:'' },
     colonne:    { sinistra:'<p>Colonna sinistra</p>', destra:'<p>Colonna destra</p>', gap:24 },
     info_box:   { bg:'#F0F7FF', bordo:'#BFDBFE', radius:10 },
-    qr:         { testo:'Il tuo QR code di accesso', size:160 },
+    qr:         { testo:'Il tuo QR code di accesso', size:160, bg:'#003DA5', colore_testo:'#ffffff', colore_label:'rgba(255,255,255,0.7)', colore_codice:'rgba(255,255,255,0.5)', radius:12, padding:28, mostra_link:true, testo_link:'🎫 Vedi registrazione e QR Code', colore_link:'#003DA5' },
     separatore: { colore:'#E8ECF4', spessore:1, spazio:24 },
     spazio:     { altezza:32 },
     mappa:      { indirizzo:'{{luogo_evento}}', testo:'Come raggiungerci', zoom:15, altezza:200 },
@@ -100,7 +100,11 @@ function blocchiToHtml(blocchi) {
       if (b.tipo==='hero') { const heroBg=b.src?`background:linear-gradient(rgba(0,0,0,0.45),rgba(0,0,0,0.45)),url('${b.src}') center/cover`:`background:${b.bg||BLU}`; return `<div style="${heroBg};padding:${b.padding||48}px 40px;text-align:center"><h1 style="font-family:Inter,Arial,sans-serif;color:${b.coloreTesto||'#fff'};font-size:30px;font-weight:900;margin:0 0 12px;letter-spacing:-0.03em">${b.titolo||''}</h1>${b.sottotitolo?`<p style="font-family:Inter,Arial,sans-serif;color:${b.coloreTesto||'#fff'};font-size:16px;margin:0;opacity:.9">${b.sottotitolo}</p>`:''}</div>` }
       if (b.tipo==='colonne') return `<table style="width:100%;border-collapse:collapse;margin:0 0 20px"><tr><td style="width:50%;vertical-align:top;padding-right:${(b.gap||24)/2}px;font-family:Inter,Arial,sans-serif;font-size:14px;color:#374151;line-height:1.6">${b.sinistra||''}</td><td style="width:50%;vertical-align:top;padding-left:${(b.gap||24)/2}px;font-family:Inter,Arial,sans-serif;font-size:14px;color:#374151;line-height:1.6">${b.destra||''}</td></tr></table>`
       if (b.tipo==='info_box') return `<div style="background:${b.bg||'#F0F7FF'};border:1.5px solid ${b.bordo||'#BFDBFE'};border-radius:${b.radius||10}px;padding:20px 24px;margin:0 0 20px"><table style="width:100%;border-collapse:collapse"><tr><td style="width:32px;vertical-align:top;font-size:20px;padding:6px 0">&#x1F4C5;</td><td style="padding:6px 0 6px 12px;vertical-align:top"><p style="margin:0;font-size:11px;color:#6B7280;text-transform:uppercase;letter-spacing:.06em;font-family:Inter,Arial,sans-serif">Data e ora</p><p style="margin:4px 0 0;font-size:15px;font-weight:700;color:${NERO};font-family:Inter,Arial,sans-serif">{{data_evento}}</p></td></tr><tr><td style="vertical-align:top;font-size:20px;padding:6px 0">&#x1F4CD;</td><td style="padding:6px 0 0 12px;vertical-align:top"><p style="margin:0;font-size:11px;color:#6B7280;text-transform:uppercase;letter-spacing:.06em;font-family:Inter,Arial,sans-serif">Luogo</p><p style="margin:4px 0 0;font-size:15px;font-weight:700;color:${NERO};font-family:Inter,Arial,sans-serif">{{luogo_evento}}</p></td></tr></table></div>`
-      if (b.tipo==='qr') return `<div style="text-align:center;padding:28px 0;margin:0 0 20px"><p style="font-size:13px;color:#6B7280;margin:0 0 16px;font-family:Inter,Arial,sans-serif">${b.testo||'Il tuo QR code di accesso'}</p>{{QR_BLOCK_${b.size||160}}}<p style="font-size:12px;color:#9CA3AF;margin:12px 0 0;font-family:monospace">{{qr_code}}</p></div>`
+      if (b.tipo==='qr') {
+        const qbg=b.bg||'#003DA5', qtx=b.colore_testo||'#fff', qlb=b.colore_label||'rgba(255,255,255,0.7)', qcd=b.colore_codice||'rgba(255,255,255,0.5)', qr=b.radius||12, qp=b.padding||28
+        const linkHtml = b.mostra_link ? `<div style="margin-top:20px;padding-top:16px;border-top:1px solid rgba(255,255,255,0.15)"><a href="{{link_iscrizione}}" style="color:${b.colore_link||BLU};font-size:14px;font-weight:700;text-decoration:none;font-family:Inter,Arial,sans-serif">${b.testo_link||'🎫 Vedi registrazione'}</a></div>` : ''
+        return `<div style="background:${qbg};border-radius:${qr}px;padding:${qp}px;margin:0 0 20px;text-align:center"><p style="font-size:12px;font-weight:700;color:${qlb};text-transform:uppercase;letter-spacing:.06em;margin:0 0 16px;font-family:Inter,Arial,sans-serif">${b.testo||'IL TUO QR CODE'}</p>{{QR_BLOCK_${b.size||160}}}<p style="font-size:${b.size_testo||20}px;font-weight:900;color:${qtx};margin:14px 0 0;font-family:Inter,Arial,sans-serif">{{numero_posto}}</p><p style="font-size:11px;color:${qcd};margin:8px 0 0;font-family:monospace;letter-spacing:.04em">{{qr_code}}</p>${linkHtml}</div>`
+      }
       if (b.tipo==='separatore') return `<div style="padding:${b.spazio||24}px 0"><hr style="border:none;border-top:${b.spessore||1}px solid ${b.colore||'#E8ECF4'};margin:0"/></div>`
       if (b.tipo==='spazio') return `<div style="height:${b.altezza||32}px"></div>`
       if (b.tipo==='mappa') { const addr=(b.indirizzo||'').replace(/\{\{luogo_evento\}\}/g,b.indirizzo||''); const addrEnc=encodeURIComponent(addr); const h=b.altezza||200; const mapUrl=`https://www.google.com/maps/search/?api=1&query=${addrEnc}`; return `<table role="presentation" width="100%" cellpadding="0" cellspacing="0" border="0" style="margin:0 0 20px;border-radius:10px;overflow:hidden;border:1.5px solid #E8ECF4"><tr><td><a href="${mapUrl}" target="_blank" rel="noopener" style="display:block;text-decoration:none"><table role="presentation" width="100%" cellpadding="0" cellspacing="0" border="0"><tr><td align="center" valign="middle" height="${h}" style="background:#EFF6FF;padding:20px;text-align:center"><div>&#x1F5FA;&#xFE0F;</div><p style="margin:8px 0 0;font-size:14px;color:#1D4ED8;font-weight:700;font-family:Inter,Arial,sans-serif">Clicca per aprire la mappa</p></td></tr><tr><td style="padding:14px 18px;background:#ffffff;border-top:2px solid #DBEAFE"><table role="presentation" width="100%" cellpadding="0" cellspacing="0" border="0"><tr><td width="30" valign="middle" style="font-size:22px;padding-right:12px">&#x1F4CD;</td><td valign="middle"><p style="margin:0 0 2px;font-size:14px;font-weight:700;color:#0A0A0A;font-family:Inter,Arial,sans-serif">${b.testo||'Come raggiungerci'}</p><p style="margin:0;font-size:12px;color:#374151;font-family:Inter,Arial,sans-serif">${addr}</p></td><td width="100" align="right" valign="middle"><span style="font-size:11px;font-weight:700;color:#5B5FEF;font-family:Inter,Arial,sans-serif;border:1.5px solid #BFDBFE;padding:5px 10px;border-radius:6px;white-space:nowrap">Apri Maps &#8594;</span></td></tr></table></td></tr></table></a></td></tr></table>` }
@@ -233,8 +237,25 @@ function BlockProps({ block, onChange }) {
     </>
     case 'info_box': return <>{colorField('Sfondo','bg','#F0F7FF')}{colorField('Bordo','bordo','#BFDBFE')}{numField('Radius','radius',10,'px',0,24)}</>
     case 'qr': return <>
-      <div style={{marginBottom:'8px'}}><label style={lbl}>Testo sopra</label><input value={block.testo||''} onChange={e=>set('testo',e.target.value)} style={inp}/></div>
-      {numField('Dimensione QR','size',160,'px',80,240)}
+      <div style={{marginBottom:'8px'}}><label style={lbl}>Testo label</label><input value={block.testo||''} onChange={e=>set('testo',e.target.value)} style={inp} placeholder="IL TUO QR CODE"/></div>
+      <div style={{marginBottom:'8px'}}><label style={lbl}>Testo link (sotto QR)</label><input value={block.testo_link||''} onChange={e=>set('testo_link',e.target.value)} style={inp} placeholder="🎫 Vedi registrazione e QR Code"/></div>
+      <div style={{display:'flex',gap:'8px',marginBottom:'8px'}}>
+        <div style={{flex:1}}><label style={lbl}>Mostra link</label><select value={block.mostra_link===false?'no':'si'} onChange={e=>set('mostra_link',e.target.value==='si')} style={inp}><option value="si">Sì</option><option value="no">No</option></select></div>
+        {numField('QR px','size',160,'',80,240)}
+      </div>
+      <div style={{display:'flex',gap:'8px',marginBottom:'8px'}}>
+        {colorField('Sfondo','bg','#003DA5')}
+        {colorField('Testo','colore_testo','#ffffff')}
+      </div>
+      <div style={{display:'flex',gap:'8px',marginBottom:'8px'}}>
+        {colorField('Label','colore_label','rgba(255,255,255,0.7)')}
+        {colorField('Codice','colore_codice','rgba(255,255,255,0.5)')}
+      </div>
+      <div style={{display:'flex',gap:'8px',marginBottom:'8px'}}>
+        {colorField('Link','colore_link','#003DA5')}
+        {numField('Raggio','radius',12,'px',0,24)}
+      </div>
+      {numField('Padding','padding',28,'px',12,48)}
     </>
     case 'separatore': return <>{colorField('Colore','colore','#E8ECF4')}{numField('Spessore','spessore',1,'px',1,4)}{numField('Spazio','spazio',24,'px',0,64)}</>
     case 'spazio': return numField('Altezza','altezza',32,'px',8,120)
