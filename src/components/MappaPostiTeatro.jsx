@@ -498,3 +498,4 @@ export default function MappaPostiTeatro({ registrations, eventId, onReload }) {
 }
 
 const zB = {width:30,height:30,borderRadius:8,border:'1px solid #E8ECF4',background:'#fff',fontSize:16,cursor:'pointer',display:'flex',alignItems:'center',justifyContent:'center',fontWeight:700}
+// rebuild 1788855850
