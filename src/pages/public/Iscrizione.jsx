@@ -184,7 +184,8 @@ export default function Iscrizione() {
 
       <div style={{ maxWidth:'640px', margin:'0 auto', padding:'40px 24px' }}>
 
-        {/* Search form — sempre visibile */}
+        {/* Search form — solo se non c'è già una registrazione caricata */}
+        {!reg && (
         <div style={{ backgroundColor:'#ffffff', borderRadius:'20px', border:'1px solid #E5E7EB', padding:'24px', marginBottom:'24px' }}>
           <h1 style={{ fontSize:'22px', fontWeight:'900', color:'#0A0A0A', letterSpacing:'-0.03em', margin:'0 0 6px' }}>
             Verifica la tua iscrizione
@@ -216,6 +217,7 @@ export default function Iscrizione() {
             </button>
           </form>
         </div>
+        )}
 
         {loading && (
           <div style={{ textAlign:'center', padding:'48px', color:'#9CA3AF', fontSize:'14px' }}>
