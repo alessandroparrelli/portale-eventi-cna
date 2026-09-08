@@ -1,10 +1,6 @@
 {
   "rewrites": [
     {
-      "source": "/iscrizione/:code",
-      "destination": "/api/iscrizione/:code"
-    },
-    {
       "source": "/(.*)",
       "destination": "/index.html"
     }
