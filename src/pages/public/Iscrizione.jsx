@@ -123,9 +123,15 @@ export default function Iscrizione() {
       const trimmed = cod.trim()
       // Try UUID lookup first (for unique links), then codice_iscrizione
       const isUuid = /^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$/i.test(trimmed)
+      const isShort = /^[A-Z0-9]{6}$/i.test(trimmed)
       let regs
       if (isUuid) {
         const { data } = await supabase.from('registrations').select('*').eq('id', trimmed).limit(1)
+        regs = data
+      }
+      if (!regs || regs.length === 0) {
+        // Try short_code (6 chars alphanumeric)
+        const { data } = await supabase.from('registrations').select('*').ilike('short_code', trimmed).limit(1)
         regs = data
       }
       if (!regs || regs.length === 0) {

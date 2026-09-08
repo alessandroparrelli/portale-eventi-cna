@@ -1113,7 +1113,7 @@ export default function IscrittiPage() {
       .replace(/{{ora}}/g, oraEvento)
       .replace(/{{luogo}}/g, eventoDettagli?.luogo || '')
       .replace(/{{numero_posto}}/g, iscritto?.numero_posto || '')
-      .replace(/{{link_registrazione}}/g, iscritto?.codice_iscrizione ? `https://portale-eventi-cna.vercel.app/iscrizione/${iscritto.codice_iscrizione}` : '')
+      .replace(/{{link_registrazione}}/g, iscritto?.short_code ? `https://portale-eventi-cna.vercel.app/i/${iscritto.short_code}` : (iscritto?.codice_iscrizione ? `https://portale-eventi-cna.vercel.app/i/${iscritto.codice_iscrizione}` : ''))
   }
 
   function inserisciVariabile(variabile) {
@@ -1133,12 +1133,12 @@ export default function IscrittiPage() {
     } else if (smsSelezione.size > 0) {
       destinatari = [...smsSelezione].map(id => {
         const r = registrations.find(x => x.id === id)
-        return r ? { registrazione_id: r.id, id: r.id, telefono: r.cellulare, nome: r.nome, cognome: r.cognome, numero_posto: r.numero_posto } : null
+        return r ? { registrazione_id: r.id, id: r.id, telefono: r.cellulare, nome: r.nome, cognome: r.cognome, numero_posto: r.numero_posto, short_code: r.short_code, codice_iscrizione: r.codice_iscrizione } : null
       }).filter(Boolean).filter(d => d.telefono)
     } else {
       destinatari = registrations
         .filter(r => r.cellulare)
-        .map(r => ({ registrazione_id: r.id, id: r.id, telefono: r.cellulare, nome: r.nome, cognome: r.cognome, numero_posto: r.numero_posto }))
+        .map(r => ({ registrazione_id: r.id, id: r.id, telefono: r.cellulare, nome: r.nome, cognome: r.cognome, numero_posto: r.numero_posto, short_code: r.short_code, codice_iscrizione: r.codice_iscrizione }))
     }
 
     // Personalizza messaggio per ogni destinatario

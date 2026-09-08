@@ -46,6 +46,7 @@ export default function App() {
           <Route path="/questionario" element={<QuestionarioPage />} />
           <Route path="/iscrizione/:codice" element={<Iscrizione />} />
           <Route path="/iscrizione" element={<Iscrizione />} />
+          <Route path="/i/:codice" element={<Iscrizione />} />
           <Route path="/conferma/:token" element={<ConfermaPresenzaPage />} />
 
           {/* Admin — layout sidebar (ogni sezione protetta dal proprio permesso) */}
