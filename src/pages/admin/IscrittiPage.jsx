@@ -1113,7 +1113,7 @@ export default function IscrittiPage() {
       .replace(/{{ora}}/g, oraEvento)
       .replace(/{{luogo}}/g, eventoDettagli?.luogo || '')
       .replace(/{{numero_posto}}/g, iscritto?.numero_posto || '')
-      .replace(/{{link_registrazione}}/g, iscritto?.id ? `https://portale-eventi-cna.vercel.app/iscrizione/${iscritto.id}` : '')
+      .replace(/{{link_registrazione}}/g, iscritto?.codice_iscrizione ? `https://portale-eventi-cna.vercel.app/iscrizione/${iscritto.codice_iscrizione}` : '')
   }
 
   function inserisciVariabile(variabile) {
