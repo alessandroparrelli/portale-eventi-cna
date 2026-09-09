@@ -1045,7 +1045,8 @@ export default function IscrittiPage() {
     let sent = 0
     for (const r of regsConEmail) {
       try {
-        await supabase.functions.invoke('send-event-email', { body: { tipo: 'conferma_iscrizione', iscrizione_id: r.id } })
+        await supabase.functions.invoke('send-event-email', { body: { tipo: 'conferma_iscrizione', iscrizione_id: r.id, solo: true } })
+        await supabase.functions.invoke('send-event-email', { body: { tipo: 'notifica_admin', iscrizione_id: r.id, solo: true } })
         sent++
       } catch(e) { console.error('err', r.id, e) }
     }
