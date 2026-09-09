@@ -68,6 +68,7 @@ export default function IscrittiPage() {
   const [formFields, setFormFields] = useState([]) // campi extra dell'evento
   const [delConfirm, setDelConfirm] = useState(null)
   const [sendingEmail, setSendingEmail] = useState(null) // id of reg being sent
+  const [sendingEmailAll, setSendingEmailAll] = useState(false)
   const { canManage } = useRole()
   const canDelete = canManage('iscritti')
   const [importModal, setImportModal] = useState(false)
@@ -468,12 +469,13 @@ export default function IscrittiPage() {
     if (sendingEmail) return
     setSendingEmail(reg.id)
     try {
-      const { error } = await supabase.functions.invoke('send-event-email', { body: { tipo: 'conferma_iscrizione', iscrizione_id: reg.id } })
-      if (error) throw error
-      // Show a quick visual feedback
-      alert(`✅ Email di conferma inviata a ${reg.email}`)
+      const { error: e1 } = await supabase.functions.invoke('send-event-email', { body: { tipo: 'conferma_iscrizione', iscrizione_id: reg.id } })
+      if (e1) throw e1
+      // Also send admin notification
+      await supabase.functions.invoke('send-event-email', { body: { tipo: 'notifica_admin', iscrizione_id: reg.id } })
+      alert(`✅ Email inviata a ${reg.email} + notifica agli admin`)
     } catch (e) {
-      alert(`❌ Errore invio email: ${e.message || e}`)
+      alert(`❌ Errore: ${e.message || e}`)
     }
     setSendingEmail(null)
   }
@@ -1034,6 +1036,21 @@ export default function IscrittiPage() {
       logAttivita('iscritti_importati', { eventoId: selectedEvento, dettagli: { ok, fail } })
       loadRegs()
     }
+  }
+
+  async function inviaConfermaATutti() {
+    const regsConEmail = registrations.filter(r => r.email)
+    if (!regsConEmail.length) return
+    setSendingEmailAll(true)
+    let sent = 0
+    for (const r of regsConEmail) {
+      try {
+        await supabase.functions.invoke('send-event-email', { body: { tipo: 'conferma_iscrizione', iscrizione_id: r.id } })
+        sent++
+      } catch(e) { console.error('err', r.id, e) }
+    }
+    setSendingEmailAll(false)
+    alert(`✅ Email di conferma inviate a ${sent} iscritti`)
   }
 
   function resetImport() {
@@ -2202,7 +2219,12 @@ export default function IscrittiPage() {
                 <strong style={{ color:'#16A34A' }}>{importDone.ok} iscritti importati</strong>
                 {importDone.fail > 0 && <span style={{ color:'#DC2626' }}> · {importDone.fail} errori</span>}
               </p>
-              <Btn variant="primary" onClick={resetImport}>Chiudi</Btn>
+              <div style={{ display:'flex', gap:'10px', justifyContent:'center', flexWrap:'wrap' }}>
+                <Btn variant="secondary" onClick={inviaConfermaATutti} disabled={sendingEmailAll}>
+                  {sendingEmailAll ? '📧 Invio in corso…' : `📧 Invia conferma a tutti (${importDone.ok})`}
+                </Btn>
+                <Btn variant="primary" onClick={resetImport}>Chiudi</Btn>
+              </div>
             </div>
           ) : (
             <>
