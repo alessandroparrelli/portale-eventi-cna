@@ -430,9 +430,20 @@ export default function MappaPostiTeatro({ registrations, eventId, onReload }) {
             </select>
           </div>
           {/* Results count */}
-          <div style={{marginTop:8,fontSize:11,color:C.mut,fontWeight:500}}>
-            {filtered.length === stats.tot ? `${filtered.length} iscritti` : `${filtered.length} di ${stats.tot} iscritti`}
-          </div>
+          {(search || filter !== 'all') ? (
+            <div style={{marginTop:8,display:'flex',alignItems:'center',gap:8,padding:'8px 12px',background:'linear-gradient(135deg,#fef3c7,#fde68a)',border:'1.5px solid #f59e0b',borderRadius:12}}>
+              <span style={{fontSize:16}}>🔍</span>
+              <span style={{fontSize:20,fontWeight:900,color:'#92400e',letterSpacing:'-0.02em'}}>{filtered.length}</span>
+              <span style={{fontSize:11,color:'#78350f',fontWeight:600}}>
+                {search ? `su ${stats.tot} — "${search}"` : `su ${stats.tot} filtrati`}
+              </span>
+              <button onClick={()=>{setSearch('');setFilter('all')}} style={{marginLeft:'auto',background:'none',border:'none',cursor:'pointer',color:'#92400e',fontSize:18,padding:0,lineHeight:1,fontWeight:700}}>×</button>
+            </div>
+          ) : (
+            <div style={{marginTop:8,fontSize:11,color:C.mut,fontWeight:500}}>
+              {filtered.length} iscritti
+            </div>
+          )}
         </div>
         {/* List */}
         <div style={{flex:1,overflowY:'auto'}}>
