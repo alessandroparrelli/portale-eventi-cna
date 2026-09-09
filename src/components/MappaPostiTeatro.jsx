@@ -168,21 +168,41 @@ export default function MappaPostiTeatro({ registrations, eventId, onReload }) {
     let l = [...registrations]
     if(filter==='assigned') l=l.filter(r=>r.numero_posto)
     else if(filter==='unassigned') l=l.filter(r=>!r.numero_posto)
-    if(search){const q=search.toLowerCase(); l=l.filter(r=>`${r.nome} ${r.cognome} ${r.ragione_sociale||''} ${r.email||''} ${r.numero_posto||''}`.toLowerCase().includes(q))}
-    // Sort
+
+    if(search){
+      const q=search.toLowerCase()
+      const match = r => `${r.nome} ${r.cognome} ${r.ragione_sociale||''} ${r.email||''} ${r.numero_posto||''}`.toLowerCase().includes(q)
+      // Show matching + their group members (accompagnatori del capogruppo trovato)
+      const gruppiMatch = new Set(l.filter(r=>match(r)&&r.gruppo_id).map(r=>r.gruppo_id))
+      l = l.filter(r => match(r) || (r.gruppo_id && gruppiMatch.has(r.gruppo_id)))
+    }
+
+    // Sort: capogruppo first, then their accompagnatori grouped below
     const [sk, sd] = sort.split('_')
     const dir = sd === 'desc' ? -1 : 1
     l.sort((a, b) => {
-      let va, vb
-      if (sk === 'cognome') { va = (a.cognome||'').toLowerCase(); vb = (b.cognome||'').toLowerCase() }
-      else if (sk === 'nome') { va = (a.nome||'').toLowerCase(); vb = (b.nome||'').toLowerCase() }
-      else if (sk === 'azienda') { va = (a.ragione_sociale||'').toLowerCase(); vb = (b.ragione_sociale||'').toLowerCase() }
-      else if (sk === 'data') { va = a.created_at||''; vb = b.created_at||'' }
-      else if (sk === 'posto') { va = a.numero_posto||'zzz'; vb = b.numero_posto||'zzz' }
-      else if (sk === 'email') { va = (a.email||'').toLowerCase(); vb = (b.email||'').toLowerCase() }
-      else { va = ''; vb = '' }
-      if (va < vb) return -1 * dir
-      if (va > vb) return 1 * dir
+      // Group accompaniers with their capogruppo
+      const aKey = a.gruppo_id || a.id
+      const bKey = b.gruppo_id || b.id
+      if (aKey !== bKey) {
+        // Sort groups by the capogruppo's sort field
+        const aCapo = registrations.find(r=>r.id===aKey) || a
+        const bCapo = registrations.find(r=>r.id===bKey) || b
+        let va, vb
+        if (sk==='cognome'){va=(aCapo.cognome||'').toLowerCase();vb=(bCapo.cognome||'').toLowerCase()}
+        else if(sk==='nome'){va=(aCapo.nome||'').toLowerCase();vb=(bCapo.nome||'').toLowerCase()}
+        else if(sk==='azienda'){va=(aCapo.ragione_sociale||'').toLowerCase();vb=(bCapo.ragione_sociale||'').toLowerCase()}
+        else if(sk==='data'){va=aCapo.created_at||'';vb=bCapo.created_at||''}
+        else if(sk==='posto'){va=aCapo.numero_posto||'zzz';vb=bCapo.numero_posto||'zzz'}
+        else if(sk==='email'){va=(aCapo.email||'').toLowerCase();vb=(bCapo.email||'').toLowerCase()}
+        else{va='';vb=''}
+        if(va<vb)return -1*dir
+        if(va>vb)return 1*dir
+      }
+      // Within same group: capogruppo first, then by name
+      const aIsCapo = a.gruppo_id===a.id ? 0 : 1
+      const bIsCapo = b.gruppo_id===b.id ? 0 : 1
+      if(aIsCapo!==bIsCapo)return aIsCapo-bIsCapo
       return 0
     })
     return l
