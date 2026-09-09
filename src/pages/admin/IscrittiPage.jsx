@@ -69,6 +69,7 @@ export default function IscrittiPage() {
   const [delConfirm, setDelConfirm] = useState(null)
   const [sendingEmail, setSendingEmail] = useState(null) // id of reg being sent
   const [sendingEmailAll, setSendingEmailAll] = useState(false)
+  const [importedIds, setImportedIds] = useState([]) // IDs degli iscritti appena importati
   const { canManage } = useRole()
   const canDelete = canManage('iscritti')
   const [importModal, setImportModal] = useState(false)
@@ -1034,13 +1035,18 @@ export default function IscrittiPage() {
     setImportDone({ ok, fail })
     if (ok > 0) {
       logAttivita('iscritti_importati', { eventoId: selectedEvento, dettagli: { ok, fail } })
+      // Fetch the IDs of the just-imported registrations (last N by created_at)
+      const { data: justImported } = await supabase.from('registrations')
+        .select('id').eq('event_id', selectedEvento).eq('stato','confermato')
+        .order('created_at', { ascending: false }).limit(ok)
+      setImportedIds((justImported || []).map(r => r.id))
       loadRegs()
     }
   }
 
   async function inviaConfermaATutti() {
-    const regsConEmail = registrations.filter(r => r.email)
-    if (!regsConEmail.length) return
+    const regsConEmail = registrations.filter(r => r.email && importedIds.includes(r.id))
+    if (!regsConEmail.length) { alert('Nessun iscritto importato trovato'); return }
     setSendingEmailAll(true)
     let sent = 0
     for (const r of regsConEmail) {
