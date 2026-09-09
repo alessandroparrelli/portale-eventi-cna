@@ -1895,19 +1895,38 @@ export default function IscrittiPage() {
           return r?.numero_posto && r?.email
         }).length
         return (
-          <Modal title="Conferma invio email posto" onClose={() => setConfirmInvioTeatro(null)} width="460px">
-            <div style={{ fontSize:'14px', color:'#374151', marginBottom:'12px' }}>
-              Stai per inviare l’email con il posto assegnato a{' '}
-              <strong>{destinatari} {isTutti ? 'iscritti (tutti con posto e email)' : `selezionati`}</strong>.
-            </div>
-            <div style={{ background:'#FEF3C7', border:'1px solid #FCD34D', borderRadius:'16px', padding:'10px 14px', fontSize:'13px', color:'#92400E', marginBottom:'24px', display:'flex', gap:'8px', alignItems:'flex-start' }}>
-              <span style={{ fontSize:'16px', flexShrink:0 }}>⚠️</span>
-              <span>Ogni destinatario riceverà una email con il proprio posto. Verifica che i posti siano stati assegnati correttamente prima di procedere.</span>
+          <Modal title="Conferma invio email posto" onClose={() => setConfirmInvioTeatro(null)} width="480px">
+            <div style={{ textAlign:'center', padding:'8px 0 20px' }}>
+              <div style={{ fontSize:48, marginBottom:8 }}>📨</div>
+              <div style={{ fontSize:18, fontWeight:800, color:'#0A0A0A', marginBottom:6 }}>
+                {destinatari} email in partenza
+              </div>
+              <div style={{ fontSize:14, color:'#6B7280', marginBottom:20 }}>
+                {isTutti ? 'Tutti gli iscritti con posto e email assegnati' : `${destinatari} iscritti selezionati`}
+              </div>
+              <div style={{ background:'#FEF3C7', border:'1px solid #FCD34D', borderRadius:12, padding:'12px 16px', fontSize:13, color:'#92400E', marginBottom:20, textAlign:'left', display:'flex', gap:8 }}>
+                <span style={{ fontSize:16, flexShrink:0 }}>⚠️</span>
+                <span>Verifica che i posti siano stati assegnati correttamente. Questa operazione è irreversibile.</span>
+              </div>
+              <div style={{ background:'#F9FAFB', borderRadius:12, padding:'16px', marginBottom:4 }}>
+                <div style={{ fontSize:13, color:'#374151', marginBottom:10, fontWeight:600 }}>
+                  Digita <strong style={{color:'#DC2626'}}>{destinatari}</strong> per confermare l'invio
+                </div>
+                <input
+                  type="number"
+                  placeholder={String(destinatari)}
+                  value={confirmInvioTeatro.inputNum || ''}
+                  onChange={e => setConfirmInvioTeatro(prev => ({...prev, inputNum: e.target.value}))}
+                  style={{ width:'100%', padding:'10px 14px', borderRadius:10, border:`1.5px solid ${parseInt(confirmInvioTeatro.inputNum)===destinatari?'#22c55e':'#E5E7EB'}`, fontSize:20, fontWeight:800, textAlign:'center', boxSizing:'border-box', outline:'none' }}
+                />
+              </div>
             </div>
             <div style={{ display:'flex', justifyContent:'flex-end', gap:'10px' }}>
               <Btn variant="ghost" onClick={() => setConfirmInvioTeatro(null)}>Annulla</Btn>
-              <Btn variant="primary" onClick={() => { setConfirmInvioTeatro(null); inviaMailPosti(false, ids) }}>
-                📨 Conferma e invia
+              <Btn variant="primary"
+                disabled={parseInt(confirmInvioTeatro.inputNum) !== destinatari}
+                onClick={() => { setConfirmInvioTeatro(null); inviaMailPosti(false, ids) }}>
+                📨 Conferma e invia {destinatari} email
               </Btn>
             </div>
           </Modal>
@@ -2227,7 +2246,15 @@ export default function IscrittiPage() {
                 {importDone.fail > 0 && <span style={{ color:'#DC2626' }}> · {importDone.fail} errori</span>}
               </p>
               <div style={{ display:'flex', gap:'10px', justifyContent:'center', flexWrap:'wrap' }}>
-                <Btn variant="secondary" onClick={inviaConfermaATutti} disabled={sendingEmailAll}>
+                <Btn variant="secondary"
+                  onClick={() => {
+                    const n = importDone.ok
+                    const inp = window.prompt(`Stai per inviare ${n} email.\n\nDigita ${n} per confermare:`)
+                    if (inp === null) return
+                    if (parseInt(inp) !== n) { alert('❌ Numero errato. Annullato.'); return }
+                    inviaConfermaATutti()
+                  }}
+                  disabled={sendingEmailAll}>
                   {sendingEmailAll ? '📧 Invio in corso…' : `📧 Invia conferma a tutti (${importDone.ok})`}
                 </Btn>
                 <Btn variant="primary" onClick={resetImport}>Chiudi</Btn>
