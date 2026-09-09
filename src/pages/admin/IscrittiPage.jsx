@@ -469,10 +469,10 @@ export default function IscrittiPage() {
     if (sendingEmail) return
     setSendingEmail(reg.id)
     try {
-      const { error: e1 } = await supabase.functions.invoke('send-event-email', { body: { tipo: 'conferma_iscrizione', iscrizione_id: reg.id } })
+      const { error: e1 } = await supabase.functions.invoke('send-event-email', { body: { tipo: 'conferma_iscrizione', iscrizione_id: reg.id, solo: true } })
       if (e1) throw e1
-      // Also send admin notification
-      await supabase.functions.invoke('send-event-email', { body: { tipo: 'notifica_admin', iscrizione_id: reg.id } })
+      // Also send admin notification (no propagation)
+      await supabase.functions.invoke('send-event-email', { body: { tipo: 'notifica_admin', iscrizione_id: reg.id, solo: true } })
       alert(`✅ Email inviata a ${reg.email} + notifica agli admin`)
     } catch (e) {
       alert(`❌ Errore: ${e.message || e}`)
