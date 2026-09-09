@@ -1682,17 +1682,15 @@ export default function IscrittiPage() {
             <GlowStatCard icon="trending"  label="Confermati"    value={totConfermati}                                            palette="cyan"/>
             <GlowStatCard icon="usercheck" label="Walk-in"       value={registrations.filter(r=>r.stato==='walk-in').length}     palette="violet"/>
             <GlowStatCard icon="userx"     label="Assenti"       value={registrations.filter(r=>r.stato==='assente').length}     palette="red"/>
-            {(search || filterStato !== 'tutti') && (
-              <div style={{ background:'linear-gradient(135deg,#fef3c7,#fde68a)', border:'1.5px solid #f59e0b', borderRadius:'20px', padding:'14px 16px', display:'flex', alignItems:'center', gap:'12px', cursor:'default' }}>
-                <span style={{ fontSize:22 }}>🔍</span>
-                <div>
-                  <div style={{ fontSize:22, fontWeight:900, color:'#92400e', letterSpacing:'-0.03em', lineHeight:1 }}>{filtered.length}</div>
-                  <div style={{ fontSize:11, color:'#78350f', fontWeight:600, marginTop:2 }}>
-                    {search ? `Risultati per "${search}"` : 'Filtrati'}
-                  </div>
+            <div style={{ background:'linear-gradient(135deg,#fef3c7,#fde68a)', border:'1.5px solid #f59e0b', borderRadius:'20px', padding:'14px 16px', display:'flex', alignItems:'center', gap:'12px', cursor:'default' }}>
+              <span style={{ fontSize:22 }}>🔍</span>
+              <div>
+                <div style={{ fontSize:22, fontWeight:900, color:'#92400e', letterSpacing:'-0.03em', lineHeight:1 }}>{filtered.length}</div>
+                <div style={{ fontSize:11, color:'#78350f', fontWeight:600, marginTop:2 }}>
+                  {search ? `Risultati per "${search}"` : filterStato !== 'tutti' ? `Filtrati (${filterStato})` : 'Iscritti trovati'}
                 </div>
               </div>
-            )}
+            </div>
           </div>
         </>
       )}
