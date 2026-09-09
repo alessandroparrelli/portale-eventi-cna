@@ -431,7 +431,7 @@ export default function IscrittiPage() {
   const filtered = (() => {
     const q = search.toLowerCase()
     const matchStato = r => filterStato==='tutti' || r.stato===filterStato
-    const matchSearch = r => !q || r.nome?.toLowerCase().includes(q) || r.cognome?.toLowerCase().includes(q) || r.email?.toLowerCase().includes(q)
+    const matchSearch = r => !q || r.nome?.toLowerCase().includes(q) || r.cognome?.toLowerCase().includes(q) || r.email?.toLowerCase().includes(q) || r.ragione_sociale?.toLowerCase().includes(q)
 
     if (!q) return registrations.filter(r => matchStato(r))
 
