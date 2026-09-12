@@ -365,7 +365,7 @@ export default function MappaPostiTeatro({ registrations, eventId, onReload }) {
     </div>}
 
     {/* Main */}
-    <div style={{display:'flex',height:'calc(100vh - 340px)',minHeight:500}}>
+    <div style={{display:'flex',height:'calc(100vh - 270px)',minHeight:550}}>
       <div ref={mapRef} style={{flex:1,overflow:'hidden',position:'relative',background:'#f8fafc',touchAction:'none'}}
         onWheel={onWheel} onMouseDown={onMD} onMouseMove={onMM} onMouseUp={onMU} onMouseLeave={onMU}
         onTouchStart={onTS} onTouchMove={onTM} onTouchEnd={onTE}>
@@ -382,7 +382,7 @@ export default function MappaPostiTeatro({ registrations, eventId, onReload }) {
       </div>
 
       {/* Right panel */}
-      <div style={{width:370,borderLeft:`1px solid ${C.brd}`,background:'#fff',display:'flex',flexDirection:'column',flexShrink:0}}>
+      <div style={{width:460,borderLeft:`1px solid ${C.brd}`,background:'#fff',display:'flex',flexDirection:'column',flexShrink:0}}>
         {/* Search + filters header */}
         <div style={{padding:'14px 16px 12px',background:'linear-gradient(to bottom,#fff,#fafbfd)',borderBottom:`1px solid ${C.brd}`}}>
           {/* Search */}
@@ -451,33 +451,34 @@ export default function MappaPostiTeatro({ registrations, eventId, onReload }) {
             const isSel=selP?.id===r.id
             const hasPosto = !!r.numero_posto
             return <div key={r.id} onClick={()=>isSel?setSelP(null):setSelP(r)} style={{
-              padding:'10px 16px',borderBottom:`1px solid #f1f5f9`,cursor:'pointer',
+              padding:'7px 12px',borderBottom:`1px solid #f1f5f9`,cursor:'pointer',
               background:isSel?'#eef2ff':hasPosto?'#f0fdf4':'transparent',
               borderLeft:isSel?`3px solid ${C.pri}`:'3px solid transparent',
-              transition:'background .15s'}}>
-              <div style={{display:'flex',alignItems:'center',gap:8}}>
-                <div style={{width:10,height:10,borderRadius:'50%',background:hasPosto?C.free:'#f59e0b',flexShrink:0,
+              transition:'background .1s'}}>
+              {/* Row 1: dot + name + posto badge inline */}
+              <div style={{display:'flex',alignItems:'center',gap:7}}>
+                <div style={{width:8,height:8,borderRadius:'50%',background:hasPosto?C.free:'#f59e0b',flexShrink:0,
                   boxShadow:hasPosto?'0 0 0 2px #dcfce7':'0 0 0 2px #fef3c7'}}/>
-                <span style={{fontWeight:700,fontSize:13.5,color:C.txt,fontFamily:"'Inter',sans-serif",flex:1}}>{r.cognome} {r.nome}</span>
+                <span style={{fontWeight:700,fontSize:13,color:isSel?C.pri:C.txt,fontFamily:"'Inter',sans-serif",flex:1,lineHeight:1.3}}>
+                  {r.cognome} {r.nome}
+                  {r.gruppo_id===r.id && <span style={{marginLeft:5,fontSize:9,fontWeight:700,color:'#166534',background:'#dcfce7',padding:'1px 5px',borderRadius:6}}>CAP</span>}
+                  {r.referente_id && r.referente_id!==r.id && <span style={{marginLeft:5,fontSize:9,color:'#6B7280'}}>↩</span>}
+                </span>
+                {hasPosto
+                  ? <span style={{background:'#dcfce7',color:'#166534',padding:'2px 7px',borderRadius:7,fontWeight:700,fontSize:10,flexShrink:0,maxWidth:160,overflow:'hidden',textOverflow:'ellipsis',whiteSpace:'nowrap'}}>🪑 {r.numero_posto}</span>
+                  : isSel
+                    ? <span style={{fontSize:10,color:C.pri,fontWeight:700,flexShrink:0}}>👆 clicca mappa</span>
+                    : <span style={{fontSize:10,color:'#d97706',flexShrink:0}}>senza posto</span>
+                }
               </div>
-              {r.ragione_sociale && <div style={{fontSize:11.5,color:'#64748b',marginLeft:18,marginTop:2,fontWeight:500}}>{r.ragione_sociale}</div>}
-              {/* Badges row */}
-              {(r.gruppo_id===r.id || (r.referente_id && r.referente_id!==r.id && refMap[r.referente_id])) &&
-                <div style={{marginLeft:18,marginTop:4,display:'flex',gap:4,flexWrap:'wrap'}}>
-                  {r.gruppo_id===r.id && <span style={{display:'inline-flex',alignItems:'center',gap:3,padding:'2px 8px',borderRadius:10,
-                    background:'linear-gradient(135deg,#dcfce7,#d1fae5)',color:'#166534',fontSize:10,fontWeight:700,letterSpacing:'-.01em'}}>👥 Capogruppo</span>}
-                  {r.referente_id && r.referente_id!==r.id && refMap[r.referente_id] && <span style={{display:'inline-flex',alignItems:'center',gap:3,
-                    padding:'2px 8px',borderRadius:10,background:'#f0fdf4',color:'#166534',fontSize:10,fontWeight:600,border:'1px solid #bbf7d0'}}>↩ {refMap[r.referente_id]}</span>}
-                </div>
-              }
-              {/* Seat status */}
-              {hasPosto ? <div style={{fontSize:11.5,marginLeft:18,marginTop:5,display:'flex',alignItems:'center',gap:6}}>
-                <span style={{background:'#dcfce7',color:'#166534',padding:'3px 10px',borderRadius:8,fontWeight:700,fontSize:11,letterSpacing:'-.01em'}}>🪑 {r.numero_posto}</span>
+              {/* Row 2: azienda */}
+              {r.ragione_sociale && <div style={{fontSize:11,color:'#94a3b8',marginLeft:15,marginTop:1,lineHeight:1.2}}>{r.ragione_sociale}</div>}
+              {/* Row 3: referente name (only if has ref) */}
+              {r.referente_id && r.referente_id!==r.id && refMap[r.referente_id] && <div style={{fontSize:10,color:'#86efac',marginLeft:15,marginTop:1}}>↩ {refMap[r.referente_id]}</div>}
+              {/* Rimuovi button only for assigned + selected */}
+              {hasPosto && isSel && <div style={{marginLeft:15,marginTop:4}}>
                 <button onClick={e=>{e.stopPropagation();if(confirm(`Rimuovere posto a ${r.nome} ${r.cognome}?`))saveSeat(r.id,null).then(ok=>{if(ok){showToast('Rimosso');onReload?.()}})}}
-                  style={{marginLeft:'auto',padding:'3px 10px',borderRadius:8,border:'none',background:'#fef2f2',color:'#dc2626',fontSize:10,cursor:'pointer',fontWeight:700,transition:'background .15s'}}>✕ Rimuovi</button>
-              </div> : <div style={{fontSize:11.5,fontWeight:600,marginLeft:18,marginTop:5,
-                color:isSel?C.pri:'#d97706'}}>
-                {isSel?'👆 Clicca un posto sulla mappa...':'Senza posto — clicca per selezionare'}
+                  style={{padding:'2px 8px',borderRadius:7,border:'none',background:'#fef2f2',color:'#dc2626',fontSize:10,cursor:'pointer',fontWeight:700}}>✕ Rimuovi posto</button>
               </div>}
             </div>
           })}
