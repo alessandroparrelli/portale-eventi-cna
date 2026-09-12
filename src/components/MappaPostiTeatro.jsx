@@ -377,7 +377,7 @@ export default function MappaPostiTeatro({ registrations, eventId, onReload }) {
           boxShadow:'0 4px 16px rgba(0,0,0,.35)',fontFamily:"'Inter',sans-serif"}}>
           <div style={{fontWeight:700}}>{tip.seat.label}</div>
           {tip.occ ? <div style={{color:'#fca5a5'}}>✦ {tip.occ.cognome} {tip.occ.nome}{tip.occ.ragione_sociale?` — ${tip.occ.ragione_sociale}`:''}</div>
-            : <div style={{color:'#86efac'}}>🟢 Disponibile</div>}
+            : <div style={{color:'#15803d'}}>🟢 Disponibile</div>}
         </div>}
       </div>
 
@@ -474,7 +474,7 @@ export default function MappaPostiTeatro({ registrations, eventId, onReload }) {
               {/* Row 2: azienda */}
               {r.ragione_sociale && <div style={{fontSize:11,color:'#94a3b8',marginLeft:15,marginTop:1,lineHeight:1.2}}>{r.ragione_sociale}</div>}
               {/* Row 3: referente name (only if has ref) */}
-              {r.referente_id && r.referente_id!==r.id && refMap[r.referente_id] && <div style={{fontSize:10,color:'#86efac',marginLeft:15,marginTop:1}}>↩ {refMap[r.referente_id]}</div>}
+              {r.referente_id && r.referente_id!==r.id && refMap[r.referente_id] && <div style={{fontSize:10,color:'#15803d',marginLeft:15,marginTop:1}}>↩ {refMap[r.referente_id]}</div>}
               {/* Rimuovi button only for assigned + selected */}
               {hasPosto && isSel && <div style={{marginLeft:15,marginTop:4}}>
                 <button onClick={e=>{e.stopPropagation();if(confirm(`Rimuovere posto a ${r.nome} ${r.cognome}?`))saveSeat(r.id,null).then(ok=>{if(ok){showToast('Rimosso');onReload?.()}})}}
