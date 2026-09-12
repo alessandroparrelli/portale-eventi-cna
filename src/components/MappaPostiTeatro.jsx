@@ -341,7 +341,11 @@ export default function MappaPostiTeatro({ registrations, eventId, onReload }) {
     <div style={{display:'flex',alignItems:'center',gap:6,padding:'8px 20px',background:'#fff',borderBottom:`1px solid ${C.brd}`,flexWrap:'wrap'}}>
       {['platea',...PIANI.map(p=>`palchi-${p}`)].map(v=>{
         const isP = v==='platea'
-        const label = isP ? '🪑 Platea (498)' : `🎪 Palchi ${v.split('-')[1]}° Piano`
+        const svgPlatea = <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><path d="M3 18h18M5 18V9a1 1 0 0 1 .553-.894l6-3a1 1 0 0 1 .894 0l6 3A1 1 0 0 1 19 9v9"/><rect x="9" y="13" width="6" height="5" rx="1"/></svg>
+        const svgPalchi = <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><rect x="2" y="7" width="4" height="10" rx="1"/><rect x="10" y="4" width="4" height="13" rx="1"/><rect x="18" y="7" width="4" height="10" rx="1"/><line x1="2" y1="20" x2="22" y2="20"/></svg>
+        const label = isP
+          ? <span style={{display:'flex',alignItems:'center',gap:5}}>{svgPlatea} Platea (498)</span>
+          : <span style={{display:'flex',alignItems:'center',gap:5}}>{svgPalchi} Palchi {v.split('-')[1]}° Piano</span>
         const active = (isP&&view==='platea')||(!isP&&view==='palchi'&&piano===+v.split('-')[1])
         return <button key={v} onClick={()=>{if(isP)setView('platea');else{setView('palchi');setPiano(+v.split('-')[1])};resetT()}} style={{
           padding:'6px 14px',borderRadius:20,border:`1.5px solid ${active?C.pri:C.brd}`,
