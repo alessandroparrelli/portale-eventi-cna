@@ -420,17 +420,17 @@ export default function MappaPostiTeatro({ registrations, eventId, onReload }) {
               fontSize:11,color:C.txt,fontFamily:"'Inter',sans-serif",fontWeight:600,
               background:'#fff',cursor:'pointer',outline:'none'
             }}>
-              <option value="data_desc">📅 Più recenti</option>
-              <option value="data_asc">📅 Più vecchi</option>
-              <option value="cognome_asc">🔤 Cognome A→Z</option>
-              <option value="cognome_desc">🔤 Cognome Z→A</option>
-              <option value="nome_asc">🔤 Nome A→Z</option>
-              <option value="nome_desc">🔤 Nome Z→A</option>
-              <option value="azienda_asc">🏢 Azienda A→Z</option>
-              <option value="azienda_desc">🏢 Azienda Z→A</option>
-              <option value="email_asc">📧 Email A→Z</option>
-              <option value="posto_asc">🪑 Posto A→Z</option>
-              <option value="posto_desc">🪑 Posto Z→A</option>
+              <option value="data_desc">Più recenti</option>
+              <option value="data_asc">Più vecchi</option>
+              <option value="cognome_asc">Cognome A→Z</option>
+              <option value="cognome_desc">Cognome Z→A</option>
+              <option value="nome_asc">Nome A→Z</option>
+              <option value="nome_desc">Nome Z→A</option>
+              <option value="azienda_asc">Azienda A→Z</option>
+              <option value="azienda_desc">Azienda Z→A</option>
+              <option value="email_asc">Email A→Z</option>
+              <option value="posto_asc">Posto A→Z</option>
+              <option value="posto_desc">Posto Z→A</option>
             </select>
           </div>
           {/* Results count */}
