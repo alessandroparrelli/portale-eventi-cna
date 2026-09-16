@@ -349,6 +349,10 @@ export default function IscrittiPage() {
           .catch(e => console.warn('Email conferma fallita:', e))
       }
 
+      // Notifica admin (sempre, anche per iscrizioni manuali senza email)
+      supabase.functions.invoke('send-event-email', { body: { tipo: 'notifica_admin', iscrizione_id: regId } })
+        .catch(e => console.warn('Notifica admin fallita:', e))
+
       setAddModal(false)
       setAddForm({ nome:'', cognome:'', email:'', cellulare:'', ragione_sociale:'', partita_iva:'', cap:'', extra_1:'', extra_2:'', extra_3:'', extra_4:'', extra_5:'' })
       setAddCapogruppo(null)
