@@ -212,40 +212,21 @@ export default function IscrittiPage() {
     }
   }
 
-  // Azzera stato presenza/rinuncia per una lista di iscritti
-  // e invia notifica email ai responsabili dell'evento se ci sono rinunce
-  async function eseguiAzzeraStato(ids) {
-    if (!ids || ids.length === 0) return
+  // Cambia stato presenza per una lista di iscritti
+  // stato: 'confermata' | 'rinuncia' | 'in_attesa'
+  async function eseguiCambiaStato(ids, stato) {
+    if (!ids || ids.length === 0 || !stato) return
     try {
-      // Raccoglie i dati degli iscritti con rinuncia per la notifica
-      const rinuncianti = registrations.filter(r => ids.includes(r.id) && r.rinuncia)
+      const update =
+        stato === 'confermata' ? { presenza_confermata: true,  rinuncia: false, rinuncia_at: null } :
+        stato === 'rinuncia'   ? { presenza_confermata: false, rinuncia: true,  rinuncia_at: new Date().toISOString() } :
+                                 { presenza_confermata: false, rinuncia: false, rinuncia_at: null }
 
-      // Azzera in DB
-      const { error } = await supabase
-        .from('registrations')
-        .update({ rinuncia: false, rinuncia_at: null, presenza_confermata: false })
-        .in('id', ids)
-
+      const { error } = await supabase.from('registrations').update(update).in('id', ids)
       if (error) { alert('Errore: ' + error.message); return }
 
-      // Se c'erano rinuncianti, invia notifica ai responsabili
-      if (rinuncianti.length > 0 && eventoInfo?.email_mittente) {
-        const body = rinuncianti.map(r =>
-          `• ${r.nome} ${r.cognome} (${r.email}) — Posto: ${r.numero_posto || 'non assegnato'}`
-        ).join("\n")
-        const subject = `[${eventoInfo.titolo}] Azzeramento rinunce — ${rinuncianti.length} iscritti ripristinati`
-        const html = `<h3>Azzeramento rinunce — ${eventoInfo.titolo}</h3><p>Lo stato di <strong>${rinuncianti.length}</strong> iscritti è stato ripristinato ad "In attesa":</p><pre style="background:#f9f9f9;padding:16px;border-radius:8px;font-size:13px">${body}</pre><p style="color:#6B7280;font-size:12px">Operazione eseguita dal pannello admin.</p>`
-        await fetch(`${import.meta.env.VITE_SUPABASE_URL}/functions/v1/send-test-email`, {
-          method: 'POST',
-          headers: {
-            'Content-Type': 'application/json',
-            'Authorization': `Bearer ${(await supabase.auth.getSession()).data.session?.access_token}`,
-          },
-          body: JSON.stringify({ to: eventoInfo.email_mittente, oggetto: subject, html })
-        })
-      }
-
-      setAzzeraStato(null)
+      setCambiaStato(null)
+      setFiltroPresenzaTeatro('tutti')
       setTeatroSelezione(new Set())
       await loadRegs()
     } catch(e) { alert('Errore: ' + String(e)) }
@@ -1527,6 +1508,17 @@ export default function IscrittiPage() {
             })}
           </div>
 
+          {filtroPresenzaTeatro !== 'tutti' && (
+            <div style={{ display:'flex', alignItems:'center', gap:'10px', marginBottom:'10px', padding:'8px 14px', background:'#EFF6FF', borderRadius:'12px', border:'1px solid #BFDBFE' }}>
+              <span style={{ fontSize:'13px', color:'#1D4ED8', fontWeight:'600' }}>
+                Filtro: <strong>{filtroPresenzaTeatro === 'confermata' ? 'Presenza confermata' : filtroPresenzaTeatro === 'rinuncia' ? 'Rinunce' : 'In attesa'}</strong>
+              </span>
+              <button onClick={() => setFiltroPresenzaTeatro('tutti')}
+                style={{ marginLeft:'auto', fontSize:'12px', fontWeight:'700', color:'#1D4ED8', background:'none', border:'1px solid #93C5FD', borderRadius:'999px', padding:'3px 10px', cursor:'pointer', fontFamily:"'Inter',sans-serif" }}>
+                ✕ Mostra tutti
+              </button>
+            </div>
+          )}
           {/* Filtri teatro */}
           <div style={{ display:'flex', gap:'10px', flexWrap:'wrap', marginBottom:'16px', alignItems:'center' }}>
             <div style={{ display:'flex', alignItems:'center', gap:'6px' }}>
@@ -1591,14 +1583,14 @@ export default function IscrittiPage() {
                 {invioPostoInCorso ? '📨 Invio…' : '📨 Invia a tutti'}
               </Btn>
 
-              {/* Azzera stato selezionati */}
+              {/* Cambia stato selezionati */}
               {teatroSelezione.size > 0 && (() => {
                 const selArr = [...teatroSelezione]
                 const conStato = selArr.filter(id => { const r = registrations.find(x=>x.id===id); return r?.rinuncia || r?.presenza_confermata }).length
                 return conStato > 0 ? (
-                  <Btn variant="ghost" size="md" onClick={() => setAzzeraStato({ ids: selArr, tipo: 'azzera' })}
+                  <Btn variant="ghost" size="md" onClick={() => setCambiaStato({ ids: selArr })}
                     style={{ border:'1px solid #E8ECF4', color:'#6B7280' }}>
-                    🔄 Azzera stato ({conStato})
+                    🔄 Cambia stato ({conStato})
                   </Btn>
                 ) : null
               })()}
@@ -1786,12 +1778,12 @@ export default function IscrittiPage() {
                             {r.rinuncia
                               ? <>
                                   <span style={{ fontSize:'12px', fontWeight:'700', color:'#DC2626', background:'#FEF2F2', padding:'4px 10px', borderRadius:'999px' }}>✗ Non verrà</span>
-                                  <button onClick={() => setAzzeraStato({ ids:[r.id], tipo:'azzera' })} style={{ fontSize:'10px', color:'#9CA3AF', background:'none', border:'1px solid #E5E7EB', borderRadius:'999px', padding:'2px 8px', cursor:'pointer', fontFamily:"'Inter',sans-serif" }}>↩ Azzera</button>
+                                  <button onClick={() => setCambiaStato({ ids:[r.id] })} style={{ fontSize:'10px', color:'#9CA3AF', background:'none', border:'1px solid #E5E7EB', borderRadius:'999px', padding:'2px 8px', cursor:'pointer', fontFamily:"'Inter',sans-serif" }}>✏ Stato</button>
                                 </>
                               : r.presenza_confermata
                               ? <>
                                   <span style={{ fontSize:'12px', fontWeight:'700', color:'#059669', background:'#F0FDF4', padding:'4px 10px', borderRadius:'999px' }}>✓ Confermata</span>
-                                  <button onClick={() => setAzzeraStato({ ids:[r.id], tipo:'azzera' })} style={{ fontSize:'10px', color:'#9CA3AF', background:'none', border:'1px solid #E5E7EB', borderRadius:'999px', padding:'2px 8px', cursor:'pointer', fontFamily:"'Inter',sans-serif" }}>↩ Azzera</button>
+                                  <button onClick={() => setCambiaStato({ ids:[r.id] })} style={{ fontSize:'10px', color:'#9CA3AF', background:'none', border:'1px solid #E5E7EB', borderRadius:'999px', padding:'2px 8px', cursor:'pointer', fontFamily:"'Inter',sans-serif" }}>✏ Stato</button>
                                 </>
                               : <span style={{ fontSize:'12px', color:'#9CA3AF', background:'#F9FAFB', padding:'4px 10px', borderRadius:'999px' }}>In attesa</span>}
                           </div>
@@ -2117,9 +2109,9 @@ export default function IscrittiPage() {
                         {r.rinuncia_at ? new Date(r.rinuncia_at).toLocaleString('it-IT',{timeZone:'Europe/Rome',day:'2-digit',month:'short',hour:'2-digit',minute:'2-digit'}) : '—'}
                       </td>
                       <td style={{ padding:'10px 12px' }}>
-                        <button onClick={() => setAzzeraStato({ ids:[r.id], tipo:'azzera' })}
+                        <button onClick={() => setCambiaStato({ ids:[r.id] })}
                           style={{ fontSize:'11px', color:'#DC2626', background:'#FEF2F2', border:'1px solid #FECACA', borderRadius:'999px', padding:'3px 10px', cursor:'pointer', fontWeight:'600', fontFamily:"'Inter',sans-serif" }}>
-                          ↩ Ripristina
+                          ✏ Cambia stato
                         </button>
                       </td>
                     </tr>
@@ -2132,29 +2124,40 @@ export default function IscrittiPage() {
       )} {/* fine condizionale tab iscritti */}
 
 
-      {/* MODAL AZZERAMENTO STATO PRESENZA */}
-      {azzeraStato && (() => {
-        const n = azzeraStato.ids.length
-        const conRinuncia = azzeraStato.ids.filter(id => registrations.find(x=>x.id===id)?.rinuncia).length
-        const conConferma = azzeraStato.ids.filter(id => registrations.find(x=>x.id===id)?.presenza_confermata).length
+      {/* MODAL CAMBIO STATO PRESENZA */}
+      {cambiaStato && (() => {
+        const n = cambiaStato.ids.length
+        const statoCorrente = n === 1 ? (() => {
+          const r = registrations.find(x => x.id === cambiaStato.ids[0])
+          return r?.rinuncia ? 'rinuncia' : r?.presenza_confermata ? 'confermata' : 'in_attesa'
+        })() : null
+        const opzioni = [
+          { id:'confermata', label:'✓ Confermata', desc:'Parteciperà all\'evento', bg:'#F0FDF4', border:'#86EFAC', colore:'#059669', active:'#059669' },
+          { id:'rinuncia',   label:'✗ Non verrà',  desc:'Ha comunicato che non parteciperà', bg:'#FEF2F2', border:'#FCA5A5', colore:'#DC2626', active:'#DC2626' },
+          { id:'in_attesa',  label:'◎ In attesa',  desc:'Ripristina in attesa di conferma', bg:'#F9FAFB', border:'#D1D5DB', colore:'#6B7280', active:'#6B7280' },
+        ]
         return (
-          <Modal title="Azzera stato presenza" onClose={() => setAzzeraStato(null)} width="460px">
-            <div style={{ textAlign:'center', padding:'8px 0 20px' }}>
-              <div style={{ fontSize:48, marginBottom:8 }}>🔄</div>
-              <p style={{ margin:'0 0 16px', fontSize:'16px', fontWeight:'800', color:'#0A0A0A' }}>
-                Azzera {n} {n===1?'iscritto':'iscritti'}
-              </p>
-              <div style={{ background:'#F9FAFB', borderRadius:12, padding:'12px 16px', fontSize:13, color:'#374151', textAlign:'left', marginBottom:16, lineHeight:1.7 }}>
-                {conRinuncia > 0 && <div>• <strong style={{color:'#DC2626'}}>{conRinuncia}</strong> con "Non verrà" → torna In attesa</div>}
-                {conConferma > 0 && <div>• <strong style={{color:'#059669'}}>{conConferma}</strong> con "Confermata" → torna In attesa</div>}
-              </div>
-              <div style={{ background:'#FEF3C7', border:'1px solid #FCD34D', borderRadius:12, padding:'12px 16px', fontSize:12, color:'#92400E', textAlign:'left' }}>
-                ⚠️ {conRinuncia > 0 ? 'Verrà inviata una notifica email ai responsabili dell\'evento.' : 'Lo stato verrà ripristinato ad "In attesa".'}
-              </div>
+          <Modal title="Cambia stato presenza" onClose={() => setCambiaStato(null)} width="460px">
+            <p style={{ margin:'0 0 20px', fontSize:'14px', color:'#6B7280' }}>
+              Scegli il nuovo stato per <strong>{n} {n===1?'iscritto':'iscritti'}</strong>:
+            </p>
+            <div style={{ display:'flex', flexDirection:'column', gap:'10px', marginBottom:'24px' }}>
+              {opzioni.map(o => (
+                <button key={o.id}
+                  onClick={() => eseguiCambiaStato(cambiaStato.ids, o.id)}
+                  style={{ display:'flex', alignItems:'center', gap:'14px', background: o.id === statoCorrente ? o.bg : '#fff', border:`2px solid ${o.id === statoCorrente ? o.active : '#E5E7EB'}`, borderRadius:'12px', padding:'14px 18px', cursor:'pointer', textAlign:'left', transition:'all .15s', fontFamily:"'Inter',sans-serif" }}>
+                  <span style={{ fontSize:'22px', flexShrink:0, width:32, textAlign:'center', color: o.colore, fontWeight:'900' }}>
+                    {o.id==='confermata' ? '✓' : o.id==='rinuncia' ? '✗' : '◎'}
+                  </span>
+                  <div>
+                    <p style={{ margin:'0 0 2px', fontSize:'14px', fontWeight:'800', color: o.colore }}>{o.label}{o.id===statoCorrente ? ' (attuale)' : ''}</p>
+                    <p style={{ margin:0, fontSize:'12px', color:'#9CA3AF' }}>{o.desc}</p>
+                  </div>
+                </button>
+              ))}
             </div>
-            <div style={{ display:'flex', justifyContent:'flex-end', gap:10 }}>
-              <Btn variant="ghost" onClick={() => setAzzeraStato(null)}>Annulla</Btn>
-              <Btn variant="primary" onClick={() => eseguiAzzeraStato(azzeraStato.ids)}>🔄 Conferma azzeramento</Btn>
+            <div style={{ display:'flex', justifyContent:'flex-end' }}>
+              <Btn variant="ghost" onClick={() => setCambiaStato(null)}>Annulla</Btn>
             </div>
           </Modal>
         )
