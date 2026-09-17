@@ -210,26 +210,77 @@ export default function IscrittiPage() {
   }
 
   async function inviaMailPosti(dry = false, ids = null) {
-    // ids: null = tutti, [] = nessuno (non chiamare), [id1,...] = selezionati
+    // ids: null = tutti con posto, [id1,...] = selezionati specifici
     if (!selectedEvento) return
-    if (dry) setDryRunRis(null)
-    else { setInvioPostoInCorso(true); setInvioPostoRis(null) }
-    try {
-      const body = { event_id: selectedEvento, dry_run: dry }
-      if (ids !== null) body.registration_ids = ids
-      const res = await fetch('https://hnkhckcclgabunkqfmrz.supabase.co/functions/v1/assegna-posto', {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify(body),
-      })
-      const data = await res.json()
-      if (dry) setDryRunRis(data)
-      else setInvioPostoRis(data)
-    } catch (e) {
-      if (dry) setDryRunRis({ error: String(e) })
-      else setInvioPostoRis({ error: String(e) })
+    const LIMIT = 250 // email per blocco — ~50s, abbondantemente dentro il timeout Edge Function
+
+    if (dry) {
+      setDryRunRis(null)
+      try {
+        const body = { event_id: selectedEvento, dry_run: true, limit: LIMIT }
+        if (ids !== null) body.registration_ids = ids
+        const res = await fetch('https://hnkhckcclgabunkqfmrz.supabase.co/functions/v1/assegna-posto', {
+          method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify(body),
+        })
+        setDryRunRis(await res.json())
+      } catch (e) { setDryRunRis({ error: String(e) }) }
+      return
     }
-    if (!dry) setInvioPostoInCorso(false)
+
+    // --- INVIO REALE: loop a blocchi finché remaining === 0 ---
+    setInvioPostoInCorso(true)
+    setInvioPostoRis({ inCorso: true, sent: 0, failed: 0, remaining: null, errors: [] })
+
+    let totalSent = 0
+    let totalFailed = 0
+    let allErrors = []
+    let blocco = 0
+
+    try {
+      while (true) {
+        blocco++
+        const body = { event_id: selectedEvento, limit: LIMIT }
+        // Se ids specificati: primo blocco con registration_ids, poi esci (invio puntuale)
+        if (ids !== null) body.registration_ids = ids
+
+        const res = await fetch('https://hnkhckcclgabunkqfmrz.supabase.co/functions/v1/assegna-posto', {
+          method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify(body),
+        })
+        const data = await res.json()
+
+        if (data.error) {
+          setInvioPostoRis({ error: data.error, sent: totalSent, failed: totalFailed, errors: allErrors })
+          break
+        }
+
+        totalSent  += data.sent  || 0
+        totalFailed += data.failed || 0
+        if (data.errors?.length) allErrors = [...allErrors, ...data.errors]
+        const remaining = data.remaining ?? 0
+
+        // Aggiorna UI in tempo reale dopo ogni blocco
+        setInvioPostoRis({
+          inCorso: !data.completato && ids === null,
+          sent: totalSent,
+          failed: totalFailed,
+          remaining,
+          completato: data.completato || ids !== null,
+          errors: allErrors,
+          blocco,
+        })
+
+        // Esci se: completato, invio puntuale (ids), o nessuno spedito in questo blocco (safeguard)
+        if (data.completato || ids !== null || data.sent === 0) break
+
+        // Pausa breve tra blocchi per non sovraccaricare
+        await new Promise(r => setTimeout(r, 800))
+      }
+    } catch (e) {
+      setInvioPostoRis({ error: String(e), sent: totalSent, failed: totalFailed, errors: allErrors })
+    }
+
+    setInvioPostoInCorso(false)
+    loadRegs() // ricarica tabella per aggiornare badge "email inviata"
   }
 
   function toggleSelezioneTeatroReg(id) {
@@ -1538,19 +1589,65 @@ export default function IscrittiPage() {
           )}
 
           {/* Risultato invio */}
-          {invioPostoRis && (
-            <div style={{ marginBottom:'14px', padding:'12px 18px', borderRadius:'16px', background: invioPostoRis.error ? '#FEF2F2' : '#F0FDF4', border:`1px solid ${invioPostoRis.error ? '#FECACA' : '#BBF7D0'}` }}>
-              <div style={{ display:'flex', justifyContent:'space-between', alignItems:'center' }}>
-                <p style={{ margin:0, fontSize:'13px', fontWeight:'700', color: invioPostoRis.error ? '#DC2626' : '#059669' }}>
-                  {invioPostoRis.error ? `❌ ${invioPostoRis.error}` : `✅ ${invioPostoRis.sent} mail inviate su ${invioPostoRis.total}${invioPostoRis.failed > 0 ? ` · ${invioPostoRis.failed} fallite` : ''}`}
-                </p>
-                <button onClick={() => setInvioPostoRis(null)} style={{ background:'none', border:'none', cursor:'pointer', color:'#9CA3AF', fontSize:'18px', padding:0 }}>×</button>
+          {invioPostoRis && (() => {
+            const ris = invioPostoRis
+            const isError = !!ris.error
+            const isCorso = !!ris.inCorso
+            const isOk    = !isError && !isCorso
+            const bg      = isError ? '#FEF2F2' : isCorso ? '#EFF6FF' : '#F0FDF4'
+            const bordo   = isError ? '#FECACA' : isCorso ? '#BFDBFE' : '#BBF7D0'
+            const colore  = isError ? '#DC2626' : isCorso ? '#1D4ED8' : '#059669'
+            const totaleInviati = (ris.sent || 0)
+            const remaining = ris.remaining ?? null
+            const totaleStimato = remaining !== null ? totaleInviati + remaining : null
+            const pct = totaleStimato > 0 ? Math.round((totaleInviati / totaleStimato) * 100) : null
+            return (
+              <div style={{ marginBottom:'14px', padding:'14px 18px', borderRadius:'16px', background: bg, border:`1px solid ${bordo}` }}>
+                <div style={{ display:'flex', justifyContent:'space-between', alignItems:'flex-start', gap:8 }}>
+                  <div style={{ flex:1 }}>
+                    {isError && (
+                      <p style={{ margin:0, fontSize:'13px', fontWeight:'700', color: colore }}>❌ {ris.error}</p>
+                    )}
+                    {isCorso && (
+                      <>
+                        <p style={{ margin:'0 0 6px', fontSize:'13px', fontWeight:'700', color: colore }}>
+                          📨 Invio in corso — blocco {ris.blocco}…
+                        </p>
+                        <p style={{ margin:0, fontSize:'13px', color:'#374151' }}>
+                          <strong>{totaleInviati}</strong> inviate
+                          {remaining !== null && <> · <strong>{remaining}</strong> rimanenti</>}
+                          {ris.failed > 0 && <> · <span style={{color:'#DC2626'}}>{ris.failed} fallite</span></>}
+                        </p>
+                        {pct !== null && (
+                          <div style={{ marginTop:8, background:'#DBEAFE', borderRadius:99, height:6, overflow:'hidden' }}>
+                            <div style={{ background:'#3B82F6', height:'100%', width:`${pct}%`, transition:'width .4s ease', borderRadius:99 }} />
+                          </div>
+                        )}
+                      </>
+                    )}
+                    {isOk && (
+                      <>
+                        <p style={{ margin:'0 0 4px', fontSize:'13px', fontWeight:'700', color: colore }}>
+                          {ris.completato ? '✅ Invio completato' : '✅ Blocco inviato'}
+                        </p>
+                        <p style={{ margin:0, fontSize:'13px', color:'#374151' }}>
+                          <strong>{totaleInviati}</strong> mail inviate
+                          {ris.failed > 0 && <> · <span style={{color:'#DC2626'}}><strong>{ris.failed}</strong> fallite</span></>}
+                          {remaining > 0 && <> · <span style={{color:'#D97706'}}>{remaining} ancora da inviare</span></>}
+                        </p>
+                      </>
+                    )}
+                  </div>
+                  {!isCorso && (
+                    <button onClick={() => setInvioPostoRis(null)} style={{ background:'none', border:'none', cursor:'pointer', color:'#9CA3AF', fontSize:'18px', padding:0, lineHeight:1, flexShrink:0 }}>×</button>
+                  )}
+                </div>
+                {ris.errors?.length > 0 && (
+                  <p style={{ margin:'8px 0 0', fontSize:'11px', color:'#DC2626', lineHeight:1.6 }}>{ris.errors.join(' · ')}</p>
+                )}
               </div>
-              {invioPostoRis.errors?.length > 0 && (
-                <p style={{ margin:'6px 0 0', fontSize:'11px', color:'#DC2626' }}>{invioPostoRis.errors.join(' · ')}</p>
-              )}
-            </div>
-          )}
+            )
+          })()}
 
           {/* Tabella */}
           <div style={s.card}>
