@@ -45,7 +45,7 @@ const VARIABILI = [
   '{{cellulare}}','{{partita_iva}}','{{cap}}',
   '{{nome_evento}}','{{data_evento}}','{{luogo_evento}}',
   '{{qr_code}}','{{link_landing}}','{{link_questionario}}',
-  '{{data_iscrizione}}','{{codice_iscrizione}}','{{numero_posto}}','{{link_conferma}}',
+  '{{data_iscrizione}}','{{codice_iscrizione}}','{{numero_posto}}','{{link_conferma}}','{{link_rinuncia}}',
 ]
 
 const PREVIEW_DATA_BASE = {
@@ -57,7 +57,7 @@ const PREVIEW_DATA_BASE = {
   '{{qr_code}}':'QR-MARCO2026','{{link_landing}}':'#','{{link_questionario}}':'#',
   '{{data_iscrizione}}': new Date().toLocaleDateString('it-IT'),
   '{{codice_iscrizione}}':'EVT-2026-M1B2',
-  '{{numero_posto}}': 'Curva Sud, Settore 18AS, Posto 9S','{{link_conferma}}':'#',
+  '{{numero_posto}}': 'Curva Sud, Settore 18AS, Posto 9S','{{link_conferma}}':'#','{{link_rinuncia}}':'#',
 }
 
 //  Block defaults 
