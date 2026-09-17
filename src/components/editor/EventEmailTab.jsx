@@ -81,6 +81,32 @@ function blockDefaults(tipo) {
 }
 
 //  Blocchi  HTML 
+function buildTicketSvgUri(nome, posto, label) {
+  label = label || 'Il tuo posto'
+  const esc = s => String(s || '').replace(/[<>&"']/g, c => ({'<':'&lt;','>':'&gt;','&':'&amp;','"':'&quot;',"'":'&apos;'}[c]))
+  const n = esc(String(nome||'').slice(0,32).toUpperCase())
+  const p = esc(String(posto||'').slice(0,42))
+  const l = esc(String(label||'Il tuo posto').toUpperCase())
+  const pl = p.length
+  const fs = pl <= 10 ? 30 : pl <= 18 ? 25 : pl <= 26 ? 20 : pl <= 34 ? 17 : 14
+  const dx = [65,92,119,146,173,200,227,254,281,308,335,362,389,416,443]
+  const dots = (y) => dx.map(x => `<circle cx="${x}" cy="${y}" r="5.5"/>`).join('')
+  const svg = [
+    '<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 520 200" width="520" height="200">',
+    '<defs><clipPath id="tc"><path d="M30,0 L490,0 Q520,0 520,20 L520,80 Q505,80 505,100 Q505,120 520,120 L520,180 Q520,200 490,200 L30,200 Q0,200 0,180 L0,120 Q15,120 15,100 Q15,80 0,80 L0,20 Q0,0 30,0 Z"/></clipPath></defs>',
+    '<rect width="520" height="200" fill="#F5E6C8" clip-path="url(#tc)"/>',
+    '<path d="M30,0 L490,0 Q520,0 520,20 L520,80 Q505,80 505,100 Q505,120 520,120 L520,180 Q520,200 490,200 L30,200 Q0,200 0,180 L0,120 Q15,120 15,100 Q15,80 0,80 L0,20 Q0,0 30,0 Z" fill="none" stroke="#C8372D" stroke-width="6"/>',
+    '<path d="M42,14 L478,14 Q506,14 506,28 L506,78 Q496,82 496,100 Q496,118 506,122 L506,172 Q506,186 478,186 L42,186 Q14,186 14,172 L14,122 Q24,118 24,100 Q24,82 14,78 L14,28 Q14,14 42,14 Z" fill="none" stroke="#C8372D" stroke-width="2.5" stroke-dasharray="6,4"/>',
+    `<g fill="#F5E6C8">${dots(0)}</g>`,
+    `<g fill="#F5E6C8">${dots(200)}</g>`,
+    `<text x="260" y="76" text-anchor="middle" font-family="Arial,Helvetica,sans-serif" font-size="13" font-weight="700" fill="#8B5E3C" letter-spacing="2">${n}</text>`,
+    `<text x="260" y="118" text-anchor="middle" font-family="Arial,Helvetica,sans-serif" font-size="${fs}" font-weight="900" fill="#1A1A1A">${p}</text>`,
+    `<text x="260" y="152" text-anchor="middle" font-family="Arial,Helvetica,sans-serif" font-size="10" font-weight="600" fill="#B07840" letter-spacing="1">${l}</text>`,
+    '</svg>'
+  ].join('')
+  return 'data:image/svg+xml;charset=utf-8,' + encodeURIComponent(svg)
+}
+
 function blocchiToHtml(blocchi) {
   if (!Array.isArray(blocchi)) return ''
   return blocchi.map(b => {
@@ -123,10 +149,11 @@ function blocchiToHtml(blocchi) {
         return `<table width="100%" cellpadding="0" cellspacing="0" border="0" style="margin:0 0 20px"><tr><td align="center"><table cellpadding="0" cellspacing="0" border="0"><tr><td align="center" bgcolor="${lbg}" style="background:${lbg};border-radius:${lr}px;padding:16px 40px"><a href="{{link_iscrizione}}" style="color:${ltx};text-decoration:none;font-family:Inter,Arial,sans-serif;font-size:${b.size||15}px;font-weight:800;display:block">${b.testo||'🎫 Vedi il tuo biglietto e QR Code'}</a></td></tr></table></td></tr></table>`
       }
       if (b.tipo === 'posto_display') {
-        const posto = '{{numero_posto}}'
+        const nome  = vars ? ((vars['{{nome}}']||'') + ' ' + (vars['{{cognome}}']||'')).trim() : 'Marco Bianchi'
+        const posto = vars?.['{{numero_posto}}'] || '{{numero_posto}}'
         const label = b.testo || 'Il tuo posto'
-        const fs = posto.length > 20 ? '18px' : posto.length > 12 ? '22px' : posto.length > 8 ? '26px' : '30px'
-        return `<table width="100%" cellpadding="0" cellspacing="0" border="0" style="margin:0 0 20px;max-width:520px;margin-left:auto;margin-right:auto"><tr><td align="center" style="padding:0"><div style="position:relative;display:inline-block;width:100%;max-width:520px"><img src="data:image/svg+xml;base64,PHN2ZyB4bWxucz0iaHR0cDovL3d3dy53My5vcmcvMjAwMC9zdmciIHZpZXdCb3g9IjAgMCA1MjAgMTgwIiB3aWR0aD0iNTIwIiBoZWlnaHQ9IjE4MCI+CiAgPCEtLSBTZm9uZG8gY3JlbWEgY29uIGZvcm1hIGJpZ2xpZXR0byB2aWEgY2xpcCAtLT4KICA8ZGVmcz4KICAgIDxjbGlwUGF0aCBpZD0iY2xpcCI+CiAgICAgIDxwYXRoIGQ9Ik0zMCwwIEw0OTAsMCBRNTIwLDAgNTIwLDIwIEw1MjAsNzUgUTUwNSw3NSA1MDUsOTAgUTUwNSwxMDUgNTIwLDEwNSBMNTIwLDE2MCBRNTIwLDE4MCA0OTAsMTgwIEwzMCwxODAgUTAsMTgwIDAsMTYwIEwwLDEwNSBRMTUsMTA1IDE1LDkwIFExNSw3NSAwLDc1IEwwLDIwIFEwLDAgMzAsMCBaIi8+CiAgICA8L2NsaXBQYXRoPgogIDwvZGVmcz4KICA8cmVjdCB3aWR0aD0iNTIwIiBoZWlnaHQ9IjE4MCIgZmlsbD0iI0Y1RTZDOCIgY2xpcC1wYXRoPSJ1cmwoI2NsaXApIi8+CiAgPCEtLSBCb3JkbyBlc3Rlcm5vIHJvc3NvIC0tPgogIDxwYXRoIGQ9Ik0zMCwwIEw0OTAsMCBRNTIwLDAgNTIwLDIwIEw1MjAsNzUgUTUwNSw3NSA1MDUsOTAgUTUwNSwxMDUgNTIwLDEwNSBMNTIwLDE2MCBRNTIwLDE4MCA0OTAsMTgwIEwzMCwxODAgUTAsMTgwIDAsMTYwIEwwLDEwNSBRMTUsMTA1IDE1LDkwIFExNSw3NSAwLDc1IEwwLDIwIFEwLDAgMzAsMCBaIiBmaWxsPSJub25lIiBzdHJva2U9IiNDODM3MkQiIHN0cm9rZS13aWR0aD0iNSIvPgogIDwhLS0gQm9yZG8gaW50ZXJubyByb3NzbyAtLT4KICA8cGF0aCBkPSJNNDIsMTIgTDQ3OCwxMiBRNTA4LDEyIDUwOCwyOCBMNTA4LDczIFE0OTgsNzcgNDk4LDkwIFE0OTgsMTAzIDUwOCwxMDcgTDUwOCwxNTIgUTUwOCwxNjggNDc4LDE2OCBMNDIsMTY4IFExMiwxNjggMTIsMTUyIEwxMiwxMDcgUTIyLDEwMyAyMiw5MCBRMjIsNzcgMTIsNzMgTDEyLDI4IFExMiwxMiA0MiwxMiBaIiBmaWxsPSJub25lIiBzdHJva2U9IiNDODM3MkQiIHN0cm9rZS13aWR0aD0iMiIvPgogIDwhLS0gRGVudGVsbGF0dXJhIHRvcDogc2VyaWUgZGkgc2VtaWNlcmNoaSBiaWFuY2hpIC0tPgogIDxnIGZpbGw9IndoaXRlIj4KICAgIDxjaXJjbGUgY3g9IjY1IiBjeT0iMCIgcj0iNSIvPjxjaXJjbGUgY3g9IjkyIiBjeT0iMCIgcj0iNSIvPjxjaXJjbGUgY3g9IjExOSIgY3k9IjAiIHI9IjUiLz4KICAgIDxjaXJjbGUgY3g9IjE0NiIgY3k9IjAiIHI9IjUiLz48Y2lyY2xlIGN4PSIxNzMiIGN5PSIwIiByPSI1Ii8+PGNpcmNsZSBjeD0iMjAwIiBjeT0iMCIgcj0iNSIvPgogICAgPGNpcmNsZSBjeD0iMjI3IiBjeT0iMCIgcj0iNSIvPjxjaXJjbGUgY3g9IjI1NCIgY3k9IjAiIHI9IjUiLz48Y2lyY2xlIGN4PSIyODEiIGN5PSIwIiByPSI1Ii8+CiAgICA8Y2lyY2xlIGN4PSIzMDgiIGN5PSIwIiByPSI1Ii8+PGNpcmNsZSBjeD0iMzM1IiBjeT0iMCIgcj0iNSIvPjxjaXJjbGUgY3g9IjM2MiIgY3k9IjAiIHI9IjUiLz4KICAgIDxjaXJjbGUgY3g9IjM4OSIgY3k9IjAiIHI9IjUiLz48Y2lyY2xlIGN4PSI0MTYiIGN5PSIwIiByPSI1Ii8+PGNpcmNsZSBjeD0iNDQzIiBjeT0iMCIgcj0iNSIvPgogIDwvZz4KICA8IS0tIERlbnRlbGxhdHVyYSBib3R0b20gLS0+CiAgPGcgZmlsbD0id2hpdGUiPgogICAgPGNpcmNsZSBjeD0iNjUiIGN5PSIxODAiIHI9IjUiLz48Y2lyY2xlIGN4PSI5MiIgY3k9IjE4MCIgcj0iNSIvPjxjaXJjbGUgY3g9IjExOSIgY3k9IjE4MCIgcj0iNSIvPgogICAgPGNpcmNsZSBjeD0iMTQ2IiBjeT0iMTgwIiByPSI1Ii8+PGNpcmNsZSBjeD0iMTczIiBjeT0iMTgwIiByPSI1Ii8+PGNpcmNsZSBjeD0iMjAwIiBjeT0iMTgwIiByPSI1Ii8+CiAgICA8Y2lyY2xlIGN4PSIyMjciIGN5PSIxODAiIHI9IjUiLz48Y2lyY2xlIGN4PSIyNTQiIGN5PSIxODAiIHI9IjUiLz48Y2lyY2xlIGN4PSIyODEiIGN5PSIxODAiIHI9IjUiLz4KICAgIDxjaXJjbGUgY3g9IjMwOCIgY3k9IjE4MCIgcj0iNSIvPjxjaXJjbGUgY3g9IjMzNSIgY3k9IjE4MCIgcj0iNSIvPjxjaXJjbGUgY3g9IjM2MiIgY3k9IjE4MCIgcj0iNSIvPgogICAgPGNpcmNsZSBjeD0iMzg5IiBjeT0iMTgwIiByPSI1Ii8+PGNpcmNsZSBjeD0iNDE2IiBjeT0iMTgwIiByPSI1Ii8+PGNpcmNsZSBjeD0iNDQzIiBjeT0iMTgwIiByPSI1Ii8+CiAgPC9nPgo8L3N2Zz4=" alt="biglietto" width="520" style="display:block;width:100%;max-width:520px;height:auto" /><div style="position:absolute;top:0;left:0;right:0;bottom:0;display:flex;flex-direction:column;align-items:center;justify-content:center;padding:16px 48px"><p style="margin:0 0 4px;font-size:11px;font-weight:700;color:#7A5C3A;text-transform:uppercase;letter-spacing:.1em;font-family:Inter,Arial,sans-serif">${label}</p><p style="margin:0;font-size:${fs};font-weight:900;color:#0A0A0A;font-family:Inter,Arial,sans-serif;line-height:1.2;text-align:center;word-break:break-word">${posto}</p></div></div></td></tr></table>`
+        const dataUri = buildTicketSvgUri(nome, posto, label)
+        return `<table width="100%" cellpadding="0" cellspacing="0" border="0" style="margin:0 0 20px;max-width:520px;margin-left:auto;margin-right:auto"><tr><td align="center" style="padding:0"><img src="${dataUri}" alt="Posto: ${posto}" width="520" style="display:block;width:100%;max-width:520px;height:auto;border:0" /></td></tr></table>`
       }
       return ''
     } catch(e) { console.error('blocco error', b?.tipo, e); return '' }
