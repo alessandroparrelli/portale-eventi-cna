@@ -107,7 +107,7 @@ function buildTicketSvgUri(nome, posto, label) {
   return 'data:image/svg+xml;charset=utf-8,' + encodeURIComponent(svg)
 }
 
-function blocchiToHtml(blocchi) {
+function blocchiToHtml(blocchi, vars) {
   if (!Array.isArray(blocchi)) return ''
   return blocchi.map(b => {
     if (!b || !b.tipo) return ''
@@ -532,7 +532,7 @@ export default function EventEmailTab({ eventoId }) {
 
   async function save() {
     setSaving(true)
-    const bodyHtml = editorMode==='html' ? current.corpo_html : blocchiToHtml(currBlocchi)
+    const bodyHtml = editorMode==='html' ? current.corpo_html : blocchiToHtml(currBlocchi, PREVIEW_DATA_BASE)
     const hc = mergeHeaderConfig(headerConfig)
     await supabase.from('email_templates')
       .upsert({
@@ -587,7 +587,7 @@ export default function EventEmailTab({ eventoId }) {
 
   function getPreviewHtml() {
     try {
-      const bodyHtml = currBlocchi.length ? blocchiToHtml(currBlocchi) : (current.corpo_html||'')
+      const bodyHtml = currBlocchi.length ? blocchiToHtml(currBlocchi, PREVIEW_DATA_BASE) : (current.corpo_html||'')
       return replacePreview(buildFullEmailHtml(bodyHtml, headerConfig), eventoTitolo)
     } catch(e) { console.error('preview error', e); return '<html><body><p style="padding:20px;color:#9CA3AF">Errore anteprima</p></body></html>' }
   }
