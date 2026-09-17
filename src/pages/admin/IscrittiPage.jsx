@@ -209,8 +209,9 @@ export default function IscrittiPage() {
     }
   }
 
-  async function inviaMailPosti(dry = false, ids = null) {
+  async function inviaMailPosti(dry = false, ids = null, forza = false) {
     // ids: null = tutti con posto, [id1,...] = selezionati specifici
+    // forza: true = reinvia anche a chi ha gia ricevuto (ignora posto_email_inviata)
     if (!selectedEvento) return
     const LIMIT = 250 // email per blocco — ~50s, abbondantemente dentro il timeout Edge Function
 
@@ -219,6 +220,7 @@ export default function IscrittiPage() {
       try {
         const body = { event_id: selectedEvento, dry_run: true, limit: LIMIT }
         if (ids !== null) body.registration_ids = ids
+        if (forza) body.forza = true
         const res = await fetch('https://hnkhckcclgabunkqfmrz.supabase.co/functions/v1/assegna-posto', {
           method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify(body),
         })
@@ -229,7 +231,7 @@ export default function IscrittiPage() {
 
     // --- INVIO REALE: loop a blocchi finché remaining === 0 ---
     setInvioPostoInCorso(true)
-    setInvioPostoRis({ inCorso: true, sent: 0, failed: 0, remaining: null, errors: [] })
+    setInvioPostoRis({ inCorso: true, sent: 0, failed: 0, remaining: null, errors: [], forza })
 
     let totalSent = 0
     let totalFailed = 0
@@ -240,8 +242,8 @@ export default function IscrittiPage() {
       while (true) {
         blocco++
         const body = { event_id: selectedEvento, limit: LIMIT }
-        // Se ids specificati: primo blocco con registration_ids, poi esci (invio puntuale)
         if (ids !== null) body.registration_ids = ids
+        if (forza) body.forza = true
 
         const res = await fetch('https://hnkhckcclgabunkqfmrz.supabase.co/functions/v1/assegna-posto', {
           method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify(body),
@@ -258,7 +260,6 @@ export default function IscrittiPage() {
         if (data.errors?.length) allErrors = [...allErrors, ...data.errors]
         const remaining = data.remaining ?? 0
 
-        // Aggiorna UI in tempo reale dopo ogni blocco
         setInvioPostoRis({
           inCorso: !data.completato && ids === null,
           sent: totalSent,
@@ -267,12 +268,10 @@ export default function IscrittiPage() {
           completato: data.completato || ids !== null,
           errors: allErrors,
           blocco,
+          forza,
         })
 
-        // Esci se: completato, invio puntuale (ids), o nessuno spedito in questo blocco (safeguard)
         if (data.completato || ids !== null || data.sent === 0) break
-
-        // Pausa breve tra blocchi per non sovraccaricare
         await new Promise(r => setTimeout(r, 800))
       }
     } catch (e) {
@@ -280,7 +279,7 @@ export default function IscrittiPage() {
     }
 
     setInvioPostoInCorso(false)
-    loadRegs() // ricarica tabella per aggiornare badge "email inviata"
+    loadRegs()
   }
 
   function toggleSelezioneTeatroReg(id) {
@@ -2009,22 +2008,28 @@ export default function IscrittiPage() {
           return r?.numero_posto && r?.email
         }).length
         return (
-          <Modal title="Conferma invio email posto" onClose={() => setConfirmInvioTeatro(null)} width="480px">
+          <Modal title={confirmInvioTeatro.forza ? 'Reinvia email posto' : 'Conferma invio email posto'} onClose={() => setConfirmInvioTeatro(null)} width="480px">
             <div style={{ textAlign:'center', padding:'8px 0 20px' }}>
-              <div style={{ fontSize:48, marginBottom:8 }}>📨</div>
+              <div style={{ fontSize:48, marginBottom:8 }}>{confirmInvioTeatro.forza ? '🔄' : '📨'}</div>
               <div style={{ fontSize:18, fontWeight:800, color:'#0A0A0A', marginBottom:6 }}>
-                {destinatari} email in partenza
+                {confirmInvioTeatro.forza
+                  ? `${destinatari} ${destinatari === 1 ? 'persona riceverà di nuovo' : 'persone riceveranno di nuovo'} la mail`
+                  : `${destinatari} email in partenza`}
               </div>
               <div style={{ fontSize:14, color:'#6B7280', marginBottom:20 }}>
-                {isTutti ? 'Tutti gli iscritti con posto e email assegnati' : `${destinatari} iscritti selezionati`}
+                {confirmInvioTeatro.forza
+                  ? 'Hanno già ricevuto la mail del posto — verrà reinviata.'
+                  : isTutti ? 'Tutti gli iscritti con posto e email assegnati' : `${destinatari} iscritti selezionati`}
               </div>
               <div style={{ background:'#FEF3C7', border:'1px solid #FCD34D', borderRadius:12, padding:'12px 16px', fontSize:13, color:'#92400E', marginBottom:20, textAlign:'left', display:'flex', gap:8 }}>
-                <span style={{ fontSize:16, flexShrink:0 }}>⚠️</span>
-                <span>Verifica che i posti siano stati assegnati correttamente. Questa operazione è irreversibile.</span>
+                <span style={{ fontSize:16, flexShrink:0 }}>{confirmInvioTeatro.forza ? '🔄' : '⚠️'}</span>
+                <span>{confirmInvioTeatro.forza
+                  ? 'Stai per reinviare la mail a iscritti che l\'hanno già ricevuta. Procedi solo se necessario (es. cambio posto, errore).'
+                  : 'Verifica che i posti siano stati assegnati correttamente. Questa operazione è irreversibile.'}</span>
               </div>
               <div style={{ background:'#F9FAFB', borderRadius:12, padding:'16px', marginBottom:4 }}>
                 <div style={{ fontSize:13, color:'#374151', marginBottom:10, fontWeight:600 }}>
-                  Digita <strong style={{color:'#DC2626'}}>{destinatari}</strong> per confermare l'invio
+                  Digita <strong style={{color:'#DC2626'}}>{destinatari}</strong> per confermare
                 </div>
                 <input
                   type="number"
@@ -2039,8 +2044,8 @@ export default function IscrittiPage() {
               <Btn variant="ghost" onClick={() => setConfirmInvioTeatro(null)}>Annulla</Btn>
               <Btn variant="primary"
                 disabled={parseInt(confirmInvioTeatro.inputNum) !== destinatari}
-                onClick={() => { setConfirmInvioTeatro(null); inviaMailPosti(false, ids) }}>
-                📨 Conferma e invia {destinatari} email
+                onClick={() => { const forza = !!confirmInvioTeatro.forza; setConfirmInvioTeatro(null); inviaMailPosti(false, ids, forza) }}>
+                {confirmInvioTeatro.forza ? `🔄 Reinvia ${destinatari} email` : `📨 Conferma e invia ${destinatari} email`}
               </Btn>
             </div>
           </Modal>
