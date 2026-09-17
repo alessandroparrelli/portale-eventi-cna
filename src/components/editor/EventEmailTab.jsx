@@ -86,23 +86,24 @@ function buildTicketSvgUri(nome, posto) {
   const n = esc(String(nome||'').slice(0,32).toUpperCase())
   const p = esc(String(posto||'').slice(0,42))
   const pl = p.length
-  // Font size posto: adattivo, partendo da più grande
-  const fs = pl <= 8 ? 38 : pl <= 14 ? 32 : pl <= 22 ? 26 : pl <= 32 ? 21 : 17
-  // SVG 520x230 per dare più spazio verticale
+  // Testo posto grande — biglietto compatto 160px di altezza
+  const fs = pl <= 8 ? 46 : pl <= 14 ? 38 : pl <= 22 ? 30 : pl <= 32 ? 24 : 20
+  const H = 160  // altezza totale SVG
+  const MID = H / 2  // centro tacche laterali
   const dx = [65,92,119,146,173,200,227,254,281,308,335,362,389,416,443]
-  const dots = (y) => dx.map(x => `<circle cx="${x}" cy="${y}" r="5.5"/>`).join('')
+  const dots = (y) => dx.map(x => `<circle cx="${x}" cy="${y}" r="5"/>`).join('')
   const svg = [
-    '<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 520 230" width="520" height="230">',
-    '<defs><clipPath id="tc"><path d="M30,0 L490,0 Q520,0 520,20 L520,95 Q505,95 505,115 Q505,135 520,135 L520,210 Q520,230 490,230 L30,230 Q0,230 0,210 L0,135 Q15,135 15,115 Q15,95 0,95 L0,20 Q0,0 30,0 Z"/></clipPath></defs>',
-    '<rect width="520" height="230" fill="#F5E6C8" clip-path="url(#tc)"/>',
-    '<path d="M30,0 L490,0 Q520,0 520,20 L520,95 Q505,95 505,115 Q505,135 520,135 L520,210 Q520,230 490,230 L30,230 Q0,230 0,210 L0,135 Q15,135 15,115 Q15,95 0,95 L0,20 Q0,0 30,0 Z" fill="none" stroke="#C8372D" stroke-width="6"/>',
-    '<path d="M42,14 L478,14 Q506,14 506,30 L506,93 Q496,97 496,115 Q496,133 506,137 L506,200 Q506,216 478,216 L42,216 Q14,216 14,200 L14,137 Q24,133 24,115 Q24,97 14,93 L14,30 Q14,14 42,14 Z" fill="none" stroke="#C8372D" stroke-width="2.5" stroke-dasharray="6,4"/>',
+    `<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 520 ${H}" width="520" height="${H}">`,
+    `<defs><clipPath id="tc"><path d="M30,0 L490,0 Q520,0 520,20 L520,${MID-18} Q505,${MID-18} 505,${MID} Q505,${MID+18} 520,${MID+18} L520,${H-20} Q520,${H} 490,${H} L30,${H} Q0,${H} 0,${H-20} L0,${MID+18} Q15,${MID+18} 15,${MID} Q15,${MID-18} 0,${MID-18} L0,20 Q0,0 30,0 Z"/></clipPath></defs>`,
+    `<rect width="520" height="${H}" fill="#F5E6C8" clip-path="url(#tc)"/>`,
+    `<path d="M30,0 L490,0 Q520,0 520,20 L520,${MID-18} Q505,${MID-18} 505,${MID} Q505,${MID+18} 520,${MID+18} L520,${H-20} Q520,${H} 490,${H} L30,${H} Q0,${H} 0,${H-20} L0,${MID+18} Q15,${MID+18} 15,${MID} Q15,${MID-18} 0,${MID-18} L0,20 Q0,0 30,0 Z" fill="none" stroke="#C8372D" stroke-width="6"/>`,
+    `<path d="M42,12 L478,12 Q508,12 508,28 L508,${MID-20} Q498,${MID-16} 498,${MID} Q498,${MID+16} 508,${MID+20} L508,${H-28} Q508,${H-12} 478,${H-12} L42,${H-12} Q12,${H-12} 12,${H-28} L12,${MID+20} Q22,${MID+16} 22,${MID} Q22,${MID-16} 12,${MID-20} L12,28 Q12,12 42,12 Z" fill="none" stroke="#C8372D" stroke-width="2.5" stroke-dasharray="6,4"/>`,
     `<g fill="#F5E6C8">${dots(0)}</g>`,
-    `<g fill="#F5E6C8">${dots(230)}</g>`,
-    // Nome — centrato verticalmente nella metà superiore
-    `<text x="260" y="88" text-anchor="middle" font-family="Arial,Helvetica,sans-serif" font-size="16" font-weight="700" fill="#8B5E3C" letter-spacing="2">${n}</text>`,
-    // Posto — grande e centrato
-    `<text x="260" y="142" text-anchor="middle" font-family="Arial,Helvetica,sans-serif" font-size="${fs}" font-weight="900" fill="#1A1A1A">${p}</text>`,
+    `<g fill="#F5E6C8">${dots(H)}</g>`,
+    // Nome — piccolo sopra
+    `<text x="260" y="${MID-10}" text-anchor="middle" font-family="Arial,Helvetica,sans-serif" font-size="14" font-weight="700" fill="#8B5E3C" letter-spacing="2">${n}</text>`,
+    // Posto — grande, centrato
+    `<text x="260" y="${MID+fs*0.38}" text-anchor="middle" font-family="Arial,Helvetica,sans-serif" font-size="${fs}" font-weight="900" fill="#1A1A1A">${p}</text>`,
     '</svg>'
   ].join('')
   return 'data:image/svg+xml;charset=utf-8,' + encodeURIComponent(svg)
