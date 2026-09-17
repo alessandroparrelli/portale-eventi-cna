@@ -81,27 +81,28 @@ function blockDefaults(tipo) {
 }
 
 //  Blocchi  HTML 
-function buildTicketSvgUri(nome, posto, label) {
-  label = label || 'Il tuo posto'
+function buildTicketSvgUri(nome, posto) {
   const esc = s => String(s || '').replace(/[<>&"']/g, c => ({'<':'&lt;','>':'&gt;','&':'&amp;','"':'&quot;',"'":'&apos;'}[c]))
   const n = esc(String(nome||'').slice(0,32).toUpperCase())
   const p = esc(String(posto||'').slice(0,42))
-  const l = esc(String(label||'Il tuo posto').toUpperCase())
   const pl = p.length
-  const fs = pl <= 10 ? 30 : pl <= 18 ? 25 : pl <= 26 ? 20 : pl <= 34 ? 17 : 14
+  // Font size posto: adattivo, partendo da più grande
+  const fs = pl <= 8 ? 38 : pl <= 14 ? 32 : pl <= 22 ? 26 : pl <= 32 ? 21 : 17
+  // SVG 520x230 per dare più spazio verticale
   const dx = [65,92,119,146,173,200,227,254,281,308,335,362,389,416,443]
   const dots = (y) => dx.map(x => `<circle cx="${x}" cy="${y}" r="5.5"/>`).join('')
   const svg = [
-    '<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 520 200" width="520" height="200">',
-    '<defs><clipPath id="tc"><path d="M30,0 L490,0 Q520,0 520,20 L520,80 Q505,80 505,100 Q505,120 520,120 L520,180 Q520,200 490,200 L30,200 Q0,200 0,180 L0,120 Q15,120 15,100 Q15,80 0,80 L0,20 Q0,0 30,0 Z"/></clipPath></defs>',
-    '<rect width="520" height="200" fill="#F5E6C8" clip-path="url(#tc)"/>',
-    '<path d="M30,0 L490,0 Q520,0 520,20 L520,80 Q505,80 505,100 Q505,120 520,120 L520,180 Q520,200 490,200 L30,200 Q0,200 0,180 L0,120 Q15,120 15,100 Q15,80 0,80 L0,20 Q0,0 30,0 Z" fill="none" stroke="#C8372D" stroke-width="6"/>',
-    '<path d="M42,14 L478,14 Q506,14 506,28 L506,78 Q496,82 496,100 Q496,118 506,122 L506,172 Q506,186 478,186 L42,186 Q14,186 14,172 L14,122 Q24,118 24,100 Q24,82 14,78 L14,28 Q14,14 42,14 Z" fill="none" stroke="#C8372D" stroke-width="2.5" stroke-dasharray="6,4"/>',
+    '<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 520 230" width="520" height="230">',
+    '<defs><clipPath id="tc"><path d="M30,0 L490,0 Q520,0 520,20 L520,95 Q505,95 505,115 Q505,135 520,135 L520,210 Q520,230 490,230 L30,230 Q0,230 0,210 L0,135 Q15,135 15,115 Q15,95 0,95 L0,20 Q0,0 30,0 Z"/></clipPath></defs>',
+    '<rect width="520" height="230" fill="#F5E6C8" clip-path="url(#tc)"/>',
+    '<path d="M30,0 L490,0 Q520,0 520,20 L520,95 Q505,95 505,115 Q505,135 520,135 L520,210 Q520,230 490,230 L30,230 Q0,230 0,210 L0,135 Q15,135 15,115 Q15,95 0,95 L0,20 Q0,0 30,0 Z" fill="none" stroke="#C8372D" stroke-width="6"/>',
+    '<path d="M42,14 L478,14 Q506,14 506,30 L506,93 Q496,97 496,115 Q496,133 506,137 L506,200 Q506,216 478,216 L42,216 Q14,216 14,200 L14,137 Q24,133 24,115 Q24,97 14,93 L14,30 Q14,14 42,14 Z" fill="none" stroke="#C8372D" stroke-width="2.5" stroke-dasharray="6,4"/>',
     `<g fill="#F5E6C8">${dots(0)}</g>`,
-    `<g fill="#F5E6C8">${dots(200)}</g>`,
-    `<text x="260" y="76" text-anchor="middle" font-family="Arial,Helvetica,sans-serif" font-size="13" font-weight="700" fill="#8B5E3C" letter-spacing="2">${n}</text>`,
-    `<text x="260" y="118" text-anchor="middle" font-family="Arial,Helvetica,sans-serif" font-size="${fs}" font-weight="900" fill="#1A1A1A">${p}</text>`,
-    `<text x="260" y="152" text-anchor="middle" font-family="Arial,Helvetica,sans-serif" font-size="10" font-weight="600" fill="#B07840" letter-spacing="1">${l}</text>`,
+    `<g fill="#F5E6C8">${dots(230)}</g>`,
+    // Nome — centrato verticalmente nella metà superiore
+    `<text x="260" y="88" text-anchor="middle" font-family="Arial,Helvetica,sans-serif" font-size="16" font-weight="700" fill="#8B5E3C" letter-spacing="2">${n}</text>`,
+    // Posto — grande e centrato
+    `<text x="260" y="142" text-anchor="middle" font-family="Arial,Helvetica,sans-serif" font-size="${fs}" font-weight="900" fill="#1A1A1A">${p}</text>`,
     '</svg>'
   ].join('')
   return 'data:image/svg+xml;charset=utf-8,' + encodeURIComponent(svg)
@@ -152,7 +153,7 @@ function blocchiToHtml(blocchi, vars) {
         const nome  = vars ? ((vars['{{nome}}']||'') + ' ' + (vars['{{cognome}}']||'')).trim() : 'Marco Bianchi'
         const posto = vars?.['{{numero_posto}}'] || '{{numero_posto}}'
         const label = b.testo || 'Il tuo posto'
-        const dataUri = buildTicketSvgUri(nome, posto, label)
+        const dataUri = buildTicketSvgUri(nome, posto)
         return `<table width="100%" cellpadding="0" cellspacing="0" border="0" style="margin:0 0 20px;max-width:520px;margin-left:auto;margin-right:auto"><tr><td align="center" style="padding:0"><img src="${dataUri}" alt="Posto: ${posto}" width="520" style="display:block;width:100%;max-width:520px;height:auto;border:0" /></td></tr></table>`
       }
       return ''
