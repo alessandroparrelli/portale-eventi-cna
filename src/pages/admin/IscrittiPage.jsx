@@ -142,7 +142,7 @@ export default function IscrittiPage() {
   const [teatroSelezione, setTeatroSelezione] = useState(new Set()) // Set di reg_id selezionati
   const [filtroPostoAssegnato, setFiltroPostoAssegnato] = useState('tutti') // 'tutti' | 'con_posto' | 'senza_posto'
   const [filtroPresenzaTeatro, setFiltroPresenzaTeatro] = useState('tutti') // 'tutti' | 'in_attesa' | 'confermata' | 'rinuncia'
-  const [azzeraStato, setAzzeraStato] = useState(null) // {ids, tipo} — modal conferma azzeramento
+  const [cambiaStato, setCambiaStato] = useState(null) // {ids} — modal cambio stato presenza
   const [searchTeatro, setSearchTeatro] = useState('')
   const [filtroMailPosto, setFiltroMailPosto] = useState('tutti') // 'tutti' | 'inviata' | 'non_inviata'
 
