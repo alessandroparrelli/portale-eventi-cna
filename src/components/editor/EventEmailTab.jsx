@@ -86,12 +86,15 @@ function buildTicketSvgUri(nome, posto) {
   const n = esc(String(nome||'').slice(0,32).toUpperCase())
   const p = esc(String(posto||'').slice(0,42))
   const pl = p.length
-  // Testo posto grande — biglietto compatto 160px di altezza
-  const fs = pl <= 8 ? 46 : pl <= 14 ? 38 : pl <= 22 ? 30 : pl <= 32 ? 24 : 20
-  const H = 160  // altezza totale SVG
-  const MID = H / 2  // centro tacche laterali
+  // Font size posto grande, adattivo
+  const fp = pl <= 8 ? 44 : pl <= 14 ? 36 : pl <= 22 ? 28 : pl <= 32 ? 23 : 19
+  const H = 180  // biglietto leggermente più alto per dare spazio verticale
+  const MID = H / 2
   const dx = [65,92,119,146,173,200,227,254,281,308,335,362,389,416,443]
   const dots = (y) => dx.map(x => `<circle cx="${x}" cy="${y}" r="5"/>`).join('')
+  // Nome: 20px, a 1/3 dall'alto; Posto: grande, a 2/3
+  const yNome  = Math.round(H * 0.38)
+  const yPosto = Math.round(H * 0.70)
   const svg = [
     `<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 520 ${H}" width="520" height="${H}">`,
     `<defs><clipPath id="tc"><path d="M30,0 L490,0 Q520,0 520,20 L520,${MID-18} Q505,${MID-18} 505,${MID} Q505,${MID+18} 520,${MID+18} L520,${H-20} Q520,${H} 490,${H} L30,${H} Q0,${H} 0,${H-20} L0,${MID+18} Q15,${MID+18} 15,${MID} Q15,${MID-18} 0,${MID-18} L0,20 Q0,0 30,0 Z"/></clipPath></defs>`,
@@ -100,10 +103,10 @@ function buildTicketSvgUri(nome, posto) {
     `<path d="M42,12 L478,12 Q508,12 508,28 L508,${MID-20} Q498,${MID-16} 498,${MID} Q498,${MID+16} 508,${MID+20} L508,${H-28} Q508,${H-12} 478,${H-12} L42,${H-12} Q12,${H-12} 12,${H-28} L12,${MID+20} Q22,${MID+16} 22,${MID} Q22,${MID-16} 12,${MID-20} L12,28 Q12,12 42,12 Z" fill="none" stroke="#C8372D" stroke-width="2.5" stroke-dasharray="6,4"/>`,
     `<g fill="#F5E6C8">${dots(0)}</g>`,
     `<g fill="#F5E6C8">${dots(H)}</g>`,
-    // Nome — piccolo sopra
-    `<text x="260" y="${MID-10}" text-anchor="middle" font-family="Arial,Helvetica,sans-serif" font-size="14" font-weight="700" fill="#8B5E3C" letter-spacing="2">${n}</text>`,
-    // Posto — grande, centrato
-    `<text x="260" y="${MID+fs*0.38}" text-anchor="middle" font-family="Arial,Helvetica,sans-serif" font-size="${fs}" font-weight="900" fill="#1A1A1A">${p}</text>`,
+    // Nome — 20px, in alto
+    `<text x="260" y="${yNome}" text-anchor="middle" font-family="Arial,Helvetica,sans-serif" font-size="20" font-weight="700" fill="#8B5E3C" letter-spacing="3">${n}</text>`,
+    // Posto — grande, in basso
+    `<text x="260" y="${yPosto}" text-anchor="middle" font-family="Arial,Helvetica,sans-serif" font-size="${fp}" font-weight="900" fill="#1A1A1A">${p}</text>`,
     '</svg>'
   ].join('')
   return 'data:image/svg+xml;charset=utf-8,' + encodeURIComponent(svg)
