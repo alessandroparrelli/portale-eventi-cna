@@ -1466,7 +1466,8 @@ export default function IscrittiPage() {
               { label:'Con posto', value: registrations.filter(r => r.numero_posto).length, color:'#5B5FEF' },
               { label:'Senza posto', value: registrations.filter(r => !r.numero_posto).length, color:'#DC2626' },
               { label:'Presenza confermata', value: registrations.filter(r => r.presenza_confermata).length, color:'#059669' },
-              { label:'In attesa conferma', value: registrations.filter(r => r.numero_posto && !r.presenza_confermata).length, color:'#D97706' },
+              { label:'Rinunce', value: registrations.filter(r => r.rinuncia).length, color:'#DC2626' },
+              { label:'In attesa', value: registrations.filter(r => r.numero_posto && !r.presenza_confermata && !r.rinuncia).length, color:'#D97706' },
             ].map(st => (
               <div key={st.label} style={{ background:'#fff', border:'1px solid #E8ECF4', borderRadius:'16px', padding:'14px 20px', flex:1, minWidth:'140px' }}>
                 <p style={{ margin:'0 0 4px', fontSize:'24px', fontWeight:'900', color:st.color, letterSpacing:'-0.02em' }}>{st.value}</p>
@@ -1718,7 +1719,9 @@ export default function IscrittiPage() {
                           {postoError[r.id] && <p style={{ margin:'4px 0 0', fontSize:'11px', color:'#DC2626' }}>{postoError[r.id]}</p>}
                         </td>
                         <td style={s.td}>
-                          {r.presenza_confermata
+                          {r.rinuncia
+                            ? <span style={{ fontSize:'12px', fontWeight:'700', color:'#DC2626', background:'#FEF2F2', padding:'4px 10px', borderRadius:'999px' }}>✗ Non verrà</span>
+                            : r.presenza_confermata
                             ? <span style={{ fontSize:'12px', fontWeight:'700', color:'#059669', background:'#F0FDF4', padding:'4px 10px', borderRadius:'999px' }}>✓ Confermata</span>
                             : <span style={{ fontSize:'12px', color:'#9CA3AF', background:'#F9FAFB', padding:'4px 10px', borderRadius:'999px' }}>In attesa</span>}
                         </td>
