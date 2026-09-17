@@ -116,6 +116,7 @@ export default function IscrittiPage() {
   const [smsListaSearch, setSmsListaSearch] = useState('')
   const [smsProva, setSmsProva] = useState(false)
   const [eventoDettagli, setEventoDettagli] = useState(null) // {titolo, data_inizio, luogo}
+  const [eventoInfo, setEventoInfo] = useState(null) // dati completi evento incluso email_mittente
 
   // Mappa id→nome per referenti di gruppo (calcolata dai registrations caricati)
   const referentiMap = {}
@@ -140,6 +141,8 @@ export default function IscrittiPage() {
   const [dryRunRis, setDryRunRis] = useState(null)
   const [teatroSelezione, setTeatroSelezione] = useState(new Set()) // Set di reg_id selezionati
   const [filtroPostoAssegnato, setFiltroPostoAssegnato] = useState('tutti') // 'tutti' | 'con_posto' | 'senza_posto'
+  const [filtroPresenzaTeatro, setFiltroPresenzaTeatro] = useState('tutti') // 'tutti' | 'in_attesa' | 'confermata' | 'rinuncia'
+  const [azzeraStato, setAzzeraStato] = useState(null) // {ids, tipo} — modal conferma azzeramento
   const [searchTeatro, setSearchTeatro] = useState('')
   const [filtroMailPosto, setFiltroMailPosto] = useState('tutti') // 'tutti' | 'inviata' | 'non_inviata'
 
@@ -207,6 +210,45 @@ export default function IscrittiPage() {
       setPostoEdit(p => ({ ...p, [regId]: undefined }))
       loadRegs()
     }
+  }
+
+  // Azzera stato presenza/rinuncia per una lista di iscritti
+  // e invia notifica email ai responsabili dell'evento se ci sono rinunce
+  async function eseguiAzzeraStato(ids) {
+    if (!ids || ids.length === 0) return
+    try {
+      // Raccoglie i dati degli iscritti con rinuncia per la notifica
+      const rinuncianti = registrations.filter(r => ids.includes(r.id) && r.rinuncia)
+
+      // Azzera in DB
+      const { error } = await supabase
+        .from('registrations')
+        .update({ rinuncia: false, rinuncia_at: null, presenza_confermata: false })
+        .in('id', ids)
+
+      if (error) { alert('Errore: ' + error.message); return }
+
+      // Se c'erano rinuncianti, invia notifica ai responsabili
+      if (rinuncianti.length > 0 && eventoInfo?.email_mittente) {
+        const body = rinuncianti.map(r =>
+          `• ${r.nome} ${r.cognome} (${r.email}) — Posto: ${r.numero_posto || 'non assegnato'}`
+        ).join("\n")
+        const subject = `[${eventoInfo.titolo}] Azzeramento rinunce — ${rinuncianti.length} iscritti ripristinati`
+        const html = `<h3>Azzeramento rinunce — ${eventoInfo.titolo}</h3><p>Lo stato di <strong>${rinuncianti.length}</strong> iscritti è stato ripristinato ad "In attesa":</p><pre style="background:#f9f9f9;padding:16px;border-radius:8px;font-size:13px">${body}</pre><p style="color:#6B7280;font-size:12px">Operazione eseguita dal pannello admin.</p>`
+        await fetch(`${import.meta.env.VITE_SUPABASE_URL}/functions/v1/send-test-email`, {
+          method: 'POST',
+          headers: {
+            'Content-Type': 'application/json',
+            'Authorization': `Bearer ${(await supabase.auth.getSession()).data.session?.access_token}`,
+          },
+          body: JSON.stringify({ to: eventoInfo.email_mittente, oggetto: subject, html })
+        })
+      }
+
+      setAzzeraStato(null)
+      setTeatroSelezione(new Set())
+      await loadRegs()
+    } catch(e) { alert('Errore: ' + String(e)) }
   }
 
   async function inviaMailPosti(dry = false, ids = null, forza = false) {
@@ -432,10 +474,11 @@ export default function IscrittiPage() {
     if (!selectedEvento) { setRegistrations([]); setFormFields([]); setTeatroAbilitato(false); return }
     loadRegs()
     // Controlla se l'evento ha teatro abilitato + carica dettagli per variabili SMS
-    supabase.from('events').select('teatro_abilitato, titolo, data_inizio, luogo').eq('id', selectedEvento).single()
+    supabase.from('events').select('teatro_abilitato, titolo, data_inizio, luogo, email_mittente, nome_mittente').eq('id', selectedEvento).single()
       .then(({ data }) => {
         setTeatroAbilitato(!!data?.teatro_abilitato)
         setEventoDettagli(data ? { titolo: data.titolo, data_inizio: data.data_inizio, luogo: data.luogo } : null)
+        setEventoInfo(data || null)
       })
     supabase.from('form_fields').select('*')
       .eq('event_id', selectedEvento).eq('visibile', true).like('colonna_db', 'extra_%')
@@ -515,6 +558,9 @@ export default function IscrittiPage() {
       if (filtroPostoAssegnato === 'senza_posto' && r.numero_posto) return false
       if (filtroMailPosto === 'inviata' && !r.posto_email_inviata) return false
       if (filtroMailPosto === 'non_inviata' && r.posto_email_inviata) return false
+      if (filtroPresenzaTeatro === 'in_attesa' && (r.presenza_confermata || r.rinuncia || !r.numero_posto)) return false
+      if (filtroPresenzaTeatro === 'confermata' && !r.presenza_confermata) return false
+      if (filtroPresenzaTeatro === 'rinuncia' && !r.rinuncia) return false
       if (qT && !matchT(r) && !(r.gruppo_id && gruppiT.has(r.gruppo_id))) return false
       return true
     })
@@ -1463,17 +1509,22 @@ export default function IscrittiPage() {
           {/* Stats */}
           <div style={{ display:'flex', gap:'12px', flexWrap:'wrap', marginBottom:'16px' }}>
             {[
-              { label:'Con posto', value: registrations.filter(r => r.numero_posto).length, color:'#5B5FEF' },
-              { label:'Senza posto', value: registrations.filter(r => !r.numero_posto).length, color:'#DC2626' },
-              { label:'Presenza confermata', value: registrations.filter(r => r.presenza_confermata).length, color:'#059669' },
-              { label:'Rinunce', value: registrations.filter(r => r.rinuncia).length, color:'#DC2626' },
-              { label:'In attesa', value: registrations.filter(r => r.numero_posto && !r.presenza_confermata && !r.rinuncia).length, color:'#D97706' },
-            ].map(st => (
-              <div key={st.label} style={{ background:'#fff', border:'1px solid #E8ECF4', borderRadius:'16px', padding:'14px 20px', flex:1, minWidth:'140px' }}>
-                <p style={{ margin:'0 0 4px', fontSize:'24px', fontWeight:'900', color:st.color, letterSpacing:'-0.02em' }}>{st.value}</p>
-                <p style={{ margin:0, fontSize:'12px', color:'#6B7280', fontWeight:'500' }}>{st.label}</p>
-              </div>
-            ))}
+              { label:'Con posto',           value: registrations.filter(r => r.numero_posto).length,                                              color:'#5B5FEF', filtro:null },
+              { label:'Senza posto',         value: registrations.filter(r => !r.numero_posto).length,                                             color:'#DC2626', filtro:null },
+              { label:'Presenza confermata', value: registrations.filter(r => r.presenza_confermata).length,                                       color:'#059669', filtro:'confermata' },
+              { label:'Rinunce',             value: registrations.filter(r => r.rinuncia).length,                                                  color:'#DC2626', filtro:'rinuncia' },
+              { label:'In attesa',           value: registrations.filter(r => r.numero_posto && !r.presenza_confermata && !r.rinuncia).length,     color:'#D97706', filtro:'in_attesa' },
+            ].map(st => {
+              const isActive = st.filtro && filtroPresenzaTeatro === st.filtro
+              return (
+                <div key={st.label}
+                  onClick={() => st.filtro && setFiltroPresenzaTeatro(filtroPresenzaTeatro === st.filtro ? 'tutti' : st.filtro)}
+                  style={{ background: isActive ? st.color : '#fff', border:`2px solid ${isActive ? st.color : '#E8ECF4'}`, borderRadius:'16px', padding:'14px 20px', flex:1, minWidth:'140px', cursor: st.filtro ? 'pointer' : 'default', transition:'all .15s ease', boxShadow: isActive ? `0 4px 12px ${st.color}33` : 'none' }}>
+                  <p style={{ margin:'0 0 4px', fontSize:'24px', fontWeight:'900', color: isActive ? '#fff' : st.color, letterSpacing:'-0.02em' }}>{st.value}</p>
+                  <p style={{ margin:0, fontSize:'12px', color: isActive ? 'rgba(255,255,255,0.85)' : '#6B7280', fontWeight:'500' }}>{st.label}{st.filtro && <span style={{fontSize:'10px',marginLeft:'4px',opacity:.7}}>{isActive ? '✕' : '↓'}</span>}</p>
+                </div>
+              )
+            })}
           </div>
 
           {/* Filtri teatro */}
@@ -1539,6 +1590,18 @@ export default function IscrittiPage() {
               <Btn variant="primary" onClick={() => setConfirmInvioTeatro({ ids: null })} disabled={invioPostoInCorso} size="md">
                 {invioPostoInCorso ? '📨 Invio…' : '📨 Invia a tutti'}
               </Btn>
+
+              {/* Azzera stato selezionati */}
+              {teatroSelezione.size > 0 && (() => {
+                const selArr = [...teatroSelezione]
+                const conStato = selArr.filter(id => { const r = registrations.find(x=>x.id===id); return r?.rinuncia || r?.presenza_confermata }).length
+                return conStato > 0 ? (
+                  <Btn variant="ghost" size="md" onClick={() => setAzzeraStato({ ids: selArr, tipo: 'azzera' })}
+                    style={{ border:'1px solid #E8ECF4', color:'#6B7280' }}>
+                    🔄 Azzera stato ({conStato})
+                  </Btn>
+                ) : null
+              })()}
 
               {/* Invio ai selezionati */}
               {teatroSelezione.size > 0 && (
@@ -1719,11 +1782,19 @@ export default function IscrittiPage() {
                           {postoError[r.id] && <p style={{ margin:'4px 0 0', fontSize:'11px', color:'#DC2626' }}>{postoError[r.id]}</p>}
                         </td>
                         <td style={s.td}>
-                          {r.rinuncia
-                            ? <span style={{ fontSize:'12px', fontWeight:'700', color:'#DC2626', background:'#FEF2F2', padding:'4px 10px', borderRadius:'999px' }}>✗ Non verrà</span>
-                            : r.presenza_confermata
-                            ? <span style={{ fontSize:'12px', fontWeight:'700', color:'#059669', background:'#F0FDF4', padding:'4px 10px', borderRadius:'999px' }}>✓ Confermata</span>
-                            : <span style={{ fontSize:'12px', color:'#9CA3AF', background:'#F9FAFB', padding:'4px 10px', borderRadius:'999px' }}>In attesa</span>}
+                          <div style={{ display:'flex', flexDirection:'column', gap:'5px', alignItems:'flex-start' }}>
+                            {r.rinuncia
+                              ? <>
+                                  <span style={{ fontSize:'12px', fontWeight:'700', color:'#DC2626', background:'#FEF2F2', padding:'4px 10px', borderRadius:'999px' }}>✗ Non verrà</span>
+                                  <button onClick={() => setAzzeraStato({ ids:[r.id], tipo:'azzera' })} style={{ fontSize:'10px', color:'#9CA3AF', background:'none', border:'1px solid #E5E7EB', borderRadius:'999px', padding:'2px 8px', cursor:'pointer', fontFamily:"'Inter',sans-serif" }}>↩ Azzera</button>
+                                </>
+                              : r.presenza_confermata
+                              ? <>
+                                  <span style={{ fontSize:'12px', fontWeight:'700', color:'#059669', background:'#F0FDF4', padding:'4px 10px', borderRadius:'999px' }}>✓ Confermata</span>
+                                  <button onClick={() => setAzzeraStato({ ids:[r.id], tipo:'azzera' })} style={{ fontSize:'10px', color:'#9CA3AF', background:'none', border:'1px solid #E5E7EB', borderRadius:'999px', padding:'2px 8px', cursor:'pointer', fontFamily:"'Inter',sans-serif" }}>↩ Azzera</button>
+                                </>
+                              : <span style={{ fontSize:'12px', color:'#9CA3AF', background:'#F9FAFB', padding:'4px 10px', borderRadius:'999px' }}>In attesa</span>}
+                          </div>
                         </td>
                         <td style={s.td}><span style={{ fontSize:'12px', color:'#374151' }}>{r.presenza_confermata_at ? formatDt(r.presenza_confermata_at) : '—'}</span></td>
                         {/* Invio singolo */}
@@ -1997,9 +2068,97 @@ export default function IscrittiPage() {
             )}
           </>
         )}
+
+          {/* SEZIONE RINUNCE */}
+          {registrations.filter(r => r.rinuncia).length > 0 && (
+            <div style={{ marginTop:32, background:'#FFF5F5', border:'1px solid #FECACA', borderRadius:16, padding:20 }}>
+              <div style={{ display:'flex', justifyContent:'space-between', alignItems:'center', marginBottom:16 }}>
+                <div>
+                  <h3 style={{ margin:'0 0 2px', fontSize:'15px', fontWeight:'800', color:'#DC2626' }}>
+                    ✗ Rinunce — {registrations.filter(r => r.rinuncia).length} iscritti
+                  </h3>
+                  <p style={{ margin:0, fontSize:'12px', color:'#9CA3AF' }}>
+                    Hanno comunicato che non parteciperanno tramite il link nell'email
+                  </p>
+                </div>
+                <button
+                  onClick={() => {
+                    const rinuncianti = registrations.filter(r => r.rinuncia)
+                    const rows = [['Nome','Cognome','Email','Telefono','Posto','Rinuncia il']]
+                    rinuncianti.forEach(r => rows.push([
+                      r.nome||'', r.cognome||'', r.email||'', r.cellulare||'',
+                      r.numero_posto||'', r.rinuncia_at ? new Date(r.rinuncia_at).toLocaleString('it-IT',{timeZone:'Europe/Rome'}) : ''
+                    ]))
+                    const csv = rows.map(r => r.map(c => `"${String(c).replace(/"/g,'""')}"`).join(',')).join('\n')
+                    const a = document.createElement('a')
+                    a.href = 'data:text/csv;charset=utf-8,\uFEFF' + encodeURIComponent(csv)
+                    a.download = `rinunce_${new Date().toISOString().slice(0,10)}.csv`
+                    a.click()
+                  }}
+                  style={{ background:'#DC2626', color:'#fff', border:'none', borderRadius:10, padding:'8px 16px', fontSize:'13px', fontWeight:'700', cursor:'pointer', fontFamily:"'Inter',sans-serif" }}>
+                  ⬇ Esporta CSV
+                </button>
+              </div>
+              <table style={{ width:'100%', borderCollapse:'collapse', fontSize:'13px' }}>
+                <thead>
+                  <tr style={{ background:'#FEE2E2' }}>
+                    {['Nome','Email','Posto','Rinuncia il','Azioni'].map(h => (
+                      <th key={h} style={{ padding:'8px 12px', textAlign:'left', fontWeight:'700', color:'#991B1B', fontSize:'11px', textTransform:'uppercase', letterSpacing:'.05em' }}>{h}</th>
+                    ))}
+                  </tr>
+                </thead>
+                <tbody>
+                  {registrations.filter(r => r.rinuncia).map(r => (
+                    <tr key={r.id} style={{ borderTop:'1px solid #FECACA' }}>
+                      <td style={{ padding:'10px 12px', fontWeight:'600', color:'#0A0A0A' }}>{r.nome} {r.cognome}</td>
+                      <td style={{ padding:'10px 12px', color:'#374151' }}>{r.email}</td>
+                      <td style={{ padding:'10px 12px', color:'#374151' }}>{r.numero_posto || <span style={{color:'#D1D5DB'}}>—</span>}</td>
+                      <td style={{ padding:'10px 12px', color:'#6B7280', fontSize:'12px' }}>
+                        {r.rinuncia_at ? new Date(r.rinuncia_at).toLocaleString('it-IT',{timeZone:'Europe/Rome',day:'2-digit',month:'short',hour:'2-digit',minute:'2-digit'}) : '—'}
+                      </td>
+                      <td style={{ padding:'10px 12px' }}>
+                        <button onClick={() => setAzzeraStato({ ids:[r.id], tipo:'azzera' })}
+                          style={{ fontSize:'11px', color:'#DC2626', background:'#FEF2F2', border:'1px solid #FECACA', borderRadius:'999px', padding:'3px 10px', cursor:'pointer', fontWeight:'600', fontFamily:"'Inter',sans-serif" }}>
+                          ↩ Ripristina
+                        </button>
+                      </td>
+                    </tr>
+                  ))}
+                </tbody>
+              </table>
+            </div>
+          )}
       </div>
       )} {/* fine condizionale tab iscritti */}
 
+
+      {/* MODAL AZZERAMENTO STATO PRESENZA */}
+      {azzeraStato && (() => {
+        const n = azzeraStato.ids.length
+        const conRinuncia = azzeraStato.ids.filter(id => registrations.find(x=>x.id===id)?.rinuncia).length
+        const conConferma = azzeraStato.ids.filter(id => registrations.find(x=>x.id===id)?.presenza_confermata).length
+        return (
+          <Modal title="Azzera stato presenza" onClose={() => setAzzeraStato(null)} width="460px">
+            <div style={{ textAlign:'center', padding:'8px 0 20px' }}>
+              <div style={{ fontSize:48, marginBottom:8 }}>🔄</div>
+              <p style={{ margin:'0 0 16px', fontSize:'16px', fontWeight:'800', color:'#0A0A0A' }}>
+                Azzera {n} {n===1?'iscritto':'iscritti'}
+              </p>
+              <div style={{ background:'#F9FAFB', borderRadius:12, padding:'12px 16px', fontSize:13, color:'#374151', textAlign:'left', marginBottom:16, lineHeight:1.7 }}>
+                {conRinuncia > 0 && <div>• <strong style={{color:'#DC2626'}}>{conRinuncia}</strong> con "Non verrà" → torna In attesa</div>}
+                {conConferma > 0 && <div>• <strong style={{color:'#059669'}}>{conConferma}</strong> con "Confermata" → torna In attesa</div>}
+              </div>
+              <div style={{ background:'#FEF3C7', border:'1px solid #FCD34D', borderRadius:12, padding:'12px 16px', fontSize:12, color:'#92400E', textAlign:'left' }}>
+                ⚠️ {conRinuncia > 0 ? 'Verrà inviata una notifica email ai responsabili dell\'evento.' : 'Lo stato verrà ripristinato ad "In attesa".'}
+              </div>
+            </div>
+            <div style={{ display:'flex', justifyContent:'flex-end', gap:10 }}>
+              <Btn variant="ghost" onClick={() => setAzzeraStato(null)}>Annulla</Btn>
+              <Btn variant="primary" onClick={() => eseguiAzzeraStato(azzeraStato.ids)}>🔄 Conferma azzeramento</Btn>
+            </div>
+          </Modal>
+        )
+      })()}
 
       {/* MODAL CONFERMA INVIO TEATRO */}
       {confirmInvioTeatro && (() => {
