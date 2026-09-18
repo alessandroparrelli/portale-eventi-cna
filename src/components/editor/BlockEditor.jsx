@@ -45,6 +45,10 @@ export function newBlock(tipo) {
       { num: '20+', label: 'Relatori', icona: 'award', icona_colore: '#7C3AED' },
       { num: '10', label: 'Edizioni', icona: 'star', icona_colore: '#059669' },
     ], animato: true }
+    case 'sezione_inizio': return { ...base,
+      sfondo: '#F7F8FC', colore_testo: '', padding_v: 'M', larghezza: 'contenuto',
+      radius_top: 'nessuno', radius_bottom: 'nessuno', etichetta: 'Sezione' }
+    case 'sezione_fine':   return { ...base }
     default:            return base
   }
 }
@@ -67,7 +71,9 @@ const BLOCK_TYPES = [
   { tipo: 'carosello',   label: 'Carosello foto',  group: 'Social' },
   { tipo: 'social',      label: 'Social & Condividi', group: 'Social' },
   { tipo: 'programma',   label: 'Programma evento', group: 'Contenuto' },
-  { tipo: 'colonne_miste',  label: 'Colonne miste',       group: 'Layout' },
+  { tipo: 'sezione_inizio', label: 'Inizio sezione',      group: 'Layout' },
+  { tipo: 'sezione_fine',   label: 'Fine sezione',         group: 'Layout' },
+  { tipo: 'colonne_miste',  label: 'Colonne miste',        group: 'Layout' },
   { tipo: 'hero_interno',   label: 'Banner sezione',      group: 'Layout' },
   { tipo: 'numeri_icona',   label: 'Numeri con icone',    group: 'Contenuto' },
 ]
@@ -639,6 +645,121 @@ function SocialEditor({ block, onChange }) {
 }
 
 
+
+// ── SezioneInizio Editor ──────────────────────────────────────────
+function SezioneInizioEditor({ block, onChange }) {
+  const SFONDI_PRESET = [
+    { label: 'Grigio chiaro', value: '#F7F8FC' },
+    { label: 'Grigio medio', value: '#F3F4F6' },
+    { label: 'Bianco', value: '#FFFFFF' },
+    { label: 'Blu CNA', value: '#003DA5' },
+    { label: 'Blu scuro', value: '#0F172A' },
+    { label: 'Viola', value: '#5B5FEF' },
+    { label: 'Verde chiaro', value: '#ECFDF5' },
+    { label: 'Giallo chiaro', value: '#FFFBEB' },
+    { label: 'Rosa chiaro', value: '#FDF2F8' },
+    { label: 'Arancio CNA', value: '#E8792F' },
+  ]
+  const PADDING = { 'nessuno': 'Nessuno', 'S': 'Piccolo', 'M': 'Medio', 'L': 'Grande', 'XL': 'Extra grande' }
+  const RADIUS  = { 'nessuno': 'Nessuno', 'S': 'Piccoli (8px)', 'M': 'Medi (16px)', 'L': 'Grandi (24px)' }
+  const isDark = ['#003DA5','#0F172A','#5B5FEF','#0A0A0A','#1E293B'].includes(block.sfondo)
+
+  return (
+    <div style={{ padding:'16px', display:'flex', flexDirection:'column', gap:'16px' }}>
+      {/* Etichetta identificativa */}
+      <div>
+        <label style={lb}>Etichetta (solo nell'editor)</label>
+        <input value={block.etichetta||'Sezione'} onChange={e=>onChange({...block,etichetta:e.target.value})} style={inp} placeholder="Es. Sezione verde" />
+        <p style={{fontSize:'11px',color:'#9CA3AF',margin:'4px 0 0'}}>Aiuta a riconoscere questa sezione nell'editor — non appare nella pagina</p>
+      </div>
+      {/* Colore sfondo */}
+      <div>
+        <label style={lb}>Colore sfondo</label>
+        <div style={{ display:'flex', flexWrap:'wrap', gap:'6px', marginBottom:'10px' }}>
+          {SFONDI_PRESET.map(p=>(
+            <button key={p.value} type="button" onClick={()=>onChange({...block,sfondo:p.value})}
+              style={{
+                padding:'5px 10px', borderRadius:'20px', fontSize:'12px', fontWeight:'600', cursor:'pointer',
+                border: block.sfondo===p.value ? '2px solid #003DA5' : '1px solid #E5E7EB',
+                background: p.value, color: ['#003DA5','#0F172A','#5B5FEF','#E8792F'].includes(p.value) ? '#fff' : '#374151',
+              }}>
+              {p.label}
+            </button>
+          ))}
+        </div>
+        <div style={{display:'flex',gap:'8px',alignItems:'center'}}>
+          <label style={{...lb,marginBottom:0}}>Personalizzato</label>
+          <input type="color" value={block.sfondo||'#F7F8FC'} onChange={e=>onChange({...block,sfondo:e.target.value})} style={{width:'36px',height:'28px',border:'none',cursor:'pointer'}} />
+          <span style={{fontSize:'12px',color:'#9CA3AF'}}>{block.sfondo||'#F7F8FC'}</span>
+        </div>
+      </div>
+      {/* Colore testo */}
+      <div>
+        <label style={lb}>Colore testo</label>
+        <div style={{display:'flex',gap:'8px',flexWrap:'wrap'}}>
+          {[{l:'Auto',v:''},{l:'Bianco',v:'#FFFFFF'},{l:'Nero',v:'#0A0A0A'}].map(o=>(
+            <button key={o.v} type="button" onClick={()=>onChange({...block,colore_testo:o.v})}
+              style={{padding:'6px 14px',borderRadius:'20px',fontSize:'12px',fontWeight:'700',cursor:'pointer',
+                border:(block.colore_testo||'')===o.v?'2px solid #003DA5':'1px solid #E5E7EB',background:'#fff',color:'#374151'}}>
+              {o.l}
+            </button>
+          ))}
+          <div style={{display:'flex',gap:'6px',alignItems:'center'}}>
+            <span style={{fontSize:'12px',color:'#9CA3AF'}}>Personalizzato</span>
+            <input type="color" value={block.colore_testo||'#0A0A0A'} onChange={e=>onChange({...block,colore_testo:e.target.value})} style={{width:'30px',height:'28px',border:'none',cursor:'pointer'}} />
+          </div>
+        </div>
+        {isDark && !block.colore_testo && (
+          <p style={{fontSize:'11px',color:'#D97706',margin:'6px 0 0',display:'flex',alignItems:'center',gap:'4px'}}>
+            ⚠️ Sfondo scuro rilevato — suggerito: Bianco
+          </p>
+        )}
+      </div>
+      {/* Layout */}
+      <div style={{display:'flex',gap:'12px',flexWrap:'wrap'}}>
+        <div style={{flex:1}}>
+          <label style={lb}>Padding verticale</label>
+          <select value={block.padding_v||'M'} onChange={e=>onChange({...block,padding_v:e.target.value})} style={inp}>
+            {Object.entries(PADDING).map(([k,v])=><option key={k} value={k}>{v}</option>)}
+          </select>
+        </div>
+        <div style={{flex:1}}>
+          <label style={lb}>Larghezza contenuto</label>
+          <select value={block.larghezza||'contenuto'} onChange={e=>onChange({...block,larghezza:e.target.value})} style={inp}>
+            <option value="contenuto">Contenuto (800px)</option>
+            <option value="ampia">Ampia (1100px)</option>
+            <option value="piena">Piena (100%)</option>
+          </select>
+        </div>
+      </div>
+      {/* Angoli */}
+      <div style={{display:'flex',gap:'12px',flexWrap:'wrap'}}>
+        <div style={{flex:1}}>
+          <label style={lb}>Angoli superiori</label>
+          <select value={block.radius_top||'nessuno'} onChange={e=>onChange({...block,radius_top:e.target.value})} style={inp}>
+            {Object.entries(RADIUS).map(([k,v])=><option key={k} value={k}>{v}</option>)}
+          </select>
+        </div>
+        <div style={{flex:1}}>
+          <label style={lb}>Angoli inferiori</label>
+          <select value={block.radius_bottom||'nessuno'} onChange={e=>onChange({...block,radius_bottom:e.target.value})} style={inp}>
+            {Object.entries(RADIUS).map(([k,v])=><option key={k} value={k}>{v}</option>)}
+          </select>
+        </div>
+      </div>
+      {/* Preview colore */}
+      <div style={{background:block.sfondo||'#F7F8FC',borderRadius:'12px',padding:'14px 18px',border:'1px solid #E5E7EB'}}>
+        <p style={{margin:0,fontSize:'13px',fontWeight:'700',color:block.colore_testo||(isDark?'#FFFFFF':'#0A0A0A')}}>
+          Anteprima colore sfondo — sezione "{block.etichetta||'Sezione'}"
+        </p>
+        <p style={{margin:'4px 0 0',fontSize:'12px',color:block.colore_testo||(isDark?'rgba(255,255,255,.65)':'#6B7280')}}>
+          I blocchi inseriti tra Inizio e Fine sezione useranno questo sfondo
+        </p>
+      </div>
+    </div>
+  )
+}
+
 // ── Colonne Miste Editor ───────────────────────────────────────────
 function ColonnaEditor({ col, onChange, lato }) {
   return (
@@ -815,12 +936,14 @@ function Block({ block, index, total, onChange, onDelete, onMoveUp, onMoveDown, 
   const typeInfo = BLOCK_TYPES.find(t=>t.tipo===block.tipo) || { label:block.tipo }
   const blockIcon = BLOCK_ICONS[block.tipo]
   return (
-    <div style={{ border:'1.5px solid #E5E7EB', borderRadius:'20px', overflow:'hidden', marginBottom:'8px', background:'#fff' }}>
+    <div style={{ border: block.tipo==='sezione_inizio' ? '2px solid #059669' : block.tipo==='sezione_fine' ? '2px dashed #059669' : '1.5px solid #E5E7EB', borderRadius:'20px', overflow:'hidden', marginBottom:'8px', background: block.tipo==='sezione_inizio'||block.tipo==='sezione_fine' ? '#F0FDF4' : '#fff' }}>
       <div style={{ display:'flex', alignItems:'center', gap:'8px', padding:'10px 14px', background:'#FAFAFA', borderBottom:collapsed?'none':'1px solid #E5E7EB', cursor:'pointer' }} onClick={()=>setCollapsed(c=>!c)}>
         <span style={{ display:'flex', alignItems:'center', width:'20px', height:'20px', flexShrink:0 }}>{blockIcon}</span>
         <span style={{flex:1,fontSize:'13px',fontWeight:'700',color:'#374151'}}>{typeInfo.label}
           {block.tipo==='testo'&&block.html&&<span style={{fontSize:'11px',fontWeight:'400',color:'#9CA3AF',marginLeft:'8px'}}>{block.html.replace(/<[^>]+>/g,'').slice(0,50)}…</span>}
           {block.tipo==='titolo'&&block.testo&&<span style={{fontSize:'11px',fontWeight:'400',color:'#9CA3AF',marginLeft:'8px'}}>{block.testo.slice(0,50)}</span>}
+          {block.tipo==='sezione_inizio'&&<span style={{display:'inline-flex',alignItems:'center',gap:'5px',fontSize:'11px',fontWeight:'700',color:'#059669',marginLeft:'8px',background:'#ECFDF5',padding:'2px 8px',borderRadius:'20px',border:'1px solid #BBF7D0'}}>▼ {block.etichetta||'Sezione'}</span>}
+          {block.tipo==='sezione_fine'&&<span style={{display:'inline-flex',alignItems:'center',gap:'5px',fontSize:'11px',fontWeight:'700',color:'#059669',marginLeft:'8px',background:'#ECFDF5',padding:'2px 8px',borderRadius:'20px',border:'1px solid #BBF7D0'}}>▲ Fine sezione</span>}
         </span>
         <button onClick={e=>{e.stopPropagation();setPreview(p=>!p)}} style={{...btnIcon,color:preview?'#003DA5':'#9CA3AF',borderColor:preview?'#003DA5':'#E5E7EB'}} title="Anteprima">👁️</button>
         <button onClick={e=>{e.stopPropagation();onDuplicate()}} style={btnIcon} title="Duplica">⧉</button>
@@ -854,6 +977,8 @@ function Block({ block, index, total, onChange, onDelete, onMoveUp, onMoveDown, 
           {block.tipo==='carosello'   && <CaroselloEditor block={block} onChange={onChange} />}
           {block.tipo==='social'      && <SocialEditor block={block} onChange={onChange} />}
           {block.tipo==='programma'   && <ProgrammaEditor block={block} onChange={onChange} />}
+          {block.tipo==='sezione_inizio' && <SezioneInizioEditor block={block} onChange={onChange} />}
+          {block.tipo==='sezione_fine'   && <div style={{padding:'16px',color:'#9CA3AF',fontSize:'13px',textAlign:'center'}}>└─ Fine sezione ─┘</div>}
           {block.tipo==='colonne_miste' && <ColonneMisteEditor block={block} onChange={onChange} />}
           {block.tipo==='hero_interno' && <HeroInternoEditor block={block} onChange={onChange} />}
           {block.tipo==='numeri_icona' && <NumeriIconaEditor block={block} onChange={onChange} />}

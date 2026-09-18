@@ -145,6 +145,18 @@ export const BLOCK_ICONS = {
       <path d="M8 14h8M10 17h4"/>
     </svg>
   ),
+  sezione_inizio: (
+    <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="#059669" strokeWidth="2" strokeLinecap="round">
+      <rect x="2" y="3" width="20" height="18" rx="2" fill="#059669" fillOpacity=".12"/>
+      <path d="M2 8h20M7 3v5M17 3v5"/>
+    </svg>
+  ),
+  sezione_fine: (
+    <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="#059669" strokeWidth="2" strokeLinecap="round">
+      <rect x="2" y="3" width="20" height="18" rx="2" fill="#059669" fillOpacity=".06"/>
+      <path d="M2 16h20M7 16v5M17 16v5"/>
+    </svg>
+  ),
   numeri_icona: (
     <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="#003DA5" strokeWidth="2" strokeLinecap="round">
       <circle cx="5" cy="6" r="2"/><circle cx="12" cy="6" r="2"/><circle cx="19" cy="6" r="2"/>
