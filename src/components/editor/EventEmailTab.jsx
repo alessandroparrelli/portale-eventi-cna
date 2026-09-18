@@ -97,10 +97,9 @@ function buildTicketSvgUri(nome, posto) {
   const yPosto = Math.round(H * 0.70)
   const svg = [
     `<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 520 ${H}" width="520" height="${H}">`,
-    `<defs><clipPath id="tc"><path d="M30,0 L490,0 Q520,0 520,20 L520,${MID-18} Q505,${MID-18} 505,${MID} Q505,${MID+18} 520,${MID+18} L520,${H-20} Q520,${H} 490,${H} L30,${H} Q0,${H} 0,${H-20} L0,${MID+18} Q15,${MID+18} 15,${MID} Q15,${MID-18} 0,${MID-18} L0,20 Q0,0 30,0 Z"/></clipPath></defs>`,
+    `<defs><clipPath id="tc"><path d="M20,0 L500,0 Q520,0 520,16 L520,${MID-16} Q506,${MID-16} 506,${MID} Q506,${MID+16} 520,${MID+16} L520,${H-16} Q520,${H} 500,${H} L20,${H} Q0,${H} 0,${H-16} L0,${MID+16} Q14,${MID+16} 14,${MID} Q14,${MID-16} 0,${MID-16} L0,16 Q0,0 20,0 Z"/></clipPath></defs>`,
     `<rect width="520" height="${H}" fill="#F5E6C8" clip-path="url(#tc)"/>`,
-    `<path d="M30,0 L490,0 Q520,0 520,20 L520,${MID-18} Q505,${MID-18} 505,${MID} Q505,${MID+18} 520,${MID+18} L520,${H-20} Q520,${H} 490,${H} L30,${H} Q0,${H} 0,${H-20} L0,${MID+18} Q15,${MID+18} 15,${MID} Q15,${MID-18} 0,${MID-18} L0,20 Q0,0 30,0 Z" fill="none" stroke="#C8372D" stroke-width="6"/>`,
-    `<path d="M42,12 L478,12 Q508,12 508,28 L508,${MID-20} Q498,${MID-16} 498,${MID} Q498,${MID+16} 508,${MID+20} L508,${H-28} Q508,${H-12} 478,${H-12} L42,${H-12} Q12,${H-12} 12,${H-28} L12,${MID+20} Q22,${MID+16} 22,${MID} Q22,${MID-16} 12,${MID-20} L12,28 Q12,12 42,12 Z" fill="none" stroke="#C8372D" stroke-width="2.5" stroke-dasharray="6,4"/>`,
+    `<path d="M32,10 L488,10 Q510,10 510,28 L510,${MID-18} Q498,${MID-14} 498,${MID} Q498,${MID+14} 510,${MID+18} L510,${H-28} Q510,${H-10} 488,${H-10} L32,${H-10} Q10,${H-10} 10,${H-28} L10,${MID+18} Q22,${MID+14} 22,${MID} Q22,${MID-14} 10,${MID-18} L10,28 Q10,10 32,10 Z" fill="none" stroke="#C8372D" stroke-width="2" stroke-dasharray="7,4"/>`,
     `<g fill="#F5E6C8">${dots(0)}</g>`,
     `<g fill="#F5E6C8">${dots(H)}</g>`,
     // Nome — 20px, in alto
