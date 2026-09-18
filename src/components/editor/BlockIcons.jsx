@@ -132,6 +132,25 @@ export const BLOCK_ICONS = {
       <circle cx="20" cy="18" r="2"/>
     </svg>
   ),
+  colonne_miste: (
+    <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="#D97706" strokeWidth="2" strokeLinecap="round">
+      <rect x="2" y="3" width="9" height="18" rx="1"/>
+      <rect x="13" y="3" width="9" height="18" rx="1"/>
+    </svg>
+  ),
+  hero_interno: (
+    <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="#EC4899" strokeWidth="2" strokeLinecap="round">
+      <rect x="2" y="4" width="20" height="16" rx="2"/>
+      <path d="M2 8h20M7 4v4M17 4v4"/>
+      <path d="M8 14h8M10 17h4"/>
+    </svg>
+  ),
+  numeri_icona: (
+    <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="#003DA5" strokeWidth="2" strokeLinecap="round">
+      <circle cx="5" cy="6" r="2"/><circle cx="12" cy="6" r="2"/><circle cx="19" cy="6" r="2"/>
+      <path d="M5 10v4M12 8v6M19 10v4M3 18h4M10 18h4M17 18h4"/>
+    </svg>
+  ),
 }
 
 // ── Icone disponibili per griglia/badge con picker ─────────────────

@@ -339,6 +339,9 @@ export default function LandingPagePublic() {
           /* Bottone CTA */
           .lp-cta-btn { width: 100% !important; text-align: center !important; box-sizing: border-box !important; }
 
+          /* Colonne miste: singola colonna su mobile */
+          .lp-colonne-miste { grid-template-columns: 1fr !important; }
+
           /* Titoli blocco contenuto */
           .lp-section-title { font-size: clamp(20px, 5.5vw, 32px) !important; }
           .lp-section-sub   { font-size: clamp(12px, 3vw, 16px) !important; }
@@ -389,6 +392,14 @@ export default function LandingPagePublic() {
           {lp.contenuto.map((block,i)=>{
             // nav_ancorata: sempre full-width, esce dal contenitore
             if (block.tipo === 'nav_ancorata') {
+              return (
+                <div key={block.id||i} style={{ marginLeft:'calc(-1 * clamp(16px,4vw,40px))', marginRight:'calc(-1 * clamp(16px,4vw,40px))', marginBottom:'0' }}>
+                  <BlockRenderer block={block} cp={cp} />
+                </div>
+              )
+            }
+            // hero_interno: full-width, nessun margin wrapper
+            if (block.tipo === 'hero_interno') {
               return (
                 <div key={block.id||i} style={{ marginLeft:'calc(-1 * clamp(16px,4vw,40px))', marginRight:'calc(-1 * clamp(16px,4vw,40px))', marginBottom:'0' }}>
                   <BlockRenderer block={block} cp={cp} />

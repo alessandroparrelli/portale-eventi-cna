@@ -9,6 +9,7 @@ import RichEditor from './RichEditor'
 import ImageUploader from './ImageUploader'
 import { BLOCK_ICONS, IconPicker, IconDisplay } from './BlockIcons'
 import { supabase, getFreshJwt } from '../../lib/supabase'
+import BlockRendererFull from '../public/BlockRenderer'
 
 const uid = () => Math.random().toString(36).slice(2, 9)
 
@@ -37,28 +38,13 @@ export function newBlock(tipo) {
       { tipo: 'sessione', titolo: 'Titolo intervento', relatori: [{ nome: 'Nome Cognome', ruolo: 'Ruolo / Ente' }] },
       { tipo: 'orario', orario: 'ORE 13.30', testo: 'Chiusura dei lavori' },
     ]}
-    case 'relatori':    return { ...base, titolo: 'I relatori', items: [
-      { nome: 'Nome Cognome', ruolo: 'Esperto / Professore', ente: 'Università degli Studi', bio: '', foto_url: '' },
-      { nome: 'Nome Cognome', ruolo: 'Responsabile', ente: 'CNA Roma', bio: '', foto_url: '' },
-    ], colonne: 2, stile_card: 'verticale' }
-    case 'pricing':     return { ...base, titolo: 'Scegli la tua quota', options: [
-      { etichetta: 'Standard', prezzo: '€ 100', unita: '+ IVA / persona', colore: '#003DA5', inclusi: ['Accesso ai lavori', 'Coffee break', 'Materiali'], cta: 'Iscriviti', evidenziata: false },
-      { etichetta: 'Premium', prezzo: '€ 180', unita: '+ IVA / persona', colore: '#7C3AED', inclusi: ['Accesso ai lavori', 'Coffee break', 'Materiali', 'Pranzo incluso', 'Attestato'], cta: 'Iscriviti', evidenziata: true },
-    ] }
-    case 'bottoni':     return { ...base, titolo: '', allineamento: 'center', items: [
-      { testo: 'Scarica le slide', url: '', icona: 'download', colore: '#003DA5', stile: 'pieno' },
-      { testo: 'Guarda la registrazione', url: '', icona: 'video', colore: '#DC2626', stile: 'contorno' },
-    ] }
-    case 'ciclo_webinar': return { ...base, titolo: 'Gli appuntamenti', edizioni: [
-      { data: '01.01.2025', titolo: 'Titolo del primo webinar', relatore: 'Nome Cognome — Ente', stato: 'passato', url_video: '', url_materiale: '', url_materiale2: '' },
-      { data: '15.01.2025', titolo: 'Titolo del secondo webinar', relatore: '', stato: 'prossimo', url_video: '', url_materiale: '', url_materiale2: '' },
-    ] }
-    case 'mappa':       return { ...base, indirizzo: 'Roma, Italia', titolo: '', altezza: '340', zoom: '15', mostra_link: true }
-    case 'nav_ancorata': return { ...base, voci: [
-      { label: 'Scopri', ancora: 'scopri' },
-      { label: 'Programma', ancora: 'programma' },
-      { label: 'Iscriviti', ancora: 'lp-form' },
-    ], sfondo: '#003DA5', colore_testo: '#FFFFFF', sticky: true }
+    case 'colonne_miste': return { ...base, gap: '40', rapporto: '50-50', inverti_mobile: false, sinistra: { tipo: 'testo', html: '<p>Testo colonna sinistra.</p>' }, destra: { tipo: 'immagine', src: '' } }
+    case 'hero_interno': return { ...base, titolo: 'Titolo sezione', sottotitolo: '', sfondo_colore: '#003DA5', sfondo_immagine: '', overlay_opacita: '60', colore_testo: '#FFFFFF', altezza: '280', cta_testo: '', cta_url: '', allineamento: 'center' }
+    case 'numeri_icona': return { ...base, items: [
+      { num: '+5.000', label: 'Partecipanti', icona: 'users', icona_colore: '#003DA5' },
+      { num: '20+', label: 'Relatori', icona: 'award', icona_colore: '#7C3AED' },
+      { num: '10', label: 'Edizioni', icona: 'star', icona_colore: '#059669' },
+    ], animato: true }
     default:            return base
   }
 }
@@ -78,15 +64,12 @@ const BLOCK_TYPES = [
   { tipo: 'video',       label: 'Video embed',     group: 'Interattivo' },
   { tipo: 'cta',         label: 'Call to action',  group: 'Interattivo' },
   { tipo: 'banner',      label: 'Banner avviso',   group: 'Interattivo' },
-  { tipo: 'carosello',      label: 'Carosello foto',      group: 'Social' },
-  { tipo: 'social',         label: 'Social & Condividi',  group: 'Social' },
-  { tipo: 'programma',      label: 'Programma evento',    group: 'Contenuto' },
-  { tipo: 'relatori',       label: 'Relatori / Speaker',  group: 'Contenuto' },
-  { tipo: 'pricing',        label: 'Quote / Opzioni',     group: 'Contenuto' },
-  { tipo: 'ciclo_webinar',  label: 'Ciclo webinar',       group: 'Contenuto' },
-  { tipo: 'bottoni',        label: 'Gruppo bottoni',      group: 'Base' },
-  { tipo: 'mappa',          label: 'Mappa embed',         group: 'Base' },
-  { tipo: 'nav_ancorata',   label: 'Menu navigazione',    group: 'Base' },
+  { tipo: 'carosello',   label: 'Carosello foto',  group: 'Social' },
+  { tipo: 'social',      label: 'Social & Condividi', group: 'Social' },
+  { tipo: 'programma',   label: 'Programma evento', group: 'Contenuto' },
+  { tipo: 'colonne_miste',  label: 'Colonne miste',       group: 'Layout' },
+  { tipo: 'hero_interno',   label: 'Banner sezione',      group: 'Layout' },
+  { tipo: 'numeri_icona',   label: 'Numeri con icone',    group: 'Contenuto' },
 ]
 
 // ── Editors singoli blocchi ─────────────────────────────────────────
@@ -655,494 +638,226 @@ function SocialEditor({ block, onChange }) {
   )
 }
 
-// ── Relatori Editor ────────────────────────────────────────────────
-function RelatoriEditor({ block, onChange }) {
-  const items = block.items || []
-  function updItem(i, patch) {
-    const next = [...items]; next[i] = { ...next[i], ...patch }; onChange({ ...block, items: next })
-  }
-  function addItem() { onChange({ ...block, items: [...items, { nome: '', ruolo: '', ente: '', bio: '', foto_url: '' }] }) }
-  function delItem(i) { onChange({ ...block, items: items.filter((_, j) => j !== i) }) }
 
+// ── Colonne Miste Editor ───────────────────────────────────────────
+function ColonnaEditor({ col, onChange, lato }) {
   return (
-    <div style={{ padding: '16px', display: 'flex', flexDirection: 'column', gap: '12px' }}>
+    <div style={{ display:'flex', flexDirection:'column', gap:'10px' }}>
       <div>
-        <label style={lb}>Titolo sezione (opzionale)</label>
-        <input value={block.titolo || ''} onChange={e => onChange({ ...block, titolo: e.target.value })} style={inp} placeholder="I relatori" />
-      </div>
-      <div style={{ display: 'flex', gap: '12px', flexWrap: 'wrap' }}>
-        <div style={{ flex: 1 }}>
-          <label style={lb}>Colonne</label>
-          <select value={block.colonne || 2} onChange={e => onChange({ ...block, colonne: Number(e.target.value) })} style={inp}>
-            <option value={1}>1 colonna</option>
-            <option value={2}>2 colonne</option>
-            <option value={3}>3 colonne</option>
-            <option value={4}>4 colonne</option>
-          </select>
-        </div>
-        <div style={{ flex: 1 }}>
-          <label style={lb}>Stile card</label>
-          <select value={block.stile_card || 'verticale'} onChange={e => onChange({ ...block, stile_card: e.target.value })} style={inp}>
-            <option value="verticale">Verticale (foto sopra)</option>
-            <option value="orizzontale">Orizzontale (foto a sinistra)</option>
-          </select>
-        </div>
-      </div>
-      {items.map((item, i) => (
-        <div key={i} style={{ border: '1px solid #E5E7EB', borderRadius: '16px', padding: '12px', display: 'flex', flexDirection: 'column', gap: '8px', background: '#FAFAFA' }}>
-          <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
-            <span style={{ fontSize: '12px', fontWeight: '700', color: '#6B7280' }}>Relatore {i + 1}</span>
-            <button onClick={() => delItem(i)} style={btnDel}>✕</button>
-          </div>
-          <input value={item.nome || ''} onChange={e => updItem(i, { nome: e.target.value })} style={inp} placeholder="Nome Cognome" />
-          <input value={item.ruolo || ''} onChange={e => updItem(i, { ruolo: e.target.value })} style={inp} placeholder="Ruolo / Titolo" />
-          <input value={item.ente || ''} onChange={e => updItem(i, { ente: e.target.value })} style={inp} placeholder="Ente / Organizzazione" />
-          <input value={item.foto_url || ''} onChange={e => updItem(i, { foto_url: e.target.value })} style={inp} placeholder="URL foto (opzionale)" />
-          <textarea value={item.bio || ''} onChange={e => updItem(i, { bio: e.target.value })} style={{ ...inp, minHeight: '60px', resize: 'vertical' }} placeholder="Breve bio (opzionale)" />
-        </div>
-      ))}
-      <button onClick={addItem} style={btnAdd}>+ Aggiungi relatore</button>
-    </div>
-  )
-}
-
-// ── Pricing Editor ─────────────────────────────────────────────────
-function PricingEditor({ block, onChange }) {
-  const options = block.options || []
-  function updOpt(i, patch) {
-    const next = [...options]; next[i] = { ...next[i], ...patch }; onChange({ ...block, options: next })
-  }
-  function updInclusi(i, val) {
-    const arr = val.split('\n'); updOpt(i, { inclusi: arr })
-  }
-  function addOpt() {
-    onChange({ ...block, options: [...options, { etichetta: 'Nuova opzione', prezzo: '€ 0', unita: '+ IVA', colore: '#003DA5', inclusi: ['Voce inclusa'], cta: 'Iscriviti', evidenziata: false }] })
-  }
-  function delOpt(i) { onChange({ ...block, options: options.filter((_, j) => j !== i) }) }
-
-  return (
-    <div style={{ padding: '16px', display: 'flex', flexDirection: 'column', gap: '12px' }}>
-      <div>
-        <label style={lb}>Titolo sezione (opzionale)</label>
-        <input value={block.titolo || ''} onChange={e => onChange({ ...block, titolo: e.target.value })} style={inp} placeholder="Scegli la tua quota" />
-      </div>
-      {options.map((opt, i) => (
-        <div key={i} style={{ border: `2px solid ${opt.colore || '#E5E7EB'}30`, borderRadius: '16px', padding: '14px', display: 'flex', flexDirection: 'column', gap: '10px', background: '#FAFAFA' }}>
-          <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
-            <span style={{ fontSize: '12px', fontWeight: '700', color: '#6B7280' }}>Opzione {i + 1}</span>
-            <div style={{ display: 'flex', gap: '8px', alignItems: 'center' }}>
-              <label style={{ display: 'flex', alignItems: 'center', gap: '6px', fontSize: '12px', fontWeight: '600', color: '#374151', cursor: 'pointer' }}>
-                <input type="checkbox" checked={opt.evidenziata || false} onChange={e => updOpt(i, { evidenziata: e.target.checked })} />
-                In evidenza
-              </label>
-              <button onClick={() => delOpt(i)} style={btnDel}>✕</button>
-            </div>
-          </div>
-          <div style={{ display: 'flex', gap: '8px' }}>
-            <div style={{ flex: 1 }}>
-              <label style={lb}>Etichetta</label>
-              <input value={opt.etichetta || ''} onChange={e => updOpt(i, { etichetta: e.target.value })} style={inp} placeholder="Standard" />
-            </div>
-            <div style={{ display: 'flex', gap: '6px', alignItems: 'flex-end' }}>
-              <label style={lb}>Colore</label>
-              <input type="color" value={opt.colore || '#003DA5'} onChange={e => updOpt(i, { colore: e.target.value })} style={{ width: '36px', height: '34px', border: 'none', cursor: 'pointer', borderRadius: '8px' }} />
-            </div>
-          </div>
-          <div style={{ display: 'flex', gap: '8px' }}>
-            <div style={{ flex: 1 }}>
-              <label style={lb}>Prezzo</label>
-              <input value={opt.prezzo || ''} onChange={e => updOpt(i, { prezzo: e.target.value })} style={inp} placeholder="€ 100" />
-            </div>
-            <div style={{ flex: 1 }}>
-              <label style={lb}>Unita / nota</label>
-              <input value={opt.unita || ''} onChange={e => updOpt(i, { unita: e.target.value })} style={inp} placeholder="+ IVA / persona" />
-            </div>
-          </div>
-          <div>
-            <label style={lb}>Cosa include (una voce per riga)</label>
-            <textarea
-              value={(opt.inclusi || []).join('\n')}
-              onChange={e => updInclusi(i, e.target.value)}
-              style={{ ...inp, minHeight: '80px', resize: 'vertical' }}
-              placeholder={"Accesso ai lavori\nMateriali\nCoffee break"}
-            />
-          </div>
-          <div>
-            <label style={lb}>Testo pulsante CTA</label>
-            <input value={opt.cta || ''} onChange={e => updOpt(i, { cta: e.target.value })} style={inp} placeholder="Iscriviti" />
-          </div>
-        </div>
-      ))}
-      <button onClick={addOpt} style={btnAdd}>+ Aggiungi opzione</button>
-    </div>
-  )
-}
-
-// ── Bottoni Editor ─────────────────────────────────────────────────
-function BottoniEditor({ block, onChange }) {
-  const items = block.items || []
-  function updItem(i, patch) {
-    const next = [...items]; next[i] = { ...next[i], ...patch }; onChange({ ...block, items: next })
-  }
-  function addItem() { onChange({ ...block, items: [...items, { testo: 'Nuovo link', url: '', icona: '', colore: '#003DA5', stile: 'contorno' }] }) }
-  function delItem(i) { onChange({ ...block, items: items.filter((_, j) => j !== i) }) }
-
-  return (
-    <div style={{ padding: '16px', display: 'flex', flexDirection: 'column', gap: '12px' }}>
-      <div style={{ display: 'flex', gap: '12px', flexWrap: 'wrap' }}>
-        <div style={{ flex: 1 }}>
-          <label style={lb}>Titolo (opzionale)</label>
-          <input value={block.titolo || ''} onChange={e => onChange({ ...block, titolo: e.target.value })} style={inp} placeholder="Download materiali" />
-        </div>
-        <div style={{ flex: 1 }}>
-          <label style={lb}>Allineamento</label>
-          <select value={block.allineamento || 'center'} onChange={e => onChange({ ...block, allineamento: e.target.value })} style={inp}>
-            <option value="left">Sinistra</option>
-            <option value="center">Centro</option>
-            <option value="right">Destra</option>
-          </select>
-        </div>
-      </div>
-      {items.map((item, i) => (
-        <div key={i} style={{ border: '1px solid #E5E7EB', borderRadius: '14px', padding: '12px', display: 'flex', flexDirection: 'column', gap: '8px', background: '#FAFAFA' }}>
-          <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
-            <span style={{ fontSize: '12px', fontWeight: '700', color: '#6B7280' }}>Bottone {i + 1}</span>
-            <button onClick={() => delItem(i)} style={btnDel}>✕</button>
-          </div>
-          <input value={item.testo || ''} onChange={e => updItem(i, { testo: e.target.value })} style={inp} placeholder="Testo bottone" />
-          <input value={item.url || ''} onChange={e => updItem(i, { url: e.target.value })} style={inp} placeholder="https://..." />
-          <div style={{ display: 'flex', gap: '8px', flexWrap: 'wrap' }}>
-            <div style={{ flex: 1 }}>
-              <label style={lb}>Stile</label>
-              <select value={item.stile || 'contorno'} onChange={e => updItem(i, { stile: e.target.value })} style={inp}>
-                <option value="pieno">Pieno</option>
-                <option value="contorno">Contorno</option>
-                <option value="ghost">Ghost</option>
-              </select>
-            </div>
-            <div style={{ display: 'flex', gap: '6px', alignItems: 'flex-end' }}>
-              <label style={lb}>Colore</label>
-              <input type="color" value={item.colore || '#003DA5'} onChange={e => updItem(i, { colore: e.target.value })} style={{ width: '36px', height: '34px', border: 'none', cursor: 'pointer', borderRadius: '8px' }} />
-            </div>
-          </div>
-          <div>
-            <label style={lb}>Apri in</label>
-            <select value={item.target || '_blank'} onChange={e => updItem(i, { target: e.target.value })} style={inp}>
-              <option value="_blank">Nuova scheda</option>
-              <option value="_self">Stessa pagina</option>
-            </select>
-          </div>
-        </div>
-      ))}
-      <button onClick={addItem} style={btnAdd}>+ Aggiungi bottone</button>
-    </div>
-  )
-}
-
-// ── CicloWebinar Editor ────────────────────────────────────────────
-function CicloWebinarEditor({ block, onChange }) {
-  const edizioni = block.edizioni || []
-  function updEd(i, patch) {
-    const next = [...edizioni]; next[i] = { ...next[i], ...patch }; onChange({ ...block, edizioni: next })
-  }
-  function addEd() { onChange({ ...block, edizioni: [...edizioni, { data: '', titolo: '', relatore: '', stato: 'prossimo', url_video: '', url_materiale: '', url_materiale2: '' }] }) }
-  function delEd(i) { onChange({ ...block, edizioni: edizioni.filter((_, j) => j !== i) }) }
-
-  return (
-    <div style={{ padding: '16px', display: 'flex', flexDirection: 'column', gap: '12px' }}>
-      <div>
-        <label style={lb}>Titolo sezione</label>
-        <input value={block.titolo || ''} onChange={e => onChange({ ...block, titolo: e.target.value })} style={inp} placeholder="Gli appuntamenti" />
-      </div>
-      <div style={{ display: 'flex', gap: '8px' }}>
-        <div style={{ flex: 1 }}>
-          <label style={lb}>Label sezione futura</label>
-          <input value={block.label_prossimo || 'Prossimo appuntamento'} onChange={e => onChange({ ...block, label_prossimo: e.target.value })} style={inp} />
-        </div>
-        <div style={{ flex: 1 }}>
-          <label style={lb}>Label sezione passata</label>
-          <input value={block.label_passati || 'Appuntamenti passati'} onChange={e => onChange({ ...block, label_passati: e.target.value })} style={inp} />
-        </div>
-      </div>
-      {edizioni.map((ed, i) => (
-        <div key={i} style={{ border: '1px solid #E5E7EB', borderRadius: '14px', padding: '12px', display: 'flex', flexDirection: 'column', gap: '8px', background: '#FAFAFA' }}>
-          <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
-            <span style={{ fontSize: '12px', fontWeight: '700', color: '#6B7280' }}>Edizione {i + 1}</span>
-            <div style={{ display: 'flex', gap: '8px', alignItems: 'center' }}>
-              <select value={ed.stato || 'prossimo'} onChange={e => updEd(i, { stato: e.target.value })} style={{ ...inp, width: 'auto', fontSize: '11px', padding: '4px 8px' }}>
-                <option value="prossimo">Prossimo</option>
-                <option value="passato">Passato</option>
-              </select>
-              <button onClick={() => delEd(i)} style={btnDel}>✕</button>
-            </div>
-          </div>
-          <div style={{ display: 'flex', gap: '8px' }}>
-            <div style={{ flex: '0 0 110px' }}>
-              <label style={lb}>Data</label>
-              <input value={ed.data || ''} onChange={e => updEd(i, { data: e.target.value })} style={inp} placeholder="22.07.26" />
-            </div>
-            <div style={{ flex: 1 }}>
-              <label style={lb}>Titolo webinar</label>
-              <input value={ed.titolo || ''} onChange={e => updEd(i, { titolo: e.target.value })} style={inp} placeholder="Titolo dell'incontro" />
-            </div>
-          </div>
-          <div>
-            <label style={lb}>Relatore</label>
-            <input value={ed.relatore || ''} onChange={e => updEd(i, { relatore: e.target.value })} style={inp} placeholder="Nome Cognome — Ente" />
-          </div>
-          {ed.stato === 'passato' && (
-            <>
-              <div>
-                <label style={lb}>Link registrazione video</label>
-                <input value={ed.url_video || ''} onChange={e => updEd(i, { url_video: e.target.value })} style={inp} placeholder="https://youtu.be/..." />
-              </div>
-              <div>
-                <label style={lb}>Link materiale 1</label>
-                <input value={ed.url_materiale || ''} onChange={e => updEd(i, { url_materiale: e.target.value })} style={inp} placeholder="URL slide / PDF" />
-                <input value={ed.label_materiale || ''} onChange={e => updEd(i, { label_materiale: e.target.value })} style={{ ...inp, marginTop: '6px' }} placeholder="Etichetta (es. Scarica le slide)" />
-              </div>
-              <div>
-                <label style={lb}>Link materiale 2 (opzionale)</label>
-                <input value={ed.url_materiale2 || ''} onChange={e => updEd(i, { url_materiale2: e.target.value })} style={inp} placeholder="URL secondo PDF" />
-                <input value={ed.label_materiale2 || ''} onChange={e => updEd(i, { label_materiale2: e.target.value })} style={{ ...inp, marginTop: '6px' }} placeholder="Etichetta secondo materiale" />
-              </div>
-            </>
-          )}
-        </div>
-      ))}
-      <button onClick={addEd} style={btnAdd}>+ Aggiungi edizione</button>
-    </div>
-  )
-}
-
-// ── Mappa Editor ───────────────────────────────────────────────────
-function MappaEditor({ block, onChange }) {
-  return (
-    <div style={{ padding: '16px', display: 'flex', flexDirection: 'column', gap: '12px' }}>
-      <div>
-        <label style={lb}>Indirizzo / Luogo</label>
-        <input value={block.indirizzo || ''} onChange={e => onChange({ ...block, indirizzo: e.target.value })} style={inp} placeholder="Via Roma 1, Milano MI" />
-        <p style={{ fontSize: '11px', color: '#9CA3AF', margin: '4px 0 0' }}>L'indirizzo viene cercato automaticamente su Google Maps</p>
-      </div>
-      <div>
-        <label style={lb}>Titolo sezione (opzionale)</label>
-        <input value={block.titolo || ''} onChange={e => onChange({ ...block, titolo: e.target.value })} style={inp} placeholder="Come raggiungerci" />
-      </div>
-      <div>
-        <label style={lb}>Testo sotto mappa (opzionale)</label>
-        <input value={block.testo || ''} onChange={e => onChange({ ...block, testo: e.target.value })} style={inp} placeholder="Hotel Cosmopolitan — Via De Gasperi 2, Civitanova Marche" />
-      </div>
-      <div style={{ display: 'flex', gap: '12px', flexWrap: 'wrap' }}>
-        <div style={{ flex: 1 }}>
-          <label style={lb}>Altezza mappa</label>
-          <select value={block.altezza || '340'} onChange={e => onChange({ ...block, altezza: e.target.value })} style={inp}>
-            <option value="220">Piccola (220px)</option>
-            <option value="340">Media (340px)</option>
-            <option value="480">Grande (480px)</option>
-          </select>
-        </div>
-        <div style={{ flex: 1 }}>
-          <label style={lb}>Zoom</label>
-          <select value={block.zoom || '15'} onChange={e => onChange({ ...block, zoom: e.target.value })} style={inp}>
-            <option value="12">Largo (città)</option>
-            <option value="15">Medio (quartiere)</option>
-            <option value="17">Ravvicinato (edificio)</option>
-          </select>
-        </div>
-      </div>
-      <label style={{ display: 'flex', alignItems: 'center', gap: '8px', cursor: 'pointer', fontSize: '13px', fontWeight: '600', color: '#374151' }}>
-        <input type="checkbox" checked={block.mostra_link !== false} onChange={e => onChange({ ...block, mostra_link: e.target.checked })} />
-        Mostra link "Apri in Google Maps"
-      </label>
-    </div>
-  )
-}
-
-// ── Nav Ancorata Editor ────────────────────────────────────────────
-function NavAncoraEditor({ block, onChange }) {
-  const voci = block.voci || []
-  function updVoce(i, patch) {
-    const next = [...voci]; next[i] = { ...next[i], ...patch }; onChange({ ...block, voci: next })
-  }
-  function addVoce() { onChange({ ...block, voci: [...voci, { label: 'Sezione', ancora: '' }] }) }
-  function delVoce(i) { onChange({ ...block, voci: voci.filter((_, j) => j !== i) }) }
-
-  return (
-    <div style={{ padding: '16px', display: 'flex', flexDirection: 'column', gap: '12px' }}>
-      <p style={{ margin: 0, fontSize: '12px', color: '#6B7280', lineHeight: 1.5 }}>
-        Il menu appare subito sotto l'hero e rimane visibile mentre si scorre la pagina. L'ancora deve corrispondere all'ID di una sezione della pagina (es. <code style={{ background: '#F3F4F6', padding: '1px 4px', borderRadius: '4px' }}>lp-form</code> per il form iscrizioni).
-      </p>
-      <div style={{ display: 'flex', gap: '12px', flexWrap: 'wrap' }}>
-        <div style={{ display: 'flex', gap: '8px', alignItems: 'center' }}>
-          <label style={lb}>Sfondo</label>
-          <input type="color" value={block.sfondo || '#003DA5'} onChange={e => onChange({ ...block, sfondo: e.target.value })} style={{ width: '36px', height: '28px', border: 'none', cursor: 'pointer' }} />
-        </div>
-        <div style={{ display: 'flex', gap: '8px', alignItems: 'center' }}>
-          <label style={lb}>Testo</label>
-          <input type="color" value={block.colore_testo || '#FFFFFF'} onChange={e => onChange({ ...block, colore_testo: e.target.value })} style={{ width: '36px', height: '28px', border: 'none', cursor: 'pointer' }} />
-        </div>
-        <label style={{ display: 'flex', alignItems: 'center', gap: '6px', fontSize: '13px', fontWeight: '600', color: '#374151', cursor: 'pointer' }}>
-          <input type="checkbox" checked={block.sticky !== false} onChange={e => onChange({ ...block, sticky: e.target.checked })} />
-          Sticky (segue lo scroll)
-        </label>
-      </div>
-      {voci.map((v, i) => (
-        <div key={i} style={{ display: 'flex', gap: '8px', alignItems: 'center' }}>
-          <input value={v.label || ''} onChange={e => updVoce(i, { label: e.target.value })} style={{ ...inp, flex: 1 }} placeholder="Etichetta" />
-          <input value={v.ancora || ''} onChange={e => updVoce(i, { ancora: e.target.value })} style={{ ...inp, flex: 1 }} placeholder="ID sezione" />
-          <button onClick={() => delVoce(i)} style={btnDel}>✕</button>
-        </div>
-      ))}
-      <button onClick={addVoce} style={btnAdd}>+ Aggiungi voce</button>
-    </div>
-  )
-}
-
-// ── Pannello Sezione (wrapper sfondo per ogni blocco) ──────────────
-function SezionePanel({ block, onChange }) {
-  const SFONDI_PRESET = [
-    { label: 'Nessuno', value: '' },
-    { label: 'Grigio chiaro', value: '#F7F8FC' },
-    { label: 'Grigio', value: '#F3F4F6' },
-    { label: 'Blu CNA', value: '#003DA5' },
-    { label: 'Blu scuro', value: '#0F172A' },
-    { label: 'Viola', value: '#5B5FEF' },
-    { label: 'Verde', value: '#ECFDF5' },
-    { label: 'Giallo', value: '#FFFBEB' },
-    { label: 'Rosa', value: '#FDF2F8' },
-  ]
-  const s = block.sezione || {}
-  function upd(patch) { onChange({ ...block, sezione: { ...s, ...patch } }) }
-
-  return (
-    <div style={{ padding: '16px', display: 'flex', flexDirection: 'column', gap: '14px' }}>
-      <div>
-        <label style={lb}>Sfondo sezione</label>
-        <div style={{ display: 'flex', flexWrap: 'wrap', gap: '6px', marginBottom: '8px' }}>
-          {SFONDI_PRESET.map(p => (
-            <button key={p.value} type="button" onClick={() => upd({ sfondo: p.value })}
-              style={{
-                padding: '5px 10px', borderRadius: '20px', fontSize: '12px', fontWeight: '600', cursor: 'pointer',
-                border: s.sfondo === p.value ? '2px solid #003DA5' : '1px solid #E5E7EB',
-                background: p.value || '#fff', color: p.value && ['#003DA5','#0F172A','#5B5FEF'].includes(p.value) ? '#fff' : '#374151',
-              }}>
-              {p.label}
-            </button>
-          ))}
-        </div>
-        <div style={{ display: 'flex', gap: '8px', alignItems: 'center' }}>
-          <label style={{ ...lb, marginBottom: 0 }}>Colore personalizzato</label>
-          <input type="color" value={s.sfondo || '#ffffff'} onChange={e => upd({ sfondo: e.target.value })} style={{ width: '36px', height: '28px', border: 'none', cursor: 'pointer' }} />
-          {s.sfondo && <button onClick={() => upd({ sfondo: '' })} style={{ fontSize: '11px', color: '#9CA3AF', background: 'none', border: 'none', cursor: 'pointer' }}>reset</button>}
-        </div>
-      </div>
-      <div>
-        <label style={lb}>Colore testo (su sfondi scuri)</label>
-        <div style={{ display: 'flex', gap: '8px' }}>
-          {[{ l: 'Auto', v: '' }, { l: 'Bianco', v: '#FFFFFF' }, { l: 'Nero', v: '#0A0A0A' }].map(o => (
-            <button key={o.v} type="button" onClick={() => upd({ colore_testo: o.v })}
-              style={{ padding: '5px 12px', borderRadius: '20px', fontSize: '12px', fontWeight: '600', cursor: 'pointer', border: (s.colore_testo || '') === o.v ? '2px solid #003DA5' : '1px solid #E5E7EB', background: '#fff', color: '#374151' }}>
-              {o.l}
-            </button>
-          ))}
-        </div>
-      </div>
-      <div style={{ display: 'flex', gap: '12px', flexWrap: 'wrap' }}>
-        <div style={{ flex: 1 }}>
-          <label style={lb}>Padding verticale</label>
-          <select value={s.padding_v || 'M'} onChange={e => upd({ padding_v: e.target.value })} style={inp}>
-            <option value="S">Piccolo (24px)</option>
-            <option value="M">Medio (48px)</option>
-            <option value="L">Grande (72px)</option>
-            <option value="XL">Extra (96px)</option>
-            <option value="nessuno">Nessuno</option>
-          </select>
-        </div>
-        <div style={{ flex: 1 }}>
-          <label style={lb}>Larghezza contenuto</label>
-          <select value={s.larghezza || 'contenuto'} onChange={e => upd({ larghezza: e.target.value })} style={inp}>
-            <option value="contenuto">Contenuto (800px)</option>
-            <option value="ampia">Ampia (1100px)</option>
-            <option value="piena">Piena (100%)</option>
-          </select>
-        </div>
-      </div>
-      <div>
-        <label style={lb}>Angoli arrotondati</label>
-        <select value={s.radius || 'nessuno'} onChange={e => upd({ radius: e.target.value })} style={inp}>
-          <option value="nessuno">Nessuno</option>
-          <option value="S">Piccoli (8px)</option>
-          <option value="M">Medi (16px)</option>
-          <option value="L">Grandi (24px)</option>
+        <label style={lb}>Tipo contenuto ({lato})</label>
+        <select value={col.tipo||'testo'} onChange={e=>onChange({...col,tipo:e.target.value})} style={inp}>
+          {['testo','immagine','stats','badge_list','video'].map(t=><option key={t} value={t}>{t}</option>)}
         </select>
       </div>
+      {col.tipo==='testo'&&<textarea value={col.html||''} onChange={e=>onChange({...col,html:e.target.value})} style={{...inp,minHeight:'80px',resize:'vertical'}} placeholder="<p>Testo HTML</p>" />}
+      {col.tipo==='immagine'&&<input value={col.src||''} onChange={e=>onChange({...col,src:e.target.value})} style={inp} placeholder="URL immagine" />}
+      {col.tipo==='video'&&<input value={col.url||''} onChange={e=>onChange({...col,url:e.target.value})} style={inp} placeholder="URL YouTube / Vimeo" />}
+      {col.tipo==='stats'&&(
+        <div style={{display:'flex',flexDirection:'column',gap:'6px'}}>
+          {(col.items||[{num:'100+',label:'Voce'}]).map((item,i)=>(
+            <div key={i} style={{display:'flex',gap:'6px'}}>
+              <input value={item.num} onChange={e=>{const it=[...(col.items||[])];it[i]={...it[i],num:e.target.value};onChange({...col,items:it})}} style={{...inp,width:'70px'}} placeholder="100+" />
+              <input value={item.label} onChange={e=>{const it=[...(col.items||[])];it[i]={...it[i],label:e.target.value};onChange({...col,items:it})}} style={{...inp,flex:1}} placeholder="Etichetta" />
+              <button onClick={()=>{const it=(col.items||[]).filter((_,j)=>j!==i);onChange({...col,items:it})}} style={btnDel}>✕</button>
+            </div>
+          ))}
+          <button onClick={()=>onChange({...col,items:[...(col.items||[]),{num:'0',label:''}]})} style={btnAdd}>+ Voce</button>
+        </div>
+      )}
+      {col.tipo==='badge_list'&&(
+        <div style={{display:'flex',flexDirection:'column',gap:'6px'}}>
+          {(col.items||[{testo:'Voce'}]).map((item,i)=>(
+            <div key={i} style={{display:'flex',gap:'6px'}}>
+              <input value={item.testo} onChange={e=>{const it=[...(col.items||[])];it[i]={...it[i],testo:e.target.value};onChange({...col,items:it})}} style={{...inp,flex:1}} placeholder="Voce lista" />
+              <button onClick={()=>{const it=(col.items||[]).filter((_,j)=>j!==i);onChange({...col,items:it})}} style={btnDel}>✕</button>
+            </div>
+          ))}
+          <button onClick={()=>onChange({...col,items:[...(col.items||[]),{testo:''}]})} style={btnAdd}>+ Voce</button>
+        </div>
+      )}
     </div>
   )
 }
 
-function Block({ block, index, total, onChange, onDelete, onMoveUp, onMoveDown }) {
+function ColonneMisteEditor({ block, onChange }) {
+  return (
+    <div style={{padding:'16px',display:'flex',flexDirection:'column',gap:'14px'}}>
+      <div style={{display:'flex',gap:'12px',flexWrap:'wrap'}}>
+        <div style={{flex:1}}>
+          <label style={lb}>Proporzioni</label>
+          <select value={block.rapporto||'50-50'} onChange={e=>onChange({...block,rapporto:e.target.value})} style={inp}>
+            <option value="50-50">50% — 50%</option>
+            <option value="60-40">60% — 40%</option>
+            <option value="40-60">40% — 60%</option>
+            <option value="33-66">33% — 66%</option>
+            <option value="66-33">66% — 33%</option>
+          </select>
+        </div>
+        <div style={{flex:1}}>
+          <label style={lb}>Gap tra colonne</label>
+          <select value={block.gap||'40'} onChange={e=>onChange({...block,gap:e.target.value})} style={inp}>
+            <option value="16">Stretto</option>
+            <option value="32">Medio</option>
+            <option value="48">Largo</option>
+          </select>
+        </div>
+      </div>
+      <label style={{display:'flex',alignItems:'center',gap:'8px',cursor:'pointer',fontSize:'13px',fontWeight:'600',color:'#374151'}}>
+        <input type="checkbox" checked={!!block.inverti_mobile} onChange={e=>onChange({...block,inverti_mobile:e.target.checked})} />
+        Inverti ordine su mobile
+      </label>
+      <div style={{display:'grid',gridTemplateColumns:'1fr 1fr',gap:'16px'}}>
+        <div style={{padding:'12px',background:'#F9FAFB',borderRadius:'12px',border:'1px solid #E5E7EB'}}>
+          <p style={{margin:'0 0 10px',fontSize:'11px',fontWeight:'700',color:'#9CA3AF',textTransform:'uppercase',letterSpacing:'.06em'}}>Sinistra</p>
+          <ColonnaEditor col={block.sinistra||{tipo:'testo',html:''}} onChange={v=>onChange({...block,sinistra:v})} lato="sinistra" />
+        </div>
+        <div style={{padding:'12px',background:'#F9FAFB',borderRadius:'12px',border:'1px solid #E5E7EB'}}>
+          <p style={{margin:'0 0 10px',fontSize:'11px',fontWeight:'700',color:'#9CA3AF',textTransform:'uppercase',letterSpacing:'.06em'}}>Destra</p>
+          <ColonnaEditor col={block.destra||{tipo:'immagine',src:''}} onChange={v=>onChange({...block,destra:v})} lato="destra" />
+        </div>
+      </div>
+    </div>
+  )
+}
+
+// ── HeroInterno Editor ─────────────────────────────────────────────
+function HeroInternoEditor({ block, onChange }) {
+  return (
+    <div style={{padding:'16px',display:'flex',flexDirection:'column',gap:'12px'}}>
+      <div>
+        <label style={lb}>Titolo</label>
+        <input value={block.titolo||''} onChange={e=>onChange({...block,titolo:e.target.value})} style={inp} placeholder="Titolo del banner" />
+      </div>
+      <div>
+        <label style={lb}>Sottotitolo</label>
+        <input value={block.sottotitolo||''} onChange={e=>onChange({...block,sottotitolo:e.target.value})} style={inp} placeholder="Testo descrittivo" />
+      </div>
+      <div style={{display:'flex',gap:'12px',flexWrap:'wrap'}}>
+        <div style={{flex:1}}>
+          <label style={lb}>Sfondo immagine (URL)</label>
+          <input value={block.sfondo_immagine||''} onChange={e=>onChange({...block,sfondo_immagine:e.target.value})} style={inp} placeholder="https://..." />
+        </div>
+        <div style={{display:'flex',gap:'8px',alignItems:'flex-end'}}>
+          <label style={lb}>Colore sfondo</label>
+          <input type="color" value={block.sfondo_colore||'#003DA5'} onChange={e=>onChange({...block,sfondo_colore:e.target.value})} style={{width:'36px',height:'34px',border:'none',cursor:'pointer',borderRadius:'8px'}} />
+        </div>
+      </div>
+      <div style={{display:'flex',gap:'12px',flexWrap:'wrap'}}>
+        <div style={{flex:1}}>
+          <label style={lb}>Overlay opacità ({block.overlay_opacita||60}%)</label>
+          <input type="range" min="0" max="90" step="5" value={block.overlay_opacita||'60'} onChange={e=>onChange({...block,overlay_opacita:e.target.value})} style={{width:'100%'}} />
+        </div>
+        <div style={{flex:1}}>
+          <label style={lb}>Altezza</label>
+          <select value={block.altezza||'280'} onChange={e=>onChange({...block,altezza:e.target.value})} style={inp}>
+            <option value="180">Piccola</option>
+            <option value="280">Media</option>
+            <option value="380">Grande</option>
+            <option value="480">Molto grande</option>
+          </select>
+        </div>
+      </div>
+      <div style={{display:'flex',gap:'12px',flexWrap:'wrap'}}>
+        <div style={{flex:1}}>
+          <label style={lb}>Allineamento</label>
+          <select value={block.allineamento||'center'} onChange={e=>onChange({...block,allineamento:e.target.value})} style={inp}>
+            <option value="left">Sinistra</option>
+            <option value="center">Centro</option>
+          </select>
+        </div>
+        <div style={{display:'flex',gap:'8px',alignItems:'flex-end'}}>
+          <label style={lb}>Colore testo</label>
+          <input type="color" value={block.colore_testo||'#FFFFFF'} onChange={e=>onChange({...block,colore_testo:e.target.value})} style={{width:'36px',height:'34px',border:'none',cursor:'pointer',borderRadius:'8px'}} />
+        </div>
+      </div>
+      <div style={{display:'flex',gap:'12px',flexWrap:'wrap'}}>
+        <div style={{flex:1}}>
+          <label style={lb}>Testo CTA</label>
+          <input value={block.cta_testo||''} onChange={e=>onChange({...block,cta_testo:e.target.value})} style={inp} placeholder="Iscriviti ora" />
+        </div>
+        <div style={{flex:1}}>
+          <label style={lb}>URL CTA</label>
+          <input value={block.cta_url||''} onChange={e=>onChange({...block,cta_url:e.target.value})} style={inp} placeholder="#lp-form" />
+        </div>
+      </div>
+    </div>
+  )
+}
+
+// ── NumeriIcona Editor ─────────────────────────────────────────────
+function NumeriIconaEditor({ block, onChange }) {
+  const ICONE = ['users','award','star','briefcase','chart','trending','shield','zap','heart','globe','check','lightbulb','rocket','target','mic']
+  return (
+    <div style={{padding:'16px',display:'flex',flexDirection:'column',gap:'12px'}}>
+      <label style={{display:'flex',alignItems:'center',gap:'6px',cursor:'pointer',fontSize:'13px',fontWeight:'600',color:'#374151'}}>
+        <input type="checkbox" checked={block.animato!==false} onChange={e=>onChange({...block,animato:e.target.checked})} />
+        Anima contatori
+      </label>
+      {(block.items||[]).map((item,i)=>(
+        <div key={i} style={{display:'flex',gap:'8px',alignItems:'center',flexWrap:'wrap',padding:'10px',background:'#F9FAFB',borderRadius:'12px',border:'1px solid #E5E7EB'}}>
+          <input value={item.num||''} onChange={e=>{const items=[...block.items];items[i]={...items[i],num:e.target.value};onChange({...block,items})}} placeholder="100+" style={{...inp,width:'80px',fontWeight:'700'}} />
+          <input value={item.label||''} onChange={e=>{const items=[...block.items];items[i]={...items[i],label:e.target.value};onChange({...block,items})}} placeholder="Etichetta" style={{...inp,flex:1}} />
+          <select value={item.icona||'star'} onChange={e=>{const items=[...block.items];items[i]={...items[i],icona:e.target.value};onChange({...block,items})}} style={{...inp,width:'100px',padding:'6px 8px'}}>
+            {ICONE.map(ic=><option key={ic} value={ic}>{ic}</option>)}
+          </select>
+          <input type="color" value={item.icona_colore||'#003DA5'} onChange={e=>{const items=[...block.items];items[i]={...items[i],icona_colore:e.target.value};onChange({...block,items})}} style={{width:'30px',height:'30px',border:'none',cursor:'pointer',flexShrink:0}} />
+          <button onClick={()=>onChange({...block,items:block.items.filter((_,j)=>j!==i)})} style={btnDel}>✕</button>
+        </div>
+      ))}
+      <button onClick={()=>onChange({...block,items:[...(block.items||[]),{num:'0',label:'',icona:'star',icona_colore:'#003DA5'}]})} style={btnAdd}>+ Aggiungi</button>
+    </div>
+  )
+}
+
+function Block({ block, index, total, onChange, onDelete, onMoveUp, onMoveDown, onDuplicate }) {
   const [collapsed, setCollapsed] = useState(false)
-  const [activeTab, setActiveTab] = useState('contenuto')
+  const [preview, setPreview] = useState(false)
   const typeInfo = BLOCK_TYPES.find(t=>t.tipo===block.tipo) || { label:block.tipo }
   const blockIcon = BLOCK_ICONS[block.tipo]
-  const hasSfondo = !!(block.sezione && block.sezione.sfondo)
   return (
-    <div style={{ border: hasSfondo ? `2px solid ${block.sezione.sfondo}60` : '1.5px solid #E5E7EB', borderRadius:'20px', overflow:'hidden', marginBottom:'8px', background:'#fff' }}>
+    <div style={{ border:'1.5px solid #E5E7EB', borderRadius:'20px', overflow:'hidden', marginBottom:'8px', background:'#fff' }}>
       <div style={{ display:'flex', alignItems:'center', gap:'8px', padding:'10px 14px', background:'#FAFAFA', borderBottom:collapsed?'none':'1px solid #E5E7EB', cursor:'pointer' }} onClick={()=>setCollapsed(c=>!c)}>
         <span style={{ display:'flex', alignItems:'center', width:'20px', height:'20px', flexShrink:0 }}>{blockIcon}</span>
         <span style={{flex:1,fontSize:'13px',fontWeight:'700',color:'#374151'}}>{typeInfo.label}
           {block.tipo==='testo'&&block.html&&<span style={{fontSize:'11px',fontWeight:'400',color:'#9CA3AF',marginLeft:'8px'}}>{block.html.replace(/<[^>]+>/g,'').slice(0,50)}…</span>}
           {block.tipo==='titolo'&&block.testo&&<span style={{fontSize:'11px',fontWeight:'400',color:'#9CA3AF',marginLeft:'8px'}}>{block.testo.slice(0,50)}</span>}
-          {hasSfondo && <span style={{ display:'inline-block', width:'10px', height:'10px', borderRadius:'50%', background:block.sezione.sfondo, marginLeft:'8px', border:'1px solid #E5E7EB', verticalAlign:'middle' }} />}
         </span>
+        <button onClick={e=>{e.stopPropagation();setPreview(p=>!p)}} style={{...btnIcon,color:preview?'#003DA5':'#9CA3AF',borderColor:preview?'#003DA5':'#E5E7EB'}} title="Anteprima">👁️</button>
+        <button onClick={e=>{e.stopPropagation();onDuplicate()}} style={btnIcon} title="Duplica">⧉</button>
         <button onClick={e=>{e.stopPropagation();onMoveUp()}} disabled={index===0} style={{...btnIcon,opacity:index===0?.3:1}} title="Sposta su">↑</button>
         <button onClick={e=>{e.stopPropagation();onMoveDown()}} disabled={index===total-1} style={{...btnIcon,opacity:index===total-1?.3:1}} title="Sposta giù">↓</button>
         <button onClick={e=>{e.stopPropagation();onDelete()}} style={{...btnIcon,color:'#DC2626',borderColor:'#FECACA'}} title="Elimina">✕</button>
         <span style={{fontSize:'12px',color:'#9CA3AF'}}>{collapsed?'▶':'▼'}</span>
       </div>
+      {preview && (
+        <div style={{ borderBottom:'1px solid #E5E7EB', background:'#F9FAFB', padding:'16px', maxHeight:'320px', overflowY:'auto' }}>
+          <div style={{pointerEvents:'none',transform:'scale(0.85)',transformOrigin:'top left'}}>
+            <BlockRendererFull block={block} cp="#003DA5" />
+          </div>
+        </div>
+      )}
       {!collapsed&&(
         <>
-          {/* Tab switcher */}
-          <div style={{ display:'flex', gap:'0', borderBottom:'1px solid #E5E7EB', background:'#FAFAFA' }}>
-            {['contenuto','sezione'].map(t=>(
-              <button key={t} type="button" onClick={()=>setActiveTab(t)} style={{
-                padding:'8px 16px', border:'none', background: activeTab===t ? '#fff' : 'transparent',
-                fontSize:'12px', fontWeight:'700', color: activeTab===t ? '#003DA5' : '#9CA3AF',
-                cursor:'pointer', borderBottom: activeTab===t ? '2px solid #003DA5' : '2px solid transparent',
-                fontFamily:"'Outfit',sans-serif", textTransform:'capitalize', transition:'all .15s',
-              }}>
-                {t === 'contenuto' ? 'Contenuto' : '\uD83C\uDFA8 Sezione'}
-              </button>
-            ))}
-          </div>
-          {activeTab === 'contenuto' && (
-            <>
-              {block.tipo==='testo'       && <RichEditor value={block.html||''} onChange={html=>onChange({...block,html})} minHeight="180px" />}
-              {block.tipo==='stats'       && <StatsEditor block={block} onChange={onChange} />}
-              {block.tipo==='griglia'     && <GrigliaEditor block={block} onChange={onChange} />}
-              {block.tipo==='cta'         && <CtaEditor block={block} onChange={onChange} />}
-              {block.tipo==='immagine'    && <ImmagineEditor block={block} onChange={onChange} />}
-              {block.tipo==='titolo'      && <TitoloEditor block={block} onChange={onChange} />}
-              {block.tipo==='banner'      && <BannerEditor block={block} onChange={onChange} />}
-              {block.tipo==='timeline'    && <TimelineEditor block={block} onChange={onChange} />}
-              {block.tipo==='accordion'   && <AccordionEditor block={block} onChange={onChange} />}
-              {block.tipo==='video'       && <VideoEditor block={block} onChange={onChange} />}
-              {block.tipo==='testimonial' && <TestimonialEditor block={block} onChange={onChange} />}
-              {block.tipo==='countdown'   && <CountdownEditor block={block} onChange={onChange} />}
-              {block.tipo==='badge_list'  && <BadgeListEditor block={block} onChange={onChange} />}
-              {block.tipo==='carosello'   && <CaroselloEditor block={block} onChange={onChange} />}
-              {block.tipo==='social'      && <SocialEditor block={block} onChange={onChange} />}
-              {block.tipo==='programma'   && <ProgrammaEditor block={block} onChange={onChange} />}
-              {block.tipo==='relatori'    && <RelatoriEditor block={block} onChange={onChange} />}
-              {block.tipo==='pricing'     && <PricingEditor block={block} onChange={onChange} />}
-              {block.tipo==='bottoni'     && <BottoniEditor block={block} onChange={onChange} />}
-              {block.tipo==='ciclo_webinar' && <CicloWebinarEditor block={block} onChange={onChange} />}
-              {block.tipo==='mappa'       && <MappaEditor block={block} onChange={onChange} />}
-              {block.tipo==='nav_ancorata' && <NavAncoraEditor block={block} onChange={onChange} />}
-              {block.tipo==='separatore'  && <div style={{padding:'16px',color:'#9CA3AF',fontSize:'13px',textAlign:'center'}}>— Linea separatrice —</div>}
-            </>
-          )}
-          {activeTab === 'sezione' && <SezionePanel block={block} onChange={onChange} />}
+          {block.tipo==='testo'       && <RichEditor value={block.html||''} onChange={html=>onChange({...block,html})} minHeight="180px" />}
+          {block.tipo==='stats'       && <StatsEditor block={block} onChange={onChange} />}
+          {block.tipo==='griglia'     && <GrigliaEditor block={block} onChange={onChange} />}
+          {block.tipo==='cta'         && <CtaEditor block={block} onChange={onChange} />}
+          {block.tipo==='immagine'    && <ImmagineEditor block={block} onChange={onChange} />}
+          {block.tipo==='titolo'      && <TitoloEditor block={block} onChange={onChange} />}
+          {block.tipo==='banner'      && <BannerEditor block={block} onChange={onChange} />}
+          {block.tipo==='timeline'    && <TimelineEditor block={block} onChange={onChange} />}
+          {block.tipo==='accordion'   && <AccordionEditor block={block} onChange={onChange} />}
+          {block.tipo==='video'       && <VideoEditor block={block} onChange={onChange} />}
+          {block.tipo==='testimonial' && <TestimonialEditor block={block} onChange={onChange} />}
+          {block.tipo==='countdown'   && <CountdownEditor block={block} onChange={onChange} />}
+          {block.tipo==='badge_list'  && <BadgeListEditor block={block} onChange={onChange} />}
+          {block.tipo==='carosello'   && <CaroselloEditor block={block} onChange={onChange} />}
+          {block.tipo==='social'      && <SocialEditor block={block} onChange={onChange} />}
+          {block.tipo==='programma'   && <ProgrammaEditor block={block} onChange={onChange} />}
+          {block.tipo==='colonne_miste' && <ColonneMisteEditor block={block} onChange={onChange} />}
+          {block.tipo==='hero_interno' && <HeroInternoEditor block={block} onChange={onChange} />}
+          {block.tipo==='numeri_icona' && <NumeriIconaEditor block={block} onChange={onChange} />}
+          {block.tipo==='separatore'  && <div style={{padding:'16px',color:'#9CA3AF',fontSize:'13px',textAlign:'center'}}>— Linea separatrice —</div>}
         </>
       )}
     </div>
@@ -1158,6 +873,11 @@ export default function BlockEditor({ blocks = [], onChange }) {
   function updateBlock(i, block) { const next=[...blocks]; next[i]=block; onChange(next) }
   function deleteBlock(i) { onChange(blocks.filter((_,j)=>j!==i)) }
   function moveBlock(i, dir) { const next=[...blocks]; const j=i+dir; if(j<0||j>=next.length)return; [next[i],next[j]]=[next[j],next[i]]; onChange(next) }
+  function duplicateBlock(i) {
+    const cloned = JSON.parse(JSON.stringify(blocks[i]))
+    cloned.id = Math.random().toString(36).slice(2,9)
+    const next = [...blocks]; next.splice(i+1, 0, cloned); onChange(next)
+  }
 
   return (
     <div>
@@ -1170,7 +890,8 @@ export default function BlockEditor({ blocks = [], onChange }) {
       {blocks.map((block,i)=>(
         <Block key={block.id} block={block} index={i} total={blocks.length}
           onChange={b=>updateBlock(i,b)} onDelete={()=>deleteBlock(i)}
-          onMoveUp={()=>moveBlock(i,-1)} onMoveDown={()=>moveBlock(i,1)} />
+          onMoveUp={()=>moveBlock(i,-1)} onMoveDown={()=>moveBlock(i,1)}
+          onDuplicate={()=>duplicateBlock(i)} />
       ))}
       <div style={{position:'relative',marginTop:'4px'}}>
         <button type="button" onClick={()=>setShowAddMenu(o=>!o)} style={{

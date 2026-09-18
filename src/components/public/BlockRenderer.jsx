@@ -630,6 +630,20 @@ export default function BlockRenderer({ block, cp = '#003DA5', formTarget = '#lp
 
   if (block.tipo === 'nav_ancorata') return <NavAncoraBlock block={block} cp={cp} />
 
+  if (block.tipo === 'colonne_miste') return (
+    <SezioneWrapper sezione={block.sezione} cp={cp}>
+      <ColonneMisteBlock block={block} cp={cp} />
+    </SezioneWrapper>
+  )
+
+  if (block.tipo === 'hero_interno') return <HeroInternoBlock block={block} cp={cp} formTarget={formTarget} />
+
+  if (block.tipo === 'numeri_icona') return (
+    <SezioneWrapper sezione={block.sezione} cp={cp}>
+      <NumeriIconaBlock block={block} cp={cp} />
+    </SezioneWrapper>
+  )
+
   return null
 }
 
@@ -1219,6 +1233,122 @@ function SocialBlock({ block, cp }) {
             </div>
           </div>
         )}
+      </div>
+    </Animate>
+  )
+}
+
+// ── Colonne Miste Block ────────────────────────────────────────────
+function ColonnaContent({ col, cp }) {
+  if (!col) return null
+  if (col.tipo === 'testo') return <div className="rich-content" dangerouslySetInnerHTML={{ __html: col.html || '' }} />
+  if (col.tipo === 'immagine') return col.src
+    ? <img src={col.src} alt={col.didascalia||''} style={{ width:'100%', borderRadius:'16px', display:'block' }} />
+    : <div style={{ background:'#F3F4F6', borderRadius:'16px', height:'200px', display:'flex', alignItems:'center', justifyContent:'center', color:'#9CA3AF', fontSize:'13px' }}>Nessuna immagine</div>
+  if (col.tipo === 'video') {
+    const embed = videoEmbedUrl(col.url)
+    if (!embed) return null
+    return <div style={{ position:'relative', paddingBottom:'56.25%', height:0, borderRadius:'16px', overflow:'hidden' }}>
+      <iframe src={embed} style={{ position:'absolute', top:0, left:0, width:'100%', height:'100%', border:'none' }} allowFullScreen title="video" />
+    </div>
+  }
+  if (col.tipo === 'stats') return (
+    <div style={{ display:'flex', flexWrap:'wrap', gap:'20px' }}>
+      {(col.items||[]).map((item,i)=>(
+        <div key={i} style={{ textAlign:'center', flex:'1 1 80px' }}>
+          <p style={{ fontSize:'clamp(28px,5vw,44px)', fontWeight:'900', color:cp, letterSpacing:'-.04em', margin:'0 0 4px', lineHeight:1 }}>
+            <AnimatedNumber target={item.num||'0'} />
+          </p>
+          <p style={{ fontSize:'12px', color:'#6B7280', fontWeight:'700', margin:0, textTransform:'uppercase', letterSpacing:'.05em' }}>{item.label}</p>
+        </div>
+      ))}
+    </div>
+  )
+  if (col.tipo === 'badge_list') return (
+    <div style={{ display:'flex', flexDirection:'column', gap:'8px' }}>
+      {(col.items||[]).map((item,i)=>(
+        <div key={i} style={{ display:'flex', alignItems:'center', gap:'10px', padding:'10px 14px', background:'#fff', border:'1px solid #E5E7EB', borderRadius:'12px' }}>
+          <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke={cp} strokeWidth="2.5" strokeLinecap="round"><polyline points="20 6 9 17 4 12"/></svg>
+          <span style={{ fontSize:'14px', color:'#374151', fontWeight:'500' }}>{item.testo}</span>
+        </div>
+      ))}
+    </div>
+  )
+  return null
+}
+
+function ColonneMisteBlock({ block, cp }) {
+  const rapporto = block.rapporto || '50-50'
+  const [left, right] = rapporto.split('-').map(n => parseInt(n))
+  const gap = block.gap || '40'
+  return (
+    <Animate animation="fadeup">
+      <div style={{ marginBottom: '32px' }}>
+        <div style={{ display:'grid', gridTemplateColumns:`${left}fr ${right}fr`, gap:`${gap}px`, alignItems:'center' }}
+          className="lp-colonne-miste">
+          <div style={{ minWidth:0 }}><ColonnaContent col={block.sinistra} cp={cp} /></div>
+          <div style={{ minWidth:0 }}><ColonnaContent col={block.destra} cp={cp} /></div>
+        </div>
+      </div>
+    </Animate>
+  )
+}
+
+// ── Hero Interno Block ─────────────────────────────────────────────
+function HeroInternoBlock({ block, cp, formTarget }) {
+  const h = parseInt(block.altezza || '280')
+  const overlayPct = parseInt(block.overlay_opacita || '60') / 100
+  const align = block.allineamento || 'center'
+  const colTesto = block.colore_testo || '#FFFFFF'
+  const hasBg = !!block.sfondo_immagine
+  return (
+    <Animate animation="fadein">
+      <div style={{
+        position:'relative', minHeight:`${h}px`,
+        display:'flex', flexDirection:'column',
+        alignItems: align === 'left' ? 'flex-start' : 'center',
+        justifyContent:'center',
+        padding:'clamp(40px,8vw,72px) clamp(24px,6vw,64px)',
+        background: hasBg ? `url(${block.sfondo_immagine}) center/cover no-repeat` : (block.sfondo_colore || cp),
+        marginBottom:'0', textAlign:align, overflow:'hidden',
+      }}>
+        {(hasBg || overlayPct > 0) && <div style={{ position:'absolute', inset:0, background:`rgba(0,0,0,${overlayPct})` }} />}
+        <div style={{ position:'relative', zIndex:1, maxWidth:'680px', width:'100%', margin:align==='center'?'0 auto':'0' }}>
+          {block.titolo && <h2 style={{ fontSize:'clamp(22px,4vw,40px)', fontWeight:'900', color:colTesto, margin:'0 0 12px', letterSpacing:'-.04em', lineHeight:1.1 }}>{block.titolo}</h2>}
+          {block.sottotitolo && <p style={{ fontSize:'clamp(14px,2vw,18px)', color:`${colTesto}CC`, margin:'0 0 28px', lineHeight:1.7 }}>{block.sottotitolo}</p>}
+          {block.cta_testo && (
+            <a href={block.cta_url || formTarget}
+              style={{ display:'inline-block', background:'#fff', color:block.sfondo_colore||cp, borderRadius:'999px', padding:'13px 32px', fontSize:'15px', fontWeight:'800', textDecoration:'none', transition:'transform .15s,box-shadow .15s' }}
+              onMouseEnter={e=>{e.currentTarget.style.transform='translateY(-2px)';e.currentTarget.style.boxShadow='0 8px 24px rgba(0,0,0,0.3)'}}
+              onMouseLeave={e=>{e.currentTarget.style.transform='translateY(0)';e.currentTarget.style.boxShadow='none'}}>
+              {block.cta_testo} {'\u2192'}
+            </a>
+          )}
+        </div>
+      </div>
+    </Animate>
+  )
+}
+
+// ── Numeri Icona Block ─────────────────────────────────────────────
+function NumeriIconaBlock({ block, cp }) {
+  const items = block.items || []
+  return (
+    <Animate animation="fadein">
+      <div style={{ display:'grid', gridTemplateColumns:`repeat(auto-fit,minmax(min(100%,160px),1fr))`, gap:'24px', padding:'32px 0', marginBottom:'16px' }}>
+        {items.map((item, i) => (
+          <Animate key={i} animation="fadeup" delay={i*100}>
+            <div style={{ textAlign:'center' }}>
+              <div style={{ display:'inline-flex', alignItems:'center', justifyContent:'center', width:'52px', height:'52px', borderRadius:'14px', background:`${item.icona_colore||cp}15`, marginBottom:'12px' }}>
+                <IconDisplay iconId={item.icona||'star'} color={item.icona_colore||cp} size={26} />
+              </div>
+              <p style={{ fontSize:'clamp(28px,5vw,46px)', fontWeight:'900', color:item.icona_colore||cp, letterSpacing:'-.04em', margin:'0 0 4px', lineHeight:1 }}>
+                {block.animato!==false ? <AnimatedNumber target={item.num||'0'} /> : (item.num||'0')}
+              </p>
+              <p style={{ fontSize:'12px', color:'#6B7280', fontWeight:'700', margin:0, textTransform:'uppercase', letterSpacing:'.05em' }}>{item.label}</p>
+            </div>
+          </Animate>
+        ))}
       </div>
     </Animate>
   )
