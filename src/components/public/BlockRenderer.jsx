@@ -610,10 +610,277 @@ export default function BlockRenderer({ block, cp = '#003DA5', formTarget = '#lp
     </SezioneWrapper>
   )
 
+  if (block.tipo === 'bottoni') return (
+    <SezioneWrapper sezione={block.sezione} cp={cp}>
+      <BottoniBlock block={block} cp={cp} />
+    </SezioneWrapper>
+  )
+
+  if (block.tipo === 'ciclo_webinar') return (
+    <SezioneWrapper sezione={block.sezione} cp={cp}>
+      <CicloWebinarBlock block={block} cp={cp} />
+    </SezioneWrapper>
+  )
+
+  if (block.tipo === 'mappa') return (
+    <SezioneWrapper sezione={block.sezione} cp={cp}>
+      <MappaBlock block={block} cp={cp} />
+    </SezioneWrapper>
+  )
+
+  if (block.tipo === 'nav_ancorata') return <NavAncoraBlock block={block} cp={cp} />
+
   return null
 }
 
-// ── Programma evento ──────────────────────────────────────────────
+// ── Bottoni Block ──────────────────────────────────────────────────
+function BottoniBlock({ block, cp }) {
+  const items = block.items || []
+  const align = block.allineamento || 'center'
+  return (
+    <Animate animation="fadeup">
+      <div style={{ marginBottom: '24px' }}>
+        {block.titolo && (
+          <p style={{ fontSize: '12px', fontWeight: '700', color: '#9CA3AF', textTransform: 'uppercase', letterSpacing: '.06em', textAlign: align, margin: '0 0 14px' }}>
+            {block.titolo}
+          </p>
+        )}
+        <div style={{ display: 'flex', flexWrap: 'wrap', gap: '10px', justifyContent: align === 'left' ? 'flex-start' : align === 'right' ? 'flex-end' : 'center' }}>
+          {items.map((btn, i) => {
+            const c = btn.colore || cp
+            const bg = btn.stile === 'pieno' ? c : btn.stile === 'ghost' ? 'transparent' : 'transparent'
+            const color = btn.stile === 'pieno' ? '#fff' : c
+            const border = btn.stile === 'ghost' ? 'none' : `2px solid ${c}`
+            return (
+              <a key={i} href={btn.url || '#'} target={btn.target || '_blank'} rel="noreferrer"
+                style={{ display: 'inline-flex', alignItems: 'center', gap: '8px', padding: '12px 22px', background: bg, color, border, borderRadius: '999px', fontSize: '14px', fontWeight: '700', textDecoration: 'none', transition: 'all .15s', fontFamily: "'Outfit',sans-serif" }}
+                onMouseEnter={e => { e.currentTarget.style.background = c; e.currentTarget.style.color = '#fff'; e.currentTarget.style.transform = 'translateY(-2px)'; e.currentTarget.style.boxShadow = `0 6px 16px ${c}40` }}
+                onMouseLeave={e => { e.currentTarget.style.background = bg; e.currentTarget.style.color = color; e.currentTarget.style.transform = 'translateY(0)'; e.currentTarget.style.boxShadow = 'none' }}>
+                {/* Icona inline per tipo comune */}
+                {btn.icona === 'download' && <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round"><path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"/><polyline points="7 10 12 15 17 10"/><line x1="12" y1="15" x2="12" y2="3"/></svg>}
+                {btn.icona === 'video' && <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round"><polygon points="5 3 19 12 5 21 5 3"/></svg>}
+                {btn.icona === 'link' && <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round"><path d="M10 13a5 5 0 0 0 7.54.54l3-3a5 5 0 0 0-7.07-7.07l-1.72 1.71"/><path d="M14 11a5 5 0 0 0-7.54-.54l-3 3a5 5 0 0 0 7.07 7.07l1.71-1.71"/></svg>}
+                {btn.icona === 'doc' && <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round"><path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"/><polyline points="14 2 14 8 20 8"/></svg>}
+                {btn.testo}
+              </a>
+            )
+          })}
+        </div>
+      </div>
+    </Animate>
+  )
+}
+
+// ── Ciclo Webinar Block ────────────────────────────────────────────
+function CicloWebinarBlock({ block, cp }) {
+  const edizioni = block.edizioni || []
+  const prossimi = edizioni.filter(e => e.stato !== 'passato')
+  const passati  = edizioni.filter(e => e.stato === 'passato')
+
+  function EdCard({ ed, isProssimo }) {
+    return (
+      <Animate animation="fadeup">
+        <div style={{
+          border: isProssimo ? `2px solid ${cp}` : '1px solid #E5E7EB',
+          borderRadius: '20px',
+          padding: '24px',
+          background: isProssimo ? `linear-gradient(135deg,${cp}06,${cp}02)` : '#fff',
+          marginBottom: '16px',
+        }}>
+          <div style={{ display: 'flex', gap: '16px', alignItems: 'flex-start', flexWrap: 'wrap' }}>
+            {/* Badge data */}
+            <div style={{ flexShrink: 0, background: isProssimo ? cp : '#F3F4F6', color: isProssimo ? '#fff' : '#6B7280', borderRadius: '12px', padding: '8px 14px', textAlign: 'center', minWidth: '80px' }}>
+              <p style={{ margin: 0, fontSize: '13px', fontWeight: '800', letterSpacing: '.02em' }}>{ed.data || '—'}</p>
+            </div>
+            {/* Contenuto */}
+            <div style={{ flex: 1, minWidth: '200px' }}>
+              <h3 style={{ fontSize: '17px', fontWeight: '800', color: '#0A0A0A', margin: '0 0 4px', letterSpacing: '-.02em', lineHeight: 1.3 }}>{ed.titolo}</h3>
+              {ed.relatore && (
+                <p style={{ fontSize: '13px', color: '#6B7280', margin: '0 0 12px', fontWeight: '500' }}>
+                  <strong style={{ color: cp }}>Con </strong>{ed.relatore}
+                </p>
+              )}
+              {/* Link per edizioni passate */}
+              {!isProssimo && (ed.url_video || ed.url_materiale || ed.url_materiale2) && (
+                <div style={{ display: 'flex', flexWrap: 'wrap', gap: '8px', marginTop: '4px' }}>
+                  {ed.url_video && (
+                    <a href={ed.url_video} target="_blank" rel="noreferrer"
+                      style={{ display: 'inline-flex', alignItems: 'center', gap: '6px', padding: '6px 14px', background: '#FEF2F2', color: '#DC2626', border: '1px solid #FECACA', borderRadius: '999px', fontSize: '12px', fontWeight: '700', textDecoration: 'none' }}>
+                      <svg width="13" height="13" viewBox="0 0 24 24" fill="currentColor"><polygon points="5 3 19 12 5 21 5 3"/></svg>
+                      Guarda la registrazione
+                    </a>
+                  )}
+                  {ed.url_materiale && (
+                    <a href={ed.url_materiale} target="_blank" rel="noreferrer"
+                      style={{ display: 'inline-flex', alignItems: 'center', gap: '6px', padding: '6px 14px', background: '#EFF6FF', color: '#1D4ED8', border: '1px solid #BFDBFE', borderRadius: '999px', fontSize: '12px', fontWeight: '700', textDecoration: 'none' }}>
+                      <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round"><path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"/><polyline points="7 10 12 15 17 10"/><line x1="12" y1="15" x2="12" y2="3"/></svg>
+                      {ed.label_materiale || 'Scarica il materiale'}
+                    </a>
+                  )}
+                  {ed.url_materiale2 && (
+                    <a href={ed.url_materiale2} target="_blank" rel="noreferrer"
+                      style={{ display: 'inline-flex', alignItems: 'center', gap: '6px', padding: '6px 14px', background: '#F0FDF4', color: '#15803D', border: '1px solid #BBF7D0', borderRadius: '999px', fontSize: '12px', fontWeight: '700', textDecoration: 'none' }}>
+                      <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round"><path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"/><polyline points="7 10 12 15 17 10"/><line x1="12" y1="15" x2="12" y2="3"/></svg>
+                      {ed.label_materiale2 || 'Secondo materiale'}
+                    </a>
+                  )}
+                </div>
+              )}
+              {isProssimo && (
+                <span style={{ display: 'inline-block', background: `${cp}18`, color: cp, fontSize: '11px', fontWeight: '800', padding: '3px 10px', borderRadius: '999px', letterSpacing: '.06em', textTransform: 'uppercase' }}>
+                  In arrivo
+                </span>
+              )}
+            </div>
+          </div>
+        </div>
+      </Animate>
+    )
+  }
+
+  return (
+    <div style={{ marginBottom: '24px' }}>
+      {block.titolo && (
+        <h2 style={{ fontSize: 'clamp(20px,3.5vw,30px)', fontWeight: '900', color: '#0A0A0A', margin: '0 0 24px', letterSpacing: '-.03em' }}>
+          {block.titolo}
+        </h2>
+      )}
+      {prossimi.length > 0 && (
+        <>
+          {(passati.length > 0 || block.label_prossimo) && (
+            <p style={{ fontSize: '11px', fontWeight: '700', color: cp, textTransform: 'uppercase', letterSpacing: '.08em', margin: '0 0 12px' }}>
+              {block.label_prossimo || 'Prossimo appuntamento'}
+            </p>
+          )}
+          {prossimi.map((ed, i) => <EdCard key={i} ed={ed} isProssimo />)}
+        </>
+      )}
+      {passati.length > 0 && (
+        <>
+          <p style={{ fontSize: '11px', fontWeight: '700', color: '#9CA3AF', textTransform: 'uppercase', letterSpacing: '.08em', margin: `${prossimi.length ? '24px' : '0'} 0 12px` }}>
+            {block.label_passati || 'Appuntamenti passati'}
+          </p>
+          {passati.map((ed, i) => <EdCard key={i} ed={ed} isProssimo={false} />)}
+        </>
+      )}
+    </div>
+  )
+}
+
+// ── Mappa Block ────────────────────────────────────────────────────
+function MappaBlock({ block, cp }) {
+  const indirizzo = block.indirizzo || ''
+  const encodedAddr = encodeURIComponent(indirizzo)
+  const zoom = block.zoom || '15'
+  const h = parseInt(block.altezza || '340')
+  const mapsUrl = `https://www.google.com/maps/search/?api=1&query=${encodedAddr}`
+  const embedUrl = `https://maps.google.com/maps?q=${encodedAddr}&z=${zoom}&output=embed`
+
+  if (!indirizzo) return (
+    <div style={{ height: '200px', background: '#F3F4F6', borderRadius: '20px', display: 'flex', alignItems: 'center', justifyContent: 'center', color: '#9CA3AF', fontSize: '14px', marginBottom: '24px' }}>
+      Imposta un indirizzo nell'editor
+    </div>
+  )
+
+  return (
+    <Animate animation="fadein">
+      <div style={{ marginBottom: '24px' }}>
+        {block.titolo && (
+          <h3 style={{ fontSize: '18px', fontWeight: '800', color: '#0A0A0A', margin: '0 0 16px', letterSpacing: '-.02em' }}>{block.titolo}</h3>
+        )}
+        <div style={{ borderRadius: '20px', overflow: 'hidden', border: '1px solid #E5E7EB', boxShadow: '0 4px 16px rgba(0,0,0,.08)' }}>
+          <iframe
+            src={embedUrl}
+            width="100%" height={h}
+            style={{ border: 'none', display: 'block' }}
+            allowFullScreen loading="lazy"
+            referrerPolicy="no-referrer-when-downgrade"
+            title="Mappa"
+          />
+        </div>
+        {(block.testo || block.mostra_link !== false) && (
+          <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', flexWrap: 'wrap', gap: '8px', marginTop: '12px' }}>
+            {block.testo && <p style={{ margin: 0, fontSize: '14px', color: '#6B7280', display: 'flex', alignItems: 'center', gap: '6px' }}>
+              <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke={cp} strokeWidth="2.5"><path d="M21 10c0 7-9 13-9 13s-9-6-9-13a9 9 0 0 1 18 0z"/><circle cx="12" cy="10" r="3"/></svg>
+              {block.testo}
+            </p>}
+            {block.mostra_link !== false && (
+              <a href={mapsUrl} target="_blank" rel="noreferrer"
+                style={{ fontSize: '13px', fontWeight: '700', color: cp, textDecoration: 'none', display: 'flex', alignItems: 'center', gap: '5px' }}>
+                Apri in Google Maps
+                <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5"><path d="M18 13v6a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2V8a2 2 0 0 1 2-2h6"/><polyline points="15 3 21 3 21 9"/><line x1="10" y1="14" x2="21" y2="3"/></svg>
+              </a>
+            )}
+          </div>
+        )}
+      </div>
+    </Animate>
+  )
+}
+
+// ── Nav Ancorata Block ─────────────────────────────────────────────
+function NavAncoraBlock({ block, cp }) {
+  const voci = block.voci || []
+  const [active, setActive] = useState('')
+  const sfondo = block.sfondo || cp
+  const colTesto = block.colore_testo || '#FFFFFF'
+
+  useEffect(() => {
+    const ids = voci.map(v => v.ancora).filter(Boolean)
+    if (!ids.length) return
+    const obs = new IntersectionObserver(
+      entries => {
+        entries.forEach(e => { if (e.isIntersecting) setActive(e.target.id) })
+      },
+      { rootMargin: '-40% 0px -55% 0px' }
+    )
+    ids.forEach(id => { const el = document.getElementById(id); if (el) obs.observe(el) })
+    return () => obs.disconnect()
+  }, [])
+
+  function scrollTo(ancora) {
+    const el = document.getElementById(ancora)
+    if (el) el.scrollIntoView({ behavior: 'smooth', block: 'start' })
+  }
+
+  return (
+    <div style={{
+      position: block.sticky !== false ? 'sticky' : 'relative',
+      top: 0,
+      zIndex: 50,
+      background: sfondo,
+      boxShadow: '0 2px 12px rgba(0,0,0,0.15)',
+    }}>
+      <div style={{ maxWidth: '800px', margin: '0 auto', padding: '0 clamp(16px,4vw,40px)', display: 'flex', gap: '0', overflowX: 'auto', scrollbarWidth: 'none' }}>
+        {voci.map((v, i) => {
+          const isActive = active === v.ancora
+          return (
+            <button key={i} type="button" onClick={() => scrollTo(v.ancora)}
+              style={{
+                flexShrink: 0,
+                padding: '14px 20px',
+                background: 'transparent',
+                border: 'none',
+                borderBottom: isActive ? `3px solid ${colTesto}` : '3px solid transparent',
+                color: isActive ? colTesto : `${colTesto}BB`,
+                fontSize: '13px',
+                fontWeight: isActive ? '800' : '600',
+                cursor: 'pointer',
+                fontFamily: "'Outfit',sans-serif",
+                letterSpacing: '.01em',
+                transition: 'all .2s',
+                whiteSpace: 'nowrap',
+              }}
+              onMouseEnter={e => { e.currentTarget.style.color = colTesto }}
+              onMouseLeave={e => { if (!isActive) e.currentTarget.style.color = `${colTesto}BB` }}>
+              {v.label}
+            </button>
+          )
+        })}
+      </div>
+    </div>
+  )
+}
 function ProgrammaBlock({ block, cp }) {
   const cTitoli = block.colore_titoli || '#E91E8C'
   const cOrari  = block.colore_orari  || cp || '#003DA5'

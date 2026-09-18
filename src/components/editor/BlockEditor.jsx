@@ -45,6 +45,20 @@ export function newBlock(tipo) {
       { etichetta: 'Standard', prezzo: '€ 100', unita: '+ IVA / persona', colore: '#003DA5', inclusi: ['Accesso ai lavori', 'Coffee break', 'Materiali'], cta: 'Iscriviti', evidenziata: false },
       { etichetta: 'Premium', prezzo: '€ 180', unita: '+ IVA / persona', colore: '#7C3AED', inclusi: ['Accesso ai lavori', 'Coffee break', 'Materiali', 'Pranzo incluso', 'Attestato'], cta: 'Iscriviti', evidenziata: true },
     ] }
+    case 'bottoni':     return { ...base, titolo: '', allineamento: 'center', items: [
+      { testo: 'Scarica le slide', url: '', icona: 'download', colore: '#003DA5', stile: 'pieno' },
+      { testo: 'Guarda la registrazione', url: '', icona: 'video', colore: '#DC2626', stile: 'contorno' },
+    ] }
+    case 'ciclo_webinar': return { ...base, titolo: 'Gli appuntamenti', edizioni: [
+      { data: '01.01.2025', titolo: 'Titolo del primo webinar', relatore: 'Nome Cognome — Ente', stato: 'passato', url_video: '', url_materiale: '', url_materiale2: '' },
+      { data: '15.01.2025', titolo: 'Titolo del secondo webinar', relatore: '', stato: 'prossimo', url_video: '', url_materiale: '', url_materiale2: '' },
+    ] }
+    case 'mappa':       return { ...base, indirizzo: 'Roma, Italia', titolo: '', altezza: '340', zoom: '15', mostra_link: true }
+    case 'nav_ancorata': return { ...base, voci: [
+      { label: 'Scopri', ancora: 'scopri' },
+      { label: 'Programma', ancora: 'programma' },
+      { label: 'Iscriviti', ancora: 'lp-form' },
+    ], sfondo: '#003DA5', colore_testo: '#FFFFFF', sticky: true }
     default:            return base
   }
 }
@@ -64,11 +78,15 @@ const BLOCK_TYPES = [
   { tipo: 'video',       label: 'Video embed',     group: 'Interattivo' },
   { tipo: 'cta',         label: 'Call to action',  group: 'Interattivo' },
   { tipo: 'banner',      label: 'Banner avviso',   group: 'Interattivo' },
-  { tipo: 'carosello',   label: 'Carosello foto',  group: 'Social' },
-  { tipo: 'social',      label: 'Social & Condividi', group: 'Social' },
-  { tipo: 'programma',   label: 'Programma evento', group: 'Contenuto' },
-  { tipo: 'relatori',    label: 'Relatori / Speaker', group: 'Contenuto' },
-  { tipo: 'pricing',     label: 'Quote / Opzioni',  group: 'Contenuto' },
+  { tipo: 'carosello',      label: 'Carosello foto',      group: 'Social' },
+  { tipo: 'social',         label: 'Social & Condividi',  group: 'Social' },
+  { tipo: 'programma',      label: 'Programma evento',    group: 'Contenuto' },
+  { tipo: 'relatori',       label: 'Relatori / Speaker',  group: 'Contenuto' },
+  { tipo: 'pricing',        label: 'Quote / Opzioni',     group: 'Contenuto' },
+  { tipo: 'ciclo_webinar',  label: 'Ciclo webinar',       group: 'Contenuto' },
+  { tipo: 'bottoni',        label: 'Gruppo bottoni',      group: 'Base' },
+  { tipo: 'mappa',          label: 'Mappa embed',         group: 'Base' },
+  { tipo: 'nav_ancorata',   label: 'Menu navigazione',    group: 'Base' },
 ]
 
 // ── Editors singoli blocchi ─────────────────────────────────────────
@@ -760,6 +778,226 @@ function PricingEditor({ block, onChange }) {
   )
 }
 
+// ── Bottoni Editor ─────────────────────────────────────────────────
+function BottoniEditor({ block, onChange }) {
+  const items = block.items || []
+  function updItem(i, patch) {
+    const next = [...items]; next[i] = { ...next[i], ...patch }; onChange({ ...block, items: next })
+  }
+  function addItem() { onChange({ ...block, items: [...items, { testo: 'Nuovo link', url: '', icona: '', colore: '#003DA5', stile: 'contorno' }] }) }
+  function delItem(i) { onChange({ ...block, items: items.filter((_, j) => j !== i) }) }
+
+  return (
+    <div style={{ padding: '16px', display: 'flex', flexDirection: 'column', gap: '12px' }}>
+      <div style={{ display: 'flex', gap: '12px', flexWrap: 'wrap' }}>
+        <div style={{ flex: 1 }}>
+          <label style={lb}>Titolo (opzionale)</label>
+          <input value={block.titolo || ''} onChange={e => onChange({ ...block, titolo: e.target.value })} style={inp} placeholder="Download materiali" />
+        </div>
+        <div style={{ flex: 1 }}>
+          <label style={lb}>Allineamento</label>
+          <select value={block.allineamento || 'center'} onChange={e => onChange({ ...block, allineamento: e.target.value })} style={inp}>
+            <option value="left">Sinistra</option>
+            <option value="center">Centro</option>
+            <option value="right">Destra</option>
+          </select>
+        </div>
+      </div>
+      {items.map((item, i) => (
+        <div key={i} style={{ border: '1px solid #E5E7EB', borderRadius: '14px', padding: '12px', display: 'flex', flexDirection: 'column', gap: '8px', background: '#FAFAFA' }}>
+          <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
+            <span style={{ fontSize: '12px', fontWeight: '700', color: '#6B7280' }}>Bottone {i + 1}</span>
+            <button onClick={() => delItem(i)} style={btnDel}>✕</button>
+          </div>
+          <input value={item.testo || ''} onChange={e => updItem(i, { testo: e.target.value })} style={inp} placeholder="Testo bottone" />
+          <input value={item.url || ''} onChange={e => updItem(i, { url: e.target.value })} style={inp} placeholder="https://..." />
+          <div style={{ display: 'flex', gap: '8px', flexWrap: 'wrap' }}>
+            <div style={{ flex: 1 }}>
+              <label style={lb}>Stile</label>
+              <select value={item.stile || 'contorno'} onChange={e => updItem(i, { stile: e.target.value })} style={inp}>
+                <option value="pieno">Pieno</option>
+                <option value="contorno">Contorno</option>
+                <option value="ghost">Ghost</option>
+              </select>
+            </div>
+            <div style={{ display: 'flex', gap: '6px', alignItems: 'flex-end' }}>
+              <label style={lb}>Colore</label>
+              <input type="color" value={item.colore || '#003DA5'} onChange={e => updItem(i, { colore: e.target.value })} style={{ width: '36px', height: '34px', border: 'none', cursor: 'pointer', borderRadius: '8px' }} />
+            </div>
+          </div>
+          <div>
+            <label style={lb}>Apri in</label>
+            <select value={item.target || '_blank'} onChange={e => updItem(i, { target: e.target.value })} style={inp}>
+              <option value="_blank">Nuova scheda</option>
+              <option value="_self">Stessa pagina</option>
+            </select>
+          </div>
+        </div>
+      ))}
+      <button onClick={addItem} style={btnAdd}>+ Aggiungi bottone</button>
+    </div>
+  )
+}
+
+// ── CicloWebinar Editor ────────────────────────────────────────────
+function CicloWebinarEditor({ block, onChange }) {
+  const edizioni = block.edizioni || []
+  function updEd(i, patch) {
+    const next = [...edizioni]; next[i] = { ...next[i], ...patch }; onChange({ ...block, edizioni: next })
+  }
+  function addEd() { onChange({ ...block, edizioni: [...edizioni, { data: '', titolo: '', relatore: '', stato: 'prossimo', url_video: '', url_materiale: '', url_materiale2: '' }] }) }
+  function delEd(i) { onChange({ ...block, edizioni: edizioni.filter((_, j) => j !== i) }) }
+
+  return (
+    <div style={{ padding: '16px', display: 'flex', flexDirection: 'column', gap: '12px' }}>
+      <div>
+        <label style={lb}>Titolo sezione</label>
+        <input value={block.titolo || ''} onChange={e => onChange({ ...block, titolo: e.target.value })} style={inp} placeholder="Gli appuntamenti" />
+      </div>
+      <div style={{ display: 'flex', gap: '8px' }}>
+        <div style={{ flex: 1 }}>
+          <label style={lb}>Label sezione futura</label>
+          <input value={block.label_prossimo || 'Prossimo appuntamento'} onChange={e => onChange({ ...block, label_prossimo: e.target.value })} style={inp} />
+        </div>
+        <div style={{ flex: 1 }}>
+          <label style={lb}>Label sezione passata</label>
+          <input value={block.label_passati || 'Appuntamenti passati'} onChange={e => onChange({ ...block, label_passati: e.target.value })} style={inp} />
+        </div>
+      </div>
+      {edizioni.map((ed, i) => (
+        <div key={i} style={{ border: '1px solid #E5E7EB', borderRadius: '14px', padding: '12px', display: 'flex', flexDirection: 'column', gap: '8px', background: '#FAFAFA' }}>
+          <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
+            <span style={{ fontSize: '12px', fontWeight: '700', color: '#6B7280' }}>Edizione {i + 1}</span>
+            <div style={{ display: 'flex', gap: '8px', alignItems: 'center' }}>
+              <select value={ed.stato || 'prossimo'} onChange={e => updEd(i, { stato: e.target.value })} style={{ ...inp, width: 'auto', fontSize: '11px', padding: '4px 8px' }}>
+                <option value="prossimo">Prossimo</option>
+                <option value="passato">Passato</option>
+              </select>
+              <button onClick={() => delEd(i)} style={btnDel}>✕</button>
+            </div>
+          </div>
+          <div style={{ display: 'flex', gap: '8px' }}>
+            <div style={{ flex: '0 0 110px' }}>
+              <label style={lb}>Data</label>
+              <input value={ed.data || ''} onChange={e => updEd(i, { data: e.target.value })} style={inp} placeholder="22.07.26" />
+            </div>
+            <div style={{ flex: 1 }}>
+              <label style={lb}>Titolo webinar</label>
+              <input value={ed.titolo || ''} onChange={e => updEd(i, { titolo: e.target.value })} style={inp} placeholder="Titolo dell'incontro" />
+            </div>
+          </div>
+          <div>
+            <label style={lb}>Relatore</label>
+            <input value={ed.relatore || ''} onChange={e => updEd(i, { relatore: e.target.value })} style={inp} placeholder="Nome Cognome — Ente" />
+          </div>
+          {ed.stato === 'passato' && (
+            <>
+              <div>
+                <label style={lb}>Link registrazione video</label>
+                <input value={ed.url_video || ''} onChange={e => updEd(i, { url_video: e.target.value })} style={inp} placeholder="https://youtu.be/..." />
+              </div>
+              <div>
+                <label style={lb}>Link materiale 1</label>
+                <input value={ed.url_materiale || ''} onChange={e => updEd(i, { url_materiale: e.target.value })} style={inp} placeholder="URL slide / PDF" />
+                <input value={ed.label_materiale || ''} onChange={e => updEd(i, { label_materiale: e.target.value })} style={{ ...inp, marginTop: '6px' }} placeholder="Etichetta (es. Scarica le slide)" />
+              </div>
+              <div>
+                <label style={lb}>Link materiale 2 (opzionale)</label>
+                <input value={ed.url_materiale2 || ''} onChange={e => updEd(i, { url_materiale2: e.target.value })} style={inp} placeholder="URL secondo PDF" />
+                <input value={ed.label_materiale2 || ''} onChange={e => updEd(i, { label_materiale2: e.target.value })} style={{ ...inp, marginTop: '6px' }} placeholder="Etichetta secondo materiale" />
+              </div>
+            </>
+          )}
+        </div>
+      ))}
+      <button onClick={addEd} style={btnAdd}>+ Aggiungi edizione</button>
+    </div>
+  )
+}
+
+// ── Mappa Editor ───────────────────────────────────────────────────
+function MappaEditor({ block, onChange }) {
+  return (
+    <div style={{ padding: '16px', display: 'flex', flexDirection: 'column', gap: '12px' }}>
+      <div>
+        <label style={lb}>Indirizzo / Luogo</label>
+        <input value={block.indirizzo || ''} onChange={e => onChange({ ...block, indirizzo: e.target.value })} style={inp} placeholder="Via Roma 1, Milano MI" />
+        <p style={{ fontSize: '11px', color: '#9CA3AF', margin: '4px 0 0' }}>L'indirizzo viene cercato automaticamente su Google Maps</p>
+      </div>
+      <div>
+        <label style={lb}>Titolo sezione (opzionale)</label>
+        <input value={block.titolo || ''} onChange={e => onChange({ ...block, titolo: e.target.value })} style={inp} placeholder="Come raggiungerci" />
+      </div>
+      <div>
+        <label style={lb}>Testo sotto mappa (opzionale)</label>
+        <input value={block.testo || ''} onChange={e => onChange({ ...block, testo: e.target.value })} style={inp} placeholder="Hotel Cosmopolitan — Via De Gasperi 2, Civitanova Marche" />
+      </div>
+      <div style={{ display: 'flex', gap: '12px', flexWrap: 'wrap' }}>
+        <div style={{ flex: 1 }}>
+          <label style={lb}>Altezza mappa</label>
+          <select value={block.altezza || '340'} onChange={e => onChange({ ...block, altezza: e.target.value })} style={inp}>
+            <option value="220">Piccola (220px)</option>
+            <option value="340">Media (340px)</option>
+            <option value="480">Grande (480px)</option>
+          </select>
+        </div>
+        <div style={{ flex: 1 }}>
+          <label style={lb}>Zoom</label>
+          <select value={block.zoom || '15'} onChange={e => onChange({ ...block, zoom: e.target.value })} style={inp}>
+            <option value="12">Largo (città)</option>
+            <option value="15">Medio (quartiere)</option>
+            <option value="17">Ravvicinato (edificio)</option>
+          </select>
+        </div>
+      </div>
+      <label style={{ display: 'flex', alignItems: 'center', gap: '8px', cursor: 'pointer', fontSize: '13px', fontWeight: '600', color: '#374151' }}>
+        <input type="checkbox" checked={block.mostra_link !== false} onChange={e => onChange({ ...block, mostra_link: e.target.checked })} />
+        Mostra link "Apri in Google Maps"
+      </label>
+    </div>
+  )
+}
+
+// ── Nav Ancorata Editor ────────────────────────────────────────────
+function NavAncoraEditor({ block, onChange }) {
+  const voci = block.voci || []
+  function updVoce(i, patch) {
+    const next = [...voci]; next[i] = { ...next[i], ...patch }; onChange({ ...block, voci: next })
+  }
+  function addVoce() { onChange({ ...block, voci: [...voci, { label: 'Sezione', ancora: '' }] }) }
+  function delVoce(i) { onChange({ ...block, voci: voci.filter((_, j) => j !== i) }) }
+
+  return (
+    <div style={{ padding: '16px', display: 'flex', flexDirection: 'column', gap: '12px' }}>
+      <p style={{ margin: 0, fontSize: '12px', color: '#6B7280', lineHeight: 1.5 }}>
+        Il menu appare subito sotto l'hero e rimane visibile mentre si scorre la pagina. L'ancora deve corrispondere all'ID di una sezione della pagina (es. <code style={{ background: '#F3F4F6', padding: '1px 4px', borderRadius: '4px' }}>lp-form</code> per il form iscrizioni).
+      </p>
+      <div style={{ display: 'flex', gap: '12px', flexWrap: 'wrap' }}>
+        <div style={{ display: 'flex', gap: '8px', alignItems: 'center' }}>
+          <label style={lb}>Sfondo</label>
+          <input type="color" value={block.sfondo || '#003DA5'} onChange={e => onChange({ ...block, sfondo: e.target.value })} style={{ width: '36px', height: '28px', border: 'none', cursor: 'pointer' }} />
+        </div>
+        <div style={{ display: 'flex', gap: '8px', alignItems: 'center' }}>
+          <label style={lb}>Testo</label>
+          <input type="color" value={block.colore_testo || '#FFFFFF'} onChange={e => onChange({ ...block, colore_testo: e.target.value })} style={{ width: '36px', height: '28px', border: 'none', cursor: 'pointer' }} />
+        </div>
+        <label style={{ display: 'flex', alignItems: 'center', gap: '6px', fontSize: '13px', fontWeight: '600', color: '#374151', cursor: 'pointer' }}>
+          <input type="checkbox" checked={block.sticky !== false} onChange={e => onChange({ ...block, sticky: e.target.checked })} />
+          Sticky (segue lo scroll)
+        </label>
+      </div>
+      {voci.map((v, i) => (
+        <div key={i} style={{ display: 'flex', gap: '8px', alignItems: 'center' }}>
+          <input value={v.label || ''} onChange={e => updVoce(i, { label: e.target.value })} style={{ ...inp, flex: 1 }} placeholder="Etichetta" />
+          <input value={v.ancora || ''} onChange={e => updVoce(i, { ancora: e.target.value })} style={{ ...inp, flex: 1 }} placeholder="ID sezione" />
+          <button onClick={() => delVoce(i)} style={btnDel}>✕</button>
+        </div>
+      ))}
+      <button onClick={addVoce} style={btnAdd}>+ Aggiungi voce</button>
+    </div>
+  )
+}
+
 // ── Pannello Sezione (wrapper sfondo per ogni blocco) ──────────────
 function SezionePanel({ block, onChange }) {
   const SFONDI_PRESET = [
@@ -897,6 +1135,10 @@ function Block({ block, index, total, onChange, onDelete, onMoveUp, onMoveDown }
               {block.tipo==='programma'   && <ProgrammaEditor block={block} onChange={onChange} />}
               {block.tipo==='relatori'    && <RelatoriEditor block={block} onChange={onChange} />}
               {block.tipo==='pricing'     && <PricingEditor block={block} onChange={onChange} />}
+              {block.tipo==='bottoni'     && <BottoniEditor block={block} onChange={onChange} />}
+              {block.tipo==='ciclo_webinar' && <CicloWebinarEditor block={block} onChange={onChange} />}
+              {block.tipo==='mappa'       && <MappaEditor block={block} onChange={onChange} />}
+              {block.tipo==='nav_ancorata' && <NavAncoraEditor block={block} onChange={onChange} />}
               {block.tipo==='separatore'  && <div style={{padding:'16px',color:'#9CA3AF',fontSize:'13px',textAlign:'center'}}>— Linea separatrice —</div>}
             </>
           )}

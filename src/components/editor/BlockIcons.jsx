@@ -108,6 +108,30 @@ export const BLOCK_ICONS = {
       <path d="M8 3v18M16 3v18M2 9h6M2 15h6M16 9h6M16 15h6"/>
     </svg>
   ),
+  bottoni: (
+    <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="#003DA5" strokeWidth="2" strokeLinecap="round">
+      <rect x="2" y="7" width="9" height="10" rx="2"/>
+      <rect x="13" y="7" width="9" height="10" rx="2"/>
+    </svg>
+  ),
+  ciclo_webinar: (
+    <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="#7C3AED" strokeWidth="2" strokeLinecap="round">
+      <path d="M15 10l4.553-2.069A1 1 0 0 1 21 8.871v6.258a1 1 0 0 1-1.447.894L15 14"/>
+      <rect x="2" y="6" width="13" height="12" rx="2"/>
+      <path d="M7 16v2M17 16v2M7 6v-2M17 6v-2"/>
+    </svg>
+  ),
+  mappa: (
+    <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="#DC2626" strokeWidth="2" strokeLinecap="round">
+      <path d="M21 10c0 7-9 13-9 13s-9-6-9-13a9 9 0 0 1 18 0z"/><circle cx="12" cy="10" r="3"/>
+    </svg>
+  ),
+  nav_ancorata: (
+    <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="#0891B2" strokeWidth="2" strokeLinecap="round">
+      <path d="M3 6h18M3 12h18M3 18h12"/>
+      <circle cx="20" cy="18" r="2"/>
+    </svg>
+  ),
 }
 
 // ── Icone disponibili per griglia/badge con picker ─────────────────

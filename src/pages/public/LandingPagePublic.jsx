@@ -387,6 +387,14 @@ export default function LandingPagePublic() {
       {hasContenuto&&(
         <div className="lp-block-wrap" style={{maxWidth:'800px',margin:'0 auto',padding:'clamp(32px,6vw,64px) clamp(16px,4vw,40px)'}}>
           {lp.contenuto.map((block,i)=>{
+            // nav_ancorata: sempre full-width, esce dal contenitore
+            if (block.tipo === 'nav_ancorata') {
+              return (
+                <div key={block.id||i} style={{ marginLeft:'calc(-1 * clamp(16px,4vw,40px))', marginRight:'calc(-1 * clamp(16px,4vw,40px))', marginBottom:'0' }}>
+                  <BlockRenderer block={block} cp={cp} />
+                </div>
+              )
+            }
             const isFullWidth = block.sezione && block.sezione.sfondo && block.sezione.larghezza === 'piena'
             const isAmpia = block.sezione && block.sezione.sfondo && block.sezione.larghezza === 'ampia'
             if (isFullWidth || isAmpia) {
