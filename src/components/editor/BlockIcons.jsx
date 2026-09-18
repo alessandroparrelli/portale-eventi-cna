@@ -96,6 +96,18 @@ export const BLOCK_ICONS = {
       <line x1="3" y1="10" x2="21" y2="10"/><path d="M8 14h.01M12 14h4M8 18h.01M12 18h4"/>
     </svg>
   ),
+  relatori: (
+    <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="#0891B2" strokeWidth="2" strokeLinecap="round">
+      <circle cx="9" cy="7" r="4"/><path d="M3 21v-2a4 4 0 0 1 4-4h4a4 4 0 0 1 4 4v2"/>
+      <path d="M16 3.13a4 4 0 0 1 0 7.75M21 21v-2a4 4 0 0 0-3-3.87"/>
+    </svg>
+  ),
+  pricing: (
+    <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="#059669" strokeWidth="2" strokeLinecap="round">
+      <rect x="2" y="3" width="20" height="18" rx="2"/>
+      <path d="M8 3v18M16 3v18M2 9h6M2 15h6M16 9h6M16 15h6"/>
+    </svg>
+  ),
 }
 
 // ── Icone disponibili per griglia/badge con picker ─────────────────

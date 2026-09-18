@@ -386,9 +386,21 @@ export default function LandingPagePublic() {
       {/* CONTENUTO */}
       {hasContenuto&&(
         <div className="lp-block-wrap" style={{maxWidth:'800px',margin:'0 auto',padding:'clamp(32px,6vw,64px) clamp(16px,4vw,40px)'}}>
-          {lp.contenuto.map((block,i)=>(
-            <BlockRenderer key={block.id||i} block={block} cp={cp} />
-          ))}
+          {lp.contenuto.map((block,i)=>{
+            const isFullWidth = block.sezione && block.sezione.sfondo && block.sezione.larghezza === 'piena'
+            const isAmpia = block.sezione && block.sezione.sfondo && block.sezione.larghezza === 'ampia'
+            if (isFullWidth || isAmpia) {
+              const extra = isFullWidth
+                ? { marginLeft:'calc(-1 * clamp(16px,4vw,40px))', marginRight:'calc(-1 * clamp(16px,4vw,40px))', marginBottom:'0' }
+                : { marginLeft:'calc(-1 * clamp(0px,2vw,80px))', marginRight:'calc(-1 * clamp(0px,2vw,80px))', marginBottom:'0' }
+              return (
+                <div key={block.id||i} style={extra}>
+                  <BlockRenderer block={block} cp={cp} />
+                </div>
+              )
+            }
+            return <BlockRenderer key={block.id||i} block={block} cp={cp} />
+          })}
         </div>
       )}
 

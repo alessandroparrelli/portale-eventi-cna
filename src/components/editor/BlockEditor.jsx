@@ -37,6 +37,14 @@ export function newBlock(tipo) {
       { tipo: 'sessione', titolo: 'Titolo intervento', relatori: [{ nome: 'Nome Cognome', ruolo: 'Ruolo / Ente' }] },
       { tipo: 'orario', orario: 'ORE 13.30', testo: 'Chiusura dei lavori' },
     ]}
+    case 'relatori':    return { ...base, titolo: 'I relatori', items: [
+      { nome: 'Nome Cognome', ruolo: 'Esperto / Professore', ente: 'Università degli Studi', bio: '', foto_url: '' },
+      { nome: 'Nome Cognome', ruolo: 'Responsabile', ente: 'CNA Roma', bio: '', foto_url: '' },
+    ], colonne: 2, stile_card: 'verticale' }
+    case 'pricing':     return { ...base, titolo: 'Scegli la tua quota', options: [
+      { etichetta: 'Standard', prezzo: '€ 100', unita: '+ IVA / persona', colore: '#003DA5', inclusi: ['Accesso ai lavori', 'Coffee break', 'Materiali'], cta: 'Iscriviti', evidenziata: false },
+      { etichetta: 'Premium', prezzo: '€ 180', unita: '+ IVA / persona', colore: '#7C3AED', inclusi: ['Accesso ai lavori', 'Coffee break', 'Materiali', 'Pranzo incluso', 'Attestato'], cta: 'Iscriviti', evidenziata: true },
+    ] }
     default:            return base
   }
 }
@@ -59,6 +67,8 @@ const BLOCK_TYPES = [
   { tipo: 'carosello',   label: 'Carosello foto',  group: 'Social' },
   { tipo: 'social',      label: 'Social & Condividi', group: 'Social' },
   { tipo: 'programma',   label: 'Programma evento', group: 'Contenuto' },
+  { tipo: 'relatori',    label: 'Relatori / Speaker', group: 'Contenuto' },
+  { tipo: 'pricing',     label: 'Quote / Opzioni',  group: 'Contenuto' },
 ]
 
 // ── Editors singoli blocchi ─────────────────────────────────────────
@@ -627,17 +637,225 @@ function SocialEditor({ block, onChange }) {
   )
 }
 
+// ── Relatori Editor ────────────────────────────────────────────────
+function RelatoriEditor({ block, onChange }) {
+  const items = block.items || []
+  function updItem(i, patch) {
+    const next = [...items]; next[i] = { ...next[i], ...patch }; onChange({ ...block, items: next })
+  }
+  function addItem() { onChange({ ...block, items: [...items, { nome: '', ruolo: '', ente: '', bio: '', foto_url: '' }] }) }
+  function delItem(i) { onChange({ ...block, items: items.filter((_, j) => j !== i) }) }
+
+  return (
+    <div style={{ padding: '16px', display: 'flex', flexDirection: 'column', gap: '12px' }}>
+      <div>
+        <label style={lb}>Titolo sezione (opzionale)</label>
+        <input value={block.titolo || ''} onChange={e => onChange({ ...block, titolo: e.target.value })} style={inp} placeholder="I relatori" />
+      </div>
+      <div style={{ display: 'flex', gap: '12px', flexWrap: 'wrap' }}>
+        <div style={{ flex: 1 }}>
+          <label style={lb}>Colonne</label>
+          <select value={block.colonne || 2} onChange={e => onChange({ ...block, colonne: Number(e.target.value) })} style={inp}>
+            <option value={1}>1 colonna</option>
+            <option value={2}>2 colonne</option>
+            <option value={3}>3 colonne</option>
+            <option value={4}>4 colonne</option>
+          </select>
+        </div>
+        <div style={{ flex: 1 }}>
+          <label style={lb}>Stile card</label>
+          <select value={block.stile_card || 'verticale'} onChange={e => onChange({ ...block, stile_card: e.target.value })} style={inp}>
+            <option value="verticale">Verticale (foto sopra)</option>
+            <option value="orizzontale">Orizzontale (foto a sinistra)</option>
+          </select>
+        </div>
+      </div>
+      {items.map((item, i) => (
+        <div key={i} style={{ border: '1px solid #E5E7EB', borderRadius: '16px', padding: '12px', display: 'flex', flexDirection: 'column', gap: '8px', background: '#FAFAFA' }}>
+          <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
+            <span style={{ fontSize: '12px', fontWeight: '700', color: '#6B7280' }}>Relatore {i + 1}</span>
+            <button onClick={() => delItem(i)} style={btnDel}>✕</button>
+          </div>
+          <input value={item.nome || ''} onChange={e => updItem(i, { nome: e.target.value })} style={inp} placeholder="Nome Cognome" />
+          <input value={item.ruolo || ''} onChange={e => updItem(i, { ruolo: e.target.value })} style={inp} placeholder="Ruolo / Titolo" />
+          <input value={item.ente || ''} onChange={e => updItem(i, { ente: e.target.value })} style={inp} placeholder="Ente / Organizzazione" />
+          <input value={item.foto_url || ''} onChange={e => updItem(i, { foto_url: e.target.value })} style={inp} placeholder="URL foto (opzionale)" />
+          <textarea value={item.bio || ''} onChange={e => updItem(i, { bio: e.target.value })} style={{ ...inp, minHeight: '60px', resize: 'vertical' }} placeholder="Breve bio (opzionale)" />
+        </div>
+      ))}
+      <button onClick={addItem} style={btnAdd}>+ Aggiungi relatore</button>
+    </div>
+  )
+}
+
+// ── Pricing Editor ─────────────────────────────────────────────────
+function PricingEditor({ block, onChange }) {
+  const options = block.options || []
+  function updOpt(i, patch) {
+    const next = [...options]; next[i] = { ...next[i], ...patch }; onChange({ ...block, options: next })
+  }
+  function updInclusi(i, val) {
+    const arr = val.split('\n'); updOpt(i, { inclusi: arr })
+  }
+  function addOpt() {
+    onChange({ ...block, options: [...options, { etichetta: 'Nuova opzione', prezzo: '€ 0', unita: '+ IVA', colore: '#003DA5', inclusi: ['Voce inclusa'], cta: 'Iscriviti', evidenziata: false }] })
+  }
+  function delOpt(i) { onChange({ ...block, options: options.filter((_, j) => j !== i) }) }
+
+  return (
+    <div style={{ padding: '16px', display: 'flex', flexDirection: 'column', gap: '12px' }}>
+      <div>
+        <label style={lb}>Titolo sezione (opzionale)</label>
+        <input value={block.titolo || ''} onChange={e => onChange({ ...block, titolo: e.target.value })} style={inp} placeholder="Scegli la tua quota" />
+      </div>
+      {options.map((opt, i) => (
+        <div key={i} style={{ border: `2px solid ${opt.colore || '#E5E7EB'}30`, borderRadius: '16px', padding: '14px', display: 'flex', flexDirection: 'column', gap: '10px', background: '#FAFAFA' }}>
+          <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
+            <span style={{ fontSize: '12px', fontWeight: '700', color: '#6B7280' }}>Opzione {i + 1}</span>
+            <div style={{ display: 'flex', gap: '8px', alignItems: 'center' }}>
+              <label style={{ display: 'flex', alignItems: 'center', gap: '6px', fontSize: '12px', fontWeight: '600', color: '#374151', cursor: 'pointer' }}>
+                <input type="checkbox" checked={opt.evidenziata || false} onChange={e => updOpt(i, { evidenziata: e.target.checked })} />
+                In evidenza
+              </label>
+              <button onClick={() => delOpt(i)} style={btnDel}>✕</button>
+            </div>
+          </div>
+          <div style={{ display: 'flex', gap: '8px' }}>
+            <div style={{ flex: 1 }}>
+              <label style={lb}>Etichetta</label>
+              <input value={opt.etichetta || ''} onChange={e => updOpt(i, { etichetta: e.target.value })} style={inp} placeholder="Standard" />
+            </div>
+            <div style={{ display: 'flex', gap: '6px', alignItems: 'flex-end' }}>
+              <label style={lb}>Colore</label>
+              <input type="color" value={opt.colore || '#003DA5'} onChange={e => updOpt(i, { colore: e.target.value })} style={{ width: '36px', height: '34px', border: 'none', cursor: 'pointer', borderRadius: '8px' }} />
+            </div>
+          </div>
+          <div style={{ display: 'flex', gap: '8px' }}>
+            <div style={{ flex: 1 }}>
+              <label style={lb}>Prezzo</label>
+              <input value={opt.prezzo || ''} onChange={e => updOpt(i, { prezzo: e.target.value })} style={inp} placeholder="€ 100" />
+            </div>
+            <div style={{ flex: 1 }}>
+              <label style={lb}>Unita / nota</label>
+              <input value={opt.unita || ''} onChange={e => updOpt(i, { unita: e.target.value })} style={inp} placeholder="+ IVA / persona" />
+            </div>
+          </div>
+          <div>
+            <label style={lb}>Cosa include (una voce per riga)</label>
+            <textarea
+              value={(opt.inclusi || []).join('\n')}
+              onChange={e => updInclusi(i, e.target.value)}
+              style={{ ...inp, minHeight: '80px', resize: 'vertical' }}
+              placeholder={"Accesso ai lavori\nMateriali\nCoffee break"}
+            />
+          </div>
+          <div>
+            <label style={lb}>Testo pulsante CTA</label>
+            <input value={opt.cta || ''} onChange={e => updOpt(i, { cta: e.target.value })} style={inp} placeholder="Iscriviti" />
+          </div>
+        </div>
+      ))}
+      <button onClick={addOpt} style={btnAdd}>+ Aggiungi opzione</button>
+    </div>
+  )
+}
+
+// ── Pannello Sezione (wrapper sfondo per ogni blocco) ──────────────
+function SezionePanel({ block, onChange }) {
+  const SFONDI_PRESET = [
+    { label: 'Nessuno', value: '' },
+    { label: 'Grigio chiaro', value: '#F7F8FC' },
+    { label: 'Grigio', value: '#F3F4F6' },
+    { label: 'Blu CNA', value: '#003DA5' },
+    { label: 'Blu scuro', value: '#0F172A' },
+    { label: 'Viola', value: '#5B5FEF' },
+    { label: 'Verde', value: '#ECFDF5' },
+    { label: 'Giallo', value: '#FFFBEB' },
+    { label: 'Rosa', value: '#FDF2F8' },
+  ]
+  const s = block.sezione || {}
+  function upd(patch) { onChange({ ...block, sezione: { ...s, ...patch } }) }
+
+  return (
+    <div style={{ padding: '16px', display: 'flex', flexDirection: 'column', gap: '14px' }}>
+      <div>
+        <label style={lb}>Sfondo sezione</label>
+        <div style={{ display: 'flex', flexWrap: 'wrap', gap: '6px', marginBottom: '8px' }}>
+          {SFONDI_PRESET.map(p => (
+            <button key={p.value} type="button" onClick={() => upd({ sfondo: p.value })}
+              style={{
+                padding: '5px 10px', borderRadius: '20px', fontSize: '12px', fontWeight: '600', cursor: 'pointer',
+                border: s.sfondo === p.value ? '2px solid #003DA5' : '1px solid #E5E7EB',
+                background: p.value || '#fff', color: p.value && ['#003DA5','#0F172A','#5B5FEF'].includes(p.value) ? '#fff' : '#374151',
+              }}>
+              {p.label}
+            </button>
+          ))}
+        </div>
+        <div style={{ display: 'flex', gap: '8px', alignItems: 'center' }}>
+          <label style={{ ...lb, marginBottom: 0 }}>Colore personalizzato</label>
+          <input type="color" value={s.sfondo || '#ffffff'} onChange={e => upd({ sfondo: e.target.value })} style={{ width: '36px', height: '28px', border: 'none', cursor: 'pointer' }} />
+          {s.sfondo && <button onClick={() => upd({ sfondo: '' })} style={{ fontSize: '11px', color: '#9CA3AF', background: 'none', border: 'none', cursor: 'pointer' }}>reset</button>}
+        </div>
+      </div>
+      <div>
+        <label style={lb}>Colore testo (su sfondi scuri)</label>
+        <div style={{ display: 'flex', gap: '8px' }}>
+          {[{ l: 'Auto', v: '' }, { l: 'Bianco', v: '#FFFFFF' }, { l: 'Nero', v: '#0A0A0A' }].map(o => (
+            <button key={o.v} type="button" onClick={() => upd({ colore_testo: o.v })}
+              style={{ padding: '5px 12px', borderRadius: '20px', fontSize: '12px', fontWeight: '600', cursor: 'pointer', border: (s.colore_testo || '') === o.v ? '2px solid #003DA5' : '1px solid #E5E7EB', background: '#fff', color: '#374151' }}>
+              {o.l}
+            </button>
+          ))}
+        </div>
+      </div>
+      <div style={{ display: 'flex', gap: '12px', flexWrap: 'wrap' }}>
+        <div style={{ flex: 1 }}>
+          <label style={lb}>Padding verticale</label>
+          <select value={s.padding_v || 'M'} onChange={e => upd({ padding_v: e.target.value })} style={inp}>
+            <option value="S">Piccolo (24px)</option>
+            <option value="M">Medio (48px)</option>
+            <option value="L">Grande (72px)</option>
+            <option value="XL">Extra (96px)</option>
+            <option value="nessuno">Nessuno</option>
+          </select>
+        </div>
+        <div style={{ flex: 1 }}>
+          <label style={lb}>Larghezza contenuto</label>
+          <select value={s.larghezza || 'contenuto'} onChange={e => upd({ larghezza: e.target.value })} style={inp}>
+            <option value="contenuto">Contenuto (800px)</option>
+            <option value="ampia">Ampia (1100px)</option>
+            <option value="piena">Piena (100%)</option>
+          </select>
+        </div>
+      </div>
+      <div>
+        <label style={lb}>Angoli arrotondati</label>
+        <select value={s.radius || 'nessuno'} onChange={e => upd({ radius: e.target.value })} style={inp}>
+          <option value="nessuno">Nessuno</option>
+          <option value="S">Piccoli (8px)</option>
+          <option value="M">Medi (16px)</option>
+          <option value="L">Grandi (24px)</option>
+        </select>
+      </div>
+    </div>
+  )
+}
+
 function Block({ block, index, total, onChange, onDelete, onMoveUp, onMoveDown }) {
   const [collapsed, setCollapsed] = useState(false)
+  const [activeTab, setActiveTab] = useState('contenuto')
   const typeInfo = BLOCK_TYPES.find(t=>t.tipo===block.tipo) || { label:block.tipo }
   const blockIcon = BLOCK_ICONS[block.tipo]
+  const hasSfondo = !!(block.sezione && block.sezione.sfondo)
   return (
-    <div style={{ border:'1.5px solid #E5E7EB', borderRadius:'20px', overflow:'hidden', marginBottom:'8px', background:'#fff' }}>
+    <div style={{ border: hasSfondo ? `2px solid ${block.sezione.sfondo}60` : '1.5px solid #E5E7EB', borderRadius:'20px', overflow:'hidden', marginBottom:'8px', background:'#fff' }}>
       <div style={{ display:'flex', alignItems:'center', gap:'8px', padding:'10px 14px', background:'#FAFAFA', borderBottom:collapsed?'none':'1px solid #E5E7EB', cursor:'pointer' }} onClick={()=>setCollapsed(c=>!c)}>
         <span style={{ display:'flex', alignItems:'center', width:'20px', height:'20px', flexShrink:0 }}>{blockIcon}</span>
         <span style={{flex:1,fontSize:'13px',fontWeight:'700',color:'#374151'}}>{typeInfo.label}
           {block.tipo==='testo'&&block.html&&<span style={{fontSize:'11px',fontWeight:'400',color:'#9CA3AF',marginLeft:'8px'}}>{block.html.replace(/<[^>]+>/g,'').slice(0,50)}…</span>}
           {block.tipo==='titolo'&&block.testo&&<span style={{fontSize:'11px',fontWeight:'400',color:'#9CA3AF',marginLeft:'8px'}}>{block.testo.slice(0,50)}</span>}
+          {hasSfondo && <span style={{ display:'inline-block', width:'10px', height:'10px', borderRadius:'50%', background:block.sezione.sfondo, marginLeft:'8px', border:'1px solid #E5E7EB', verticalAlign:'middle' }} />}
         </span>
         <button onClick={e=>{e.stopPropagation();onMoveUp()}} disabled={index===0} style={{...btnIcon,opacity:index===0?.3:1}} title="Sposta su">↑</button>
         <button onClick={e=>{e.stopPropagation();onMoveDown()}} disabled={index===total-1} style={{...btnIcon,opacity:index===total-1?.3:1}} title="Sposta giù">↓</button>
@@ -646,23 +864,43 @@ function Block({ block, index, total, onChange, onDelete, onMoveUp, onMoveDown }
       </div>
       {!collapsed&&(
         <>
-          {block.tipo==='testo'       && <RichEditor value={block.html||''} onChange={html=>onChange({...block,html})} minHeight="180px" />}
-          {block.tipo==='stats'       && <StatsEditor block={block} onChange={onChange} />}
-          {block.tipo==='griglia'     && <GrigliaEditor block={block} onChange={onChange} />}
-          {block.tipo==='cta'         && <CtaEditor block={block} onChange={onChange} />}
-          {block.tipo==='immagine'    && <ImmagineEditor block={block} onChange={onChange} />}
-          {block.tipo==='titolo'      && <TitoloEditor block={block} onChange={onChange} />}
-          {block.tipo==='banner'      && <BannerEditor block={block} onChange={onChange} />}
-          {block.tipo==='timeline'    && <TimelineEditor block={block} onChange={onChange} />}
-          {block.tipo==='accordion'   && <AccordionEditor block={block} onChange={onChange} />}
-          {block.tipo==='video'       && <VideoEditor block={block} onChange={onChange} />}
-          {block.tipo==='testimonial' && <TestimonialEditor block={block} onChange={onChange} />}
-          {block.tipo==='countdown'   && <CountdownEditor block={block} onChange={onChange} />}
-          {block.tipo==='badge_list'  && <BadgeListEditor block={block} onChange={onChange} />}
-          {block.tipo==='carosello'   && <CaroselloEditor block={block} onChange={onChange} />}
-          {block.tipo==='social'      && <SocialEditor block={block} onChange={onChange} />}
-          {block.tipo==='programma'   && <ProgrammaEditor block={block} onChange={onChange} />}
-          {block.tipo==='separatore'  && <div style={{padding:'16px',color:'#9CA3AF',fontSize:'13px',textAlign:'center'}}>— Linea separatrice —</div>}
+          {/* Tab switcher */}
+          <div style={{ display:'flex', gap:'0', borderBottom:'1px solid #E5E7EB', background:'#FAFAFA' }}>
+            {['contenuto','sezione'].map(t=>(
+              <button key={t} type="button" onClick={()=>setActiveTab(t)} style={{
+                padding:'8px 16px', border:'none', background: activeTab===t ? '#fff' : 'transparent',
+                fontSize:'12px', fontWeight:'700', color: activeTab===t ? '#003DA5' : '#9CA3AF',
+                cursor:'pointer', borderBottom: activeTab===t ? '2px solid #003DA5' : '2px solid transparent',
+                fontFamily:"'Outfit',sans-serif", textTransform:'capitalize', transition:'all .15s',
+              }}>
+                {t === 'contenuto' ? 'Contenuto' : '\uD83C\uDFA8 Sezione'}
+              </button>
+            ))}
+          </div>
+          {activeTab === 'contenuto' && (
+            <>
+              {block.tipo==='testo'       && <RichEditor value={block.html||''} onChange={html=>onChange({...block,html})} minHeight="180px" />}
+              {block.tipo==='stats'       && <StatsEditor block={block} onChange={onChange} />}
+              {block.tipo==='griglia'     && <GrigliaEditor block={block} onChange={onChange} />}
+              {block.tipo==='cta'         && <CtaEditor block={block} onChange={onChange} />}
+              {block.tipo==='immagine'    && <ImmagineEditor block={block} onChange={onChange} />}
+              {block.tipo==='titolo'      && <TitoloEditor block={block} onChange={onChange} />}
+              {block.tipo==='banner'      && <BannerEditor block={block} onChange={onChange} />}
+              {block.tipo==='timeline'    && <TimelineEditor block={block} onChange={onChange} />}
+              {block.tipo==='accordion'   && <AccordionEditor block={block} onChange={onChange} />}
+              {block.tipo==='video'       && <VideoEditor block={block} onChange={onChange} />}
+              {block.tipo==='testimonial' && <TestimonialEditor block={block} onChange={onChange} />}
+              {block.tipo==='countdown'   && <CountdownEditor block={block} onChange={onChange} />}
+              {block.tipo==='badge_list'  && <BadgeListEditor block={block} onChange={onChange} />}
+              {block.tipo==='carosello'   && <CaroselloEditor block={block} onChange={onChange} />}
+              {block.tipo==='social'      && <SocialEditor block={block} onChange={onChange} />}
+              {block.tipo==='programma'   && <ProgrammaEditor block={block} onChange={onChange} />}
+              {block.tipo==='relatori'    && <RelatoriEditor block={block} onChange={onChange} />}
+              {block.tipo==='pricing'     && <PricingEditor block={block} onChange={onChange} />}
+              {block.tipo==='separatore'  && <div style={{padding:'16px',color:'#9CA3AF',fontSize:'13px',textAlign:'center'}}>— Linea separatrice —</div>}
+            </>
+          )}
+          {activeTab === 'sezione' && <SezionePanel block={block} onChange={onChange} />}
         </>
       )}
     </div>

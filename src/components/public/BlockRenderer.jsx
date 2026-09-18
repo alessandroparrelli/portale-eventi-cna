@@ -145,76 +145,292 @@ export function videoEmbedUrl(url) {
   return null
 }
 
+// ── Wrapper Sezione ────────────────────────────────────────────────
+// Avvolge ogni blocco con sfondo, padding e larghezza personalizzabili
+function SezioneWrapper({ sezione, cp, children }) {
+  if (!sezione || !sezione.sfondo) return <>{children}</>
+  const PADDING = { S: '24px', M: '48px', L: '72px', XL: '96px', nessuno: '0' }
+  const RADIUS  = { nessuno: '0', S: '8px', M: '16px', L: '24px' }
+  const MAX_W   = { contenuto: '800px', ampia: '1100px', piena: '100%' }
+  const pv = PADDING[sezione.padding_v || 'M']
+  const bdr = RADIUS[sezione.radius || 'nessuno']
+  const mxw = MAX_W[sezione.larghezza || 'contenuto']
+  const colore = sezione.colore_testo || (
+    ['#003DA5','#0F172A','#5B5FEF','#1E293B','#0A0A0A'].includes(sezione.sfondo) ? '#FFFFFF' : undefined
+  )
+  return (
+    <div style={{
+      background: sezione.sfondo,
+      borderRadius: bdr,
+      marginLeft: sezione.larghezza === 'piena' ? '-40px' : undefined,
+      marginRight: sezione.larghezza === 'piena' ? '-40px' : undefined,
+      marginBottom: '0',
+    }}>
+      <div style={{
+        maxWidth: mxw,
+        margin: '0 auto',
+        padding: `${pv} clamp(16px, 4vw, 40px)`,
+        color: colore,
+        '--cp-override': colore,
+      }}>
+        {children}
+      </div>
+    </div>
+  )
+}
+
+// ── Relatori Block ─────────────────────────────────────────────────
+function RelatoriBlock({ block, cp }) {
+  const items = block.items || []
+  const colonne = block.colonne || 2
+  const stile = block.stile_card || 'verticale'
+  const minW = colonne === 1 ? '100%' : colonne === 4 ? '160px' : colonne === 3 ? '200px' : '240px'
+
+  return (
+    <Animate animation="fadeup">
+      <div style={{ marginBottom: '24px' }}>
+        {block.titolo && (
+          <h2 style={{ fontSize: 'clamp(20px,3.5vw,32px)', fontWeight: '900', color: '#0A0A0A', textAlign: 'center', margin: '0 0 32px', letterSpacing: '-.03em' }}>
+            {block.titolo}
+          </h2>
+        )}
+        <div style={{
+          display: 'grid',
+          gridTemplateColumns: `repeat(auto-fit, minmax(min(100%, ${minW}), 1fr))`,
+          gap: '20px',
+        }}>
+          {items.map((item, i) => (
+            <Animate key={i} animation="fadeup" delay={i * 80}>
+              {stile === 'orizzontale' ? (
+                <div style={{ display: 'flex', gap: '16px', alignItems: 'flex-start', background: '#fff', border: '1px solid #E5E7EB', borderRadius: '20px', padding: '18px', transition: 'box-shadow .2s, transform .2s' }}
+                  onMouseEnter={e => { e.currentTarget.style.boxShadow = `0 8px 24px ${cp}18`; e.currentTarget.style.transform = 'translateY(-2px)' }}
+                  onMouseLeave={e => { e.currentTarget.style.boxShadow = 'none'; e.currentTarget.style.transform = 'translateY(0)' }}>
+                  {/* Avatar orizzontale */}
+                  <div style={{ flexShrink: 0 }}>
+                    {item.foto_url ? (
+                      <img src={item.foto_url} alt={item.nome} style={{ width: '64px', height: '64px', borderRadius: '50%', objectFit: 'cover', border: `3px solid ${cp}20` }} />
+                    ) : (
+                      <div style={{ width: '64px', height: '64px', borderRadius: '50%', background: `linear-gradient(135deg, ${cp}, ${cp}99)`, display: 'flex', alignItems: 'center', justifyContent: 'center', color: '#fff', fontWeight: '900', fontSize: '22px', flexShrink: 0 }}>
+                        {(item.nome || '?')[0].toUpperCase()}
+                      </div>
+                    )}
+                  </div>
+                  <div style={{ flex: 1, minWidth: 0 }}>
+                    <p style={{ margin: '0 0 2px', fontSize: '16px', fontWeight: '800', color: '#0A0A0A', letterSpacing: '-.02em' }}>{item.nome}</p>
+                    {item.ruolo && <p style={{ margin: '0 0 2px', fontSize: '13px', fontWeight: '700', color: cp }}>{item.ruolo}</p>}
+                    {item.ente && <p style={{ margin: '0 0 6px', fontSize: '12px', color: '#6B7280' }}>{item.ente}</p>}
+                    {item.bio && <p style={{ margin: 0, fontSize: '13px', color: '#374151', lineHeight: '1.6' }}>{item.bio}</p>}
+                  </div>
+                </div>
+              ) : (
+                <div style={{ textAlign: 'center', background: '#fff', border: '1px solid #E5E7EB', borderRadius: '20px', padding: '24px 18px', transition: 'box-shadow .2s, transform .2s' }}
+                  onMouseEnter={e => { e.currentTarget.style.boxShadow = `0 8px 24px ${cp}18`; e.currentTarget.style.transform = 'translateY(-3px)' }}
+                  onMouseLeave={e => { e.currentTarget.style.boxShadow = 'none'; e.currentTarget.style.transform = 'translateY(0)' }}>
+                  {/* Avatar verticale */}
+                  <div style={{ display: 'flex', justifyContent: 'center', marginBottom: '14px' }}>
+                    {item.foto_url ? (
+                      <img src={item.foto_url} alt={item.nome} style={{ width: '80px', height: '80px', borderRadius: '50%', objectFit: 'cover', border: `3px solid ${cp}30`, boxShadow: `0 4px 16px ${cp}20` }} />
+                    ) : (
+                      <div style={{ width: '80px', height: '80px', borderRadius: '50%', background: `linear-gradient(135deg, ${cp}, ${cp}99)`, display: 'flex', alignItems: 'center', justifyContent: 'center', color: '#fff', fontWeight: '900', fontSize: '28px', boxShadow: `0 4px 16px ${cp}30` }}>
+                        {(item.nome || '?')[0].toUpperCase()}
+                      </div>
+                    )}
+                  </div>
+                  <p style={{ margin: '0 0 4px', fontSize: '16px', fontWeight: '800', color: '#0A0A0A', letterSpacing: '-.02em' }}>{item.nome}</p>
+                  {item.ruolo && <p style={{ margin: '0 0 2px', fontSize: '13px', fontWeight: '700', color: cp }}>{item.ruolo}</p>}
+                  {item.ente && <p style={{ margin: '0 0 10px', fontSize: '12px', color: '#9CA3AF' }}>{item.ente}</p>}
+                  {item.bio && <p style={{ margin: 0, fontSize: '13px', color: '#374151', lineHeight: '1.65', textAlign: 'left' }}>{item.bio}</p>}
+                </div>
+              )}
+            </Animate>
+          ))}
+        </div>
+      </div>
+    </Animate>
+  )
+}
+
+// ── Pricing Block ──────────────────────────────────────────────────
+function PricingBlock({ block, cp, formTarget }) {
+  const options = block.options || []
+  return (
+    <Animate animation="fadeup">
+      <div style={{ marginBottom: '24px' }}>
+        {block.titolo && (
+          <h2 style={{ fontSize: 'clamp(20px,3.5vw,32px)', fontWeight: '900', color: '#0A0A0A', textAlign: 'center', margin: '0 0 32px', letterSpacing: '-.03em' }}>
+            {block.titolo}
+          </h2>
+        )}
+        <div style={{ display: 'grid', gridTemplateColumns: `repeat(auto-fit, minmax(min(100%, 240px), 1fr))`, gap: '20px', alignItems: 'stretch' }}>
+          {options.map((opt, i) => {
+            const c = opt.colore || cp
+            const ev = opt.evidenziata
+            return (
+              <Animate key={i} animation="fadeup" delay={i * 100}>
+                <div style={{
+                  border: `2px solid ${ev ? c : '#E5E7EB'}`,
+                  borderRadius: '20px',
+                  padding: '28px 24px',
+                  background: ev ? `linear-gradient(160deg, ${c}08, ${c}03)` : '#fff',
+                  position: 'relative',
+                  display: 'flex',
+                  flexDirection: 'column',
+                  height: '100%',
+                  boxSizing: 'border-box',
+                  boxShadow: ev ? `0 8px 32px ${c}25` : 'none',
+                  transition: 'box-shadow .2s, transform .2s',
+                }}
+                  onMouseEnter={e => { e.currentTarget.style.boxShadow = `0 12px 36px ${c}30`; e.currentTarget.style.transform = 'translateY(-3px)' }}
+                  onMouseLeave={e => { e.currentTarget.style.boxShadow = ev ? `0 8px 32px ${c}25` : 'none'; e.currentTarget.style.transform = 'translateY(0)' }}>
+                  {ev && (
+                    <div style={{ position: 'absolute', top: '-12px', left: '50%', transform: 'translateX(-50%)', background: c, color: '#fff', fontSize: '11px', fontWeight: '800', padding: '4px 14px', borderRadius: '20px', letterSpacing: '.06em', textTransform: 'uppercase', whiteSpace: 'nowrap' }}>
+                      Consigliato
+                    </div>
+                  )}
+                  {/* Badge etichetta */}
+                  <div style={{ marginBottom: '16px' }}>
+                    <span style={{ display: 'inline-block', background: `${c}18`, color: c, fontSize: '12px', fontWeight: '800', padding: '4px 12px', borderRadius: '20px', letterSpacing: '.06em', textTransform: 'uppercase' }}>
+                      {opt.etichetta || ''}
+                    </span>
+                  </div>
+                  {/* Prezzo */}
+                  <p style={{ fontSize: 'clamp(28px,5vw,44px)', fontWeight: '900', color: c, letterSpacing: '-.04em', margin: '0 0 4px', lineHeight: 1 }}>
+                    {opt.prezzo || ''}
+                  </p>
+                  {opt.unita && <p style={{ fontSize: '13px', color: '#6B7280', margin: '0 0 20px', fontWeight: '500' }}>{opt.unita}</p>}
+                  {/* Separatore */}
+                  <hr style={{ border: 'none', borderTop: `1px solid ${c}20`, margin: '0 0 20px' }} />
+                  {/* Lista inclusi */}
+                  <ul style={{ listStyle: 'none', margin: '0 0 24px', padding: 0, flex: 1 }}>
+                    {(opt.inclusi || []).filter(v => v.trim()).map((voce, j) => (
+                      <li key={j} style={{ display: 'flex', alignItems: 'flex-start', gap: '10px', marginBottom: '10px', fontSize: '14px', color: '#374151', lineHeight: '1.5' }}>
+                        <span style={{ flexShrink: 0, marginTop: '2px', color: c }}>
+                          <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round"><polyline points="20 6 9 17 4 12"/></svg>
+                        </span>
+                        {voce}
+                      </li>
+                    ))}
+                  </ul>
+                  {/* CTA */}
+                  {opt.cta && (
+                    <a href={formTarget}
+                      style={{
+                        display: 'block', textAlign: 'center', background: ev ? c : 'transparent',
+                        color: ev ? '#fff' : c, border: `2px solid ${c}`,
+                        borderRadius: '20px', padding: '13px 24px',
+                        fontSize: '14px', fontWeight: '800', textDecoration: 'none',
+                        transition: 'all .15s', marginTop: 'auto',
+                      }}
+                      onMouseEnter={e => { e.currentTarget.style.background = c; e.currentTarget.style.color = '#fff' }}
+                      onMouseLeave={e => { e.currentTarget.style.background = ev ? c : 'transparent'; e.currentTarget.style.color = ev ? '#fff' : c }}>
+                      {opt.cta} →
+                    </a>
+                  )}
+                </div>
+              </Animate>
+            )
+          })}
+        </div>
+      </div>
+    </Animate>
+  )
+}
+
 // ── Block Renderer principale ─────────────────────────────────────
 export default function BlockRenderer({ block, cp = '#003DA5', formTarget = '#lp-form' }) {
   if (!block) return null
 
   if (block.tipo === 'testo') return (
-    <Animate animation="fadeup">
-      <div className="rich-content" style={{ marginBottom: '16px' }} dangerouslySetInnerHTML={{ __html: block.html || '' }} />
-    </Animate>
+    <SezioneWrapper sezione={block.sezione} cp={cp}>
+      <Animate animation="fadeup">
+        <div className="rich-content" style={{ marginBottom: '16px' }} dangerouslySetInnerHTML={{ __html: block.html || '' }} />
+      </Animate>
+    </SezioneWrapper>
   )
 
-  if (block.tipo === 'titolo') return (
-    <Animate animation={block.animazione || 'fadeup'}>
-      <div className="lp-blocco-titolo" style={{ textAlign: block.allineamento || 'center', marginBottom: '32px', marginTop: '8px' }}>
-        <h2 className="lp-section-title" style={{ fontSize: 'clamp(22px,4vw,38px)', fontWeight: '900', color: '#0A0A0A', letterSpacing: '-.03em', margin: '0 0 8px', lineHeight: 1.1 }}>{block.testo}</h2>
-        {block.sottotitolo && <p className="lp-section-sub" style={{ fontSize: 'clamp(13px,2vw,17px)', color: '#6B7280', margin: 0, lineHeight: 1.6 }}>{block.sottotitolo}</p>}
-      </div>
-    </Animate>
-  )
+  if (block.tipo === 'titolo') {
+    const tcol = (block.sezione?.colore_testo) || '#0A0A0A'
+    const tsub = (block.sezione?.colore_testo) ? (block.sezione.colore_testo === '#FFFFFF' ? 'rgba(255,255,255,.75)' : '#6B7280') : '#6B7280'
+    return (
+      <SezioneWrapper sezione={block.sezione} cp={cp}>
+        <Animate animation={block.animazione || 'fadeup'}>
+          <div className="lp-blocco-titolo" style={{ textAlign: block.allineamento || 'center', marginBottom: '32px', marginTop: '8px' }}>
+            <h2 className="lp-section-title" style={{ fontSize: 'clamp(22px,4vw,38px)', fontWeight: '900', color: tcol, letterSpacing: '-.03em', margin: '0 0 8px', lineHeight: 1.1 }}>{block.testo}</h2>
+            {block.sottotitolo && <p className="lp-section-sub" style={{ fontSize: 'clamp(13px,2vw,17px)', color: tsub, margin: 0, lineHeight: 1.6 }}>{block.sottotitolo}</p>}
+          </div>
+        </Animate>
+      </SezioneWrapper>
+    )
+  }
 
-  if (block.tipo === 'stats') return (
-    <Animate animation="fadein">
-      <div className="lp-stats" style={{ display: 'flex', flexWrap: 'wrap', gap: '24px', justifyContent: 'center', padding: '32px 0', marginBottom: '16px' }}>
-        {(block.items || []).map((item, i) => (
-          <Animate key={i} animation="fadeup" delay={i * 100}>
-            <div style={{ textAlign: 'center', flex: '1 1 80px' }}>
-              <p style={{ fontSize: 'clamp(32px,6vw,52px)', fontWeight: '900', color: block.colore || cp, letterSpacing: '-.04em', margin: '0 0 4px', lineHeight: 1 }}>
-                {block.animato !== false ? <AnimatedNumber target={item.num || item.numero || '0'} /> : (item.num || item.numero)}
-              </p>
-              <p style={{ fontSize: '12px', color: '#6B7280', fontWeight: '700', margin: 0, textTransform: 'uppercase', letterSpacing: '.05em' }}>{item.label}</p>
-            </div>
-          </Animate>
-        ))}
-      </div>
-    </Animate>
-  )
+  if (block.tipo === 'stats') {
+    const numCol = (block.sezione?.colore_testo) || (block.colore || cp)
+    const labCol = (block.sezione?.colore_testo === '#FFFFFF') ? 'rgba(255,255,255,.7)' : '#6B7280'
+    return (
+      <SezioneWrapper sezione={block.sezione} cp={cp}>
+        <Animate animation="fadein">
+          <div className="lp-stats" style={{ display: 'flex', flexWrap: 'wrap', gap: '24px', justifyContent: 'center', padding: '32px 0', marginBottom: '16px' }}>
+            {(block.items || []).map((item, i) => (
+              <Animate key={i} animation="fadeup" delay={i * 100}>
+                <div style={{ textAlign: 'center', flex: '1 1 80px' }}>
+                  <p style={{ fontSize: 'clamp(32px,6vw,52px)', fontWeight: '900', color: numCol, letterSpacing: '-.04em', margin: '0 0 4px', lineHeight: 1 }}>
+                    {block.animato !== false ? <AnimatedNumber target={item.num || item.numero || '0'} /> : (item.num || item.numero)}
+                  </p>
+                  <p style={{ fontSize: '12px', color: labCol, fontWeight: '700', margin: 0, textTransform: 'uppercase', letterSpacing: '.05em' }}>{item.label}</p>
+                </div>
+              </Animate>
+            ))}
+          </div>
+        </Animate>
+      </SezioneWrapper>
+    )
+  }
 
   if (block.tipo === 'griglia') {
     const cols = block.cols || block.colonne || []
+    const cardBg = (block.sezione?.sfondo && ['#003DA5','#0F172A','#5B5FEF'].includes(block.sezione.sfondo)) ? 'rgba(255,255,255,0.12)' : '#fff'
+    const cardBorder = (block.sezione?.sfondo && ['#003DA5','#0F172A','#5B5FEF'].includes(block.sezione.sfondo)) ? 'rgba(255,255,255,0.2)' : '#E5E7EB'
+    const titCol = (block.sezione?.colore_testo) || '#0A0A0A'
+    const tesCol = (block.sezione?.colore_testo === '#FFFFFF') ? 'rgba(255,255,255,.75)' : '#6B7280'
     return (
-      <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(min(100%, 260px), 1fr))', gap: '16px', marginBottom: '24px' }}>
-        {cols.map((col, i) => (
-          <Animate key={i} animation="fadeup" delay={i * 80}>
-            <div
-              style={{ background: '#fff', border: '1px solid #E5E7EB', borderRadius: '20px', padding: '22px', height: '100%', boxSizing: 'border-box', transition: 'box-shadow .2s, transform .2s' }}
-              onMouseEnter={e => { e.currentTarget.style.boxShadow = `0 8px 24px ${cp}20`; e.currentTarget.style.transform = 'translateY(-2px)' }}
-              onMouseLeave={e => { e.currentTarget.style.boxShadow = 'none'; e.currentTarget.style.transform = 'translateY(0)' }}
-            >
-              {col.icona && <div style={{ marginBottom: '10px' }}><IconDisplay iconId={col.icona} color={col.icona_colore||cp} size={32} /></div>}
-              {col.titolo && <h3 style={{ fontSize: '16px', fontWeight: '800', color: '#0A0A0A', margin: '0 0 8px', letterSpacing: '-.02em' }}>{col.titolo}</h3>}
-              {col.testo && <p style={{ fontSize: '14px', color: '#6B7280', lineHeight: '1.65', margin: 0 }}>{col.testo}</p>}
-            </div>
-          </Animate>
-        ))}
-      </div>
+      <SezioneWrapper sezione={block.sezione} cp={cp}>
+        <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(min(100%, 260px), 1fr))', gap: '16px', marginBottom: '24px' }}>
+          {cols.map((col, i) => (
+            <Animate key={i} animation="fadeup" delay={i * 80}>
+              <div
+                style={{ background: cardBg, border: `1px solid ${cardBorder}`, borderRadius: '20px', padding: '22px', height: '100%', boxSizing: 'border-box', transition: 'box-shadow .2s, transform .2s' }}
+                onMouseEnter={e => { e.currentTarget.style.boxShadow = `0 8px 24px ${cp}20`; e.currentTarget.style.transform = 'translateY(-2px)' }}
+                onMouseLeave={e => { e.currentTarget.style.boxShadow = 'none'; e.currentTarget.style.transform = 'translateY(0)' }}
+              >
+                {col.icona && <div style={{ marginBottom: '10px' }}><IconDisplay iconId={col.icona} color={col.icona_colore||cp} size={32} /></div>}
+                {col.titolo && <h3 style={{ fontSize: '16px', fontWeight: '800', color: titCol, margin: '0 0 8px', letterSpacing: '-.02em' }}>{col.titolo}</h3>}
+                {col.testo && <p style={{ fontSize: '14px', color: tesCol, lineHeight: '1.65', margin: 0 }}>{col.testo}</p>}
+              </div>
+            </Animate>
+          ))}
+        </div>
+      </SezioneWrapper>
     )
   }
 
   if (block.tipo === 'badge_list') {
     const colonne = block.colonne || 2
+    const badgeBg = (block.sezione?.sfondo && ['#003DA5','#0F172A','#5B5FEF'].includes(block.sezione.sfondo)) ? 'rgba(255,255,255,0.12)' : '#fff'
+    const badgeBorder = (block.sezione?.sfondo && ['#003DA5','#0F172A','#5B5FEF'].includes(block.sezione.sfondo)) ? 'rgba(255,255,255,0.2)' : '#E5E7EB'
+    const badgeTxt = (block.sezione?.colore_testo) || '#374151'
     return (
-      <Animate animation="fadeup">
-        <div style={{ display: 'grid', gridTemplateColumns: `repeat(auto-fit, minmax(min(100%, ${colonne === 1 ? '100%' : colonne === 3 ? '150px' : '210px'}), 1fr))`, gap: '10px', marginBottom: '24px' }}>
-          {(block.items || []).map((item, i) => (
-            <div key={i} style={{ display: 'flex', alignItems: 'center', gap: '10px', padding: '12px 14px', background: '#fff', border: '1px solid #E5E7EB', borderRadius: '20px' }}>
-              <IconDisplay iconId={item.icona||'check'} color={item.icona_colore||block.colore||cp} size={20} />
-              <span style={{ fontSize: '14px', color: '#374151', fontWeight: '500' }}>{item.testo}</span>
-            </div>
-          ))}
-        </div>
-      </Animate>
+      <SezioneWrapper sezione={block.sezione} cp={cp}>
+        <Animate animation="fadeup">
+          <div style={{ display: 'grid', gridTemplateColumns: `repeat(auto-fit, minmax(min(100%, ${colonne === 1 ? '100%' : colonne === 3 ? '150px' : '210px'}), 1fr))`, gap: '10px', marginBottom: '24px' }}>
+            {(block.items || []).map((item, i) => (
+              <div key={i} style={{ display: 'flex', alignItems: 'center', gap: '10px', padding: '12px 14px', background: badgeBg, border: `1px solid ${badgeBorder}`, borderRadius: '20px' }}>
+                <IconDisplay iconId={item.icona||'check'} color={item.icona_colore||block.colore||cp} size={20} />
+                <span style={{ fontSize: '14px', color: badgeTxt, fontWeight: '500' }}>{item.testo}</span>
+              </div>
+            ))}
+          </div>
+        </Animate>
+      </SezioneWrapper>
     )
   }
 
@@ -224,16 +440,18 @@ export default function BlockRenderer({ block, cp = '#003DA5', formTarget = '#lp
     const btnColor = block.stile === 'contorno' ? (block.colore || cp) : '#fff'
     const btnBorder = block.stile === 'contorno' ? `2px solid ${block.colore || cp}` : 'none'
     return (
-      <Animate animation="fadein">
-        <div style={{ background: `linear-gradient(135deg, ${cp}10, ${cp}06)`, border: `1px solid ${cp}25`, borderRadius: '16px', padding: '36px 24px', textAlign: 'center', marginBottom: '24px' }}>
-          {block.titolo && <h2 style={{ fontSize: 'clamp(18px,3vw,28px)', fontWeight: '900', color: '#0A0A0A', letterSpacing: '-.03em', margin: '0 0 20px' }}>{block.titolo}</h2>}
-          <a href={formTarget} style={{ display: 'inline-block', background: btnBg, color: btnColor, border: btnBorder, borderRadius: br, padding: '14px 36px', fontSize: '15px', fontWeight: '800', textDecoration: 'none', transition: 'transform .15s,box-shadow .15s' }}
-            onMouseEnter={e => { e.currentTarget.style.transform = 'translateY(-2px)'; e.currentTarget.style.boxShadow = `0 8px 20px ${cp}40` }}
-            onMouseLeave={e => { e.currentTarget.style.transform = 'translateY(0)'; e.currentTarget.style.boxShadow = 'none' }}>
-            {block.testo_btn || block.testo || 'Iscriviti →'}
-          </a>
-        </div>
-      </Animate>
+      <SezioneWrapper sezione={block.sezione} cp={cp}>
+        <Animate animation="fadein">
+          <div style={{ background: `linear-gradient(135deg, ${cp}10, ${cp}06)`, border: `1px solid ${cp}25`, borderRadius: '16px', padding: '36px 24px', textAlign: 'center', marginBottom: '24px' }}>
+            {block.titolo && <h2 style={{ fontSize: 'clamp(18px,3vw,28px)', fontWeight: '900', color: '#0A0A0A', letterSpacing: '-.03em', margin: '0 0 20px' }}>{block.titolo}</h2>}
+            <a href={formTarget} style={{ display: 'inline-block', background: btnBg, color: btnColor, border: btnBorder, borderRadius: br, padding: '14px 36px', fontSize: '15px', fontWeight: '800', textDecoration: 'none', transition: 'transform .15s,box-shadow .15s' }}
+              onMouseEnter={e => { e.currentTarget.style.transform = 'translateY(-2px)'; e.currentTarget.style.boxShadow = `0 8px 20px ${cp}40` }}
+              onMouseLeave={e => { e.currentTarget.style.transform = 'translateY(0)'; e.currentTarget.style.boxShadow = 'none' }}>
+              {block.testo_btn || block.testo || 'Iscriviti \u2192'}
+            </a>
+          </div>
+        </Animate>
+      </SezioneWrapper>
     )
   }
 
@@ -246,113 +464,151 @@ export default function BlockRenderer({ block, cp = '#003DA5', formTarget = '#lp
     }
     const c = configs[block.stile || 'info'] || configs.info
     return (
-      <Animate animation="slidein">
-        <div style={{ background: c.bg, border: `1px solid ${c.border}`, borderRadius: '20px', padding: '16px 20px', marginBottom: '16px', display: 'flex', alignItems: 'flex-start', gap: '12px' }}>
-          {block.icona && <span style={{ fontSize: '18px', flexShrink: 0 }}>{block.icona}</span>}
-          <p style={{ margin: 0, fontSize: '14px', color: c.color, lineHeight: '1.6', fontWeight: '500' }}>{block.testo}</p>
-        </div>
-      </Animate>
+      <SezioneWrapper sezione={block.sezione} cp={cp}>
+        <Animate animation="slidein">
+          <div style={{ background: c.bg, border: `1px solid ${c.border}`, borderRadius: '20px', padding: '16px 20px', marginBottom: '16px', display: 'flex', alignItems: 'flex-start', gap: '12px' }}>
+            {block.icona && <span style={{ fontSize: '18px', flexShrink: 0 }}>{block.icona}</span>}
+            <p style={{ margin: 0, fontSize: '14px', color: c.color, lineHeight: '1.6', fontWeight: '500' }}>{block.testo}</p>
+          </div>
+        </Animate>
+      </SezioneWrapper>
     )
   }
 
   if (block.tipo === 'timeline') return (
-    <Animate animation="fadeup">
-      <div style={{ position: 'relative', marginBottom: '32px' }}>
-        <div style={{ position: 'absolute', left: '18px', top: '8px', bottom: '8px', width: '2px', background: `linear-gradient(to bottom, ${cp}, ${cp}30)` }} />
-        {(block.items || []).map((item, i) => (
-          <Animate key={i} animation="slidein" delay={i * 100}>
-            <div style={{ display: 'flex', gap: '20px', marginBottom: '24px', paddingLeft: '2px' }}>
-              <div style={{ flexShrink: 0, width: '36px', height: '36px', borderRadius: '50%', background: cp, color: '#fff', display: 'flex', alignItems: 'center', justifyContent: 'center', fontSize: '11px', fontWeight: '800', zIndex: 1, boxShadow: `0 0 0 4px ${cp}18` }}>
-                {item.anno || i + 1}
+    <SezioneWrapper sezione={block.sezione} cp={cp}>
+      <Animate animation="fadeup">
+        <div style={{ position: 'relative', marginBottom: '32px' }}>
+          <div style={{ position: 'absolute', left: '18px', top: '8px', bottom: '8px', width: '2px', background: `linear-gradient(to bottom, ${cp}, ${cp}30)` }} />
+          {(block.items || []).map((item, i) => (
+            <Animate key={i} animation="slidein" delay={i * 100}>
+              <div style={{ display: 'flex', gap: '20px', marginBottom: '24px', paddingLeft: '2px' }}>
+                <div style={{ flexShrink: 0, width: '36px', height: '36px', borderRadius: '50%', background: cp, color: '#fff', display: 'flex', alignItems: 'center', justifyContent: 'center', fontSize: '11px', fontWeight: '800', zIndex: 1, boxShadow: `0 0 0 4px ${cp}18` }}>
+                  {item.anno || i + 1}
+                </div>
+                <div style={{ paddingTop: '4px', flex: 1, minWidth: 0 }}>
+                  <h4 style={{ fontSize: '16px', fontWeight: '800', color: (block.sezione?.colore_testo) || '#0A0A0A', margin: '0 0 5px', letterSpacing: '-.02em' }}>{item.titolo}</h4>
+                  <p style={{ fontSize: '14px', color: (block.sezione?.colore_testo === '#FFFFFF') ? 'rgba(255,255,255,.75)' : '#6B7280', lineHeight: '1.65', margin: 0, overflowWrap: 'break-word' }}>{item.testo}</p>
+                </div>
               </div>
-              <div style={{ paddingTop: '4px', flex: 1, minWidth: 0 }}>
-                <h4 style={{ fontSize: '16px', fontWeight: '800', color: '#0A0A0A', margin: '0 0 5px', letterSpacing: '-.02em' }}>{item.titolo}</h4>
-                <p style={{ fontSize: '14px', color: '#6B7280', lineHeight: '1.65', margin: 0, overflowWrap: 'break-word' }}>{item.testo}</p>
-              </div>
-            </div>
-          </Animate>
-        ))}
-      </div>
-    </Animate>
+            </Animate>
+          ))}
+        </div>
+      </Animate>
+    </SezioneWrapper>
   )
 
   if (block.tipo === 'accordion') return (
-    <Animate animation="fadeup">
-      <div style={{ marginBottom: '24px' }}>
-        {(block.items || []).map((item, i) => (
-          <AccordionItem key={i} domanda={item.domanda} risposta={item.risposta} cp={cp} />
-        ))}
-      </div>
-    </Animate>
+    <SezioneWrapper sezione={block.sezione} cp={cp}>
+      <Animate animation="fadeup">
+        <div style={{ marginBottom: '24px' }}>
+          {(block.items || []).map((item, i) => (
+            <AccordionItem key={i} domanda={item.domanda} risposta={item.risposta} cp={cp} />
+          ))}
+        </div>
+      </Animate>
+    </SezioneWrapper>
   )
 
   if (block.tipo === 'video') {
     const embed = videoEmbedUrl(block.url)
     if (!embed) return null
     return (
-      <Animate animation="fadein">
-        <div style={{ marginBottom: '24px' }}>
-          <div style={{ position: 'relative', paddingBottom: '56.25%', height: 0, borderRadius: '20px', overflow: 'hidden', boxShadow: '0 8px 32px rgba(0,0,0,0.15)' }}>
-            <iframe src={embed} style={{ position: 'absolute', top: 0, left: 0, width: '100%', height: '100%', border: 'none' }} allowFullScreen title="video" />
+      <SezioneWrapper sezione={block.sezione} cp={cp}>
+        <Animate animation="fadein">
+          <div style={{ marginBottom: '24px' }}>
+            <div style={{ position: 'relative', paddingBottom: '56.25%', height: 0, borderRadius: '20px', overflow: 'hidden', boxShadow: '0 8px 32px rgba(0,0,0,0.15)' }}>
+              <iframe src={embed} style={{ position: 'absolute', top: 0, left: 0, width: '100%', height: '100%', border: 'none' }} allowFullScreen title="video" />
+            </div>
+            {block.didascalia && <p style={{ fontSize: '13px', color: '#9CA3AF', textAlign: 'center', marginTop: '8px', fontStyle: 'italic' }}>{block.didascalia}</p>}
           </div>
-          {block.didascalia && <p style={{ fontSize: '13px', color: '#9CA3AF', textAlign: 'center', marginTop: '8px', fontStyle: 'italic' }}>{block.didascalia}</p>}
-        </div>
-      </Animate>
+        </Animate>
+      </SezioneWrapper>
     )
   }
 
   if (block.tipo === 'testimonial') return (
-    <Animate animation="fadeup">
-      <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(min(100%, 270px), 1fr))', gap: '16px', marginBottom: '24px' }}>
-        {(block.items || []).map((item, i) => (
-          <Animate key={i} animation="fadeup" delay={i * 100}>
-            <div style={{ background: '#fff', border: '1px solid #E5E7EB', borderRadius: '20px', padding: '22px', position: 'relative' }}>
-              <span style={{ fontSize: '36px', color: cp, opacity: .12, position: 'absolute', top: '10px', left: '18px', lineHeight: 1, fontFamily: 'serif' }}>"</span>
-              <p style={{ fontSize: '14px', color: '#374151', lineHeight: '1.7', margin: '0 0 14px', position: 'relative', zIndex: 1, fontStyle: 'italic' }}>{item.testo}</p>
-              <div style={{ display: 'flex', alignItems: 'center', gap: '10px' }}>
-                <div style={{ width: '34px', height: '34px', borderRadius: '50%', background: cp, display: 'flex', alignItems: 'center', justifyContent: 'center', color: '#fff', fontWeight: '800', fontSize: '13px', flexShrink: 0 }}>
-                  {((item.nome || '?')[0] || '?').toUpperCase()}
-                </div>
-                <div>
-                  <p style={{ margin: 0, fontSize: '13px', fontWeight: '700', color: '#0A0A0A' }}>{item.nome}</p>
-                  {item.ruolo && <p style={{ margin: 0, fontSize: '12px', color: '#9CA3AF' }}>{item.ruolo}</p>}
+    <SezioneWrapper sezione={block.sezione} cp={cp}>
+      <Animate animation="fadeup">
+        <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(min(100%, 270px), 1fr))', gap: '16px', marginBottom: '24px' }}>
+          {(block.items || []).map((item, i) => (
+            <Animate key={i} animation="fadeup" delay={i * 100}>
+              <div style={{ background: '#fff', border: '1px solid #E5E7EB', borderRadius: '20px', padding: '22px', position: 'relative' }}>
+                <span style={{ fontSize: '36px', color: cp, opacity: .12, position: 'absolute', top: '10px', left: '18px', lineHeight: 1, fontFamily: 'serif' }}>"</span>
+                <p style={{ fontSize: '14px', color: '#374151', lineHeight: '1.7', margin: '0 0 14px', position: 'relative', zIndex: 1, fontStyle: 'italic' }}>{item.testo}</p>
+                <div style={{ display: 'flex', alignItems: 'center', gap: '10px' }}>
+                  <div style={{ width: '34px', height: '34px', borderRadius: '50%', background: cp, display: 'flex', alignItems: 'center', justifyContent: 'center', color: '#fff', fontWeight: '800', fontSize: '13px', flexShrink: 0 }}>
+                    {((item.nome || '?')[0] || '?').toUpperCase()}
+                  </div>
+                  <div>
+                    <p style={{ margin: 0, fontSize: '13px', fontWeight: '700', color: '#0A0A0A' }}>{item.nome}</p>
+                    {item.ruolo && <p style={{ margin: 0, fontSize: '12px', color: '#9CA3AF' }}>{item.ruolo}</p>}
+                  </div>
                 </div>
               </div>
-            </div>
-          </Animate>
-        ))}
-      </div>
-    </Animate>
+            </Animate>
+          ))}
+        </div>
+      </Animate>
+    </SezioneWrapper>
   )
 
   if (block.tipo === 'countdown') return (
-    <Animate animation="fadein">
-      <div style={{ marginBottom: '24px' }}>
-        <Countdown data={block.data} titolo={block.titolo} messaggio_scaduto={block.messaggio_scaduto} cp={cp} />
-      </div>
-    </Animate>
+    <SezioneWrapper sezione={block.sezione} cp={cp}>
+      <Animate animation="fadein">
+        <div style={{ marginBottom: '24px' }}>
+          <Countdown data={block.data} titolo={block.titolo} messaggio_scaduto={block.messaggio_scaduto} cp={cp} />
+        </div>
+      </Animate>
+    </SezioneWrapper>
   )
 
   if (block.tipo === 'immagine') {
     const maxW = block.size === 'small' ? '33%' : block.size === 'medium' ? '60%' : '100%'
     const align = block.align || 'center'
     return (
-      <Animate animation="fadein">
-        <div style={{ marginBottom: '16px', textAlign: align }}>
-          {block.src && <img src={block.src} alt={block.didascalia || ''} style={{ maxWidth: maxW, width: '100%', display: 'inline-block', borderRadius: '20px' }} />}
-          {block.didascalia && <p style={{ fontSize: '13px', color: '#9CA3AF', marginTop: '8px', fontStyle: 'italic' }}>{block.didascalia}</p>}
-        </div>
-      </Animate>
+      <SezioneWrapper sezione={block.sezione} cp={cp}>
+        <Animate animation="fadein">
+          <div style={{ marginBottom: '16px', textAlign: align }}>
+            {block.src && <img src={block.src} alt={block.didascalia || ''} style={{ maxWidth: maxW, width: '100%', display: 'inline-block', borderRadius: '20px' }} />}
+            {block.didascalia && <p style={{ fontSize: '13px', color: '#9CA3AF', marginTop: '8px', fontStyle: 'italic' }}>{block.didascalia}</p>}
+          </div>
+        </Animate>
+      </SezioneWrapper>
     )
   }
 
   if (block.tipo === 'separatore') return <hr style={{ border: 'none', borderTop: '1px solid #E5E7EB', margin: '32px 0' }} />
 
-  if (block.tipo === 'programma') return <ProgrammaBlock block={block} cp={cp} />
+  if (block.tipo === 'programma') return (
+    <SezioneWrapper sezione={block.sezione} cp={cp}>
+      <ProgrammaBlock block={block} cp={cp} />
+    </SezioneWrapper>
+  )
 
-  if (block.tipo === 'carosello') return <CaroselloBlock block={block} />
+  if (block.tipo === 'carosello') return (
+    <SezioneWrapper sezione={block.sezione} cp={cp}>
+      <CaroselloBlock block={block} />
+    </SezioneWrapper>
+  )
 
-  if (block.tipo === 'social') return <SocialBlock block={block} cp={cp} />
+  if (block.tipo === 'social') return (
+    <SezioneWrapper sezione={block.sezione} cp={cp}>
+      <SocialBlock block={block} cp={cp} />
+    </SezioneWrapper>
+  )
+
+  if (block.tipo === 'relatori') return (
+    <SezioneWrapper sezione={block.sezione} cp={cp}>
+      <RelatoriBlock block={block} cp={cp} />
+    </SezioneWrapper>
+  )
+
+  if (block.tipo === 'pricing') return (
+    <SezioneWrapper sezione={block.sezione} cp={cp}>
+      <PricingBlock block={block} cp={cp} formTarget={formTarget} />
+    </SezioneWrapper>
+  )
 
   return null
 }
