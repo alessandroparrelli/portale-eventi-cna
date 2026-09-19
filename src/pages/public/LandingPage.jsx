@@ -12,6 +12,7 @@ import FormIscrizione from './FormIscrizione'
 import SocialLinks from '../../components/SocialLinks'
 import { useSocial } from '../../hooks/useSocial'
 import BlockRenderer from '../../components/public/BlockRenderer'
+import ContenutoBlocks from '../../components/public/ContenutoBlocks'
 
 /* ── PATTERN PALLINI DECORATIVI ──────────────────────── */
 function generaPalliniSVG(c1, c2, opacita, angolo) {
@@ -357,8 +358,10 @@ export default function LandingPage() {
     ? { backgroundImage:`url(${event.immagine_hero})`,backgroundSize:'cover',backgroundPosition: lh.bg_position || 'center top' }
     : { background: lh.hero_sfondo || tema.colore_primario || '#003DA5' }
 
+  const _pgMxW = {L:'1280px',M:'1080px',S:'860px'}[tema.larghezza_pagina||'auto']
+  const _pgStyle = _pgMxW ? {maxWidth:_pgMxW, margin:'0 auto', boxShadow:'0 0 60px rgba(0,0,0,0.12)'} : {}
   return (
-    <div style={{...s.root, backgroundColor: tema.sfondo_pagina || '#FFFFFF', position: 'relative'}}>
+    <div style={{...s.root, backgroundColor: tema.sfondo_pagina || '#FFFFFF', position: 'relative', ..._pgStyle}}>
       {isAdminPreview && (
         <div style={{ position:'sticky', top:0, zIndex:9999, background:'#F59E0B', color:'#000',
           textAlign:'center', padding:'8px 16px', fontSize:13, fontWeight:700,
@@ -530,9 +533,11 @@ export default function LandingPage() {
         {/* BLOCCHI CONTENUTO */}
         {(event.sezioni||[]).length > 0 && (
           <div style={{ marginBottom:'16px' }}>
-            {event.sezioni.map((block,i) => (
-              <BlockRenderer key={block.id||i} block={block} cp={event.colore_primario||'#003DA5'} formTarget="#form-iscrizione"/>
-            ))}
+            <ContenutoBlocks
+              blocks={event.sezioni}
+              cp={event.colore_primario||tema.colore_primario||'#003DA5'}
+              formTarget="#form-iscrizione"
+            />
           </div>
         )}
 
