@@ -882,9 +882,23 @@ export default function EventoEditorPage() {
 
             {/* Logo header */}
             <div style={{ marginBottom:'24px', padding:'16px', background:'#F9FAFB', border:'1px solid #E8ECF4', borderRadius:'20px' }}>
-              <p style={{ fontSize:'12px', fontWeight:'700', color:'#6B7280', textTransform:'uppercase', letterSpacing:'.06em', margin:'0 0 6px' }}>
-                🏷 Logo header
-              </p>
+              {/* Toggle mostra logo */}
+              <div style={{ display:'flex', alignItems:'center', justifyContent:'space-between', marginBottom:'10px' }}>
+                <p style={{ fontSize:'12px', fontWeight:'700', color:'#6B7280', textTransform:'uppercase', letterSpacing:'.06em', margin:0 }}>🏷 Logo header</p>
+                <button
+                  onClick={() => setH('mostra_logo')(event.layout_hero?.mostra_logo === false ? true : false)}
+                  style={{
+                    display:'flex', alignItems:'center', gap:'6px',
+                    padding:'5px 12px', borderRadius:'20px', cursor:'pointer', fontSize:'12px', fontWeight:'700',
+                    fontFamily:"'Inter',sans-serif", transition:'all .15s',
+                    border: event.layout_hero?.mostra_logo === false ? '1px solid #FECACA' : '1px solid #BBF7D0',
+                    background: event.layout_hero?.mostra_logo === false ? '#FEF2F2' : '#F0FDF4',
+                    color: event.layout_hero?.mostra_logo === false ? '#DC2626' : '#16A34A',
+                  }}>
+                  {event.layout_hero?.mostra_logo === false ? '🙈 Logo nascosto' : '👁 Logo visibile'}
+                </button>
+              </div>
+
               <p style={{ fontSize:'12px', color:'#9CA3AF', margin:'0 0 12px', lineHeight:'1.5' }}>
                 Scegli il logo che apparirà nell'header della pagina evento.
               </p>
@@ -1010,11 +1024,33 @@ export default function EventoEditorPage() {
 
             {/* Testi hero */}
             <div style={{ marginTop:'16px', display:'grid', gridTemplateColumns:'1fr', gap:'12px' }}>
-              <Field label="Titolo principale (H1)" hint="Uguale al titolo evento — modificalo dalla tab Info">
-                <div style={{ padding:'10px 14px', background:'#F9FAFB', border:'1px solid #E8ECF4', borderRadius:'16px', fontSize:'14px', color:'#9CA3AF', fontStyle:'italic' }}>
+              <div>
+                <div style={{ display:'flex', alignItems:'center', justifyContent:'space-between', marginBottom:'6px' }}>
+                  <label style={{ fontSize:'12px', fontWeight:'700', color:'#374151' }}>Titolo principale (H1)</label>
+                  <button
+                    onClick={() => setH('mostra_titolo')(event.layout_hero?.mostra_titolo === false ? true : false)}
+                    style={{
+                      display:'flex', alignItems:'center', gap:'6px',
+                      padding:'5px 12px', borderRadius:'20px', cursor:'pointer', fontSize:'12px', fontWeight:'700',
+                      fontFamily:"'Inter',sans-serif", transition:'all .15s',
+                      border: event.layout_hero?.mostra_titolo === false ? '1px solid #FECACA' : '1px solid #BBF7D0',
+                      background: event.layout_hero?.mostra_titolo === false ? '#FEF2F2' : '#F0FDF4',
+                      color: event.layout_hero?.mostra_titolo === false ? '#DC2626' : '#16A34A',
+                    }}>
+                    {event.layout_hero?.mostra_titolo === false ? '🙈 Titolo nascosto' : '👁 Titolo visibile'}
+                  </button>
+                </div>
+                <div style={{ padding:'10px 14px', background:'#F9FAFB', border:'1px solid #E8ECF4', borderRadius:'16px', fontSize:'14px', color:'#9CA3AF', fontStyle:'italic',
+                  opacity: event.layout_hero?.mostra_titolo === false ? 0.4 : 1 }}>
                   {event.titolo || 'Titolo evento…'}
                 </div>
-              </Field>
+                {event.layout_hero?.mostra_titolo === false && (
+                  <p style={{ fontSize:'11px', color:'#DC2626', margin:'4px 0 0', display:'flex', alignItems:'center', gap:'4px' }}>
+                    ⚠️ Il titolo non sarà visibile sull'hero. Assicurati che l'immagine di sfondo comunichi il nome dell'evento.
+                  </p>
+                )}
+              </div>
+
               <Field label="Secondo titolo (H2 — opzionale)" hint="Appare sotto il titolo principale, più piccolo">
                 <Input
                   value={event.layout_hero?.titolo2||''}

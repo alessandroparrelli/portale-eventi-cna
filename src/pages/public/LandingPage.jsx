@@ -432,7 +432,8 @@ export default function LandingPage() {
           display: 'flex', flexDirection: 'column',
           alignItems: lh.allineamento === 'sinistra' ? 'flex-start' : 'center',
         }}>
-          {/* Logo */}
+          {/* Logo — nascondibile */}
+          {lh.mostra_logo !== false && (
           <div className="ev-hero-logo" style={{ marginBottom: 'clamp(20px,4vw,36px)' }}>
             <div style={{
               background: (lh.logo_sfondo || tema.logo_bg) === 'colore_primario' ? (tema.colore_primario || '#003DA5')
@@ -449,8 +450,10 @@ export default function LandingPage() {
               />
             </div>
           </div>
+          )}
 
-          {/* H1 */}
+          {/* H1 — nascondibile */}
+          {lh.mostra_titolo !== false && (
           <h1 style={{
             ...s.heroTitle,
             color:         lh.titolo_colore     || '#FFFFFF',
@@ -461,6 +464,7 @@ export default function LandingPage() {
             maxWidth:      '100%',
             wordBreak:     'break-word',
           }}>{event.titolo}</h1>
+          )}
 
           {/* H2 secondo titolo */}
           {lh.titolo2 && (
