@@ -36,6 +36,8 @@ export const TEMA_DEFAULT = {
   pattern_colore1:     '#003DA5',
   pattern_colore2:     '#E8792F',
   pattern_opacita:     '25',       // 0-100
+  // Layout pagina
+  larghezza_pagina:    'auto',     // auto | S | M | L
 }
 
 export function temaConDefault(t) {
@@ -341,6 +343,33 @@ export default function AspettoTab({ event, setEvent }) {
               value={tema.testo_colore}
               onChange={v => setT('testo_colore', v)}
             />
+          </div>
+        </Sezione>
+
+        {/* ── Sezione: Larghezza pagina ── */}
+        <Sezione title="Larghezza pagina" icon="↔️">
+          <div>
+            <label style={sLabel}>Larghezza massima del contenuto</label>
+            <p style={sHint}>Controlla quanto si allarga la pagina su schermi grandi. Il contenuto interno rimane sempre centrato e adattivo.</p>
+            <div style={{ display:'flex', gap:'8px', marginTop:'8px', flexWrap:'wrap' }}>
+              {[
+                { v:'auto', l:'Automatica', sub:'100% larghezza' },
+                { v:'L',    l:'Larga',      sub:'1280px max' },
+                { v:'M',    l:'Media',      sub:'1080px max' },
+                { v:'S',    l:'Stretta',    sub:'860px max' },
+              ].map(({v, l, sub}) => {
+                const att = (tema.larghezza_pagina||'auto') === v
+                return (
+                  <button key={v} type="button" onClick={() => setT('larghezza_pagina', v)}
+                    style={{ flex:'1 1 auto', minWidth:'100px', padding:'10px 8px', border:`1.5px solid ${att?'#003DA5':'#E5E7EB'}`,
+                      borderRadius:'16px', background: att?'#EBF0FA':'#fff', cursor:'pointer',
+                      textAlign:'center', fontFamily:"'Outfit',sans-serif" }}>
+                    <p style={{ margin:0, fontSize:'13px', fontWeight:'700', color:att?'#003DA5':'#374151' }}>{l}</p>
+                    <p style={{ margin:'2px 0 0', fontSize:'11px', color:att?'#5B5FEF':'#9CA3AF' }}>{sub}</p>
+                  </button>
+                )
+              })}
+            </div>
           </div>
         </Sezione>
 

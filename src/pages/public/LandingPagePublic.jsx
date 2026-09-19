@@ -394,8 +394,10 @@ export default function LandingPagePublic() {
   const titolo2Grassetto = !!lh.titolo2_grassetto
   const hasContenuto = lp.contenuto&&lp.contenuto.length>0
 
+  const _pgMxW = {L:'1280px',M:'1080px',S:'860px'}[tema.larghezza_pagina||'auto']
+  const _pgStyle = _pgMxW ? {maxWidth:_pgMxW,margin:'0 auto',boxShadow:'0 0 60px rgba(0,0,0,0.12)'} : {}
   return (
-    <div style={{fontFamily:'Inter,sans-serif',background:tema.sfondo_pagina||'#fff',minHeight:'100vh',position:'relative'}}>
+    <div style={{fontFamily:'Inter,sans-serif',background:tema.sfondo_pagina||'#fff',minHeight:'100vh',position:'relative',..._pgStyle}}>
       <PatternOverlay tema={tema} />
       <style>{RICH_CSS}{`
         @keyframes spin{from{transform:rotate(0)}to{transform:rotate(360deg)}}
