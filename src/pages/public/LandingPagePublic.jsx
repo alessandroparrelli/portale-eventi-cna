@@ -322,7 +322,7 @@ export default function LandingPagePublic() {
           .lp-hero-wrap { padding: 40px 16px !important; }
 
           /* Contenuto blocchi */
-          .lp-block-wrap { padding: 32px 16px !important; }
+          .lp-block-wrap { width: 100% !important; padding-top: 24px !important; }
 
           /* Stats: 2 colonne su mobile */
           .lp-stats { flex-wrap: wrap !important; gap: 16px !important; }
@@ -390,9 +390,9 @@ export default function LandingPagePublic() {
         </div>
       </div>
 
-      {/* CONTENUTO */}
+      {/* CONTENUTO — full width, il padding orizzontale è gestito da ContenutoBlocks */}
       {hasContenuto&&(
-        <div className="lp-block-wrap" style={{maxWidth:'800px',margin:'0 auto',padding:'clamp(32px,6vw,64px) clamp(16px,4vw,40px)'}}>
+        <div className="lp-block-wrap" style={{width:'100%',padding:'clamp(32px,6vw,48px) 0 0'}}>
           <ContenutoBlocks blocks={lp.contenuto} cp={cp} />
         </div>
       )}

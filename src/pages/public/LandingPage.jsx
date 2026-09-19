@@ -489,8 +489,9 @@ export default function LandingPage() {
       {/* Data e luogo rimossi da sotto hero — spostati prima del form */}
 
       {/* ── BODY ── */}
-      <div style={{ ...s.body, backgroundColor: tema.sfondo_pagina || '#FFFFFF' }}>
+      <div style={s.body}>
 
+        <div style={{ maxWidth:'820px', margin:'0 auto', padding:'32px 24px 0', boxSizing:'border-box' }}>
         {/* PULSANTE PARTECIPA */}
         {(() => {
           const btnRadius = tema.btn_stile === 'pill' ? '50px' : `${tema.btn_raggio || 8}px`
@@ -520,19 +521,23 @@ export default function LandingPage() {
         })()}
 
 
+        </div>{/* /wrapper-centrato-top */}
+
         {/* DESCRIZIONE (solo se non ci sono blocchi) */}
         {(event.descrizione_html || event.descrizione) && !(event.sezioni||[]).length && (
+          <div style={{ maxWidth:'820px', margin:'0 auto', padding:'0 24px', boxSizing:'border-box' }}>
           <section style={s.section}>
             {event.descrizione_html
               ? <div className="rich-content" dangerouslySetInnerHTML={{ __html:event.descrizione_html }}/>
               : <div style={s.descText}>{(event.descrizione||'').split('\n').map((p,i)=><p key={i} style={{ margin:'0 0 12px' }}>{p}</p>)}</div>
             }
           </section>
+          </div>
         )}
 
-        {/* BLOCCHI CONTENUTO */}
+        {/* BLOCCHI CONTENUTO — full width */}
         {(event.sezioni||[]).length > 0 && (
-          <div style={{ marginBottom:'16px' }}>
+          <div style={{ width:'100%' }}>
             <ContenutoBlocks
               blocks={event.sezioni}
               cp={event.colore_primario||tema.colore_primario||'#003DA5'}
@@ -541,6 +546,7 @@ export default function LandingPage() {
           </div>
         )}
 
+        <div style={{ maxWidth:'820px', margin:'0 auto', padding:'0 24px', boxSizing:'border-box', width:'100%' }}>
         {/* PROGRAMMA / SESSIONI */}
         {(event.sessioni||[]).length > 0 && (() => {
           const primaryColor = tema.colore_primario || '#003DA5'
@@ -750,6 +756,7 @@ export default function LandingPage() {
           </div>
         )}
 
+        </div>{/* /wrapper-centrato-bottom */}
       </div>
 
       {/* ── Barra condivisione ── */}
@@ -798,7 +805,7 @@ const s = {
   heroMeta:    { display:'flex', alignItems:'center', gap:'8px', fontSize:'14px', color:'rgba(255,255,255,.9)', margin:'0 0 8px', fontWeight:'500', flexWrap:'wrap', textTransform:'capitalize' },
   heroLoc:     { display:'inline-flex', alignItems:'center', gap:'6px', color:'rgba(255,255,255,.8)', fontSize:'13px', textDecoration:'none', fontWeight:'500' },
   // Body
-  body:        { maxWidth:'820px', margin:'0 auto', padding:'32px 24px 0', width:'100%' },
+  body:        { width:'100%', padding:'0' },
   section:     { marginBottom:'32px' },
   secTitle:    { fontSize:'20px', fontWeight:'900', color:'#0A0A0A', letterSpacing:'-.03em', margin:'0 0 16px' },
   descText:    { fontSize:'15px', color:'#374151', lineHeight:'1.75' },

@@ -162,8 +162,7 @@ function SezioneWrapper({ sezione, cp, children }) {
     <div style={{
       background: sezione.sfondo,
       borderRadius: bdr,
-      marginLeft: sezione.larghezza === 'piena' ? '-40px' : undefined,
-      marginRight: sezione.larghezza === 'piena' ? '-40px' : undefined,
+      width: '100%',
       marginBottom: '0',
     }}>
       <div style={{

@@ -35,26 +35,30 @@ export default function ContenutoBlocks({ blocks, cp, formTarget }) {
   }
 
   function renderBlock(block, i) {
+    // Blocchi intrinsecamente full-width: escono dal contenitore
     if (FULL_W_TYPES.has(block.tipo)) {
       return (
-        <div key={block.id||i} style={{ marginLeft:'calc(-1 * clamp(16px,4vw,40px))', marginRight:'calc(-1 * clamp(16px,4vw,40px))', marginBottom:'0' }}>
+        <div key={block.id||i} style={{ width:'100%' }}>
           <BlockRenderer block={block} cp={cp} formTarget={formTarget} />
         </div>
       )
     }
+    // Blocchi con sfondo piena/ampia: escono dal wrapper centrato
     const isFullWidth = block.sezione?.sfondo && block.sezione.larghezza === 'piena'
     const isAmpia     = block.sezione?.sfondo && block.sezione.larghezza === 'ampia'
     if (isFullWidth || isAmpia) {
-      const extra = isFullWidth
-        ? { marginLeft:'calc(-1 * clamp(16px,4vw,40px))', marginRight:'calc(-1 * clamp(16px,4vw,40px))', marginBottom:'0' }
-        : { marginLeft:'calc(-1 * clamp(0px,2vw,80px))', marginRight:'calc(-1 * clamp(0px,2vw,80px))', marginBottom:'0' }
       return (
-        <div key={block.id||i} style={extra}>
+        <div key={block.id||i} style={{ width:'100%' }}>
           <BlockRenderer block={block} cp={cp} formTarget={formTarget} />
         </div>
       )
     }
-    return <BlockRenderer key={block.id||i} block={block} cp={cp} formTarget={formTarget} />
+    // Blocchi normali: wrapper centrato con padding orizzontale
+    return (
+      <div key={block.id||i} style={{ maxWidth:'800px', margin:'0 auto', padding:'0 clamp(16px,4vw,40px)', boxSizing:'border-box' }}>
+        <BlockRenderer block={block} cp={cp} formTarget={formTarget} />
+      </div>
+    )
   }
 
   return (
@@ -70,16 +74,9 @@ export default function ContenutoBlocks({ blocks, cp, formTarget }) {
         const mxw     = MAX_W_MAP  [m.larghezza    || 'contenuto']
         const sfondo  = m.sfondo || '#F7F8FC'
         const colTesto = m.colore_testo || undefined
-        const isFullSec  = m.larghezza === 'piena'
-        const isAmpiaSec = m.larghezza === 'ampia'
-        const negMargin  = isFullSec
-          ? { marginLeft:'calc(-1 * clamp(16px,4vw,40px))', marginRight:'calc(-1 * clamp(16px,4vw,40px))' }
-          : isAmpiaSec
-            ? { marginLeft:'calc(-1 * clamp(0px,2vw,80px))', marginRight:'calc(-1 * clamp(0px,2vw,80px))' }
-            : {}
-
+        // Le sezioni colorate ora sono sempre width:100% (il padre è già full-width)
         return (
-          <div key={m.id||gi} style={{ ...negMargin, background:sfondo, borderRadius:`${rtop} ${rtop} ${rbot} ${rbot}`, color:colTesto, marginBottom:'0' }}>
+          <div key={m.id||gi} style={{ width:'100%', background:sfondo, borderRadius:`${rtop} ${rtop} ${rbot} ${rbot}`, color:colTesto, marginBottom:'0' }}>
             <div style={{ maxWidth:mxw, margin:'0 auto', padding:`${pv} clamp(16px,4vw,40px)` }}>
               {item.children.map((block, bi) => {
                 if (FULL_W_TYPES.has(block.tipo)) {
