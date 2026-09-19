@@ -988,11 +988,30 @@ export default function EventoEditorPage() {
             </div>
 
             {/* Controlli layout */}
+            {/* Toggle modalità hero */}
+            <div style={{ marginBottom:'12px', display:'flex', gap:'8px', flexWrap:'wrap' }}>
+              {[
+                { v: false, l: '📐 Altezza fissa', sub: 'Usa lo slider' },
+                { v: true,  l: '📱 Adatta al device', sub: 'Segue le proporzioni' },
+              ].map(({v, l, sub}) => {
+                const att = (event.layout_hero?.hero_adattivo || false) === v
+                return (
+                  <button key={String(v)} type="button" onClick={() => setH('hero_adattivo')(v)}
+                    style={{ flex:'1 1 180px', padding:'10px 14px', border:`1.5px solid ${att?'#5B5FEF':'#E8ECF4'}`,
+                      borderRadius:'16px', background: att?'#EEEFFD':'#fff', cursor:'pointer',
+                      textAlign:'left', fontFamily:"'Outfit',sans-serif" }}>
+                    <p style={{ margin:0, fontSize:'13px', fontWeight:'700', color:att?'#5B5FEF':'#374151' }}>{l}</p>
+                    <p style={{ margin:'2px 0 0', fontSize:'11px', color:att?'#818CF8':'#9CA3AF' }}>{sub}</p>
+                  </button>
+                )
+              })}
+            </div>
             <div style={p.grid3}>
-              <Field label={`Altezza hero: ${event.layout_hero?.altezza||'380'}px`}>
+              <Field label={`Altezza hero: ${event.layout_hero?.altezza||'380'}px`}
+                hint={event.layout_hero?.hero_adattivo ? 'Non usata in modalità adattiva' : ''}>
                 <input type="range" min="200" max="700" step="20"
                   value={event.layout_hero?.altezza||'380'} onChange={e=>setH('altezza')(e.target.value)}
-                  style={{ width:'100%' }}/>
+                  style={{ width:'100%', opacity: event.layout_hero?.hero_adattivo ? 0.4 : 1 }}/>
               </Field>
               <Field label={`Opacità overlay: ${event.layout_hero?.overlay_opacita||'55'}%`}>
                 <input type="range" min="0" max="90" step="5"

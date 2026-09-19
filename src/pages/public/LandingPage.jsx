@@ -399,7 +399,7 @@ export default function LandingPage() {
         /* Blocca zoom iOS */
         input, select, textarea { font-size:16px !important; }
         @media (max-width: 600px) {
-          .hero-section { min-height: 420px !important; padding: 32px 16px !important; }
+          .hero-section:not(.hero-adattivo) { min-height: 420px !important; padding: 32px 16px !important; }
           .ev-hero-content h1 { font-size: clamp(22px,7vw,40px) !important; word-break: break-word !important; }
           .ev-hero-content h2 { font-size: clamp(14px,4.5vw,22px) !important; }
           .ev-hero-content p  { font-size: clamp(13px,3.5vw,17px) !important; }
@@ -408,29 +408,55 @@ export default function LandingPage() {
 
 {/* Header rimosso — logo sovrapposto all'hero */}
 
-      {/* ── HERO — struttura identica alla Landing Page ── */}
-      <div className="hero-section" style={{
+      {/* ── HERO ── */}
+      <div className={`hero-section${lh.hero_adattivo && event.immagine_hero ? " hero-adattivo" : ""}`} style={{
         position: 'relative',
-        minHeight: `${lh.altezza || 480}px`,
+        minHeight: lh.hero_adattivo && event.immagine_hero ? undefined : `${lh.altezza || 480}px`,
         display: 'flex',
         flexDirection: 'column',
         alignItems: lh.allineamento === 'sinistra' ? 'flex-start' : 'center',
         justifyContent: 'center',
-        padding: 'clamp(40px,6vw,72px) clamp(16px,4vw,48px)',
+        padding: lh.hero_adattivo && event.immagine_hero ? '0' : 'clamp(40px,6vw,72px) clamp(16px,4vw,48px)',
         width: '100%',
         boxSizing: 'border-box',
-        ...heroStyle,
+        overflow: 'hidden',
+        // Quando non c'è immagine, usa colore sfondo
+        background: event.immagine_hero ? undefined : (lh.hero_sfondo || tema.colore_primario || '#003DA5'),
       }}>
+        {/* Immagine hero — tag <img> reale per responsività corretta */}
+        {event.immagine_hero && (
+          <img
+            src={event.immagine_hero}
+            alt=""
+            aria-hidden="true"
+            style={{
+              position: lh.hero_adattivo ? 'relative' : 'absolute',
+              inset: lh.hero_adattivo ? undefined : 0,
+              width: '100%',
+              height: lh.hero_adattivo ? 'auto' : '100%',
+              objectFit: 'cover',
+              objectPosition: lh.bg_position || 'center top',
+              display: 'block',
+              zIndex: 0,
+            }}
+          />
+        )}
         {/* Overlay scuro */}
         <div style={{ position:'absolute', inset:0, backgroundColor:(() => { const h=lh.overlay_colore||'#000000'; const r=parseInt(h.slice(1,3),16),g=parseInt(h.slice(3,5),16),b=parseInt(h.slice(5,7),16); return `rgba(${r},${g},${b},${(lh.overlay_opacita||55)/100})` })(), zIndex:1 }} />
 
         {/* Contenuto — logo + titoli in colonna, sopra l'overlay */}
         <div className="ev-hero-content" style={{
-          position: 'relative', zIndex: 2,
+          position: lh.hero_adattivo && event.immagine_hero ? 'absolute' : 'relative',
+          inset: lh.hero_adattivo && event.immagine_hero ? 0 : undefined,
+          zIndex: 2,
           maxWidth: '760px', width: '100%',
+          margin: lh.hero_adattivo && event.immagine_hero ? 'auto' : undefined,
+          padding: lh.hero_adattivo && event.immagine_hero ? 'clamp(40px,6vw,72px) clamp(16px,4vw,48px)' : undefined,
           textAlign: lh.allineamento === 'sinistra' ? 'left' : 'center',
           display: 'flex', flexDirection: 'column',
+          justifyContent: 'center',
           alignItems: lh.allineamento === 'sinistra' ? 'flex-start' : 'center',
+          boxSizing: 'border-box',
         }}>
           {/* Logo — nascondibile */}
           {lh.mostra_logo !== false && (
