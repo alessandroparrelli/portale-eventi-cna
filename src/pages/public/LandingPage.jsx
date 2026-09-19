@@ -274,6 +274,8 @@ export default function LandingPage() {
   const [notFound,    setNotFound]    = useState(false)
   const [iscrizioniN, setIscrizioniN] = useState(0)
   const [formVisible, setFormVisible] = useState(false)
+  // Se c'è un blocco evento_cta nelle sezioni, il form è sempre aperto
+  const hasEventoCta = (event?.sezioni||[]).some(b => b.tipo === 'evento_cta')
   const [conferma,    setConferma]    = useState(null)
 
   usePageTitle(event?.titolo || null)
@@ -740,7 +742,7 @@ export default function LandingPage() {
           </section>
         )}
 
-        {formVisible && !esaurito && !conferma && (
+        {(formVisible || hasEventoCta) && !esaurito && !conferma && (
           <div id="form-iscrizione" style={s.formWrap}>
             <h3 style={s.formTitle}>Modulo di iscrizione</h3>
           {/* Avvisi / raccomandazioni configurabili dall'admin */}
@@ -759,7 +761,7 @@ export default function LandingPage() {
           )}
 
           <FormIscrizione event={event} tema={tema} onSuccess={dati => {
-              setFormVisible(false)
+              if (!hasEventoCta) setFormVisible(false)
               setConferma(dati)
             }}/>
           </div>
