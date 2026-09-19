@@ -207,6 +207,28 @@ export default function IscrizioniTab({ event, setEvent, eventId }) {
     setCampi(prev => prev.map(c => c.id === id ? { ...c, ...nuovoCampo } : c))
   }
 
+  /* ── Ripristina campi standard mancanti ── */
+  async function ripristinaCampiMancanti() {
+    const colonnePresenti = campi.map(c => c.colonna_db)
+    const STANDARD = [
+      { colonna_db:'nome',           label:'Nome',                    tipo:'testo',    obbligatorio:true,  visibile:true,  ordine:1 },
+      { colonna_db:'cognome',        label:'Cognome',                 tipo:'testo',    obbligatorio:true,  visibile:true,  ordine:2 },
+      { colonna_db:'email',          label:'Email',                   tipo:'email',    obbligatorio:true,  visibile:true,  ordine:3 },
+      { colonna_db:'cellulare',      label:'Cellulare',               tipo:'telefono', obbligatorio:false, visibile:false, ordine:4 },
+      { colonna_db:'cap',            label:'CAP',                     tipo:'testo',    obbligatorio:false, visibile:false, ordine:5 },
+      { colonna_db:'ragione_sociale',label:'Ragione Sociale',         tipo:'testo',    obbligatorio:false, visibile:false, ordine:6 },
+      { colonna_db:'partita_iva',    label:'Partita IVA',             tipo:'testo',    obbligatorio:false, visibile:false, ordine:7 },
+      { colonna_db:'mestiere_id',    label:'Categoria professionale', tipo:'select',   obbligatorio:false, visibile:false, ordine:8 },
+    ]
+    const mancanti = STANDARD.filter(s => !colonnePresenti.includes(s.colonna_db))
+    if (!mancanti.length) { alert('Tutti i campi standard sono già presenti!'); return }
+    for (const campo of mancanti) {
+      const { data, error } = await supabase.from('form_fields').insert({ event_id: eventId, ...campo }).select().single()
+      if (!error && data) setCampi(prev => [...prev, data].sort((a,b) => a.ordine - b.ordine))
+    }
+    alert(`Ripristinati ${mancanti.length} campo/i: ${mancanti.map(m=>m.label).join(', ')}`)
+  }
+
   /* ── Aggiunge campo extra ── */
   function aggiungiExtra() {
     const usati = campiExtra.map(c => c.colonna_db)
@@ -538,6 +560,18 @@ export default function IscrizioniTab({ event, setEvent, eventId }) {
           </div>
         ) : (
           <div>
+            {/* Pulsante ripristino campi mancanti */}
+            {campiStandard.length < 8 && (
+              <div style={{ display:'flex', alignItems:'center', justifyContent:'space-between', padding:'8px 12px', background:'#FEF3C7', borderRadius:'12px', marginBottom:'8px' }}>
+                <span style={{ fontSize:'12px', color:'#92400E', fontWeight:'600' }}>
+                  ⚠️ {8 - campiStandard.length} campo/i standard mancante/i
+                </span>
+                <button type='button' onClick={ripristinaCampiMancanti}
+                  style={{ padding:'5px 12px', background:'#D97706', color:'#fff', border:'none', borderRadius:'20px', fontSize:'12px', fontWeight:'700', cursor:'pointer', fontFamily:"'Outfit',sans-serif" }}>
+                  Ripristina
+                </button>
+              </div>
+            )}
             {campiStandard.map(c => (
               <RigaCampo key={c.id} campo={c} onChange={nc => aggiornaCampo(c.id, nc)} />
             ))}
