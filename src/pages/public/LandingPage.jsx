@@ -496,8 +496,8 @@ export default function LandingPage() {
       <div style={s.body}>
 
         <div style={{ maxWidth:'820px', margin:'0 auto', padding:'32px 24px 0', boxSizing:'border-box' }}>
-        {/* PULSANTE PARTECIPA */}
-        {(() => {
+        {/* PULSANTE PARTECIPA — nascosto se c'è un blocco evento_cta nelle sezioni */}
+        {!(event.sezioni||[]).some(b=>b.tipo==='evento_cta') && (() => {
           const btnRadius = tema.btn_stile === 'pill' ? '50px' : `${tema.btn_raggio || 8}px`
           const aBtnPrimary = {
             display:'flex', alignItems:'center', justifyContent:'center',
@@ -546,6 +546,7 @@ export default function LandingPage() {
               blocks={event.sezioni}
               cp={event.colore_primario||tema.colore_primario||'#003DA5'}
               formTarget="#form-iscrizione"
+              eventData={event}
             />
           </div>
         )}
@@ -603,8 +604,8 @@ export default function LandingPage() {
           )
         })()}
 
-        {/* ── INFO EVENTO + PULSANTI CALENDARIO/MAPPA ── */}
-        {(event.data_inizio || event.luogo) && (
+        {/* ── INFO EVENTO — nascosto se c'è un blocco evento_info nelle sezioni ── */}
+        {!(event.sezioni||[]).some(b=>b.tipo==='evento_info') && (event.data_inizio || event.luogo) && (
           <div style={{ marginBottom:'24px', padding:'20px', backgroundColor: tema.sfondo_sezioni || '#F4F5F7', borderRadius:'20px' }}>
             {event.data_inizio && (
               <div style={{ display:'flex', alignItems:'center', gap:'10px', marginBottom: event.luogo ? '12px' : '0' }}>
@@ -683,8 +684,8 @@ export default function LandingPage() {
           </div>
         )}
 
-        {/* CTA / FORM */}
-        {!conferma && (
+        {/* CTA / FORM — nascosto se c'è un blocco evento_cta nelle sezioni */}
+        {!conferma && !(event.sezioni||[]).some(b=>b.tipo==='evento_cta') && (
           <section style={{ ...s.ctaSection, backgroundColor: tema.cta_bg || '#EEF4FF', border: `1px solid ${(tema.colore_pulsanti || tema.colore_primario || '#005AC9')}33` }}>
             <div style={s.ctaRow}>
               <div style={{ flex:1 }}>
@@ -738,8 +739,8 @@ export default function LandingPage() {
           </div>
         )}
 
-        {/* MAPPA */}
-        {event.luogo && (
+        {/* MAPPA — nascosta se c'è un blocco evento_mappa nelle sezioni */}
+        {!(event.sezioni||[]).some(b=>b.tipo==='evento_mappa') && event.luogo && (
           <div style={s.mapSection}>
             <h2 style={s.secTitle}>Come raggiungerci</h2>
             <div style={s.mapWrap}>

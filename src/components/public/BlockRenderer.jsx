@@ -336,7 +336,7 @@ function PricingBlock({ block, cp, formTarget }) {
 }
 
 // ── Block Renderer principale ─────────────────────────────────────
-export default function BlockRenderer({ block, cp = '#003DA5', formTarget = '#lp-form' }) {
+export default function BlockRenderer({ block, cp = '#003DA5', formTarget = '#lp-form', eventData = null }) {
   if (!block) return null
 
   if (block.tipo === 'testo') return (
@@ -642,6 +642,10 @@ export default function BlockRenderer({ block, cp = '#003DA5', formTarget = '#lp
       <NumeriIconaBlock block={block} cp={cp} />
     </SezioneWrapper>
   )
+
+  if (block.tipo === 'evento_info') return <EventoInfoBlock block={block} cp={cp} eventData={eventData} />
+  if (block.tipo === 'evento_cta')  return <EventoCtaBlock  block={block} cp={cp} formTarget={formTarget} />
+  if (block.tipo === 'evento_mappa') return <EventoMappaBlock block={block} cp={cp} eventData={eventData} />
 
   return null
 }
@@ -1348,6 +1352,177 @@ function NumeriIconaBlock({ block, cp }) {
             </div>
           </Animate>
         ))}
+      </div>
+    </Animate>
+  )
+}
+
+// ── Helpers calendario ─────────────────────────────────────────────
+function fmtDataEvento(ts) {
+  if (!ts) return ''
+  return new Date(ts).toLocaleDateString('it-IT', { weekday:'long', day:'numeric', month:'long', year:'numeric', timeZone:'Europe/Rome' })
+}
+function fmtOraEvento(ts) {
+  if (!ts) return ''
+  const t = new Date(ts).toLocaleTimeString('it-IT', { hour:'2-digit', minute:'2-digit', timeZone:'Europe/Rome' })
+  return t === '00:00' ? '' : t
+}
+
+// ── EventoInfo Block ───────────────────────────────────────────────
+function EventoInfoBlock({ block, cp, eventData }) {
+  const ev = eventData || {}
+  const titolo = block.titolo_box || ''
+  const sfondoBox = block.sfondo_box || '#F4F5F7'
+
+  function handleCalendar() {
+    const fmtIcs  = ts => ts ? new Date(ts).toISOString().replace(/[-:]/g,'').replace(/\.\d{3}/,'') : null
+    const fmtGcal = ts => ts ? new Date(ts).toISOString().replace(/[-:]/g,'').replace(/\.\d{3}Z$/,'Z') : null
+    const isIOS = /iPad|iPhone|iPod/.test(navigator.userAgent) || (navigator.platform==='MacIntel'&&navigator.maxTouchPoints>1)
+    if (isIOS) {
+      const dtStart = fmtIcs(ev.data_inizio), dtEnd = fmtIcs(ev.data_fine)||dtStart
+      const now = fmtIcs(new Date().toISOString())
+      const ics = ['BEGIN:VCALENDAR','VERSION:2.0','PRODID:-//CNA Roma//IT','CALSCALE:GREGORIAN','METHOD:PUBLISH','BEGIN:VEVENT',
+        `UID:${ev.id}@cna-eventi`,`DTSTAMP:${now}Z`,`DTSTART:${dtStart}`,`DTEND:${dtEnd}`,
+        `SUMMARY:${ev.titolo}`,ev.luogo?`LOCATION:${ev.luogo.replace(/,/g,'\\,')}`:''
+        ,'END:VEVENT','END:VCALENDAR'].filter(Boolean).join('\r\n')
+      const url = URL.createObjectURL(new Blob([ics],{type:'text/calendar;charset=utf-8'}))
+      window.location.href = url
+      setTimeout(()=>URL.revokeObjectURL(url),3000)
+    } else {
+      const gcStart = fmtGcal(ev.data_inizio), gcEnd = fmtGcal(ev.data_fine)||gcStart
+      const params = new URLSearchParams({ action:'TEMPLATE', text:ev.titolo||'', dates:`${gcStart}/${gcEnd}`, ...(ev.luogo?{location:ev.luogo}:{}) })
+      window.open(`https://calendar.google.com/calendar/render?${params}`,'_blank','noopener')
+    }
+  }
+
+  if (!ev.data_inizio && !ev.luogo) return null
+
+  return (
+    <Animate animation="fadeup">
+      <div style={{ marginBottom:'24px', maxWidth:'800px', margin:'0 auto 24px', padding:'0 clamp(16px,4vw,40px)', boxSizing:'border-box' }}>
+        <div style={{ padding:'20px', backgroundColor: sfondoBox, borderRadius:'20px' }}>
+          {titolo && <p style={{ fontSize:'12px', fontWeight:'700', color:'#9CA3AF', textTransform:'uppercase', letterSpacing:'.06em', margin:'0 0 12px' }}>{titolo}</p>}
+          {ev.data_inizio && (
+            <div style={{ display:'flex', alignItems:'center', gap:'10px', marginBottom: ev.luogo ? '12px' : '0' }}>
+              <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke={cp} strokeWidth="2" strokeLinecap="round"><rect x="3" y="4" width="18" height="18" rx="2"/><line x1="16" y1="2" x2="16" y2="6"/><line x1="8" y1="2" x2="8" y2="6"/><line x1="3" y1="10" x2="21" y2="10"/></svg>
+              <span style={{ fontSize:'15px', fontWeight:'700', color:'#0A0A0A', fontFamily:"'Outfit',sans-serif" }}>
+                {fmtDataEvento(ev.data_inizio)}
+                {fmtOraEvento(ev.data_inizio) && ` · ${fmtOraEvento(ev.data_inizio)}`}
+                {ev.data_fine && fmtOraEvento(ev.data_fine) && ` — ${fmtOraEvento(ev.data_fine)}`}
+              </span>
+            </div>
+          )}
+          {ev.luogo && (
+            <div style={{ display:'flex', alignItems:'center', gap:'10px', marginBottom:'16px' }}>
+              <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke={cp} strokeWidth="2" strokeLinecap="round"><path d="M21 10c0 7-9 13-9 13s-9-6-9-13a9 9 0 0 1 18 0z"/><circle cx="12" cy="10" r="3"/></svg>
+              <span style={{ fontSize:'15px', fontWeight:'700', color:'#0A0A0A', fontFamily:"'Outfit',sans-serif" }}>{ev.luogo}</span>
+            </div>
+          )}
+          <div style={{ display:'grid', gridTemplateColumns: ev.luogo ? '1fr 1fr' : '1fr', gap:'10px' }}>
+            {ev.data_inizio && (
+              <button onClick={handleCalendar} style={{
+                display:'flex', alignItems:'center', justifyContent:'center', gap:'8px',
+                padding:'12px 16px', backgroundColor:'#FFFFFF',
+                border:`1.5px solid ${cp}`, color:cp,
+                borderRadius:'20px', fontSize:'13px', fontWeight:'700', fontFamily:"'Outfit',sans-serif", cursor:'pointer',
+              }}>
+                <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round"><rect x="3" y="4" width="18" height="18" rx="2"/><line x1="16" y1="2" x2="16" y2="6"/><line x1="8" y1="2" x2="8" y2="6"/><line x1="3" y1="10" x2="21" y2="10"/></svg>
+                Aggiungi al calendario
+              </button>
+            )}
+            {ev.luogo && (
+              <a href={`https://maps.google.com/?q=${encodeURIComponent(ev.luogo)}`} target="_blank" rel="noopener noreferrer" style={{
+                display:'flex', alignItems:'center', justifyContent:'center', gap:'8px',
+                padding:'12px 16px', backgroundColor:'#FFFFFF',
+                border:`1.5px solid ${cp}`, color:cp,
+                borderRadius:'20px', fontSize:'13px', fontWeight:'700', fontFamily:"'Outfit',sans-serif",
+                cursor:'pointer', textDecoration:'none',
+              }}>
+                <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round"><path d="M21 10c0 7-9 13-9 13s-9-6-9-13a9 9 0 0 1 18 0z"/><circle cx="12" cy="10" r="3"/></svg>
+                Mappa dell'evento
+              </a>
+            )}
+          </div>
+        </div>
+      </div>
+    </Animate>
+  )
+}
+
+// ── EventoCta Block ────────────────────────────────────────────────
+function EventoCtaBlock({ block, cp, formTarget }) {
+  const testo = block.testo_btn || "Partecipa all'evento"
+  const sfondo = block.sfondo_box || '#EEF4FF'
+  const titolo = block.titolo_cta || "Partecipa all'evento"
+  const sottotitolo = block.sottotitolo_cta || 'Registrazione gratuita. Ricevi il QR Code per l\'ingresso.'
+  function scrollToForm() {
+    const el = document.getElementById('form-iscrizione') || document.querySelector(formTarget)
+    if (el) el.scrollIntoView({ behavior:'smooth', block:'start' })
+  }
+  return (
+    <Animate animation="fadeup">
+      <div style={{ marginBottom:'24px', maxWidth:'800px', margin:'0 auto 24px', padding:'0 clamp(16px,4vw,40px)', boxSizing:'border-box' }}>
+        <section style={{
+          backgroundColor: sfondo,
+          border: `1px solid ${cp}33`,
+          borderRadius:'20px', padding:'24px',
+          display:'flex', flexWrap:'wrap', gap:'16px', alignItems:'center'
+        }}>
+          <div style={{ flex:1, minWidth:'200px' }}>
+            <h2 style={{ fontSize:'20px', fontWeight:'900', color:'#0A0A0A', letterSpacing:'-.03em', margin:'0 0 4px' }}>{titolo}</h2>
+            <p style={{ fontSize:'13px', color:'#6B7280', margin:0 }}>{sottotitolo}</p>
+          </div>
+          <button onClick={scrollToForm} style={{
+            display:'inline-flex', alignItems:'center', gap:'8px',
+            padding:'13px 28px', backgroundColor: cp, color:'#fff',
+            border:'none', borderRadius:'999px', fontSize:'14px',
+            fontWeight:'800', fontFamily:"'Outfit',sans-serif", cursor:'pointer',
+            transition:'transform .15s, box-shadow .15s', flexShrink:0,
+          }}
+            onMouseEnter={e=>{e.currentTarget.style.transform='translateY(-2px)';e.currentTarget.style.boxShadow=`0 8px 24px ${cp}40`}}
+            onMouseLeave={e=>{e.currentTarget.style.transform='translateY(0)';e.currentTarget.style.boxShadow='none'}}>
+            <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round"><polyline points="9 18 15 12 9 6"/></svg>
+            {testo}
+          </button>
+        </section>
+      </div>
+    </Animate>
+  )
+}
+
+// ── EventoMappa Block ──────────────────────────────────────────────
+function EventoMappaBlock({ block, cp, eventData }) {
+  const ev = eventData || {}
+  const luogo = ev.luogo || ''
+  const altezza = parseInt(block.altezza || '340')
+  if (!luogo) return null
+  return (
+    <Animate animation="fadein">
+      <div style={{ marginBottom:'24px', maxWidth:'800px', margin:'0 auto 24px', padding:'0 clamp(16px,4vw,40px)', boxSizing:'border-box' }}>
+        <h2 style={{ fontSize:'22px', fontWeight:'900', color:'#0A0A0A', letterSpacing:'-.03em', margin:'0 0 16px' }}>
+          {block.titolo || 'Come raggiungerci'}
+        </h2>
+        <div style={{ borderRadius:'20px', overflow:'hidden', border:'1px solid #E5E7EB', boxShadow:'0 4px 16px rgba(0,0,0,.08)' }}>
+          <iframe
+            title="Mappa evento"
+            width="100%" height={altezza}
+            style={{ border:0, display:'block' }}
+            loading="lazy" allowFullScreen
+            referrerPolicy="no-referrer-when-downgrade"
+            src={`https://maps.google.com/maps?q=${encodeURIComponent(luogo)}&output=embed&z=15&hl=it&t=m`}
+          />
+        </div>
+        <div style={{ display:'flex', justifyContent:'space-between', alignItems:'center', marginTop:'10px', flexWrap:'wrap', gap:'8px' }}>
+          {luogo && <p style={{ margin:0, fontSize:'14px', color:'#6B7280', display:'flex', alignItems:'center', gap:'6px' }}>
+            <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke={cp} strokeWidth="2.5"><path d="M21 10c0 7-9 13-9 13s-9-6-9-13a9 9 0 0 1 18 0z"/><circle cx="12" cy="10" r="3"/></svg>
+            {luogo}
+          </p>}
+          <a href={`https://maps.google.com/?q=${encodeURIComponent(luogo)}`} target="_blank" rel="noopener noreferrer"
+            style={{ fontSize:'13px', fontWeight:'700', color:cp, textDecoration:'none', display:'flex', alignItems:'center', gap:'5px' }}>
+            Apri in Google Maps
+            <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5"><path d="M18 13v6a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2V8a2 2 0 0 1 2-2h6"/><polyline points="15 3 21 3 21 9"/><line x1="10" y1="14" x2="21" y2="3"/></svg>
+          </a>
+        </div>
       </div>
     </Animate>
   )

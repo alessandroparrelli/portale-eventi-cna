@@ -4,7 +4,7 @@
  */
 import BlockRenderer from './BlockRenderer'
 
-export default function ContenutoBlocks({ blocks, cp, formTarget }) {
+export default function ContenutoBlocks({ blocks, cp, formTarget, eventData }) {
   const PADDING_MAP  = { nessuno:'0', S:'24px', M:'48px', L:'72px', XL:'96px' }
   const RADIUS_MAP   = { nessuno:'0', S:'8px', M:'16px', L:'24px' }
   const MAX_W_MAP    = { contenuto:'800px', ampia:'1100px', piena:'100%' }
@@ -39,7 +39,7 @@ export default function ContenutoBlocks({ blocks, cp, formTarget }) {
     if (FULL_W_TYPES.has(block.tipo)) {
       return (
         <div key={block.id||i} style={{ width:'100%' }}>
-          <BlockRenderer block={block} cp={cp} formTarget={formTarget} />
+          <BlockRenderer block={block} cp={cp} formTarget={formTarget} eventData={eventData} />
         </div>
       )
     }
@@ -49,14 +49,14 @@ export default function ContenutoBlocks({ blocks, cp, formTarget }) {
     if (isFullWidth || isAmpia) {
       return (
         <div key={block.id||i} style={{ width:'100%' }}>
-          <BlockRenderer block={block} cp={cp} formTarget={formTarget} />
+          <BlockRenderer block={block} cp={cp} formTarget={formTarget} eventData={eventData} />
         </div>
       )
     }
     // Blocchi normali: wrapper centrato con padding orizzontale
     return (
       <div key={block.id||i} style={{ maxWidth:'800px', margin:'0 auto', padding:'0 clamp(16px,4vw,40px)', boxSizing:'border-box' }}>
-        <BlockRenderer block={block} cp={cp} formTarget={formTarget} />
+        <BlockRenderer block={block} cp={cp} formTarget={formTarget} eventData={eventData} />
       </div>
     )
   }
@@ -82,7 +82,7 @@ export default function ContenutoBlocks({ blocks, cp, formTarget }) {
                 if (FULL_W_TYPES.has(block.tipo)) {
                   return (
                     <div key={block.id||bi} style={{ marginLeft:'calc(-1 * clamp(16px,4vw,40px))', marginRight:'calc(-1 * clamp(16px,4vw,40px))', marginBottom:'0' }}>
-                      <BlockRenderer block={block} cp={cp} formTarget={formTarget} />
+                      <BlockRenderer block={block} cp={cp} formTarget={formTarget} eventData={eventData} />
                     </div>
                   )
                 }

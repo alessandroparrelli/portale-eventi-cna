@@ -49,6 +49,9 @@ export function newBlock(tipo) {
       sfondo: '#F7F8FC', colore_testo: '', padding_v: 'M', larghezza: 'contenuto',
       radius_top: 'nessuno', radius_bottom: 'nessuno', etichetta: 'Sezione' }
     case 'sezione_fine':   return { ...base }
+    case 'evento_info':  return { ...base, titolo_box:'', sfondo_box:'#F4F5F7' }
+    case 'evento_cta':   return { ...base, titolo_cta:"Partecipa all'evento", sottotitolo_cta:"Registrazione gratuita. Ricevi il QR Code per l'ingresso.", testo_btn:'Iscriviti ora', sfondo_box:'#EEF4FF' }
+    case 'evento_mappa': return { ...base, titolo:'Come raggiungerci', altezza:'340' }
     default:            return base
   }
 }
@@ -76,6 +79,9 @@ const BLOCK_TYPES = [
   { tipo: 'colonne_miste',  label: 'Colonne miste',        group: 'Layout' },
   { tipo: 'hero_interno',   label: 'Banner sezione',      group: 'Layout' },
   { tipo: 'numeri_icona',   label: 'Numeri con icone',    group: 'Contenuto' },
+  { tipo: 'evento_info',    label: 'Info evento (data+luogo)', group: 'Evento' },
+  { tipo: 'evento_cta',     label: 'Call to action iscrizione', group: 'Evento' },
+  { tipo: 'evento_mappa',   label: 'Mappa evento',             group: 'Evento' },
 ]
 
 // ── Editors singoli blocchi ─────────────────────────────────────────
@@ -930,6 +936,82 @@ function NumeriIconaEditor({ block, onChange }) {
   )
 }
 
+
+// ── Editor blocchi Evento ──────────────────────────────────────────
+function EventoInfoEditor({ block, onChange }) {
+  return (
+    <div style={{ padding:'16px', display:'flex', flexDirection:'column', gap:'12px' }}>
+      <div style={{ padding:'12px', background:'#EFF6FF', borderRadius:'12px', border:'1px solid #BFDBFE' }}>
+        <p style={{ margin:0, fontSize:'12px', color:'#1E40AF', fontWeight:'600', display:'flex', alignItems:'center', gap:'6px' }}>
+          ℹ️ Questo blocco mostra automaticamente data, orario e luogo dall’evento con i pulsanti "Aggiungi al calendario" e "Mappa".
+          I dati vengono presi dalla tab Info &amp; Date — non serve inserire nulla qui.
+        </p>
+      </div>
+      <div>
+        <label style={lb}>Titolo box (opzionale)</label>
+        <input value={block.titolo_box||''} onChange={e=>onChange({...block,titolo_box:e.target.value})} style={inp} placeholder="Es. Quando e dove" />
+      </div>
+      <div style={{ display:'flex', gap:'8px', alignItems:'center' }}>
+        <label style={{ ...lb, marginBottom:0 }}>Colore sfondo box</label>
+        <input type="color" value={block.sfondo_box||'#F4F5F7'} onChange={e=>onChange({...block,sfondo_box:e.target.value})} style={{ width:'36px', height:'28px', border:'none', cursor:'pointer' }} />
+        <span style={{ fontSize:'12px', color:'#9CA3AF' }}>{block.sfondo_box||'#F4F5F7'}</span>
+      </div>
+    </div>
+  )
+}
+
+function EventoCtaEditor({ block, onChange }) {
+  return (
+    <div style={{ padding:'16px', display:'flex', flexDirection:'column', gap:'12px' }}>
+      <div style={{ padding:'12px', background:'#EFF6FF', borderRadius:'12px', border:'1px solid #BFDBFE' }}>
+        <p style={{ margin:0, fontSize:'12px', color:'#1E40AF', fontWeight:'600' }}>
+          ℹ️ Questo blocco mostra il pulsante di iscrizione che scrolla al form. Si nasconde automaticamente se i posti sono esauriti o l’utente si è già iscritto.
+        </p>
+      </div>
+      <div>
+        <label style={lb}>Titolo</label>
+        <input value={block.titolo_cta||''} onChange={e=>onChange({...block,titolo_cta:e.target.value})} style={inp} placeholder="Partecipa all'evento" />
+      </div>
+      <div>
+        <label style={lb}>Testo descrittivo</label>
+        <input value={block.sottotitolo_cta||''} onChange={e=>onChange({...block,sottotitolo_cta:e.target.value})} style={inp} placeholder="Registrazione gratuita..." />
+      </div>
+      <div>
+        <label style={lb}>Testo pulsante</label>
+        <input value={block.testo_btn||''} onChange={e=>onChange({...block,testo_btn:e.target.value})} style={inp} placeholder="Iscriviti ora" />
+      </div>
+      <div style={{ display:'flex', gap:'8px', alignItems:'center' }}>
+        <label style={{ ...lb, marginBottom:0 }}>Colore sfondo box</label>
+        <input type="color" value={block.sfondo_box||'#EEF4FF'} onChange={e=>onChange({...block,sfondo_box:e.target.value})} style={{ width:'36px', height:'28px', border:'none', cursor:'pointer' }} />
+      </div>
+    </div>
+  )
+}
+
+function EventoMappaEditor({ block, onChange }) {
+  return (
+    <div style={{ padding:'16px', display:'flex', flexDirection:'column', gap:'12px' }}>
+      <div style={{ padding:'12px', background:'#EFF6FF', borderRadius:'12px', border:'1px solid #BFDBFE' }}>
+        <p style={{ margin:0, fontSize:'12px', color:'#1E40AF', fontWeight:'600' }}>
+          ℹ️ Mostra la mappa Google Maps del luogo dell’evento. Il luogo viene preso automaticamente dalla tab Info &amp; Date.
+        </p>
+      </div>
+      <div>
+        <label style={lb}>Titolo sezione</label>
+        <input value={block.titolo||''} onChange={e=>onChange({...block,titolo:e.target.value})} style={inp} placeholder="Come raggiungerci" />
+      </div>
+      <div>
+        <label style={lb}>Altezza mappa</label>
+        <select value={block.altezza||'340'} onChange={e=>onChange({...block,altezza:e.target.value})} style={inp}>
+          <option value="220">Piccola (220px)</option>
+          <option value="340">Media (340px)</option>
+          <option value="480">Grande (480px)</option>
+        </select>
+      </div>
+    </div>
+  )
+}
+
 function Block({ block, index, total, onChange, onDelete, onMoveUp, onMoveDown, onDuplicate }) {
   const [collapsed, setCollapsed] = useState(false)
   const [preview, setPreview] = useState(false)
@@ -982,7 +1064,10 @@ function Block({ block, index, total, onChange, onDelete, onMoveUp, onMoveDown, 
           {block.tipo==='colonne_miste' && <ColonneMisteEditor block={block} onChange={onChange} />}
           {block.tipo==='hero_interno' && <HeroInternoEditor block={block} onChange={onChange} />}
           {block.tipo==='numeri_icona' && <NumeriIconaEditor block={block} onChange={onChange} />}
-          {block.tipo==='separatore'  && <div style={{padding:'16px',color:'#9CA3AF',fontSize:'13px',textAlign:'center'}}>— Linea separatrice —</div>}
+          {block.tipo==='evento_info'  && <EventoInfoEditor  block={block} onChange={onChange} />}
+              {block.tipo==='evento_cta'   && <EventoCtaEditor   block={block} onChange={onChange} />}
+              {block.tipo==='evento_mappa' && <EventoMappaEditor block={block} onChange={onChange} />}
+              {block.tipo==='separatore'  && <div style={{padding:'16px',color:'#9CA3AF',fontSize:'13px',textAlign:'center'}}>— Linea separatrice —</div>}
         </>
       )}
     </div>

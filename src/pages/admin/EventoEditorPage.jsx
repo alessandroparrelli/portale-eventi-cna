@@ -22,6 +22,16 @@ import { useRole } from '../../hooks/useRole'
 import { logAttivita } from '../../lib/activityLog'
 import RichEditor from '../../components/editor/RichEditor'
 import BlockEditor, { newBlock } from '../../components/editor/BlockEditor'
+
+// Blocchi precaricati per ogni nuovo evento
+function sezioniDefault() {
+  function uid() { return Math.random().toString(36).slice(2,9) }
+  return [
+    { id: uid(), tipo: 'evento_cta',   titolo_cta: "Partecipa all'evento", sottotitolo_cta: "Registrazione gratuita. Ricevi il QR Code per l'ingresso.", testo_btn: 'Iscriviti ora', sfondo_box: '#EEF4FF' },
+    { id: uid(), tipo: 'evento_info',  titolo_box: '', sfondo_box: '#F4F5F7' },
+    { id: uid(), tipo: 'evento_mappa', titolo: 'Come raggiungerci', altezza: '340' },
+  ]
+}
 import ImageUploader from '../../components/editor/ImageUploader'
 import LogoManager from '../../components/editor/LogoManager'
 import AddressSearch from '../../components/editor/AddressSearch'
@@ -366,7 +376,7 @@ export default function EventoEditorPage() {
       certificato_template:'laterale', certificato_config:{},
     colore_primario:'#5B5FEF', colore_sfondo:'#F4F5F7', tema:{},
     layout_hero:{ altezza:'380', overlay_opacita:'55', overlay_colore:'#000000', allineamento:'sinistra', titolo_colore:'#FFFFFF', titolo_dimensione:'clamp(26px,5vw,54px)', titolo_grassetto:true, titolo_maiuscolo:false },
-    sezioni:[], mailup_blocchi:[], email_organizzatore:'', email_mittente:'', email_cc:'', nome_mittente:'',
+    sezioni: sezioniDefault(), mailup_blocchi:[], email_organizzatore:'', email_mittente:'', email_cc:'', nome_mittente:'',
   })
   const eventRef = useRef(null)   // sempre aggiornato — evita race condition nel save
   useEffect(() => { eventRef.current = event }, [event])
@@ -1147,6 +1157,20 @@ export default function EventoEditorPage() {
             <p style={{ fontSize:'13px', color:'#6B7280', margin:'0 0 16px', lineHeight:'1.5' }}>
               Aggiungi blocchi con il pulsante <strong>+</strong>. Usa <strong>↑ ↓</strong> per riordinare.
             </p>
+            {/* Pulsante ripristina blocchi predefiniti */}
+            {(event.sezioni||[]).length === 0 && (
+              <div style={{ background:'#EFF6FF', border:'1px solid #BFDBFE', borderRadius:'20px', padding:'16px 20px', marginBottom:'16px', display:'flex', alignItems:'center', justifyContent:'space-between', gap:'12px' }}>
+                <div>
+                  <p style={{ margin:'0 0 2px', fontSize:'14px', fontWeight:'700', color:'#1E40AF' }}>Nessun blocco presente</p>
+                  <p style={{ margin:0, fontSize:'12px', color:'#3B82F6' }}>Aggiungi i blocchi standard (CTA iscrizione, info evento, mappa) oppure costruisci la pagina da zero.</p>
+                </div>
+                <button
+                  onClick={() => updEvent(p => ({ ...p, sezioni: sezioniDefault() }))}
+                  style={{ padding:'8px 16px', background:'#1D4ED8', color:'#fff', border:'none', borderRadius:'20px', fontSize:'13px', fontWeight:'700', cursor:'pointer', fontFamily:"'Outfit',sans-serif", whiteSpace:'nowrap', flexShrink:0 }}>
+                  ⭐ Aggiungi blocchi predefiniti
+                </button>
+              </div>
+            )}
             <BlockEditor
               blocks={event.sezioni || []}
               onChange={blocks => updEvent(p => ({ ...p, sezioni: blocks }))}
