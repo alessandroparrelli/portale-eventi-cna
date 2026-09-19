@@ -1,6 +1,28 @@
 {
   "rewrites": [
     {
+      "source": "/eventi/:slug",
+      "has": [
+        {
+          "type": "header",
+          "key": "user-agent",
+          "value": "(?i).*(whatsapp|facebookexternalhit|facebot|twitterbot|telegrambot|linkedinbot|slackbot|discordbot|applebot|iframely|embedly|pinterest|vkshare|skype|viber|snapchat|googlebot|bingbot).*"
+        }
+      ],
+      "destination": "/api/og-meta?type=evento&slug=:slug"
+    },
+    {
+      "source": "/lp/:slug",
+      "has": [
+        {
+          "type": "header",
+          "key": "user-agent",
+          "value": "(?i).*(whatsapp|facebookexternalhit|facebot|twitterbot|telegrambot|linkedinbot|slackbot|discordbot|applebot|iframely|embedly|pinterest|vkshare|skype|viber|snapchat|googlebot|bingbot).*"
+        }
+      ],
+      "destination": "/api/og-meta?type=lp&slug=:slug"
+    },
+    {
       "source": "/(.*)",
       "destination": "/index.html"
     }
