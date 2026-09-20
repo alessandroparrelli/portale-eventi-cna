@@ -511,7 +511,7 @@ export default function EmailEditorPage() {
           </div>
 
           {/* Header avanzato */}
-          <HeaderEditor config={headerConfig} onChange={setHeaderConfig}/>
+          <HeaderEditor config={headerConfig} onChange={setHeaderConfig} previewData={PREVIEW_DATA}/>
 
           {/* Variabili */}
           <div style={{background:'#F9FAFB',borderRadius:'16px',border:'1px solid #E8ECF4',overflow:'hidden'}}>

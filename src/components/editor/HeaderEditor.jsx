@@ -84,7 +84,8 @@ export function buildHeaderHtml(cfg) {
     ? `<img src="${logo}" alt="Logo" style="height:${c.logo_altezza}px;display:${c.layout==='stacked'?'inline-block':'block'}" />`
     : ''
 
-  const titoloHtml = c.titolo
+  // mostra_titolo: false → nascondi anche se c.titolo è valorizzato
+  const titoloHtml = (c.titolo && c.mostra_titolo !== false)
     ? `<p style="margin:${c.layout==='stacked'?'8px 0 0':'0'};font-size:${c.titolo_size}px;font-weight:${c.titolo_weight};color:${c.titolo_colore};font-family:${c.titolo_font};letter-spacing:${c.titolo_spacing}em;text-align:${c.titolo_align};line-height:1.3">${c.titolo}</p>`
     : ''
 
@@ -94,7 +95,7 @@ export function buildHeaderHtml(cfg) {
   } else {
     // left or center — logo and title inline
     const flexAlign = c.layout === 'center' ? 'center' : 'flex-start'
-    if (c.titolo) {
+    if (c.titolo && c.mostra_titolo !== false) {
       innerHtml = `<td style="padding:${c.padding_v}px ${c.padding_h}px" align="${tdAlign}">
         <table cellpadding="0" cellspacing="0" border="0"><tr>
           ${logoHtml ? `<td style="vertical-align:middle;padding-right:12px">${logoHtml}</td>` : ''}
@@ -230,7 +231,11 @@ function AlignPicker({ value, onChange }) {
 }
 
 // ─── Componente principale ────────────────────────────────────────────────────
-export default function HeaderEditor({ config, onChange, defaultExpanded = false, heroImageUrl = '' }) {
+export default function HeaderEditor({ config, onChange, defaultExpanded = false, heroImageUrl = '', previewData = null }) {
+  function prevReplace(text) {
+    if (!previewData || !text) return text
+    return Object.entries(previewData).reduce((t,[k,v]) => t.replaceAll(k,v), text)
+  }
   const [expanded, setExpanded] = useState(defaultExpanded)
   const [activeTab, setActiveTab] = useState('layout') // 'layout' | 'logo' | 'titolo' | 'stile'
   const [showLogoPicker, setShowLogoPicker] = useState(false)
@@ -247,11 +252,11 @@ export default function HeaderEditor({ config, onChange, defaultExpanded = false
       {(c.logo_url || DEFAULT_LOGO) && (
         <img src={c.logo_url || DEFAULT_LOGO} style={{ height:'14px', objectFit:'contain' }} alt=""/>
       )}
-      {c.titolo && (
+      {c.titolo && c.mostra_titolo !== false && (
         <span style={{
           color: c.titolo_colore, fontSize:'9px', fontWeight: c.titolo_weight,
           fontFamily: c.titolo_font, overflow:'hidden', textOverflow:'ellipsis', whiteSpace:'nowrap',
-        }}>{c.titolo}</span>
+        }}>{prevReplace(c.titolo)}</span>
       )}
       {!c.logo_url && !c.titolo && (
         <span style={{ color:'rgba(255,255,255,0.4)', fontSize:'9px' }}>header</span>
@@ -296,14 +301,14 @@ export default function HeaderEditor({ config, onChange, defaultExpanded = false
               {(c.logo_url || DEFAULT_LOGO) && (
                 <img src={c.logo_url || DEFAULT_LOGO} style={{ height:`${c.logo_altezza}px`, objectFit:'contain', flexShrink:0, maxWidth:'65%' }} alt="logo"/>
               )}
-              {c.titolo && (
+              {c.titolo && c.mostra_titolo !== false && (
                 <span style={{
                   color: c.titolo_colore, fontSize:`${c.titolo_size}px`,
                   fontWeight: c.titolo_weight, fontFamily: c.titolo_font,
                   letterSpacing: `${c.titolo_spacing}em`,
                   textAlign: c.layout==='stacked'?'center':c.titolo_align,
                   lineHeight: 1.3,
-                }}>{c.titolo}</span>
+                }}>{prevReplace(c.titolo)}</span>
               )}
               {!c.logo_url && !c.titolo && (
                 <span style={{ color:'rgba(255,255,255,0.4)', fontSize:'11px' }}>Anteprima header</span>
