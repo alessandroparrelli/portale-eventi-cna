@@ -61,6 +61,7 @@ export const DEFAULT_HEADER_CONFIG = {
   // Visibility
   mostra_header: true,
   mostra_footer: true,
+  mostra_titolo: true,
 }
 
 /** Merge config parziale con defaults */
@@ -395,6 +396,16 @@ export default function HeaderEditor({ config, onChange, defaultExpanded = false
 
             {/* ── TITOLO ── */}
             {activeTab === 'titolo' && <>
+              {/* Toggle mostra/nascondi titolo */}
+              <div style={{ padding:'10px 12px', background: c.mostra_titolo===false?'#FEF2F2':'#F0FDF4', borderRadius:'12px', border:`1px solid ${c.mostra_titolo===false?'#FECACA':'#BBF7D0'}`, marginBottom:'4px' }}>
+                <label style={{ display:'flex', alignItems:'center', gap:'8px', cursor:'pointer', fontSize:'12px', fontWeight:'700', color: c.mostra_titolo===false?'#DC2626':'#16A34A' }}>
+                  <input type="checkbox" checked={c.mostra_titolo!==false} onChange={e=>set('mostra_titolo',e.target.checked)}
+                    style={{ accentColor: c.mostra_titolo===false?'#DC2626':BLU, width:'15px', height:'15px' }}/>
+                  {c.mostra_titolo===false ? '🙈 Titolo nascosto nell\'header' : '👁 Titolo visibile nell\'header'}
+                </label>
+                {c.mostra_titolo===false && <p style={{ margin:'4px 0 0', fontSize:'11px', color:'#9CA3AF' }}>Il titolo dell\'evento non apparirà nell\'header dell\'email</p>}
+              </div>
+              <div style={{ opacity: c.mostra_titolo===false ? 0.4 : 1, pointerEvents: c.mostra_titolo===false ? 'none' : 'auto' }}>
               <div>
                 <label style={lbl}>Testo titolo</label>
                 <input value={c.titolo||''} onChange={e=>set('titolo',e.target.value)}
@@ -422,6 +433,7 @@ export default function HeaderEditor({ config, onChange, defaultExpanded = false
                 <ColorPicker label="Colore testo" value={c.titolo_colore} onChange={v=>set('titolo_colore',v)} defaultValue="rgba(255,255,255,0.9)"/>
                 <AlignPicker value={c.titolo_align} onChange={v=>set('titolo_align',v)}/>
               </div>
+              </div>{/* /opacity wrapper */}
             </>}
 
             {/* -- STILE -- */}

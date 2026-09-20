@@ -538,6 +538,8 @@ export default function EventEmailTab({ eventoId }) {
     setSaving(true)
     const bodyHtml = editorMode==='html' ? current.corpo_html : blocchiToHtml(currBlocchi, PREVIEW_DATA_BASE)
     const hc = mergeHeaderConfig(headerConfig)
+
+    // 1. Salva il template selezionato (corpo + header)
     await supabase.from('email_templates')
       .upsert({
         event_id: eventoId, tipo: selected,
@@ -549,6 +551,25 @@ export default function EventEmailTab({ eventoId }) {
         titolo_size: hc.titolo_size||null,
         personalizzato: true, updated_at: new Date().toISOString(),
       }, { onConflict: 'event_id,tipo' })
+
+    // 2. Propaga header_config a TUTTI gli altri tipi dello stesso evento
+    //    L'header è visivamente condiviso — cambiare il colore su uno
+    //    deve riflettersi su tutti i template dell'evento
+    const altriTipi = ['conferma','notifica_admin','reminder','questionario','posto_teatro']
+      .filter(t => t !== selected)
+    for (const tipo of altriTipi) {
+      await supabase.from('email_templates')
+        .update({
+          header_config: hc,
+          logo_url: hc.logo_url||null, header_colore: hc.sfondo||null,
+          header_titolo: hc.titolo||null, logo_altezza: hc.logo_altezza||null,
+          titolo_size: hc.titolo_size||null,
+          updated_at: new Date().toISOString(),
+        })
+        .eq('event_id', eventoId)
+        .eq('tipo', tipo)
+    }
+
     setSaving(false); setSaved(true); setTimeout(()=>setSaved(false), 2500)
   }
 
