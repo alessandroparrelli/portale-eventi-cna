@@ -381,6 +381,7 @@ export default function EventoEditorPage() {
   const eventRef = useRef(null)   // sempre aggiornato — evita race condition nel save
   useEffect(() => { eventRef.current = event }, [event])
   const [saving, setSaving] = useState(false)
+  const salvaFormFieldsFn = React.useRef(null)
   const [saved, setSaved]             = useState(false)
   const [activeTab, setActiveTab]     = useState('info')
   const [showPreview, setShowPreview] = useState(false)
@@ -545,6 +546,10 @@ export default function EventoEditorPage() {
         }
       }
       logAttivita('evento_modificato', { eventoId: id, eventoTitolo: payload.titolo })
+      // Salva anche i campi form se la tab iscrizioni è montata
+      if (salvaFormFieldsFn.current) {
+        await salvaFormFieldsFn.current()
+      }
     }
     setSaving(false); setSaved(true); setPreviewKey(k => k + 1); setTimeout(()=>setSaved(false),2500)
     // Ripristina la posizione di scroll dopo il salvataggio
@@ -1207,7 +1212,7 @@ export default function EventoEditorPage() {
         {/* ── ISCRIZIONI ── */}
         {activeTab==='iscrizioni' && (
           <div style={p.panel}>
-            <IscrizioniTab event={event} setEvent={setEvent} eventId={id} />
+            <IscrizioniTab onSalvaReady={fn => { salvaFormFieldsFn.current = fn }} event={event} setEvent={setEvent} eventId={id} />
           </div>
         )}
 
