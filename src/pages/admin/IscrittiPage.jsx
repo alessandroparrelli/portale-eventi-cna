@@ -141,6 +141,7 @@ export default function IscrittiPage() {
   const [confirmReminder, setConfirmReminder] = useState(null) // { ids: [...] | null } oppure null
   const [reminderInCorso, setReminderInCorso] = useState(false)
   const [reminderRis, setReminderRis] = useState(null)
+  const [reminderPreview, setReminderPreview] = useState(null) // { html, oggetto, fonte, loading, error }
   const [dryRunRis, setDryRunRis] = useState(null)
   const [teatroSelezione, setTeatroSelezione] = useState(new Set()) // Set di reg_id selezionati
   const [filtroPostoAssegnato, setFiltroPostoAssegnato] = useState('tutti') // 'tutti' | 'con_posto' | 'senza_posto'
@@ -2286,43 +2287,130 @@ export default function IscrittiPage() {
         const destinatari = isTutti
           ? registrations.filter(r => r.email && !r.rinuncia).length
           : (ids || []).filter(id => { const r = registrations.find(x => x.id === id); return r?.email && !r?.rinuncia }).length
+        // Primo iscritto valido per caricare l'anteprima
+        const primoId = isTutti
+          ? registrations.find(r => r.email && !r.rinuncia)?.id
+          : (ids || []).find(id => { const r = registrations.find(x => x.id === id); return r?.email && !r?.rinuncia })
         return (
-          <Modal title="Conferma invio reminder" onClose={() => setConfirmReminder(null)} width="480px">
-            <div style={{ textAlign:'center', padding:'8px 0 20px' }}>
-              <div style={{ fontSize:48, marginBottom:8 }}>📣</div>
-              <div style={{ fontSize:18, fontWeight:800, color:'#0A0A0A', marginBottom:6 }}>
-                {`${destinatari} reminder in partenza`}
-              </div>
-              <div style={{ fontSize:14, color:'#6B7280', marginBottom:20 }}>
-                {isTutti
-                  ? `Tutti gli iscritti con email (escluse rinunce)`
-                  : `${destinatari} iscritti selezionati`}
-              </div>
-              <div style={{ background:'#F5F3FF', border:'1px solid #DDD6FE', borderRadius:12, padding:'12px 16px', fontSize:13, color:'#4C1D95', marginBottom:20, textAlign:'left', display:'flex', gap:8 }}>
-                <span style={{ fontSize:16, flexShrink:0 }}>📣</span>
-                <span>Verrà inviata l&apos;email di tipo <strong>reminder</strong> con i dettagli dell&apos;evento. Gli iscritti che hanno rinunciato non verranno inclusi.</span>
-              </div>
-              <div style={{ background:'#F9FAFB', borderRadius:12, padding:'16px', marginBottom:4 }}>
-                <div style={{ fontSize:13, color:'#374151', marginBottom:10, fontWeight:600 }}>
-                  Digita <strong style={{color:'#7C4DFF'}}>{destinatari}</strong> per confermare
+          <Modal title="Conferma invio reminder" onClose={() => { setConfirmReminder(null); setReminderPreview(null) }} width="820px">
+            <div style={{ display:'flex', gap:'24px', alignItems:'flex-start' }}>
+
+              {/* COLONNA SX: conferma */}
+              <div style={{ flex:'0 0 340px' }}>
+                <div style={{ textAlign:'center', padding:'8px 0 16px' }}>
+                  <div style={{ fontSize:48, marginBottom:8 }}>📣</div>
+                  <div style={{ fontSize:18, fontWeight:800, color:'#0A0A0A', marginBottom:6 }}>
+                    {`${destinatari} reminder in partenza`}
+                  </div>
+                  <div style={{ fontSize:14, color:'#6B7280', marginBottom:16 }}>
+                    {isTutti ? 'Tutti gli iscritti con email (escluse rinunce)' : `${destinatari} iscritti selezionati`}
+                  </div>
                 </div>
-                <input
-                  type="number"
-                  placeholder={String(destinatari)}
-                  value={confirmReminder.inputNum || ''}
-                  onChange={e => setConfirmReminder(prev => ({...prev, inputNum: e.target.value}))}
-                  style={{ width:'100%', padding:'10px 14px', borderRadius:10, border:`1.5px solid ${parseInt(confirmReminder.inputNum)===destinatari?'#7C4DFF':'#E5E7EB'}`, fontSize:20, fontWeight:800, textAlign:'center', boxSizing:'border-box', outline:'none' }}
-                />
+                <div style={{ background:'#F5F3FF', border:'1px solid #DDD6FE', borderRadius:12, padding:'12px 16px', fontSize:13, color:'#4C1D95', marginBottom:16, display:'flex', gap:8 }}>
+                  <span style={{ fontSize:16, flexShrink:0 }}>📣</span>
+                  <span>Verrà inviata l&apos;email <strong>reminder</strong> con i dettagli dell&apos;evento. Gli iscritti che hanno rinunciato non verranno inclusi.</span>
+                </div>
+                <div style={{ background:'#F9FAFB', borderRadius:12, padding:'16px', marginBottom:16 }}>
+                  <div style={{ fontSize:13, color:'#374151', marginBottom:10, fontWeight:600 }}>
+                    Digita <strong style={{color:'#7C4DFF'}}>{destinatari}</strong> per confermare
+                  </div>
+                  <input
+                    type="number"
+                    placeholder={String(destinatari)}
+                    value={confirmReminder.inputNum || ''}
+                    onChange={e => setConfirmReminder(prev => ({...prev, inputNum: e.target.value}))}
+                    style={{ width:'100%', padding:'10px 14px', borderRadius:10, border:`1.5px solid ${parseInt(confirmReminder.inputNum)===destinatari?'#7C4DFF':'#E5E7EB'}`, fontSize:20, fontWeight:800, textAlign:'center', boxSizing:'border-box', outline:'none' }}
+                  />
+                </div>
+                <div style={{ display:'flex', flexDirection:'column', gap:'8px' }}>
+                  <Btn
+                    disabled={parseInt(confirmReminder.inputNum) !== destinatari || reminderInCorso}
+                    onClick={() => { setConfirmReminder(null); setReminderPreview(null); inviaReminder(ids) }}
+                    style={{ background:'#7C4DFF', color:'#fff', width:'100%', justifyContent:'center' }}>
+                    📣 Invia {destinatari} reminder
+                  </Btn>
+                  <Btn variant="ghost" onClick={() => { setConfirmReminder(null); setReminderPreview(null) }} style={{ width:'100%', justifyContent:'center' }}>Annulla</Btn>
+                </div>
               </div>
-            </div>
-            <div style={{ display:'flex', justifyContent:'flex-end', gap:'10px' }}>
-              <Btn variant="ghost" onClick={() => setConfirmReminder(null)}>Annulla</Btn>
-              <Btn
-                disabled={parseInt(confirmReminder.inputNum) !== destinatari || reminderInCorso}
-                onClick={() => { setConfirmReminder(null); inviaReminder(ids) }}
-                style={{ background:'#7C4DFF', color:'#fff' }}>
-                📣 Invia {destinatari} reminder
-              </Btn>
+
+              {/* COLONNA DX: anteprima */}
+              <div style={{ flex:1, minWidth:0 }}>
+                <div style={{ display:'flex', alignItems:'center', justifyContent:'space-between', marginBottom:'10px' }}>
+                  <span style={{ fontSize:'13px', fontWeight:'700', color:'#374151' }}>Anteprima email</span>
+                  {!reminderPreview && (
+                    <button
+                      onClick={async () => {
+                        if (!primoId) return
+                        setReminderPreview({ loading: true })
+                        try {
+                          const res = await fetch('https://hnkhckcclgabunkqfmrz.supabase.co/functions/v1/send-event-email', {
+                            method: 'POST',
+                            headers: { 'Content-Type': 'application/json' },
+                            body: JSON.stringify({ tipo: 'reminder', iscrizione_id: primoId, solo_html: true }),
+                          })
+                          const data = await res.json()
+                          if (data.error) setReminderPreview({ error: data.error })
+                          else setReminderPreview({ html: data.html, oggetto: data.oggetto, fonte: data.fonte })
+                        } catch(e) { setReminderPreview({ error: String(e) }) }
+                      }}
+                      style={{ background:'#F5F3FF', border:'1px solid #DDD6FE', borderRadius:20, padding:'5px 14px', fontSize:'12px', fontWeight:'700', color:'#7C4DFF', cursor:'pointer', fontFamily:'inherit' }}>
+                      🔍 Carica anteprima
+                    </button>
+                  )}
+                  {reminderPreview && !reminderPreview.loading && !reminderPreview.error && (
+                    <div style={{ display:'flex', alignItems:'center', gap:'8px' }}>
+                      <span style={{
+                        fontSize:'11px', fontWeight:'700', padding:'3px 10px', borderRadius:20,
+                        background: reminderPreview.fonte === 'evento' ? '#DCFCE7' : '#FEF9C3',
+                        color: reminderPreview.fonte === 'evento' ? '#166534' : '#854D0E',
+                        border: `1px solid ${reminderPreview.fonte === 'evento' ? '#86EFAC' : '#FDE68A'}`
+                      }}>
+                        {reminderPreview.fonte === 'evento' ? '✓ Template personalizzato evento' : '⚠ Template standard (default)'}
+                      </span>
+                      <button onClick={() => setReminderPreview(null)}
+                        style={{ background:'none', border:'none', cursor:'pointer', color:'#9CA3AF', fontSize:'16px', padding:0, lineHeight:1 }}>↺</button>
+                    </div>
+                  )}
+                </div>
+
+                {/* Oggetto */}
+                {reminderPreview?.oggetto && (
+                  <div style={{ background:'#F9FAFB', border:'1px solid #E8ECF4', borderRadius:8, padding:'8px 12px', fontSize:'12px', color:'#374151', marginBottom:'8px' }}>
+                    <span style={{ color:'#9CA3AF', fontWeight:600 }}>Oggetto: </span>{reminderPreview.oggetto}
+                  </div>
+                )}
+
+                {/* Stato iframe */}
+                <div style={{ border:'1px solid #E8ECF4', borderRadius:12, overflow:'hidden', background:'#F9FAFB', height:'480px', display:'flex', alignItems:'center', justifyContent:'center' }}>
+                  {!reminderPreview && (
+                    <div style={{ textAlign:'center', color:'#9CA3AF' }}>
+                      <div style={{ fontSize:32, marginBottom:8 }}>📧</div>
+                      <p style={{ fontSize:'13px', margin:0 }}>Clicca &ldquo;Carica anteprima&rdquo; per vedere l&apos;email</p>
+                      <p style={{ fontSize:'12px', margin:'4px 0 0', color:'#D1D5DB' }}>Viene usato il primo iscritto come dati di esempio</p>
+                    </div>
+                  )}
+                  {reminderPreview?.loading && (
+                    <div style={{ textAlign:'center', color:'#9CA3AF' }}>
+                      <div style={{ fontSize:32, marginBottom:8 }}>⏳</div>
+                      <p style={{ fontSize:'13px', margin:0 }}>Caricamento anteprima…</p>
+                    </div>
+                  )}
+                  {reminderPreview?.error && (
+                    <div style={{ textAlign:'center', color:'#DC2626', padding:'20px' }}>
+                      <div style={{ fontSize:32, marginBottom:8 }}>❌</div>
+                      <p style={{ fontSize:'13px', margin:0 }}>{reminderPreview.error}</p>
+                    </div>
+                  )}
+                  {reminderPreview?.html && (
+                    <iframe
+                      srcDoc={reminderPreview.html}
+                      style={{ width:'100%', height:'100%', border:'none', display:'block' }}
+                      title="Anteprima reminder"
+                      sandbox="allow-same-origin"
+                    />
+                  )}
+                </div>
+              </div>
             </div>
           </Modal>
         )
