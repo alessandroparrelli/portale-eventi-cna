@@ -470,11 +470,11 @@ export default function IscrittiPage() {
   }
 
     function toggleSelezioneTeatroTutti(regs) {
-    const conPosto = regs.filter(r => r.numero_posto && r.email).map(r => r.id)
+    const conEmail = regs.filter(r => r.email).map(r => r.id)
     setTeatroSelezione(prev => {
-      const tuttiSelezionati = conPosto.every(id => prev.has(id))
+      const tuttiSelezionati = conEmail.every(id => prev.has(id))
       if (tuttiSelezionati) return new Set()
-      return new Set(conPosto)
+      return new Set(conEmail)
     })
   }
 
@@ -1607,90 +1607,90 @@ export default function IscrittiPage() {
             )}
           </div>
 
-          {/* Barra azioni invio */}
-          <div style={{ background:'#F9FAFB', border:'1px solid #E8ECF4', borderRadius:'20px', padding:'14px 16px', marginBottom:'16px' }}>
-            <div style={{ display:'flex', gap:'10px', flexWrap:'wrap', alignItems:'center' }}>
-              {/* Invio massivo a tutti */}
-              <Btn variant="primary" onClick={() => setConfirmInvioTeatro({ ids: null })} disabled={invioPostoInCorso} size="md">
-                {invioPostoInCorso ? '📨 Invio…' : '📨 Invia a tutti'}
-              </Btn>
-
-              {/* Cambia stato selezionati */}
-              {teatroSelezione.size > 0 && (() => {
+          {/* Barra selezione */}
+          {teatroSelezione.size > 0 && (
+            <div style={{ display:'flex', alignItems:'center', gap:'10px', marginBottom:'8px', padding:'8px 14px', background:'#EFF6FF', border:'1px solid #BFDBFE', borderRadius:'12px' }}>
+              <span style={{ fontSize:'13px', color:'#1D4ED8', fontWeight:'700' }}>
+                ✓ {teatroSelezione.size} {teatroSelezione.size === 1 ? 'iscritto selezionato' : 'iscritti selezionati'}
+              </span>
+              <button onClick={() => setTeatroSelezione(new Set())}
+                style={{ fontSize:'12px', color:'#DC2626', background:'none', border:'none', cursor:'pointer', padding:'2px 8px', fontWeight:'700', borderRadius:8, border:'1px solid #FECACA', background:'#FEF2F2' }}>
+                × Deseleziona tutto
+              </button>
+              <div style={{ flex:1 }} />
+              {(() => {
                 const selArr = [...teatroSelezione]
                 const conStato = selArr.filter(id => { const r = registrations.find(x=>x.id===id); return r?.rinuncia || r?.presenza_confermata }).length
                 return conStato > 0 ? (
-                  <Btn variant="ghost" size="md" onClick={() => setCambiaStato({ ids: selArr })}
-                    style={{ border:'1px solid #E8ECF4', color:'#6B7280' }}>
+                  <Btn variant="ghost" size="sm" onClick={() => setCambiaStato({ ids: selArr })}
+                    style={{ border:'1px solid #E8ECF4', color:'#6B7280', fontSize:'12px' }}>
                     🔄 Cambia stato ({conStato})
                   </Btn>
                 ) : null
               })()}
+            </div>
+          )}
 
-              {/* Invio ai selezionati */}
+          {/* Box 1: INVIO EMAIL POSTO */}
+          <div style={{ background:'#EFF6FF', border:'1px solid #BFDBFE', borderRadius:'16px', padding:'14px 18px', marginBottom:'10px' }}>
+            <div style={{ display:'flex', alignItems:'center', gap:'6px', marginBottom:'10px' }}>
+              <span style={{ fontSize:'12px', fontWeight:'800', color:'#1D4ED8', textTransform:'uppercase', letterSpacing:'.05em' }}>📨 Email posto assegnato</span>
+            </div>
+            <div style={{ display:'flex', gap:'8px', flexWrap:'wrap', alignItems:'center' }}>
+              <Btn variant="primary" onClick={() => setConfirmInvioTeatro({ ids: null })} disabled={invioPostoInCorso} size="md"
+                style={{ background:'#1D4ED8', border:'none' }}>
+                {invioPostoInCorso ? '📨 Invio…' : '📨 Invia a tutti'}
+              </Btn>
               {teatroSelezione.size > 0 && (
-                <Btn variant="secondary" onClick={() => setConfirmInvioTeatro({ ids: [...teatroSelezione] })} disabled={invioPostoInCorso} size="md">
+                <Btn size="md" onClick={() => setConfirmInvioTeatro({ ids: [...teatroSelezione] })} disabled={invioPostoInCorso}
+                  style={{ background:'#fff', border:'1.5px solid #1D4ED8', color:'#1D4ED8', fontWeight:'700', borderRadius:'20px', padding:'7px 16px', cursor:'pointer', fontFamily:'inherit', fontSize:'13px' }}>
                   📨 Invia ai selezionati ({teatroSelezione.size})
                 </Btn>
               )}
-
               <div style={{ flex:1 }} />
-
-              {/* Dry run */}
-              <Btn variant="ghost" onClick={() => inviaMailPosti(true, teatroSelezione.size > 0 ? [...teatroSelezione] : null)} size="md">
-                🔍 {teatroSelezione.size > 0 ? `Anteprima selezionati (${teatroSelezione.size})` : 'Anteprima tutti'}
+              <Btn variant="ghost" onClick={() => inviaMailPosti(true, teatroSelezione.size > 0 ? [...teatroSelezione] : null)} size="md"
+                style={{ fontSize:'12px', color:'#6B7280' }}>
+                🔍 {teatroSelezione.size > 0 ? `Anteprima sel. (${teatroSelezione.size})` : 'Anteprima tutti'}
               </Btn>
-              {/* Export Excel posti */}
-              <div style={{ marginLeft:'auto' }}>
-                <Btn variant="secondary" onClick={exportExcelTeatro} size="md">
-                  <Download size={15}/> Esporta posti Excel
-                </Btn>
-              </div>
+              <Btn variant="ghost" onClick={exportExcelTeatro} size="md" style={{ fontSize:'12px', color:'#6B7280' }}>
+                <Download size={13}/> Excel posti
+              </Btn>
             </div>
+          </div>
 
-            {/* Seconda riga toolbar: Reminder */}
-            <div style={{ display:'flex', gap:'10px', flexWrap:'wrap', alignItems:'center', paddingTop:'10px', borderTop:'1px solid #E8ECF4' }}>
-              <span style={{ fontSize:'12px', fontWeight:'700', color:'#6B7280', textTransform:'uppercase', letterSpacing:'.04em' }}>📣 Reminder</span>
-              <Btn variant="ghost" size="md"
+          {/* Box 2: REMINDER */}
+          <div style={{ background:'#F5F3FF', border:'1px solid #DDD6FE', borderRadius:'16px', padding:'14px 18px', marginBottom:'16px' }}>
+            <div style={{ display:'flex', alignItems:'center', gap:'6px', marginBottom:'10px' }}>
+              <span style={{ fontSize:'12px', fontWeight:'800', color:'#6D28D9', textTransform:'uppercase', letterSpacing:'.05em' }}>📣 Reminder evento</span>
+            </div>
+            <div style={{ display:'flex', gap:'8px', flexWrap:'wrap', alignItems:'center' }}>
+              <Btn size="md"
                 onClick={() => setConfirmReminder({ ids: null })}
                 disabled={reminderInCorso}
-                style={{ border:'1px solid #7C4DFF', color:'#7C4DFF', background:'#F5F3FF' }}>
-                {reminderInCorso ? '⏳ Invio in corso…' : `📣 Invia reminder a tutti (${registrations.filter(r => r.email && !r.rinuncia).length})`}
+                style={{ background:'#7C4DFF', color:'#fff', border:'none', fontWeight:'700', borderRadius:'20px', padding:'7px 16px', cursor:'pointer', fontFamily:'inherit', fontSize:'13px', opacity: reminderInCorso ? .6 : 1 }}>
+                {reminderInCorso ? '⏳ Invio…' : `📣 Invia a tutti (${registrations.filter(r => r.email && !r.rinuncia).length})`}
               </Btn>
               {teatroSelezione.size > 0 && (
-                <Btn variant="ghost" size="md"
+                <Btn size="md"
                   onClick={() => setConfirmReminder({ ids: [...teatroSelezione] })}
                   disabled={reminderInCorso}
-                  style={{ border:'1px solid #7C4DFF', color:'#7C4DFF' }}>
-                  📣 Reminder ai selezionati ({teatroSelezione.size})
+                  style={{ background:'#fff', border:'1.5px solid #7C4DFF', color:'#7C4DFF', fontWeight:'700', borderRadius:'20px', padding:'7px 16px', cursor:'pointer', fontFamily:'inherit', fontSize:'13px' }}>
+                  📣 Ai selezionati ({teatroSelezione.size})
                 </Btn>
               )}
               {reminderRis && (
-                <div style={{ display:'flex', alignItems:'center', gap:'8px', marginLeft:'auto' }}>
-                  <span style={{ fontSize:'13px', fontWeight:'700',
-                    color: reminderRis.failed > 0 ? '#DC2626' : '#059669' }}>
-                    {reminderRis.failed > 0
-                      ? `⚠️ ${reminderRis.sent} inviati, ${reminderRis.failed} errori`
-                      : `✓ ${reminderRis.sent} reminder inviati`}
-                  </span>
-                  <button onClick={() => setReminderRis(null)}
-                    style={{ background:'none', border:'none', cursor:'pointer', color:'#9CA3AF', fontSize:'16px', padding:0, lineHeight:1 }}>×</button>
-                </div>
+                <>
+                  <div style={{ flex:1 }} />
+                  <div style={{ display:'flex', alignItems:'center', gap:'8px' }}>
+                    <span style={{ fontSize:'13px', fontWeight:'700', color: reminderRis.failed > 0 ? '#DC2626' : '#059669' }}>
+                      {reminderRis.failed > 0 ? `⚠️ ${reminderRis.sent} inviati, ${reminderRis.failed} errori` : `✓ ${reminderRis.sent} reminder inviati`}
+                    </span>
+                    <button onClick={() => setReminderRis(null)}
+                      style={{ background:'none', border:'none', cursor:'pointer', color:'#9CA3AF', fontSize:'16px', padding:0, lineHeight:1 }}>×</button>
+                  </div>
+                </>
               )}
             </div>
-
-            {/* Info selezione */}
-            {teatroSelezione.size > 0 && (
-              <div style={{ marginTop:'10px', display:'flex', alignItems:'center', gap:'10px' }}>
-                <span style={{ fontSize:'12px', color:'#374151', fontWeight:'600' }}>
-                  {teatroSelezione.size} selezionati
-                </span>
-                <button onClick={() => setTeatroSelezione(new Set())}
-                  style={{ fontSize:'12px', color:'#DC2626', background:'none', border:'none', cursor:'pointer', padding:0, fontWeight:'600' }}>
-                  Deseleziona tutto
-                </button>
-              </div>
-            )}
           </div>
 
           {/* Risultato dry run */}
@@ -1775,8 +1775,8 @@ export default function IscrittiPage() {
                   <tr style={{ background:'linear-gradient(90deg,#5B5FEF,#3730A3)' }}>
                     <th style={{ padding:'10px 12px', background:'transparent', color:'#fff', width:'40px' }}>
                       <input type="checkbox"
-                        checked={registrations.filter(r => r.numero_posto && r.email).length > 0 &&
-                          registrations.filter(r => r.numero_posto && r.email).every(r => teatroSelezione.has(r.id))}
+                        checked={registrations.filter(r => r.email).length > 0 &&
+                          registrations.filter(r => r.email).every(r => teatroSelezione.has(r.id))}
                         onChange={() => toggleSelezioneTeatroTutti(registrations)}
                         style={{ cursor:'pointer', width:'16px', height:'16px', accentColor:'#fff' }}
                         title="Seleziona/deseleziona tutti (con posto e email)"
@@ -1795,14 +1795,14 @@ export default function IscrittiPage() {
                       <tr key={r.id} style={{ backgroundColor: selezionato ? '#EFF6FF' : (i % 2 === 0 ? '#fff' : '#F9FAFB'), borderBottom:'1px solid #F3F4F6', transition:'background .1s' }}>
                         {/* Checkbox */}
                         <td style={{ ...s.td, textAlign:'center', paddingLeft:'12px', paddingRight:'12px' }}>
-                          {r.numero_posto && r.email ? (
+                          {r.email ? (
                             <input type="checkbox"
                               checked={selezionato}
                               onChange={() => toggleSelezioneTeatroReg(r.id)}
                               style={{ cursor:'pointer', width:'16px', height:'16px', accentColor:'#5B5FEF' }}
                             />
                           ) : (
-                            <span title="Nessun posto o email mancante" style={{ color:'#D1D5DB', fontSize:'12px' }}>—</span>
+                            <span title="Email mancante" style={{ color:'#D1D5DB', fontSize:'12px' }}>—</span>
                           )}
                         </td>
                         <td style={s.td}>
