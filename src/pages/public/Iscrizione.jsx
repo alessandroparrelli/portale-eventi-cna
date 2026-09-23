@@ -359,9 +359,10 @@ export default function Iscrizione() {
               </div>
             )}
 
-            {/* Dati partecipante + QR */}
-            <div style={{ display:'grid', gridTemplateColumns:'1fr 1fr', gap:'16px', marginBottom:'16px' }}>
-              {/* Dati */}
+            {/* Dati partecipante + QR — impilati verticalmente, responsive */}
+            <div style={{ display:'flex', flexDirection:'column', gap:'12px', marginBottom:'16px' }}>
+
+              {/* Dati iscritto */}
               <div style={{ backgroundColor:'#ffffff', borderRadius:'20px', border:'1px solid #E5E7EB', padding:'20px' }}>
                 <p style={{ fontSize:'11px', fontWeight:'700', color:'#9CA3AF', textTransform:'uppercase', letterSpacing:'0.06em', margin:'0 0 14px' }}>Dati iscritto</p>
                 <div style={{ display:'flex', flexDirection:'column', gap:'10px' }}>
@@ -400,9 +401,9 @@ export default function Iscrizione() {
                 </div>
               </div>
 
-              {/* QR */}
-              <div style={{ backgroundColor:'#ffffff', borderRadius:'20px', border:'1px solid #E5E7EB', padding:'20px', display:'flex', flexDirection:'column', alignItems:'center', justifyContent:'center' }}>
-                <p style={{ fontSize:'11px', fontWeight:'700', color:'#9CA3AF', textTransform:'uppercase', letterSpacing:'0.06em', margin:'0 0 14px' }}>QR Code check-in</p>
+              {/* QR Code check-in */}
+              <div style={{ backgroundColor:'#ffffff', borderRadius:'20px', border:'1px solid #E5E7EB', padding:'24px 20px', display:'flex', flexDirection:'column', alignItems:'center' }}>
+                <p style={{ fontSize:'11px', fontWeight:'700', color:'#9CA3AF', textTransform:'uppercase', letterSpacing:'0.06em', margin:'0 0 16px' }}>QR Code check-in</p>
                 {reg.qr_code
                   ? <>
                       <QRCodeDisplay value={reg.qr_code} />
