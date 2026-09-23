@@ -1936,7 +1936,7 @@ export default function IscrittiPage() {
             <GlowStatCard icon="check"     label="Presenti"      value={totPresenti}                                              palette="green"/>
             <GlowStatCard icon="trending"  label="Confermati"    value={totConfermati}                                            palette="cyan"/>
             <GlowStatCard icon="usercheck" label="Walk-in"       value={registrations.filter(r=>r.stato==='walk-in').length}     palette="violet"/>
-            <GlowStatCard icon="userx"     label="Assenti"       value={registrations.filter(r=>r.stato==='assente').length}     palette="red"/>
+            <GlowStatCard icon="userx"     label="Non verrà"     value={registrations.filter(r=>r.rinuncia).length}              palette="red"/>
             <div style={{ background:'linear-gradient(135deg,#fef3c7,#fde68a)', border:'1.5px solid #f59e0b', borderRadius:'20px', padding:'14px 16px', display:'flex', alignItems:'center', gap:'12px', cursor:'default' }}>
               <span style={{ fontSize:22 }}>🔍</span>
               <div>
