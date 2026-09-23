@@ -138,6 +138,9 @@ export default function IscrittiPage() {
   const [invioPostoInCorso, setInvioPostoInCorso] = useState(false)
   const [invioPostoRis, setInvioPostoRis] = useState(null)
   const [confirmInvioTeatro, setConfirmInvioTeatro] = useState(null) // { ids: [...] | null } oppure null
+  const [confirmReminder, setConfirmReminder] = useState(null) // { ids: [...] | null } oppure null
+  const [reminderInCorso, setReminderInCorso] = useState(false)
+  const [reminderRis, setReminderRis] = useState(null)
   const [dryRunRis, setDryRunRis] = useState(null)
   const [teatroSelezione, setTeatroSelezione] = useState(new Set()) // Set di reg_id selezionati
   const [filtroPostoAssegnato, setFiltroPostoAssegnato] = useState('tutti') // 'tutti' | 'con_posto' | 'senza_posto'
@@ -303,6 +306,34 @@ export default function IscrittiPage() {
 
     setInvioPostoInCorso(false)
     loadRegs()
+  }
+
+  async function inviaReminder(ids = null) {
+    // ids: null = tutti gli iscritti con email, [...] = solo i selezionati
+    if (!selectedEvento) return
+    setReminderInCorso(true)
+    setReminderRis(null)
+
+    const destinatari = ids !== null
+      ? ids.filter(id => registrations.find(r => r.id === id && r.email))
+      : registrations.filter(r => r.email && !r.rinuncia).map(r => r.id)
+
+    let sent = 0, failed = 0, errors = []
+    for (const regId of destinatari) {
+      try {
+        const { error } = await supabase.functions.invoke('send-event-email', {
+          body: { tipo: 'reminder', iscrizione_id: regId, solo: true },
+        })
+        if (error) { failed++; errors.push({ id: regId, error: error.message }) }
+        else sent++
+      } catch (e) {
+        failed++
+        errors.push({ id: regId, error: String(e) })
+      }
+    }
+
+    setReminderRis({ sent, failed, errors, completato: true })
+    setReminderInCorso(false)
   }
 
   function toggleSelezioneTeatroReg(id) {
@@ -1616,6 +1647,37 @@ export default function IscrittiPage() {
               </div>
             </div>
 
+            {/* Seconda riga toolbar: Reminder */}
+            <div style={{ display:'flex', gap:'10px', flexWrap:'wrap', alignItems:'center', paddingTop:'10px', borderTop:'1px solid #E8ECF4' }}>
+              <span style={{ fontSize:'12px', fontWeight:'700', color:'#6B7280', textTransform:'uppercase', letterSpacing:'.04em' }}>📣 Reminder</span>
+              <Btn variant="ghost" size="md"
+                onClick={() => setConfirmReminder({ ids: null })}
+                disabled={reminderInCorso}
+                style={{ border:'1px solid #7C4DFF', color:'#7C4DFF', background:'#F5F3FF' }}>
+                {reminderInCorso ? '⏳ Invio in corso…' : `📣 Invia reminder a tutti (${registrations.filter(r => r.email && !r.rinuncia).length})`}
+              </Btn>
+              {teatroSelezione.size > 0 && (
+                <Btn variant="ghost" size="md"
+                  onClick={() => setConfirmReminder({ ids: [...teatroSelezione] })}
+                  disabled={reminderInCorso}
+                  style={{ border:'1px solid #7C4DFF', color:'#7C4DFF' }}>
+                  📣 Reminder ai selezionati ({teatroSelezione.size})
+                </Btn>
+              )}
+              {reminderRis && (
+                <div style={{ display:'flex', alignItems:'center', gap:'8px', marginLeft:'auto' }}>
+                  <span style={{ fontSize:'13px', fontWeight:'700',
+                    color: reminderRis.failed > 0 ? '#DC2626' : '#059669' }}>
+                    {reminderRis.failed > 0
+                      ? `⚠️ ${reminderRis.sent} inviati, ${reminderRis.failed} errori`
+                      : `✓ ${reminderRis.sent} reminder inviati`}
+                  </span>
+                  <button onClick={() => setReminderRis(null)}
+                    style={{ background:'none', border:'none', cursor:'pointer', color:'#9CA3AF', fontSize:'16px', padding:0, lineHeight:1 }}>×</button>
+                </div>
+              )}
+            </div>
+
             {/* Info selezione */}
             {teatroSelezione.size > 0 && (
               <div style={{ marginTop:'10px', display:'flex', alignItems:'center', gap:'10px' }}>
@@ -2211,6 +2273,55 @@ export default function IscrittiPage() {
                 disabled={parseInt(confirmInvioTeatro.inputNum) !== destinatari}
                 onClick={() => { const forza = !!confirmInvioTeatro.forza; setConfirmInvioTeatro(null); inviaMailPosti(false, ids, forza) }}>
                 {confirmInvioTeatro.forza ? `🔄 Reinvia ${destinatari} email` : `📨 Conferma e invia ${destinatari} email`}
+              </Btn>
+            </div>
+          </Modal>
+        )
+      })()}
+
+      {/* MODAL REMINDER */}
+      {confirmReminder && (() => {
+        const ids = confirmReminder.ids
+        const isTutti = ids === null
+        const destinatari = isTutti
+          ? registrations.filter(r => r.email && !r.rinuncia).length
+          : (ids || []).filter(id => { const r = registrations.find(x => x.id === id); return r?.email && !r?.rinuncia }).length
+        return (
+          <Modal title="Conferma invio reminder" onClose={() => setConfirmReminder(null)} width="480px">
+            <div style={{ textAlign:'center', padding:'8px 0 20px' }}>
+              <div style={{ fontSize:48, marginBottom:8 }}>📣</div>
+              <div style={{ fontSize:18, fontWeight:800, color:'#0A0A0A', marginBottom:6 }}>
+                {`${destinatari} reminder in partenza`}
+              </div>
+              <div style={{ fontSize:14, color:'#6B7280', marginBottom:20 }}>
+                {isTutti
+                  ? `Tutti gli iscritti con email (escluse rinunce)`
+                  : `${destinatari} iscritti selezionati`}
+              </div>
+              <div style={{ background:'#F5F3FF', border:'1px solid #DDD6FE', borderRadius:12, padding:'12px 16px', fontSize:13, color:'#4C1D95', marginBottom:20, textAlign:'left', display:'flex', gap:8 }}>
+                <span style={{ fontSize:16, flexShrink:0 }}>📣</span>
+                <span>Verrà inviata l&apos;email di tipo <strong>reminder</strong> con i dettagli dell&apos;evento. Gli iscritti che hanno rinunciato non verranno inclusi.</span>
+              </div>
+              <div style={{ background:'#F9FAFB', borderRadius:12, padding:'16px', marginBottom:4 }}>
+                <div style={{ fontSize:13, color:'#374151', marginBottom:10, fontWeight:600 }}>
+                  Digita <strong style={{color:'#7C4DFF'}}>{destinatari}</strong> per confermare
+                </div>
+                <input
+                  type="number"
+                  placeholder={String(destinatari)}
+                  value={confirmReminder.inputNum || ''}
+                  onChange={e => setConfirmReminder(prev => ({...prev, inputNum: e.target.value}))}
+                  style={{ width:'100%', padding:'10px 14px', borderRadius:10, border:`1.5px solid ${parseInt(confirmReminder.inputNum)===destinatari?'#7C4DFF':'#E5E7EB'}`, fontSize:20, fontWeight:800, textAlign:'center', boxSizing:'border-box', outline:'none' }}
+                />
+              </div>
+            </div>
+            <div style={{ display:'flex', justifyContent:'flex-end', gap:'10px' }}>
+              <Btn variant="ghost" onClick={() => setConfirmReminder(null)}>Annulla</Btn>
+              <Btn
+                disabled={parseInt(confirmReminder.inputNum) !== destinatari || reminderInCorso}
+                onClick={() => { setConfirmReminder(null); inviaReminder(ids) }}
+                style={{ background:'#7C4DFF', color:'#fff' }}>
+                📣 Invia {destinatari} reminder
               </Btn>
             </div>
           </Modal>
