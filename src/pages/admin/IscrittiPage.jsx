@@ -1852,22 +1852,42 @@ export default function IscrittiPage() {
                           </div>
                         </td>
                         <td style={s.td}><span style={{ fontSize:'12px', color:'#374151' }}>{r.presenza_confermata_at ? formatDt(r.presenza_confermata_at) : '—'}</span></td>
-                        {/* Invio singolo */}
+                        {/* Azioni: invio singolo + copia link */}
                         <td style={s.td}>
-                          {r.numero_posto && r.email ? (
-                            <button
-                              onClick={() => inviaMailPosti(false, [r.id])}
-                              disabled={invioPostoInCorso}
-                              title="Invia mail posto a questo iscritto"
-                              style={{ background:'none', border:'1px solid #E8ECF4', borderRadius:'20px', padding:'5px 10px', cursor:'pointer', fontSize:'12px', color:'#374151', fontFamily:"'Inter',sans-serif", fontWeight:'600', whiteSpace:'nowrap' }}>
-                              📨 Invia
-                            </button>
-                          ) : (
-                            <span style={{ fontSize:'11px', color:'#D1D5DB' }}>—</span>
-                          )}
-                          {r.posto_email_inviata && (
-                            <span style={{ marginLeft:'6px', fontSize:'11px', color:'#059669', fontWeight:'600', background:'#F0FDF4', padding:'3px 7px', borderRadius:'999px', whiteSpace:'nowrap' }}>✓ Inviata</span>
-                          )}
+                          <div style={{ display:'flex', flexDirection:'column', gap:'5px', alignItems:'flex-start' }}>
+                            {/* Invio mail posto */}
+                            {r.numero_posto && r.email ? (
+                              <div style={{ display:'flex', alignItems:'center', gap:'5px' }}>
+                                <button
+                                  onClick={() => inviaMailPosti(false, [r.id])}
+                                  disabled={invioPostoInCorso}
+                                  title="Invia mail posto a questo iscritto"
+                                  style={{ background:'none', border:'1px solid #E8ECF4', borderRadius:'20px', padding:'4px 10px', cursor:'pointer', fontSize:'12px', color:'#374151', fontFamily:"'Inter',sans-serif", fontWeight:'600', whiteSpace:'nowrap' }}>
+                                  📨 Invia
+                                </button>
+                                {r.posto_email_inviata && (
+                                  <span style={{ fontSize:'11px', color:'#059669', fontWeight:'600', background:'#F0FDF4', padding:'3px 7px', borderRadius:'999px', whiteSpace:'nowrap' }}>✓</span>
+                                )}
+                              </div>
+                            ) : null}
+                            {/* Copia link iscrizione — per tutti gli iscritti con codice */}
+                            {r.codice_iscrizione && (
+                              <button
+                                onClick={() => {
+                                  const url = `https://portale-eventi-cna.vercel.app/iscrizione/${r.codice_iscrizione}`
+                                  navigator.clipboard.writeText(url).then(() => {
+                                    // feedback visivo momentaneo
+                                    const btn = document.getElementById(`copy-${r.id}`)
+                                    if (btn) { btn.textContent = '✓ Copiato'; setTimeout(() => { if (btn) btn.textContent = '🔗 Link' }, 1800) }
+                                  })
+                                }}
+                                id={`copy-${r.id}`}
+                                title={`Copia link iscrizione: /iscrizione/${r.codice_iscrizione}`}
+                                style={{ background:'none', border:'1px solid #E8ECF4', borderRadius:'20px', padding:'4px 10px', cursor:'pointer', fontSize:'12px', color:'#5B5FEF', fontFamily:"'Inter',sans-serif", fontWeight:'600', whiteSpace:'nowrap' }}>
+                                🔗 Link
+                              </button>
+                            )}
+                          </div>
                         </td>
                       </tr>
                     )

@@ -153,7 +153,7 @@ export default function Iscrizione() {
 
       const { data: ev } = await supabase
         .from('events')
-        .select('id,titolo,slug,data_inizio,data_fine,luogo,immagine_hero,logo_url,tema')
+        .select('id,titolo,slug,data_inizio,data_fine,luogo,immagine_hero,logo_url,tema,teatro_abilitato')
         .eq('id', r.event_id)
         .single()
 
@@ -267,13 +267,21 @@ export default function Iscrizione() {
               </div>
             </div>
 
-            {/* Posto assegnato */}
-            {reg.numero_posto && (
+            {/* Posto assegnato / in attesa */}
+            {reg.numero_posto ? (
               <div style={{ background:'#003DA5', borderRadius:'20px', padding:'22px 28px', marginBottom:'16px', textAlign:'center' }}>
                 <p style={{ margin:'0 0 6px', fontSize:'11px', fontWeight:'700', color:'rgba(255,255,255,0.7)', textTransform:'uppercase', letterSpacing:'0.08em' }}>IL TUO POSTO</p>
                 <p style={{ margin:0, fontSize: reg.numero_posto.length > 20 ? '20px' : '26px', fontWeight:'900', color:'#fff', lineHeight:'1.2', letterSpacing:'-0.02em' }}>{reg.numero_posto}</p>
               </div>
-            )}
+            ) : event?.teatro_abilitato ? (
+              <div style={{ background:'#FFFBEB', border:'1.5px solid #FCD34D', borderRadius:'20px', padding:'18px 24px', marginBottom:'16px', display:'flex', alignItems:'center', gap:'14px' }}>
+                <span style={{ fontSize:'28px', flexShrink:0 }}>⏳</span>
+                <div>
+                  <p style={{ margin:'0 0 3px', fontSize:'14px', fontWeight:'800', color:'#92400E' }}>Posto non ancora assegnato</p>
+                  <p style={{ margin:0, fontSize:'13px', color:'#B45309', lineHeight:'1.5' }}>Il tuo posto verrà assegnato a breve — riceverai una email di conferma con il numero del posto e il QR code di accesso.</p>
+                </div>
+              </div>
+            ) : null}
 
             {/* Card evento */}
             <div style={{ backgroundColor:'#ffffff', borderRadius:'20px', border:'1px solid #E5E7EB', overflow:'hidden', marginBottom:'16px' }}>
