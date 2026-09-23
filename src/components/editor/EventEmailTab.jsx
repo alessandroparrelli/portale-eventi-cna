@@ -51,7 +51,7 @@ const VARIABILI = [
 const PREVIEW_DATA_BASE = {
   '{{nome}}':'Marco','{{cognome}}':'Bianchi','{{ragione_sociale}}':'Bianchi Srl',
   '{{email}}':'marco@esempio.it',
-  '{{data_evento}}':'Venerd 25 settembre 2026, ore 09:30',
+  '{{data_evento}}':'Sabato 10 ottobre 2026, ore 09:30',
   '{{luogo_evento}}':'Palazzo dei Congressi, Roma',
   '{{cellulare}}':'333 1234567','{{partita_iva}}':'12345670015','{{cap}}':'00100',
   '{{qr_code}}':'QR-MARCO2026','{{link_landing}}':'#','{{link_questionario}}':'#',
