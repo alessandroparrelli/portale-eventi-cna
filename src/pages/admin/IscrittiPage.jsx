@@ -1620,11 +1620,10 @@ export default function IscrittiPage() {
               <div style={{ flex:1 }} />
               {(() => {
                 const selArr = [...teatroSelezione]
-                const conStato = selArr.filter(id => { const r = registrations.find(x=>x.id===id); return r?.rinuncia || r?.presenza_confermata }).length
-                return conStato > 0 ? (
+                return selArr.length > 0 ? (
                   <Btn variant="ghost" size="sm" onClick={() => setCambiaStato({ ids: selArr })}
                     style={{ border:'1px solid #E8ECF4', color:'#6B7280', fontSize:'12px' }}>
-                    🔄 Cambia stato ({conStato})
+                    🔄 Cambia stato ({selArr.length})
                   </Btn>
                 ) : null
               })()}
@@ -1848,7 +1847,10 @@ export default function IscrittiPage() {
                                   <span style={{ fontSize:'12px', fontWeight:'700', color:'#059669', background:'#F0FDF4', padding:'4px 10px', borderRadius:'999px' }}>✓ Confermata</span>
                                   <button onClick={() => setCambiaStato({ ids:[r.id] })} style={{ fontSize:'10px', color:'#9CA3AF', background:'none', border:'1px solid #E5E7EB', borderRadius:'999px', padding:'2px 8px', cursor:'pointer', fontFamily:"'Inter',sans-serif" }}>✏ Stato</button>
                                 </>
-                              : <span style={{ fontSize:'12px', color:'#9CA3AF', background:'#F9FAFB', padding:'4px 10px', borderRadius:'999px' }}>In attesa</span>}
+                              : <>
+                                  <span style={{ fontSize:'12px', color:'#9CA3AF', background:'#F9FAFB', padding:'4px 10px', borderRadius:'999px' }}>In attesa</span>
+                                  <button onClick={() => setCambiaStato({ ids:[r.id] })} style={{ fontSize:'10px', color:'#9CA3AF', background:'none', border:'1px solid #E5E7EB', borderRadius:'999px', padding:'2px 8px', cursor:'pointer', fontFamily:"'Inter',sans-serif" }}>✏ Stato</button>
+                                </>}
                           </div>
                         </td>
                         <td style={s.td}><span style={{ fontSize:'12px', color:'#374151' }}>{r.presenza_confermata_at ? formatDt(r.presenza_confermata_at) : '—'}</span></td>
