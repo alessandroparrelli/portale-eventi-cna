@@ -32,7 +32,7 @@ function QRActions({ qrValue, codice, eventoTitolo }) {
   }
   function shareWhatsApp() {
     const pageUrl = window.location.origin + '/iscrizione/' + codice
-    const msg = `🎟 La mia iscrizione a "${eventoTitolo || 'evento CNA'}"
+    const msg = `🏟 La mia iscrizione a "${eventoTitolo || 'evento CNA'}"
 
 Codice: ${codice}
 QR Code: ${pageUrl}
@@ -69,22 +69,15 @@ function CertificatoBtn({ registrationId }) {
 function QRCodeDisplay({ value }) {
   const [dataUrl, setDataUrl] = useState(null)
   const [err, setErr] = useState(false)
-
   useEffect(() => {
     if (!value) return
     setDataUrl(null); setErr(false)
     import('qrcode').then(QRCode => {
-      QRCode.toDataURL(value, {
-        width: 280,
-        margin: 2,
-        color: { dark: '#0A0A0A', light: '#FFFFFF' },
-      }).then(url => setDataUrl(url)).catch(() => setErr(true))
+      QRCode.toDataURL(value, { width: 280, margin: 2, color: { dark: '#0A0A0A', light: '#FFFFFF' } })
+        .then(url => setDataUrl(url)).catch(() => setErr(true))
     }).catch(() => setErr(true))
   }, [value])
-
-  // Fallback: URL diretto qrserver.com (funziona sempre)
   const fallbackUrl = `https://api.qrserver.com/v1/create-qr-code/?size=280x280&format=png&data=${encodeURIComponent(value)}`
-
   return (
     <div style={{ display:'flex', flexDirection:'column', alignItems:'center', gap:'8px' }}>
       {dataUrl
@@ -119,47 +112,55 @@ export default function Iscrizione() {
   async function lookup(cod) {
     setLoading(true)
     setError(null)
+    const trimmed = cod.trim()
+    const isUuid = /^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$/i.test(trimmed)
+    let regs = null
+    const MAX_TENTATIVI = 3
+
+    for (let tentativo = 0; tentativo < MAX_TENTATIVI; tentativo++) {
+      try {
+        if (tentativo > 0) await new Promise(r => setTimeout(r, 1500))
+        let found = null
+        if (isUuid) {
+          const { data } = await supabase.from('registrations').select('*').eq('id', trimmed).limit(1)
+          found = data
+        }
+        if (!found || found.length === 0) {
+          const { data } = await supabase.from('registrations').select('*').ilike('short_code', trimmed).limit(1)
+          found = data
+        }
+        if (!found || found.length === 0) {
+          const { data } = await supabase.from('registrations').select('*').ilike('codice_iscrizione', trimmed).limit(1)
+          found = data
+        }
+        if (found && found.length > 0) { regs = found; break }
+      } catch (e) {
+        if (tentativo === MAX_TENTATIVI - 1) {
+          setError('Errore di connessione. Riprova.')
+          setLoading(false); return
+        }
+      }
+    }
+
+    if (!regs || regs.length === 0) {
+      setError('Nessuna iscrizione trovata con questo codice.')
+      setReg(null); setEvent(null)
+      setLoading(false); return
+    }
+
     try {
-      const trimmed = cod.trim()
-      // Try UUID lookup first (for unique links), then codice_iscrizione
-      const isUuid = /^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$/i.test(trimmed)
-      const isShort = /^[A-Z0-9]{6}$/i.test(trimmed)
-      let regs
-      if (isUuid) {
-        const { data } = await supabase.from('registrations').select('*').eq('id', trimmed).limit(1)
-        regs = data
-      }
-      if (!regs || regs.length === 0) {
-        // Try short_code (6 chars alphanumeric)
-        const { data } = await supabase.from('registrations').select('*').ilike('short_code', trimmed).limit(1)
-        regs = data
-      }
-      if (!regs || regs.length === 0) {
-        const { data } = await supabase.from('registrations').select('*').ilike('codice_iscrizione', trimmed).limit(1)
-        regs = data
-      }
-
-      if (!regs || regs.length === 0) {
-        setError('Nessuna iscrizione trovata con questo codice.')
-        setReg(null); setEvent(null)
-        setLoading(false); return
-      }
-
       const r = regs[0]
       setReg(r)
-      // Show the QR code or codice in the search input (not the raw UUID)
       if (r.qr_code) setSearchInput(r.qr_code)
       else if (r.codice_iscrizione) setSearchInput(r.codice_iscrizione)
-
       const { data: ev } = await supabase
         .from('events')
         .select('id,titolo,slug,data_inizio,data_fine,luogo,immagine_hero,logo_url,tema,teatro_abilitato')
         .eq('id', r.event_id)
         .single()
-
       setEvent(ev)
     } catch (e) {
-      setError('Errore durante la ricerca.')
+      setError('Errore durante il caricamento dei dati.')
     }
     setLoading(false)
   }
@@ -177,52 +178,37 @@ export default function Iscrizione() {
 
   return (
     <div style={{ minHeight:'100vh', backgroundColor:'#F4F5F7', fontFamily:"'Outfit',sans-serif" }}>
-      {/* Header */}
       <div style={{ backgroundColor:'#ffffff', borderBottom:'1px solid #E5E7EB', padding:'0 24px', height:'60px', display:'flex', alignItems:'center', justifyContent:'space-between' }}>
         <img src={CNA_LOGO} alt="CNA Roma" style={{ height:'36px', objectFit:'contain' }} />
-        <button
-          onClick={() => navigate(-1)}
-          style={{ display:'flex', alignItems:'center', gap:'6px', background:'none', border:'none', cursor:'pointer', fontSize:'13px', color:'#6B7280', fontFamily:"'Outfit',sans-serif", fontWeight:'500' }}
-        >
+        <button onClick={() => navigate(-1)}
+          style={{ display:'flex', alignItems:'center', gap:'6px', background:'none', border:'none', cursor:'pointer', fontSize:'13px', color:'#6B7280', fontFamily:"'Outfit',sans-serif", fontWeight:'500' }}>
           <ArrowLeft size={16}/> Torna indietro
         </button>
       </div>
 
       <div style={{ maxWidth:'640px', margin:'0 auto', padding:'40px 24px' }}>
 
-        {/* Search form — solo se non c'è già una registrazione caricata */}
         {!reg && (
-        <div style={{ backgroundColor:'#ffffff', borderRadius:'20px', border:'1px solid #E5E7EB', padding:'24px', marginBottom:'24px' }}>
-          <h1 style={{ fontSize:'22px', fontWeight:'900', color:'#0A0A0A', letterSpacing:'-0.03em', margin:'0 0 6px' }}>
-            Verifica la tua iscrizione
-          </h1>
-          <p style={{ fontSize:'14px', color:'#6B7280', margin:'0 0 20px' }}>
-            Inserisci il codice ricevuto via email per visualizzare i dettagli e il QR code.
-          </p>
-          <form onSubmit={handleSearch} style={{ display:'flex', gap:'10px' }}>
-            <input
-              value={searchInput}
-              onChange={e => setSearchInput(e.target.value.toUpperCase())}
-              placeholder="EVT-AACCCC-NNNN"
-              style={{
-                flex:1, border:'1px solid #D1D5DB', borderRadius:'20px', padding:'10px 14px',
-                fontSize:'16px', fontFamily:"'Outfit',sans-serif", fontWeight:'600',
-                letterSpacing:'0.05em', outline:'none', color:'#0A0A0A'
-              }}
-            />
-            <button
-              type="submit"
-              disabled={searching || !searchInput.trim()}
-              style={{
-                backgroundColor: primaryColor, color:'#fff', border:'none', borderRadius:'20px',
-                padding:'10px 20px', fontSize:'14px', fontWeight:'700', cursor:'pointer',
-                fontFamily:"'Outfit',sans-serif", opacity: searching ? 0.7 : 1
-              }}
-            >
-              {searching ? 'Ricerca…' : 'Cerca'}
-            </button>
-          </form>
-        </div>
+          <div style={{ backgroundColor:'#ffffff', borderRadius:'20px', border:'1px solid #E5E7EB', padding:'24px', marginBottom:'24px' }}>
+            <h1 style={{ fontSize:'22px', fontWeight:'900', color:'#0A0A0A', letterSpacing:'-0.03em', margin:'0 0 6px' }}>
+              Verifica la tua iscrizione
+            </h1>
+            <p style={{ fontSize:'14px', color:'#6B7280', margin:'0 0 20px' }}>
+              Inserisci il codice ricevuto via email per visualizzare i dettagli e il QR code.
+            </p>
+            <form onSubmit={handleSearch} style={{ display:'flex', gap:'10px' }}>
+              <input
+                value={searchInput}
+                onChange={e => setSearchInput(e.target.value.toUpperCase())}
+                placeholder="EVT-AACCCC-NNNN"
+                style={{ flex:1, border:'1px solid #D1D5DB', borderRadius:'20px', padding:'10px 14px', fontSize:'16px', fontFamily:"'Outfit',sans-serif", fontWeight:'600', letterSpacing:'0.05em', outline:'none', color:'#0A0A0A' }}
+              />
+              <button type="submit" disabled={searching || !searchInput.trim()}
+                style={{ backgroundColor: primaryColor, color:'#fff', border:'none', borderRadius:'20px', padding:'10px 20px', fontSize:'14px', fontWeight:'700', cursor:'pointer', fontFamily:"'Outfit',sans-serif", opacity: searching ? 0.7 : 1 }}>
+                {searching ? 'Ricerca…' : 'Cerca'}
+              </button>
+            </form>
+          </div>
         )}
 
         {loading && (
@@ -235,39 +221,35 @@ export default function Iscrizione() {
         {error && !loading && (
           <div style={{ backgroundColor:'#FEF2F2', border:'1px solid #FECACA', borderRadius:'20px', padding:'20px', display:'flex', gap:'14px', alignItems:'flex-start' }}>
             <XCircle size={22} style={{ color:'#DC2626', flexShrink:0, marginTop:'1px' }} />
-            <div>
+            <div style={{ flex:1 }}>
               <p style={{ fontSize:'15px', fontWeight:'700', color:'#DC2626', margin:'0 0 4px' }}>Iscrizione non trovata</p>
-              <p style={{ fontSize:'13px', color:'#7F1D1D', margin:0 }}>{error}</p>
+              <p style={{ fontSize:'13px', color:'#7F1D1D', margin:'0 0 12px' }}>{error}</p>
+              {codice && (
+                <button
+                  onClick={() => lookup(codice)}
+                  style={{ display:'inline-flex', alignItems:'center', gap:'6px', backgroundColor:'#DC2626', color:'#fff', border:'none', borderRadius:'20px', padding:'8px 16px', fontSize:'13px', fontWeight:'700', cursor:'pointer', fontFamily:"'Outfit',sans-serif" }}
+                >
+                  🔄 Riprova
+                </button>
+              )}
             </div>
           </div>
         )}
 
         {reg && event && !loading && (
           <>
-            {/* Status banner */}
-            <div style={{
-              backgroundColor: reg.presente ? '#F0FDF4' : '#EFF6FF',
-              border: `1px solid ${reg.presente ? '#86EFAC' : '#BFDBFE'}`,
-              borderRadius:'20px', padding:'16px 20px', marginBottom:'16px',
-              display:'flex', gap:'12px', alignItems:'center'
-            }}>
-              {reg.presente
-                ? <CheckCircle2 size={24} style={{ color:'#16A34A', flexShrink:0 }} />
-                : <Clock size={24} style={{ color:'#2563EB', flexShrink:0 }} />
-              }
+            <div style={{ backgroundColor: reg.presente ? '#F0FDF4' : '#EFF6FF', border: `1px solid ${reg.presente ? '#86EFAC' : '#BFDBFE'}`, borderRadius:'20px', padding:'16px 20px', marginBottom:'16px', display:'flex', gap:'12px', alignItems:'center' }}>
+              {reg.presente ? <CheckCircle2 size={24} style={{ color:'#16A34A', flexShrink:0 }} /> : <Clock size={24} style={{ color:'#2563EB', flexShrink:0 }} />}
               <div>
                 <p style={{ fontSize:'15px', fontWeight:'800', color: reg.presente ? '#166534' : '#1E40AF', margin:'0 0 2px' }}>
                   {reg.presente ? 'Check-in effettuato' : 'Iscrizione confermata'}
                 </p>
                 <p style={{ fontSize:'13px', color: reg.presente ? '#166534' : '#3B82F6', margin:0, opacity:0.85 }}>
-                  {reg.presente
-                    ? `Presente il ${fmtDt(reg.checkin_at, true)}`
-                    : 'Presenta il QR code all\'ingresso per il check-in'}
+                  {reg.presente ? `Presente il ${fmtDt(reg.checkin_at, true)}` : "Presenta il QR code all'ingresso per il check-in"}
                 </p>
               </div>
             </div>
 
-            {/* Posto assegnato / in attesa */}
             {reg.numero_posto ? (
               <div style={{ background:'#003DA5', borderRadius:'20px', padding:'22px 28px', marginBottom:'16px', textAlign:'center' }}>
                 <p style={{ margin:'0 0 6px', fontSize:'11px', fontWeight:'700', color:'rgba(255,255,255,0.7)', textTransform:'uppercase', letterSpacing:'0.08em' }}>IL TUO POSTO</p>
@@ -283,7 +265,6 @@ export default function Iscrizione() {
               </div>
             ) : null}
 
-            {/* Card evento */}
             <div style={{ backgroundColor:'#ffffff', borderRadius:'20px', border:'1px solid #E5E7EB', overflow:'hidden', marginBottom:'16px' }}>
               {event.immagine_hero && (
                 <div style={{ height:'220px', backgroundImage:`url(${event.immagine_hero})`, backgroundSize:'cover', backgroundPosition:'center', position:'relative' }}>
@@ -304,9 +285,7 @@ export default function Iscrizione() {
                 <div style={{ display:'flex', gap:'10px', alignItems:'flex-start' }}>
                   <CalendarDays size={16} style={{ color:'#6B7280', flexShrink:0, marginTop:'2px' }} />
                   <div>
-                    <p style={{ fontSize:'14px', fontWeight:'600', color:'#0A0A0A', margin:0 }}>
-                      {fmtDt(event.data_inizio, true)}
-                    </p>
+                    <p style={{ fontSize:'14px', fontWeight:'600', color:'#0A0A0A', margin:0 }}>{fmtDt(event.data_inizio, true)}</p>
                     {event.data_fine && event.data_fine !== event.data_inizio && (
                       <p style={{ fontSize:'13px', color:'#6B7280', margin:'2px 0 0' }}>fino al {fmtDt(event.data_fine, true)}</p>
                     )}
@@ -321,7 +300,6 @@ export default function Iscrizione() {
               </div>
             </div>
 
-            {/* Aggiungi al calendario */}
             {event.data_inizio && (
               <div style={{ marginBottom:'16px' }}>
                 <button onClick={() => {
@@ -332,25 +310,12 @@ export default function Iscrizione() {
                   const title = event.titolo || 'Evento CNA Roma'
                   const loc = (event.luogo || '').replace(/,/g, '\\,')
                   const desc = reg.numero_posto ? `Posto: ${reg.numero_posto}\\nCodice: ${reg.codice_iscrizione}` : `Codice: ${reg.codice_iscrizione}`
-                  const ics = [
-                    'BEGIN:VCALENDAR','VERSION:2.0','PRODID:-//CNA Roma//Eventi//IT','CALSCALE:GREGORIAN','METHOD:PUBLISH',
-                    'BEGIN:VEVENT',
-                    `DTSTART:${start}`,`DTEND:${end}`,
-                    `SUMMARY:${title}`,`LOCATION:${loc}`,`DESCRIPTION:${desc}`,
-                    `URL:${window.location.href}`,
-                    'STATUS:CONFIRMED',`UID:${reg.id}@cnaeventi`,
-                    'END:VEVENT','END:VCALENDAR'
-                  ].join('\r\n')
+                  const ics = ['BEGIN:VCALENDAR','VERSION:2.0','PRODID:-//CNA Roma//Eventi//IT','CALSCALE:GREGORIAN','METHOD:PUBLISH','BEGIN:VEVENT',`DTSTART:${start}`,`DTEND:${end}`,`SUMMARY:${title}`,`LOCATION:${loc}`,`DESCRIPTION:${desc}`,`URL:${window.location.href}`,'STATUS:CONFIRMED',`UID:${reg.id}@cnaeventi`,'END:VEVENT','END:VCALENDAR'].join('\r\n')
                   const blob = new Blob([ics], { type: 'text/calendar;charset=utf-8' })
                   const url = URL.createObjectURL(blob)
                   const a = document.createElement('a'); a.href = url; a.download = `${title.replace(/[^a-zA-Z0-9]/g,'_')}.ics`; a.click()
                   URL.revokeObjectURL(url)
-                }} style={{
-                  width:'100%', display:'flex', alignItems:'center', justifyContent:'center', gap:'10px',
-                  padding:'14px 20px', borderRadius:'16px', border:'1.5px solid #E5E7EB', background:'#fff',
-                  cursor:'pointer', fontSize:'14px', fontWeight:'700', color:'#0A0A0A', fontFamily:"'Outfit',sans-serif",
-                  transition:'all .15s'
-                }}>
+                }} style={{ width:'100%', display:'flex', alignItems:'center', justifyContent:'center', gap:'10px', padding:'14px 20px', borderRadius:'16px', border:'1.5px solid #E5E7EB', background:'#fff', cursor:'pointer', fontSize:'14px', fontWeight:'700', color:'#0A0A0A', fontFamily:"'Outfit',sans-serif", transition:'all .15s' }}>
                   <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="#003DA5" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
                     <rect x="3" y="4" width="18" height="18" rx="2" ry="2"/><line x1="16" y1="2" x2="16" y2="6"/><line x1="8" y1="2" x2="8" y2="6"/><line x1="3" y1="10" x2="21" y2="10"/><line x1="12" y1="14" x2="12" y2="18"/><line x1="10" y1="16" x2="14" y2="16"/>
                   </svg>
@@ -359,10 +324,7 @@ export default function Iscrizione() {
               </div>
             )}
 
-            {/* Dati partecipante + QR — impilati verticalmente, responsive */}
             <div style={{ display:'flex', flexDirection:'column', gap:'12px', marginBottom:'16px' }}>
-
-              {/* Dati iscritto */}
               <div style={{ backgroundColor:'#ffffff', borderRadius:'20px', border:'1px solid #E5E7EB', padding:'20px' }}>
                 <p style={{ fontSize:'11px', fontWeight:'700', color:'#9CA3AF', textTransform:'uppercase', letterSpacing:'0.06em', margin:'0 0 14px' }}>Dati iscritto</p>
                 <div style={{ display:'flex', flexDirection:'column', gap:'10px' }}>
@@ -401,7 +363,6 @@ export default function Iscrizione() {
                 </div>
               </div>
 
-              {/* QR Code check-in */}
               <div style={{ backgroundColor:'#ffffff', borderRadius:'20px', border:'1px solid #E5E7EB', padding:'24px 20px', display:'flex', flexDirection:'column', alignItems:'center' }}>
                 <p style={{ fontSize:'11px', fontWeight:'700', color:'#9CA3AF', textTransform:'uppercase', letterSpacing:'0.06em', margin:'0 0 16px' }}>QR Code check-in</p>
                 {reg.qr_code
@@ -419,7 +380,6 @@ export default function Iscrizione() {
               </div>
             </div>
 
-            {/* Nota */}
             <p style={{ fontSize:'12px', color:'#9CA3AF', textAlign:'center', margin:0 }}>
               Conserva questa pagina o fai uno screenshot del QR code per il check-in.
             </p>
