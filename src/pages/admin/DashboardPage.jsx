@@ -291,11 +291,27 @@ export default function DashboardPage() {
               const fillPct = ev.capienza_max>0 ? Math.min(Math.round((ev.iscritti/ev.capienza_max)*100),100) : null
               const presRate = ev.iscritti>0 ? Math.round((ev.presenti/ev.iscritti)*100) : null
               const sc = STATUS_COLORS[ev.stato]||STATUS_COLORS.bozza
-              const accent = ev.stato==='pubblicato' ? '#22C55E' : ev.stato==='chiuso' ? '#F59E0B' : ev.stato==='archiviato' ? '#9CA3AF' : '#E8ECF4'
+              // Colore bordo e striscia per fase
+              const now2 = new Date()
+              const dataInizioEv = ev.data_inizio ? new Date(ev.data_inizio) : null
+              const dataFineEv   = ev.data_fine   ? new Date(ev.data_fine)   : null
+              const isInCorso  = dataInizioEv && now2 >= dataInizioEv && (!dataFineEv || now2 <= dataFineEv)
+              const isConcluso = dataFineEv && now2 > dataFineEv
+              const cardAccent = ev.stato==='archiviato' ? '#9CA3AF'
+                               : isConcluso              ? '#6B7280'
+                               : isInCorso               ? '#22C55E'
+                               : ev.stato==='pubblicato' ? '#5B5FEF'
+                               : ev.stato==='chiuso'     ? '#F59E0B'
+                               :                          '#CBD5E1'
+              const cardShadow     = `0 1px 3px rgba(20,20,40,.04)`
+              const cardShadowHover= `0 8px 24px rgba(20,20,40,.10)`
               return (
-                <div key={ev.id} style={{ background:'#fff', border:'1px solid #E8ECF4', borderRadius:'16px', padding:'16px', display:'flex', flexDirection:'column', transition:'all .18s', cursor:'default', boxShadow:'0 1px 3px rgba(20,20,40,.04)' }}
-                  onMouseEnter={e=>{e.currentTarget.style.boxShadow='0 8px 24px rgba(20,20,40,.09)';e.currentTarget.style.transform='translateY(-2px)'}}
-                  onMouseLeave={e=>{e.currentTarget.style.boxShadow='0 1px 3px rgba(20,20,40,.04)';e.currentTarget.style.transform='none'}}>
+                <div key={ev.id} style={{ background:'#fff', border:`2px solid ${cardAccent}`, borderRadius:'16px', overflow:'hidden', display:'flex', flexDirection:'column', transition:'all .18s', cursor:'default', boxShadow:cardShadow }}
+                  onMouseEnter={e=>{e.currentTarget.style.boxShadow=cardShadowHover;e.currentTarget.style.transform='translateY(-2px)'}}
+                  onMouseLeave={e=>{e.currentTarget.style.boxShadow=cardShadow;e.currentTarget.style.transform='none'}}>
+                  {/* Striscia colorata top */}
+                  <div style={{ height:'5px', background:cardAccent, flexShrink:0 }}/>
+                  <div style={{ padding:'16px', display:'flex', flexDirection:'column', flex:1 }}>
 
                   <div style={{ display:'flex', alignItems:'flex-start', justifyContent:'space-between', gap:'8px', marginBottom:'12px' }}>
                     <div style={{ minWidth:0 }}>
@@ -355,6 +371,7 @@ export default function DashboardPage() {
                       compact
                     />
                   </div>
+                  </div>{/* fine inner padding */}
                 </div>
               )
             })}
