@@ -315,7 +315,7 @@ export default function DashboardPage() {
 
                   <div style={{ display:'flex', alignItems:'flex-start', justifyContent:'space-between', gap:'8px', marginBottom:'12px' }}>
                     <div style={{ minWidth:0 }}>
-                      <p style={{ fontWeight:'600', fontSize:'13px', color:'#111827', margin:'0 0 4px', lineHeight:1.4, overflow:'hidden', display:'-webkit-box', WebkitLineClamp:2, WebkitBoxOrient:'vertical' }}>{ev.titolo}</p>
+                      <p style={{ fontWeight:'700', fontSize:'16px', color:'#111827', margin:'0 0 4px', lineHeight:1.35, overflow:'hidden', display:'-webkit-box', WebkitLineClamp:2, WebkitBoxOrient:'vertical' }}>{ev.titolo}</p>
                       <span style={{ fontSize:'10px', fontWeight:'600', color:P, background:'#EEEFFD', padding:'1px 7px', borderRadius:'20px', fontFamily:'monospace' }}>
                         EVT-{String(ev.codice||0).padStart(4,'0')}
                       </span>
