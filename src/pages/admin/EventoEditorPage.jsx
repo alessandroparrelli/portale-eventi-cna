@@ -358,6 +358,245 @@ const se = {
   addBtn:    { background:'none', border:'1px dashed #5B5FEF', borderRadius:'20px', padding:'5px 12px', cursor:'pointer', fontSize:'12px', color:'#5B5FEF', fontFamily:"'Inter',sans-serif", fontWeight:'600' },
 }
 
+// ── CARD OBIETTIVI ────────────────────────────────────────────
+function ProgressRing({ pct, size = 80, stroke = 8, color = '#5B5FEF', bg = '#E8ECF4', label, sub }) {
+  const r = (size - stroke) / 2
+  const circ = 2 * Math.PI * r
+  const filled = Math.min(pct, 100) / 100 * circ
+  return (
+    <div style={{ display:'flex', flexDirection:'column', alignItems:'center', gap:'6px' }}>
+      <svg width={size} height={size} viewBox={`0 0 ${size} ${size}`}>
+        <circle cx={size/2} cy={size/2} r={r} fill="none" stroke={bg} strokeWidth={stroke}/>
+        <circle cx={size/2} cy={size/2} r={r} fill="none" stroke={color} strokeWidth={stroke}
+          strokeDasharray={`${filled} ${circ - filled}`}
+          strokeDashoffset={circ / 4}
+          strokeLinecap="round"
+          style={{ transition:'stroke-dasharray .6s ease' }}
+        />
+        <text x={size/2} y={size/2 + 5} textAnchor="middle"
+          fontSize={size < 70 ? '13' : '15'} fontWeight="800" fill={pct >= 100 ? color : '#111827'}
+          fontFamily="Inter,sans-serif">
+          {pct}%
+        </text>
+      </svg>
+      <div style={{ textAlign:'center' }}>
+        <p style={{ fontSize:'13px', fontWeight:'700', color:'#111827', margin:'0 0 1px' }}>{label}</p>
+        {sub && <p style={{ fontSize:'11px', color:'#9CA3AF', margin:0 }}>{sub}</p>}
+      </div>
+    </div>
+  )
+}
+
+function MiniProgressBar({ value, max, color = '#5B5FEF', label, sublabel }) {
+  const pct = max > 0 ? Math.min(Math.round((value / max) * 100), 100) : 0
+  const barColor = pct >= 100 ? '#22C55E' : pct >= 70 ? color : pct >= 40 ? '#F59E0B' : '#EF4444'
+  return (
+    <div style={{ marginBottom:'14px' }}>
+      <div style={{ display:'flex', justifyContent:'space-between', alignItems:'baseline', marginBottom:'6px' }}>
+        <span style={{ fontSize:'12px', fontWeight:'600', color:'#374151' }}>{label}</span>
+        <span style={{ fontSize:'12px', color:'#6B7280' }}>{sublabel}</span>
+      </div>
+      <div style={{ height:'8px', background:'#F3F4F6', borderRadius:'99px', overflow:'hidden' }}>
+        <div style={{ width:`${pct}%`, height:'100%', borderRadius:'99px', background:barColor, transition:'width .4s ease' }}/>
+      </div>
+      <div style={{ display:'flex', justifyContent:'space-between', marginTop:'4px' }}>
+        <span style={{ fontSize:'11px', color:barColor, fontWeight:'600' }}>{pct}%</span>
+        {max > 0 && <span style={{ fontSize:'11px', color:'#9CA3AF' }}>su {max.toLocaleString('it-IT')}</span>}
+      </div>
+    </div>
+  )
+}
+
+export function EventObiettiviCard({ iscritti, presenti, obiettivoIscritti, obiettivoPresenze, capienzaMax, compact = false }) {
+  const pctIscritti = obiettivoIscritti > 0 ? Math.min(Math.round((iscritti / obiettivoIscritti) * 100), 100) : null
+  const pctPresenti = obiettivoPresenze > 0 ? Math.min(Math.round((presenti / obiettivoPresenze) * 100), 100) : null
+  const fillCapienza = capienzaMax > 0 ? Math.min(Math.round((iscritti / capienzaMax) * 100), 100) : null
+
+  const hasObj = obiettivoIscritti || obiettivoPresenze
+
+  if (!hasObj && !capienzaMax) {
+    return (
+      <div style={{ padding:'20px', background:'#F9FAFB', borderRadius:'16px', textAlign:'center', border:'1px dashed #E8ECF4' }}>
+        <p style={{ fontSize:'13px', color:'#9CA3AF', margin:0 }}>
+          {compact ? 'Nessun obiettivo impostato' : 'Nessun obiettivo impostato. Configurali nel tab "Obiettivi".'}
+        </p>
+      </div>
+    )
+  }
+
+  if (compact) {
+    return (
+      <div style={{ background:'#F9FAFB', borderRadius:'12px', padding:'10px 14px', border:'1px solid #E8ECF4' }}>
+        <p style={{ fontSize:'10px', fontWeight:'700', color:'#9CA3AF', textTransform:'uppercase', letterSpacing:'.06em', margin:'0 0 8px' }}>🎯 Obiettivi</p>
+        {obiettivoIscritti > 0 && (
+          <MiniProgressBar value={iscritti} max={obiettivoIscritti} label="Registrazioni" sublabel={`${iscritti}/${obiettivoIscritti}`}/>
+        )}
+        {obiettivoPresenze > 0 && (
+          <MiniProgressBar value={presenti} max={obiettivoPresenze} color="#7C4DFF" label="Presenze" sublabel={`${presenti}/${obiettivoPresenze}`}/>
+        )}
+        {!obiettivoIscritti && !obiettivoPresenze && capienzaMax > 0 && (
+          <MiniProgressBar value={iscritti} max={capienzaMax} label="Capienza" sublabel={`${iscritti}/${capienzaMax}`}/>
+        )}
+      </div>
+    )
+  }
+
+  return (
+    <div style={{ background:'#F9FAFB', borderRadius:'16px', padding:'20px', border:'1px solid #E8ECF4' }}>
+      <p style={{ fontSize:'12px', fontWeight:'700', color:'#9CA3AF', textTransform:'uppercase', letterSpacing:'.06em', margin:'0 0 16px' }}>Stato attuale vs obiettivi</p>
+      <div style={{ display:'flex', gap:'24px', flexWrap:'wrap', justifyContent:'center' }}>
+        {obiettivoIscritti > 0 && (
+          <ProgressRing
+            pct={pctIscritti}
+            color="#5B5FEF"
+            label="Registrazioni"
+            sub={`${iscritti} / ${obiettivoIscritti}`}
+          />
+        )}
+        {obiettivoPresenze > 0 && (
+          <ProgressRing
+            pct={pctPresenti}
+            color="#7C4DFF"
+            label="Presenze"
+            sub={`${presenti} / ${obiettivoPresenze}`}
+          />
+        )}
+        {capienzaMax > 0 && (
+          <ProgressRing
+            pct={fillCapienza}
+            color={fillCapienza >= 90 ? '#EF4444' : fillCapienza >= 70 ? '#F59E0B' : '#22C55E'}
+            bg="#E8ECF4"
+            label="Capienza"
+            sub={`${iscritti} / ${capienzaMax}`}
+          />
+        )}
+      </div>
+    </div>
+  )
+}
+
+// ── CARD STATO AVANZAMENTO ─────────────────────────────────────
+const CHECKLIST_ITEMS = [
+  { key:'has_titolo',      label:'Titolo impostato',         check: ev => !!ev.titolo },
+  { key:'has_date',        label:'Date definite',            check: ev => !!ev.data_inizio },
+  { key:'has_luogo',       label:'Luogo inserito',           check: ev => !!ev.luogo },
+  { key:'has_hero',        label:'Immagine hero caricata',   check: ev => !!ev.immagine_hero },
+  { key:'is_published',    label:'Evento pubblicato',        check: ev => ev.stato === 'pubblicato' },
+  { key:'has_iscritti',    label:'Almeno 1 iscritto',        check: (ev, isc) => isc > 0 },
+  { key:'has_presenti',    label:'Check-in effettuati',      check: (ev, isc, pres) => pres > 0 },
+]
+
+export function EventAvanzamentoCard({ event, iscritti = 0, presenti = 0, compact = false }) {
+  const now = new Date()
+  const dataInizio = event.data_inizio ? new Date(event.data_inizio) : null
+  const dataFine   = event.data_fine   ? new Date(event.data_fine)   : null
+
+  // Fase
+  let fase = 'pianificazione'
+  let faseLabel = 'Pianificazione'
+  let faseColor = '#F59E0B'
+  let faseIcon = '📋'
+  if (event.stato === 'archiviato') {
+    fase = 'archiviato'; faseLabel = 'Archiviato'; faseColor = '#9CA3AF'; faseIcon = '📦'
+  } else if (dataFine && now > dataFine) {
+    fase = 'concluso'; faseLabel = 'Concluso'; faseColor = '#6B7280'; faseIcon = '✅'
+  } else if (dataInizio && now >= dataInizio) {
+    fase = 'in_corso'; faseLabel = 'In corso'; faseColor = '#22C55E'; faseIcon = '🟢'
+  } else if (event.stato === 'pubblicato') {
+    fase = 'aperto'; faseLabel = 'Aperto iscrizioni'; faseColor = '#5B5FEF'; faseIcon = '🔵'
+  }
+
+  const checks = CHECKLIST_ITEMS.map(item => ({
+    ...item,
+    done: item.check(event, iscritti, presenti),
+  }))
+  const doneCount = checks.filter(c => c.done).length
+  const pctChecklist = Math.round((doneCount / checks.length) * 100)
+
+  const daysToEvent = dataInizio ? Math.ceil((dataInizio - now) / (1000*60*60*24)) : null
+
+  if (compact) {
+    return (
+      <div style={{ background:'#F9FAFB', borderRadius:'12px', padding:'10px 14px', border:'1px solid #E8ECF4' }}>
+        <div style={{ display:'flex', alignItems:'center', justifyContent:'space-between', marginBottom:'8px' }}>
+          <p style={{ fontSize:'10px', fontWeight:'700', color:'#9CA3AF', textTransform:'uppercase', letterSpacing:'.06em', margin:0 }}>📊 Avanzamento</p>
+          <span style={{ fontSize:'11px', fontWeight:'700', color:faseColor, background:faseColor+'18', padding:'2px 8px', borderRadius:'20px' }}>
+            {faseIcon} {faseLabel}
+          </span>
+        </div>
+        <div style={{ height:'6px', background:'#F3F4F6', borderRadius:'99px', overflow:'hidden', marginBottom:'6px' }}>
+          <div style={{ width:`${pctChecklist}%`, height:'100%', background:'#5B5FEF', borderRadius:'99px', transition:'width .4s' }}/>
+        </div>
+        <div style={{ display:'flex', justifyContent:'space-between' }}>
+          <span style={{ fontSize:'11px', color:'#9CA3AF' }}>{doneCount}/{checks.length} completati</span>
+          {daysToEvent !== null && daysToEvent > 0 && (
+            <span style={{ fontSize:'11px', color:'#5B5FEF', fontWeight:'600' }}>tra {daysToEvent}g</span>
+          )}
+          {daysToEvent !== null && daysToEvent <= 0 && fase !== 'concluso' && (
+            <span style={{ fontSize:'11px', color:'#22C55E', fontWeight:'600' }}>Oggi!</span>
+          )}
+        </div>
+      </div>
+    )
+  }
+
+  return (
+    <div>
+      {/* Header fase */}
+      <div style={{ display:'flex', alignItems:'center', justifyContent:'space-between', marginBottom:'20px', flexWrap:'wrap', gap:'12px' }}>
+        <div style={{ display:'flex', alignItems:'center', gap:'10px' }}>
+          <span style={{ fontSize:'24px' }}>{faseIcon}</span>
+          <div>
+            <p style={{ fontSize:'13px', color:'#9CA3AF', margin:'0 0 2px' }}>Fase corrente</p>
+            <p style={{ fontSize:'16px', fontWeight:'800', color:faseColor, margin:0, letterSpacing:'-.02em' }}>{faseLabel}</p>
+          </div>
+        </div>
+        {daysToEvent !== null && daysToEvent > 0 && (
+          <div style={{ textAlign:'right' }}>
+            <p style={{ fontSize:'24px', fontWeight:'900', color:'#5B5FEF', margin:'0 0 2px', letterSpacing:'-.04em' }}>{daysToEvent}</p>
+            <p style={{ fontSize:'11px', color:'#9CA3AF', margin:0 }}>giorni all'evento</p>
+          </div>
+        )}
+        {fase === 'in_corso' && (
+          <div style={{ padding:'6px 14px', background:'#DCFCE7', borderRadius:'20px' }}>
+            <p style={{ fontSize:'12px', fontWeight:'700', color:'#16A34A', margin:0 }}>🟢 Evento in corso</p>
+          </div>
+        )}
+        {fase === 'concluso' && (
+          <div style={{ padding:'6px 14px', background:'#F3F4F6', borderRadius:'20px' }}>
+            <p style={{ fontSize:'12px', fontWeight:'700', color:'#6B7280', margin:0 }}>Evento concluso</p>
+          </div>
+        )}
+      </div>
+
+      {/* Barra completamento setup */}
+      <div style={{ marginBottom:'20px' }}>
+        <div style={{ display:'flex', justifyContent:'space-between', marginBottom:'8px' }}>
+          <span style={{ fontSize:'12px', fontWeight:'600', color:'#374151' }}>Setup completamento</span>
+          <span style={{ fontSize:'12px', color:'#5B5FEF', fontWeight:'700' }}>{pctChecklist}%</span>
+        </div>
+        <div style={{ height:'10px', background:'#F3F4F6', borderRadius:'99px', overflow:'hidden' }}>
+          <div style={{ width:`${pctChecklist}%`, height:'100%', borderRadius:'99px', transition:'width .5s ease',
+            background:`linear-gradient(90deg, #5B5FEF, #7C4DFF)` }}/>
+        </div>
+      </div>
+
+      {/* Checklist */}
+      <div style={{ display:'grid', gridTemplateColumns:'1fr 1fr', gap:'8px' }}>
+        {checks.map(c => (
+          <div key={c.key} style={{ display:'flex', alignItems:'center', gap:'8px', padding:'8px 12px',
+            background: c.done ? '#F0FDF4' : '#FEF3C7',
+            border:`1px solid ${c.done ? '#BBF7D0' : '#FDE68A'}`,
+            borderRadius:'10px' }}>
+            <span style={{ fontSize:'14px', flexShrink:0 }}>{c.done ? '✅' : '⚠️'}</span>
+            <span style={{ fontSize:'12px', fontWeight:'600', color: c.done ? '#15803D' : '#92400E' }}>{c.label}</span>
+          </div>
+        ))}
+      </div>
+    </div>
+  )
+}
+
 // ── PAGINA EDITOR COMPLETO ───────────────────────────────────
 export default function EventoEditorPage() {
   const { id } = useParams()
@@ -377,6 +616,7 @@ export default function EventoEditorPage() {
     colore_primario:'#5B5FEF', colore_sfondo:'#F4F5F7', tema:{},
     layout_hero:{ altezza:'380', overlay_opacita:'55', overlay_colore:'#000000', allineamento:'sinistra', titolo_colore:'#FFFFFF', titolo_dimensione:'clamp(26px,5vw,54px)', titolo_grassetto:true, titolo_maiuscolo:false },
     sezioni: sezioniDefault(), mailup_blocchi:[], email_organizzatore:'', email_mittente:'', email_cc:'', nome_mittente:'',
+    obiettivo_iscritti: null, obiettivo_presenze: null,
   })
   const eventRef = useRef(null)   // sempre aggiornato — evita race condition nel save
   useEffect(() => { eventRef.current = event }, [event])
@@ -409,7 +649,11 @@ export default function EventoEditorPage() {
   }, [id])
 
   async function loadEvent() {
-    const { data } = await supabase.from('events').select('*').eq('id', id).single()
+    const [{ data }, { count: countIscritti }, { count: countPresenti }] = await Promise.all([
+      supabase.from('events').select('*').eq('id', id).single(),
+      supabase.from('registrations').select('*', { count:'exact', head:true }).eq('event_id', id),
+      supabase.from('registrations').select('*', { count:'exact', head:true }).eq('event_id', id).eq('presente', true),
+    ])
     if (data) {
       let sezioni = data.sezioni || []
       // Migrazione automatica: se c'è descrizione_html ma nessun blocco, crea il primo blocco testo
@@ -439,6 +683,8 @@ export default function EventoEditorPage() {
           mailup_blocchi: data.mailup_blocchi || [],
         tags: data.tags || [],
           nome_mittente: data.nome_mittente || '',
+          _iscritti: countIscritti || 0,
+          _presenti: countPresenti || 0,
         }
         eventRef.current = next
         return next
@@ -480,6 +726,8 @@ export default function EventoEditorPage() {
       data_fine: toUTCISOStr(ev.data_fine), luogo:ev.luogo||null,
         modalita:ev.modalita||'presenza', link_riunione:ev.link_riunione||null,
         teatro_abilitato:ev.teatro_abilitato||false, teatro_capienza:ev.teatro_capienza||null, teatro_note:ev.teatro_note||null,
+      obiettivo_iscritti:ev.obiettivo_iscritti||null,
+      obiettivo_presenze:ev.obiettivo_presenze||null,
         form_note:ev.form_note||null,
         certificato_abilitato:ev.certificato_abilitato||false, certificato_titolo:ev.certificato_titolo||null,
         certificato_invio_auto:ev.certificato_invio_auto!==false, certificato_colore:ev.certificato_colore||'#5B5FEF',
@@ -512,6 +760,8 @@ export default function EventoEditorPage() {
       teatro_capienza:ev.teatro_capienza||null,
       teatro_note:ev.teatro_note||null,
       form_note:ev.form_note||null,
+      obiettivo_iscritti:ev.obiettivo_iscritti||null,
+      obiettivo_presenze:ev.obiettivo_presenze||null,
     }
     if (isNew) {
       const { data } = await supabase.from('events').insert(payload).select().single()
@@ -612,6 +862,7 @@ export default function EventoEditorPage() {
 
   const TABS = [
     { id:'info',         label:'Info & Date',    icon:'📋', color:'blue'   },
+    { id:'obiettivi',    label:'Obiettivi',      icon:'🎯', color:'green'  },
     { id:'hero',         label:'Hero',           icon:'🖼',  color:'cyan'   },
     { id:'contenuto',    label:'Contenuto',      icon:'📝', color:'green'  },
     { id:'aspetto',      label:'Aspetto',        icon:'🎨', color:'violet' },
@@ -886,6 +1137,66 @@ export default function EventoEditorPage() {
                   <option value="archiviato">📦 Archiviato</option>
                 </Select>
               </Field>
+            </div>
+          </div>
+        )}
+
+        {/* ── OBIETTIVI ── */}
+        {activeTab==='obiettivi' && (
+          <div style={p.panel}>
+            <h2 style={p.panelTitle}>Obiettivi evento</h2>
+            <p style={{ fontSize:'14px', color:'#6B7280', margin:'-12px 0 24px', lineHeight:1.6 }}>
+              Imposta i target di partecipazione. Le card di avanzamento saranno visibili qui e nella Dashboard.
+            </p>
+
+            {/* CARD 1 — Obiettivi registrazioni & presenze */}
+            <div style={{ background:'#fff', border:'1px solid #E8ECF4', borderRadius:'20px', padding:'24px', marginBottom:'20px', boxShadow:'0 1px 4px rgba(20,20,40,.05)' }}>
+              <div style={{ display:'flex', alignItems:'center', gap:'10px', marginBottom:'20px' }}>
+                <span style={{ fontSize:'20px' }}>🎯</span>
+                <h3 style={{ fontSize:'15px', fontWeight:'800', color:'#111827', margin:0, letterSpacing:'-.02em' }}>Target partecipazione</h3>
+              </div>
+              <div style={{ display:'grid', gridTemplateColumns:'1fr 1fr', gap:'16px', marginBottom:'24px' }}>
+                <Field label="Obiettivo registrazioni">
+                  <Input
+                    type="number"
+                    min="0"
+                    placeholder="Es. 200"
+                    value={event.obiettivo_iscritti||''}
+                    onChange={e => updEvent(p => ({ ...p, obiettivo_iscritti: e.target.value ? parseInt(e.target.value) : null }))}
+                  />
+                </Field>
+                <Field label="Obiettivo presenze">
+                  <Input
+                    type="number"
+                    min="0"
+                    placeholder="Es. 150"
+                    value={event.obiettivo_presenze||''}
+                    onChange={e => updEvent(p => ({ ...p, obiettivo_presenze: e.target.value ? parseInt(e.target.value) : null }))}
+                  />
+                </Field>
+              </div>
+
+              {/* Preview card obiettivi */}
+              <EventObiettiviCard
+                iscritti={event._iscritti||0}
+                presenti={event._presenti||0}
+                obiettivoIscritti={event.obiettivo_iscritti}
+                obiettivoPresenze={event.obiettivo_presenze}
+                capienzaMax={event.capienza_max}
+              />
+            </div>
+
+            {/* CARD 2 — Stato avanzamento */}
+            <div style={{ background:'#fff', border:'1px solid #E8ECF4', borderRadius:'20px', padding:'24px', boxShadow:'0 1px 4px rgba(20,20,40,.05)' }}>
+              <div style={{ display:'flex', alignItems:'center', gap:'10px', marginBottom:'20px' }}>
+                <span style={{ fontSize:'20px' }}>📊</span>
+                <h3 style={{ fontSize:'15px', fontWeight:'800', color:'#111827', margin:0, letterSpacing:'-.02em' }}>Stato avanzamento</h3>
+              </div>
+              <EventAvanzamentoCard
+                event={event}
+                iscritti={event._iscritti||0}
+                presenti={event._presenti||0}
+              />
             </div>
           </div>
         )}

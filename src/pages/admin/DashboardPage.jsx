@@ -5,6 +5,7 @@ import { supabase } from '../../lib/supabase'
 import GlowStatCard from '../../components/GlowStatCard'
 import GlowTabBar from '../../components/GlowTabBar'
 import { CalendarDays, Clock, Plus, ArrowRight } from 'lucide-react'
+import { EventObiettiviCard, EventAvanzamentoCard } from './EventoEditorPage'
 
 const P = '#5B5FEF'
 const STATUS_LABELS = { bozza:'Bozza', pubblicato:'Pubblicato', chiuso:'Chiuso', archiviato:'Archiviato' }
@@ -126,7 +127,7 @@ export default function DashboardPage() {
     try {
       const { data: eventsData } = await supabase
         .from('events')
-        .select('id,titolo,slug,stato,data_inizio,data_fine,luogo,capienza_max,created_at,codice')
+        .select('id,titolo,slug,stato,data_inizio,data_fine,luogo,capienza_max,created_at,codice,obiettivo_iscritti,obiettivo_presenze')
         .order('created_at', { ascending:false })
       const { data: regData } = await supabase
         .from('registrations')
@@ -325,11 +326,31 @@ export default function DashboardPage() {
                     </div>
                   </div>
 
-                  <div style={{ display:'flex', alignItems:'center', justifyContent:'space-between', marginTop:'auto' }}>
+                  <div style={{ display:'flex', alignItems:'center', justifyContent:'space-between', marginTop:'4px', marginBottom:'12px' }}>
                     <span style={{ fontSize:'11px', color:'#9CA3AF' }}>{presRate!=null ? `${presRate}% presenti` : 'Nessun check-in'}</span>
-                    <button onClick={()=>navigate('/admin/eventi')} style={{ background:'none', border:`1px solid ${P}30`, color:P, borderRadius:'20px', padding:'4px 12px', fontSize:'12px', fontWeight:'600', fontFamily:"'Inter',sans-serif", cursor:'pointer' }}>
+                    <button onClick={()=>navigate(`/admin/eventi/${ev.id}/editor`)} style={{ background:'none', border:`1px solid ${P}30`, color:P, borderRadius:'20px', padding:'4px 12px', fontSize:'12px', fontWeight:'600', fontFamily:"'Inter',sans-serif", cursor:'pointer' }}>
                       Gestisci
                     </button>
+                  </div>
+
+                  {/* Card obiettivi (compact) */}
+                  <EventObiettiviCard
+                    iscritti={ev.iscritti}
+                    presenti={ev.presenti}
+                    obiettivoIscritti={ev.obiettivo_iscritti}
+                    obiettivoPresenze={ev.obiettivo_presenze}
+                    capienzaMax={ev.capienza_max}
+                    compact
+                  />
+
+                  {/* Card avanzamento (compact) */}
+                  <div style={{ marginTop:'8px' }}>
+                    <EventAvanzamentoCard
+                      event={ev}
+                      iscritti={ev.iscritti}
+                      presenti={ev.presenti}
+                      compact
+                    />
                   </div>
                 </div>
               )
