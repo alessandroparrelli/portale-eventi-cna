@@ -1630,9 +1630,9 @@ export default function IscrittiPage() {
             </div>
           )}
 
-          {/* Box 1: INVIO EMAIL POSTO */}
-          <div style={{ background:'#EFF6FF', border:'1px solid #BFDBFE', borderRadius:'16px', padding:'14px 18px', marginBottom:'10px' }}>
-            <div style={{ display:'flex', alignItems:'center', gap:'6px', marginBottom:'10px' }}>
+                    <div style={{ display:'flex', gap:'10px', marginBottom:'16px' }}>
+{/* Box 1: INVIO EMAIL POSTO */}
+          <div style={{ flex:1, background:'#EFF6FF', border:'1px solid #BFDBFE', borderRadius:'16px', padding:'14px 18px', marginBottom:'0' }}>            <div style={{ display:'flex', alignItems:'center', gap:'6px', marginBottom:'10px' }}>
               <span style={{ fontSize:'12px', fontWeight:'800', color:'#1D4ED8', textTransform:'uppercase', letterSpacing:'.05em' }}>📨 Email posto assegnato</span>
             </div>
             <div style={{ display:'flex', gap:'8px', flexWrap:'wrap', alignItems:'center' }}>
@@ -1658,8 +1658,7 @@ export default function IscrittiPage() {
           </div>
 
           {/* Box 2: REMINDER */}
-          <div style={{ background:'#F5F3FF', border:'1px solid #DDD6FE', borderRadius:'16px', padding:'14px 18px', marginBottom:'16px' }}>
-            <div style={{ display:'flex', alignItems:'center', gap:'6px', marginBottom:'10px' }}>
+          <div style={{ flex:1, background:'#F5F3FF', border:'1px solid #DDD6FE', borderRadius:'16px', padding:'14px 18px', marginBottom:'0' }}>            <div style={{ display:'flex', alignItems:'center', gap:'6px', marginBottom:'10px' }}>
               <span style={{ fontSize:'12px', fontWeight:'800', color:'#6D28D9', textTransform:'uppercase', letterSpacing:'.05em' }}>📣 Reminder evento</span>
             </div>
             <div style={{ display:'flex', gap:'8px', flexWrap:'wrap', alignItems:'center' }}>
@@ -1692,7 +1691,9 @@ export default function IscrittiPage() {
             </div>
           </div>
 
-          {/* Risultato dry run */}
+                    </div>{/* fine wrapper affiancato */}
+
+{/* Risultato dry run */}
           {dryRunRis && (
             <div style={{ marginBottom:'14px', padding:'12px 18px', borderRadius:'16px', background: dryRunRis.error ? '#FEF2F2' : '#EFF6FF', border:`1px solid ${dryRunRis.error ? '#FECACA' : '#BFDBFE'}` }}>
               <div style={{ display:'flex', justifyContent:'space-between', alignItems:'center' }}>
