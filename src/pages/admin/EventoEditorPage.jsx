@@ -426,8 +426,8 @@ export function EventObiettiviCard({ iscritti, presenti, obiettivoIscritti, obie
 
   if (compact) {
     return (
-      <div style={{ background:'#F9FAFB', borderRadius:'12px', padding:'10px 14px', border:'1px solid #E8ECF4' }}>
-        <p style={{ fontSize:'10px', fontWeight:'700', color:'#9CA3AF', textTransform:'uppercase', letterSpacing:'.06em', margin:'0 0 8px' }}>🎯 Obiettivi</p>
+      <div style={{ background:'linear-gradient(135deg, #EEF2FF 0%, #E0E7FF 100%)', borderRadius:'12px', padding:'11px 14px', border:'1px solid #C7D2FE' }}>
+        <p style={{ fontSize:'10px', fontWeight:'800', color:'#4338CA', textTransform:'uppercase', letterSpacing:'.07em', margin:'0 0 9px' }}>🎯 Obiettivi</p>
         {obiettivoIscritti > 0 && (
           <MiniProgressBar value={iscritti} max={obiettivoIscritti} label="Registrazioni" sublabel={`${iscritti}/${obiettivoIscritti}`}/>
         )}
@@ -436,6 +436,9 @@ export function EventObiettiviCard({ iscritti, presenti, obiettivoIscritti, obie
         )}
         {!obiettivoIscritti && !obiettivoPresenze && capienzaMax > 0 && (
           <MiniProgressBar value={iscritti} max={capienzaMax} label="Capienza" sublabel={`${iscritti}/${capienzaMax}`}/>
+        )}
+        {!obiettivoIscritti && !obiettivoPresenze && !capienzaMax && (
+          <p style={{ fontSize:'11px', color:'#6366F1', margin:0, fontStyle:'italic' }}>Nessun obiettivo impostato</p>
         )}
       </div>
     )
@@ -516,24 +519,39 @@ export function EventAvanzamentoCard({ event, iscritti = 0, presenti = 0, compac
   const daysToEvent = dataInizio ? Math.ceil((dataInizio - now) / (1000*60*60*24)) : null
 
   if (compact) {
+    const avBg = fase === 'in_corso'      ? 'linear-gradient(135deg,#DCFCE7 0%,#D1FAE5 100%)'
+               : fase === 'concluso'      ? 'linear-gradient(135deg,#F3F4F6 0%,#E5E7EB 100%)'
+               : fase === 'archiviato'    ? 'linear-gradient(135deg,#F3F4F6 0%,#E5E7EB 100%)'
+               : fase === 'aperto'        ? 'linear-gradient(135deg,#EDE9FE 0%,#DDD6FE 100%)'
+               :                           'linear-gradient(135deg,#FEF9C3 0%,#FEF08A 100%)'
+    const avBorder = fase === 'in_corso'  ? '#86EFAC'
+               : fase === 'concluso'      ? '#D1D5DB'
+               : fase === 'archiviato'    ? '#D1D5DB'
+               : fase === 'aperto'        ? '#C4B5FD'
+               :                           '#FDE047'
+    const avLabelColor = fase === 'in_corso'  ? '#166534'
+               : fase === 'concluso'      ? '#6B7280'
+               : fase === 'archiviato'    ? '#6B7280'
+               : fase === 'aperto'        ? '#5B21B6'
+               :                           '#854D0E'
     return (
-      <div style={{ background:'#F9FAFB', borderRadius:'12px', padding:'10px 14px', border:'1px solid #E8ECF4' }}>
-        <div style={{ display:'flex', alignItems:'center', justifyContent:'space-between', marginBottom:'8px' }}>
-          <p style={{ fontSize:'10px', fontWeight:'700', color:'#9CA3AF', textTransform:'uppercase', letterSpacing:'.06em', margin:0 }}>📊 Avanzamento</p>
-          <span style={{ fontSize:'11px', fontWeight:'700', color:faseColor, background:faseColor+'18', padding:'2px 8px', borderRadius:'20px' }}>
+      <div style={{ background:avBg, borderRadius:'12px', padding:'11px 14px', border:`1px solid ${avBorder}` }}>
+        <div style={{ display:'flex', alignItems:'center', justifyContent:'space-between', marginBottom:'9px' }}>
+          <p style={{ fontSize:'10px', fontWeight:'800', color:avLabelColor, textTransform:'uppercase', letterSpacing:'.07em', margin:0 }}>📊 Avanzamento</p>
+          <span style={{ fontSize:'11px', fontWeight:'700', color:faseColor, background:'#fff', padding:'2px 9px', borderRadius:'20px', border:`1px solid ${avBorder}`, boxShadow:'0 1px 2px rgba(0,0,0,.06)' }}>
             {faseIcon} {faseLabel}
           </span>
         </div>
-        <div style={{ height:'6px', background:'#F3F4F6', borderRadius:'99px', overflow:'hidden', marginBottom:'6px' }}>
-          <div style={{ width:`${pctChecklist}%`, height:'100%', background:'#5B5FEF', borderRadius:'99px', transition:'width .4s' }}/>
+        <div style={{ height:'7px', background:'rgba(0,0,0,.08)', borderRadius:'99px', overflow:'hidden', marginBottom:'6px' }}>
+          <div style={{ width:`${pctChecklist}%`, height:'100%', background: fase==='in_corso'?'#16A34A': fase==='aperto'?'#7C3AED':'#5B5FEF', borderRadius:'99px', transition:'width .4s' }}/>
         </div>
         <div style={{ display:'flex', justifyContent:'space-between' }}>
-          <span style={{ fontSize:'11px', color:'#9CA3AF' }}>{doneCount}/{checks.length} completati</span>
+          <span style={{ fontSize:'11px', color:avLabelColor, fontWeight:'500' }}>{doneCount}/{checks.length} completati</span>
           {daysToEvent !== null && daysToEvent > 0 && (
-            <span style={{ fontSize:'11px', color:'#5B5FEF', fontWeight:'600' }}>tra {daysToEvent}g</span>
+            <span style={{ fontSize:'11px', color:faseColor, fontWeight:'700' }}>tra {daysToEvent}g</span>
           )}
           {daysToEvent !== null && daysToEvent <= 0 && fase !== 'concluso' && (
-            <span style={{ fontSize:'11px', color:'#22C55E', fontWeight:'600' }}>Oggi!</span>
+            <span style={{ fontSize:'11px', color:'#16A34A', fontWeight:'700' }}>Oggi!</span>
           )}
         </div>
       </div>

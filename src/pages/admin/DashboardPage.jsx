@@ -333,6 +333,9 @@ export default function DashboardPage() {
                     </button>
                   </div>
 
+                  {/* Divisore */}
+                  <div style={{ height:'1px', background:'#E8ECF4', margin:'4px 0 12px' }}/>
+
                   {/* Card obiettivi (compact) */}
                   <EventObiettiviCard
                     iscritti={ev.iscritti}
