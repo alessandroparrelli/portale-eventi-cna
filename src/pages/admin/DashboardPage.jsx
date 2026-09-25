@@ -344,9 +344,14 @@ export default function DashboardPage() {
 
                   <div style={{ display:'flex', alignItems:'center', justifyContent:'space-between', marginTop:'4px', marginBottom:'12px' }}>
                     <span style={{ fontSize:'11px', color:'#9CA3AF' }}>{presRate!=null ? `${presRate}% presenti` : 'Nessun check-in'}</span>
-                    <button onClick={()=>navigate(`/admin/eventi/${ev.id}/editor`)} style={{ background:'none', border:`1px solid ${P}30`, color:P, borderRadius:'20px', padding:'4px 12px', fontSize:'12px', fontWeight:'600', fontFamily:"'Inter',sans-serif", cursor:'pointer' }}>
-                      Gestisci
-                    </button>
+                    <div style={{ display:'flex', gap:'6px' }}>
+                      <button onClick={()=>navigate(`/admin/iscritti?evento=${ev.id}`)} style={{ background:'none', border:`1px solid #10B98130`, color:'#10B981', borderRadius:'20px', padding:'4px 12px', fontSize:'12px', fontWeight:'600', fontFamily:"'Inter',sans-serif", cursor:'pointer' }}>
+                        Iscritti
+                      </button>
+                      <button onClick={()=>navigate(`/admin/eventi/${ev.id}/editor`)} style={{ background:'none', border:`1px solid ${P}30`, color:P, borderRadius:'20px', padding:'4px 12px', fontSize:'12px', fontWeight:'600', fontFamily:"'Inter',sans-serif", cursor:'pointer' }}>
+                        Gestisci
+                      </button>
+                    </div>
                   </div>
 
                   {/* Divisore */}
