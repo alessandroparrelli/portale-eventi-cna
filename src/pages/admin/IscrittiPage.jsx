@@ -529,6 +529,7 @@ export default function IscrittiPage() {
     setLoading(true)
     const { data } = await supabase.from('registrations')
       .select('*').eq('event_id', selectedEvento).order('created_at',{ascending:false})
+      .range(0, 9999)
     setRegistrations(data||[])
     setLoading(false)
   }
