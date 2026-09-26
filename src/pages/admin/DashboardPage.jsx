@@ -132,6 +132,7 @@ export default function DashboardPage() {
       const { data: regData } = await supabase
         .from('registrations')
         .select('event_id,stato,presente,created_at')
+        .range(0, 9999)
       const enriched = (eventsData||[]).map(ev => {
         const regs = (regData||[]).filter(r => r.event_id === ev.id)
         return { ...ev, iscritti:regs.length, presenti:regs.filter(r=>r.presente).length }
