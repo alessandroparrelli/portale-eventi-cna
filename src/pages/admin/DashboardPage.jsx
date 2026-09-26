@@ -125,36 +125,36 @@ export default function DashboardPage() {
   async function loadData() {
     setLoading(true)
     try {
-      const { data: eventsData } = await supabase
-        .from('events')
-        .select('id,titolo,slug,stato,data_inizio,data_fine,luogo,capienza_max,created_at,codice,obiettivo_iscritti,obiettivo_presenze')
-        .order('created_at', { ascending:false })
-      const { data: regData } = await supabase
-        .from('registrations')
-        .select('event_id,stato,presente,created_at')
-        .range(0, 9999)
+      const [{ data: eventsData }, { data: statsRaw }] = await Promise.all([
+        supabase
+          .from('events')
+          .select('id,titolo,slug,stato,data_inizio,data_fine,luogo,capienza_max,created_at,codice,obiettivo_iscritti,obiettivo_presenze')
+          .order('created_at', { ascending:false }),
+        supabase.rpc('get_dashboard_stats'),
+      ])
+      const perEvento  = statsRaw?.per_evento  || {}
       const enriched = (eventsData||[]).map(ev => {
-        const regs = (regData||[]).filter(r => r.event_id === ev.id)
-        return { ...ev, iscritti:regs.length, presenti:regs.filter(r=>r.presente).length }
+        const s = perEvento[ev.id] || { iscritti:0, presenti:0 }
+        return { ...ev, iscritti: Number(s.iscritti||0), presenti: Number(s.presenti||0) }
       })
       setEvents(enriched.slice(0,10))
       const now = new Date()
-      const todayStr = now.toISOString().slice(0,10)
-      const oggi = (regData||[]).filter(r => r.created_at?.slice(0,10) === todayStr).length
       const prossimi = (eventsData||[]).filter(e => e.stato==='pubblicato' && e.data_inizio && new Date(e.data_inizio) > now)
       setNextEvents(prossimi.slice(0,3))
       setStats({
-        totale: eventsData?.length||0,
+        totale:     eventsData?.length||0,
         pubblicati: eventsData?.filter(e=>e.stato==='pubblicato').length||0,
-        iscritti: regData?.length||0,
-        presenti: regData?.filter(r=>r.presente).length||0,
-        oggi, prossimi: prossimi.length,
+        iscritti:   Number(statsRaw?.totale_iscritti||0),
+        presenti:   Number(statsRaw?.totale_presenti||0),
+        oggi:       Number(statsRaw?.iscritti_oggi||0),
+        prossimi:   prossimi.length,
       })
+      const sette = statsRaw?.iscritti_7gg || {}
       const weekly = []
       for (let i = 6; i >= 0; i--) {
         const d = new Date(now); d.setDate(d.getDate()-i)
         const ds = d.toISOString().slice(0,10)
-        weekly.push({ label:d.toLocaleDateString('it-IT',{weekday:'short'}).slice(0,2), count:(regData||[]).filter(r=>r.created_at?.slice(0,10)===ds).length })
+        weekly.push({ label:d.toLocaleDateString('it-IT',{weekday:'short'}).slice(0,2), count: Number(sette[ds]||0) })
       }
       setWeeklyData(weekly)
     } catch(e) { console.error(e) }
