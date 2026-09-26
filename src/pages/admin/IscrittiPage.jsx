@@ -527,9 +527,7 @@ export default function IscrittiPage() {
 
   async function loadRegs() {
     setLoading(true)
-    const { data } = await supabase.from('registrations')
-      .select('*').eq('event_id', selectedEvento).order('created_at',{ascending:false})
-      .range(0, 9999)
+    const { data } = await supabase.rpc('get_registrations_by_event', { p_event_id: selectedEvento })
     setRegistrations(data||[])
     setLoading(false)
   }
