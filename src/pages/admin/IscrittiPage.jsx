@@ -1697,11 +1697,19 @@ export default function IscrittiPage() {
             <div style={{ marginBottom:'14px', padding:'12px 18px', borderRadius:'16px', background: dryRunRis.error ? '#FEF2F2' : '#EFF6FF', border:`1px solid ${dryRunRis.error ? '#FECACA' : '#BFDBFE'}` }}>
               <div style={{ display:'flex', justifyContent:'space-between', alignItems:'center' }}>
                 <p style={{ margin:0, fontSize:'13px', fontWeight:'700', color: dryRunRis.error ? '#DC2626' : '#1D4ED8' }}>
-                  {dryRunRis.error ? `❌ ${dryRunRis.error}` : `📋 ${dryRunRis.count} iscritti riceverebbero la mail.`}
+                  {dryRunRis.error ? `❌ ${dryRunRis.error}` : `📧 ${dryRunRis.sent ?? dryRunRis.count ?? dryRunRis.sample?.length ?? 0} iscritti riceveranno la mail`}
                 </p>
                 <button onClick={() => setDryRunRis(null)} style={{ background:'none', border:'none', cursor:'pointer', color:'#9CA3AF', fontSize:'18px', padding:0 }}>×</button>
               </div>
-              {dryRunRis.sample?.length > 0 && <p style={{ margin:'6px 0 0', fontSize:'12px', color:'#374151' }}>Es: {dryRunRis.sample.map(r => `${r.nome} (${r.numero_posto})`).join(' · ')}</p>}
+          {dryRunRis.sample?.length > 0 && (
+            <div style={{ display:'flex', flexWrap:'wrap', gap:'6px', marginTop:'8px' }}>
+              {dryRunRis.sample.map((r, i) => (
+                <span key={i} style={{ background:'#fff', border:'0.5px solid #C7D2FE', borderRadius:'6px', fontSize:'12px', color:'#4338CA', padding:'3px 9px', whiteSpace:'nowrap' }}>
+                  {r.nome}{r.cognome ? ` ${r.cognome}` : ''}{r.numero_posto ? ` · P.${r.numero_posto}` : ''}
+                </span>
+              ))}
+            </div>
+          )}
             </div>
           )}
 
