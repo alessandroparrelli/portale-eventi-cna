@@ -50,6 +50,7 @@ import AspettoTab from '../../components/editor/AspettoTab'
 import SessioniTab from '../../components/editor/SessioniTab'
 import QuestionarioTab from '../../components/editor/QuestionarioTab'
 import MailUpExportTab from '../../components/editor/MailUpExportTab'
+import RegistratoriTab from '../../components/editor/RegistratoriTab'
 import TagInput from '../../components/editor/TagInput'
 import EmbedWidget from '../../components/editor/EmbedWidget'
 import GlowTabBar from '../../components/GlowTabBar'
@@ -891,6 +892,7 @@ export default function EventoEditorPage() {
     { id:'email',        label:'Email',          icon:'✉️', color:'rose'   },
     { id:'mailup',       label:'MailUp',         icon:'📧', color:'teal'   },
     { id:'embed',        label:'Embed',          icon:'🔗', color:'indigo' },
+    { id:'registratori', label:'Registratori',    icon:'👥', color:'blue'   },
     { id:'preview',      label:'Preview',        icon:'👁',  color:'amber'  },
   ]
 
@@ -1603,6 +1605,12 @@ export default function EventoEditorPage() {
         )}
 
         {/* ── PREVIEW ── */}
+        {activeTab==='registratori' && (
+          <RegistratoriTab
+            event={event}
+            onUpdate={patch => updEvent(prev => ({ ...prev, ...patch }))}
+          />
+        )}
         {activeTab==='preview' && (
           <div style={{ display:'flex', flexDirection:'column', height:'100%' }}>
             {!event.slug ? (
