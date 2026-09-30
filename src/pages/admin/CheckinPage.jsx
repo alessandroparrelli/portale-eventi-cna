@@ -194,16 +194,22 @@ export default function CheckinPage() {
   const [ticketReg,      setTicketReg]     = useState(null)
   const html5QrRef = useRef(null)
   const resultTimerRef = useRef(null)
-  const { canManage } = useRole()
+  const { canManage, ruolo } = useRole()
   const canWrite = canManage('checkin')
 
   useEffect(() => {
-    supabase.from('events').select('id,titolo,stato')
-      .eq('stato', 'pubblicato').order('data_inizio', { ascending: false })
-      .then(({ data }) => setEventi(data || []))
+    if (ruolo === 'registratore') {
+      supabase.rpc('get_eventi_accessibili').then(({ data }) =>
+        setEventi((data || []).filter(e => e.stato === 'pubblicato'))
+      )
+    } else {
+      supabase.from('events').select('id,titolo,stato')
+        .eq('stato', 'pubblicato').order('data_inizio', { ascending: false })
+        .then(({ data }) => setEventi(data || []))
+    }
     supabase.from('mestieri').select('id,nome').eq('attivo', true).order('ordine')
       .then(({ data }) => setMestieri(data || []))
-  }, [])
+  }, [ruolo])
 
   useEffect(() => {
     if (selectedEvento) loadPresenti()
@@ -265,19 +271,18 @@ export default function CheckinPage() {
     const reg = ticketReg
     if (!reg) return
     setCheckingId(reg.id)
-    const { error } = await supabase.from('registrations')
-      .update({ presente: true, stato: 'presente', checkin_at: new Date().toISOString() })
-      .eq('id', reg.id)
-    if (!error) {
+    setTicketReg(null)
+    const { data: rpcData, error } = await supabase.rpc('checkin_manuale', { p_registration_id: reg.id })
+    if (!error && rpcData?.ok) {
+      const now = new Date().toISOString()
       setIscritti(prev => prev.map(r => r.id === reg.id
-        ? { ...r, presente: true, stato: 'presente', checkin_at: new Date().toISOString() }
+        ? { ...r, presente: true, stato: 'presente', checkin_at: now }
         : r
       ))
       setResult({ ok: true, nome: `${reg.nome} ${reg.cognome}`, numero_posto: reg.numero_posto, ragione_sociale: reg.ragione_sociale })
       loadPresenti()
     }
     setCheckingId(null)
-    setTicketReg(null)
   }
 
   async function doCheckin(qr, manuale = false) {
