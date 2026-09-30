@@ -126,6 +126,19 @@ function ResultBanner({ result, onClose, titoloEvento }) {
   const double   = result.error === 'gia_presente'
   const notFound = result.error === 'non_trovato'
 
+  if (result.fromTicket && ok) {
+    return (
+      <div style={{ position:'fixed', inset:0, zIndex:9998, display:'flex', alignItems:'center', justifyContent:'center', pointerEvents:'none' }}>
+        <div onClick={onClose} style={{ pointerEvents:'auto', background:'#16A34A', color:'#fff', borderRadius:'20px', padding:'24px 40px', display:'flex', flexDirection:'column', alignItems:'center', gap:'10px', boxShadow:'0 8px 32px rgba(0,0,0,.3)', animation:'fadeInUp .25s ease', cursor:'pointer' }}>
+          <CheckCircle2 size={44} color="#fff" />
+          <div style={{ fontSize:'21px', fontWeight:'800' }}>Check-in confermato</div>
+          {result.nome && <div style={{ fontSize:'15px', opacity:.85 }}>{result.nome}</div>}
+          {result.numero_posto && <div style={{ fontSize:'13px', opacity:.7 }}>{result.numero_posto}</div>}
+        </div>
+      </div>
+    )
+  }
+
   const statusColor = notFound ? '#ef4444' : ok ? '#16A34A' : '#b45309'
   const statusBg    = notFound ? 'rgba(239,68,68,.12)' : ok ? 'rgba(22,163,74,.12)' : 'rgba(180,83,9,.12)'
   const statusIcon  = notFound
@@ -219,7 +232,7 @@ export default function CheckinPage() {
   useEffect(() => {
     if (result) {
       clearTimeout(resultTimerRef.current)
-      resultTimerRef.current = setTimeout(() => setResult(null), 6000)
+      resultTimerRef.current = setTimeout(() => setResult(null), 3000)
     }
     return () => clearTimeout(resultTimerRef.current)
   }, [result])
@@ -279,7 +292,7 @@ export default function CheckinPage() {
         ? { ...r, presente: true, stato: 'presente', checkin_at: now }
         : r
       ))
-      setResult({ ok: true, nome: `${reg.nome} ${reg.cognome}`, numero_posto: reg.numero_posto, ragione_sociale: reg.ragione_sociale })
+      setResult({ ok: true, fromTicket: true, nome: `${reg.nome} ${reg.cognome}`, numero_posto: reg.numero_posto, ragione_sociale: reg.ragione_sociale })
       loadPresenti()
     }
     setCheckingId(null)
@@ -589,7 +602,7 @@ export default function CheckinPage() {
         </Modal>
       )}
 
-      <style>{`@keyframes spin{from{transform:rotate(0)}to{transform:rotate(360deg)}}`}</style>
+      <style>{`@keyframes spin{from{transform:rotate(0)}to{transform:rotate(360deg)}} @keyframes fadeInUp{from{opacity:0;transform:translateY(16px)}to{opacity:1;transform:translateY(0)}}`}</style>
 
       {ticketReg && (
         <div style={{ position:'fixed', inset:0, background:'rgba(0,0,0,.8)', display:'flex', alignItems:'center', justifyContent:'center', zIndex:9999, padding:'16px' }}
