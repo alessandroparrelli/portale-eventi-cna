@@ -897,50 +897,100 @@ export default function IscrittiPage() {
     const evento = eventi.find(e=>e.id===selectedEvento)
     const eventoTitle = evento?.titolo || 'evento'
     const dataExport = new Date().toLocaleDateString('it-IT',{day:'2-digit',month:'long',year:'numeric'})
-    const oraExport = new Date().toLocaleTimeString('it-IT',{hour:'2-digit',minute:'2-digit'})
-    const presenti = registrations.filter(r => r.presente)
+    const oraExport  = new Date().toLocaleTimeString('it-IT',{hour:'2-digit',minute:'2-digit'})
+    const presenti   = registrations.filter(r => r.presente)
     if (!presenti.length) return
+
+    const fmtDt   = v => v ? new Date(v).toLocaleString('it-IT',{timeZone:'Europe/Rome',day:'2-digit',month:'2-digit',year:'numeric',hour:'2-digit',minute:'2-digit'}) : ''
+    const fmtBool = v => v === true ? 'Sì' : v === false ? 'No' : ''
+
+    const COLS = [
+      { h:'#',                    w:5,  v:(_,i)=>i+1 },
+      { h:'N° iscrizione',        w:12, v:r=>r.numero_iscrizione||'' },
+      { h:'Codice iscrizione',    w:18, v:r=>r.codice_iscrizione||'' },
+      { h:'Cognome',              w:18, v:r=>r.cognome||'' },
+      { h:'Nome',                 w:16, v:r=>r.nome||'' },
+      { h:'Email',                w:30, v:r=>r.email||'' },
+      { h:'Cellulare',            w:14, v:r=>r.cellulare||'' },
+      { h:'Ragione Sociale',      w:28, v:r=>r.ragione_sociale||'' },
+      { h:'Partita IVA',          w:16, v:r=>r.partita_iva||'' },
+      { h:'CAP',                  w:8,  v:r=>r.cap||'' },
+      { h:'Categoria',            w:22, v:r=>getMestiere(r.mestiere_id) },
+      { h:'Associato CNA',        w:14, v:r=>fmtBool(r.associato_cna) },
+      { h:'Data stipula',         w:14, v:r=>r.associato_data_stipula||'' },
+      { h:'Stato iscrizione',     w:14, v:r=>r.stato||'' },
+      { h:'Posto assegnato',      w:22, v:r=>r.numero_posto||'' },
+      { h:'Check-in',             w:18, v:r=>fmtDt(r.checkin_at) },
+      { h:'Iscritto il',          w:18, v:r=>fmtDt(r.created_at) },
+      { h:'Presenza confermata',  w:18, v:r=>fmtBool(r.presenza_confermata) },
+      { h:'Extra 1',              w:20, v:r=>r.extra_1||'' },
+      { h:'Extra 2',              w:20, v:r=>r.extra_2||'' },
+      { h:'Extra 3',              w:20, v:r=>r.extra_3||'' },
+      { h:'Extra 4',              w:20, v:r=>r.extra_4||'' },
+      { h:'Extra 5',              w:20, v:r=>r.extra_5||'' },
+      { h:'QR code',              w:28, v:r=>r.qr_code||'' },
+    ]
+
     const ExcelJS = (await import('exceljs')).default
     const wb = new ExcelJS.Workbook()
     const ws = wb.addWorksheet('Presenti')
-    ws.mergeCells('A1:H1')
-    const r1 = ws.getRow(1)
-    r1.getCell(1).value = `Presenti — ${eventoTitle}`
-    r1.getCell(1).font = { bold:true, size:14, color:{ argb:'FFFFFFFF' } }
-    r1.getCell(1).fill = { type:'pattern', pattern:'solid', fgColor:{ argb:'FF003DA5' } }
-    r1.getCell(1).alignment = { horizontal:'center', vertical:'middle' }
-    r1.height = 28
-    ws.mergeCells('A2:H2')
-    ws.getRow(2).getCell(1).value = `Esportato il ${dataExport} alle ${oraExport} · CNA Roma — Portale Eventi`
-    ws.getRow(2).getCell(1).font = { size:9, color:{ argb:'FF6B7280' }, italic:true }
-    ws.getRow(2).height = 16
-    const headers = ['#','Cognome','Nome','Email','Cellulare','Ragione Sociale','Posto','Check-in']
+    const nCols = COLS.length
+
+    ws.mergeCells(1,1,1,nCols)
+    const rTit = ws.getRow(1)
+    rTit.getCell(1).value     = `Presenti — ${eventoTitle}`
+    rTit.getCell(1).font      = { bold:true, size:14, color:{ argb:'FFFFFFFF' } }
+    rTit.getCell(1).fill      = { type:'pattern', pattern:'solid', fgColor:{ argb:'FF003DA5' } }
+    rTit.getCell(1).alignment = { horizontal:'center', vertical:'middle' }
+    rTit.height = 28
+
+    ws.mergeCells(2,1,2,nCols)
+    const rSub = ws.getRow(2)
+    rSub.getCell(1).value = `Esportato il ${dataExport} alle ${oraExport} · CNA Roma — Portale Eventi · ${presenti.length} presenti`
+    rSub.getCell(1).font  = { size:9, color:{ argb:'FF6B7280' }, italic:true }
+    rSub.height = 16
+
     const hRow = ws.getRow(3)
-    headers.forEach((h, i) => {
+    COLS.forEach(({ h }, i) => {
       const cell = hRow.getCell(i+1)
-      cell.value = h
-      cell.font = { bold:true, size:10, color:{ argb:'FFFFFFFF' } }
-      cell.fill = { type:'pattern', pattern:'solid', fgColor:{ argb:'FF1E3A5F' } }
-      cell.alignment = { horizontal:'center', vertical:'middle' }
+      cell.value     = h
+      cell.font      = { bold:true, size:9, color:{ argb:'FFFFFFFF' } }
+      cell.fill      = { type:'pattern', pattern:'solid', fgColor:{ argb:'FF1E3A5F' } }
+      cell.alignment = { horizontal:'center', vertical:'middle', wrapText:true }
+      cell.border    = { bottom:{ style:'thin', color:{ argb:'FF003DA5' } } }
     })
-    hRow.height = 20
-    ws.columns = [{width:6},{width:18},{width:16},{width:30},{width:14},{width:28},{width:22},{width:20}]
+    hRow.height = 22
+    ws.columns = COLS.map(c => ({ width: c.w }))
+
     presenti.forEach((r, idx) => {
-      const row = ws.addRow([
-        idx+1, r.cognome||'', r.nome||'', r.email||'', r.cellulare||'', r.ragione_sociale||'', r.numero_posto||'',
-        r.checkin_at ? new Date(r.checkin_at).toLocaleString('it-IT',{timeZone:'Europe/Rome',day:'2-digit',month:'2-digit',year:'numeric',hour:'2-digit',minute:'2-digit'}) : '',
-      ])
-      const bg = idx%2===0 ? 'FFFAFAFA' : 'FFFFFFFF'
-      row.eachCell(cell => { cell.fill={type:'pattern',pattern:'solid',fgColor:{argb:bg}}; cell.font={size:10}; cell.alignment={vertical:'middle'}; cell.border={bottom:{style:'hair',color:{argb:'FFE5E7EB'}}} })
-      row.height = 18
+      const row   = ws.addRow(COLS.map(c => c.v(r, idx)))
+      const rowBg = r.associato_cna === true ? 'FFE8F5E9' : idx % 2 === 0 ? 'FFFAFAFA' : 'FFFFFFFF'
+      row.eachCell((cell, ci) => {
+        cell.fill      = { type:'pattern', pattern:'solid', fgColor:{ argb:rowBg } }
+        cell.font      = { size:9 }
+        cell.alignment = { vertical:'middle' }
+        cell.border    = { bottom:{ style:'hair', color:{ argb:'FFE5E7EB' } } }
+        if (ci === 12) {
+          if (r.associato_cna === true)  cell.font = { size:9, bold:true, color:{ argb:'FF166534' } }
+          if (r.associato_cna === false) cell.font = { size:9, color:{ argb:'FF991B1B' } }
+        }
+      })
+      row.height = 17
     })
-    ws.addRow(['','','','','','',`Totale presenti: ${presenti.length}`,'']).getCell(7).font={bold:true,size:10}
+
+    const totRow = ws.addRow(Array(nCols).fill(''))
+    totRow.getCell(nCols - 2).value = `Totale presenti: ${presenti.length}`
+    totRow.getCell(nCols - 2).font  = { bold:true, size:10 }
+
     const buffer = await wb.xlsx.writeBuffer()
-    const blob = new Blob([buffer],{type:'application/vnd.openxmlformats-officedocument.spreadsheetml.sheet'})
-    const url = URL.createObjectURL(blob)
-    const a = document.createElement('a'); a.href=url; a.download=`presenti-${eventoTitle.toLowerCase().replace(/\s+/g,'-')}-${new Date().toISOString().slice(0,10)}.xlsx`
-    document.body.appendChild(a); a.click(); document.body.removeChild(a); URL.revokeObjectURL(url)
-    logAttivita('presenti_esportati',{eventoId:selectedEvento,eventoTitolo:eventoTitle,dettagli:{totale:presenti.length}})
+    const blob = new Blob([buffer],{ type:'application/vnd.openxmlformats-officedocument.spreadsheetml.sheet' })
+    const url  = URL.createObjectURL(blob)
+    const a    = document.createElement('a')
+    a.href     = url
+    a.download = `presenti-${eventoTitle.toLowerCase().replace(/\s+/g,'-')}-${new Date().toISOString().slice(0,10)}.xlsx`
+    document.body.appendChild(a); a.click(); document.body.removeChild(a)
+    URL.revokeObjectURL(url)
+    logAttivita('presenti_esportati',{ eventoId:selectedEvento, eventoTitolo:eventoTitle, dettagli:{ totale:presenti.length } })
   }
 
   function downloadTemplate() {
