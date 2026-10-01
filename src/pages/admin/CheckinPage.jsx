@@ -119,58 +119,64 @@ function Biglietto({ onClose, titoloEvento, nome, cognome, ragioneSociale, email
   )
 }
 
-/* ── ResultBanner: mostra il biglietto dopo scansione QR ── */
-function ResultBanner({ result, onClose, titoloEvento }) {
+/* ── ResultBanner: modal dark uniforme per QR e lista iscritti ── */
+function ResultBanner({ result, onClose }) {
   if (!result) return null
   const ok       = result.ok
   const double   = result.error === 'gia_presente'
   const notFound = result.error === 'non_trovato'
 
-  if (result.fromTicket && ok) {
-    return (
-      <div style={{ position:'fixed', inset:0, zIndex:9998, display:'flex', alignItems:'center', justifyContent:'center', pointerEvents:'none' }}>
-        <div onClick={onClose} style={{ pointerEvents:'auto', background:'#16A34A', color:'#fff', borderRadius:'20px', padding:'24px 40px', display:'flex', flexDirection:'column', alignItems:'center', gap:'10px', boxShadow:'0 8px 32px rgba(0,0,0,.3)', animation:'fadeInUp .25s ease', cursor:'pointer' }}>
-          <CheckCircle2 size={44} color="#fff" />
-          <div style={{ fontSize:'21px', fontWeight:'800' }}>Check-in confermato</div>
-          {result.nome && <div style={{ fontSize:'15px', opacity:.85 }}>{result.nome}</div>}
-          {result.numero_posto && <div style={{ fontSize:'13px', opacity:.7 }}>{result.numero_posto}</div>}
-        </div>
-      </div>
-    )
-  }
-
-  const statusColor = notFound ? '#ef4444' : ok ? '#16A34A' : '#b45309'
-  const statusBg    = notFound ? 'rgba(239,68,68,.12)' : ok ? 'rgba(22,163,74,.12)' : 'rgba(180,83,9,.12)'
+  const headerBg    = notFound ? '#7F1D1D' : ok ? '#14532D' : '#78350F'
+  const accentColor = notFound ? '#FCA5A5' : ok ? '#86EFAC' : '#FCD34D'
+  const statusLabel = notFound ? 'QR non trovato' : ok ? 'Check-in confermato' : 'Già registrato'
   const statusIcon  = notFound
-    ? <XCircle size={20} color={statusColor} />
+    ? <XCircle size={28} color={accentColor} />
     : ok
-    ? <CheckCircle2 size={20} color={statusColor} />
-    : <AlertTriangle size={20} color={statusColor} />
-  const statusLabel = notFound ? '✗ QR non trovato' : ok ? '✓ Check-in confermato' : '⚠ Già registrato'
-  const extraInfo   = double && result.checkin_at
-    ? `Già registrato alle ${new Date(result.checkin_at).toLocaleTimeString('it-IT',{hour:'2-digit',minute:'2-digit'})}`
-    : notFound ? 'Nessun iscritto trovato con questo QR.' : null
-
-  const [nome, cognome] = result.nome ? result.nome.split(' ') : [null, null]
+    ? <CheckCircle2 size={28} color={accentColor} />
+    : <AlertTriangle size={28} color={accentColor} />
+  const oraGiaPresente = double && result.checkin_at
+    ? new Date(result.checkin_at).toLocaleTimeString('it-IT',{hour:'2-digit',minute:'2-digit'})
+    : null
 
   return (
-    <div style={{ marginBottom:14 }}>
-      <div style={{ display:'flex', justifyContent:'flex-end', marginBottom:'10px' }}>
-        <CloseBtn onClick={onClose} />
+    <div
+      style={{ position:'fixed', inset:0, background:'rgba(0,0,0,.75)', display:'flex', alignItems:'center', justifyContent:'center', zIndex:9998, padding:'20px' }}
+      onClick={onClose}
+    >
+      <div
+        onClick={e => e.stopPropagation()}
+        style={{ width:'100%', maxWidth:'420px', background:'#111827', borderRadius:'20px', overflow:'hidden', boxShadow:'0 24px 64px rgba(0,0,0,.6)', animation:'fadeInUp .2s ease' }}
+      >
+        <div style={{ background:headerBg, padding:'18px 22px', display:'flex', alignItems:'center', justifyContent:'space-between' }}>
+          <div style={{ display:'flex', alignItems:'center', gap:'10px' }}>
+            {statusIcon}
+            <span style={{ color:accentColor, fontSize:'16px', fontWeight:'800' }}>{statusLabel}</span>
+          </div>
+          <button onClick={onClose} style={{ background:'rgba(255,255,255,.15)', border:'none', borderRadius:'50%', width:'30px', height:'30px', cursor:'pointer', display:'flex', alignItems:'center', justifyContent:'center', color:'#fff' }}>
+            <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round"><line x1="18" y1="6" x2="6" y2="18"/><line x1="6" y1="6" x2="18" y2="18"/></svg>
+          </button>
+        </div>
+        <div style={{ padding:'24px 22px', display:'flex', flexDirection:'column', gap:'14px' }}>
+          {result.nome && (
+            <div>
+              <div style={{ fontSize:'11px', fontWeight:'700', color:'#6B7280', letterSpacing:'.08em', textTransform:'uppercase', marginBottom:'4px' }}>Partecipante</div>
+              <div style={{ fontSize:'24px', fontWeight:'800', color:'#F9FAFB', lineHeight:1.2 }}>{result.nome}</div>
+              {result.ragione_sociale && <div style={{ fontSize:'13px', color:'#9CA3AF', marginTop:'3px' }}>{result.ragione_sociale}</div>}
+            </div>
+          )}
+          {result.numero_posto && (
+            <div style={{ background:'#1F2937', borderRadius:'12px', padding:'14px 18px' }}>
+              <div style={{ fontSize:'11px', fontWeight:'700', color:'#6B7280', letterSpacing:'.08em', textTransform:'uppercase', marginBottom:'5px' }}>Posto assegnato</div>
+              <div style={{ fontSize:'20px', fontWeight:'800', color:'#60A5FA' }}>{result.numero_posto}</div>
+            </div>
+          )}
+          {notFound && <div style={{ color:'#9CA3AF', fontSize:'14px' }}>Nessun iscritto trovato con questo QR.</div>}
+          {oraGiaPresente && <div style={{ color:'#FCD34D', fontSize:'14px' }}>Già registrato alle {oraGiaPresente}.</div>}
+          <button onClick={onClose} style={{ width:'100%', padding:'14px', background:'#1F2937', color:'#9CA3AF', border:'none', borderRadius:'12px', fontSize:'15px', fontWeight:'600', cursor:'pointer', marginTop:'4px' }}>
+            Chiudi
+          </button>
+        </div>
       </div>
-      <Biglietto
-        onClose={onClose}
-        titoloEvento={titoloEvento}
-        nome={nome}
-        cognome={cognome}
-        ragioneSociale={result.ragione_sociale}
-        numeroPosto={result.numero_posto}
-        statusIcon={statusIcon}
-        statusColor={statusColor}
-        statusBg={statusBg}
-        statusLabel={statusLabel}
-        extraInfo={extraInfo}
-      />
     </div>
   )
 }
@@ -439,7 +445,7 @@ export default function CheckinPage() {
             <div style={{ width:`${pct}%`, height:'100%', background:'linear-gradient(90deg,#059669,#10b981)', borderRadius:'2px', transition:'width .5s' }}/>
           </div>
 
-          <ResultBanner result={result} onClose={() => setResult(null)} titoloEvento={titoloEvento} />
+          <ResultBanner result={result} onClose={() => setResult(null)} />
 
           <div style={s.scanCard}>
             <div id="qr-viewport" style={{ width:'100%', overflow:'hidden', borderRadius:'10px 10px 0 0', minHeight: scanning ? '280px' : '0', backgroundColor: scanning ? '#000' : 'transparent' }} />
