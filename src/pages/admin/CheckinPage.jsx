@@ -605,51 +605,70 @@ export default function CheckinPage() {
       <style>{`@keyframes spin{from{transform:rotate(0)}to{transform:rotate(360deg)}} @keyframes fadeInUp{from{opacity:0;transform:translateY(16px)}to{opacity:1;transform:translateY(0)}}`}</style>
 
       {ticketReg && (
-        <div style={{ position:'fixed', inset:0, background:'rgba(0,0,0,.8)', display:'flex', alignItems:'center', justifyContent:'center', zIndex:9999, padding:'16px' }}
-          onClick={() => setTicketReg(null)}>
-          <div style={{ width:'100%', maxWidth:'520px' }} onClick={e => e.stopPropagation()}>
-            {/* Riga chiudi — sopra il biglietto, fuori da esso */}
-            <div style={{ display:'flex', justifyContent:'flex-end', alignItems:'center', marginBottom:'10px' }}>
-              <button onClick={() => setTicketReg(null)} style={{
-                display:'flex', alignItems:'center', gap:'8px',
-                background:'#0A0A0A', border:'none', borderRadius:'24px',
-                color:'#fff', padding:'10px 18px', fontSize:'15px', fontWeight:'700',
-                fontFamily:"'Inter',sans-serif", cursor:'pointer',
-                boxShadow:'0 2px 12px rgba(0,0,0,.4)',
-                letterSpacing:'-.01em',
-              }}>
-                <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round"><line x1="18" y1="6" x2="6" y2="18"/><line x1="6" y1="6" x2="18" y2="18"/></svg>
-                Chiudi
+        <div
+          style={{ position:'fixed', inset:0, background:'rgba(0,0,0,.75)', display:'flex', alignItems:'center', justifyContent:'center', zIndex:9999, padding:'20px' }}
+          onClick={() => setTicketReg(null)}
+        >
+          <div
+            onClick={e => e.stopPropagation()}
+            style={{ width:'100%', maxWidth:'420px', background:'#111827', borderRadius:'20px', overflow:'hidden', boxShadow:'0 24px 64px rgba(0,0,0,.6)' }}
+          >
+            <div style={{ background:'#003DA5', padding:'20px 24px', display:'flex', alignItems:'center', justifyContent:'space-between' }}>
+              <span style={{ color:'#fff', fontSize:'13px', fontWeight:'600', letterSpacing:'.06em', textTransform:'uppercase', opacity:.85 }}>
+                Check-in manuale
+              </span>
+              <button
+                onClick={() => setTicketReg(null)}
+                style={{ background:'rgba(255,255,255,.15)', border:'none', borderRadius:'50%', width:'32px', height:'32px', cursor:'pointer', display:'flex', alignItems:'center', justifyContent:'center', color:'#fff' }}
+              >
+                <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round"><line x1="18" y1="6" x2="6" y2="18"/><line x1="6" y1="6" x2="18" y2="18"/></svg>
               </button>
             </div>
-            <Biglietto
-              onClose={null}
-              titoloEvento={titoloEvento}
-              nome={ticketReg.nome}
-              cognome={ticketReg.cognome}
-              ragioneSociale={ticketReg.ragione_sociale}
-              email={ticketReg.email}
-              numeroPosto={ticketReg.numero_posto}
-              statusIcon={null}
-              statusColor={null}
-              statusBg={null}
-              statusLabel={null}
-              bottone={
-                <button onClick={confermaCheckinDaTicket} disabled={!!checkingId} style={{
-                  width:'100%', padding:'16px',
-                  background: checkingId ? '#9CA3AF' : 'linear-gradient(135deg,#16A34A,#15803D)',
-                  color:'#fff', border:'none', borderRadius:'20px',
-                  fontSize:'17px', fontWeight:'800', fontFamily:"'Inter',sans-serif",
+            <div style={{ padding:'28px 24px', display:'flex', flexDirection:'column', gap:'20px' }}>
+              <div>
+                <div style={{ fontSize:'11px', fontWeight:'700', color:'#6B7280', letterSpacing:'.08em', textTransform:'uppercase', marginBottom:'4px' }}>Partecipante</div>
+                <div style={{ fontSize:'28px', fontWeight:'800', color:'#F9FAFB', lineHeight:1.15 }}>
+                  {ticketReg.cognome} {ticketReg.nome}
+                </div>
+                {ticketReg.ragione_sociale && (
+                  <div style={{ fontSize:'14px', color:'#9CA3AF', marginTop:'4px' }}>{ticketReg.ragione_sociale}</div>
+                )}
+                {ticketReg.email && (
+                  <div style={{ fontSize:'13px', color:'#6B7280', marginTop:'2px' }}>{ticketReg.email}</div>
+                )}
+              </div>
+              {ticketReg.numero_posto && (
+                <div style={{ background:'#1F2937', borderRadius:'12px', padding:'16px 20px' }}>
+                  <div style={{ fontSize:'11px', fontWeight:'700', color:'#6B7280', letterSpacing:'.08em', textTransform:'uppercase', marginBottom:'6px' }}>Posto assegnato</div>
+                  <div style={{ fontSize:'22px', fontWeight:'800', color:'#60A5FA' }}>{ticketReg.numero_posto}</div>
+                </div>
+              )}
+              <button
+                onClick={confermaCheckinDaTicket}
+                disabled={!!checkingId}
+                style={{
+                  width:'100%', padding:'18px',
+                  background: checkingId ? '#374151' : '#16A34A',
+                  color: checkingId ? '#9CA3AF' : '#fff',
+                  border:'none', borderRadius:'14px',
+                  fontSize:'18px', fontWeight:'800', fontFamily:"'Inter',sans-serif",
                   cursor: checkingId ? 'default' : 'pointer',
-                  display:'flex', alignItems:'center', justifyContent:'center', gap:10,
-                }}>
-                  {checkingId
-                    ? <><div style={{ width:18, height:18, border:'2px solid #fff', borderTopColor:'transparent', borderRadius:'50%', animation:'spin .6s linear infinite' }} /> Registrazione…</>
-                    : <><svg width="20" height="20" fill="none" stroke="#fff" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round" viewBox="0 0 24 24"><path d="M22 11.08V12a10 10 0 1 1-5.93-9.14"/><polyline points="22 4 12 14.01 9 11.01"/></svg> Conferma check-in</>
-                  }
-                </button>
-              }
-            />
+                  display:'flex', alignItems:'center', justifyContent:'center', gap:'10px',
+                  transition:'background .15s',
+                }}
+              >
+                {checkingId
+                  ? <><div style={{ width:20, height:20, border:'2px solid #6B7280', borderTopColor:'transparent', borderRadius:'50%', animation:'spin .6s linear infinite' }} /> Registrazione in corso…</>
+                  : <><svg width="22" height="22" fill="none" stroke="#fff" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round" viewBox="0 0 24 24"><path d="M22 11.08V12a10 10 0 1 1-5.93-9.14"/><polyline points="22 4 12 14.01 9 11.01"/></svg> Conferma check-in</>
+                }
+              </button>
+              <button
+                onClick={() => setTicketReg(null)}
+                style={{ background:'none', border:'none', color:'#6B7280', fontSize:'14px', cursor:'pointer', padding:'0', fontFamily:"'Inter',sans-serif" }}
+              >
+                Annulla
+              </button>
+            </div>
           </div>
         </div>
       )}
