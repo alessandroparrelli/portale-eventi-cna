@@ -195,6 +195,7 @@ export default function CheckinPage() {
   const [scanning,       setScanning]      = useState(false)
   const [manualModal,    setManualModal]   = useState(false)
   const [walkinModal,    setWalkinModal]   = useState(false)
+  const [confirmAnnulla, setConfirmAnnulla] = useState(null)
   const [listaModal,     setListaModal]    = useState(false)
   const [result,         setResult]        = useState(null)
   const [manualQr,       setManualQr]      = useState('')
@@ -577,7 +578,7 @@ export default function CheckinPage() {
                     <div key={r.id} style={{ display:'flex', alignItems:'center', gap:'12px', padding:'10px 14px', borderBottom:'1px solid #F3F4F6', background: r.presente ? '#F0FDF4' : '#fff', transition:'background .15s', cursor: r.presente ? 'default' : 'pointer' }}
                       onClick={() => !r.presente && checkinManuale(r)}>
                       <button
-                        onClick={e => { e.stopPropagation(); r.presente ? annullaCheckin(r) : checkinManuale(r) }}
+                        onClick={e => { e.stopPropagation(); r.presente ? setConfirmAnnulla(r) : checkinManuale(r) }}
                         disabled={isChecking}
                         style={{ width:'34px', height:'34px', borderRadius:'50%', flexShrink:0, cursor:'pointer', border: r.presente ? 'none' : '2px solid #D1D5DB', background: r.presente ? '#16A34A' : '#fff', display:'flex', alignItems:'center', justifyContent:'center', transition:'all .15s' }}>
                         {isChecking
@@ -674,6 +675,52 @@ export default function CheckinPage() {
               >
                 Annulla
               </button>
+            </div>
+          </div>
+        </div>
+      )}
+
+      {confirmAnnulla && (
+        <div
+          style={{ position:'fixed', inset:0, background:'rgba(0,0,0,.75)', display:'flex', alignItems:'center', justifyContent:'center', zIndex:9999, padding:'20px' }}
+          onClick={() => setConfirmAnnulla(null)}
+        >
+          <div
+            onClick={e => e.stopPropagation()}
+            style={{ width:'100%', maxWidth:'400px', background:'#111827', borderRadius:'20px', overflow:'hidden', boxShadow:'0 24px 64px rgba(0,0,0,.6)', animation:'fadeInUp .2s ease' }}
+          >
+            <div style={{ background:'#78350F', padding:'18px 22px', display:'flex', alignItems:'center', justifyContent:'space-between' }}>
+              <div style={{ display:'flex', alignItems:'center', gap:'10px' }}>
+                <AlertTriangle size={24} color="#FCD34D" />
+                <span style={{ color:'#FCD34D', fontSize:'15px', fontWeight:'800' }}>Annulla presenza</span>
+              </div>
+              <button onClick={() => setConfirmAnnulla(null)} style={{ background:'rgba(255,255,255,.15)', border:'none', borderRadius:'50%', width:'30px', height:'30px', cursor:'pointer', display:'flex', alignItems:'center', justifyContent:'center', color:'#fff' }}>
+                <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round"><line x1="18" y1="6" x2="6" y2="18"/><line x1="6" y1="6" x2="18" y2="18"/></svg>
+              </button>
+            </div>
+            <div style={{ padding:'24px 22px', display:'flex', flexDirection:'column', gap:'16px' }}>
+              <div>
+                <div style={{ fontSize:'11px', fontWeight:'700', color:'#6B7280', letterSpacing:'.08em', textTransform:'uppercase', marginBottom:'4px' }}>Partecipante</div>
+                <div style={{ fontSize:'22px', fontWeight:'800', color:'#F9FAFB', lineHeight:1.2 }}>{confirmAnnulla.cognome} {confirmAnnulla.nome}</div>
+                {confirmAnnulla.numero_posto && (
+                  <div style={{ fontSize:'13px', color:'#60A5FA', marginTop:'4px', fontWeight:'600' }}>{confirmAnnulla.numero_posto}</div>
+                )}
+              </div>
+              <div style={{ fontSize:'14px', color:'#9CA3AF' }}>
+                Questa azione rimuoverà la presenza registrata. Il partecipante tornerà in lista di attesa.
+              </div>
+              <div style={{ display:'flex', flexDirection:'column', gap:'10px', marginTop:'4px' }}>
+                <button
+                  onClick={() => { annullaCheckin(confirmAnnulla); setConfirmAnnulla(null) }}
+                  style={{ width:'100%', padding:'16px', background:'#B45309', color:'#fff', border:'none', borderRadius:'14px', fontSize:'16px', fontWeight:'800', cursor:'pointer', display:'flex', alignItems:'center', justifyContent:'center', gap:'8px' }}
+                >
+                  <svg width="18" height="18" fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round" viewBox="0 0 24 24"><polyline points="3 6 5 6 21 6"/><path d="M19 6l-1 14H6L5 6"/><path d="M10 11v6"/><path d="M14 11v6"/><path d="M9 6V4h6v2"/></svg>
+                  Sì, annulla presenza
+                </button>
+                <button onClick={() => setConfirmAnnulla(null)} style={{ width:'100%', padding:'14px', background:'#1F2937', color:'#9CA3AF', border:'none', borderRadius:'12px', fontSize:'15px', fontWeight:'600', cursor:'pointer' }}>
+                  No, mantieni
+                </button>
+              </div>
             </div>
           </div>
         </div>
