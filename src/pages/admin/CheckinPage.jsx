@@ -308,7 +308,7 @@ export default function CheckinPage() {
     if (!qr.trim()) return
     setProcessing(true)
     const { data, error } = await supabase.rpc('checkin_by_qr', { p_qr_code: qr.trim() })
-    setResult(error ? { ok: false, error: 'non_trovato' } : data)
+    setResult(error ? { ok: false, error: 'non_trovato' } : { ...data, fromTicket: true })
     setProcessing(false)
     if (data?.ok) {
       logAttivita(manuale ? 'checkin_manuale' : 'checkin_qr', { eventoId: selectedEvento, dettagli: { nome: data.nome } })
@@ -374,7 +374,7 @@ export default function CheckinPage() {
     })
     setProcessing(false)
     if (!error && data?.ok) {
-      setResult({ ok: true, nome: `${w.nome} ${w.cognome}` })
+      setResult({ ok: true, fromTicket: true, nome: `${w.nome} ${w.cognome}` })
       setWalkin({ nome: '', cognome: '', email: '', cellulare: '', ragione_sociale: '', partita_iva: '', cap: '', mestiere_id: '' })
       setWalkinModal(false); loadPresenti()
     }
