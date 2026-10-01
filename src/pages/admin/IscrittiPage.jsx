@@ -539,7 +539,7 @@ export default function IscrittiPage() {
 
   const filtered = (() => {
     const q = search.toLowerCase()
-    const matchStato = r => filterStato==='tutti' || r.stato===filterStato
+    const matchStato = r => filterStato==='tutti' || (filterStato==='presente' ? r.presente : r.stato===filterStato)
     const matchSearch = r => !q || r.nome?.toLowerCase().includes(q) || r.cognome?.toLowerCase().includes(q) || r.email?.toLowerCase().includes(q) || r.ragione_sociale?.toLowerCase().includes(q)
 
     if (!q) return registrations.filter(r => matchStato(r))
@@ -891,6 +891,56 @@ export default function IscrittiPage() {
     document.body.removeChild(a)
     URL.revokeObjectURL(url)
     logAttivita('iscritti_esportati', { eventoId: selectedEvento, eventoTitolo: eventoTitle, dettagli: { totale: filtered.length } })
+  }
+
+  async function exportExcelPresenti() {
+    const evento = eventi.find(e=>e.id===selectedEvento)
+    const eventoTitle = evento?.titolo || 'evento'
+    const dataExport = new Date().toLocaleDateString('it-IT',{day:'2-digit',month:'long',year:'numeric'})
+    const oraExport = new Date().toLocaleTimeString('it-IT',{hour:'2-digit',minute:'2-digit'})
+    const presenti = registrations.filter(r => r.presente)
+    if (!presenti.length) return
+    const ExcelJS = (await import('exceljs')).default
+    const wb = new ExcelJS.Workbook()
+    const ws = wb.addWorksheet('Presenti')
+    ws.mergeCells('A1:H1')
+    const r1 = ws.getRow(1)
+    r1.getCell(1).value = `Presenti — ${eventoTitle}`
+    r1.getCell(1).font = { bold:true, size:14, color:{ argb:'FFFFFFFF' } }
+    r1.getCell(1).fill = { type:'pattern', pattern:'solid', fgColor:{ argb:'FF003DA5' } }
+    r1.getCell(1).alignment = { horizontal:'center', vertical:'middle' }
+    r1.height = 28
+    ws.mergeCells('A2:H2')
+    ws.getRow(2).getCell(1).value = `Esportato il ${dataExport} alle ${oraExport} · CNA Roma — Portale Eventi`
+    ws.getRow(2).getCell(1).font = { size:9, color:{ argb:'FF6B7280' }, italic:true }
+    ws.getRow(2).height = 16
+    const headers = ['#','Cognome','Nome','Email','Cellulare','Ragione Sociale','Posto','Check-in']
+    const hRow = ws.getRow(3)
+    headers.forEach((h, i) => {
+      const cell = hRow.getCell(i+1)
+      cell.value = h
+      cell.font = { bold:true, size:10, color:{ argb:'FFFFFFFF' } }
+      cell.fill = { type:'pattern', pattern:'solid', fgColor:{ argb:'FF1E3A5F' } }
+      cell.alignment = { horizontal:'center', vertical:'middle' }
+    })
+    hRow.height = 20
+    ws.columns = [{width:6},{width:18},{width:16},{width:30},{width:14},{width:28},{width:22},{width:20}]
+    presenti.forEach((r, idx) => {
+      const row = ws.addRow([
+        idx+1, r.cognome||'', r.nome||'', r.email||'', r.cellulare||'', r.ragione_sociale||'', r.numero_posto||'',
+        r.checkin_at ? new Date(r.checkin_at).toLocaleString('it-IT',{timeZone:'Europe/Rome',day:'2-digit',month:'2-digit',year:'numeric',hour:'2-digit',minute:'2-digit'}) : '',
+      ])
+      const bg = idx%2===0 ? 'FFFAFAFA' : 'FFFFFFFF'
+      row.eachCell(cell => { cell.fill={type:'pattern',pattern:'solid',fgColor:{argb:bg}}; cell.font={size:10}; cell.alignment={vertical:'middle'}; cell.border={bottom:{style:'hair',color:{argb:'FFE5E7EB'}}} })
+      row.height = 18
+    })
+    ws.addRow(['','','','','','',`Totale presenti: ${presenti.length}`,'']).getCell(7).font={bold:true,size:10}
+    const buffer = await wb.xlsx.writeBuffer()
+    const blob = new Blob([buffer],{type:'application/vnd.openxmlformats-officedocument.spreadsheetml.sheet'})
+    const url = URL.createObjectURL(blob)
+    const a = document.createElement('a'); a.href=url; a.download=`presenti-${eventoTitle.toLowerCase().replace(/\s+/g,'-')}-${new Date().toISOString().slice(0,10)}.xlsx`
+    document.body.appendChild(a); a.click(); document.body.removeChild(a); URL.revokeObjectURL(url)
+    logAttivita('presenti_esportati',{eventoId:selectedEvento,eventoTitolo:eventoTitle,dettagli:{totale:presenti.length}})
   }
 
   function downloadTemplate() {
@@ -1488,6 +1538,9 @@ export default function IscrittiPage() {
           <Btn variant="secondary" onClick={downloadTemplate} size="md"><Download size={16}/> Template</Btn>
           <Btn variant="secondary" onClick={() => { setImportModal(true); setImportDone(null); setImportPreview([]); setImportErrors([]) }} size="md"><Upload size={16}/> Importa</Btn>
           <Btn variant="secondary" onClick={exportExcel} size="md"><Download size={16}/> Esporta Excel</Btn>
+          {filterStato === 'presente' && (
+            <Btn variant="secondary" onClick={exportExcelPresenti} size="md" style={{ background:'#ECFDF5', color:'#16A34A', borderColor:'#86EFAC' }}><Download size={16}/> Esporta presenti</Btn>
+          )}
         </div>
       )}
 
@@ -1941,7 +1994,7 @@ export default function IscrittiPage() {
           </div>
           <div style={{ display:'grid', gridTemplateColumns:'repeat(auto-fit,minmax(140px,1fr))', gap:'10px', marginBottom:'16px' }} className="stat-grid-auto">
             <GlowStatCard icon="users"     label="Tot. iscritti" value={registrations.length}                                    palette="blue"/>
-            <GlowStatCard icon="check"     label="Presenti"      value={totPresenti}                                              palette="green"/>
+            <GlowStatCard icon="check"     label="Presenti"      value={totPresenti}                                              palette="green"  onClick={() => setFilterStato(f => f==='presente' ? 'tutti' : 'presente')} active={filterStato==='presente'}/>
             <GlowStatCard icon="trending"  label="Confermati"    value={totConfermati}                                            palette="cyan"/>
             <GlowStatCard icon="usercheck" label="Walk-in"       value={registrations.filter(r=>r.stato==='walk-in').length}     palette="violet"/>
             <GlowStatCard icon="userx"     label="Non verrà"     value={registrations.filter(r=>r.rinuncia).length}              palette="red"/>
