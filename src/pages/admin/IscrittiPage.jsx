@@ -7,7 +7,7 @@ import { useAuth } from '../../hooks/useAuth'
 import GlowTableHead from '../../components/GlowTableHead'
 import GlowStatCard from '../../components/GlowStatCard'
 import { Modal, PresenzaBadge, Field, Input, Select, Btn, EmptyState } from '../../components/ui'
-import { Users, Search, Download, Upload, Eye, Trash2, UserCheck, AlertCircle, CheckCircle2, X, MapPin, Ticket, RefreshCw, MessageSquare, UserPlus, Link2, Pencil } from 'lucide-react'
+import { Users, Search, Download, Upload, Eye, Trash2, UserCheck, AlertCircle, CheckCircle2, X, MapPin, Ticket, RefreshCw, MessageSquare, UserPlus, Link2, Pencil, FileText } from 'lucide-react'
 import DeleteConfirmModal from '../../components/DeleteConfirmModal'
 import * as XLSX from 'xlsx'
 import ExcelJS from 'exceljs/dist/exceljs.min.js'
@@ -993,6 +993,176 @@ export default function IscrittiPage() {
     logAttivita('presenti_esportati',{ eventoId:selectedEvento, eventoTitolo:eventoTitle, dettagli:{ totale:presenti.length } })
   }
 
+  function tcName(s) {
+    if (!s) return ''
+    return s.trim().split(/\s+/).map(w => w.charAt(0).toUpperCase() + w.slice(1).toLowerCase()).join(' ')
+  }
+
+  function buildRegistroRows() {
+    return [...registrations]
+      .filter(r => ['confermato','presente','walk-in'].includes(r.stato))
+      .sort((a,b) => {
+        const ca=(a.cognome||'').toLowerCase(), cb=(b.cognome||'').toLowerCase()
+        const na=(a.nome||'').toLowerCase(),    nb=(b.nome||'').toLowerCase()
+        return ca<cb?-1:ca>cb?1:na<nb?-1:na>nb?1:0
+      })
+  }
+
+  async function exportRegistroPDF() {
+    const evento = eventi.find(e=>e.id===selectedEvento)
+    const eventoTitle = evento?.titolo || 'evento'
+    const sorted = buildRegistroRows()
+    if (!sorted.length) return
+    const BLU='#003DA5', BLU_CH='#EEF3FF', NERO='#0A0A0A'
+    const now = new Date()
+    const dataStr = now.toLocaleDateString('it-IT',{day:'2-digit',month:'long',year:'numeric'})
+    const oraStr  = now.toLocaleTimeString('it-IT',{hour:'2-digit',minute:'2-digit'})
+    const nTot   = sorted.length
+    const nPosto = sorted.filter(r=>r.numero_posto).length
+    const logoUrl = 'https://raw.githubusercontent.com/alessandroparrelli/fileappoggio/main/NUOVO-LOGO-CNA-ROMA-SOLO-ROMA.png'
+    const righe = sorted.map((r,i)=>{
+      const bg = i%2===0?'#FFFFFF':BLU_CH
+      return `<tr style="background:${bg}">
+        <td style="color:#9CA3AF;text-align:center;font-size:8.5pt">${i+1}</td>
+        <td style="font-weight:700;color:${NERO}">${tcName(r.cognome)}</td>
+        <td>${tcName(r.nome)}</td>
+        <td style="color:#4B5563;font-size:9pt">${tcName(r.ragione_sociale)||'—'}</td>
+        <td style="font-weight:700;color:${BLU};text-align:center">${r.numero_posto||'—'}</td>
+      </tr>`
+    }).join('')
+    const html=`<!DOCTYPE html><html lang="it"><head><meta charset="UTF-8">
+      <title>Registro — ${eventoTitle}</title>
+      <style>
+        *{box-sizing:border-box;margin:0;padding:0}
+        body{font-family:'Calibri',Arial,sans-serif;font-size:10pt;color:#111}
+        @page{size:A4 portrait;margin:10mm 8mm 10mm 8mm}
+        .header{display:flex;justify-content:space-between;align-items:flex-end;border-bottom:2.5px solid ${BLU};padding-bottom:6px;margin-bottom:8px;page-break-inside:avoid}
+        .header img{height:38px}
+        .header h1{font-size:13pt;font-weight:700;color:${BLU};margin-bottom:3px}
+        .header p{font-size:8.5pt;color:#6B7280;margin-bottom:1px}
+        .hright{text-align:right;font-size:8.5pt;color:#9CA3AF}
+        table{width:100%;border-collapse:collapse;font-size:10pt}
+        thead tr{background:${BLU}}
+        thead th{color:#fff;padding:5px;font-size:9pt;font-weight:700;text-align:left;text-transform:uppercase;letter-spacing:.03em}
+        th.c,td.c{text-align:center}
+        tbody td{padding:4.5px 5px;border-bottom:.4px solid #D0D9F0;vertical-align:middle}
+        .footer{margin-top:8px;border-top:.5px solid #E5EAEF;padding-top:4px;display:flex;justify-content:space-between;font-size:7.5pt;color:#9CA3AF;page-break-inside:avoid}
+        .toolbar{background:${BLU};color:#fff;padding:10px 16px;display:flex;align-items:center;gap:12px;font-size:11pt}
+        .btn-print{margin-left:auto;background:#fff;color:${BLU};border:none;padding:8px 20px;border-radius:8px;font-weight:700;font-size:11pt;cursor:pointer}
+        .btn-close{background:transparent;color:#fff;border:1px solid rgba(255,255,255,.4);padding:8px 16px;border-radius:8px;cursor:pointer}
+        @media print{.toolbar{display:none}thead{display:table-header-group}tr{page-break-inside:avoid}}
+      </style></head><body>
+      <div class="toolbar no-print">
+        <strong>Registro iscritti</strong> — ${eventoTitle}
+        <button class="btn-print" onclick="window.print()">🖨 Stampa / Salva PDF</button>
+        <button class="btn-close" onclick="window.close()">✕</button>
+      </div>
+      <div style="padding:0">
+        <div class="header">
+          <div style="display:flex;align-items:center;gap:14px">
+            <img src="${logoUrl}" alt="CNA Roma" onerror="this.style.display='none'">
+            <div>
+              <h1>${eventoTitle}</h1>
+              <p>${evento?.luogo||''}</p>
+              <p>${nTot} iscritti · ${nPosto} con posto · ${dataStr} ore ${oraStr}</p>
+            </div>
+          </div>
+          <div class="hright">Lista iscritti<br>per cognome</div>
+        </div>
+        <table>
+          <thead><tr>
+            <th style="width:4%" class="c">#</th>
+            <th style="width:22%">Cognome</th>
+            <th style="width:20%">Nome</th>
+            <th style="width:32%">Società</th>
+            <th style="width:22%" class="c">Posto assegnato</th>
+          </tr></thead>
+          <tbody>${righe}</tbody>
+        </table>
+        <div class="footer">
+          <span>CNA Roma — Portale Eventi · documento ad uso interno</span>
+          <span>${dataStr} ore ${oraStr}</span>
+        </div>
+      </div></body></html>`
+    const win=window.open('','_blank','width=900,height=700')
+    win.document.write(html); win.document.close()
+    logAttivita('registro_pdf',{eventoId:selectedEvento,eventoTitolo:eventoTitle,dettagli:{totale:nTot}})
+  }
+
+  async function exportRegistroWord() {
+    const evento = eventi.find(e=>e.id===selectedEvento)
+    const eventoTitle = evento?.titolo || 'evento'
+    const sorted = buildRegistroRows()
+    if (!sorted.length) return
+    const { Document, Packer, Table, TableRow, TableCell, Paragraph, TextRun,
+            WidthType, AlignmentType, ShadingType, BorderStyle, Header } = await import('docx')
+    const BLU='003DA5', BLU_CH='EEF3FF'
+    const PAGE_W=11906, MARGIN=720, TABLE_W=PAGE_W-MARGIN*2
+    const COL={
+      num:Math.round(TABLE_W*.04), cog:Math.round(TABLE_W*.22),
+      nom:Math.round(TABLE_W*.20), soc:Math.round(TABLE_W*.32),
+      pos:Math.round(TABLE_W*.22),
+    }
+    const nb={style:BorderStyle.NONE}
+    const lb=(c='D0D9F0')=>({style:BorderStyle.SINGLE,size:2,color:c})
+    function mkCell(text,{w,bg,bold=false,size=20,color='111827',align=AlignmentType.LEFT,lc='D0D9F0'}={}){
+      return new TableCell({
+        width:{size:w||COL.soc,type:WidthType.DXA},
+        shading:bg?{type:ShadingType.CLEAR,fill:bg}:undefined,
+        borders:{top:nb,left:nb,right:nb,bottom:lb(lc)},
+        verticalAlign:'center',
+        children:[new Paragraph({
+          alignment:align,spacing:{before:40,after:40},
+          children:[new TextRun({text:text||'—',bold,size,color,font:'Calibri'})]
+        })]
+      })
+    }
+    const hRow=new TableRow({tableHeader:true,children:[
+      mkCell('#',           {w:COL.num,bg:BLU,color:'FFFFFF',bold:true,size:18,align:AlignmentType.CENTER,lc:BLU}),
+      mkCell('COGNOME',     {w:COL.cog,bg:BLU,color:'FFFFFF',bold:true,size:18,lc:BLU}),
+      mkCell('NOME',        {w:COL.nom,bg:BLU,color:'FFFFFF',bold:true,size:18,lc:BLU}),
+      mkCell('SOCIETÀ',     {w:COL.soc,bg:BLU,color:'FFFFFF',bold:true,size:18,lc:BLU}),
+      mkCell('POSTO',       {w:COL.pos,bg:BLU,color:'FFFFFF',bold:true,size:18,align:AlignmentType.CENTER,lc:BLU}),
+    ]})
+    const dataRows=sorted.map((r,i)=>{
+      const bg=i%2===0?'FFFFFF':BLU_CH
+      return new TableRow({children:[
+        mkCell(String(i+1),                    {w:COL.num,bg,color:'9CA3AF',size:18,align:AlignmentType.CENTER}),
+        mkCell(tcName(r.cognome),              {w:COL.cog,bg,bold:true,size:20,color:'0A0A0A'}),
+        mkCell(tcName(r.nome),                 {w:COL.nom,bg,size:20,color:'1F2937'}),
+        mkCell(tcName(r.ragione_sociale)||'—', {w:COL.soc,bg,size:18,color:'4B5563'}),
+        mkCell(r.numero_posto||'—',            {w:COL.pos,bg,bold:true,size:18,color:BLU,align:AlignmentType.CENTER}),
+      ]})
+    })
+    const table=new Table({
+      width:{size:TABLE_W,type:WidthType.DXA},
+      columnWidths:[COL.num,COL.cog,COL.nom,COL.soc,COL.pos],
+      rows:[hRow,...dataRows],
+    })
+    const now=new Date()
+    const dataStr=now.toLocaleDateString('it-IT',{day:'2-digit',month:'long',year:'numeric'})
+    const oraStr=now.toLocaleTimeString('it-IT',{hour:'2-digit',minute:'2-digit'})
+    const doc=new Document({sections:[{
+      properties:{page:{size:{width:PAGE_W,height:16838},margin:{top:MARGIN*2.5,bottom:MARGIN,left:MARGIN,right:MARGIN}}},
+      headers:{default:new Header({children:[new Paragraph({
+        border:{bottom:{style:BorderStyle.SINGLE,size:6,color:BLU}},
+        spacing:{after:80},
+        children:[
+          new TextRun({text:eventoTitle+'  ·  ',bold:true,size:24,color:BLU,font:'Calibri'}),
+          new TextRun({text:`${sorted.length} iscritti · ${dataStr} ore ${oraStr}`,size:18,color:'6B7280',font:'Calibri'}),
+        ]
+      })]})},
+      children:[table],
+    }]})
+    const buf=await Packer.toBuffer(doc)
+    const blob=new Blob([buf],{type:'application/vnd.openxmlformats-officedocument.wordprocessingml.document'})
+    const url=URL.createObjectURL(blob)
+    const a=document.createElement('a')
+    a.href=url; a.download=`registro-${eventoTitle.toLowerCase().replace(/\s+/g,'-')}-${new Date().toISOString().slice(0,10)}.docx`
+    document.body.appendChild(a);a.click();document.body.removeChild(a);URL.revokeObjectURL(url)
+    logAttivita('registro_word',{eventoId:selectedEvento,eventoTitolo:eventoTitle,dettagli:{totale:sorted.length}})
+  }
+
   function downloadTemplate() {
     const rows = [{ 'Nome':'Mario','Cognome':'Rossi','Email':'mario@esempio.it','Cellulare':'3331234567','Ragione Sociale':'Rossi Srl','P.IVA':'01234567890','CAP':'00100' }]
     const ws = XLSX.utils.json_to_sheet(rows)
@@ -1588,6 +1758,8 @@ export default function IscrittiPage() {
           <Btn variant="secondary" onClick={downloadTemplate} size="md"><Download size={16}/> Template</Btn>
           <Btn variant="secondary" onClick={() => { setImportModal(true); setImportDone(null); setImportPreview([]); setImportErrors([]) }} size="md"><Upload size={16}/> Importa</Btn>
           <Btn variant="secondary" onClick={exportExcel} size="md"><Download size={16}/> Esporta Excel</Btn>
+          <Btn variant="secondary" onClick={exportRegistroPDF}  size="md" style={{ background:'#EFF6FF', color:'#1D4ED8', borderColor:'#BFDBFE' }}><FileText size={16}/> Registro PDF</Btn>
+          <Btn variant="secondary" onClick={exportRegistroWord} size="md" style={{ background:'#EFF6FF', color:'#1D4ED8', borderColor:'#BFDBFE' }}><FileText size={16}/> Registro Word</Btn>
           {filterStato === 'presente' && (
             <Btn variant="secondary" onClick={exportExcelPresenti} size="md" style={{ background:'#ECFDF5', color:'#16A34A', borderColor:'#86EFAC' }}><Download size={16}/> Esporta presenti</Btn>
           )}
