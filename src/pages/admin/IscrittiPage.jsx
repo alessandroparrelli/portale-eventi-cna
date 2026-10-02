@@ -1758,11 +1758,17 @@ export default function IscrittiPage() {
           <Btn variant="secondary" onClick={downloadTemplate} size="md"><Download size={16}/> Template</Btn>
           <Btn variant="secondary" onClick={() => { setImportModal(true); setImportDone(null); setImportPreview([]); setImportErrors([]) }} size="md"><Upload size={16}/> Importa</Btn>
           <Btn variant="secondary" onClick={exportExcel} size="md"><Download size={16}/> Esporta Excel</Btn>
-          <Btn variant="secondary" onClick={exportRegistroPDF}  size="md" style={{ background:'#EFF6FF', color:'#1D4ED8', borderColor:'#BFDBFE' }}><FileText size={16}/> Registro PDF</Btn>
-          <Btn variant="secondary" onClick={exportRegistroWord} size="md" style={{ background:'#EFF6FF', color:'#1D4ED8', borderColor:'#BFDBFE' }}><FileText size={16}/> Registro Word</Btn>
           {filterStato === 'presente' && (
             <Btn variant="secondary" onClick={exportExcelPresenti} size="md" style={{ background:'#ECFDF5', color:'#16A34A', borderColor:'#86EFAC' }}><Download size={16}/> Esporta presenti</Btn>
           )}
+        </div>
+        {/* Riga registro — sempre visibile quando c'è un evento */}
+        <div style={{ display:'flex', gap:'8px', flexWrap:'wrap', marginBottom:'16px', alignItems:'center' }}>
+          <Btn variant="secondary" onClick={exportRegistroPDF}  size="md" style={{ background:'#EFF6FF', color:'#1D4ED8', borderColor:'#BFDBFE', fontWeight:'700' }}><FileText size={16}/> 🖨 Registro PDF</Btn>
+          <Btn variant="secondary" onClick={exportRegistroWord} size="md" style={{ background:'#EFF6FF', color:'#1D4ED8', borderColor:'#BFDBFE', fontWeight:'700' }}><FileText size={16}/> 📄 Registro Word</Btn>
+          <span style={{ fontSize:'12px', color:'#9CA3AF', marginLeft:'4px' }}>
+            Lista iscritti ordinata per cognome — da stampare per le mascherine
+          </span>
         </div>
       )}
 
