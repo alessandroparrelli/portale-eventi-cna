@@ -1980,7 +1980,7 @@ export default function IscrittiPage() {
             <div style={{ marginBottom:'14px', padding:'12px 18px', borderRadius:'16px', background: dryRunRis.error ? '#FEF2F2' : '#EFF6FF', border:`1px solid ${dryRunRis.error ? '#FECACA' : '#BFDBFE'}` }}>
               <div style={{ display:'flex', justifyContent:'space-between', alignItems:'center' }}>
                 <p style={{ margin:0, fontSize:'13px', fontWeight:'700', color: dryRunRis.error ? '#DC2626' : '#1D4ED8' }}>
-                  {dryRunRis.error ? `❌ ${dryRunRis.error}` : `📧 ${dryRunRis.sent ?? dryRunRis.count ?? dryRunRis.sample?.length ?? 0} iscritti riceveranno la mail`}
+                  {dryRunRis.error ? `❌ ${dryRunRis.error}` : `📧 ${dryRunRis.total_questo_blocco ?? dryRunRis.sent ?? dryRunRis.sample?.length ?? 0} iscritti riceveranno la mail`}
                 </p>
                 <button onClick={() => setDryRunRis(null)} style={{ background:'none', border:'none', cursor:'pointer', color:'#9CA3AF', fontSize:'18px', padding:0 }}>×</button>
               </div>
