@@ -251,7 +251,17 @@ export default function IscrittiPage() {
         const res = await fetch('https://hnkhckcclgabunkqfmrz.supabase.co/functions/v1/assegna-posto', {
           method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify(body),
         })
-        setDryRunRis(await res.json())
+        const ris = await res.json()
+        // Se ids specificati: costruisco il sample completo dai dati già in memoria
+        if (ids !== null && Array.isArray(ids)) {
+          const idSet = new Set(ids)
+          const localSample = registrations
+            .filter(r => idSet.has(r.id) && r.numero_posto)
+            .map(r => ({ id: r.id, nome: r.nome, cognome: r.cognome, email: r.email, numero_posto: r.numero_posto }))
+          ris.sample = localSample
+          ris.total_questo_blocco = localSample.length
+        }
+        setDryRunRis(ris)
       } catch (e) { setDryRunRis({ error: String(e) }) }
       return
     }
