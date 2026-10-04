@@ -37,6 +37,7 @@ const BLOCK_TYPES = [
   { tipo:'spazio',    label:'Spazio',      icon:<span style={{fontSize:'12px'}}></span>, cat:'layout' },
   { tipo:'mappa',     label:'Mappa',       icon:<MapPin size={13}/>,         cat:'evento' },
   { tipo:'posto_display', label:'Numero posto', icon:<span style={{fontSize:'12px'}}>&#127919;</span>, cat:'evento' },
+  { tipo:'link_registrazione', label:'Link Registrazione', icon:<span style={{fontSize:'12px'}}>🎫</span>, cat:'evento' },
 ]
 
 const VARIABILI = [
@@ -44,19 +45,19 @@ const VARIABILI = [
   '{{cellulare}}','{{partita_iva}}','{{cap}}',
   '{{nome_evento}}','{{data_evento}}','{{luogo_evento}}',
   '{{qr_code}}','{{link_landing}}','{{link_questionario}}',
-  '{{data_iscrizione}}','{{codice_iscrizione}}','{{numero_posto}}','{{link_conferma}}',
+  '{{data_iscrizione}}','{{codice_iscrizione}}','{{numero_posto}}','{{link_conferma}}','{{link_rinuncia}}',
 ]
 
 const PREVIEW_DATA_BASE = {
   '{{nome}}':'Marco','{{cognome}}':'Bianchi','{{ragione_sociale}}':'Bianchi Srl',
   '{{email}}':'marco@esempio.it',
-  '{{data_evento}}':'Venerd 25 settembre 2026, ore 09:30',
+  '{{data_evento}}':'Sabato 10 ottobre 2026, ore 09:30',
   '{{luogo_evento}}':'Palazzo dei Congressi, Roma',
   '{{cellulare}}':'333 1234567','{{partita_iva}}':'12345670015','{{cap}}':'00100',
   '{{qr_code}}':'QR-MARCO2026','{{link_landing}}':'#','{{link_questionario}}':'#',
   '{{data_iscrizione}}': new Date().toLocaleDateString('it-IT'),
   '{{codice_iscrizione}}':'EVT-2026-M1B2',
-  '{{numero_posto}}': 'Curva Sud, Settore 18AS, Posto 9S','{{link_conferma}}':'#',
+  '{{numero_posto}}': 'Curva Sud, Settore 18AS, Posto 9S','{{link_conferma}}':'#','{{link_rinuncia}}':'#',
 }
 
 //  Block defaults 
@@ -69,17 +70,48 @@ function blockDefaults(tipo) {
     hero:       { titolo:'{{nome_evento}}', sottotitolo:'Ti aspettiamo!', bg:BLU, coloreTesto:'#ffffff', padding:48, src:'' },
     colonne:    { sinistra:'<p>Colonna sinistra</p>', destra:'<p>Colonna destra</p>', gap:24 },
     info_box:   { bg:'#F0F7FF', bordo:'#BFDBFE', radius:10 },
-    qr:         { testo:'Il tuo QR code di accesso', size:160 },
+    qr:         { testo:'IL TUO QR CODE DI ACCESSO', size:180, bg:'#003DA5', colore_testo:'#ffffff', colore_label:'rgba(255,255,255,0.7)', colore_codice:'rgba(255,255,255,0.5)', radius:12, padding:28, mostra_link:true, testo_link:'\uD83C\uDFAB Vedi registrazione e QR Code', colore_link:'#ffffff' },
     separatore: { colore:'#E5E7EB', spessore:1, spazio:24 },
     spazio:     { altezza:32 },
     mappa:      { indirizzo:'{{luogo_evento}}', testo:'Come raggiungerci', zoom:15, altezza:200 },
     posto_display: { testo:'Il tuo posto' },
+    link_registrazione: { testo:'\uD83C\uDFAB Vedi il tuo biglietto e QR Code', colore:'#003DA5', testocolore:'#ffffff', radius:10, size:15 },
   }
   return { tipo, id:`b_${Date.now()}_${Math.random().toString(36).slice(2,7)}`, ...(map[tipo]||{}) }
 }
 
 //  Blocchi  HTML 
-function blocchiToHtml(blocchi) {
+function buildTicketSvgUri(nome, posto) {
+  const esc = s => String(s || '').replace(/[<>&"']/g, c => ({'<':'&lt;','>':'&gt;','&':'&amp;','"':'&quot;',"'":'&apos;'}[c]))
+  const n = esc(String(nome||'').slice(0,32).toUpperCase())
+  const p = esc(String(posto||'').slice(0,42))
+  const pl = p.length
+  // Font size posto grande, adattivo
+  const fp = pl <= 8 ? 44 : pl <= 14 ? 36 : pl <= 22 ? 28 : pl <= 32 ? 23 : 19
+  const H = 180  // biglietto leggermente più alto per dare spazio verticale
+  const MID = H / 2
+  const dx = [65,92,119,146,173,200,227,254,281,308,335,362,389,416,443]
+  const dots = (y) => dx.map(x => `<circle cx="${x}" cy="${y}" r="5"/>`).join('')
+  // Nome: 20px, a 1/3 dall'alto; Posto: grande, a 2/3
+  const yNome  = Math.round(H * 0.38)
+  const yPosto = Math.round(H * 0.70)
+  const svg = [
+    `<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 520 ${H}" width="520" height="${H}">`,
+    `<defs><clipPath id="tc"><path d="M20,0 L500,0 Q520,0 520,16 L520,${MID-16} Q506,${MID-16} 506,${MID} Q506,${MID+16} 520,${MID+16} L520,${H-16} Q520,${H} 500,${H} L20,${H} Q0,${H} 0,${H-16} L0,${MID+16} Q14,${MID+16} 14,${MID} Q14,${MID-16} 0,${MID-16} L0,16 Q0,0 20,0 Z"/></clipPath></defs>`,
+    `<rect width="520" height="${H}" fill="#F5E6C8" clip-path="url(#tc)"/>`,
+    `<path d="M32,10 L488,10 Q510,10 510,28 L510,${MID-18} Q498,${MID-14} 498,${MID} Q498,${MID+14} 510,${MID+18} L510,${H-28} Q510,${H-10} 488,${H-10} L32,${H-10} Q10,${H-10} 10,${H-28} L10,${MID+18} Q22,${MID+14} 22,${MID} Q22,${MID-14} 10,${MID-18} L10,28 Q10,10 32,10 Z" fill="none" stroke="#C8372D" stroke-width="2" stroke-dasharray="7,4"/>`,
+    `<g fill="#F5E6C8">${dots(0)}</g>`,
+    `<g fill="#F5E6C8">${dots(H)}</g>`,
+    // Nome — 20px, in alto
+    `<text x="260" y="${yNome}" text-anchor="middle" font-family="Arial,Helvetica,sans-serif" font-size="20" font-weight="700" fill="#8B5E3C" letter-spacing="3">${n}</text>`,
+    // Posto — grande, in basso
+    `<text x="260" y="${yPosto}" text-anchor="middle" font-family="Arial,Helvetica,sans-serif" font-size="${fp}" font-weight="900" fill="#1A1A1A">${p}</text>`,
+    '</svg>'
+  ].join('')
+  return 'data:image/svg+xml;charset=utf-8,' + encodeURIComponent(svg)
+}
+
+function blocchiToHtml(blocchi, vars) {
   if (!Array.isArray(blocchi)) return ''
   return blocchi.map(b => {
     if (!b || !b.tipo) return ''
@@ -101,7 +133,12 @@ function blocchiToHtml(blocchi) {
       }
       if (b.tipo === 'colonne') return `<table style="width:100%;border-collapse:collapse;margin:0 0 20px"><tr><td style="width:50%;vertical-align:top;padding-right:${(b.gap||24)/2}px;font-family:Inter,Arial,sans-serif;font-size:14px;color:#374151;line-height:1.6">${b.sinistra||''}</td><td style="width:50%;vertical-align:top;padding-left:${(b.gap||24)/2}px;font-family:Inter,Arial,sans-serif;font-size:14px;color:#374151;line-height:1.6">${b.destra||''}</td></tr></table>`
       if (b.tipo === 'info_box') return `<div style="background:${b.bg||'#F0F7FF'};border:1.5px solid ${b.bordo||'#BFDBFE'};border-radius:${b.radius||10}px;padding:20px 24px;margin:0 0 20px"><table style="width:100%;border-collapse:collapse"><tr><td style="width:32px;vertical-align:top;font-size:20px;padding:6px 0">&#x1F4C5;</td><td style="padding:6px 0 6px 12px;vertical-align:top"><p style="margin:0;font-size:11px;color:#6B7280;text-transform:uppercase;letter-spacing:.06em;font-family:Inter,Arial,sans-serif">Data e ora</p><p style="margin:4px 0 0;font-size:15px;font-weight:700;color:${NERO};font-family:Inter,Arial,sans-serif">{{data_evento}}</p></td></tr><tr><td style="vertical-align:top;font-size:20px;padding:6px 0">&#x1F4CD;</td><td style="padding:6px 0 0 12px;vertical-align:top"><p style="margin:0;font-size:11px;color:#6B7280;text-transform:uppercase;letter-spacing:.06em;font-family:Inter,Arial,sans-serif">Luogo</p><p style="margin:4px 0 0;font-size:15px;font-weight:700;color:${NERO};font-family:Inter,Arial,sans-serif">{{luogo_evento}}</p></td></tr></table></div>`
-      if (b.tipo === 'qr') return `<div style="text-align:center;padding:28px 0;margin:0 0 20px"><p style="font-size:13px;color:#6B7280;margin:0 0 16px;font-family:Inter,Arial,sans-serif">${b.testo||'Il tuo QR code di accesso'}</p>{{QR_BLOCK_${b.size||160}}}<p style="font-size:12px;color:#9CA3AF;margin:12px 0 0;font-family:monospace">{{qr_code}}</p></div>`
+      if (b.tipo === 'qr') {
+        const sz=b.size||160, qbg=b.bg||'#003DA5', qtx=b.colore_testo||'#fff', qlb=b.colore_label||'rgba(255,255,255,0.7)', qcd=b.colore_codice||'rgba(255,255,255,0.5)', qrd=b.radius||12, qp=b.padding||28
+        const qrImg = `<img src="https://api.qrserver.com/v1/create-qr-code/?size=${sz}x${sz}&format=png&data=QR-ANTEPRIMA" alt="QR" width="${sz}" height="${sz}" style="display:block;margin:0 auto;border-radius:8px;background:#fff;padding:4px" />`
+        const linkHtml = b.mostra_link!==false ? `<div style="margin-top:16px;padding-top:14px;border-top:1px solid rgba(255,255,255,0.15)"><a href="#" style="color:${b.colore_link||'#ffffff'};font-size:14px;font-weight:700;text-decoration:none;font-family:Inter,Arial,sans-serif">${b.testo_link||'🎫 Vedi registrazione e QR Code'}</a></div>` : ''
+        return `<div style="background:${qbg};border-radius:${qrd}px;padding:${qp}px;margin:0 0 20px;text-align:center"><p style="font-size:12px;font-weight:700;color:${qlb};text-transform:uppercase;letter-spacing:.06em;margin:0 0 16px;font-family:Inter,Arial,sans-serif">${b.testo||'IL TUO QR CODE'}</p>${qrImg}<p style="font-size:11px;color:${qcd};margin:8px 0 0;font-family:monospace;letter-spacing:.04em">{{qr_code}}</p>${linkHtml}</div>`
+      }
       if (b.tipo === 'separatore') return `<div style="padding:${b.spazio||24}px 0"><hr style="border:none;border-top:${b.spessore||1}px solid ${b.colore||'#E5E7EB'};margin:0"/></div>`
       if (b.tipo === 'spazio') return `<div style="height:${b.altezza||32}px"></div>`
       if (b.tipo === 'mappa') {
@@ -111,10 +148,16 @@ function blocchiToHtml(blocchi) {
         const mapUrl  = `https://www.google.com/maps/search/?api=1&query=${addrEnc}`
         return `<table role="presentation" width="100%" cellpadding="0" cellspacing="0" border="0" style="margin:0 0 20px;border-radius:10px;overflow:hidden;border:1.5px solid #E5E7EB"><tr><td><a href="${mapUrl}" target="_blank" rel="noopener" style="display:block;text-decoration:none"><table role="presentation" width="100%" cellpadding="0" cellspacing="0" border="0"><tr><td align="center" valign="middle" height="${h}" style="background:#EFF6FF;padding:20px;text-align:center"><div>&#x1F5FA;&#xFE0F;</div><p style="margin:8px 0 0;font-size:14px;color:#1D4ED8;font-weight:700;font-family:Inter,Arial,sans-serif">Clicca per aprire la mappa</p></td></tr><tr><td style="padding:14px 18px;background:#ffffff;border-top:2px solid #DBEAFE"><table role="presentation" width="100%" cellpadding="0" cellspacing="0" border="0"><tr><td width="30" valign="middle" style="font-size:22px;padding-right:12px">&#x1F4CD;</td><td valign="middle"><p style="margin:0 0 2px;font-size:14px;font-weight:700;color:#0A0A0A;font-family:Inter,Arial,sans-serif">${b.testo||'Come raggiungerci'}</p><p style="margin:0;font-size:12px;color:#374151;font-family:Inter,Arial,sans-serif">${addr}</p></td><td width="100" align="right" valign="middle"><span style="font-size:11px;font-weight:700;color:#003DA5;font-family:Inter,Arial,sans-serif;border:1.5px solid #BFDBFE;padding:5px 10px;border-radius:6px;white-space:nowrap">Apri Maps &#8594;</span></td></tr></table></td></tr></table></a></td></tr></table>`
       }
+      if (b.tipo === 'link_registrazione') {
+        const lbg=b.colore||'#003DA5', ltx=b.testocolore||'#ffffff', lr=b.radius||10
+        return `<table width="100%" cellpadding="0" cellspacing="0" border="0" style="margin:0 0 20px"><tr><td align="center"><table cellpadding="0" cellspacing="0" border="0"><tr><td align="center" bgcolor="${lbg}" style="background:${lbg};border-radius:${lr}px;padding:16px 40px"><a href="{{link_iscrizione}}" style="color:${ltx};text-decoration:none;font-family:Inter,Arial,sans-serif;font-size:${b.size||15}px;font-weight:800;display:block">${b.testo||'🎫 Vedi il tuo biglietto e QR Code'}</a></td></tr></table></td></tr></table>`
+      }
       if (b.tipo === 'posto_display') {
-        const posto = '{{numero_posto}}'
+        const nome  = vars ? ((vars['{{nome}}']||'') + ' ' + (vars['{{cognome}}']||'')).trim() : 'Marco Bianchi'
+        const posto = vars?.['{{numero_posto}}'] || '{{numero_posto}}'
         const label = b.testo || 'Il tuo posto'
-        return `<table width="100%" cellpadding="0" cellspacing="0" border="0" style="margin-bottom:16px"><tr><td align="center" bgcolor="#003DA5" style="background:#003DA5;border-radius:12px;padding:28px 24px;text-align:center"><p style="margin:0 0 8px;font-size:12px;font-weight:700;color:rgba(255,255,255,0.75);text-transform:uppercase;letter-spacing:.08em;font-family:Inter,Arial,sans-serif">${label}</p><p style="margin:0;font-size:28px;font-weight:900;color:#ffffff;font-family:Inter,Arial,sans-serif;line-height:1.2;word-break:break-word">${posto}</p></td></tr></table>`
+        const dataUri = buildTicketSvgUri(nome, posto)
+        return `<table width="100%" cellpadding="0" cellspacing="0" border="0" style="margin:0 0 20px;max-width:520px;margin-left:auto;margin-right:auto"><tr><td align="center" style="padding:0"><img src="${dataUri}" alt="Posto: ${posto}" width="520" style="display:block;width:100%;max-width:520px;height:auto;border:0" /></td></tr></table>`
       }
       return ''
     } catch(e) { console.error('blocco error', b?.tipo, e); return '' }
@@ -305,8 +348,21 @@ function BlockProps({ block, onChange }) {
       {numField('Radius','radius',10,'px',0,24)}
     </>
     case 'qr': return <>
-      <div style={{ marginBottom:'8px' }}><label style={lbl}>Testo sopra</label><input value={block.testo||''} onChange={e=>set('testo',e.target.value)} style={inp}/></div>
-      {numField('Dimensione QR','size',160,'px',80,240)}
+      <div style={{marginBottom:'8px'}}><label style={lbl}>Label sopra QR</label><input value={block.testo||''} onChange={e=>set('testo',e.target.value)} style={inp} placeholder="IL TUO QR CODE"/></div>
+      {numField('Dimensione QR','size',180,'px',80,280)}
+      <div style={{display:'flex',gap:'8px',marginBottom:'8px'}}>{colorField('Sfondo box','bg','#003DA5')}{colorField('Testo posto','colore_testo','#ffffff')}</div>
+      <div style={{display:'flex',gap:'8px',marginBottom:'8px'}}>{colorField('Label','colore_label','rgba(255,255,255,0.7)')}{colorField('Codice','colore_codice','rgba(255,255,255,0.5)')}</div>
+      <div style={{display:'flex',gap:'8px',marginBottom:'8px'}}>{numField('Raggio','radius',12,'px',0,24)}{numField('Padding','padding',28,'px',12,48)}</div>
+      <div style={{marginBottom:'8px'}}><label style={lbl}>Mostra link</label><select value={block.mostra_link===false?'no':'si'} onChange={e=>set('mostra_link',e.target.value==='si')} style={inp}><option value="si">S\u00ec</option><option value="no">No</option></select></div>
+      {block.mostra_link!==false && <>
+        <div style={{marginBottom:'8px'}}><label style={lbl}>Testo link</label><input value={block.testo_link||''} onChange={e=>set('testo_link',e.target.value)} style={inp}/></div>
+        {colorField('Colore link','colore_link','#ffffff')}
+      </>}
+    </>
+    case 'link_registrazione': return <>
+      <div style={{marginBottom:'8px'}}><label style={lbl}>Testo pulsante</label><input value={block.testo||''} onChange={e=>set('testo',e.target.value)} style={inp}/></div>
+      <div style={{display:'flex',gap:'8px',marginBottom:'8px'}}>{colorField('Sfondo','colore','#003DA5')}{colorField('Testo','testocolore','#ffffff')}</div>
+      <div style={{display:'flex',gap:'8px'}}>{numField('Font','size',15,'px',12,22)}{numField('Raggio','radius',10,'px',0,24)}</div>
     </>
     case 'separatore': return <>
       {colorField('Colore linea','colore','#E5E7EB')}
@@ -480,8 +536,10 @@ export default function EventEmailTab({ eventoId }) {
 
   async function save() {
     setSaving(true)
-    const bodyHtml = editorMode==='html' ? current.corpo_html : blocchiToHtml(currBlocchi)
+    const bodyHtml = editorMode==='html' ? current.corpo_html : blocchiToHtml(currBlocchi, PREVIEW_DATA_BASE)
     const hc = mergeHeaderConfig(headerConfig)
+
+    // 1. Salva il template selezionato (corpo + header)
     await supabase.from('email_templates')
       .upsert({
         event_id: eventoId, tipo: selected,
@@ -493,6 +551,25 @@ export default function EventEmailTab({ eventoId }) {
         titolo_size: hc.titolo_size||null,
         personalizzato: true, updated_at: new Date().toISOString(),
       }, { onConflict: 'event_id,tipo' })
+
+    // 2. Propaga header_config a TUTTI gli altri tipi dello stesso evento
+    //    L'header è visivamente condiviso — cambiare il colore su uno
+    //    deve riflettersi su tutti i template dell'evento
+    const altriTipi = ['conferma','notifica_admin','reminder','questionario','posto_teatro']
+      .filter(t => t !== selected)
+    for (const tipo of altriTipi) {
+      await supabase.from('email_templates')
+        .update({
+          header_config: hc,
+          logo_url: hc.logo_url||null, header_colore: hc.sfondo||null,
+          header_titolo: hc.titolo||null, logo_altezza: hc.logo_altezza||null,
+          titolo_size: hc.titolo_size||null,
+          updated_at: new Date().toISOString(),
+        })
+        .eq('event_id', eventoId)
+        .eq('tipo', tipo)
+    }
+
     setSaving(false); setSaved(true); setTimeout(()=>setSaved(false), 2500)
   }
 
@@ -535,7 +612,7 @@ export default function EventEmailTab({ eventoId }) {
 
   function getPreviewHtml() {
     try {
-      const bodyHtml = currBlocchi.length ? blocchiToHtml(currBlocchi) : (current.corpo_html||'')
+      const bodyHtml = currBlocchi.length ? blocchiToHtml(currBlocchi, PREVIEW_DATA_BASE) : (current.corpo_html||'')
       return replacePreview(buildFullEmailHtml(bodyHtml, headerConfig), eventoTitolo)
     } catch(e) { console.error('preview error', e); return '<html><body><p style="padding:20px;color:#9CA3AF">Errore anteprima</p></body></html>' }
   }
@@ -704,7 +781,7 @@ export default function EventEmailTab({ eventoId }) {
                 <h3 style={{ margin:'0 0 4px', fontSize:'16px', fontWeight:'800', color:NERO }}>Intestazione email</h3>
                 <p style={{ margin:0, fontSize:'12px', color:'#6B7280' }}>Logo, colore sfondo, titolo e layout dell'header</p>
               </div>
-              <HeaderEditor config={headerConfig} onChange={setHeaderConfig} defaultExpanded={true} heroImageUrl={heroImageUrl}/>
+              <HeaderEditor config={headerConfig} onChange={setHeaderConfig} previewData={PREVIEW_DATA_BASE} defaultExpanded={true} heroImageUrl={heroImageUrl}/>
               <div style={{ marginTop:'16px' }}>
                 <label style={lbl}>Variabili disponibili</label>
                 <div style={{ display:'flex', flexWrap:'wrap', gap:'4px' }}>

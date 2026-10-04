@@ -9,6 +9,7 @@ import RichEditor from './RichEditor'
 import ImageUploader from './ImageUploader'
 import { BLOCK_ICONS, IconPicker, IconDisplay } from './BlockIcons'
 import { supabase, getFreshJwt } from '../../lib/supabase'
+import BlockRendererFull from '../public/BlockRenderer'
 
 const uid = () => Math.random().toString(36).slice(2, 9)
 
@@ -37,6 +38,20 @@ export function newBlock(tipo) {
       { tipo: 'sessione', titolo: 'Titolo intervento', relatori: [{ nome: 'Nome Cognome', ruolo: 'Ruolo / Ente' }] },
       { tipo: 'orario', orario: 'ORE 13.30', testo: 'Chiusura dei lavori' },
     ]}
+    case 'colonne_miste': return { ...base, gap: '40', rapporto: '50-50', inverti_mobile: false, sinistra: { tipo: 'testo', html: '<p>Testo colonna sinistra.</p>' }, destra: { tipo: 'immagine', src: '' } }
+    case 'hero_interno': return { ...base, titolo: 'Titolo sezione', sottotitolo: '', sfondo_colore: '#003DA5', sfondo_immagine: '', overlay_opacita: '60', colore_testo: '#FFFFFF', altezza: '280', cta_testo: '', cta_url: '', allineamento: 'center' }
+    case 'numeri_icona': return { ...base, items: [
+      { num: '+5.000', label: 'Partecipanti', icona: 'users', icona_colore: '#003DA5' },
+      { num: '20+', label: 'Relatori', icona: 'award', icona_colore: '#7C3AED' },
+      { num: '10', label: 'Edizioni', icona: 'star', icona_colore: '#059669' },
+    ], animato: true }
+    case 'sezione_inizio': return { ...base,
+      sfondo: '#F7F8FC', colore_testo: '', padding_v: 'M', larghezza: 'contenuto',
+      radius_top: 'nessuno', radius_bottom: 'nessuno', etichetta: 'Sezione' }
+    case 'sezione_fine':   return { ...base }
+    case 'evento_info':  return { ...base, titolo_box:'', sfondo_box:'#F4F5F7' }
+    case 'evento_cta':   return { ...base, titolo_cta:"Partecipa all'evento", sottotitolo_cta:"Registrazione gratuita. Ricevi il QR Code per l'ingresso.", testo_btn:'Iscriviti ora', sfondo_box:'#EEF4FF' }
+    case 'evento_mappa': return { ...base, titolo:'Come raggiungerci', altezza:'340' }
     default:            return base
   }
 }
@@ -59,6 +74,14 @@ const BLOCK_TYPES = [
   { tipo: 'carosello',   label: 'Carosello foto',  group: 'Social' },
   { tipo: 'social',      label: 'Social & Condividi', group: 'Social' },
   { tipo: 'programma',   label: 'Programma evento', group: 'Contenuto' },
+  { tipo: 'sezione_inizio', label: 'Inizio sezione',      group: 'Layout' },
+  { tipo: 'sezione_fine',   label: 'Fine sezione',         group: 'Layout' },
+  { tipo: 'colonne_miste',  label: 'Colonne miste',        group: 'Layout' },
+  { tipo: 'hero_interno',   label: 'Banner sezione',      group: 'Layout' },
+  { tipo: 'numeri_icona',   label: 'Numeri con icone',    group: 'Contenuto' },
+  { tipo: 'evento_info',    label: 'Info evento (data+luogo)', group: 'Evento' },
+  { tipo: 'evento_cta',     label: 'Call to action iscrizione', group: 'Evento' },
+  { tipo: 'evento_mappa',   label: 'Mappa evento',             group: 'Evento' },
 ]
 
 // ── Editors singoli blocchi ─────────────────────────────────────────
@@ -627,23 +650,397 @@ function SocialEditor({ block, onChange }) {
   )
 }
 
-function Block({ block, index, total, onChange, onDelete, onMoveUp, onMoveDown }) {
+
+
+// ── SezioneInizio Editor ──────────────────────────────────────────
+function SezioneInizioEditor({ block, onChange }) {
+  const SFONDI_PRESET = [
+    { label: 'Grigio chiaro', value: '#F7F8FC' },
+    { label: 'Grigio medio', value: '#F3F4F6' },
+    { label: 'Bianco', value: '#FFFFFF' },
+    { label: 'Blu CNA', value: '#003DA5' },
+    { label: 'Blu scuro', value: '#0F172A' },
+    { label: 'Viola', value: '#5B5FEF' },
+    { label: 'Verde chiaro', value: '#ECFDF5' },
+    { label: 'Giallo chiaro', value: '#FFFBEB' },
+    { label: 'Rosa chiaro', value: '#FDF2F8' },
+    { label: 'Arancio CNA', value: '#E8792F' },
+  ]
+  const PADDING = { 'nessuno': 'Nessuno', 'S': 'Piccolo', 'M': 'Medio', 'L': 'Grande', 'XL': 'Extra grande' }
+  const RADIUS  = { 'nessuno': 'Nessuno', 'S': 'Piccoli (8px)', 'M': 'Medi (16px)', 'L': 'Grandi (24px)' }
+  const isDark = ['#003DA5','#0F172A','#5B5FEF','#0A0A0A','#1E293B'].includes(block.sfondo)
+
+  return (
+    <div style={{ padding:'16px', display:'flex', flexDirection:'column', gap:'16px' }}>
+      {/* Etichetta identificativa */}
+      <div>
+        <label style={lb}>Etichetta (solo nell'editor)</label>
+        <input value={block.etichetta||'Sezione'} onChange={e=>onChange({...block,etichetta:e.target.value})} style={inp} placeholder="Es. Sezione verde" />
+        <p style={{fontSize:'11px',color:'#9CA3AF',margin:'4px 0 0'}}>Aiuta a riconoscere questa sezione nell'editor — non appare nella pagina</p>
+      </div>
+      {/* Colore sfondo */}
+      <div>
+        <label style={lb}>Colore sfondo</label>
+        <div style={{ display:'flex', flexWrap:'wrap', gap:'6px', marginBottom:'10px' }}>
+          {SFONDI_PRESET.map(p=>(
+            <button key={p.value} type="button" onClick={()=>onChange({...block,sfondo:p.value})}
+              style={{
+                padding:'5px 10px', borderRadius:'20px', fontSize:'12px', fontWeight:'600', cursor:'pointer',
+                border: block.sfondo===p.value ? '2px solid #003DA5' : '1px solid #E5E7EB',
+                background: p.value, color: ['#003DA5','#0F172A','#5B5FEF','#E8792F'].includes(p.value) ? '#fff' : '#374151',
+              }}>
+              {p.label}
+            </button>
+          ))}
+        </div>
+        <div style={{display:'flex',gap:'8px',alignItems:'center'}}>
+          <label style={{...lb,marginBottom:0}}>Personalizzato</label>
+          <input type="color" value={block.sfondo||'#F7F8FC'} onChange={e=>onChange({...block,sfondo:e.target.value})} style={{width:'36px',height:'28px',border:'none',cursor:'pointer'}} />
+          <span style={{fontSize:'12px',color:'#9CA3AF'}}>{block.sfondo||'#F7F8FC'}</span>
+        </div>
+      </div>
+      {/* Colore testo */}
+      <div>
+        <label style={lb}>Colore testo</label>
+        <div style={{display:'flex',gap:'8px',flexWrap:'wrap'}}>
+          {[{l:'Auto',v:''},{l:'Bianco',v:'#FFFFFF'},{l:'Nero',v:'#0A0A0A'}].map(o=>(
+            <button key={o.v} type="button" onClick={()=>onChange({...block,colore_testo:o.v})}
+              style={{padding:'6px 14px',borderRadius:'20px',fontSize:'12px',fontWeight:'700',cursor:'pointer',
+                border:(block.colore_testo||'')===o.v?'2px solid #003DA5':'1px solid #E5E7EB',background:'#fff',color:'#374151'}}>
+              {o.l}
+            </button>
+          ))}
+          <div style={{display:'flex',gap:'6px',alignItems:'center'}}>
+            <span style={{fontSize:'12px',color:'#9CA3AF'}}>Personalizzato</span>
+            <input type="color" value={block.colore_testo||'#0A0A0A'} onChange={e=>onChange({...block,colore_testo:e.target.value})} style={{width:'30px',height:'28px',border:'none',cursor:'pointer'}} />
+          </div>
+        </div>
+        {isDark && !block.colore_testo && (
+          <p style={{fontSize:'11px',color:'#D97706',margin:'6px 0 0',display:'flex',alignItems:'center',gap:'4px'}}>
+            ⚠️ Sfondo scuro rilevato — suggerito: Bianco
+          </p>
+        )}
+      </div>
+      {/* Layout */}
+      <div style={{display:'flex',gap:'12px',flexWrap:'wrap'}}>
+        <div style={{flex:1}}>
+          <label style={lb}>Padding verticale</label>
+          <select value={block.padding_v||'M'} onChange={e=>onChange({...block,padding_v:e.target.value})} style={inp}>
+            {Object.entries(PADDING).map(([k,v])=><option key={k} value={k}>{v}</option>)}
+          </select>
+        </div>
+        <div style={{flex:1}}>
+          <label style={lb}>Larghezza contenuto</label>
+          <select value={block.larghezza||'contenuto'} onChange={e=>onChange({...block,larghezza:e.target.value})} style={inp}>
+            <option value="contenuto">Contenuto (800px)</option>
+            <option value="ampia">Ampia (1100px)</option>
+            <option value="piena">Piena (100%)</option>
+          </select>
+        </div>
+      </div>
+      {/* Angoli */}
+      <div style={{display:'flex',gap:'12px',flexWrap:'wrap'}}>
+        <div style={{flex:1}}>
+          <label style={lb}>Angoli superiori</label>
+          <select value={block.radius_top||'nessuno'} onChange={e=>onChange({...block,radius_top:e.target.value})} style={inp}>
+            {Object.entries(RADIUS).map(([k,v])=><option key={k} value={k}>{v}</option>)}
+          </select>
+        </div>
+        <div style={{flex:1}}>
+          <label style={lb}>Angoli inferiori</label>
+          <select value={block.radius_bottom||'nessuno'} onChange={e=>onChange({...block,radius_bottom:e.target.value})} style={inp}>
+            {Object.entries(RADIUS).map(([k,v])=><option key={k} value={k}>{v}</option>)}
+          </select>
+        </div>
+      </div>
+      {/* Preview colore */}
+      <div style={{background:block.sfondo||'#F7F8FC',borderRadius:'12px',padding:'14px 18px',border:'1px solid #E5E7EB'}}>
+        <p style={{margin:0,fontSize:'13px',fontWeight:'700',color:block.colore_testo||(isDark?'#FFFFFF':'#0A0A0A')}}>
+          Anteprima colore sfondo — sezione "{block.etichetta||'Sezione'}"
+        </p>
+        <p style={{margin:'4px 0 0',fontSize:'12px',color:block.colore_testo||(isDark?'rgba(255,255,255,.65)':'#6B7280')}}>
+          I blocchi inseriti tra Inizio e Fine sezione useranno questo sfondo
+        </p>
+      </div>
+    </div>
+  )
+}
+
+// ── Colonne Miste Editor ───────────────────────────────────────────
+function ColonnaEditor({ col, onChange, lato }) {
+  return (
+    <div style={{ display:'flex', flexDirection:'column', gap:'10px' }}>
+      <div>
+        <label style={lb}>Tipo contenuto ({lato})</label>
+        <select value={col.tipo||'testo'} onChange={e=>onChange({...col,tipo:e.target.value})} style={inp}>
+          {['testo','immagine','stats','badge_list','video'].map(t=><option key={t} value={t}>{t}</option>)}
+        </select>
+      </div>
+      {col.tipo==='testo'&&<textarea value={col.html||''} onChange={e=>onChange({...col,html:e.target.value})} style={{...inp,minHeight:'80px',resize:'vertical'}} placeholder="<p>Testo HTML</p>" />}
+      {col.tipo==='immagine'&&<input value={col.src||''} onChange={e=>onChange({...col,src:e.target.value})} style={inp} placeholder="URL immagine" />}
+      {col.tipo==='video'&&<input value={col.url||''} onChange={e=>onChange({...col,url:e.target.value})} style={inp} placeholder="URL YouTube / Vimeo" />}
+      {col.tipo==='stats'&&(
+        <div style={{display:'flex',flexDirection:'column',gap:'6px'}}>
+          {(col.items||[{num:'100+',label:'Voce'}]).map((item,i)=>(
+            <div key={i} style={{display:'flex',gap:'6px'}}>
+              <input value={item.num} onChange={e=>{const it=[...(col.items||[])];it[i]={...it[i],num:e.target.value};onChange({...col,items:it})}} style={{...inp,width:'70px'}} placeholder="100+" />
+              <input value={item.label} onChange={e=>{const it=[...(col.items||[])];it[i]={...it[i],label:e.target.value};onChange({...col,items:it})}} style={{...inp,flex:1}} placeholder="Etichetta" />
+              <button onClick={()=>{const it=(col.items||[]).filter((_,j)=>j!==i);onChange({...col,items:it})}} style={btnDel}>✕</button>
+            </div>
+          ))}
+          <button onClick={()=>onChange({...col,items:[...(col.items||[]),{num:'0',label:''}]})} style={btnAdd}>+ Voce</button>
+        </div>
+      )}
+      {col.tipo==='badge_list'&&(
+        <div style={{display:'flex',flexDirection:'column',gap:'6px'}}>
+          {(col.items||[{testo:'Voce'}]).map((item,i)=>(
+            <div key={i} style={{display:'flex',gap:'6px'}}>
+              <input value={item.testo} onChange={e=>{const it=[...(col.items||[])];it[i]={...it[i],testo:e.target.value};onChange({...col,items:it})}} style={{...inp,flex:1}} placeholder="Voce lista" />
+              <button onClick={()=>{const it=(col.items||[]).filter((_,j)=>j!==i);onChange({...col,items:it})}} style={btnDel}>✕</button>
+            </div>
+          ))}
+          <button onClick={()=>onChange({...col,items:[...(col.items||[]),{testo:''}]})} style={btnAdd}>+ Voce</button>
+        </div>
+      )}
+    </div>
+  )
+}
+
+function ColonneMisteEditor({ block, onChange }) {
+  return (
+    <div style={{padding:'16px',display:'flex',flexDirection:'column',gap:'14px'}}>
+      <div style={{display:'flex',gap:'12px',flexWrap:'wrap'}}>
+        <div style={{flex:1}}>
+          <label style={lb}>Proporzioni</label>
+          <select value={block.rapporto||'50-50'} onChange={e=>onChange({...block,rapporto:e.target.value})} style={inp}>
+            <option value="50-50">50% — 50%</option>
+            <option value="60-40">60% — 40%</option>
+            <option value="40-60">40% — 60%</option>
+            <option value="33-66">33% — 66%</option>
+            <option value="66-33">66% — 33%</option>
+          </select>
+        </div>
+        <div style={{flex:1}}>
+          <label style={lb}>Gap tra colonne</label>
+          <select value={block.gap||'40'} onChange={e=>onChange({...block,gap:e.target.value})} style={inp}>
+            <option value="16">Stretto</option>
+            <option value="32">Medio</option>
+            <option value="48">Largo</option>
+          </select>
+        </div>
+      </div>
+      <label style={{display:'flex',alignItems:'center',gap:'8px',cursor:'pointer',fontSize:'13px',fontWeight:'600',color:'#374151'}}>
+        <input type="checkbox" checked={!!block.inverti_mobile} onChange={e=>onChange({...block,inverti_mobile:e.target.checked})} />
+        Inverti ordine su mobile
+      </label>
+      <div style={{display:'grid',gridTemplateColumns:'1fr 1fr',gap:'16px'}}>
+        <div style={{padding:'12px',background:'#F9FAFB',borderRadius:'12px',border:'1px solid #E5E7EB'}}>
+          <p style={{margin:'0 0 10px',fontSize:'11px',fontWeight:'700',color:'#9CA3AF',textTransform:'uppercase',letterSpacing:'.06em'}}>Sinistra</p>
+          <ColonnaEditor col={block.sinistra||{tipo:'testo',html:''}} onChange={v=>onChange({...block,sinistra:v})} lato="sinistra" />
+        </div>
+        <div style={{padding:'12px',background:'#F9FAFB',borderRadius:'12px',border:'1px solid #E5E7EB'}}>
+          <p style={{margin:'0 0 10px',fontSize:'11px',fontWeight:'700',color:'#9CA3AF',textTransform:'uppercase',letterSpacing:'.06em'}}>Destra</p>
+          <ColonnaEditor col={block.destra||{tipo:'immagine',src:''}} onChange={v=>onChange({...block,destra:v})} lato="destra" />
+        </div>
+      </div>
+    </div>
+  )
+}
+
+// ── HeroInterno Editor ─────────────────────────────────────────────
+function HeroInternoEditor({ block, onChange }) {
+  return (
+    <div style={{padding:'16px',display:'flex',flexDirection:'column',gap:'12px'}}>
+      <div>
+        <label style={lb}>Titolo</label>
+        <input value={block.titolo||''} onChange={e=>onChange({...block,titolo:e.target.value})} style={inp} placeholder="Titolo del banner" />
+      </div>
+      <div>
+        <label style={lb}>Sottotitolo</label>
+        <input value={block.sottotitolo||''} onChange={e=>onChange({...block,sottotitolo:e.target.value})} style={inp} placeholder="Testo descrittivo" />
+      </div>
+      <div style={{display:'flex',gap:'12px',flexWrap:'wrap'}}>
+        <div style={{flex:1}}>
+          <label style={lb}>Sfondo immagine (URL)</label>
+          <input value={block.sfondo_immagine||''} onChange={e=>onChange({...block,sfondo_immagine:e.target.value})} style={inp} placeholder="https://..." />
+        </div>
+        <div style={{display:'flex',gap:'8px',alignItems:'flex-end'}}>
+          <label style={lb}>Colore sfondo</label>
+          <input type="color" value={block.sfondo_colore||'#003DA5'} onChange={e=>onChange({...block,sfondo_colore:e.target.value})} style={{width:'36px',height:'34px',border:'none',cursor:'pointer',borderRadius:'8px'}} />
+        </div>
+      </div>
+      <div style={{display:'flex',gap:'12px',flexWrap:'wrap'}}>
+        <div style={{flex:1}}>
+          <label style={lb}>Overlay opacità ({block.overlay_opacita||60}%)</label>
+          <input type="range" min="0" max="90" step="5" value={block.overlay_opacita||'60'} onChange={e=>onChange({...block,overlay_opacita:e.target.value})} style={{width:'100%'}} />
+        </div>
+        <div style={{flex:1}}>
+          <label style={lb}>Altezza</label>
+          <select value={block.altezza||'280'} onChange={e=>onChange({...block,altezza:e.target.value})} style={inp}>
+            <option value="180">Piccola</option>
+            <option value="280">Media</option>
+            <option value="380">Grande</option>
+            <option value="480">Molto grande</option>
+          </select>
+        </div>
+      </div>
+      <div style={{display:'flex',gap:'12px',flexWrap:'wrap'}}>
+        <div style={{flex:1}}>
+          <label style={lb}>Allineamento</label>
+          <select value={block.allineamento||'center'} onChange={e=>onChange({...block,allineamento:e.target.value})} style={inp}>
+            <option value="left">Sinistra</option>
+            <option value="center">Centro</option>
+          </select>
+        </div>
+        <div style={{display:'flex',gap:'8px',alignItems:'flex-end'}}>
+          <label style={lb}>Colore testo</label>
+          <input type="color" value={block.colore_testo||'#FFFFFF'} onChange={e=>onChange({...block,colore_testo:e.target.value})} style={{width:'36px',height:'34px',border:'none',cursor:'pointer',borderRadius:'8px'}} />
+        </div>
+      </div>
+      <div style={{display:'flex',gap:'12px',flexWrap:'wrap'}}>
+        <div style={{flex:1}}>
+          <label style={lb}>Testo CTA</label>
+          <input value={block.cta_testo||''} onChange={e=>onChange({...block,cta_testo:e.target.value})} style={inp} placeholder="Iscriviti ora" />
+        </div>
+        <div style={{flex:1}}>
+          <label style={lb}>URL CTA</label>
+          <input value={block.cta_url||''} onChange={e=>onChange({...block,cta_url:e.target.value})} style={inp} placeholder="#lp-form" />
+        </div>
+      </div>
+    </div>
+  )
+}
+
+// ── NumeriIcona Editor ─────────────────────────────────────────────
+function NumeriIconaEditor({ block, onChange }) {
+  const ICONE = ['users','award','star','briefcase','chart','trending','shield','zap','heart','globe','check','lightbulb','rocket','target','mic']
+  return (
+    <div style={{padding:'16px',display:'flex',flexDirection:'column',gap:'12px'}}>
+      <label style={{display:'flex',alignItems:'center',gap:'6px',cursor:'pointer',fontSize:'13px',fontWeight:'600',color:'#374151'}}>
+        <input type="checkbox" checked={block.animato!==false} onChange={e=>onChange({...block,animato:e.target.checked})} />
+        Anima contatori
+      </label>
+      {(block.items||[]).map((item,i)=>(
+        <div key={i} style={{display:'flex',gap:'8px',alignItems:'center',flexWrap:'wrap',padding:'10px',background:'#F9FAFB',borderRadius:'12px',border:'1px solid #E5E7EB'}}>
+          <input value={item.num||''} onChange={e=>{const items=[...block.items];items[i]={...items[i],num:e.target.value};onChange({...block,items})}} placeholder="100+" style={{...inp,width:'80px',fontWeight:'700'}} />
+          <input value={item.label||''} onChange={e=>{const items=[...block.items];items[i]={...items[i],label:e.target.value};onChange({...block,items})}} placeholder="Etichetta" style={{...inp,flex:1}} />
+          <select value={item.icona||'star'} onChange={e=>{const items=[...block.items];items[i]={...items[i],icona:e.target.value};onChange({...block,items})}} style={{...inp,width:'100px',padding:'6px 8px'}}>
+            {ICONE.map(ic=><option key={ic} value={ic}>{ic}</option>)}
+          </select>
+          <input type="color" value={item.icona_colore||'#003DA5'} onChange={e=>{const items=[...block.items];items[i]={...items[i],icona_colore:e.target.value};onChange({...block,items})}} style={{width:'30px',height:'30px',border:'none',cursor:'pointer',flexShrink:0}} />
+          <button onClick={()=>onChange({...block,items:block.items.filter((_,j)=>j!==i)})} style={btnDel}>✕</button>
+        </div>
+      ))}
+      <button onClick={()=>onChange({...block,items:[...(block.items||[]),{num:'0',label:'',icona:'star',icona_colore:'#003DA5'}]})} style={btnAdd}>+ Aggiungi</button>
+    </div>
+  )
+}
+
+
+// ── Editor blocchi Evento ──────────────────────────────────────────
+function EventoInfoEditor({ block, onChange }) {
+  return (
+    <div style={{ padding:'16px', display:'flex', flexDirection:'column', gap:'12px' }}>
+      <div style={{ padding:'12px', background:'#EFF6FF', borderRadius:'12px', border:'1px solid #BFDBFE' }}>
+        <p style={{ margin:0, fontSize:'12px', color:'#1E40AF', fontWeight:'600', display:'flex', alignItems:'center', gap:'6px' }}>
+          ℹ️ Questo blocco mostra automaticamente data, orario e luogo dall’evento con i pulsanti "Aggiungi al calendario" e "Mappa".
+          I dati vengono presi dalla tab Info &amp; Date — non serve inserire nulla qui.
+        </p>
+      </div>
+      <div>
+        <label style={lb}>Titolo box (opzionale)</label>
+        <input value={block.titolo_box||''} onChange={e=>onChange({...block,titolo_box:e.target.value})} style={inp} placeholder="Es. Quando e dove" />
+      </div>
+      <div style={{ display:'flex', gap:'8px', alignItems:'center' }}>
+        <label style={{ ...lb, marginBottom:0 }}>Colore sfondo box</label>
+        <input type="color" value={block.sfondo_box||'#F4F5F7'} onChange={e=>onChange({...block,sfondo_box:e.target.value})} style={{ width:'36px', height:'28px', border:'none', cursor:'pointer' }} />
+        <span style={{ fontSize:'12px', color:'#9CA3AF' }}>{block.sfondo_box||'#F4F5F7'}</span>
+      </div>
+    </div>
+  )
+}
+
+function EventoCtaEditor({ block, onChange }) {
+  return (
+    <div style={{ padding:'16px', display:'flex', flexDirection:'column', gap:'12px' }}>
+      <div style={{ padding:'12px', background:'#EFF6FF', borderRadius:'12px', border:'1px solid #BFDBFE' }}>
+        <p style={{ margin:0, fontSize:'12px', color:'#1E40AF', fontWeight:'600' }}>
+          ℹ️ Questo blocco mostra il pulsante di iscrizione che scrolla al form. Si nasconde automaticamente se i posti sono esauriti o l’utente si è già iscritto.
+        </p>
+      </div>
+      <div>
+        <label style={lb}>Titolo</label>
+        <input value={block.titolo_cta||''} onChange={e=>onChange({...block,titolo_cta:e.target.value})} style={inp} placeholder="Partecipa all'evento" />
+      </div>
+      <div>
+        <label style={lb}>Testo descrittivo</label>
+        <input value={block.sottotitolo_cta||''} onChange={e=>onChange({...block,sottotitolo_cta:e.target.value})} style={inp} placeholder="Registrazione gratuita..." />
+      </div>
+      <div>
+        <label style={lb}>Testo pulsante</label>
+        <input value={block.testo_btn||''} onChange={e=>onChange({...block,testo_btn:e.target.value})} style={inp} placeholder="Iscriviti ora" />
+      </div>
+      <div style={{ display:'flex', gap:'8px', alignItems:'center' }}>
+        <label style={{ ...lb, marginBottom:0 }}>Colore sfondo box</label>
+        <input type="color" value={block.sfondo_box||'#EEF4FF'} onChange={e=>onChange({...block,sfondo_box:e.target.value})} style={{ width:'36px', height:'28px', border:'none', cursor:'pointer' }} />
+      </div>
+    </div>
+  )
+}
+
+function EventoMappaEditor({ block, onChange }) {
+  return (
+    <div style={{ padding:'16px', display:'flex', flexDirection:'column', gap:'12px' }}>
+      <div style={{ padding:'12px', background:'#EFF6FF', borderRadius:'12px', border:'1px solid #BFDBFE' }}>
+        <p style={{ margin:0, fontSize:'12px', color:'#1E40AF', fontWeight:'600' }}>
+          ℹ️ Mostra la mappa Google Maps del luogo dell’evento. Il luogo viene preso automaticamente dalla tab Info &amp; Date.
+        </p>
+      </div>
+      <div>
+        <label style={lb}>Titolo sezione</label>
+        <input value={block.titolo||''} onChange={e=>onChange({...block,titolo:e.target.value})} style={inp} placeholder="Come raggiungerci" />
+      </div>
+      <div>
+        <label style={lb}>Altezza mappa</label>
+        <select value={block.altezza||'340'} onChange={e=>onChange({...block,altezza:e.target.value})} style={inp}>
+          <option value="220">Piccola (220px)</option>
+          <option value="340">Media (340px)</option>
+          <option value="480">Grande (480px)</option>
+        </select>
+      </div>
+    </div>
+  )
+}
+
+function Block({ block, index, total, onChange, onDelete, onMoveUp, onMoveDown, onDuplicate }) {
   const [collapsed, setCollapsed] = useState(false)
+  const [preview, setPreview] = useState(false)
   const typeInfo = BLOCK_TYPES.find(t=>t.tipo===block.tipo) || { label:block.tipo }
   const blockIcon = BLOCK_ICONS[block.tipo]
   return (
-    <div style={{ border:'1.5px solid #E5E7EB', borderRadius:'20px', overflow:'hidden', marginBottom:'8px', background:'#fff' }}>
+    <div style={{ border: block.tipo==='sezione_inizio' ? '2px solid #059669' : block.tipo==='sezione_fine' ? '2px dashed #059669' : '1.5px solid #E5E7EB', borderRadius:'20px', overflow:'hidden', marginBottom:'8px', background: block.tipo==='sezione_inizio'||block.tipo==='sezione_fine' ? '#F0FDF4' : '#fff' }}>
       <div style={{ display:'flex', alignItems:'center', gap:'8px', padding:'10px 14px', background:'#FAFAFA', borderBottom:collapsed?'none':'1px solid #E5E7EB', cursor:'pointer' }} onClick={()=>setCollapsed(c=>!c)}>
         <span style={{ display:'flex', alignItems:'center', width:'20px', height:'20px', flexShrink:0 }}>{blockIcon}</span>
         <span style={{flex:1,fontSize:'13px',fontWeight:'700',color:'#374151'}}>{typeInfo.label}
           {block.tipo==='testo'&&block.html&&<span style={{fontSize:'11px',fontWeight:'400',color:'#9CA3AF',marginLeft:'8px'}}>{block.html.replace(/<[^>]+>/g,'').slice(0,50)}…</span>}
           {block.tipo==='titolo'&&block.testo&&<span style={{fontSize:'11px',fontWeight:'400',color:'#9CA3AF',marginLeft:'8px'}}>{block.testo.slice(0,50)}</span>}
+          {block.tipo==='sezione_inizio'&&<span style={{display:'inline-flex',alignItems:'center',gap:'5px',fontSize:'11px',fontWeight:'700',color:'#059669',marginLeft:'8px',background:'#ECFDF5',padding:'2px 8px',borderRadius:'20px',border:'1px solid #BBF7D0'}}>▼ {block.etichetta||'Sezione'}</span>}
+          {block.tipo==='sezione_fine'&&<span style={{display:'inline-flex',alignItems:'center',gap:'5px',fontSize:'11px',fontWeight:'700',color:'#059669',marginLeft:'8px',background:'#ECFDF5',padding:'2px 8px',borderRadius:'20px',border:'1px solid #BBF7D0'}}>▲ Fine sezione</span>}
         </span>
+        <button onClick={e=>{e.stopPropagation();setPreview(p=>!p)}} style={{...btnIcon,color:preview?'#003DA5':'#9CA3AF',borderColor:preview?'#003DA5':'#E5E7EB'}} title="Anteprima">👁️</button>
+        <button onClick={e=>{e.stopPropagation();onDuplicate()}} style={btnIcon} title="Duplica">⧉</button>
         <button onClick={e=>{e.stopPropagation();onMoveUp()}} disabled={index===0} style={{...btnIcon,opacity:index===0?.3:1}} title="Sposta su">↑</button>
         <button onClick={e=>{e.stopPropagation();onMoveDown()}} disabled={index===total-1} style={{...btnIcon,opacity:index===total-1?.3:1}} title="Sposta giù">↓</button>
         <button onClick={e=>{e.stopPropagation();onDelete()}} style={{...btnIcon,color:'#DC2626',borderColor:'#FECACA'}} title="Elimina">✕</button>
         <span style={{fontSize:'12px',color:'#9CA3AF'}}>{collapsed?'▶':'▼'}</span>
       </div>
+      {preview && (
+        <div style={{ borderBottom:'1px solid #E5E7EB', background:'#F9FAFB', padding:'16px', maxHeight:'320px', overflowY:'auto' }}>
+          <div style={{pointerEvents:'none',transform:'scale(0.85)',transformOrigin:'top left'}}>
+            <BlockRendererFull block={block} cp="#003DA5" />
+          </div>
+        </div>
+      )}
       {!collapsed&&(
         <>
           {block.tipo==='testo'       && <RichEditor value={block.html||''} onChange={html=>onChange({...block,html})} minHeight="180px" />}
@@ -662,7 +1059,15 @@ function Block({ block, index, total, onChange, onDelete, onMoveUp, onMoveDown }
           {block.tipo==='carosello'   && <CaroselloEditor block={block} onChange={onChange} />}
           {block.tipo==='social'      && <SocialEditor block={block} onChange={onChange} />}
           {block.tipo==='programma'   && <ProgrammaEditor block={block} onChange={onChange} />}
-          {block.tipo==='separatore'  && <div style={{padding:'16px',color:'#9CA3AF',fontSize:'13px',textAlign:'center'}}>— Linea separatrice —</div>}
+          {block.tipo==='sezione_inizio' && <SezioneInizioEditor block={block} onChange={onChange} />}
+          {block.tipo==='sezione_fine'   && <div style={{padding:'16px',color:'#9CA3AF',fontSize:'13px',textAlign:'center'}}>└─ Fine sezione ─┘</div>}
+          {block.tipo==='colonne_miste' && <ColonneMisteEditor block={block} onChange={onChange} />}
+          {block.tipo==='hero_interno' && <HeroInternoEditor block={block} onChange={onChange} />}
+          {block.tipo==='numeri_icona' && <NumeriIconaEditor block={block} onChange={onChange} />}
+          {block.tipo==='evento_info'  && <EventoInfoEditor  block={block} onChange={onChange} />}
+              {block.tipo==='evento_cta'   && <EventoCtaEditor   block={block} onChange={onChange} />}
+              {block.tipo==='evento_mappa' && <EventoMappaEditor block={block} onChange={onChange} />}
+              {block.tipo==='separatore'  && <div style={{padding:'16px',color:'#9CA3AF',fontSize:'13px',textAlign:'center'}}>— Linea separatrice —</div>}
         </>
       )}
     </div>
@@ -678,6 +1083,11 @@ export default function BlockEditor({ blocks = [], onChange }) {
   function updateBlock(i, block) { const next=[...blocks]; next[i]=block; onChange(next) }
   function deleteBlock(i) { onChange(blocks.filter((_,j)=>j!==i)) }
   function moveBlock(i, dir) { const next=[...blocks]; const j=i+dir; if(j<0||j>=next.length)return; [next[i],next[j]]=[next[j],next[i]]; onChange(next) }
+  function duplicateBlock(i) {
+    const cloned = JSON.parse(JSON.stringify(blocks[i]))
+    cloned.id = Math.random().toString(36).slice(2,9)
+    const next = [...blocks]; next.splice(i+1, 0, cloned); onChange(next)
+  }
 
   return (
     <div>
@@ -690,7 +1100,8 @@ export default function BlockEditor({ blocks = [], onChange }) {
       {blocks.map((block,i)=>(
         <Block key={block.id} block={block} index={i} total={blocks.length}
           onChange={b=>updateBlock(i,b)} onDelete={()=>deleteBlock(i)}
-          onMoveUp={()=>moveBlock(i,-1)} onMoveDown={()=>moveBlock(i,1)} />
+          onMoveUp={()=>moveBlock(i,-1)} onMoveDown={()=>moveBlock(i,1)}
+          onDuplicate={()=>duplicateBlock(i)} />
       ))}
       <div style={{position:'relative',marginTop:'4px'}}>
         <button type="button" onClick={()=>setShowAddMenu(o=>!o)} style={{

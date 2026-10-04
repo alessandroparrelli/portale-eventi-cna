@@ -6,6 +6,7 @@ import { temaConDefault } from '../../components/editor/AspettoTab'
 import SocialLinks from '../../components/SocialLinks'
 import { useSocial } from '../../hooks/useSocial'
 import BlockRenderer, { Animate } from '../../components/public/BlockRenderer'
+import ContenutoBlocks from '../../components/public/ContenutoBlocks'
 
 const LOGO_URL = 'https://raw.githubusercontent.com/alessandroparrelli/fileappoggio/main/NUOVO-LOGO-CNA-ROMA-SOLO-ROMA.png'
 
@@ -225,6 +226,7 @@ function FormContatti({ lp, tema }) {
 const lbSt = { display:'block', fontSize:'13px', fontWeight:'600', color:'#374151', marginBottom:'6px' }
 const iSt  = { width:'100%', boxSizing:'border-box', padding:'11px 14px', border:'1px solid #E5E7EB', borderRadius:'20px', fontSize:'15px', fontFamily:'Inter,sans-serif', outline:'none', color:'#0A0A0A' }
 
+
 // ── Pagina pubblica ───────────────────────────────────────────────
 export default function LandingPagePublic() {
   const { slug } = useParams()
@@ -287,8 +289,10 @@ export default function LandingPagePublic() {
   const titolo2Grassetto = !!lh.titolo2_grassetto
   const hasContenuto = lp.contenuto&&lp.contenuto.length>0
 
+  const _pgMxW = {L:'1280px',M:'1080px',S:'860px'}[tema.larghezza_pagina||'auto']
+  const _pgStyle = _pgMxW ? {maxWidth:_pgMxW,margin:'0 auto',boxShadow:'0 0 60px rgba(0,0,0,0.12)'} : {}
   return (
-    <div style={{fontFamily:'Inter,sans-serif',background:tema.sfondo_pagina||'#fff',minHeight:'100vh',position:'relative'}}>
+    <div style={{fontFamily:'Inter,sans-serif',background:tema.sfondo_pagina||'#fff',minHeight:'100vh',position:'relative',..._pgStyle}}>
       <PatternOverlay tema={tema} />
       <style>{RICH_CSS}{`
         @keyframes spin{from{transform:rotate(0)}to{transform:rotate(360deg)}}
@@ -318,7 +322,7 @@ export default function LandingPagePublic() {
           .lp-hero-wrap { padding: 40px 16px !important; }
 
           /* Contenuto blocchi */
-          .lp-block-wrap { padding: 32px 16px !important; }
+          .lp-block-wrap { width: 100% !important; padding-top: 24px !important; }
 
           /* Stats: 2 colonne su mobile */
           .lp-stats { flex-wrap: wrap !important; gap: 16px !important; }
@@ -338,6 +342,9 @@ export default function LandingPagePublic() {
 
           /* Bottone CTA */
           .lp-cta-btn { width: 100% !important; text-align: center !important; box-sizing: border-box !important; }
+
+          /* Colonne miste: singola colonna su mobile */
+          .lp-colonne-miste { grid-template-columns: 1fr !important; }
 
           /* Titoli blocco contenuto */
           .lp-section-title { font-size: clamp(20px, 5.5vw, 32px) !important; }
@@ -383,12 +390,10 @@ export default function LandingPagePublic() {
         </div>
       </div>
 
-      {/* CONTENUTO */}
+      {/* CONTENUTO — full width, il padding orizzontale è gestito da ContenutoBlocks */}
       {hasContenuto&&(
-        <div className="lp-block-wrap" style={{maxWidth:'800px',margin:'0 auto',padding:'clamp(32px,6vw,64px) clamp(16px,4vw,40px)'}}>
-          {lp.contenuto.map((block,i)=>(
-            <BlockRenderer key={block.id||i} block={block} cp={cp} />
-          ))}
+        <div className="lp-block-wrap" style={{width:'100%',padding:'clamp(32px,6vw,48px) 0 0'}}>
+          <ContenutoBlocks blocks={lp.contenuto} cp={cp} />
         </div>
       )}
 

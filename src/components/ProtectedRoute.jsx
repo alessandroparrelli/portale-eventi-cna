@@ -1,10 +1,13 @@
-import { Navigate } from 'react-router-dom'
+import { Navigate, useLocation } from 'react-router-dom'
 import { useAuth } from '../hooks/useAuth'
+import { useRole } from '../hooks/useRole'
 
 export default function ProtectedRoute({ children }) {
-  const { user, loading } = useAuth()
+  const { user, loading: authLoading } = useAuth()
+  const { ruolo, loading: roleLoading } = useRole()
+  const location = useLocation()
 
-  if (loading) {
+  if (authLoading || roleLoading) {
     return (
       <div style={{
         minHeight: '100vh',
@@ -20,7 +23,7 @@ export default function ProtectedRoute({ children }) {
             alt="CNA Roma"
             style={{ height: '48px', marginBottom: '16px', opacity: 0.6 }}
           />
-          <p style={{ color: '#6B7280', fontSize: '14px', fontWeight: '500' }}>Caricamento…</p>
+          <p style={{ color: '#6B7280', fontSize: '14px', fontWeight: '500' }}>Caricamento...</p>
         </div>
       </div>
     )
@@ -28,6 +31,13 @@ export default function ProtectedRoute({ children }) {
 
   if (!user) {
     return <Navigate to="/login" replace />
+  }
+
+  // Registratori su /admin -> redirect HARD a /admin/checkin (bypass React Router)
+  if (ruolo === 'registratore' &&
+      (location.pathname === '/admin' || location.pathname === '/admin/')) {
+    window.location.replace('/admin/checkin')
+    return null
   }
 
   return children

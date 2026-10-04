@@ -119,45 +119,64 @@ function Biglietto({ onClose, titoloEvento, nome, cognome, ragioneSociale, email
   )
 }
 
-/* ── ResultBanner: mostra il biglietto dopo scansione QR ── */
-function ResultBanner({ result, onClose, titoloEvento }) {
+/* ── ResultBanner: modal dark uniforme per QR e lista iscritti ── */
+function ResultBanner({ result, onClose }) {
   if (!result) return null
   const ok       = result.ok
   const double   = result.error === 'gia_presente'
   const notFound = result.error === 'non_trovato'
 
-  const statusColor = notFound ? '#ef4444' : ok ? '#16A34A' : '#b45309'
-  const statusBg    = notFound ? 'rgba(239,68,68,.12)' : ok ? 'rgba(22,163,74,.12)' : 'rgba(180,83,9,.12)'
+  const headerBg    = notFound ? '#7F1D1D' : ok ? '#14532D' : '#78350F'
+  const accentColor = notFound ? '#FCA5A5' : ok ? '#86EFAC' : '#FCD34D'
+  const statusLabel = notFound ? 'QR non trovato' : ok ? 'Check-in confermato' : 'Già registrato'
   const statusIcon  = notFound
-    ? <XCircle size={20} color={statusColor} />
+    ? <XCircle size={28} color={accentColor} />
     : ok
-    ? <CheckCircle2 size={20} color={statusColor} />
-    : <AlertTriangle size={20} color={statusColor} />
-  const statusLabel = notFound ? '✗ QR non trovato' : ok ? '✓ Check-in confermato' : '⚠ Già registrato'
-  const extraInfo   = double && result.checkin_at
-    ? `Già registrato alle ${new Date(result.checkin_at).toLocaleTimeString('it-IT',{hour:'2-digit',minute:'2-digit'})}`
-    : notFound ? 'Nessun iscritto trovato con questo QR.' : null
-
-  const [nome, cognome] = result.nome ? result.nome.split(' ') : [null, null]
+    ? <CheckCircle2 size={28} color={accentColor} />
+    : <AlertTriangle size={28} color={accentColor} />
+  const oraGiaPresente = double && result.checkin_at
+    ? new Date(result.checkin_at).toLocaleTimeString('it-IT',{hour:'2-digit',minute:'2-digit'})
+    : null
 
   return (
-    <div style={{ marginBottom:14 }}>
-      <div style={{ display:'flex', justifyContent:'flex-end', marginBottom:'10px' }}>
-        <CloseBtn onClick={onClose} />
+    <div
+      style={{ position:'fixed', inset:0, background:'rgba(0,0,0,.75)', display:'flex', alignItems:'center', justifyContent:'center', zIndex:9998, padding:'20px' }}
+      onClick={onClose}
+    >
+      <div
+        onClick={e => e.stopPropagation()}
+        style={{ width:'100%', maxWidth:'420px', background:'#111827', borderRadius:'20px', overflow:'hidden', boxShadow:'0 24px 64px rgba(0,0,0,.6)', animation:'fadeInUp .2s ease' }}
+      >
+        <div style={{ background:headerBg, padding:'18px 22px', display:'flex', alignItems:'center', justifyContent:'space-between' }}>
+          <div style={{ display:'flex', alignItems:'center', gap:'10px' }}>
+            {statusIcon}
+            <span style={{ color:accentColor, fontSize:'16px', fontWeight:'800' }}>{statusLabel}</span>
+          </div>
+          <button onClick={onClose} style={{ background:'rgba(255,255,255,.15)', border:'none', borderRadius:'50%', width:'30px', height:'30px', cursor:'pointer', display:'flex', alignItems:'center', justifyContent:'center', color:'#fff' }}>
+            <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round"><line x1="18" y1="6" x2="6" y2="18"/><line x1="6" y1="6" x2="18" y2="18"/></svg>
+          </button>
+        </div>
+        <div style={{ padding:'24px 22px', display:'flex', flexDirection:'column', gap:'14px' }}>
+          {result.nome && (
+            <div>
+              <div style={{ fontSize:'11px', fontWeight:'700', color:'#6B7280', letterSpacing:'.08em', textTransform:'uppercase', marginBottom:'4px' }}>Partecipante</div>
+              <div style={{ fontSize:'24px', fontWeight:'800', color:'#F9FAFB', lineHeight:1.2 }}>{result.nome}</div>
+              {result.ragione_sociale && <div style={{ fontSize:'13px', color:'#9CA3AF', marginTop:'3px' }}>{result.ragione_sociale}</div>}
+            </div>
+          )}
+          {result.numero_posto && (
+            <div style={{ background:'#1F2937', borderRadius:'12px', padding:'14px 18px' }}>
+              <div style={{ fontSize:'11px', fontWeight:'700', color:'#6B7280', letterSpacing:'.08em', textTransform:'uppercase', marginBottom:'5px' }}>Posto assegnato</div>
+              <div style={{ fontSize:'20px', fontWeight:'800', color:'#60A5FA' }}>{result.numero_posto}</div>
+            </div>
+          )}
+          {notFound && <div style={{ color:'#9CA3AF', fontSize:'14px' }}>Nessun iscritto trovato con questo QR.</div>}
+          {oraGiaPresente && <div style={{ color:'#FCD34D', fontSize:'14px' }}>Già registrato alle {oraGiaPresente}.</div>}
+          <button onClick={onClose} style={{ width:'100%', padding:'14px', background:'#1F2937', color:'#9CA3AF', border:'none', borderRadius:'12px', fontSize:'15px', fontWeight:'600', cursor:'pointer', marginTop:'4px' }}>
+            Chiudi
+          </button>
+        </div>
       </div>
-      <Biglietto
-        onClose={onClose}
-        titoloEvento={titoloEvento}
-        nome={nome}
-        cognome={cognome}
-        ragioneSociale={result.ragione_sociale}
-        numeroPosto={result.numero_posto}
-        statusIcon={statusIcon}
-        statusColor={statusColor}
-        statusBg={statusBg}
-        statusLabel={statusLabel}
-        extraInfo={extraInfo}
-      />
     </div>
   )
 }
@@ -176,6 +195,7 @@ export default function CheckinPage() {
   const [scanning,       setScanning]      = useState(false)
   const [manualModal,    setManualModal]   = useState(false)
   const [walkinModal,    setWalkinModal]   = useState(false)
+  const [confirmAnnulla, setConfirmAnnulla] = useState(null)
   const [listaModal,     setListaModal]    = useState(false)
   const [result,         setResult]        = useState(null)
   const [manualQr,       setManualQr]      = useState('')
@@ -188,21 +208,28 @@ export default function CheckinPage() {
   const [processing,     setProcessing]    = useState(false)
   const [iscritti,       setIscritti]      = useState([])
   const [searchLista,    setSearchLista]   = useState('')
+  const [filterLista,    setFilterLista]   = useState('tutti') // 'tutti' | 'presenti' | 'attesa'
   const [loadingLista,   setLoadingLista]  = useState(false)
   const [checkingId,     setCheckingId]    = useState(null)
   const [ticketReg,      setTicketReg]     = useState(null)
   const html5QrRef = useRef(null)
   const resultTimerRef = useRef(null)
-  const { canManage } = useRole()
+  const { canManage, ruolo } = useRole()
   const canWrite = canManage('checkin')
 
   useEffect(() => {
-    supabase.from('events').select('id,titolo,stato')
-      .eq('stato', 'pubblicato').order('data_inizio', { ascending: false })
-      .then(({ data }) => setEventi(data || []))
+    if (ruolo === 'registratore') {
+      supabase.rpc('get_eventi_accessibili').then(({ data }) =>
+        setEventi((data || []).filter(e => e.stato === 'pubblicato'))
+      )
+    } else {
+      supabase.from('events').select('id,titolo,stato')
+        .eq('stato', 'pubblicato').order('data_inizio', { ascending: false })
+        .then(({ data }) => setEventi(data || []))
+    }
     supabase.from('mestieri').select('id,nome').eq('attivo', true).order('ordine')
       .then(({ data }) => setMestieri(data || []))
-  }, [])
+  }, [ruolo])
 
   useEffect(() => {
     if (selectedEvento) loadPresenti()
@@ -212,7 +239,7 @@ export default function CheckinPage() {
   useEffect(() => {
     if (result) {
       clearTimeout(resultTimerRef.current)
-      resultTimerRef.current = setTimeout(() => setResult(null), 6000)
+      resultTimerRef.current = setTimeout(() => setResult(null), 3000)
     }
     return () => clearTimeout(resultTimerRef.current)
   }, [result])
@@ -264,26 +291,25 @@ export default function CheckinPage() {
     const reg = ticketReg
     if (!reg) return
     setCheckingId(reg.id)
-    const { error } = await supabase.from('registrations')
-      .update({ presente: true, stato: 'presente', checkin_at: new Date().toISOString() })
-      .eq('id', reg.id)
-    if (!error) {
+    setTicketReg(null)
+    const { data: rpcData, error } = await supabase.rpc('checkin_manuale', { p_registration_id: reg.id })
+    if (!error && rpcData?.ok) {
+      const now = new Date().toISOString()
       setIscritti(prev => prev.map(r => r.id === reg.id
-        ? { ...r, presente: true, stato: 'presente', checkin_at: new Date().toISOString() }
+        ? { ...r, presente: true, stato: 'presente', checkin_at: now }
         : r
       ))
-      setResult({ ok: true, nome: `${reg.nome} ${reg.cognome}`, numero_posto: reg.numero_posto, ragione_sociale: reg.ragione_sociale })
+      setResult({ ok: true, fromTicket: true, nome: `${reg.nome} ${reg.cognome}`, numero_posto: reg.numero_posto, ragione_sociale: reg.ragione_sociale })
       loadPresenti()
     }
     setCheckingId(null)
-    setTicketReg(null)
   }
 
   async function doCheckin(qr, manuale = false) {
     if (!qr.trim()) return
     setProcessing(true)
     const { data, error } = await supabase.rpc('checkin_by_qr', { p_qr_code: qr.trim() })
-    setResult(error ? { ok: false, error: 'non_trovato' } : data)
+    setResult(error ? { ok: false, error: 'non_trovato' } : { ...data, fromTicket: true })
     setProcessing(false)
     if (data?.ok) {
       logAttivita(manuale ? 'checkin_manuale' : 'checkin_qr', { eventoId: selectedEvento, dettagli: { nome: data.nome } })
@@ -349,7 +375,7 @@ export default function CheckinPage() {
     })
     setProcessing(false)
     if (!error && data?.ok) {
-      setResult({ ok: true, nome: `${w.nome} ${w.cognome}` })
+      setResult({ ok: true, fromTicket: true, nome: `${w.nome} ${w.cognome}` })
       setWalkin({ nome: '', cognome: '', email: '', cellulare: '', ragione_sociale: '', partita_iva: '', cap: '', mestiere_id: '' })
       setWalkinModal(false); loadPresenti()
     }
@@ -360,11 +386,14 @@ export default function CheckinPage() {
   const nonPresenti  = totali - presenti.length
 
   const filteredIscritti = (() => {
+    let list = iscritti
+    if (filterLista === 'presenti') list = list.filter(r => r.presente)
+    else if (filterLista === 'attesa') list = list.filter(r => !r.presente)
     const q = searchLista.toLowerCase()
-    if (!q) return iscritti
+    if (!q) return list
     const match = r => r.nome?.toLowerCase().includes(q) || r.cognome?.toLowerCase().includes(q) || r.ragione_sociale?.toLowerCase().includes(q)
-    const gruppiMatch = new Set(iscritti.filter(r => match(r) && r.gruppo_id).map(r => r.gruppo_id))
-    return iscritti.filter(r => match(r) || (r.gruppo_id && gruppiMatch.has(r.gruppo_id)))
+    const gruppiMatch = new Set(list.filter(r => match(r) && r.gruppo_id).map(r => r.gruppo_id))
+    return list.filter(r => match(r) || (r.gruppo_id && gruppiMatch.has(r.gruppo_id)))
   })()
 
   return (
@@ -417,7 +446,7 @@ export default function CheckinPage() {
             <div style={{ width:`${pct}%`, height:'100%', background:'linear-gradient(90deg,#059669,#10b981)', borderRadius:'2px', transition:'width .5s' }}/>
           </div>
 
-          <ResultBanner result={result} onClose={() => setResult(null)} titoloEvento={titoloEvento} />
+          <ResultBanner result={result} onClose={() => setResult(null)} />
 
           <div style={s.scanCard}>
             <div id="qr-viewport" style={{ width:'100%', overflow:'hidden', borderRadius:'10px 10px 0 0', minHeight: scanning ? '280px' : '0', backgroundColor: scanning ? '#000' : 'transparent' }} />
@@ -510,7 +539,7 @@ export default function CheckinPage() {
       )}
 
       {listaModal && (
-        <Modal title="Lista iscritti" onClose={() => { setListaModal(false); setSearchLista('') }} width="600px">
+        <Modal title="Lista iscritti" onClose={() => { setListaModal(false); setSearchLista(''); setFilterLista('tutti') }} width="600px">
           <div style={{ display:'flex', flexDirection:'column', gap:'12px', height:'70vh', maxHeight:'600px' }}>
             <div style={{ position:'relative' }}>
               <Search size={16} style={{ position:'absolute', left:'12px', top:'50%', transform:'translateY(-50%)', color:'#9CA3AF' }} />
@@ -519,15 +548,21 @@ export default function CheckinPage() {
                 style={{ width:'100%', padding:'10px 12px 10px 36px', border:'1px solid #E8ECF4', borderRadius:'16px', fontSize:'14px', fontFamily:"'Inter',sans-serif", outline:'none', boxSizing:'border-box' }} />
             </div>
             <div style={{ display:'flex', gap:'8px' }}>
-              {[{ label:'Totale', val:iscritti.length, color:'#5B5FEF' },
-                { label:'Presenti', val:iscritti.filter(r => r.presente).length, color:'#16A34A' },
-                { label:'Attesa', val:iscritti.filter(r => !r.presente).length, color:'#D97706' }
-              ].map(stat => (
-                <div key={stat.label} style={{ flex:1, background:'#F9FAFB', borderRadius:'16px', padding:'8px 10px', textAlign:'center', border:'1px solid #E8ECF4' }}>
-                  <p style={{ fontSize:'18px', fontWeight:'900', color:stat.color, margin:0, letterSpacing:'-.02em' }}>{stat.val}</p>
-                  <p style={{ fontSize:'11px', color:'#6B7280', margin:0, fontWeight:'600' }}>{stat.label}</p>
-                </div>
-              ))}
+              {[{ label:'Totale', val:iscritti.length, color:'#5B5FEF', key:'tutti' },
+                { label:'Presenti', val:iscritti.filter(r => r.presente).length, color:'#16A34A', key:'presenti' },
+                { label:'Attesa', val:iscritti.filter(r => !r.presente).length, color:'#D97706', key:'attesa' }
+              ].map(stat => {
+                const active = filterLista === stat.key
+                return (
+                  <div key={stat.label} onClick={() => setFilterLista(active ? 'tutti' : stat.key)}
+                    style={{ flex:1, background: active ? stat.color : '#F9FAFB', borderRadius:'16px', padding:'8px 10px', textAlign:'center',
+                      border: active ? 'none' : '1px solid #E8ECF4', cursor:'pointer', transition:'all .2s',
+                      boxShadow: active ? `0 2px 10px ${stat.color}40` : 'none' }}>
+                    <p style={{ fontSize:'18px', fontWeight:'900', color: active ? '#fff' : stat.color, margin:0, letterSpacing:'-.02em' }}>{stat.val}</p>
+                    <p style={{ fontSize:'11px', color: active ? 'rgba(255,255,255,.85)' : '#6B7280', margin:0, fontWeight:'600' }}>{stat.label}</p>
+                  </div>
+                )
+              })}
             </div>
             {loadingLista ? (
               <div style={{ flex:1, display:'flex', alignItems:'center', justifyContent:'center' }}>
@@ -543,7 +578,7 @@ export default function CheckinPage() {
                     <div key={r.id} style={{ display:'flex', alignItems:'center', gap:'12px', padding:'10px 14px', borderBottom:'1px solid #F3F4F6', background: r.presente ? '#F0FDF4' : '#fff', transition:'background .15s', cursor: r.presente ? 'default' : 'pointer' }}
                       onClick={() => !r.presente && checkinManuale(r)}>
                       <button
-                        onClick={e => { e.stopPropagation(); r.presente ? annullaCheckin(r) : checkinManuale(r) }}
+                        onClick={e => { e.stopPropagation(); r.presente ? setConfirmAnnulla(r) : checkinManuale(r) }}
                         disabled={isChecking}
                         style={{ width:'34px', height:'34px', borderRadius:'50%', flexShrink:0, cursor:'pointer', border: r.presente ? 'none' : '2px solid #D1D5DB', background: r.presente ? '#16A34A' : '#fff', display:'flex', alignItems:'center', justifyContent:'center', transition:'all .15s' }}>
                         {isChecking
@@ -574,54 +609,119 @@ export default function CheckinPage() {
         </Modal>
       )}
 
-      <style>{`@keyframes spin{from{transform:rotate(0)}to{transform:rotate(360deg)}}`}</style>
+      <style>{`@keyframes spin{from{transform:rotate(0)}to{transform:rotate(360deg)}} @keyframes fadeInUp{from{opacity:0;transform:translateY(16px)}to{opacity:1;transform:translateY(0)}}`}</style>
 
       {ticketReg && (
-        <div style={{ position:'fixed', inset:0, background:'rgba(0,0,0,.8)', display:'flex', alignItems:'center', justifyContent:'center', zIndex:9999, padding:'16px' }}
-          onClick={() => setTicketReg(null)}>
-          <div style={{ width:'100%', maxWidth:'520px' }} onClick={e => e.stopPropagation()}>
-            {/* Riga chiudi — sopra il biglietto, fuori da esso */}
-            <div style={{ display:'flex', justifyContent:'flex-end', alignItems:'center', marginBottom:'10px' }}>
-              <button onClick={() => setTicketReg(null)} style={{
-                display:'flex', alignItems:'center', gap:'8px',
-                background:'#0A0A0A', border:'none', borderRadius:'24px',
-                color:'#fff', padding:'10px 18px', fontSize:'15px', fontWeight:'700',
-                fontFamily:"'Inter',sans-serif", cursor:'pointer',
-                boxShadow:'0 2px 12px rgba(0,0,0,.4)',
-                letterSpacing:'-.01em',
-              }}>
-                <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round"><line x1="18" y1="6" x2="6" y2="18"/><line x1="6" y1="6" x2="18" y2="18"/></svg>
-                Chiudi
+        <div
+          style={{ position:'fixed', inset:0, background:'rgba(0,0,0,.75)', display:'flex', alignItems:'center', justifyContent:'center', zIndex:9999, padding:'20px' }}
+          onClick={() => setTicketReg(null)}
+        >
+          <div
+            onClick={e => e.stopPropagation()}
+            style={{ width:'100%', maxWidth:'420px', background:'#111827', borderRadius:'20px', overflow:'hidden', boxShadow:'0 24px 64px rgba(0,0,0,.6)' }}
+          >
+            <div style={{ background:'#003DA5', padding:'20px 24px', display:'flex', alignItems:'center', justifyContent:'space-between' }}>
+              <span style={{ color:'#fff', fontSize:'13px', fontWeight:'600', letterSpacing:'.06em', textTransform:'uppercase', opacity:.85 }}>
+                Check-in manuale
+              </span>
+              <button
+                onClick={() => setTicketReg(null)}
+                style={{ background:'rgba(255,255,255,.15)', border:'none', borderRadius:'50%', width:'32px', height:'32px', cursor:'pointer', display:'flex', alignItems:'center', justifyContent:'center', color:'#fff' }}
+              >
+                <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round"><line x1="18" y1="6" x2="6" y2="18"/><line x1="6" y1="6" x2="18" y2="18"/></svg>
               </button>
             </div>
-            <Biglietto
-              onClose={null}
-              titoloEvento={titoloEvento}
-              nome={ticketReg.nome}
-              cognome={ticketReg.cognome}
-              ragioneSociale={ticketReg.ragione_sociale}
-              email={ticketReg.email}
-              numeroPosto={ticketReg.numero_posto}
-              statusIcon={null}
-              statusColor={null}
-              statusBg={null}
-              statusLabel={null}
-              bottone={
-                <button onClick={confermaCheckinDaTicket} disabled={!!checkingId} style={{
-                  width:'100%', padding:'16px',
-                  background: checkingId ? '#9CA3AF' : 'linear-gradient(135deg,#16A34A,#15803D)',
-                  color:'#fff', border:'none', borderRadius:'20px',
-                  fontSize:'17px', fontWeight:'800', fontFamily:"'Inter',sans-serif",
+            <div style={{ padding:'28px 24px', display:'flex', flexDirection:'column', gap:'20px' }}>
+              <div>
+                <div style={{ fontSize:'11px', fontWeight:'700', color:'#6B7280', letterSpacing:'.08em', textTransform:'uppercase', marginBottom:'4px' }}>Partecipante</div>
+                <div style={{ fontSize:'28px', fontWeight:'800', color:'#F9FAFB', lineHeight:1.15 }}>
+                  {ticketReg.cognome} {ticketReg.nome}
+                </div>
+                {ticketReg.ragione_sociale && (
+                  <div style={{ fontSize:'14px', color:'#9CA3AF', marginTop:'4px' }}>{ticketReg.ragione_sociale}</div>
+                )}
+                {ticketReg.email && (
+                  <div style={{ fontSize:'13px', color:'#6B7280', marginTop:'2px' }}>{ticketReg.email}</div>
+                )}
+              </div>
+              {ticketReg.numero_posto && (
+                <div style={{ background:'#1F2937', borderRadius:'12px', padding:'16px 20px' }}>
+                  <div style={{ fontSize:'11px', fontWeight:'700', color:'#6B7280', letterSpacing:'.08em', textTransform:'uppercase', marginBottom:'6px' }}>Posto assegnato</div>
+                  <div style={{ fontSize:'22px', fontWeight:'800', color:'#60A5FA' }}>{ticketReg.numero_posto}</div>
+                </div>
+              )}
+              <button
+                onClick={confermaCheckinDaTicket}
+                disabled={!!checkingId}
+                style={{
+                  width:'100%', padding:'18px',
+                  background: checkingId ? '#374151' : '#16A34A',
+                  color: checkingId ? '#9CA3AF' : '#fff',
+                  border:'none', borderRadius:'14px',
+                  fontSize:'18px', fontWeight:'800', fontFamily:"'Inter',sans-serif",
                   cursor: checkingId ? 'default' : 'pointer',
-                  display:'flex', alignItems:'center', justifyContent:'center', gap:10,
-                }}>
-                  {checkingId
-                    ? <><div style={{ width:18, height:18, border:'2px solid #fff', borderTopColor:'transparent', borderRadius:'50%', animation:'spin .6s linear infinite' }} /> Registrazione…</>
-                    : <><svg width="20" height="20" fill="none" stroke="#fff" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round" viewBox="0 0 24 24"><path d="M22 11.08V12a10 10 0 1 1-5.93-9.14"/><polyline points="22 4 12 14.01 9 11.01"/></svg> Conferma check-in</>
-                  }
+                  display:'flex', alignItems:'center', justifyContent:'center', gap:'10px',
+                  transition:'background .15s',
+                }}
+              >
+                {checkingId
+                  ? <><div style={{ width:20, height:20, border:'2px solid #6B7280', borderTopColor:'transparent', borderRadius:'50%', animation:'spin .6s linear infinite' }} /> Registrazione in corso…</>
+                  : <><svg width="22" height="22" fill="none" stroke="#fff" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round" viewBox="0 0 24 24"><path d="M22 11.08V12a10 10 0 1 1-5.93-9.14"/><polyline points="22 4 12 14.01 9 11.01"/></svg> Conferma check-in</>
+                }
+              </button>
+              <button
+                onClick={() => setTicketReg(null)}
+                style={{ background:'none', border:'none', color:'#6B7280', fontSize:'14px', cursor:'pointer', padding:'0', fontFamily:"'Inter',sans-serif" }}
+              >
+                Annulla
+              </button>
+            </div>
+          </div>
+        </div>
+      )}
+
+      {confirmAnnulla && (
+        <div
+          style={{ position:'fixed', inset:0, background:'rgba(0,0,0,.75)', display:'flex', alignItems:'center', justifyContent:'center', zIndex:9999, padding:'20px' }}
+          onClick={() => setConfirmAnnulla(null)}
+        >
+          <div
+            onClick={e => e.stopPropagation()}
+            style={{ width:'100%', maxWidth:'400px', background:'#111827', borderRadius:'20px', overflow:'hidden', boxShadow:'0 24px 64px rgba(0,0,0,.6)', animation:'fadeInUp .2s ease' }}
+          >
+            <div style={{ background:'#78350F', padding:'18px 22px', display:'flex', alignItems:'center', justifyContent:'space-between' }}>
+              <div style={{ display:'flex', alignItems:'center', gap:'10px' }}>
+                <AlertTriangle size={24} color="#FCD34D" />
+                <span style={{ color:'#FCD34D', fontSize:'15px', fontWeight:'800' }}>Annulla presenza</span>
+              </div>
+              <button onClick={() => setConfirmAnnulla(null)} style={{ background:'rgba(255,255,255,.15)', border:'none', borderRadius:'50%', width:'30px', height:'30px', cursor:'pointer', display:'flex', alignItems:'center', justifyContent:'center', color:'#fff' }}>
+                <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round"><line x1="18" y1="6" x2="6" y2="18"/><line x1="6" y1="6" x2="18" y2="18"/></svg>
+              </button>
+            </div>
+            <div style={{ padding:'24px 22px', display:'flex', flexDirection:'column', gap:'16px' }}>
+              <div>
+                <div style={{ fontSize:'11px', fontWeight:'700', color:'#6B7280', letterSpacing:'.08em', textTransform:'uppercase', marginBottom:'4px' }}>Partecipante</div>
+                <div style={{ fontSize:'22px', fontWeight:'800', color:'#F9FAFB', lineHeight:1.2 }}>{confirmAnnulla.cognome} {confirmAnnulla.nome}</div>
+                {confirmAnnulla.numero_posto && (
+                  <div style={{ fontSize:'13px', color:'#60A5FA', marginTop:'4px', fontWeight:'600' }}>{confirmAnnulla.numero_posto}</div>
+                )}
+              </div>
+              <div style={{ fontSize:'14px', color:'#9CA3AF' }}>
+                Questa azione rimuoverà la presenza registrata. Il partecipante tornerà in lista di attesa.
+              </div>
+              <div style={{ display:'flex', flexDirection:'column', gap:'10px', marginTop:'4px' }}>
+                <button
+                  onClick={() => { annullaCheckin(confirmAnnulla); setConfirmAnnulla(null) }}
+                  style={{ width:'100%', padding:'16px', background:'#B45309', color:'#fff', border:'none', borderRadius:'14px', fontSize:'16px', fontWeight:'800', cursor:'pointer', display:'flex', alignItems:'center', justifyContent:'center', gap:'8px' }}
+                >
+                  <svg width="18" height="18" fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round" viewBox="0 0 24 24"><polyline points="3 6 5 6 21 6"/><path d="M19 6l-1 14H6L5 6"/><path d="M10 11v6"/><path d="M14 11v6"/><path d="M9 6V4h6v2"/></svg>
+                  Sì, annulla presenza
                 </button>
-              }
-            />
+                <button onClick={() => setConfirmAnnulla(null)} style={{ width:'100%', padding:'14px', background:'#1F2937', color:'#9CA3AF', border:'none', borderRadius:'12px', fontSize:'15px', fontWeight:'600', cursor:'pointer' }}>
+                  No, mantieni
+                </button>
+              </div>
+            </div>
           </div>
         </div>
       )}

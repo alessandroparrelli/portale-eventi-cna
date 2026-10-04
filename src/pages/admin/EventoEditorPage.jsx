@@ -22,6 +22,16 @@ import { useRole } from '../../hooks/useRole'
 import { logAttivita } from '../../lib/activityLog'
 import RichEditor from '../../components/editor/RichEditor'
 import BlockEditor, { newBlock } from '../../components/editor/BlockEditor'
+
+// Blocchi precaricati per ogni nuovo evento
+function sezioniDefault() {
+  function uid() { return Math.random().toString(36).slice(2,9) }
+  return [
+    { id: uid(), tipo: 'evento_cta',   titolo_cta: "Partecipa all'evento", sottotitolo_cta: "Registrazione gratuita. Ricevi il QR Code per l'ingresso.", testo_btn: 'Iscriviti ora', sfondo_box: '#EEF4FF' },
+    { id: uid(), tipo: 'evento_info',  titolo_box: '', sfondo_box: '#F4F5F7' },
+    { id: uid(), tipo: 'evento_mappa', titolo: 'Come raggiungerci', altezza: '340' },
+  ]
+}
 import ImageUploader from '../../components/editor/ImageUploader'
 import LogoManager from '../../components/editor/LogoManager'
 import AddressSearch from '../../components/editor/AddressSearch'
@@ -40,6 +50,7 @@ import AspettoTab from '../../components/editor/AspettoTab'
 import SessioniTab from '../../components/editor/SessioniTab'
 import QuestionarioTab from '../../components/editor/QuestionarioTab'
 import MailUpExportTab from '../../components/editor/MailUpExportTab'
+import RegistratoriTab from '../../components/editor/RegistratoriTab'
 import TagInput from '../../components/editor/TagInput'
 import EmbedWidget from '../../components/editor/EmbedWidget'
 import GlowTabBar from '../../components/GlowTabBar'
@@ -348,6 +359,263 @@ const se = {
   addBtn:    { background:'none', border:'1px dashed #5B5FEF', borderRadius:'20px', padding:'5px 12px', cursor:'pointer', fontSize:'12px', color:'#5B5FEF', fontFamily:"'Inter',sans-serif", fontWeight:'600' },
 }
 
+// ── CARD OBIETTIVI ────────────────────────────────────────────
+function ProgressRing({ pct, size = 80, stroke = 8, color = '#5B5FEF', bg = '#E8ECF4', label, sub }) {
+  const r = (size - stroke) / 2
+  const circ = 2 * Math.PI * r
+  const filled = Math.min(pct, 100) / 100 * circ
+  return (
+    <div style={{ display:'flex', flexDirection:'column', alignItems:'center', gap:'6px' }}>
+      <svg width={size} height={size} viewBox={`0 0 ${size} ${size}`}>
+        <circle cx={size/2} cy={size/2} r={r} fill="none" stroke={bg} strokeWidth={stroke}/>
+        <circle cx={size/2} cy={size/2} r={r} fill="none" stroke={color} strokeWidth={stroke}
+          strokeDasharray={`${filled} ${circ - filled}`}
+          strokeDashoffset={circ / 4}
+          strokeLinecap="round"
+          style={{ transition:'stroke-dasharray .6s ease' }}
+        />
+        <text x={size/2} y={size/2 + 5} textAnchor="middle"
+          fontSize={size < 70 ? '13' : '15'} fontWeight="800" fill={pct >= 100 ? color : '#111827'}
+          fontFamily="Inter,sans-serif">
+          {pct}%
+        </text>
+      </svg>
+      <div style={{ textAlign:'center' }}>
+        <p style={{ fontSize:'13px', fontWeight:'700', color:'#111827', margin:'0 0 1px' }}>{label}</p>
+        {sub && <p style={{ fontSize:'11px', color:'#9CA3AF', margin:0 }}>{sub}</p>}
+      </div>
+    </div>
+  )
+}
+
+function MiniProgressBar({ value, max, color = '#5B5FEF', label, sublabel }) {
+  const pct = max > 0 ? Math.min(Math.round((value / max) * 100), 100) : 0
+  const barColor = pct >= 100 ? '#22C55E' : pct >= 70 ? color : pct >= 40 ? '#F59E0B' : '#EF4444'
+  return (
+    <div style={{ marginBottom:'14px' }}>
+      <div style={{ display:'flex', justifyContent:'space-between', alignItems:'baseline', marginBottom:'6px' }}>
+        <span style={{ fontSize:'12px', fontWeight:'600', color:'#374151' }}>{label}</span>
+        <span style={{ fontSize:'12px', color:'#6B7280' }}>{sublabel}</span>
+      </div>
+      <div style={{ height:'8px', background:'#F3F4F6', borderRadius:'99px', overflow:'hidden' }}>
+        <div style={{ width:`${pct}%`, height:'100%', borderRadius:'99px', background:barColor, transition:'width .4s ease' }}/>
+      </div>
+      <div style={{ display:'flex', justifyContent:'space-between', marginTop:'4px' }}>
+        <span style={{ fontSize:'11px', color:barColor, fontWeight:'600' }}>{pct}%</span>
+        {max > 0 && <span style={{ fontSize:'11px', color:'#9CA3AF' }}>su {max.toLocaleString('it-IT')}</span>}
+      </div>
+    </div>
+  )
+}
+
+export function EventObiettiviCard({ iscritti, presenti, obiettivoIscritti, obiettivoPresenze, capienzaMax, compact = false }) {
+  const pctIscritti = obiettivoIscritti > 0 ? Math.min(Math.round((iscritti / obiettivoIscritti) * 100), 100) : null
+  const pctPresenti = obiettivoPresenze > 0 ? Math.min(Math.round((presenti / obiettivoPresenze) * 100), 100) : null
+  const fillCapienza = capienzaMax > 0 ? Math.min(Math.round((iscritti / capienzaMax) * 100), 100) : null
+
+  const hasObj = obiettivoIscritti || obiettivoPresenze
+
+  if (!hasObj && !capienzaMax) {
+    return (
+      <div style={{ padding:'20px', background:'#F9FAFB', borderRadius:'16px', textAlign:'center', border:'1px dashed #E8ECF4' }}>
+        <p style={{ fontSize:'13px', color:'#9CA3AF', margin:0 }}>
+          {compact ? 'Nessun obiettivo impostato' : 'Nessun obiettivo impostato. Configurali nel tab "Obiettivi".'}
+        </p>
+      </div>
+    )
+  }
+
+  if (compact) {
+    return (
+      <div style={{ background:'linear-gradient(135deg, #EEF2FF 0%, #E0E7FF 100%)', borderRadius:'12px', padding:'11px 14px', border:'1px solid #C7D2FE' }}>
+        <p style={{ fontSize:'10px', fontWeight:'800', color:'#4338CA', textTransform:'uppercase', letterSpacing:'.07em', margin:'0 0 9px' }}>🎯 Obiettivi</p>
+        {obiettivoIscritti > 0 && (
+          <MiniProgressBar value={iscritti} max={obiettivoIscritti} label="Registrazioni" sublabel={`${iscritti}/${obiettivoIscritti}`}/>
+        )}
+        {obiettivoPresenze > 0 && (
+          <MiniProgressBar value={presenti} max={obiettivoPresenze} color="#7C4DFF" label="Presenze" sublabel={`${presenti}/${obiettivoPresenze}`}/>
+        )}
+        {!obiettivoIscritti && !obiettivoPresenze && capienzaMax > 0 && (
+          <MiniProgressBar value={iscritti} max={capienzaMax} label="Capienza" sublabel={`${iscritti}/${capienzaMax}`}/>
+        )}
+        {!obiettivoIscritti && !obiettivoPresenze && !capienzaMax && (
+          <p style={{ fontSize:'11px', color:'#6366F1', margin:0, fontStyle:'italic' }}>Nessun obiettivo impostato</p>
+        )}
+      </div>
+    )
+  }
+
+  return (
+    <div style={{ background:'#F9FAFB', borderRadius:'16px', padding:'20px', border:'1px solid #E8ECF4' }}>
+      <p style={{ fontSize:'12px', fontWeight:'700', color:'#9CA3AF', textTransform:'uppercase', letterSpacing:'.06em', margin:'0 0 16px' }}>Stato attuale vs obiettivi</p>
+      <div style={{ display:'flex', gap:'24px', flexWrap:'wrap', justifyContent:'center' }}>
+        {obiettivoIscritti > 0 && (
+          <ProgressRing
+            pct={pctIscritti}
+            color="#5B5FEF"
+            label="Registrazioni"
+            sub={`${iscritti} / ${obiettivoIscritti}`}
+          />
+        )}
+        {obiettivoPresenze > 0 && (
+          <ProgressRing
+            pct={pctPresenti}
+            color="#7C4DFF"
+            label="Presenze"
+            sub={`${presenti} / ${obiettivoPresenze}`}
+          />
+        )}
+        {capienzaMax > 0 && (
+          <ProgressRing
+            pct={fillCapienza}
+            color={fillCapienza >= 90 ? '#EF4444' : fillCapienza >= 70 ? '#F59E0B' : '#22C55E'}
+            bg="#E8ECF4"
+            label="Capienza"
+            sub={`${iscritti} / ${capienzaMax}`}
+          />
+        )}
+      </div>
+    </div>
+  )
+}
+
+// ── CARD STATO AVANZAMENTO ─────────────────────────────────────
+const CHECKLIST_ITEMS = [
+  { key:'has_titolo',      label:'Titolo impostato',         check: ev => !!ev.titolo },
+  { key:'has_date',        label:'Date definite',            check: ev => !!ev.data_inizio },
+  { key:'has_luogo',       label:'Luogo inserito',           check: ev => !!ev.luogo },
+  { key:'has_hero',        label:'Immagine hero caricata',   check: ev => !!ev.immagine_hero },
+  { key:'is_published',    label:'Evento pubblicato',        check: ev => ev.stato === 'pubblicato' },
+  { key:'has_iscritti',    label:'Almeno 1 iscritto',        check: (ev, isc) => isc > 0 },
+  { key:'has_presenti',    label:'Check-in effettuati',      check: (ev, isc, pres) => pres > 0 },
+]
+
+export function EventAvanzamentoCard({ event, iscritti = 0, presenti = 0, compact = false }) {
+  const now = new Date()
+  const dataInizio = event.data_inizio ? new Date(event.data_inizio) : null
+  const dataFine   = event.data_fine   ? new Date(event.data_fine)   : null
+
+  // Fase
+  let fase = 'pianificazione'
+  let faseLabel = 'Pianificazione'
+  let faseColor = '#F59E0B'
+  let faseIcon = '📋'
+  if (event.stato === 'archiviato') {
+    fase = 'archiviato'; faseLabel = 'Archiviato'; faseColor = '#9CA3AF'; faseIcon = '📦'
+  } else if (dataFine && now > dataFine) {
+    fase = 'concluso'; faseLabel = 'Concluso'; faseColor = '#6B7280'; faseIcon = '✅'
+  } else if (dataInizio && now >= dataInizio) {
+    fase = 'in_corso'; faseLabel = 'In corso'; faseColor = '#22C55E'; faseIcon = '🟢'
+  } else if (event.stato === 'pubblicato') {
+    fase = 'aperto'; faseLabel = 'Aperto iscrizioni'; faseColor = '#5B5FEF'; faseIcon = '🔵'
+  }
+
+  const checks = CHECKLIST_ITEMS.map(item => ({
+    ...item,
+    done: item.check(event, iscritti, presenti),
+  }))
+  const doneCount = checks.filter(c => c.done).length
+  const pctChecklist = Math.round((doneCount / checks.length) * 100)
+
+  const daysToEvent = dataInizio ? Math.ceil((dataInizio - now) / (1000*60*60*24)) : null
+
+  if (compact) {
+    const avBg = fase === 'in_corso'      ? 'linear-gradient(135deg,#DCFCE7 0%,#D1FAE5 100%)'
+               : fase === 'concluso'      ? 'linear-gradient(135deg,#F3F4F6 0%,#E5E7EB 100%)'
+               : fase === 'archiviato'    ? 'linear-gradient(135deg,#F3F4F6 0%,#E5E7EB 100%)'
+               : fase === 'aperto'        ? 'linear-gradient(135deg,#EDE9FE 0%,#DDD6FE 100%)'
+               :                           'linear-gradient(135deg,#FEF9C3 0%,#FEF08A 100%)'
+    const avBorder = fase === 'in_corso'  ? '#86EFAC'
+               : fase === 'concluso'      ? '#D1D5DB'
+               : fase === 'archiviato'    ? '#D1D5DB'
+               : fase === 'aperto'        ? '#C4B5FD'
+               :                           '#FDE047'
+    const avLabelColor = fase === 'in_corso'  ? '#166534'
+               : fase === 'concluso'      ? '#6B7280'
+               : fase === 'archiviato'    ? '#6B7280'
+               : fase === 'aperto'        ? '#5B21B6'
+               :                           '#854D0E'
+    return (
+      <div style={{ background:avBg, borderRadius:'12px', padding:'11px 14px', border:`1px solid ${avBorder}` }}>
+        <div style={{ display:'flex', alignItems:'center', justifyContent:'space-between', marginBottom:'9px' }}>
+          <p style={{ fontSize:'10px', fontWeight:'800', color:avLabelColor, textTransform:'uppercase', letterSpacing:'.07em', margin:0 }}>📊 Avanzamento</p>
+          <span style={{ fontSize:'11px', fontWeight:'700', color:faseColor, background:'#fff', padding:'2px 9px', borderRadius:'20px', border:`1px solid ${avBorder}`, boxShadow:'0 1px 2px rgba(0,0,0,.06)' }}>
+            {faseIcon} {faseLabel}
+          </span>
+        </div>
+        <div style={{ height:'7px', background:'rgba(0,0,0,.08)', borderRadius:'99px', overflow:'hidden', marginBottom:'6px' }}>
+          <div style={{ width:`${pctChecklist}%`, height:'100%', background: fase==='in_corso'?'#16A34A': fase==='aperto'?'#7C3AED':'#5B5FEF', borderRadius:'99px', transition:'width .4s' }}/>
+        </div>
+        <div style={{ display:'flex', justifyContent:'space-between' }}>
+          <span style={{ fontSize:'11px', color:avLabelColor, fontWeight:'500' }}>{doneCount}/{checks.length} completati</span>
+          {daysToEvent !== null && daysToEvent > 0 && (
+            <span style={{ fontSize:'11px', color:faseColor, fontWeight:'700' }}>tra {daysToEvent}g</span>
+          )}
+          {daysToEvent !== null && daysToEvent <= 0 && fase !== 'concluso' && (
+            <span style={{ fontSize:'11px', color:'#16A34A', fontWeight:'700' }}>Oggi!</span>
+          )}
+        </div>
+      </div>
+    )
+  }
+
+  return (
+    <div>
+      {/* Header fase */}
+      <div style={{ display:'flex', alignItems:'center', justifyContent:'space-between', marginBottom:'20px', flexWrap:'wrap', gap:'12px' }}>
+        <div style={{ display:'flex', alignItems:'center', gap:'10px' }}>
+          <span style={{ fontSize:'24px' }}>{faseIcon}</span>
+          <div>
+            <p style={{ fontSize:'13px', color:'#9CA3AF', margin:'0 0 2px' }}>Fase corrente</p>
+            <p style={{ fontSize:'16px', fontWeight:'800', color:faseColor, margin:0, letterSpacing:'-.02em' }}>{faseLabel}</p>
+          </div>
+        </div>
+        {daysToEvent !== null && daysToEvent > 0 && (
+          <div style={{ textAlign:'right' }}>
+            <p style={{ fontSize:'24px', fontWeight:'900', color:'#5B5FEF', margin:'0 0 2px', letterSpacing:'-.04em' }}>{daysToEvent}</p>
+            <p style={{ fontSize:'11px', color:'#9CA3AF', margin:0 }}>giorni all'evento</p>
+          </div>
+        )}
+        {fase === 'in_corso' && (
+          <div style={{ padding:'6px 14px', background:'#DCFCE7', borderRadius:'20px' }}>
+            <p style={{ fontSize:'12px', fontWeight:'700', color:'#16A34A', margin:0 }}>🟢 Evento in corso</p>
+          </div>
+        )}
+        {fase === 'concluso' && (
+          <div style={{ padding:'6px 14px', background:'#F3F4F6', borderRadius:'20px' }}>
+            <p style={{ fontSize:'12px', fontWeight:'700', color:'#6B7280', margin:0 }}>Evento concluso</p>
+          </div>
+        )}
+      </div>
+
+      {/* Barra completamento setup */}
+      <div style={{ marginBottom:'20px' }}>
+        <div style={{ display:'flex', justifyContent:'space-between', marginBottom:'8px' }}>
+          <span style={{ fontSize:'12px', fontWeight:'600', color:'#374151' }}>Setup completamento</span>
+          <span style={{ fontSize:'12px', color:'#5B5FEF', fontWeight:'700' }}>{pctChecklist}%</span>
+        </div>
+        <div style={{ height:'10px', background:'#F3F4F6', borderRadius:'99px', overflow:'hidden' }}>
+          <div style={{ width:`${pctChecklist}%`, height:'100%', borderRadius:'99px', transition:'width .5s ease',
+            background:`linear-gradient(90deg, #5B5FEF, #7C4DFF)` }}/>
+        </div>
+      </div>
+
+      {/* Checklist */}
+      <div style={{ display:'grid', gridTemplateColumns:'1fr 1fr', gap:'8px' }}>
+        {checks.map(c => (
+          <div key={c.key} style={{ display:'flex', alignItems:'center', gap:'8px', padding:'8px 12px',
+            background: c.done ? '#F0FDF4' : '#FEF3C7',
+            border:`1px solid ${c.done ? '#BBF7D0' : '#FDE68A'}`,
+            borderRadius:'10px' }}>
+            <span style={{ fontSize:'14px', flexShrink:0 }}>{c.done ? '✅' : '⚠️'}</span>
+            <span style={{ fontSize:'12px', fontWeight:'600', color: c.done ? '#15803D' : '#92400E' }}>{c.label}</span>
+          </div>
+        ))}
+      </div>
+    </div>
+  )
+}
+
 // ── PAGINA EDITOR COMPLETO ───────────────────────────────────
 export default function EventoEditorPage() {
   const { id } = useParams()
@@ -366,17 +634,32 @@ export default function EventoEditorPage() {
       certificato_template:'laterale', certificato_config:{},
     colore_primario:'#5B5FEF', colore_sfondo:'#F4F5F7', tema:{},
     layout_hero:{ altezza:'380', overlay_opacita:'55', overlay_colore:'#000000', allineamento:'sinistra', titolo_colore:'#FFFFFF', titolo_dimensione:'clamp(26px,5vw,54px)', titolo_grassetto:true, titolo_maiuscolo:false },
-    sezioni:[], mailup_blocchi:[], email_organizzatore:'', email_mittente:'', email_cc:'', nome_mittente:'',
+    sezioni: sezioniDefault(), mailup_blocchi:[], email_organizzatore:'', email_mittente:'', email_cc:'', nome_mittente:'',
+    obiettivo_iscritti: null, obiettivo_presenze: null,
   })
   const eventRef = useRef(null)   // sempre aggiornato — evita race condition nel save
   useEffect(() => { eventRef.current = event }, [event])
   const [saving, setSaving] = useState(false)
-  const [saved, setSaved] = useState(false)
-  const [activeTab, setActiveTab] = useState('info')
+  const salvaFormFieldsFn = React.useRef(null)
+  const [saved, setSaved]             = useState(false)
+  const [activeTab, setActiveTab]     = useState('info')
+  const [showPreview, setShowPreview] = useState(false)
+  const [previewDevice, setPreviewDevice] = useState('desktop')
+  const [splitWidth, setSplitWidth]   = useState(420)
+  const [previewKey, setPreviewKey]   = useState(0)
   const { canManage } = useRole()
   const canWrite = canManage('eventi')
 
   usePageTitle(event.titolo ? `Modifica — ${event.titolo}` : 'Nuovo evento')
+
+  function startDrag(e) {
+    e.preventDefault()
+    const startX = e.clientX, startW = splitWidth
+    const onMove = ev => setSplitWidth(Math.max(320, Math.min(720, startW + ev.clientX - startX)))
+    const onUp   = () => { document.removeEventListener('mousemove',onMove); document.removeEventListener('mouseup',onUp) }
+    document.addEventListener('mousemove', onMove)
+    document.addEventListener('mouseup', onUp)
+  }
 
 
 
@@ -385,7 +668,11 @@ export default function EventoEditorPage() {
   }, [id])
 
   async function loadEvent() {
-    const { data } = await supabase.from('events').select('*').eq('id', id).single()
+    const [{ data }, { count: countIscritti }, { count: countPresenti }] = await Promise.all([
+      supabase.from('events').select('*').eq('id', id).single(),
+      supabase.from('registrations').select('*', { count:'exact', head:true }).eq('event_id', id),
+      supabase.from('registrations').select('*', { count:'exact', head:true }).eq('event_id', id).eq('presente', true),
+    ])
     if (data) {
       let sezioni = data.sezioni || []
       // Migrazione automatica: se c'è descrizione_html ma nessun blocco, crea il primo blocco testo
@@ -415,6 +702,8 @@ export default function EventoEditorPage() {
           mailup_blocchi: data.mailup_blocchi || [],
         tags: data.tags || [],
           nome_mittente: data.nome_mittente || '',
+          _iscritti: countIscritti || 0,
+          _presenti: countPresenti || 0,
         }
         eventRef.current = next
         return next
@@ -456,6 +745,8 @@ export default function EventoEditorPage() {
       data_fine: toUTCISOStr(ev.data_fine), luogo:ev.luogo||null,
         modalita:ev.modalita||'presenza', link_riunione:ev.link_riunione||null,
         teatro_abilitato:ev.teatro_abilitato||false, teatro_capienza:ev.teatro_capienza||null, teatro_note:ev.teatro_note||null,
+      obiettivo_iscritti:ev.obiettivo_iscritti||null,
+      obiettivo_presenze:ev.obiettivo_presenze||null,
         form_note:ev.form_note||null,
         certificato_abilitato:ev.certificato_abilitato||false, certificato_titolo:ev.certificato_titolo||null,
         certificato_invio_auto:ev.certificato_invio_auto!==false, certificato_colore:ev.certificato_colore||'#5B5FEF',
@@ -488,6 +779,8 @@ export default function EventoEditorPage() {
       teatro_capienza:ev.teatro_capienza||null,
       teatro_note:ev.teatro_note||null,
       form_note:ev.form_note||null,
+      obiettivo_iscritti:ev.obiettivo_iscritti||null,
+      obiettivo_presenze:ev.obiettivo_presenze||null,
     }
     if (isNew) {
       const { data } = await supabase.from('events').insert(payload).select().single()
@@ -522,8 +815,12 @@ export default function EventoEditorPage() {
         }
       }
       logAttivita('evento_modificato', { eventoId: id, eventoTitolo: payload.titolo })
+      // Salva anche i campi form se la tab iscrizioni è montata
+      if (salvaFormFieldsFn.current) {
+        await salvaFormFieldsFn.current()
+      }
     }
-    setSaving(false); setSaved(true); setTimeout(()=>setSaved(false),2500)
+    setSaving(false); setSaved(true); setPreviewKey(k => k + 1); setTimeout(()=>setSaved(false),2500)
     // Ripristina la posizione di scroll dopo il salvataggio
     if (contentRef.current) contentRef.current.scrollTop = scrollTop
   }
@@ -584,6 +881,7 @@ export default function EventoEditorPage() {
 
   const TABS = [
     { id:'info',         label:'Info & Date',    icon:'📋', color:'blue'   },
+    { id:'obiettivi',    label:'Obiettivi',      icon:'🎯', color:'green'  },
     { id:'hero',         label:'Hero',           icon:'🖼',  color:'cyan'   },
     { id:'contenuto',    label:'Contenuto',      icon:'📝', color:'green'  },
     { id:'aspetto',      label:'Aspetto',        icon:'🎨', color:'violet' },
@@ -594,6 +892,7 @@ export default function EventoEditorPage() {
     { id:'email',        label:'Email',          icon:'✉️', color:'rose'   },
     { id:'mailup',       label:'MailUp',         icon:'📧', color:'teal'   },
     { id:'embed',        label:'Embed',          icon:'🔗', color:'indigo' },
+    { id:'registratori', label:'Registratori',    icon:'👥', color:'blue'   },
     { id:'preview',      label:'Preview',        icon:'👁',  color:'amber'  },
   ]
 
@@ -632,8 +931,23 @@ export default function EventoEditorPage() {
         <GlowTabBar active={activeTab} onChange={setActiveTab} tabs={TABS} />
       </div>
 
-      {/* CONTENT */}
-      <div ref={contentRef} style={p.content}>
+      {/* Toolbar anteprima */}
+      <div style={{ background:'#fff', borderBottom:'1px solid #E8ECF4', padding:'0 20px',
+        display:'flex', alignItems:'center', gap:'8px', height:'38px', flexShrink:0, justifyContent:'flex-end' }}>
+        <span style={{ fontSize:'11px', color:'#9CA3AF' }}>Anteprima live:</span>
+        <button onClick={() => setShowPreview(p => !p)}
+          style={{ padding:'4px 14px', borderRadius:'20px', border:'1px solid #E8ECF4',
+            background: showPreview ? '#5B5FEF' : '#F3F4F6',
+            color: showPreview ? '#fff' : '#374151',
+            fontSize:'12px', fontWeight:'700', cursor:'pointer', fontFamily:"'Outfit',sans-serif" }}>
+          {showPreview ? '✖ Chiudi' : '▶ Apri'}
+        </button>
+      </div>
+
+      {/* Layout split */}
+      <div style={{ flex:1, overflow:'hidden', display:'flex' }}>
+        {/* Pannello editor */}
+        <div ref={contentRef} style={{ ...p.content, width: showPreview ? `${splitWidth}px` : '100%', flexShrink:0, overflow:'auto' }}>
 
         {/* ── INFO ── */}
         {activeTab==='info' && (
@@ -847,6 +1161,66 @@ export default function EventoEditorPage() {
           </div>
         )}
 
+        {/* ── OBIETTIVI ── */}
+        {activeTab==='obiettivi' && (
+          <div style={p.panel}>
+            <h2 style={p.panelTitle}>Obiettivi evento</h2>
+            <p style={{ fontSize:'14px', color:'#6B7280', margin:'-12px 0 24px', lineHeight:1.6 }}>
+              Imposta i target di partecipazione. Le card di avanzamento saranno visibili qui e nella Dashboard.
+            </p>
+
+            {/* CARD 1 — Obiettivi registrazioni & presenze */}
+            <div style={{ background:'#fff', border:'1px solid #E8ECF4', borderRadius:'20px', padding:'24px', marginBottom:'20px', boxShadow:'0 1px 4px rgba(20,20,40,.05)' }}>
+              <div style={{ display:'flex', alignItems:'center', gap:'10px', marginBottom:'20px' }}>
+                <span style={{ fontSize:'20px' }}>🎯</span>
+                <h3 style={{ fontSize:'15px', fontWeight:'800', color:'#111827', margin:0, letterSpacing:'-.02em' }}>Target partecipazione</h3>
+              </div>
+              <div style={{ display:'grid', gridTemplateColumns:'1fr 1fr', gap:'16px', marginBottom:'24px' }}>
+                <Field label="Obiettivo registrazioni">
+                  <Input
+                    type="number"
+                    min="0"
+                    placeholder="Es. 200"
+                    value={event.obiettivo_iscritti||''}
+                    onChange={e => updEvent(p => ({ ...p, obiettivo_iscritti: e.target.value ? parseInt(e.target.value) : null }))}
+                  />
+                </Field>
+                <Field label="Obiettivo presenze">
+                  <Input
+                    type="number"
+                    min="0"
+                    placeholder="Es. 150"
+                    value={event.obiettivo_presenze||''}
+                    onChange={e => updEvent(p => ({ ...p, obiettivo_presenze: e.target.value ? parseInt(e.target.value) : null }))}
+                  />
+                </Field>
+              </div>
+
+              {/* Preview card obiettivi */}
+              <EventObiettiviCard
+                iscritti={event._iscritti||0}
+                presenti={event._presenti||0}
+                obiettivoIscritti={event.obiettivo_iscritti}
+                obiettivoPresenze={event.obiettivo_presenze}
+                capienzaMax={event.capienza_max}
+              />
+            </div>
+
+            {/* CARD 2 — Stato avanzamento */}
+            <div style={{ background:'#fff', border:'1px solid #E8ECF4', borderRadius:'20px', padding:'24px', boxShadow:'0 1px 4px rgba(20,20,40,.05)' }}>
+              <div style={{ display:'flex', alignItems:'center', gap:'10px', marginBottom:'20px' }}>
+                <span style={{ fontSize:'20px' }}>📊</span>
+                <h3 style={{ fontSize:'15px', fontWeight:'800', color:'#111827', margin:0, letterSpacing:'-.02em' }}>Stato avanzamento</h3>
+              </div>
+              <EventAvanzamentoCard
+                event={event}
+                iscritti={event._iscritti||0}
+                presenti={event._presenti||0}
+              />
+            </div>
+          </div>
+        )}
+
         {/* ── HERO ── */}
         {activeTab==='hero' && (
           <div style={p.panel}>
@@ -854,9 +1228,23 @@ export default function EventoEditorPage() {
 
             {/* Logo header */}
             <div style={{ marginBottom:'24px', padding:'16px', background:'#F9FAFB', border:'1px solid #E8ECF4', borderRadius:'20px' }}>
-              <p style={{ fontSize:'12px', fontWeight:'700', color:'#6B7280', textTransform:'uppercase', letterSpacing:'.06em', margin:'0 0 6px' }}>
-                🏷 Logo header
-              </p>
+              {/* Toggle mostra logo */}
+              <div style={{ display:'flex', alignItems:'center', justifyContent:'space-between', marginBottom:'10px' }}>
+                <p style={{ fontSize:'12px', fontWeight:'700', color:'#6B7280', textTransform:'uppercase', letterSpacing:'.06em', margin:0 }}>🏷 Logo header</p>
+                <button
+                  onClick={() => setH('mostra_logo')(event.layout_hero?.mostra_logo === false ? true : false)}
+                  style={{
+                    display:'flex', alignItems:'center', gap:'6px',
+                    padding:'5px 12px', borderRadius:'20px', cursor:'pointer', fontSize:'12px', fontWeight:'700',
+                    fontFamily:"'Inter',sans-serif", transition:'all .15s',
+                    border: event.layout_hero?.mostra_logo === false ? '1px solid #FECACA' : '1px solid #BBF7D0',
+                    background: event.layout_hero?.mostra_logo === false ? '#FEF2F2' : '#F0FDF4',
+                    color: event.layout_hero?.mostra_logo === false ? '#DC2626' : '#16A34A',
+                  }}>
+                  {event.layout_hero?.mostra_logo === false ? '🙈 Logo nascosto' : '👁 Logo visibile'}
+                </button>
+              </div>
+
               <p style={{ fontSize:'12px', color:'#9CA3AF', margin:'0 0 12px', lineHeight:'1.5' }}>
                 Scegli il logo che apparirà nell'header della pagina evento.
               </p>
@@ -936,11 +1324,30 @@ export default function EventoEditorPage() {
             </div>
 
             {/* Controlli layout */}
+            {/* Toggle modalità hero */}
+            <div style={{ marginBottom:'12px', display:'flex', gap:'8px', flexWrap:'wrap' }}>
+              {[
+                { v: false, l: '📐 Altezza fissa', sub: 'Usa lo slider' },
+                { v: true,  l: '📱 Adatta al device', sub: 'Segue le proporzioni' },
+              ].map(({v, l, sub}) => {
+                const att = (event.layout_hero?.hero_adattivo || false) === v
+                return (
+                  <button key={String(v)} type="button" onClick={() => setH('hero_adattivo')(v)}
+                    style={{ flex:'1 1 180px', padding:'10px 14px', border:`1.5px solid ${att?'#5B5FEF':'#E8ECF4'}`,
+                      borderRadius:'16px', background: att?'#EEEFFD':'#fff', cursor:'pointer',
+                      textAlign:'left', fontFamily:"'Outfit',sans-serif" }}>
+                    <p style={{ margin:0, fontSize:'13px', fontWeight:'700', color:att?'#5B5FEF':'#374151' }}>{l}</p>
+                    <p style={{ margin:'2px 0 0', fontSize:'11px', color:att?'#818CF8':'#9CA3AF' }}>{sub}</p>
+                  </button>
+                )
+              })}
+            </div>
             <div style={p.grid3}>
-              <Field label={`Altezza hero: ${event.layout_hero?.altezza||'380'}px`}>
+              <Field label={`Altezza hero: ${event.layout_hero?.altezza||'380'}px`}
+                hint={event.layout_hero?.hero_adattivo ? 'Non usata in modalità adattiva' : ''}>
                 <input type="range" min="200" max="700" step="20"
                   value={event.layout_hero?.altezza||'380'} onChange={e=>setH('altezza')(e.target.value)}
-                  style={{ width:'100%' }}/>
+                  style={{ width:'100%', opacity: event.layout_hero?.hero_adattivo ? 0.4 : 1 }}/>
               </Field>
               <Field label={`Opacità overlay: ${event.layout_hero?.overlay_opacita||'55'}%`}>
                 <input type="range" min="0" max="90" step="5"
@@ -982,11 +1389,33 @@ export default function EventoEditorPage() {
 
             {/* Testi hero */}
             <div style={{ marginTop:'16px', display:'grid', gridTemplateColumns:'1fr', gap:'12px' }}>
-              <Field label="Titolo principale (H1)" hint="Uguale al titolo evento — modificalo dalla tab Info">
-                <div style={{ padding:'10px 14px', background:'#F9FAFB', border:'1px solid #E8ECF4', borderRadius:'16px', fontSize:'14px', color:'#9CA3AF', fontStyle:'italic' }}>
+              <div>
+                <div style={{ display:'flex', alignItems:'center', justifyContent:'space-between', marginBottom:'6px' }}>
+                  <label style={{ fontSize:'12px', fontWeight:'700', color:'#374151' }}>Titolo principale (H1)</label>
+                  <button
+                    onClick={() => setH('mostra_titolo')(event.layout_hero?.mostra_titolo === false ? true : false)}
+                    style={{
+                      display:'flex', alignItems:'center', gap:'6px',
+                      padding:'5px 12px', borderRadius:'20px', cursor:'pointer', fontSize:'12px', fontWeight:'700',
+                      fontFamily:"'Inter',sans-serif", transition:'all .15s',
+                      border: event.layout_hero?.mostra_titolo === false ? '1px solid #FECACA' : '1px solid #BBF7D0',
+                      background: event.layout_hero?.mostra_titolo === false ? '#FEF2F2' : '#F0FDF4',
+                      color: event.layout_hero?.mostra_titolo === false ? '#DC2626' : '#16A34A',
+                    }}>
+                    {event.layout_hero?.mostra_titolo === false ? '🙈 Titolo nascosto' : '👁 Titolo visibile'}
+                  </button>
+                </div>
+                <div style={{ padding:'10px 14px', background:'#F9FAFB', border:'1px solid #E8ECF4', borderRadius:'16px', fontSize:'14px', color:'#9CA3AF', fontStyle:'italic',
+                  opacity: event.layout_hero?.mostra_titolo === false ? 0.4 : 1 }}>
                   {event.titolo || 'Titolo evento…'}
                 </div>
-              </Field>
+                {event.layout_hero?.mostra_titolo === false && (
+                  <p style={{ fontSize:'11px', color:'#DC2626', margin:'4px 0 0', display:'flex', alignItems:'center', gap:'4px' }}>
+                    ⚠️ Il titolo non sarà visibile sull'hero. Assicurati che l'immagine di sfondo comunichi il nome dell'evento.
+                  </p>
+                )}
+              </div>
+
               <Field label="Secondo titolo (H2 — opzionale)" hint="Appare sotto il titolo principale, più piccolo">
                 <Input
                   value={event.layout_hero?.titolo2||''}
@@ -1083,6 +1512,20 @@ export default function EventoEditorPage() {
             <p style={{ fontSize:'13px', color:'#6B7280', margin:'0 0 16px', lineHeight:'1.5' }}>
               Aggiungi blocchi con il pulsante <strong>+</strong>. Usa <strong>↑ ↓</strong> per riordinare.
             </p>
+            {/* Pulsante ripristina blocchi predefiniti */}
+            {(event.sezioni||[]).length === 0 && (
+              <div style={{ background:'#EFF6FF', border:'1px solid #BFDBFE', borderRadius:'20px', padding:'16px 20px', marginBottom:'16px', display:'flex', alignItems:'center', justifyContent:'space-between', gap:'12px' }}>
+                <div>
+                  <p style={{ margin:'0 0 2px', fontSize:'14px', fontWeight:'700', color:'#1E40AF' }}>Nessun blocco presente</p>
+                  <p style={{ margin:0, fontSize:'12px', color:'#3B82F6' }}>Aggiungi i blocchi standard (CTA iscrizione, info evento, mappa) oppure costruisci la pagina da zero.</p>
+                </div>
+                <button
+                  onClick={() => updEvent(p => ({ ...p, sezioni: sezioniDefault() }))}
+                  style={{ padding:'8px 16px', background:'#1D4ED8', color:'#fff', border:'none', borderRadius:'20px', fontSize:'13px', fontWeight:'700', cursor:'pointer', fontFamily:"'Outfit',sans-serif", whiteSpace:'nowrap', flexShrink:0 }}>
+                  ⭐ Aggiungi blocchi predefiniti
+                </button>
+              </div>
+            )}
             <BlockEditor
               blocks={event.sezioni || []}
               onChange={blocks => updEvent(p => ({ ...p, sezioni: blocks }))}
@@ -1100,7 +1543,7 @@ export default function EventoEditorPage() {
         {/* ── ISCRIZIONI ── */}
         {activeTab==='iscrizioni' && (
           <div style={p.panel}>
-            <IscrizioniTab event={event} setEvent={setEvent} eventId={id} />
+            <IscrizioniTab onSalvaReady={fn => { salvaFormFieldsFn.current = fn }} event={event} setEvent={setEvent} eventId={id} />
           </div>
         )}
 
@@ -1162,6 +1605,12 @@ export default function EventoEditorPage() {
         )}
 
         {/* ── PREVIEW ── */}
+        {activeTab==='registratori' && (
+          <RegistratoriTab
+            event={event}
+            onUpdate={patch => updEvent(prev => ({ ...prev, ...patch }))}
+          />
+        )}
         {activeTab==='preview' && (
           <div style={{ display:'flex', flexDirection:'column', height:'100%' }}>
             {!event.slug ? (
@@ -1193,6 +1642,77 @@ export default function EventoEditorPage() {
             )}
           </div>
         )}
+        </div>
+
+        {/* Drag handle */}
+        {showPreview && (
+          <div onMouseDown={startDrag}
+            style={{ width:'6px', flexShrink:0, cursor:'col-resize', background:'#E8ECF4', position:'relative', zIndex:10 }}
+            onMouseEnter={e => e.currentTarget.style.background='#5B5FEF'}
+            onMouseLeave={e => e.currentTarget.style.background='#E8ECF4'}>
+            <div style={{ position:'absolute', top:'50%', left:'50%', transform:'translate(-50%,-50%)',
+              width:'3px', height:'32px', borderRadius:'3px', background:'#9CA3AF' }} />
+          </div>
+        )}
+
+        {/* Pannello anteprima */}
+        {showPreview && (
+          <div style={{ flex:1, display:'flex', flexDirection:'column', background:'#1E293B', overflow:'hidden', minWidth:0 }}>
+            <div style={{ display:'flex', alignItems:'center', gap:'6px', padding:'6px 14px', background:'#0F172A', flexShrink:0 }}>
+              <span style={{ fontSize:'11px', color:'#475569', fontWeight:'700', marginRight:'4px', letterSpacing:'.04em' }}>PREVIEW</span>
+              {[['desktop','🖥️','Desktop'],['tablet','📱','768px'],['mobile','📱','390px']].map(([d,ic,l])=>(
+                <button key={d} onClick={() => setPreviewDevice(d)}
+                  style={{ padding:'3px 10px', borderRadius:'20px', border:'none',
+                    background: previewDevice===d ? '#5B5FEF' : 'transparent',
+                    color: previewDevice===d ? '#fff' : '#64748B',
+                    fontSize:'11px', fontWeight:'700', cursor:'pointer', fontFamily:"'Outfit',sans-serif" }}>
+                  {ic} {l}
+                </button>
+              ))}
+              <div style={{ flex:1 }} />
+              <button onClick={() => setPreviewKey(k => k+1)}
+                style={{ padding:'3px 10px', borderRadius:'20px', border:'1px solid #334155',
+                  background:'transparent', color:'#94A3B8', fontSize:'11px', fontWeight:'700',
+                  cursor:'pointer', fontFamily:"'Outfit',sans-serif" }}>
+                ↻ Ricarica
+              </button>
+              <a href={`/eventi/${event.slug}`} target="_blank" rel="noreferrer"
+                style={{ padding:'3px 10px', borderRadius:'20px', border:'1px solid #334155',
+                  background:'transparent', color:'#94A3B8', fontSize:'11px', fontWeight:'700',
+                  textDecoration:'none', fontFamily:"'Outfit',sans-serif" }}>
+                ↗ Apri
+              </a>
+            </div>
+            <div style={{ flex:1, display:'flex', alignItems:'center', justifyContent:'center',
+              padding: previewDevice==='desktop' ? '0' : '20px', overflow:'auto' }}>
+              {(() => {
+                const devW = {desktop:'100%', tablet:'768px', mobile:'390px'}[previewDevice]
+                const devH = {desktop:'100%', tablet:'1024px', mobile:'844px'}[previewDevice]
+                const isD  = previewDevice === 'desktop'
+                return (
+                  <div style={{ width:devW, height:isD?'100%':devH, background:'#fff',
+                    flexShrink:0, overflow:'hidden', borderRadius:isD?'0':'16px',
+                    boxShadow:isD?'none':'0 8px 40px rgba(0,0,0,.5)',
+                    display:'flex', flexDirection:'column' }}>
+                    {!isD && (
+                      <div style={{ height:'24px', background:'#111', flexShrink:0,
+                        display:'flex', alignItems:'center', justifyContent:'center' }}>
+                        <div style={{ width:'52px', height:'5px', borderRadius:'3px', background:'#333' }} />
+                      </div>
+                    )}
+                    <iframe
+                      key={previewKey}
+                      src={`/eventi/${event.slug}`}
+                      style={{ flex:1, border:'none', width:'100%', display:'block' }}
+                      title="Anteprima"
+                    />
+                  </div>
+                )
+              })()}
+            </div>
+          </div>
+        )}
+
       </div>
 
       <style>{`

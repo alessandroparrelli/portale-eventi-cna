@@ -29,7 +29,7 @@ const SVG_ICONS = {
   globe:     <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><circle cx="12" cy="12" r="10"/><line x1="2" y1="12" x2="22" y2="12"/><path d="M12 2a15.3 15.3 0 0 1 4 10 15.3 15.3 0 0 1-4 10 15.3 15.3 0 0 1-4-10 15.3 15.3 0 0 1 4-10z"/></svg>,
 }
 
-export default function GlowStatCard({ icon, label, value, sub, palette = 'blue', trend }) {
+export default function GlowStatCard({ icon, label, value, sub, palette = 'blue', trend, onClick, active }) {
   const [hovered, setHovered] = useState(false)
   const p = PALETTES[palette] || PALETTES.blue
   const IconEl = typeof icon === 'string' ? SVG_ICONS[icon] : icon
@@ -38,18 +38,19 @@ export default function GlowStatCard({ icon, label, value, sub, palette = 'blue'
     <div
       onMouseEnter={() => setHovered(true)}
       onMouseLeave={() => setHovered(false)}
+      onClick={onClick}
       style={{
         display: 'flex', alignItems: 'center', gap: '12px',
         padding: '14px 16px',
-        backgroundColor: '#FFFFFF',
-        border: `1px solid ${hovered ? p.accent + '30' : '#E8ECF4'}`,
+        backgroundColor: active ? p.bg : '#FFFFFF',
+        border: `1px solid ${active ? p.accent + '60' : hovered ? p.accent + '30' : '#E8ECF4'}`,
         borderRadius: '16px',
         transition: 'all 0.18s ease',
         boxShadow: hovered
           ? `0 8px 24px ${p.accent}18, 0 2px 8px rgba(0,0,0,.06)`
           : '0 1px 4px rgba(20,20,40,.05)',
         transform: hovered ? 'translateY(-2px)' : 'none',
-        cursor: 'default', minWidth: 0, overflow: 'hidden',
+        cursor: onClick ? 'pointer' : 'default', minWidth: 0, overflow: 'hidden',
       }}
     >
       <div style={{

@@ -5,6 +5,7 @@ import { supabase } from '../../lib/supabase'
 import GlowStatCard from '../../components/GlowStatCard'
 import GlowTabBar from '../../components/GlowTabBar'
 import { CalendarDays, Clock, Plus, ArrowRight } from 'lucide-react'
+import { EventObiettiviCard, EventAvanzamentoCard } from './EventoEditorPage'
 
 const P = '#5B5FEF'
 const STATUS_LABELS = { bozza:'Bozza', pubblicato:'Pubblicato', chiuso:'Chiuso', archiviato:'Archiviato' }
@@ -124,35 +125,36 @@ export default function DashboardPage() {
   async function loadData() {
     setLoading(true)
     try {
-      const { data: eventsData } = await supabase
-        .from('events')
-        .select('id,titolo,slug,stato,data_inizio,data_fine,luogo,capienza_max,created_at,codice')
-        .order('created_at', { ascending:false })
-      const { data: regData } = await supabase
-        .from('registrations')
-        .select('event_id,stato,presente,created_at')
+      const [{ data: eventsData }, { data: statsRaw }] = await Promise.all([
+        supabase
+          .from('events')
+          .select('id,titolo,slug,stato,data_inizio,data_fine,luogo,capienza_max,created_at,codice,obiettivo_iscritti,obiettivo_presenze')
+          .order('created_at', { ascending:false }),
+        supabase.rpc('get_dashboard_stats'),
+      ])
+      const perEvento  = statsRaw?.per_evento  || {}
       const enriched = (eventsData||[]).map(ev => {
-        const regs = (regData||[]).filter(r => r.event_id === ev.id)
-        return { ...ev, iscritti:regs.length, presenti:regs.filter(r=>r.presente).length }
+        const s = perEvento[ev.id] || { iscritti:0, presenti:0 }
+        return { ...ev, iscritti: Number(s.iscritti||0), presenti: Number(s.presenti||0) }
       })
       setEvents(enriched.slice(0,10))
       const now = new Date()
-      const todayStr = now.toISOString().slice(0,10)
-      const oggi = (regData||[]).filter(r => r.created_at?.slice(0,10) === todayStr).length
       const prossimi = (eventsData||[]).filter(e => e.stato==='pubblicato' && e.data_inizio && new Date(e.data_inizio) > now)
       setNextEvents(prossimi.slice(0,3))
       setStats({
-        totale: eventsData?.length||0,
+        totale:     eventsData?.length||0,
         pubblicati: eventsData?.filter(e=>e.stato==='pubblicato').length||0,
-        iscritti: regData?.length||0,
-        presenti: regData?.filter(r=>r.presente).length||0,
-        oggi, prossimi: prossimi.length,
+        iscritti:   Number(statsRaw?.totale_iscritti||0),
+        presenti:   Number(statsRaw?.totale_presenti||0),
+        oggi:       Number(statsRaw?.iscritti_oggi||0),
+        prossimi:   prossimi.length,
       })
+      const sette = statsRaw?.iscritti_7gg || {}
       const weekly = []
       for (let i = 6; i >= 0; i--) {
         const d = new Date(now); d.setDate(d.getDate()-i)
         const ds = d.toISOString().slice(0,10)
-        weekly.push({ label:d.toLocaleDateString('it-IT',{weekday:'short'}).slice(0,2), count:(regData||[]).filter(r=>r.created_at?.slice(0,10)===ds).length })
+        weekly.push({ label:d.toLocaleDateString('it-IT',{weekday:'short'}).slice(0,2), count: Number(sette[ds]||0) })
       }
       setWeeklyData(weekly)
     } catch(e) { console.error(e) }
@@ -290,15 +292,31 @@ export default function DashboardPage() {
               const fillPct = ev.capienza_max>0 ? Math.min(Math.round((ev.iscritti/ev.capienza_max)*100),100) : null
               const presRate = ev.iscritti>0 ? Math.round((ev.presenti/ev.iscritti)*100) : null
               const sc = STATUS_COLORS[ev.stato]||STATUS_COLORS.bozza
-              const accent = ev.stato==='pubblicato' ? '#22C55E' : ev.stato==='chiuso' ? '#F59E0B' : ev.stato==='archiviato' ? '#9CA3AF' : '#E8ECF4'
+              // Colore bordo e striscia per fase
+              const now2 = new Date()
+              const dataInizioEv = ev.data_inizio ? new Date(ev.data_inizio) : null
+              const dataFineEv   = ev.data_fine   ? new Date(ev.data_fine)   : null
+              const isInCorso  = dataInizioEv && now2 >= dataInizioEv && (!dataFineEv || now2 <= dataFineEv)
+              const isConcluso = dataFineEv && now2 > dataFineEv
+              const cardAccent = ev.stato==='archiviato' ? '#9CA3AF'
+                               : isConcluso              ? '#6B7280'
+                               : isInCorso               ? '#22C55E'
+                               : ev.stato==='pubblicato' ? '#5B5FEF'
+                               : ev.stato==='chiuso'     ? '#F59E0B'
+                               :                          '#CBD5E1'
+              const cardShadow     = `0 1px 3px rgba(20,20,40,.04)`
+              const cardShadowHover= `0 8px 24px rgba(20,20,40,.10)`
               return (
-                <div key={ev.id} style={{ background:'#fff', border:'1px solid #E8ECF4', borderRadius:'16px', padding:'16px', display:'flex', flexDirection:'column', transition:'all .18s', cursor:'default', boxShadow:'0 1px 3px rgba(20,20,40,.04)' }}
-                  onMouseEnter={e=>{e.currentTarget.style.boxShadow='0 8px 24px rgba(20,20,40,.09)';e.currentTarget.style.transform='translateY(-2px)'}}
-                  onMouseLeave={e=>{e.currentTarget.style.boxShadow='0 1px 3px rgba(20,20,40,.04)';e.currentTarget.style.transform='none'}}>
+                <div key={ev.id} style={{ background:'#fff', border:`2px solid ${cardAccent}`, borderRadius:'16px', overflow:'hidden', display:'flex', flexDirection:'column', transition:'all .18s', cursor:'default', boxShadow:cardShadow }}
+                  onMouseEnter={e=>{e.currentTarget.style.boxShadow=cardShadowHover;e.currentTarget.style.transform='translateY(-2px)'}}
+                  onMouseLeave={e=>{e.currentTarget.style.boxShadow=cardShadow;e.currentTarget.style.transform='none'}}>
+                  {/* Striscia colorata top */}
+                  <div style={{ height:'5px', background:cardAccent, flexShrink:0 }}/>
+                  <div style={{ padding:'16px', display:'flex', flexDirection:'column', flex:1 }}>
 
                   <div style={{ display:'flex', alignItems:'flex-start', justifyContent:'space-between', gap:'8px', marginBottom:'12px' }}>
                     <div style={{ minWidth:0 }}>
-                      <p style={{ fontWeight:'600', fontSize:'13px', color:'#111827', margin:'0 0 4px', lineHeight:1.4, overflow:'hidden', display:'-webkit-box', WebkitLineClamp:2, WebkitBoxOrient:'vertical' }}>{ev.titolo}</p>
+                      <p style={{ fontWeight:'700', fontSize:'16px', color:'#111827', margin:'0 0 4px', lineHeight:1.35, overflow:'hidden', display:'-webkit-box', WebkitLineClamp:2, WebkitBoxOrient:'vertical' }}>{ev.titolo}</p>
                       <span style={{ fontSize:'10px', fontWeight:'600', color:P, background:'#EEEFFD', padding:'1px 7px', borderRadius:'20px', fontFamily:'monospace' }}>
                         EVT-{String(ev.codice||0).padStart(4,'0')}
                       </span>
@@ -325,12 +343,41 @@ export default function DashboardPage() {
                     </div>
                   </div>
 
-                  <div style={{ display:'flex', alignItems:'center', justifyContent:'space-between', marginTop:'auto' }}>
+                  <div style={{ display:'flex', alignItems:'center', justifyContent:'space-between', marginTop:'4px', marginBottom:'12px' }}>
                     <span style={{ fontSize:'11px', color:'#9CA3AF' }}>{presRate!=null ? `${presRate}% presenti` : 'Nessun check-in'}</span>
-                    <button onClick={()=>navigate('/admin/eventi')} style={{ background:'none', border:`1px solid ${P}30`, color:P, borderRadius:'20px', padding:'4px 12px', fontSize:'12px', fontWeight:'600', fontFamily:"'Inter',sans-serif", cursor:'pointer' }}>
-                      Gestisci
-                    </button>
+                    <div style={{ display:'flex', gap:'6px' }}>
+                      <button onClick={()=>navigate(`/admin/iscritti?evento=${ev.id}`)} style={{ background:'none', border:`1px solid #10B98130`, color:'#10B981', borderRadius:'20px', padding:'4px 12px', fontSize:'12px', fontWeight:'600', fontFamily:"'Inter',sans-serif", cursor:'pointer' }}>
+                        Iscritti
+                      </button>
+                      <button onClick={()=>navigate(`/admin/eventi/${ev.id}/editor`)} style={{ background:'none', border:`1px solid ${P}30`, color:P, borderRadius:'20px', padding:'4px 12px', fontSize:'12px', fontWeight:'600', fontFamily:"'Inter',sans-serif", cursor:'pointer' }}>
+                        Gestisci
+                      </button>
+                    </div>
                   </div>
+
+                  {/* Divisore */}
+                  <div style={{ height:'1px', background:'#E8ECF4', margin:'4px 0 12px' }}/>
+
+                  {/* Card obiettivi (compact) */}
+                  <EventObiettiviCard
+                    iscritti={ev.iscritti}
+                    presenti={ev.presenti}
+                    obiettivoIscritti={ev.obiettivo_iscritti}
+                    obiettivoPresenze={ev.obiettivo_presenze}
+                    capienzaMax={ev.capienza_max}
+                    compact
+                  />
+
+                  {/* Card avanzamento (compact) */}
+                  <div style={{ marginTop:'8px' }}>
+                    <EventAvanzamentoCard
+                      event={ev}
+                      iscritti={ev.iscritti}
+                      presenti={ev.presenti}
+                      compact
+                    />
+                  </div>
+                  </div>{/* fine inner padding */}
                 </div>
               )
             })}

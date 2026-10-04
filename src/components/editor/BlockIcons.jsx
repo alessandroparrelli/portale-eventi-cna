@@ -96,6 +96,89 @@ export const BLOCK_ICONS = {
       <line x1="3" y1="10" x2="21" y2="10"/><path d="M8 14h.01M12 14h4M8 18h.01M12 18h4"/>
     </svg>
   ),
+  relatori: (
+    <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="#0891B2" strokeWidth="2" strokeLinecap="round">
+      <circle cx="9" cy="7" r="4"/><path d="M3 21v-2a4 4 0 0 1 4-4h4a4 4 0 0 1 4 4v2"/>
+      <path d="M16 3.13a4 4 0 0 1 0 7.75M21 21v-2a4 4 0 0 0-3-3.87"/>
+    </svg>
+  ),
+  pricing: (
+    <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="#059669" strokeWidth="2" strokeLinecap="round">
+      <rect x="2" y="3" width="20" height="18" rx="2"/>
+      <path d="M8 3v18M16 3v18M2 9h6M2 15h6M16 9h6M16 15h6"/>
+    </svg>
+  ),
+  bottoni: (
+    <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="#003DA5" strokeWidth="2" strokeLinecap="round">
+      <rect x="2" y="7" width="9" height="10" rx="2"/>
+      <rect x="13" y="7" width="9" height="10" rx="2"/>
+    </svg>
+  ),
+  ciclo_webinar: (
+    <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="#7C3AED" strokeWidth="2" strokeLinecap="round">
+      <path d="M15 10l4.553-2.069A1 1 0 0 1 21 8.871v6.258a1 1 0 0 1-1.447.894L15 14"/>
+      <rect x="2" y="6" width="13" height="12" rx="2"/>
+      <path d="M7 16v2M17 16v2M7 6v-2M17 6v-2"/>
+    </svg>
+  ),
+  mappa: (
+    <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="#DC2626" strokeWidth="2" strokeLinecap="round">
+      <path d="M21 10c0 7-9 13-9 13s-9-6-9-13a9 9 0 0 1 18 0z"/><circle cx="12" cy="10" r="3"/>
+    </svg>
+  ),
+  nav_ancorata: (
+    <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="#0891B2" strokeWidth="2" strokeLinecap="round">
+      <path d="M3 6h18M3 12h18M3 18h12"/>
+      <circle cx="20" cy="18" r="2"/>
+    </svg>
+  ),
+  colonne_miste: (
+    <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="#D97706" strokeWidth="2" strokeLinecap="round">
+      <rect x="2" y="3" width="9" height="18" rx="1"/>
+      <rect x="13" y="3" width="9" height="18" rx="1"/>
+    </svg>
+  ),
+  hero_interno: (
+    <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="#EC4899" strokeWidth="2" strokeLinecap="round">
+      <rect x="2" y="4" width="20" height="16" rx="2"/>
+      <path d="M2 8h20M7 4v4M17 4v4"/>
+      <path d="M8 14h8M10 17h4"/>
+    </svg>
+  ),
+  sezione_inizio: (
+    <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="#059669" strokeWidth="2" strokeLinecap="round">
+      <rect x="2" y="3" width="20" height="18" rx="2" fill="#059669" fillOpacity=".12"/>
+      <path d="M2 8h20M7 3v5M17 3v5"/>
+    </svg>
+  ),
+  sezione_fine: (
+    <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="#059669" strokeWidth="2" strokeLinecap="round">
+      <rect x="2" y="3" width="20" height="18" rx="2" fill="#059669" fillOpacity=".06"/>
+      <path d="M2 16h20M7 16v5M17 16v5"/>
+    </svg>
+  ),
+  evento_info: (
+    <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="#0891B2" strokeWidth="2" strokeLinecap="round">
+      <rect x="3" y="4" width="18" height="18" rx="2"/><line x1="16" y1="2" x2="16" y2="6"/><line x1="8" y1="2" x2="8" y2="6"/><line x1="3" y1="10" x2="21" y2="10"/>
+      <path d="M21 10c0 7-9 13-9 13s-9-6-9-13a9 9 0 0 1 18 0z" stroke="#DC2626"/>
+    </svg>
+  ),
+  evento_cta: (
+    <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="#059669" strokeWidth="2" strokeLinecap="round">
+      <path d="M22 2L11 13"/><polygon points="22 2 15 22 11 13 2 9 22 2"/>
+    </svg>
+  ),
+  evento_mappa: (
+    <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="#DC2626" strokeWidth="2" strokeLinecap="round">
+      <path d="M21 10c0 7-9 13-9 13s-9-6-9-13a9 9 0 0 1 18 0z"/><circle cx="12" cy="10" r="3"/>
+    </svg>
+  ),
+  numeri_icona: (
+    <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="#003DA5" strokeWidth="2" strokeLinecap="round">
+      <circle cx="5" cy="6" r="2"/><circle cx="12" cy="6" r="2"/><circle cx="19" cy="6" r="2"/>
+      <path d="M5 10v4M12 8v6M19 10v4M3 18h4M10 18h4M17 18h4"/>
+    </svg>
+  ),
 }
 
 // ── Icone disponibili per griglia/badge con picker ─────────────────

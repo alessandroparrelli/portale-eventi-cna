@@ -7,12 +7,13 @@ import { useAuth } from '../../hooks/useAuth'
 import GlowTableHead from '../../components/GlowTableHead'
 import GlowStatCard from '../../components/GlowStatCard'
 import { Modal, PresenzaBadge, Field, Input, Select, Btn, EmptyState } from '../../components/ui'
-import { Users, Search, Download, Upload, Eye, Trash2, UserCheck, AlertCircle, CheckCircle2, X, MapPin, Ticket, RefreshCw, MessageSquare, UserPlus, Link2, Pencil } from 'lucide-react'
+import { Users, Search, Download, Upload, Eye, Trash2, UserCheck, AlertCircle, CheckCircle2, X, MapPin, Ticket, RefreshCw, MessageSquare, UserPlus, Link2, Pencil, FileText } from 'lucide-react'
 import DeleteConfirmModal from '../../components/DeleteConfirmModal'
 import * as XLSX from 'xlsx'
 import ExcelJS from 'exceljs/dist/exceljs.min.js'
 import { logAttivita } from '../../lib/activityLog'
 import EventSelector from '../../components/EventSelector'
+import MappaPostiTeatro from '../../components/MappaPostiTeatro'
 
 function formatDt(ts) {
   if (!ts) return '—'
@@ -66,6 +67,9 @@ export default function IscrittiPage() {
   const [detail, setDetail] = useState(null)
   const [formFields, setFormFields] = useState([]) // campi extra dell'evento
   const [delConfirm, setDelConfirm] = useState(null)
+  const [sendingEmail, setSendingEmail] = useState(null) // id of reg being sent
+  const [sendingEmailAll, setSendingEmailAll] = useState(false)
+  const [importedIds, setImportedIds] = useState([]) // IDs degli iscritti appena importati
   const { canManage } = useRole()
   const canDelete = canManage('iscritti')
   const [importModal, setImportModal] = useState(false)
@@ -112,6 +116,7 @@ export default function IscrittiPage() {
   const [smsListaSearch, setSmsListaSearch] = useState('')
   const [smsProva, setSmsProva] = useState(false)
   const [eventoDettagli, setEventoDettagli] = useState(null) // {titolo, data_inizio, luogo}
+  const [eventoInfo, setEventoInfo] = useState(null) // dati completi evento incluso email_mittente
 
   // Mappa id→nome per referenti di gruppo (calcolata dai registrations caricati)
   const referentiMap = {}
@@ -133,9 +138,15 @@ export default function IscrittiPage() {
   const [invioPostoInCorso, setInvioPostoInCorso] = useState(false)
   const [invioPostoRis, setInvioPostoRis] = useState(null)
   const [confirmInvioTeatro, setConfirmInvioTeatro] = useState(null) // { ids: [...] | null } oppure null
+  const [confirmReminder, setConfirmReminder] = useState(null) // { ids: [...] | null } oppure null
+  const [reminderInCorso, setReminderInCorso] = useState(false)
+  const [reminderRis, setReminderRis] = useState(null)
+  const [reminderPreview, setReminderPreview] = useState(null) // { html, oggetto, fonte, loading, error }
   const [dryRunRis, setDryRunRis] = useState(null)
   const [teatroSelezione, setTeatroSelezione] = useState(new Set()) // Set di reg_id selezionati
   const [filtroPostoAssegnato, setFiltroPostoAssegnato] = useState('tutti') // 'tutti' | 'con_posto' | 'senza_posto'
+  const [filtroPresenzaTeatro, setFiltroPresenzaTeatro] = useState('tutti') // 'tutti' | 'in_attesa' | 'confermata' | 'rinuncia'
+  const [cambiaStato, setCambiaStato] = useState(null) // {ids} — modal cambio stato presenza
   const [searchTeatro, setSearchTeatro] = useState('')
   const [filtroMailPosto, setFiltroMailPosto] = useState('tutti') // 'tutti' | 'inviata' | 'non_inviata'
 
@@ -205,27 +216,135 @@ export default function IscrittiPage() {
     }
   }
 
-  async function inviaMailPosti(dry = false, ids = null) {
-    // ids: null = tutti, [] = nessuno (non chiamare), [id1,...] = selezionati
-    if (!selectedEvento) return
-    if (dry) setDryRunRis(null)
-    else { setInvioPostoInCorso(true); setInvioPostoRis(null) }
+  // Cambia stato presenza per una lista di iscritti
+  // stato: 'confermata' | 'rinuncia' | 'in_attesa'
+  async function eseguiCambiaStato(ids, stato) {
+    if (!ids || ids.length === 0 || !stato) return
     try {
-      const body = { event_id: selectedEvento, dry_run: dry }
-      if (ids !== null) body.registration_ids = ids
-      const res = await fetch('https://hnkhckcclgabunkqfmrz.supabase.co/functions/v1/assegna-posto', {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify(body),
-      })
-      const data = await res.json()
-      if (dry) setDryRunRis(data)
-      else setInvioPostoRis(data)
-    } catch (e) {
-      if (dry) setDryRunRis({ error: String(e) })
-      else setInvioPostoRis({ error: String(e) })
+      const update =
+        stato === 'confermata' ? { presenza_confermata: true,  rinuncia: false, rinuncia_at: null } :
+        stato === 'rinuncia'   ? { presenza_confermata: false, rinuncia: true,  rinuncia_at: new Date().toISOString() } :
+                                 { presenza_confermata: false, rinuncia: false, rinuncia_at: null }
+
+      const { error } = await supabase.from('registrations').update(update).in('id', ids)
+      if (error) { alert('Errore: ' + error.message); return }
+
+      setCambiaStato(null)
+      setFiltroPresenzaTeatro('tutti')
+      setTeatroSelezione(new Set())
+      await loadRegs()
+    } catch(e) { alert('Errore: ' + String(e)) }
+  }
+
+  async function inviaMailPosti(dry = false, ids = null, forza = false) {
+    // ids: null = tutti con posto, [id1,...] = selezionati specifici
+    // forza: true = reinvia anche a chi ha gia ricevuto (ignora posto_email_inviata)
+    if (!selectedEvento) return
+    const LIMIT = 250 // email per blocco — ~50s, abbondantemente dentro il timeout Edge Function
+
+    if (dry) {
+      setDryRunRis(null)
+      try {
+        const body = { event_id: selectedEvento, dry_run: true, limit: LIMIT }
+        if (ids !== null) body.registration_ids = ids
+        if (forza) body.forza = true
+        const res = await fetch('https://hnkhckcclgabunkqfmrz.supabase.co/functions/v1/assegna-posto', {
+          method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify(body),
+        })
+        const ris = await res.json()
+        // Se ids specificati: costruisco il sample completo dai dati già in memoria
+        if (ids !== null && Array.isArray(ids)) {
+          const idSet = new Set(ids)
+          const localSample = registrations
+            .filter(r => idSet.has(r.id) && r.numero_posto)
+            .map(r => ({ id: r.id, nome: r.nome, cognome: r.cognome, email: r.email, numero_posto: r.numero_posto }))
+          ris.sample = localSample
+          ris.total_questo_blocco = localSample.length
+        }
+        setDryRunRis(ris)
+      } catch (e) { setDryRunRis({ error: String(e) }) }
+      return
     }
-    if (!dry) setInvioPostoInCorso(false)
+
+    // --- INVIO REALE: loop a blocchi finché remaining === 0 ---
+    setInvioPostoInCorso(true)
+    setInvioPostoRis({ inCorso: true, sent: 0, failed: 0, remaining: null, errors: [], forza })
+
+    let totalSent = 0
+    let totalFailed = 0
+    let allErrors = []
+    let blocco = 0
+
+    try {
+      while (true) {
+        blocco++
+        const body = { event_id: selectedEvento, limit: LIMIT }
+        if (ids !== null) body.registration_ids = ids
+        if (forza) body.forza = true
+
+        const res = await fetch('https://hnkhckcclgabunkqfmrz.supabase.co/functions/v1/assegna-posto', {
+          method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify(body),
+        })
+        const data = await res.json()
+
+        if (data.error) {
+          setInvioPostoRis({ error: data.error, sent: totalSent, failed: totalFailed, errors: allErrors })
+          break
+        }
+
+        totalSent  += data.sent  || 0
+        totalFailed += data.failed || 0
+        if (data.errors?.length) allErrors = [...allErrors, ...data.errors]
+        const remaining = data.remaining ?? 0
+
+        setInvioPostoRis({
+          inCorso: !data.completato && ids === null,
+          sent: totalSent,
+          failed: totalFailed,
+          remaining,
+          completato: data.completato || ids !== null,
+          errors: allErrors,
+          blocco,
+          forza,
+        })
+
+        if (data.completato || ids !== null || data.sent === 0) break
+        await new Promise(r => setTimeout(r, 800))
+      }
+    } catch (e) {
+      setInvioPostoRis({ error: String(e), sent: totalSent, failed: totalFailed, errors: allErrors })
+    }
+
+    setInvioPostoInCorso(false)
+    loadRegs()
+  }
+
+  async function inviaReminder(ids = null) {
+    // ids: null = tutti gli iscritti con email, [...] = solo i selezionati
+    if (!selectedEvento) return
+    setReminderInCorso(true)
+    setReminderRis(null)
+
+    const destinatari = ids !== null
+      ? ids.filter(id => registrations.find(r => r.id === id && r.email))
+      : registrations.filter(r => r.email && !r.rinuncia).map(r => r.id)
+
+    let sent = 0, failed = 0, errors = []
+    for (const regId of destinatari) {
+      try {
+        const { error } = await supabase.functions.invoke('send-event-email', {
+          body: { tipo: 'reminder', iscrizione_id: regId, solo: true },
+        })
+        if (error) { failed++; errors.push({ id: regId, error: error.message }) }
+        else sent++
+      } catch (e) {
+        failed++
+        errors.push({ id: regId, error: String(e) })
+      }
+    }
+
+    setReminderRis({ sent, failed, errors, completato: true })
+    setReminderInCorso(false)
   }
 
   function toggleSelezioneTeatroReg(id) {
@@ -345,6 +464,10 @@ export default function IscrittiPage() {
           .catch(e => console.warn('Email conferma fallita:', e))
       }
 
+      // Notifica admin (sempre, anche per iscrizioni manuali senza email)
+      supabase.functions.invoke('send-event-email', { body: { tipo: 'notifica_admin', iscrizione_id: regId } })
+        .catch(e => console.warn('Notifica admin fallita:', e))
+
       setAddModal(false)
       setAddForm({ nome:'', cognome:'', email:'', cellulare:'', ragione_sociale:'', partita_iva:'', cap:'', extra_1:'', extra_2:'', extra_3:'', extra_4:'', extra_5:'' })
       setAddCapogruppo(null)
@@ -357,11 +480,11 @@ export default function IscrittiPage() {
   }
 
     function toggleSelezioneTeatroTutti(regs) {
-    const conPosto = regs.filter(r => r.numero_posto && r.email).map(r => r.id)
+    const conEmail = regs.filter(r => r.email).map(r => r.id)
     setTeatroSelezione(prev => {
-      const tuttiSelezionati = conPosto.every(id => prev.has(id))
+      const tuttiSelezionati = conEmail.every(id => prev.has(id))
       if (tuttiSelezionati) return new Set()
-      return new Set(conPosto)
+      return new Set(conEmail)
     })
   }
 
@@ -374,10 +497,11 @@ export default function IscrittiPage() {
     if (!selectedEvento) { setRegistrations([]); setFormFields([]); setTeatroAbilitato(false); return }
     loadRegs()
     // Controlla se l'evento ha teatro abilitato + carica dettagli per variabili SMS
-    supabase.from('events').select('teatro_abilitato, titolo, data_inizio, luogo').eq('id', selectedEvento).single()
+    supabase.from('events').select('teatro_abilitato, titolo, data_inizio, luogo, email_mittente, nome_mittente').eq('id', selectedEvento).single()
       .then(({ data }) => {
         setTeatroAbilitato(!!data?.teatro_abilitato)
         setEventoDettagli(data ? { titolo: data.titolo, data_inizio: data.data_inizio, luogo: data.luogo } : null)
+        setEventoInfo(data || null)
       })
     supabase.from('form_fields').select('*')
       .eq('event_id', selectedEvento).eq('visibile', true).like('colonna_db', 'extra_%')
@@ -413,8 +537,7 @@ export default function IscrittiPage() {
 
   async function loadRegs() {
     setLoading(true)
-    const { data } = await supabase.from('registrations')
-      .select('*').eq('event_id', selectedEvento).order('created_at',{ascending:false})
+    const { data } = await supabase.rpc('get_registrations_by_event', { p_event_id: selectedEvento })
     setRegistrations(data||[])
     setLoading(false)
   }
@@ -426,8 +549,8 @@ export default function IscrittiPage() {
 
   const filtered = (() => {
     const q = search.toLowerCase()
-    const matchStato = r => filterStato==='tutti' || r.stato===filterStato
-    const matchSearch = r => !q || r.nome?.toLowerCase().includes(q) || r.cognome?.toLowerCase().includes(q) || r.email?.toLowerCase().includes(q)
+    const matchStato = r => filterStato==='tutti' || (filterStato==='presente' ? r.presente : r.stato===filterStato)
+    const matchSearch = r => !q || r.nome?.toLowerCase().includes(q) || r.cognome?.toLowerCase().includes(q) || r.email?.toLowerCase().includes(q) || r.ragione_sociale?.toLowerCase().includes(q)
 
     if (!q) return registrations.filter(r => matchStato(r))
 
@@ -457,10 +580,28 @@ export default function IscrittiPage() {
       if (filtroPostoAssegnato === 'senza_posto' && r.numero_posto) return false
       if (filtroMailPosto === 'inviata' && !r.posto_email_inviata) return false
       if (filtroMailPosto === 'non_inviata' && r.posto_email_inviata) return false
+      if (filtroPresenzaTeatro === 'in_attesa' && (r.presenza_confermata || r.rinuncia || !r.numero_posto)) return false
+      if (filtroPresenzaTeatro === 'confermata' && !r.presenza_confermata) return false
+      if (filtroPresenzaTeatro === 'rinuncia' && !r.rinuncia) return false
       if (qT && !matchT(r) && !(r.gruppo_id && gruppiT.has(r.gruppo_id))) return false
       return true
     })
   })()
+
+  async function inviaEmailConferma(reg) {
+    if (sendingEmail) return
+    setSendingEmail(reg.id)
+    try {
+      const { error: e1 } = await supabase.functions.invoke('send-event-email', { body: { tipo: 'conferma_iscrizione', iscrizione_id: reg.id, solo: true } })
+      if (e1) throw e1
+      // Also send admin notification (no propagation)
+      await supabase.functions.invoke('send-event-email', { body: { tipo: 'notifica_admin', iscrizione_id: reg.id, solo: true } })
+      alert(`✅ Email inviata a ${reg.email} + notifica agli admin`)
+    } catch (e) {
+      alert(`❌ Errore: ${e.message || e}`)
+    }
+    setSendingEmail(null)
+  }
 
   async function deleteReg() {
     await supabase.from('registrations').delete().eq('id', delConfirm.id)
@@ -762,6 +903,276 @@ export default function IscrittiPage() {
     logAttivita('iscritti_esportati', { eventoId: selectedEvento, eventoTitolo: eventoTitle, dettagli: { totale: filtered.length } })
   }
 
+  async function exportExcelPresenti() {
+    const evento = eventi.find(e=>e.id===selectedEvento)
+    const eventoTitle = evento?.titolo || 'evento'
+    const dataExport = new Date().toLocaleDateString('it-IT',{day:'2-digit',month:'long',year:'numeric'})
+    const oraExport  = new Date().toLocaleTimeString('it-IT',{hour:'2-digit',minute:'2-digit'})
+    const presenti   = registrations.filter(r => r.presente)
+    if (!presenti.length) return
+
+    const fmtDt   = v => v ? new Date(v).toLocaleString('it-IT',{timeZone:'Europe/Rome',day:'2-digit',month:'2-digit',year:'numeric',hour:'2-digit',minute:'2-digit'}) : ''
+    const fmtBool = v => v === true ? 'Sì' : v === false ? 'No' : ''
+
+    const COLS = [
+      { h:'#',                    w:5,  v:(_,i)=>i+1 },
+      { h:'N° iscrizione',        w:12, v:r=>r.numero_iscrizione||'' },
+      { h:'Codice iscrizione',    w:18, v:r=>r.codice_iscrizione||'' },
+      { h:'Cognome',              w:18, v:r=>r.cognome||'' },
+      { h:'Nome',                 w:16, v:r=>r.nome||'' },
+      { h:'Email',                w:30, v:r=>r.email||'' },
+      { h:'Cellulare',            w:14, v:r=>r.cellulare||'' },
+      { h:'Ragione Sociale',      w:28, v:r=>r.ragione_sociale||'' },
+      { h:'Partita IVA',          w:16, v:r=>r.partita_iva||'' },
+      { h:'CAP',                  w:8,  v:r=>r.cap||'' },
+      { h:'Categoria',            w:22, v:r=>getMestiere(r.mestiere_id) },
+      { h:'Associato CNA',        w:14, v:r=>fmtBool(r.associato_cna) },
+      { h:'Data stipula',         w:14, v:r=>r.associato_data_stipula||'' },
+      { h:'Stato iscrizione',     w:14, v:r=>r.stato||'' },
+      { h:'Posto assegnato',      w:22, v:r=>r.numero_posto||'' },
+      { h:'Check-in',             w:18, v:r=>fmtDt(r.checkin_at) },
+      { h:'Iscritto il',          w:18, v:r=>fmtDt(r.created_at) },
+      { h:'Presenza confermata',  w:18, v:r=>fmtBool(r.presenza_confermata) },
+      { h:'Extra 1',              w:20, v:r=>r.extra_1||'' },
+      { h:'Extra 2',              w:20, v:r=>r.extra_2||'' },
+      { h:'Extra 3',              w:20, v:r=>r.extra_3||'' },
+      { h:'Extra 4',              w:20, v:r=>r.extra_4||'' },
+      { h:'Extra 5',              w:20, v:r=>r.extra_5||'' },
+      { h:'QR code',              w:28, v:r=>r.qr_code||'' },
+    ]
+
+    const ExcelJS = (await import('exceljs')).default
+    const wb = new ExcelJS.Workbook()
+    const ws = wb.addWorksheet('Presenti')
+    const nCols = COLS.length
+
+    ws.mergeCells(1,1,1,nCols)
+    const rTit = ws.getRow(1)
+    rTit.getCell(1).value     = `Presenti — ${eventoTitle}`
+    rTit.getCell(1).font      = { bold:true, size:14, color:{ argb:'FFFFFFFF' } }
+    rTit.getCell(1).fill      = { type:'pattern', pattern:'solid', fgColor:{ argb:'FF003DA5' } }
+    rTit.getCell(1).alignment = { horizontal:'center', vertical:'middle' }
+    rTit.height = 28
+
+    ws.mergeCells(2,1,2,nCols)
+    const rSub = ws.getRow(2)
+    rSub.getCell(1).value = `Esportato il ${dataExport} alle ${oraExport} · CNA Roma — Portale Eventi · ${presenti.length} presenti`
+    rSub.getCell(1).font  = { size:9, color:{ argb:'FF6B7280' }, italic:true }
+    rSub.height = 16
+
+    const hRow = ws.getRow(3)
+    COLS.forEach(({ h }, i) => {
+      const cell = hRow.getCell(i+1)
+      cell.value     = h
+      cell.font      = { bold:true, size:9, color:{ argb:'FFFFFFFF' } }
+      cell.fill      = { type:'pattern', pattern:'solid', fgColor:{ argb:'FF1E3A5F' } }
+      cell.alignment = { horizontal:'center', vertical:'middle', wrapText:true }
+      cell.border    = { bottom:{ style:'thin', color:{ argb:'FF003DA5' } } }
+    })
+    hRow.height = 22
+    ws.columns = COLS.map(c => ({ width: c.w }))
+
+    presenti.forEach((r, idx) => {
+      const row   = ws.addRow(COLS.map(c => c.v(r, idx)))
+      const rowBg = r.associato_cna === true ? 'FFE8F5E9' : idx % 2 === 0 ? 'FFFAFAFA' : 'FFFFFFFF'
+      row.eachCell((cell, ci) => {
+        cell.fill      = { type:'pattern', pattern:'solid', fgColor:{ argb:rowBg } }
+        cell.font      = { size:9 }
+        cell.alignment = { vertical:'middle' }
+        cell.border    = { bottom:{ style:'hair', color:{ argb:'FFE5E7EB' } } }
+        if (ci === 12) {
+          if (r.associato_cna === true)  cell.font = { size:9, bold:true, color:{ argb:'FF166534' } }
+          if (r.associato_cna === false) cell.font = { size:9, color:{ argb:'FF991B1B' } }
+        }
+      })
+      row.height = 17
+    })
+
+    const totRow = ws.addRow(Array(nCols).fill(''))
+    totRow.getCell(nCols - 2).value = `Totale presenti: ${presenti.length}`
+    totRow.getCell(nCols - 2).font  = { bold:true, size:10 }
+
+    const buffer = await wb.xlsx.writeBuffer()
+    const blob = new Blob([buffer],{ type:'application/vnd.openxmlformats-officedocument.spreadsheetml.sheet' })
+    const url  = URL.createObjectURL(blob)
+    const a    = document.createElement('a')
+    a.href     = url
+    a.download = `presenti-${eventoTitle.toLowerCase().replace(/\s+/g,'-')}-${new Date().toISOString().slice(0,10)}.xlsx`
+    document.body.appendChild(a); a.click(); document.body.removeChild(a)
+    URL.revokeObjectURL(url)
+    logAttivita('presenti_esportati',{ eventoId:selectedEvento, eventoTitolo:eventoTitle, dettagli:{ totale:presenti.length } })
+  }
+
+  function tcName(s) {
+    if (!s) return ''
+    return s.trim().split(/\s+/).map(w => w.charAt(0).toUpperCase() + w.slice(1).toLowerCase()).join(' ')
+  }
+
+  function buildRegistroRows() {
+    return [...registrations]
+      .filter(r => ['confermato','presente','walk-in'].includes(r.stato))
+      .sort((a,b) => {
+        const ca=(a.cognome||'').toLowerCase(), cb=(b.cognome||'').toLowerCase()
+        const na=(a.nome||'').toLowerCase(),    nb=(b.nome||'').toLowerCase()
+        return ca<cb?-1:ca>cb?1:na<nb?-1:na>nb?1:0
+      })
+  }
+
+  async function exportRegistroPDF() {
+    const evento = eventi.find(e=>e.id===selectedEvento)
+    const eventoTitle = evento?.titolo || 'evento'
+    const sorted = buildRegistroRows()
+    if (!sorted.length) return
+    const BLU='#003DA5', BLU_CH='#EEF3FF', NERO='#0A0A0A'
+    const now = new Date()
+    const dataStr = now.toLocaleDateString('it-IT',{day:'2-digit',month:'long',year:'numeric'})
+    const oraStr  = now.toLocaleTimeString('it-IT',{hour:'2-digit',minute:'2-digit'})
+    const nTot   = sorted.length
+    const nPosto = sorted.filter(r=>r.numero_posto).length
+    const logoUrl = 'https://raw.githubusercontent.com/alessandroparrelli/fileappoggio/main/NUOVO-LOGO-CNA-ROMA-SOLO-ROMA.png'
+    const righe = sorted.map((r,i)=>{
+      const bg = i%2===0?'#FFFFFF':BLU_CH
+      return `<tr style="background:${bg}">
+        <td style="color:#9CA3AF;text-align:center;font-size:8.5pt">${i+1}</td>
+        <td style="font-weight:700;color:${NERO}">${tcName(r.cognome)}</td>
+        <td>${tcName(r.nome)}</td>
+        <td style="color:#4B5563;font-size:9pt">${tcName(r.ragione_sociale)||'—'}</td>
+        <td style="font-weight:700;color:${BLU};text-align:center">${r.numero_posto||'—'}</td>
+      </tr>`
+    }).join('')
+    const html=`<!DOCTYPE html><html lang="it"><head><meta charset="UTF-8">
+      <title>Registro — ${eventoTitle}</title>
+      <style>
+        *{box-sizing:border-box;margin:0;padding:0}
+        body{font-family:'Calibri',Arial,sans-serif;font-size:10pt;color:#111}
+        @page{size:A4 portrait;margin:10mm 8mm 10mm 8mm}
+        .header{display:flex;justify-content:space-between;align-items:flex-end;border-bottom:2.5px solid ${BLU};padding-bottom:6px;margin-bottom:8px;page-break-inside:avoid}
+        .header img{height:38px}
+        .header h1{font-size:13pt;font-weight:700;color:${BLU};margin-bottom:3px}
+        .header p{font-size:8.5pt;color:#6B7280;margin-bottom:1px}
+        .hright{text-align:right;font-size:8.5pt;color:#9CA3AF}
+        table{width:100%;border-collapse:collapse;font-size:10pt}
+        thead tr{background:${BLU}}
+        thead th{color:#fff;padding:5px;font-size:9pt;font-weight:700;text-align:left;text-transform:uppercase;letter-spacing:.03em}
+        th.c,td.c{text-align:center}
+        tbody td{padding:4.5px 5px;border-bottom:.4px solid #D0D9F0;vertical-align:middle}
+        .footer{margin-top:8px;border-top:.5px solid #E5EAEF;padding-top:4px;display:flex;justify-content:space-between;font-size:7.5pt;color:#9CA3AF;page-break-inside:avoid}
+        .toolbar{background:${BLU};color:#fff;padding:10px 16px;display:flex;align-items:center;gap:12px;font-size:11pt}
+        .btn-print{margin-left:auto;background:#fff;color:${BLU};border:none;padding:8px 20px;border-radius:8px;font-weight:700;font-size:11pt;cursor:pointer}
+        .btn-close{background:transparent;color:#fff;border:1px solid rgba(255,255,255,.4);padding:8px 16px;border-radius:8px;cursor:pointer}
+        @media print{.toolbar{display:none}thead{display:table-header-group}tr{page-break-inside:avoid}}
+      </style></head><body>
+      <div class="toolbar no-print">
+        <strong>Registro iscritti</strong> — ${eventoTitle}
+        <button class="btn-print" onclick="window.print()">🖨 Stampa / Salva PDF</button>
+        <button class="btn-close" onclick="window.close()">✕</button>
+      </div>
+      <div style="padding:0">
+        <div class="header">
+          <div style="display:flex;align-items:center;gap:14px">
+            <img src="${logoUrl}" alt="CNA Roma" onerror="this.style.display='none'">
+            <div>
+              <h1>${eventoTitle}</h1>
+              <p>${evento?.luogo||''}</p>
+              <p>${nTot} iscritti · ${nPosto} con posto · ${dataStr} ore ${oraStr}</p>
+            </div>
+          </div>
+          <div class="hright">Lista iscritti<br>per cognome</div>
+        </div>
+        <table>
+          <thead><tr>
+            <th style="width:4%" class="c">#</th>
+            <th style="width:22%">Cognome</th>
+            <th style="width:20%">Nome</th>
+            <th style="width:32%">Società</th>
+            <th style="width:22%" class="c">Posto assegnato</th>
+          </tr></thead>
+          <tbody>${righe}</tbody>
+        </table>
+        <div class="footer">
+          <span>CNA Roma — Portale Eventi · documento ad uso interno</span>
+          <span>${dataStr} ore ${oraStr}</span>
+        </div>
+      </div></body></html>`
+    const win=window.open('','_blank','width=900,height=700')
+    win.document.write(html); win.document.close()
+    logAttivita('registro_pdf',{eventoId:selectedEvento,eventoTitolo:eventoTitle,dettagli:{totale:nTot}})
+  }
+
+  async function exportRegistroWord() {
+    const evento = eventi.find(e=>e.id===selectedEvento)
+    const eventoTitle = evento?.titolo || 'evento'
+    const sorted = buildRegistroRows()
+    if (!sorted.length) return
+    const { Document, Packer, Table, TableRow, TableCell, Paragraph, TextRun,
+            WidthType, AlignmentType, ShadingType, BorderStyle, Header } = await import('docx')
+    const BLU='003DA5', BLU_CH='EEF3FF'
+    const PAGE_W=11906, MARGIN=720, TABLE_W=PAGE_W-MARGIN*2
+    const COL={
+      num:Math.round(TABLE_W*.04), cog:Math.round(TABLE_W*.22),
+      nom:Math.round(TABLE_W*.20), soc:Math.round(TABLE_W*.32),
+      pos:Math.round(TABLE_W*.22),
+    }
+    const nb={style:BorderStyle.NONE}
+    const lb=(c='D0D9F0')=>({style:BorderStyle.SINGLE,size:2,color:c})
+    function mkCell(text,{w,bg,bold=false,size=20,color='111827',align=AlignmentType.LEFT,lc='D0D9F0'}={}){
+      return new TableCell({
+        width:{size:w||COL.soc,type:WidthType.DXA},
+        shading:bg?{type:ShadingType.CLEAR,fill:bg}:undefined,
+        borders:{top:nb,left:nb,right:nb,bottom:lb(lc)},
+        verticalAlign:'center',
+        children:[new Paragraph({
+          alignment:align,spacing:{before:40,after:40},
+          children:[new TextRun({text:text||'—',bold,size,color,font:'Calibri'})]
+        })]
+      })
+    }
+    const hRow=new TableRow({tableHeader:true,children:[
+      mkCell('#',           {w:COL.num,bg:BLU,color:'FFFFFF',bold:true,size:18,align:AlignmentType.CENTER,lc:BLU}),
+      mkCell('COGNOME',     {w:COL.cog,bg:BLU,color:'FFFFFF',bold:true,size:18,lc:BLU}),
+      mkCell('NOME',        {w:COL.nom,bg:BLU,color:'FFFFFF',bold:true,size:18,lc:BLU}),
+      mkCell('SOCIETÀ',     {w:COL.soc,bg:BLU,color:'FFFFFF',bold:true,size:18,lc:BLU}),
+      mkCell('POSTO',       {w:COL.pos,bg:BLU,color:'FFFFFF',bold:true,size:18,align:AlignmentType.CENTER,lc:BLU}),
+    ]})
+    const dataRows=sorted.map((r,i)=>{
+      const bg=i%2===0?'FFFFFF':BLU_CH
+      return new TableRow({children:[
+        mkCell(String(i+1),                    {w:COL.num,bg,color:'9CA3AF',size:18,align:AlignmentType.CENTER}),
+        mkCell(tcName(r.cognome),              {w:COL.cog,bg,bold:true,size:20,color:'0A0A0A'}),
+        mkCell(tcName(r.nome),                 {w:COL.nom,bg,size:20,color:'1F2937'}),
+        mkCell(tcName(r.ragione_sociale)||'—', {w:COL.soc,bg,size:18,color:'4B5563'}),
+        mkCell(r.numero_posto||'—',            {w:COL.pos,bg,bold:true,size:18,color:BLU,align:AlignmentType.CENTER}),
+      ]})
+    })
+    const table=new Table({
+      width:{size:TABLE_W,type:WidthType.DXA},
+      columnWidths:[COL.num,COL.cog,COL.nom,COL.soc,COL.pos],
+      rows:[hRow,...dataRows],
+    })
+    const now=new Date()
+    const dataStr=now.toLocaleDateString('it-IT',{day:'2-digit',month:'long',year:'numeric'})
+    const oraStr=now.toLocaleTimeString('it-IT',{hour:'2-digit',minute:'2-digit'})
+    const doc=new Document({sections:[{
+      properties:{page:{size:{width:PAGE_W,height:16838},margin:{top:MARGIN*2.5,bottom:MARGIN,left:MARGIN,right:MARGIN}}},
+      headers:{default:new Header({children:[new Paragraph({
+        border:{bottom:{style:BorderStyle.SINGLE,size:6,color:BLU}},
+        spacing:{after:80},
+        children:[
+          new TextRun({text:eventoTitle+'  ·  ',bold:true,size:24,color:BLU,font:'Calibri'}),
+          new TextRun({text:`${sorted.length} iscritti · ${dataStr} ore ${oraStr}`,size:18,color:'6B7280',font:'Calibri'}),
+        ]
+      })]})},
+      children:[table],
+    }]})
+    const buf=await Packer.toBuffer(doc)
+    const blob=new Blob([buf],{type:'application/vnd.openxmlformats-officedocument.wordprocessingml.document'})
+    const url=URL.createObjectURL(blob)
+    const a=document.createElement('a')
+    a.href=url; a.download=`registro-${eventoTitle.toLowerCase().replace(/\s+/g,'-')}-${new Date().toISOString().slice(0,10)}.docx`
+    document.body.appendChild(a);a.click();document.body.removeChild(a);URL.revokeObjectURL(url)
+    logAttivita('registro_word',{eventoId:selectedEvento,eventoTitolo:eventoTitle,dettagli:{totale:sorted.length}})
+  }
+
   function downloadTemplate() {
     const rows = [{ 'Nome':'Mario','Cognome':'Rossi','Email':'mario@esempio.it','Cellulare':'3331234567','Ragione Sociale':'Rossi Srl','P.IVA':'01234567890','CAP':'00100' }]
     const ws = XLSX.utils.json_to_sheet(rows)
@@ -1016,8 +1427,29 @@ export default function IscrittiPage() {
     setImportDone({ ok, fail })
     if (ok > 0) {
       logAttivita('iscritti_importati', { eventoId: selectedEvento, dettagli: { ok, fail } })
+      // Fetch the IDs of the just-imported registrations (last N by created_at)
+      const { data: justImported } = await supabase.from('registrations')
+        .select('id').eq('event_id', selectedEvento).eq('stato','confermato')
+        .order('created_at', { ascending: false }).limit(ok)
+      setImportedIds((justImported || []).map(r => r.id))
       loadRegs()
     }
+  }
+
+  async function inviaConfermaATutti() {
+    const regsConEmail = registrations.filter(r => r.email && importedIds.includes(r.id))
+    if (!regsConEmail.length) { alert('Nessun iscritto importato trovato'); return }
+    setSendingEmailAll(true)
+    let sent = 0
+    for (const r of regsConEmail) {
+      try {
+        await supabase.functions.invoke('send-event-email', { body: { tipo: 'conferma_iscrizione', iscrizione_id: r.id, solo: true } })
+        await supabase.functions.invoke('send-event-email', { body: { tipo: 'notifica_admin', iscrizione_id: r.id, solo: true } })
+        sent++
+      } catch(e) { console.error('err', r.id, e) }
+    }
+    setSendingEmailAll(false)
+    alert(`✅ Email di conferma inviate a ${sent} iscritti`)
   }
 
   function resetImport() {
@@ -1111,6 +1543,8 @@ export default function IscrittiPage() {
       .replace(/{{data}}/g, dataEvento)
       .replace(/{{ora}}/g, oraEvento)
       .replace(/{{luogo}}/g, eventoDettagli?.luogo || '')
+      .replace(/{{numero_posto}}/g, iscritto?.numero_posto || '')
+      .replace(/{{link_registrazione}}/g, iscritto?.short_code ? `https://portale-eventi-cna.vercel.app/i/${iscritto.short_code}` : (iscritto?.codice_iscrizione ? `https://portale-eventi-cna.vercel.app/i/${iscritto.codice_iscrizione}` : ''))
   }
 
   function inserisciVariabile(variabile) {
@@ -1130,12 +1564,12 @@ export default function IscrittiPage() {
     } else if (smsSelezione.size > 0) {
       destinatari = [...smsSelezione].map(id => {
         const r = registrations.find(x => x.id === id)
-        return r ? { registrazione_id: r.id, telefono: r.cellulare, nome: r.nome, cognome: r.cognome } : null
+        return r ? { registrazione_id: r.id, id: r.id, telefono: r.cellulare, nome: r.nome, cognome: r.cognome, numero_posto: r.numero_posto, short_code: r.short_code, codice_iscrizione: r.codice_iscrizione } : null
       }).filter(Boolean).filter(d => d.telefono)
     } else {
       destinatari = registrations
         .filter(r => r.cellulare)
-        .map(r => ({ registrazione_id: r.id, telefono: r.cellulare, nome: r.nome, cognome: r.cognome }))
+        .map(r => ({ registrazione_id: r.id, id: r.id, telefono: r.cellulare, nome: r.nome, cognome: r.cognome, numero_posto: r.numero_posto, short_code: r.short_code, codice_iscrizione: r.codice_iscrizione }))
     }
 
     // Personalizza messaggio per ogni destinatario
@@ -1146,7 +1580,7 @@ export default function IscrittiPage() {
 
     // Per l'API, ogni messaggio e' gia' personalizzato — li inviamo individualmente se diversi
     // Se il testo non ha variabili personali, batch unico
-    const hasPersonalVars = smsTesto.includes('{{nome}}') || smsTesto.includes('{{cognome}}') || smsTesto.includes('{{nome_completo}}')
+    const hasPersonalVars = smsTesto.includes('{{nome}}') || smsTesto.includes('{{cognome}}') || smsTesto.includes('{{nome_completo}}') || smsTesto.includes('{{link_registrazione}}') || smsTesto.includes('{{numero_posto}}')
 
     try {
       const { data: { session } } = await supabase.auth.getSession()
@@ -1226,7 +1660,7 @@ export default function IscrittiPage() {
   }
 
   function getAnteprimaSms() {
-    if (smsProva) return interpolaSms(smsTesto, { nome: 'Mario', cognome: 'Rossi' })
+    if (smsProva) return interpolaSms(smsTesto, { nome: 'Mario', cognome: 'Rossi', id: 'esempio-uuid', numero_posto: 'Platea Fila 1 Posto 1' })
     if (smsAnteprimaIscritto) return interpolaSms(smsTesto, smsAnteprimaIscritto)
     const primoId = [...smsSelezione][0]
     const primo = primoId ? registrations.find(r => r.id === primoId) : registrations.find(r => r.cellulare)
@@ -1334,13 +1768,30 @@ export default function IscrittiPage() {
           <Btn variant="secondary" onClick={downloadTemplate} size="md"><Download size={16}/> Template</Btn>
           <Btn variant="secondary" onClick={() => { setImportModal(true); setImportDone(null); setImportPreview([]); setImportErrors([]) }} size="md"><Upload size={16}/> Importa</Btn>
           <Btn variant="secondary" onClick={exportExcel} size="md"><Download size={16}/> Esporta Excel</Btn>
+          {filterStato === 'presente' && (
+            <Btn variant="secondary" onClick={exportExcelPresenti} size="md" style={{ background:'#ECFDF5', color:'#16A34A', borderColor:'#86EFAC' }}><Download size={16}/> Esporta presenti</Btn>
+          )}
+        </div>
+      )}
+      {/* Riga registro — sempre visibile quando c'è un evento */}
+      {selectedEvento && (
+        <div style={{ display:'flex', gap:'8px', flexWrap:'wrap', marginBottom:'16px', alignItems:'center' }}>
+          <Btn variant="secondary" onClick={exportRegistroPDF}  size="md" style={{ background:'#EFF6FF', color:'#1D4ED8', borderColor:'#BFDBFE', fontWeight:'700' }}><FileText size={16}/> 🖨 Registro PDF</Btn>
+          <Btn variant="secondary" onClick={exportRegistroWord} size="md" style={{ background:'#EFF6FF', color:'#1D4ED8', borderColor:'#BFDBFE', fontWeight:'700' }}><FileText size={16}/> 📄 Registro Word</Btn>
+          <span style={{ fontSize:'12px', color:'#9CA3AF', marginLeft:'4px' }}>
+            Lista iscritti ordinata per cognome · da stampare per le mascherine
+          </span>
         </div>
       )}
 
       {/* TAB SWITCHER — visibile solo se teatro abilitato */}
       {selectedEvento && teatroAbilitato && (
         <div style={{ display:'flex', gap:'6px', marginBottom:'20px', background:'#F1F5F9', borderRadius:'16px', padding:'5px' }}>
-          {[{ id:'iscritti', label:'👥 Iscritti' }, { id:'teatro', label:'🎭 Gestione posti' }].map(tab => (
+          {[
+            { id:'iscritti', label: <span style={{display:'flex',alignItems:'center',gap:6}}><svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><path d="M17 21v-2a4 4 0 0 0-4-4H5a4 4 0 0 0-4 4v2"/><circle cx="9" cy="7" r="4"/><path d="M23 21v-2a4 4 0 0 0-3-3.87"/><path d="M16 3.13a4 4 0 0 1 0 7.75"/></svg>Iscritti</span> },
+            { id:'teatro', label: <span style={{display:'flex',alignItems:'center',gap:6}}><svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><path d="M3 18h18M5 18V9a1 1 0 0 1 .553-.894l6-3a1 1 0 0 1 .894 0l6 3A1 1 0 0 1 19 9v9"/><rect x="9" y="13" width="6" height="5" rx="1"/></svg>Gestione posti</span> },
+            { id:'mappa', label: <span style={{display:'flex',alignItems:'center',gap:6}}><svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><polygon points="1 6 1 22 8 18 16 22 23 18 23 2 16 6 8 2 1 6"/><line x1="8" y1="2" x2="8" y2="18"/><line x1="16" y1="6" x2="16" y2="22"/></svg>Mappa posti</span> },
+          ].map(tab => (
             <button key={tab.id} onClick={() => setTabAttivo(tab.id)}
               style={{
                 flex:1, padding:'11px 24px', border:'none', cursor:'pointer',
@@ -1363,18 +1814,35 @@ export default function IscrittiPage() {
           {/* Stats */}
           <div style={{ display:'flex', gap:'12px', flexWrap:'wrap', marginBottom:'16px' }}>
             {[
-              { label:'Con posto', value: registrations.filter(r => r.numero_posto).length, color:'#5B5FEF' },
-              { label:'Senza posto', value: registrations.filter(r => !r.numero_posto).length, color:'#DC2626' },
-              { label:'Presenza confermata', value: registrations.filter(r => r.presenza_confermata).length, color:'#059669' },
-              { label:'In attesa conferma', value: registrations.filter(r => r.numero_posto && !r.presenza_confermata).length, color:'#D97706' },
-            ].map(st => (
-              <div key={st.label} style={{ background:'#fff', border:'1px solid #E8ECF4', borderRadius:'16px', padding:'14px 20px', flex:1, minWidth:'140px' }}>
-                <p style={{ margin:'0 0 4px', fontSize:'24px', fontWeight:'900', color:st.color, letterSpacing:'-0.02em' }}>{st.value}</p>
-                <p style={{ margin:0, fontSize:'12px', color:'#6B7280', fontWeight:'500' }}>{st.label}</p>
-              </div>
-            ))}
+              { label:'Con posto',           value: registrations.filter(r => r.numero_posto).length,                                              color:'#5B5FEF', filtro:null },
+              { label:'Senza posto',         value: registrations.filter(r => !r.numero_posto).length,                                             color:'#DC2626', filtro:null },
+              { label:'Presenza confermata', value: registrations.filter(r => r.presenza_confermata).length,                                       color:'#059669', filtro:'confermata' },
+              { label:'Rinunce',             value: registrations.filter(r => r.rinuncia).length,                                                  color:'#DC2626', filtro:'rinuncia' },
+              { label:'In attesa',           value: registrations.filter(r => r.numero_posto && !r.presenza_confermata && !r.rinuncia).length,     color:'#D97706', filtro:'in_attesa' },
+            ].map(st => {
+              const isActive = st.filtro && filtroPresenzaTeatro === st.filtro
+              return (
+                <div key={st.label}
+                  onClick={() => st.filtro && setFiltroPresenzaTeatro(filtroPresenzaTeatro === st.filtro ? 'tutti' : st.filtro)}
+                  style={{ background: isActive ? st.color : '#fff', border:`2px solid ${isActive ? st.color : '#E8ECF4'}`, borderRadius:'16px', padding:'14px 20px', flex:1, minWidth:'140px', cursor: st.filtro ? 'pointer' : 'default', transition:'all .15s ease', boxShadow: isActive ? `0 4px 12px ${st.color}33` : 'none' }}>
+                  <p style={{ margin:'0 0 4px', fontSize:'24px', fontWeight:'900', color: isActive ? '#fff' : st.color, letterSpacing:'-0.02em' }}>{st.value}</p>
+                  <p style={{ margin:0, fontSize:'12px', color: isActive ? 'rgba(255,255,255,0.85)' : '#6B7280', fontWeight:'500' }}>{st.label}{st.filtro && <span style={{fontSize:'10px',marginLeft:'4px',opacity:.7}}>{isActive ? '✕' : '↓'}</span>}</p>
+                </div>
+              )
+            })}
           </div>
 
+          {filtroPresenzaTeatro !== 'tutti' && (
+            <div style={{ display:'flex', alignItems:'center', gap:'10px', marginBottom:'10px', padding:'8px 14px', background:'#EFF6FF', borderRadius:'12px', border:'1px solid #BFDBFE' }}>
+              <span style={{ fontSize:'13px', color:'#1D4ED8', fontWeight:'600' }}>
+                Filtro: <strong>{filtroPresenzaTeatro === 'confermata' ? 'Presenza confermata' : filtroPresenzaTeatro === 'rinuncia' ? 'Rinunce' : 'In attesa'}</strong>
+              </span>
+              <button onClick={() => setFiltroPresenzaTeatro('tutti')}
+                style={{ marginLeft:'auto', fontSize:'12px', fontWeight:'700', color:'#1D4ED8', background:'none', border:'1px solid #93C5FD', borderRadius:'999px', padding:'3px 10px', cursor:'pointer', fontFamily:"'Inter',sans-serif" }}>
+                ✕ Mostra tutti
+              </button>
+            </div>
+          )}
           {/* Filtri teatro */}
           <div style={{ display:'flex', gap:'10px', flexWrap:'wrap', marginBottom:'16px', alignItems:'center' }}>
             <div style={{ display:'flex', alignItems:'center', gap:'6px' }}>
@@ -1431,76 +1899,173 @@ export default function IscrittiPage() {
             )}
           </div>
 
-          {/* Barra azioni invio */}
-          <div style={{ background:'#F9FAFB', border:'1px solid #E8ECF4', borderRadius:'20px', padding:'14px 16px', marginBottom:'16px' }}>
-            <div style={{ display:'flex', gap:'10px', flexWrap:'wrap', alignItems:'center' }}>
-              {/* Invio massivo a tutti */}
-              <Btn variant="primary" onClick={() => setConfirmInvioTeatro({ ids: null })} disabled={invioPostoInCorso} size="md">
+          {/* Barra selezione */}
+          {teatroSelezione.size > 0 && (
+            <div style={{ display:'flex', alignItems:'center', gap:'10px', marginBottom:'8px', padding:'8px 14px', background:'#EFF6FF', border:'1px solid #BFDBFE', borderRadius:'12px' }}>
+              <span style={{ fontSize:'13px', color:'#1D4ED8', fontWeight:'700' }}>
+                ✓ {teatroSelezione.size} {teatroSelezione.size === 1 ? 'iscritto selezionato' : 'iscritti selezionati'}
+              </span>
+              <button onClick={() => setTeatroSelezione(new Set())}
+                style={{ fontSize:'12px', color:'#DC2626', background:'none', border:'none', cursor:'pointer', padding:'2px 8px', fontWeight:'700', borderRadius:8, border:'1px solid #FECACA', background:'#FEF2F2' }}>
+                × Deseleziona tutto
+              </button>
+              <div style={{ flex:1 }} />
+              {(() => {
+                const selArr = [...teatroSelezione]
+                return selArr.length > 0 ? (
+                  <Btn variant="ghost" size="sm" onClick={() => setCambiaStato({ ids: selArr })}
+                    style={{ border:'1px solid #E8ECF4', color:'#6B7280', fontSize:'12px' }}>
+                    🔄 Cambia stato ({selArr.length})
+                  </Btn>
+                ) : null
+              })()}
+            </div>
+          )}
+
+                    <div style={{ display:'flex', gap:'10px', marginBottom:'16px' }}>
+{/* Box 1: INVIO EMAIL POSTO */}
+          <div style={{ flex:1, background:'#EFF6FF', border:'1px solid #BFDBFE', borderRadius:'16px', padding:'14px 18px', marginBottom:'0' }}>            <div style={{ display:'flex', alignItems:'center', gap:'6px', marginBottom:'10px' }}>
+              <span style={{ fontSize:'12px', fontWeight:'800', color:'#1D4ED8', textTransform:'uppercase', letterSpacing:'.05em' }}>📨 Email posto assegnato</span>
+            </div>
+            <div style={{ display:'flex', gap:'8px', flexWrap:'wrap', alignItems:'center' }}>
+              <Btn variant="primary" onClick={() => setConfirmInvioTeatro({ ids: null })} disabled={invioPostoInCorso} size="md"
+                style={{ background:'#1D4ED8', border:'none' }}>
                 {invioPostoInCorso ? '📨 Invio…' : '📨 Invia a tutti'}
               </Btn>
-
-              {/* Invio ai selezionati */}
               {teatroSelezione.size > 0 && (
-                <Btn variant="secondary" onClick={() => setConfirmInvioTeatro({ ids: [...teatroSelezione] })} disabled={invioPostoInCorso} size="md">
+                <Btn size="md" onClick={() => setConfirmInvioTeatro({ ids: [...teatroSelezione] })} disabled={invioPostoInCorso}
+                  style={{ background:'#fff', border:'1.5px solid #1D4ED8', color:'#1D4ED8', fontWeight:'700', borderRadius:'20px', padding:'7px 16px', cursor:'pointer', fontFamily:'inherit', fontSize:'13px' }}>
                   📨 Invia ai selezionati ({teatroSelezione.size})
                 </Btn>
               )}
-
               <div style={{ flex:1 }} />
-
-              {/* Dry run */}
-              <Btn variant="ghost" onClick={() => inviaMailPosti(true, teatroSelezione.size > 0 ? [...teatroSelezione] : null)} size="md">
-                🔍 {teatroSelezione.size > 0 ? `Anteprima selezionati (${teatroSelezione.size})` : 'Anteprima tutti'}
+              <Btn variant="ghost" onClick={() => inviaMailPosti(true, teatroSelezione.size > 0 ? [...teatroSelezione] : null)} size="md"
+                style={{ fontSize:'12px', color:'#6B7280' }}>
+                🔍 {teatroSelezione.size > 0 ? `Anteprima sel. (${teatroSelezione.size})` : 'Anteprima tutti'}
               </Btn>
-              {/* Export Excel posti */}
-              <div style={{ marginLeft:'auto' }}>
-                <Btn variant="secondary" onClick={exportExcelTeatro} size="md">
-                  <Download size={15}/> Esporta posti Excel
-                </Btn>
-              </div>
+              <Btn variant="ghost" onClick={exportExcelTeatro} size="md" style={{ fontSize:'12px', color:'#6B7280' }}>
+                <Download size={13}/> Excel posti
+              </Btn>
             </div>
-
-            {/* Info selezione */}
-            {teatroSelezione.size > 0 && (
-              <div style={{ marginTop:'10px', display:'flex', alignItems:'center', gap:'10px' }}>
-                <span style={{ fontSize:'12px', color:'#374151', fontWeight:'600' }}>
-                  {teatroSelezione.size} selezionati
-                </span>
-                <button onClick={() => setTeatroSelezione(new Set())}
-                  style={{ fontSize:'12px', color:'#DC2626', background:'none', border:'none', cursor:'pointer', padding:0, fontWeight:'600' }}>
-                  Deseleziona tutto
-                </button>
-              </div>
-            )}
           </div>
 
-          {/* Risultato dry run */}
+          {/* Box 2: REMINDER */}
+          <div style={{ flex:1, background:'#F5F3FF', border:'1px solid #DDD6FE', borderRadius:'16px', padding:'14px 18px', marginBottom:'0' }}>            <div style={{ display:'flex', alignItems:'center', gap:'6px', marginBottom:'10px' }}>
+              <span style={{ fontSize:'12px', fontWeight:'800', color:'#6D28D9', textTransform:'uppercase', letterSpacing:'.05em' }}>📣 Reminder evento</span>
+            </div>
+            <div style={{ display:'flex', gap:'8px', flexWrap:'wrap', alignItems:'center' }}>
+              <Btn size="md"
+                onClick={() => setConfirmReminder({ ids: null })}
+                disabled={reminderInCorso}
+                style={{ background:'#7C4DFF', color:'#fff', border:'none', fontWeight:'700', borderRadius:'20px', padding:'7px 16px', cursor:'pointer', fontFamily:'inherit', fontSize:'13px', opacity: reminderInCorso ? .6 : 1 }}>
+                {reminderInCorso ? '⏳ Invio…' : `📣 Invia a tutti (${registrations.filter(r => r.email && !r.rinuncia).length})`}
+              </Btn>
+              {teatroSelezione.size > 0 && (
+                <Btn size="md"
+                  onClick={() => setConfirmReminder({ ids: [...teatroSelezione] })}
+                  disabled={reminderInCorso}
+                  style={{ background:'#fff', border:'1.5px solid #7C4DFF', color:'#7C4DFF', fontWeight:'700', borderRadius:'20px', padding:'7px 16px', cursor:'pointer', fontFamily:'inherit', fontSize:'13px' }}>
+                  📣 Ai selezionati ({teatroSelezione.size})
+                </Btn>
+              )}
+              {reminderRis && (
+                <>
+                  <div style={{ flex:1 }} />
+                  <div style={{ display:'flex', alignItems:'center', gap:'8px' }}>
+                    <span style={{ fontSize:'13px', fontWeight:'700', color: reminderRis.failed > 0 ? '#DC2626' : '#059669' }}>
+                      {reminderRis.failed > 0 ? `⚠️ ${reminderRis.sent} inviati, ${reminderRis.failed} errori` : `✓ ${reminderRis.sent} reminder inviati`}
+                    </span>
+                    <button onClick={() => setReminderRis(null)}
+                      style={{ background:'none', border:'none', cursor:'pointer', color:'#9CA3AF', fontSize:'16px', padding:0, lineHeight:1 }}>×</button>
+                  </div>
+                </>
+              )}
+            </div>
+          </div>
+
+                    </div>{/* fine wrapper affiancato */}
+
+{/* Risultato dry run */}
           {dryRunRis && (
             <div style={{ marginBottom:'14px', padding:'12px 18px', borderRadius:'16px', background: dryRunRis.error ? '#FEF2F2' : '#EFF6FF', border:`1px solid ${dryRunRis.error ? '#FECACA' : '#BFDBFE'}` }}>
               <div style={{ display:'flex', justifyContent:'space-between', alignItems:'center' }}>
                 <p style={{ margin:0, fontSize:'13px', fontWeight:'700', color: dryRunRis.error ? '#DC2626' : '#1D4ED8' }}>
-                  {dryRunRis.error ? `❌ ${dryRunRis.error}` : `📋 ${dryRunRis.count} iscritti riceverebbero la mail.`}
+                  {dryRunRis.error ? `❌ ${dryRunRis.error}` : `📧 ${dryRunRis.total_questo_blocco ?? dryRunRis.sent ?? dryRunRis.sample?.length ?? 0} iscritti riceveranno la mail`}
                 </p>
                 <button onClick={() => setDryRunRis(null)} style={{ background:'none', border:'none', cursor:'pointer', color:'#9CA3AF', fontSize:'18px', padding:0 }}>×</button>
               </div>
-              {dryRunRis.sample?.length > 0 && <p style={{ margin:'6px 0 0', fontSize:'12px', color:'#374151' }}>Es: {dryRunRis.sample.map(r => `${r.nome} (${r.numero_posto})`).join(' · ')}</p>}
+          {dryRunRis.sample?.length > 0 && (
+            <div style={{ display:'flex', flexWrap:'wrap', gap:'6px', marginTop:'8px' }}>
+              {dryRunRis.sample.map((r, i) => (
+                <span key={i} style={{ background:'#fff', border:'0.5px solid #C7D2FE', borderRadius:'6px', fontSize:'12px', color:'#4338CA', padding:'3px 9px', whiteSpace:'nowrap' }}>
+                  {r.nome}{r.cognome ? ` ${r.cognome}` : ''}{r.numero_posto ? ` · P.${r.numero_posto}` : ''}
+                </span>
+              ))}
+            </div>
+          )}
             </div>
           )}
 
           {/* Risultato invio */}
-          {invioPostoRis && (
-            <div style={{ marginBottom:'14px', padding:'12px 18px', borderRadius:'16px', background: invioPostoRis.error ? '#FEF2F2' : '#F0FDF4', border:`1px solid ${invioPostoRis.error ? '#FECACA' : '#BBF7D0'}` }}>
-              <div style={{ display:'flex', justifyContent:'space-between', alignItems:'center' }}>
-                <p style={{ margin:0, fontSize:'13px', fontWeight:'700', color: invioPostoRis.error ? '#DC2626' : '#059669' }}>
-                  {invioPostoRis.error ? `❌ ${invioPostoRis.error}` : `✅ ${invioPostoRis.sent} mail inviate su ${invioPostoRis.total}${invioPostoRis.failed > 0 ? ` · ${invioPostoRis.failed} fallite` : ''}`}
-                </p>
-                <button onClick={() => setInvioPostoRis(null)} style={{ background:'none', border:'none', cursor:'pointer', color:'#9CA3AF', fontSize:'18px', padding:0 }}>×</button>
+          {invioPostoRis && (() => {
+            const ris = invioPostoRis
+            const isError = !!ris.error
+            const isCorso = !!ris.inCorso
+            const isOk    = !isError && !isCorso
+            const bg      = isError ? '#FEF2F2' : isCorso ? '#EFF6FF' : '#F0FDF4'
+            const bordo   = isError ? '#FECACA' : isCorso ? '#BFDBFE' : '#BBF7D0'
+            const colore  = isError ? '#DC2626' : isCorso ? '#1D4ED8' : '#059669'
+            const totaleInviati = (ris.sent || 0)
+            const remaining = ris.remaining ?? null
+            const totaleStimato = remaining !== null ? totaleInviati + remaining : null
+            const pct = totaleStimato > 0 ? Math.round((totaleInviati / totaleStimato) * 100) : null
+            return (
+              <div style={{ marginBottom:'14px', padding:'14px 18px', borderRadius:'16px', background: bg, border:`1px solid ${bordo}` }}>
+                <div style={{ display:'flex', justifyContent:'space-between', alignItems:'flex-start', gap:8 }}>
+                  <div style={{ flex:1 }}>
+                    {isError && (
+                      <p style={{ margin:0, fontSize:'13px', fontWeight:'700', color: colore }}>❌ {ris.error}</p>
+                    )}
+                    {isCorso && (
+                      <>
+                        <p style={{ margin:'0 0 6px', fontSize:'13px', fontWeight:'700', color: colore }}>
+                          📨 Invio in corso — blocco {ris.blocco}…
+                        </p>
+                        <p style={{ margin:0, fontSize:'13px', color:'#374151' }}>
+                          <strong>{totaleInviati}</strong> inviate
+                          {remaining !== null && <> · <strong>{remaining}</strong> rimanenti</>}
+                          {ris.failed > 0 && <> · <span style={{color:'#DC2626'}}>{ris.failed} fallite</span></>}
+                        </p>
+                        {pct !== null && (
+                          <div style={{ marginTop:8, background:'#DBEAFE', borderRadius:99, height:6, overflow:'hidden' }}>
+                            <div style={{ background:'#3B82F6', height:'100%', width:`${pct}%`, transition:'width .4s ease', borderRadius:99 }} />
+                          </div>
+                        )}
+                      </>
+                    )}
+                    {isOk && (
+                      <>
+                        <p style={{ margin:'0 0 4px', fontSize:'13px', fontWeight:'700', color: colore }}>
+                          {ris.completato ? '✅ Invio completato' : '✅ Blocco inviato'}
+                        </p>
+                        <p style={{ margin:0, fontSize:'13px', color:'#374151' }}>
+                          <strong>{totaleInviati}</strong> mail inviate
+                          {ris.failed > 0 && <> · <span style={{color:'#DC2626'}}><strong>{ris.failed}</strong> fallite</span></>}
+                          {remaining > 0 && <> · <span style={{color:'#D97706'}}>{remaining} ancora da inviare</span></>}
+                        </p>
+                      </>
+                    )}
+                  </div>
+                  {!isCorso && (
+                    <button onClick={() => setInvioPostoRis(null)} style={{ background:'none', border:'none', cursor:'pointer', color:'#9CA3AF', fontSize:'18px', padding:0, lineHeight:1, flexShrink:0 }}>×</button>
+                  )}
+                </div>
+                {ris.errors?.length > 0 && (
+                  <p style={{ margin:'8px 0 0', fontSize:'11px', color:'#DC2626', lineHeight:1.6 }}>{ris.errors.join(' · ')}</p>
+                )}
               </div>
-              {invioPostoRis.errors?.length > 0 && (
-                <p style={{ margin:'6px 0 0', fontSize:'11px', color:'#DC2626' }}>{invioPostoRis.errors.join(' · ')}</p>
-              )}
-            </div>
-          )}
+            )
+          })()}
 
           {/* Tabella */}
           <div style={s.card}>
@@ -1510,8 +2075,8 @@ export default function IscrittiPage() {
                   <tr style={{ background:'linear-gradient(90deg,#5B5FEF,#3730A3)' }}>
                     <th style={{ padding:'10px 12px', background:'transparent', color:'#fff', width:'40px' }}>
                       <input type="checkbox"
-                        checked={registrations.filter(r => r.numero_posto && r.email).length > 0 &&
-                          registrations.filter(r => r.numero_posto && r.email).every(r => teatroSelezione.has(r.id))}
+                        checked={registrations.filter(r => r.email).length > 0 &&
+                          registrations.filter(r => r.email).every(r => teatroSelezione.has(r.id))}
                         onChange={() => toggleSelezioneTeatroTutti(registrations)}
                         style={{ cursor:'pointer', width:'16px', height:'16px', accentColor:'#fff' }}
                         title="Seleziona/deseleziona tutti (con posto e email)"
@@ -1530,14 +2095,14 @@ export default function IscrittiPage() {
                       <tr key={r.id} style={{ backgroundColor: selezionato ? '#EFF6FF' : (i % 2 === 0 ? '#fff' : '#F9FAFB'), borderBottom:'1px solid #F3F4F6', transition:'background .1s' }}>
                         {/* Checkbox */}
                         <td style={{ ...s.td, textAlign:'center', paddingLeft:'12px', paddingRight:'12px' }}>
-                          {r.numero_posto && r.email ? (
+                          {r.email ? (
                             <input type="checkbox"
                               checked={selezionato}
                               onChange={() => toggleSelezioneTeatroReg(r.id)}
                               style={{ cursor:'pointer', width:'16px', height:'16px', accentColor:'#5B5FEF' }}
                             />
                           ) : (
-                            <span title="Nessun posto o email mancante" style={{ color:'#D1D5DB', fontSize:'12px' }}>—</span>
+                            <span title="Email mancante" style={{ color:'#D1D5DB', fontSize:'12px' }}>—</span>
                           )}
                         </td>
                         <td style={s.td}>
@@ -1572,27 +2137,60 @@ export default function IscrittiPage() {
                           {postoError[r.id] && <p style={{ margin:'4px 0 0', fontSize:'11px', color:'#DC2626' }}>{postoError[r.id]}</p>}
                         </td>
                         <td style={s.td}>
-                          {r.presenza_confermata
-                            ? <span style={{ fontSize:'12px', fontWeight:'700', color:'#059669', background:'#F0FDF4', padding:'4px 10px', borderRadius:'999px' }}>✓ Confermata</span>
-                            : <span style={{ fontSize:'12px', color:'#9CA3AF', background:'#F9FAFB', padding:'4px 10px', borderRadius:'999px' }}>In attesa</span>}
+                          <div style={{ display:'flex', flexDirection:'column', gap:'5px', alignItems:'flex-start' }}>
+                            {r.rinuncia
+                              ? <>
+                                  <span style={{ fontSize:'12px', fontWeight:'700', color:'#DC2626', background:'#FEF2F2', padding:'4px 10px', borderRadius:'999px' }}>✗ Non verrà</span>
+                                  <button onClick={() => setCambiaStato({ ids:[r.id] })} style={{ fontSize:'10px', color:'#9CA3AF', background:'none', border:'1px solid #E5E7EB', borderRadius:'999px', padding:'2px 8px', cursor:'pointer', fontFamily:"'Inter',sans-serif" }}>✏ Stato</button>
+                                </>
+                              : r.presenza_confermata
+                              ? <>
+                                  <span style={{ fontSize:'12px', fontWeight:'700', color:'#059669', background:'#F0FDF4', padding:'4px 10px', borderRadius:'999px' }}>✓ Confermata</span>
+                                  <button onClick={() => setCambiaStato({ ids:[r.id] })} style={{ fontSize:'10px', color:'#9CA3AF', background:'none', border:'1px solid #E5E7EB', borderRadius:'999px', padding:'2px 8px', cursor:'pointer', fontFamily:"'Inter',sans-serif" }}>✏ Stato</button>
+                                </>
+                              : <>
+                                  <span style={{ fontSize:'12px', color:'#9CA3AF', background:'#F9FAFB', padding:'4px 10px', borderRadius:'999px' }}>In attesa</span>
+                                  <button onClick={() => setCambiaStato({ ids:[r.id] })} style={{ fontSize:'10px', color:'#9CA3AF', background:'none', border:'1px solid #E5E7EB', borderRadius:'999px', padding:'2px 8px', cursor:'pointer', fontFamily:"'Inter',sans-serif" }}>✏ Stato</button>
+                                </>}
+                          </div>
                         </td>
                         <td style={s.td}><span style={{ fontSize:'12px', color:'#374151' }}>{r.presenza_confermata_at ? formatDt(r.presenza_confermata_at) : '—'}</span></td>
-                        {/* Invio singolo */}
+                        {/* Azioni: invio singolo + copia link */}
                         <td style={s.td}>
-                          {r.numero_posto && r.email ? (
-                            <button
-                              onClick={() => inviaMailPosti(false, [r.id])}
-                              disabled={invioPostoInCorso}
-                              title="Invia mail posto a questo iscritto"
-                              style={{ background:'none', border:'1px solid #E8ECF4', borderRadius:'20px', padding:'5px 10px', cursor:'pointer', fontSize:'12px', color:'#374151', fontFamily:"'Inter',sans-serif", fontWeight:'600', whiteSpace:'nowrap' }}>
-                              📨 Invia
-                            </button>
-                          ) : (
-                            <span style={{ fontSize:'11px', color:'#D1D5DB' }}>—</span>
-                          )}
-                          {r.posto_email_inviata && (
-                            <span style={{ marginLeft:'6px', fontSize:'11px', color:'#059669', fontWeight:'600', background:'#F0FDF4', padding:'3px 7px', borderRadius:'999px', whiteSpace:'nowrap' }}>✓ Inviata</span>
-                          )}
+                          <div style={{ display:'flex', flexDirection:'column', gap:'5px', alignItems:'flex-start' }}>
+                            {/* Invio mail posto */}
+                            {r.numero_posto && r.email ? (
+                              <div style={{ display:'flex', alignItems:'center', gap:'5px' }}>
+                                <button
+                                  onClick={() => inviaMailPosti(false, [r.id])}
+                                  disabled={invioPostoInCorso}
+                                  title="Invia mail posto a questo iscritto"
+                                  style={{ background:'none', border:'1px solid #E8ECF4', borderRadius:'20px', padding:'4px 10px', cursor:'pointer', fontSize:'12px', color:'#374151', fontFamily:"'Inter',sans-serif", fontWeight:'600', whiteSpace:'nowrap' }}>
+                                  📨 Invia
+                                </button>
+                                {r.posto_email_inviata && (
+                                  <span style={{ fontSize:'11px', color:'#059669', fontWeight:'600', background:'#F0FDF4', padding:'3px 7px', borderRadius:'999px', whiteSpace:'nowrap' }}>✓</span>
+                                )}
+                              </div>
+                            ) : null}
+                            {/* Copia link iscrizione — per tutti gli iscritti con codice */}
+                            {r.codice_iscrizione && (
+                              <button
+                                onClick={() => {
+                                  const url = `https://portale-eventi-cna.vercel.app/iscrizione/${r.codice_iscrizione}`
+                                  navigator.clipboard.writeText(url).then(() => {
+                                    // feedback visivo momentaneo
+                                    const btn = document.getElementById(`copy-${r.id}`)
+                                    if (btn) { btn.textContent = '✓ Copiato'; setTimeout(() => { if (btn) btn.textContent = '🔗 Link' }, 1800) }
+                                  })
+                                }}
+                                id={`copy-${r.id}`}
+                                title={`Copia link iscrizione: /iscrizione/${r.codice_iscrizione}`}
+                                style={{ background:'none', border:'1px solid #E8ECF4', borderRadius:'20px', padding:'4px 10px', cursor:'pointer', fontSize:'12px', color:'#5B5FEF', fontFamily:"'Inter',sans-serif", fontWeight:'600', whiteSpace:'nowrap' }}>
+                                🔗 Link
+                              </button>
+                            )}
+                          </div>
                         </td>
                       </tr>
                     )
@@ -1603,6 +2201,11 @@ export default function IscrittiPage() {
             {registrations.length === 0 && <div style={{ padding:'48px', textAlign:'center', color:'#9CA3AF', fontSize:'14px' }}>Nessun iscritto per questo evento</div>}
           </div>
         </div>
+      )}
+
+      {/* TAB MAPPA POSTI — assegnazione visuale su piantina */}
+      {selectedEvento && teatroAbilitato && tabAttivo === 'mappa' && (
+        <MappaPostiTeatro registrations={registrations} eventId={selectedEvento} onReload={loadRegs} />
       )}
 
       {/* STAT CARDS + TABELLA — solo tab iscritti */}
@@ -1631,10 +2234,19 @@ export default function IscrittiPage() {
           </div>
           <div style={{ display:'grid', gridTemplateColumns:'repeat(auto-fit,minmax(140px,1fr))', gap:'10px', marginBottom:'16px' }} className="stat-grid-auto">
             <GlowStatCard icon="users"     label="Tot. iscritti" value={registrations.length}                                    palette="blue"/>
-            <GlowStatCard icon="check"     label="Presenti"      value={totPresenti}                                              palette="green"/>
+            <GlowStatCard icon="check"     label="Presenti"      value={totPresenti}                                              palette="green"  onClick={() => setFilterStato(f => f==='presente' ? 'tutti' : 'presente')} active={filterStato==='presente'}/>
             <GlowStatCard icon="trending"  label="Confermati"    value={totConfermati}                                            palette="cyan"/>
             <GlowStatCard icon="usercheck" label="Walk-in"       value={registrations.filter(r=>r.stato==='walk-in').length}     palette="violet"/>
-            <GlowStatCard icon="userx"     label="Assenti"       value={registrations.filter(r=>r.stato==='assente').length}     palette="red"/>
+            <GlowStatCard icon="userx"     label="Non verrà"     value={registrations.filter(r=>r.rinuncia).length}              palette="red"/>
+            <div style={{ background:'linear-gradient(135deg,#fef3c7,#fde68a)', border:'1.5px solid #f59e0b', borderRadius:'20px', padding:'14px 16px', display:'flex', alignItems:'center', gap:'12px', cursor:'default' }}>
+              <span style={{ fontSize:22 }}>🔍</span>
+              <div>
+                <div style={{ fontSize:22, fontWeight:900, color:'#92400e', letterSpacing:'-0.03em', lineHeight:1 }}>{filtered.length}</div>
+                <div style={{ fontSize:11, color:'#78350f', fontWeight:600, marginTop:2 }}>
+                  {search ? `Risultati per "${search}"` : filterStato !== 'tutti' ? `Filtrati (${filterStato})` : 'Iscritti trovati'}
+                </div>
+              </div>
+            </div>
           </div>
         </>
       )}
@@ -1742,6 +2354,18 @@ export default function IscrittiPage() {
                               </button>
                             )}
 
+                            {r.email && (
+                              <button 
+                                style={{...s.iconBtn, color: sendingEmail === r.id ? '#9CA3AF' : '#059669'}} 
+                                title={`Invia email conferma a ${r.email}`} 
+                                disabled={sendingEmail === r.id}
+                                onClick={(e)=>{e.stopPropagation();inviaEmailConferma(r)}}>
+                                {sendingEmail === r.id 
+                                  ? <RefreshCw size={15} style={{animation:'spin 1s linear infinite'}}/>
+                                  : <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><rect x="2" y="4" width="20" height="16" rx="2"/><path d="M22 7l-10 6L2 7"/></svg>
+                                }
+                              </button>
+                            )}
                             {canDelete && (
                               <button style={{...s.iconBtn, color:'#DC2626'}} title="Elimina" onClick={()=>setDelConfirm(r)}>
                                 <Trash2 size={15}/>
@@ -1822,9 +2446,108 @@ export default function IscrittiPage() {
             )}
           </>
         )}
+
+          {/* SEZIONE RINUNCE */}
+          {registrations.filter(r => r.rinuncia).length > 0 && (
+            <div style={{ marginTop:32, background:'#FFF5F5', border:'1px solid #FECACA', borderRadius:16, padding:20 }}>
+              <div style={{ display:'flex', justifyContent:'space-between', alignItems:'center', marginBottom:16 }}>
+                <div>
+                  <h3 style={{ margin:'0 0 2px', fontSize:'15px', fontWeight:'800', color:'#DC2626' }}>
+                    ✗ Rinunce — {registrations.filter(r => r.rinuncia).length} iscritti
+                  </h3>
+                  <p style={{ margin:0, fontSize:'12px', color:'#9CA3AF' }}>
+                    Hanno comunicato che non parteciperanno tramite il link nell'email
+                  </p>
+                </div>
+                <button
+                  onClick={() => {
+                    const rinuncianti = registrations.filter(r => r.rinuncia)
+                    const rows = [['Nome','Cognome','Email','Telefono','Posto','Rinuncia il']]
+                    rinuncianti.forEach(r => rows.push([
+                      r.nome||'', r.cognome||'', r.email||'', r.cellulare||'',
+                      r.numero_posto||'', r.rinuncia_at ? new Date(r.rinuncia_at).toLocaleString('it-IT',{timeZone:'Europe/Rome'}) : ''
+                    ]))
+                    const csv = rows.map(r => r.map(c => `"${String(c).replace(/"/g,'""')}"`).join(',')).join('\n')
+                    const a = document.createElement('a')
+                    a.href = 'data:text/csv;charset=utf-8,\uFEFF' + encodeURIComponent(csv)
+                    a.download = `rinunce_${new Date().toISOString().slice(0,10)}.csv`
+                    a.click()
+                  }}
+                  style={{ background:'#DC2626', color:'#fff', border:'none', borderRadius:10, padding:'8px 16px', fontSize:'13px', fontWeight:'700', cursor:'pointer', fontFamily:"'Inter',sans-serif" }}>
+                  ⬇ Esporta CSV
+                </button>
+              </div>
+              <table style={{ width:'100%', borderCollapse:'collapse', fontSize:'13px' }}>
+                <thead>
+                  <tr style={{ background:'#FEE2E2' }}>
+                    {['Nome','Email','Posto','Rinuncia il','Azioni'].map(h => (
+                      <th key={h} style={{ padding:'8px 12px', textAlign:'left', fontWeight:'700', color:'#991B1B', fontSize:'11px', textTransform:'uppercase', letterSpacing:'.05em' }}>{h}</th>
+                    ))}
+                  </tr>
+                </thead>
+                <tbody>
+                  {registrations.filter(r => r.rinuncia).map(r => (
+                    <tr key={r.id} style={{ borderTop:'1px solid #FECACA' }}>
+                      <td style={{ padding:'10px 12px', fontWeight:'600', color:'#0A0A0A' }}>{r.nome} {r.cognome}</td>
+                      <td style={{ padding:'10px 12px', color:'#374151' }}>{r.email}</td>
+                      <td style={{ padding:'10px 12px', color:'#374151' }}>{r.numero_posto || <span style={{color:'#D1D5DB'}}>—</span>}</td>
+                      <td style={{ padding:'10px 12px', color:'#6B7280', fontSize:'12px' }}>
+                        {r.rinuncia_at ? new Date(r.rinuncia_at).toLocaleString('it-IT',{timeZone:'Europe/Rome',day:'2-digit',month:'short',hour:'2-digit',minute:'2-digit'}) : '—'}
+                      </td>
+                      <td style={{ padding:'10px 12px' }}>
+                        <button onClick={() => setCambiaStato({ ids:[r.id] })}
+                          style={{ fontSize:'11px', color:'#DC2626', background:'#FEF2F2', border:'1px solid #FECACA', borderRadius:'999px', padding:'3px 10px', cursor:'pointer', fontWeight:'600', fontFamily:"'Inter',sans-serif" }}>
+                          ✏ Cambia stato
+                        </button>
+                      </td>
+                    </tr>
+                  ))}
+                </tbody>
+              </table>
+            </div>
+          )}
       </div>
       )} {/* fine condizionale tab iscritti */}
 
+
+      {/* MODAL CAMBIO STATO PRESENZA */}
+      {cambiaStato && (() => {
+        const n = cambiaStato.ids.length
+        const statoCorrente = n === 1 ? (() => {
+          const r = registrations.find(x => x.id === cambiaStato.ids[0])
+          return r?.rinuncia ? 'rinuncia' : r?.presenza_confermata ? 'confermata' : 'in_attesa'
+        })() : null
+        const opzioni = [
+          { id:'confermata', label:'✓ Confermata', desc:'Parteciperà all\'evento', bg:'#F0FDF4', border:'#86EFAC', colore:'#059669', active:'#059669' },
+          { id:'rinuncia',   label:'✗ Non verrà',  desc:'Ha comunicato che non parteciperà', bg:'#FEF2F2', border:'#FCA5A5', colore:'#DC2626', active:'#DC2626' },
+          { id:'in_attesa',  label:'◎ In attesa',  desc:'Ripristina in attesa di conferma', bg:'#F9FAFB', border:'#D1D5DB', colore:'#6B7280', active:'#6B7280' },
+        ]
+        return (
+          <Modal title="Cambia stato presenza" onClose={() => setCambiaStato(null)} width="460px">
+            <p style={{ margin:'0 0 20px', fontSize:'14px', color:'#6B7280' }}>
+              Scegli il nuovo stato per <strong>{n} {n===1?'iscritto':'iscritti'}</strong>:
+            </p>
+            <div style={{ display:'flex', flexDirection:'column', gap:'10px', marginBottom:'24px' }}>
+              {opzioni.map(o => (
+                <button key={o.id}
+                  onClick={() => eseguiCambiaStato(cambiaStato.ids, o.id)}
+                  style={{ display:'flex', alignItems:'center', gap:'14px', background: o.id === statoCorrente ? o.bg : '#fff', border:`2px solid ${o.id === statoCorrente ? o.active : '#E5E7EB'}`, borderRadius:'12px', padding:'14px 18px', cursor:'pointer', textAlign:'left', transition:'all .15s', fontFamily:"'Inter',sans-serif" }}>
+                  <span style={{ fontSize:'22px', flexShrink:0, width:32, textAlign:'center', color: o.colore, fontWeight:'900' }}>
+                    {o.id==='confermata' ? '✓' : o.id==='rinuncia' ? '✗' : '◎'}
+                  </span>
+                  <div>
+                    <p style={{ margin:'0 0 2px', fontSize:'14px', fontWeight:'800', color: o.colore }}>{o.label}{o.id===statoCorrente ? ' (attuale)' : ''}</p>
+                    <p style={{ margin:0, fontSize:'12px', color:'#9CA3AF' }}>{o.desc}</p>
+                  </div>
+                </button>
+              ))}
+            </div>
+            <div style={{ display:'flex', justifyContent:'flex-end' }}>
+              <Btn variant="ghost" onClick={() => setCambiaStato(null)}>Annulla</Btn>
+            </div>
+          </Modal>
+        )
+      })()}
 
       {/* MODAL CONFERMA INVIO TEATRO */}
       {confirmInvioTeatro && (() => {
@@ -1836,20 +2559,181 @@ export default function IscrittiPage() {
           return r?.numero_posto && r?.email
         }).length
         return (
-          <Modal title="Conferma invio email posto" onClose={() => setConfirmInvioTeatro(null)} width="460px">
-            <div style={{ fontSize:'14px', color:'#374151', marginBottom:'12px' }}>
-              Stai per inviare l’email con il posto assegnato a{' '}
-              <strong>{destinatari} {isTutti ? 'iscritti (tutti con posto e email)' : `selezionati`}</strong>.
-            </div>
-            <div style={{ background:'#FEF3C7', border:'1px solid #FCD34D', borderRadius:'16px', padding:'10px 14px', fontSize:'13px', color:'#92400E', marginBottom:'24px', display:'flex', gap:'8px', alignItems:'flex-start' }}>
-              <span style={{ fontSize:'16px', flexShrink:0 }}>⚠️</span>
-              <span>Ogni destinatario riceverà una email con il proprio posto. Verifica che i posti siano stati assegnati correttamente prima di procedere.</span>
+          <Modal title={confirmInvioTeatro.forza ? 'Reinvia email posto' : 'Conferma invio email posto'} onClose={() => setConfirmInvioTeatro(null)} width="480px">
+            <div style={{ textAlign:'center', padding:'8px 0 20px' }}>
+              <div style={{ fontSize:48, marginBottom:8 }}>{confirmInvioTeatro.forza ? '🔄' : '📨'}</div>
+              <div style={{ fontSize:18, fontWeight:800, color:'#0A0A0A', marginBottom:6 }}>
+                {confirmInvioTeatro.forza
+                  ? `${destinatari} ${destinatari === 1 ? 'persona riceverà di nuovo' : 'persone riceveranno di nuovo'} la mail`
+                  : `${destinatari} email in partenza`}
+              </div>
+              <div style={{ fontSize:14, color:'#6B7280', marginBottom:20 }}>
+                {confirmInvioTeatro.forza
+                  ? 'Hanno già ricevuto la mail del posto — verrà reinviata.'
+                  : isTutti ? 'Tutti gli iscritti con posto e email assegnati' : `${destinatari} iscritti selezionati`}
+              </div>
+              <div style={{ background:'#FEF3C7', border:'1px solid #FCD34D', borderRadius:12, padding:'12px 16px', fontSize:13, color:'#92400E', marginBottom:20, textAlign:'left', display:'flex', gap:8 }}>
+                <span style={{ fontSize:16, flexShrink:0 }}>{confirmInvioTeatro.forza ? '🔄' : '⚠️'}</span>
+                <span>{confirmInvioTeatro.forza
+                  ? 'Stai per reinviare la mail a iscritti che l\'hanno già ricevuta. Procedi solo se necessario (es. cambio posto, errore).'
+                  : 'Verifica che i posti siano stati assegnati correttamente. Questa operazione è irreversibile.'}</span>
+              </div>
+              <div style={{ background:'#F9FAFB', borderRadius:12, padding:'16px', marginBottom:4 }}>
+                <div style={{ fontSize:13, color:'#374151', marginBottom:10, fontWeight:600 }}>
+                  Digita <strong style={{color:'#DC2626'}}>{destinatari}</strong> per confermare
+                </div>
+                <input
+                  type="number"
+                  placeholder={String(destinatari)}
+                  value={confirmInvioTeatro.inputNum || ''}
+                  onChange={e => setConfirmInvioTeatro(prev => ({...prev, inputNum: e.target.value}))}
+                  style={{ width:'100%', padding:'10px 14px', borderRadius:10, border:`1.5px solid ${parseInt(confirmInvioTeatro.inputNum)===destinatari?'#22c55e':'#E5E7EB'}`, fontSize:20, fontWeight:800, textAlign:'center', boxSizing:'border-box', outline:'none' }}
+                />
+              </div>
             </div>
             <div style={{ display:'flex', justifyContent:'flex-end', gap:'10px' }}>
               <Btn variant="ghost" onClick={() => setConfirmInvioTeatro(null)}>Annulla</Btn>
-              <Btn variant="primary" onClick={() => { setConfirmInvioTeatro(null); inviaMailPosti(false, ids) }}>
-                📨 Conferma e invia
+              <Btn variant="primary"
+                disabled={parseInt(confirmInvioTeatro.inputNum) !== destinatari}
+                onClick={() => { const forza = !!confirmInvioTeatro.forza; setConfirmInvioTeatro(null); inviaMailPosti(false, ids, forza) }}>
+                {confirmInvioTeatro.forza ? `🔄 Reinvia ${destinatari} email` : `📨 Conferma e invia ${destinatari} email`}
               </Btn>
+            </div>
+          </Modal>
+        )
+      })()}
+
+      {/* MODAL REMINDER */}
+      {confirmReminder && (() => {
+        const ids = confirmReminder.ids
+        const isTutti = ids === null
+        const destinatari = isTutti
+          ? registrations.filter(r => r.email && !r.rinuncia).length
+          : (ids || []).filter(id => { const r = registrations.find(x => x.id === id); return r?.email && !r?.rinuncia }).length
+        // Primo iscritto valido per caricare l'anteprima
+        const primoId = isTutti
+          ? registrations.find(r => r.email && !r.rinuncia)?.id
+          : (ids || []).find(id => { const r = registrations.find(x => x.id === id); return r?.email && !r?.rinuncia })
+        return (
+          <Modal title="Conferma invio reminder" onClose={() => { setConfirmReminder(null); setReminderPreview(null) }} width="820px">
+            <div style={{ display:'flex', gap:'24px', alignItems:'flex-start' }}>
+
+              {/* COLONNA SX: conferma */}
+              <div style={{ flex:'0 0 340px' }}>
+                <div style={{ textAlign:'center', padding:'8px 0 16px' }}>
+                  <div style={{ fontSize:48, marginBottom:8 }}>📣</div>
+                  <div style={{ fontSize:18, fontWeight:800, color:'#0A0A0A', marginBottom:6 }}>
+                    {`${destinatari} reminder in partenza`}
+                  </div>
+                  <div style={{ fontSize:14, color:'#6B7280', marginBottom:16 }}>
+                    {isTutti ? 'Tutti gli iscritti con email (escluse rinunce)' : `${destinatari} iscritti selezionati`}
+                  </div>
+                </div>
+                <div style={{ background:'#F5F3FF', border:'1px solid #DDD6FE', borderRadius:12, padding:'12px 16px', fontSize:13, color:'#4C1D95', marginBottom:16, display:'flex', gap:8 }}>
+                  <span style={{ fontSize:16, flexShrink:0 }}>📣</span>
+                  <span>Verrà inviata l&apos;email <strong>reminder</strong> con i dettagli dell&apos;evento. Gli iscritti che hanno rinunciato non verranno inclusi.</span>
+                </div>
+                <div style={{ background:'#F9FAFB', borderRadius:12, padding:'16px', marginBottom:16 }}>
+                  <div style={{ fontSize:13, color:'#374151', marginBottom:10, fontWeight:600 }}>
+                    Digita <strong style={{color:'#7C4DFF'}}>{destinatari}</strong> per confermare
+                  </div>
+                  <input
+                    type="number"
+                    placeholder={String(destinatari)}
+                    value={confirmReminder.inputNum || ''}
+                    onChange={e => setConfirmReminder(prev => ({...prev, inputNum: e.target.value}))}
+                    style={{ width:'100%', padding:'10px 14px', borderRadius:10, border:`1.5px solid ${parseInt(confirmReminder.inputNum)===destinatari?'#7C4DFF':'#E5E7EB'}`, fontSize:20, fontWeight:800, textAlign:'center', boxSizing:'border-box', outline:'none' }}
+                  />
+                </div>
+                <div style={{ display:'flex', flexDirection:'column', gap:'8px' }}>
+                  <Btn
+                    disabled={parseInt(confirmReminder.inputNum) !== destinatari || reminderInCorso}
+                    onClick={() => { setConfirmReminder(null); setReminderPreview(null); inviaReminder(ids) }}
+                    style={{ background:'#7C4DFF', color:'#fff', width:'100%', justifyContent:'center' }}>
+                    📣 Invia {destinatari} reminder
+                  </Btn>
+                  <Btn variant="ghost" onClick={() => { setConfirmReminder(null); setReminderPreview(null) }} style={{ width:'100%', justifyContent:'center' }}>Annulla</Btn>
+                </div>
+              </div>
+
+              {/* COLONNA DX: anteprima */}
+              <div style={{ flex:1, minWidth:0 }}>
+                <div style={{ display:'flex', alignItems:'center', justifyContent:'space-between', marginBottom:'10px' }}>
+                  <span style={{ fontSize:'13px', fontWeight:'700', color:'#374151' }}>Anteprima email</span>
+                  {!reminderPreview && (
+                    <button
+                      onClick={async () => {
+                        if (!primoId) return
+                        setReminderPreview({ loading: true })
+                        try {
+                          const res = await fetch('https://hnkhckcclgabunkqfmrz.supabase.co/functions/v1/send-event-email', {
+                            method: 'POST',
+                            headers: { 'Content-Type': 'application/json' },
+                            body: JSON.stringify({ tipo: 'reminder', iscrizione_id: primoId, solo_html: true }),
+                          })
+                          const data = await res.json()
+                          if (data.error) setReminderPreview({ error: data.error })
+                          else setReminderPreview({ html: data.html, oggetto: data.oggetto, fonte: data.fonte })
+                        } catch(e) { setReminderPreview({ error: String(e) }) }
+                      }}
+                      style={{ background:'#F5F3FF', border:'1px solid #DDD6FE', borderRadius:20, padding:'5px 14px', fontSize:'12px', fontWeight:'700', color:'#7C4DFF', cursor:'pointer', fontFamily:'inherit' }}>
+                      🔍 Carica anteprima
+                    </button>
+                  )}
+                  {reminderPreview && !reminderPreview.loading && !reminderPreview.error && (
+                    <div style={{ display:'flex', alignItems:'center', gap:'8px' }}>
+                      <span style={{
+                        fontSize:'11px', fontWeight:'700', padding:'3px 10px', borderRadius:20,
+                        background: reminderPreview.fonte === 'evento' ? '#DCFCE7' : '#FEF9C3',
+                        color: reminderPreview.fonte === 'evento' ? '#166534' : '#854D0E',
+                        border: `1px solid ${reminderPreview.fonte === 'evento' ? '#86EFAC' : '#FDE68A'}`
+                      }}>
+                        {reminderPreview.fonte === 'evento' ? '✓ Template personalizzato evento' : '⚠ Template standard (default)'}
+                      </span>
+                      <button onClick={() => setReminderPreview(null)}
+                        style={{ background:'none', border:'none', cursor:'pointer', color:'#9CA3AF', fontSize:'16px', padding:0, lineHeight:1 }}>↺</button>
+                    </div>
+                  )}
+                </div>
+
+                {/* Oggetto */}
+                {reminderPreview?.oggetto && (
+                  <div style={{ background:'#F9FAFB', border:'1px solid #E8ECF4', borderRadius:8, padding:'8px 12px', fontSize:'12px', color:'#374151', marginBottom:'8px' }}>
+                    <span style={{ color:'#9CA3AF', fontWeight:600 }}>Oggetto: </span>{reminderPreview.oggetto}
+                  </div>
+                )}
+
+                {/* Stato iframe */}
+                <div style={{ border:'1px solid #E8ECF4', borderRadius:12, overflow:'hidden', background:'#F9FAFB', height:'480px', display:'flex', alignItems:'center', justifyContent:'center' }}>
+                  {!reminderPreview && (
+                    <div style={{ textAlign:'center', color:'#9CA3AF' }}>
+                      <div style={{ fontSize:32, marginBottom:8 }}>📧</div>
+                      <p style={{ fontSize:'13px', margin:0 }}>Clicca &ldquo;Carica anteprima&rdquo; per vedere l&apos;email</p>
+                      <p style={{ fontSize:'12px', margin:'4px 0 0', color:'#D1D5DB' }}>Viene usato il primo iscritto come dati di esempio</p>
+                    </div>
+                  )}
+                  {reminderPreview?.loading && (
+                    <div style={{ textAlign:'center', color:'#9CA3AF' }}>
+                      <div style={{ fontSize:32, marginBottom:8 }}>⏳</div>
+                      <p style={{ fontSize:'13px', margin:0 }}>Caricamento anteprima…</p>
+                    </div>
+                  )}
+                  {reminderPreview?.error && (
+                    <div style={{ textAlign:'center', color:'#DC2626', padding:'20px' }}>
+                      <div style={{ fontSize:32, marginBottom:8 }}>❌</div>
+                      <p style={{ fontSize:'13px', margin:0 }}>{reminderPreview.error}</p>
+                    </div>
+                  )}
+                  {reminderPreview?.html && (
+                    <iframe
+                      srcDoc={reminderPreview.html}
+                      style={{ width:'100%', height:'100%', border:'none', display:'block' }}
+                      title="Anteprima reminder"
+                      sandbox="allow-same-origin"
+                    />
+                  )}
+                </div>
+              </div>
             </div>
           </Modal>
         )
@@ -1881,7 +2765,8 @@ export default function IscrittiPage() {
                 <p style={{ fontSize:'11px', fontWeight:'700', color:'#6B7280', textTransform:'uppercase', letterSpacing:'.05em', margin:'0 0 6px' }}>Inserisci variabile</p>
                 <div style={{ display:'flex', flexWrap:'wrap', gap:5 }}>
                   {[['nome','Nome'],['cognome','Cognome'],['nome_completo','Nome completo'],
-                    ['evento','Evento'],['data','Data'],['ora','Ora'],['luogo','Luogo']
+                    ['evento','Evento'],['data','Data'],['ora','Ora'],['luogo','Luogo'],
+                    ['numero_posto','Posto'],['link_registrazione','Link registrazione']
                   ].map(([v, label]) => (
                     <button key={v} onClick={() => inserisciVariabile(v)}
                       style={{ fontSize:11, fontWeight:600, padding:'3px 9px', borderRadius:20,
@@ -2166,7 +3051,20 @@ export default function IscrittiPage() {
                 <strong style={{ color:'#16A34A' }}>{importDone.ok} iscritti importati</strong>
                 {importDone.fail > 0 && <span style={{ color:'#DC2626' }}> · {importDone.fail} errori</span>}
               </p>
-              <Btn variant="primary" onClick={resetImport}>Chiudi</Btn>
+              <div style={{ display:'flex', gap:'10px', justifyContent:'center', flexWrap:'wrap' }}>
+                <Btn variant="secondary"
+                  onClick={() => {
+                    const n = importDone.ok
+                    const inp = window.prompt(`Stai per inviare ${n} email.\n\nDigita ${n} per confermare:`)
+                    if (inp === null) return
+                    if (parseInt(inp) !== n) { alert('❌ Numero errato. Annullato.'); return }
+                    inviaConfermaATutti()
+                  }}
+                  disabled={sendingEmailAll}>
+                  {sendingEmailAll ? '📧 Invio in corso…' : `📧 Invia conferma a tutti (${importDone.ok})`}
+                </Btn>
+                <Btn variant="primary" onClick={resetImport}>Chiudi</Btn>
+              </div>
             </div>
           ) : (
             <>
@@ -2489,3 +3387,4 @@ const s = {
   cell: { color:'#374151', fontSize:'14px' },
   iconBtn: { background:'none', border:'1px solid #E8ECF4', borderRadius:'20px', padding:'5px 7px', cursor:'pointer', color:'#6B7280', display:'flex', alignItems:'center' },
 }
+// cache bust 1790435454

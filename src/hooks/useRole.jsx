@@ -22,6 +22,9 @@ export function useRole() {
       setProfile(prof || null)
       setPermessi(perm || {})
       setLoading(false)
+    }).catch(() => {
+      if (!active) return
+      setLoading(false)
     })
     return () => { active = false }
   }, [user])
@@ -39,13 +42,11 @@ export function useRole() {
     permessi,
     loading,
     ruolo,
-    // Flag legacy mantenuti per compatibilità — riflettono comunque il ruolo,
-    // non più gli unici usati per i permessi (ora granulari per sezione).
     isAdmin: ruolo === 'admin',
     isSupervisore: ruolo === 'supervisore',
     isUtente: ruolo === 'utente',
+    isRegistratore: ruolo === 'registratore',
     canDelete: ruolo === 'admin',
-    // Permessi granulari per sezione — usare questi nelle pagine
     canView,
     canManage,
   }

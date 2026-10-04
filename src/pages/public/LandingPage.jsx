@@ -12,6 +12,7 @@ import FormIscrizione from './FormIscrizione'
 import SocialLinks from '../../components/SocialLinks'
 import { useSocial } from '../../hooks/useSocial'
 import BlockRenderer from '../../components/public/BlockRenderer'
+import ContenutoBlocks from '../../components/public/ContenutoBlocks'
 
 /* ── PATTERN PALLINI DECORATIVI ──────────────────────── */
 function generaPalliniSVG(c1, c2, opacita, angolo) {
@@ -273,6 +274,8 @@ export default function LandingPage() {
   const [notFound,    setNotFound]    = useState(false)
   const [iscrizioniN, setIscrizioniN] = useState(0)
   const [formVisible, setFormVisible] = useState(false)
+  // Se c'è un blocco evento_cta nelle sezioni, il form è sempre aperto
+  const hasEventoCta = (event?.sezioni||[]).some(b => b.tipo === 'evento_cta')
   const [conferma,    setConferma]    = useState(null)
 
   usePageTitle(event?.titolo || null)
@@ -357,8 +360,10 @@ export default function LandingPage() {
     ? { backgroundImage:`url(${event.immagine_hero})`,backgroundSize:'cover',backgroundPosition: lh.bg_position || 'center top' }
     : { background: lh.hero_sfondo || tema.colore_primario || '#003DA5' }
 
+  const _pgMxW = {L:'1280px',M:'1080px',S:'860px'}[tema.larghezza_pagina||'auto']
+  const _pgStyle = _pgMxW ? {maxWidth:_pgMxW, margin:'0 auto', boxShadow:'0 0 60px rgba(0,0,0,0.12)'} : {}
   return (
-    <div style={{...s.root, backgroundColor: tema.sfondo_pagina || '#FFFFFF', position: 'relative'}}>
+    <div style={{...s.root, backgroundColor: tema.sfondo_pagina || '#FFFFFF', position: 'relative', ..._pgStyle}}>
       {isAdminPreview && (
         <div style={{ position:'sticky', top:0, zIndex:9999, background:'#F59E0B', color:'#000',
           textAlign:'center', padding:'8px 16px', fontSize:13, fontWeight:700,
@@ -396,7 +401,7 @@ export default function LandingPage() {
         /* Blocca zoom iOS */
         input, select, textarea { font-size:16px !important; }
         @media (max-width: 600px) {
-          .hero-section { min-height: 420px !important; padding: 32px 16px !important; }
+          .hero-section:not(.hero-adattivo) { min-height: 420px !important; padding: 32px 16px !important; }
           .ev-hero-content h1 { font-size: clamp(22px,7vw,40px) !important; word-break: break-word !important; }
           .ev-hero-content h2 { font-size: clamp(14px,4.5vw,22px) !important; }
           .ev-hero-content p  { font-size: clamp(13px,3.5vw,17px) !important; }
@@ -405,31 +410,58 @@ export default function LandingPage() {
 
 {/* Header rimosso — logo sovrapposto all'hero */}
 
-      {/* ── HERO — struttura identica alla Landing Page ── */}
-      <div className="hero-section" style={{
+      {/* ── HERO ── */}
+      <div className={`hero-section${lh.hero_adattivo && event.immagine_hero ? " hero-adattivo" : ""}`} style={{
         position: 'relative',
-        minHeight: `${lh.altezza || 480}px`,
+        minHeight: lh.hero_adattivo && event.immagine_hero ? undefined : `${lh.altezza || 480}px`,
         display: 'flex',
         flexDirection: 'column',
         alignItems: lh.allineamento === 'sinistra' ? 'flex-start' : 'center',
         justifyContent: 'center',
-        padding: 'clamp(40px,6vw,72px) clamp(16px,4vw,48px)',
+        padding: lh.hero_adattivo && event.immagine_hero ? '0' : 'clamp(40px,6vw,72px) clamp(16px,4vw,48px)',
         width: '100%',
         boxSizing: 'border-box',
-        ...heroStyle,
+        overflow: 'hidden',
+        // Quando non c'è immagine, usa colore sfondo
+        background: event.immagine_hero ? undefined : (lh.hero_sfondo || tema.colore_primario || '#003DA5'),
       }}>
+        {/* Immagine hero — tag <img> reale per responsività corretta */}
+        {event.immagine_hero && (
+          <img
+            src={event.immagine_hero}
+            alt=""
+            aria-hidden="true"
+            style={{
+              position: lh.hero_adattivo ? 'relative' : 'absolute',
+              inset: lh.hero_adattivo ? undefined : 0,
+              width: '100%',
+              height: lh.hero_adattivo ? 'auto' : '100%',
+              objectFit: 'cover',
+              objectPosition: lh.bg_position || 'center top',
+              display: 'block',
+              zIndex: 0,
+            }}
+          />
+        )}
         {/* Overlay scuro */}
         <div style={{ position:'absolute', inset:0, backgroundColor:(() => { const h=lh.overlay_colore||'#000000'; const r=parseInt(h.slice(1,3),16),g=parseInt(h.slice(3,5),16),b=parseInt(h.slice(5,7),16); return `rgba(${r},${g},${b},${(lh.overlay_opacita||55)/100})` })(), zIndex:1 }} />
 
         {/* Contenuto — logo + titoli in colonna, sopra l'overlay */}
         <div className="ev-hero-content" style={{
-          position: 'relative', zIndex: 2,
+          position: lh.hero_adattivo && event.immagine_hero ? 'absolute' : 'relative',
+          inset: lh.hero_adattivo && event.immagine_hero ? 0 : undefined,
+          zIndex: 2,
           maxWidth: '760px', width: '100%',
+          margin: lh.hero_adattivo && event.immagine_hero ? 'auto' : undefined,
+          padding: lh.hero_adattivo && event.immagine_hero ? 'clamp(40px,6vw,72px) clamp(16px,4vw,48px)' : undefined,
           textAlign: lh.allineamento === 'sinistra' ? 'left' : 'center',
           display: 'flex', flexDirection: 'column',
+          justifyContent: 'center',
           alignItems: lh.allineamento === 'sinistra' ? 'flex-start' : 'center',
+          boxSizing: 'border-box',
         }}>
-          {/* Logo */}
+          {/* Logo — nascondibile */}
+          {lh.mostra_logo !== false && (
           <div className="ev-hero-logo" style={{ marginBottom: 'clamp(20px,4vw,36px)' }}>
             <div style={{
               background: (lh.logo_sfondo || tema.logo_bg) === 'colore_primario' ? (tema.colore_primario || '#003DA5')
@@ -446,8 +478,10 @@ export default function LandingPage() {
               />
             </div>
           </div>
+          )}
 
-          {/* H1 */}
+          {/* H1 — nascondibile */}
+          {lh.mostra_titolo !== false && (
           <h1 style={{
             ...s.heroTitle,
             color:         lh.titolo_colore     || '#FFFFFF',
@@ -458,6 +492,7 @@ export default function LandingPage() {
             maxWidth:      '100%',
             wordBreak:     'break-word',
           }}>{event.titolo}</h1>
+          )}
 
           {/* H2 secondo titolo */}
           {lh.titolo2 && (
@@ -486,10 +521,11 @@ export default function LandingPage() {
       {/* Data e luogo rimossi da sotto hero — spostati prima del form */}
 
       {/* ── BODY ── */}
-      <div style={{ ...s.body, backgroundColor: tema.sfondo_pagina || '#FFFFFF' }}>
+      <div style={s.body}>
 
-        {/* PULSANTE PARTECIPA */}
-        {(() => {
+        <div style={{ maxWidth:'820px', margin:'0 auto', padding:'32px 24px 0', boxSizing:'border-box' }}>
+        {/* PULSANTE PARTECIPA — nascosto se c'è un blocco evento_cta nelle sezioni */}
+        {!(event.sezioni||[]).some(b=>b.tipo==='evento_cta') && (() => {
           const btnRadius = tema.btn_stile === 'pill' ? '50px' : `${tema.btn_raggio || 8}px`
           const aBtnPrimary = {
             display:'flex', alignItems:'center', justifyContent:'center',
@@ -517,25 +553,33 @@ export default function LandingPage() {
         })()}
 
 
+        </div>{/* /wrapper-centrato-top */}
+
         {/* DESCRIZIONE (solo se non ci sono blocchi) */}
         {(event.descrizione_html || event.descrizione) && !(event.sezioni||[]).length && (
+          <div style={{ maxWidth:'820px', margin:'0 auto', padding:'0 24px', boxSizing:'border-box' }}>
           <section style={s.section}>
             {event.descrizione_html
               ? <div className="rich-content" dangerouslySetInnerHTML={{ __html:event.descrizione_html }}/>
               : <div style={s.descText}>{(event.descrizione||'').split('\n').map((p,i)=><p key={i} style={{ margin:'0 0 12px' }}>{p}</p>)}</div>
             }
           </section>
-        )}
-
-        {/* BLOCCHI CONTENUTO */}
-        {(event.sezioni||[]).length > 0 && (
-          <div style={{ marginBottom:'16px' }}>
-            {event.sezioni.map((block,i) => (
-              <BlockRenderer key={block.id||i} block={block} cp={event.colore_primario||'#003DA5'} formTarget="#form-iscrizione"/>
-            ))}
           </div>
         )}
 
+        {/* BLOCCHI CONTENUTO — full width */}
+        {(event.sezioni||[]).length > 0 && (
+          <div style={{ width:'100%' }}>
+            <ContenutoBlocks
+              blocks={event.sezioni}
+              cp={event.colore_primario||tema.colore_primario||'#003DA5'}
+              formTarget="#form-iscrizione"
+              eventData={event}
+            />
+          </div>
+        )}
+
+        <div style={{ maxWidth:'820px', margin:'0 auto', padding:'0 24px', boxSizing:'border-box', width:'100%' }}>
         {/* PROGRAMMA / SESSIONI */}
         {(event.sessioni||[]).length > 0 && (() => {
           const primaryColor = tema.colore_primario || '#003DA5'
@@ -588,8 +632,8 @@ export default function LandingPage() {
           )
         })()}
 
-        {/* ── INFO EVENTO + PULSANTI CALENDARIO/MAPPA ── */}
-        {(event.data_inizio || event.luogo) && (
+        {/* ── INFO EVENTO — nascosto se c'è un blocco evento_info nelle sezioni ── */}
+        {!(event.sezioni||[]).some(b=>b.tipo==='evento_info') && (event.data_inizio || event.luogo) && (
           <div style={{ marginBottom:'24px', padding:'20px', backgroundColor: tema.sfondo_sezioni || '#F4F5F7', borderRadius:'20px' }}>
             {event.data_inizio && (
               <div style={{ display:'flex', alignItems:'center', gap:'10px', marginBottom: event.luogo ? '12px' : '0' }}>
@@ -668,8 +712,8 @@ export default function LandingPage() {
           </div>
         )}
 
-        {/* CTA / FORM */}
-        {!conferma && (
+        {/* CTA / FORM — nascosto se c'è un blocco evento_cta nelle sezioni */}
+        {!conferma && !(event.sezioni||[]).some(b=>b.tipo==='evento_cta') && (
           <section style={{ ...s.ctaSection, backgroundColor: tema.cta_bg || '#EEF4FF', border: `1px solid ${(tema.colore_pulsanti || tema.colore_primario || '#005AC9')}33` }}>
             <div style={s.ctaRow}>
               <div style={{ flex:1 }}>
@@ -698,7 +742,7 @@ export default function LandingPage() {
           </section>
         )}
 
-        {formVisible && !esaurito && !conferma && (
+        {(formVisible || hasEventoCta) && !esaurito && !conferma && (
           <div id="form-iscrizione" style={s.formWrap}>
             <h3 style={s.formTitle}>Modulo di iscrizione</h3>
           {/* Avvisi / raccomandazioni configurabili dall'admin */}
@@ -717,14 +761,14 @@ export default function LandingPage() {
           )}
 
           <FormIscrizione event={event} tema={tema} onSuccess={dati => {
-              setFormVisible(false)
+              if (!hasEventoCta) setFormVisible(false)
               setConferma(dati)
             }}/>
           </div>
         )}
 
-        {/* MAPPA */}
-        {event.luogo && (
+        {/* MAPPA — nascosta se c'è un blocco evento_mappa nelle sezioni */}
+        {!(event.sezioni||[]).some(b=>b.tipo==='evento_mappa') && event.luogo && (
           <div style={s.mapSection}>
             <h2 style={s.secTitle}>Come raggiungerci</h2>
             <div style={s.mapWrap}>
@@ -745,6 +789,7 @@ export default function LandingPage() {
           </div>
         )}
 
+        </div>{/* /wrapper-centrato-bottom */}
       </div>
 
       {/* ── Barra condivisione ── */}
@@ -793,7 +838,7 @@ const s = {
   heroMeta:    { display:'flex', alignItems:'center', gap:'8px', fontSize:'14px', color:'rgba(255,255,255,.9)', margin:'0 0 8px', fontWeight:'500', flexWrap:'wrap', textTransform:'capitalize' },
   heroLoc:     { display:'inline-flex', alignItems:'center', gap:'6px', color:'rgba(255,255,255,.8)', fontSize:'13px', textDecoration:'none', fontWeight:'500' },
   // Body
-  body:        { maxWidth:'820px', margin:'0 auto', padding:'32px 24px 0', width:'100%' },
+  body:        { width:'100%', padding:'0' },
   section:     { marginBottom:'32px' },
   secTitle:    { fontSize:'20px', fontWeight:'900', color:'#0A0A0A', letterSpacing:'-.03em', margin:'0 0 16px' },
   descText:    { fontSize:'15px', color:'#374151', lineHeight:'1.75' },

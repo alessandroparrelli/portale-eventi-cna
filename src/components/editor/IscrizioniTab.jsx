@@ -1,4 +1,4 @@
-import { useEffect, useState } from 'react'
+import React, { useEffect, useState } from 'react'
 import { supabase } from '../../lib/supabase'
 import { Plus, Trash2, GripVertical, AlertCircle, Save, Check } from 'lucide-react'
 
@@ -152,7 +152,7 @@ function RigaCampoExtra({ campo, onChange, onDelete }) {
 }
 
 /* ─── COMPONENTE PRINCIPALE ─────────────────────────────────────── */
-export default function IscrizioniTab({ event, setEvent, eventId }) {
+export default function IscrizioniTab({ event, setEvent, eventId, onSalvaReady }) {
   const [campi,   setCampi]   = useState([])
   const [loading, setLoading] = useState(true)
   const [saving,  setSaving]  = useState(false)
@@ -162,8 +162,47 @@ export default function IscrizioniTab({ event, setEvent, eventId }) {
   // Un evento è "nuovo" se non ha ancora un UUID nel DB
   const isNew = !eventId || eventId === 'nuovo' || eventId === 'undefined'
 
+  // Registra la funzione salva nel padre appena disponibile
+  React.useEffect(() => {
+    if (onSalvaReady) onSalvaReady(salvaFormFields)
+  }, [])
+
   const campiStandard = campi.filter(c => c.colonna_db && !c.colonna_db.startsWith('extra_'))
   const campiExtra    = campi.filter(c => c.colonna_db?.startsWith('extra_'))
+
+  /* ── Salvataggio silenzioso campi (chiamato dal save principale) ── */
+  async function salvaFormFields() {
+    if (isNew || !eventId || eventId === 'nuovo') return
+    try {
+      for (const c of campi.filter(cc => cc.colonna_db && !cc.colonna_db.startsWith('extra_'))) {
+        await supabase.from('form_fields')
+          .update({ obbligatorio: c.obbligatorio, visibile: c.visibile, label: c.label })
+          .eq('id', c.id)
+      }
+      const { data: dbExtra } = await supabase.from('form_fields')
+        .select('id').eq('event_id', eventId).like('colonna_db', 'extra_%')
+      const dbIds = (dbExtra || []).map(r => r.id)
+      const locali = campi.filter(cc => cc.colonna_db?.startsWith('extra_'))
+      const localiIds = locali.filter(cc => !cc._nuovo).map(cc => cc.id)
+      const daEliminare = dbIds.filter(id => !localiIds.includes(id))
+      if (daEliminare.length) await supabase.from('form_fields').delete().in('id', daEliminare)
+      for (const c of locali) {
+        if (c._nuovo) {
+          const { data: ins } = await supabase.from('form_fields').insert({
+            event_id: eventId, label: c.label || 'Campo extra', tipo: c.tipo,
+            colonna_db: c.colonna_db, obbligatorio: c.obbligatorio, visibile: true,
+            ordine: c.ordine, opzioni: c.opzioni ? { choices: c.opzioni.choices } : null,
+          }).select().single()
+          if (ins) setCampi(prev => prev.map(x => x.id === c.id ? ins : x))
+        } else {
+          await supabase.from('form_fields').update({
+            label: c.label, tipo: c.tipo, obbligatorio: c.obbligatorio,
+            ordine: c.ordine, opzioni: c.opzioni ? { choices: c.opzioni.choices } : null,
+          }).eq('id', c.id)
+        }
+      }
+    } catch(e) { console.error('salvaFormFields:', e.message) }
+  }
 
   /* ── Carica campi dal DB ── */
   useEffect(() => {

@@ -45,20 +45,20 @@ const VARIABILI = [
   '{{cellulare}}','{{partita_iva}}','{{cap}}',
   '{{nome_evento}}','{{data_evento}}','{{luogo_evento}}',
   '{{qr_code}}','{{link_landing}}','{{link_questionario}}',
-  '{{data_iscrizione}}','{{codice_iscrizione}}','{{numero_posto}}','{{link_conferma}}',
+  '{{data_iscrizione}}','{{codice_iscrizione}}','{{numero_posto}}','{{link_conferma}}','{{link_rinuncia}}',
 ]
 
 const PREVIEW_DATA = {
   '{{nome}}':'Marco','{{cognome}}':'Bianchi',
   '{{ragione_sociale}}':'Bianchi Srl','{{email}}':'marco@esempio.it',
   '{{nome_evento}}':'Forum CNA Roma 2026',
-  '{{data_evento}}':'Venerdi 25 settembre 2026, ore 09:30',
+  '{{data_evento}}':'Sabato 10 ottobre 2026, ore 09:30',
   '{{luogo_evento}}':'Palazzo dei Congressi, Roma',
   '{{cellulare}}':'333 1234567','{{partita_iva}}':'12345670015','{{cap}}':'00100',
   '{{qr_code}}':'QR-MARCO2026','{{link_landing}}':'#','{{link_questionario}}':'#',
   '{{data_iscrizione}}': new Date().toLocaleDateString('it-IT'),
   '{{codice_iscrizione}}':'EVT-2026-M1B2',
-  '{{numero_posto}}':'Platea 14A','{{link_conferma}}':'#',
+  '{{numero_posto}}':'Platea 14A','{{link_conferma}}':'#','{{link_rinuncia}}':'#',
 }
 
 function replacePreview(html) {
@@ -490,7 +490,7 @@ export default function EmailPage() {
                 <h3 style={{ margin:'0 0 4px', fontSize:'16px', fontWeight:'800', color:NERO }}>Intestazione email</h3>
                 <p style={{ margin:0, fontSize:'12px', color:'#6B7280' }}>Logo, colore sfondo, titolo e layout</p>
               </div>
-              <HeaderEditor config={headerConfig} onChange={setHeaderConfig} defaultExpanded={true}/>
+              <HeaderEditor config={headerConfig} onChange={setHeaderConfig} defaultExpanded={true} previewData={PREVIEW_DATA}/>
               <div style={{ marginTop:'16px' }}>
                 <label style={lbl}>Variabili disponibili</label>
                 <div style={{ display:'flex', flexWrap:'wrap', gap:'4px' }}>

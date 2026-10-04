@@ -204,9 +204,24 @@ export default function LandingEditorPage() {
         ))}
       </div>
 
-      {/* ── Contenuto ── */}
-      <div style={{ flex:1, overflow:'auto', padding:'24px' }}>
-        <div style={{ maxWidth: tab === 'aspetto' ? '100%' : '760px' }}>
+      {/* Toolbar anteprima */}
+      <div style={{ background:'#fff', borderBottom:'1px solid #E8ECF4', padding:'0 20px',
+        display:'flex', alignItems:'center', gap:'8px', height:'38px', flexShrink:0, justifyContent:'flex-end' }}>
+        <span style={{ fontSize:'11px', color:'#9CA3AF' }}>Anteprima live:</span>
+        <button onClick={() => setShowPreview(p => !p)}
+          style={{ padding:'4px 14px', borderRadius:'20px', border:'1px solid #E8ECF4',
+            background: showPreview ? '#5B5FEF' : '#F3F4F6',
+            color: showPreview ? '#fff' : '#374151',
+            fontSize:'12px', fontWeight:'700', cursor:'pointer', fontFamily:"'Outfit',sans-serif" }}>
+          {showPreview ? '✖ Chiudi' : '▶ Apri'}
+        </button>
+      </div>
+
+      {/* Layout split */}
+      <div ref={containerRef} style={{ flex:1, overflow:'hidden', display:'flex' }}>
+        {/* Pannello editor */}
+        <div style={{ width: showPreview ? `${splitWidth}px` : '100%', flexShrink:0, overflow:'auto', padding:'24px' }}>
+          <div style={{ maxWidth: tab === 'aspetto' ? '100%' : '760px' }}>
 
           {/* ═══ INFO ═══ */}
           {tab === 'info' && (
@@ -522,7 +537,78 @@ export default function LandingEditorPage() {
             </div>
           )}
 
+          </div>
         </div>
+
+        {/* Drag handle */}
+        {showPreview && (
+          <div onMouseDown={startDrag}
+            style={{ width:'6px', flexShrink:0, cursor:'col-resize', background:'#E8ECF4', position:'relative', zIndex:10 }}
+            onMouseEnter={e => e.currentTarget.style.background='#5B5FEF'}
+            onMouseLeave={e => e.currentTarget.style.background='#E8ECF4'}>
+            <div style={{ position:'absolute', top:'50%', left:'50%', transform:'translate(-50%,-50%)',
+              width:'3px', height:'32px', borderRadius:'3px', background:'#9CA3AF' }} />
+          </div>
+        )}
+
+        {/* Pannello anteprima */}
+        {showPreview && (
+          <div style={{ flex:1, display:'flex', flexDirection:'column', background:'#1E293B', overflow:'hidden', minWidth:0 }}>
+            <div style={{ display:'flex', alignItems:'center', gap:'6px', padding:'6px 14px', background:'#0F172A', flexShrink:0 }}>
+              <span style={{ fontSize:'11px', color:'#475569', fontWeight:'700', marginRight:'4px', letterSpacing:'.04em' }}>PREVIEW</span>
+              {[['desktop','🖥️','Desktop'],['tablet','📱','768px'],['mobile','📱','390px']].map(([d,ic,l])=>(
+                <button key={d} onClick={() => setPreviewDevice(d)}
+                  style={{ padding:'3px 10px', borderRadius:'20px', border:'none',
+                    background: previewDevice===d ? '#5B5FEF' : 'transparent',
+                    color: previewDevice===d ? '#fff' : '#64748B',
+                    fontSize:'11px', fontWeight:'700', cursor:'pointer', fontFamily:"'Outfit',sans-serif" }}>
+                  {ic} {l}
+                </button>
+              ))}
+              <div style={{ flex:1 }} />
+              <button onClick={() => setPreviewKey(k => k+1)}
+                style={{ padding:'3px 10px', borderRadius:'20px', border:'1px solid #334155',
+                  background:'transparent', color:'#94A3B8', fontSize:'11px',
+                  fontWeight:'700', cursor:'pointer', fontFamily:"'Outfit',sans-serif" }}>
+                ↻ Ricarica
+              </button>
+              <a href={`/lp/${data.slug}`} target="_blank" rel="noreferrer"
+                style={{ padding:'3px 10px', borderRadius:'20px', border:'1px solid #334155',
+                  background:'transparent', color:'#94A3B8', fontSize:'11px',
+                  fontWeight:'700', textDecoration:'none', fontFamily:"'Outfit',sans-serif" }}>
+                ↗ Apri
+              </a>
+            </div>
+            <div style={{ flex:1, display:'flex', alignItems:'center', justifyContent:'center',
+              padding: previewDevice==='desktop' ? '0' : '20px', overflow:'auto' }}>
+              {(() => {
+                const devW = {desktop:'100%', tablet:'768px', mobile:'390px'}[previewDevice]
+                const devH = {desktop:'100%', tablet:'1024px', mobile:'844px'}[previewDevice]
+                const isD  = previewDevice === 'desktop'
+                return (
+                  <div style={{ width:devW, height:isD?'100%':devH, background:'#fff',
+                    flexShrink:0, overflow:'hidden', borderRadius:isD?'0':'16px',
+                    boxShadow:isD?'none':'0 8px 40px rgba(0,0,0,.5)',
+                    display:'flex', flexDirection:'column' }}>
+                    {!isD && (
+                      <div style={{ height:'24px', background:'#111', flexShrink:0,
+                        display:'flex', alignItems:'center', justifyContent:'center' }}>
+                        <div style={{ width:'52px', height:'5px', borderRadius:'3px', background:'#333' }} />
+                      </div>
+                    )}
+                    <iframe
+                      key={previewKey}
+                      src={`/lp/${data.slug}`}
+                      style={{ flex:1, border:'none', width:'100%', display:'block' }}
+                      title="Anteprima"
+                    />
+                  </div>
+                )
+              })()}
+            </div>
+          </div>
+        )}
+
       </div>
     </div>
   )
