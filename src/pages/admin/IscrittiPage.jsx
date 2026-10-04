@@ -1003,6 +1003,110 @@ export default function IscrittiPage() {
     logAttivita('presenti_esportati',{ eventoId:selectedEvento, eventoTitolo:eventoTitle, dettagli:{ totale:presenti.length } })
   }
 
+  async function exportExcelPostiAssegnati() {
+    const evento = eventi.find(e=>e.id===selectedEvento)
+    const eventoTitle = evento?.titolo || 'evento'
+    const dataExport = new Date().toLocaleDateString('it-IT',{day:'2-digit',month:'long',year:'numeric'})
+    const oraExport  = new Date().toLocaleTimeString('it-IT',{hour:'2-digit',minute:'2-digit'})
+    if (!registrations.length) return
+
+    // Tutti gli iscritti, ordinati per cognome e nome
+    const tutti = [...registrations].sort((a,b) => {
+      const c = (a.cognome||'').localeCompare(b.cognome||'', 'it', { sensitivity:'base' })
+      return c !== 0 ? c : (a.nome||'').localeCompare(b.nome||'', 'it', { sensitivity:'base' })
+    })
+
+    const fmtDt   = v => v ? new Date(v).toLocaleString('it-IT',{timeZone:'Europe/Rome',day:'2-digit',month:'2-digit',year:'numeric',hour:'2-digit',minute:'2-digit'}) : ''
+    const fmtBool = v => v === true ? 'Si' : v === false ? 'No' : ''
+
+    const COLS = [
+      { h:'#',                    w:5,  v:(_,i)=>i+1 },
+      { h:'Cognome',              w:18, v:r=>r.cognome||'' },
+      { h:'Nome',                 w:16, v:r=>r.nome||'' },
+      { h:'Posto assegnato',      w:22, v:r=>r.numero_posto||'NON ASSEGNATO' },
+      { h:'Email',                w:30, v:r=>r.email||'' },
+      { h:'Cellulare',            w:14, v:r=>r.cellulare||'' },
+      { h:'Ragione Sociale',      w:28, v:r=>r.ragione_sociale||'' },
+      { h:'Partita IVA',          w:16, v:r=>r.partita_iva||'' },
+      { h:'CAP',                  w:8,  v:r=>r.cap||'' },
+      { h:'Categoria',            w:22, v:r=>getMestiere(r.mestiere_id) },
+      { h:'Associato CNA',        w:14, v:r=>fmtBool(r.associato_cna) },
+      { h:'Stato iscrizione',     w:14, v:r=>r.stato||'' },
+      { h:'Presenza confermata',  w:18, v:r=>r.rinuncia ? 'Rinuncia' : fmtBool(r.presenza_confermata) },
+      { h:'Mail posto inviata',   w:16, v:r=>fmtBool(!!r.posto_email_inviata) },
+      { h:'Presente (check-in)',  w:18, v:r=>fmtDt(r.checkin_at) },
+      { h:'N. iscrizione',        w:12, v:r=>r.numero_iscrizione||'' },
+      { h:'Codice iscrizione',    w:18, v:r=>r.codice_iscrizione||'' },
+      { h:'Iscritto il',          w:18, v:r=>fmtDt(r.created_at) },
+      ...formFields.map(f => ({ h:f.label, w:20, v:r=>{ const x = r.campi_extra?.[f.id]; return x == null ? '' : (Array.isArray(x) ? x.join(', ') : String(x)) } })),
+    ]
+    const POSTO_COL = 4
+
+    const ExcelJS = (await import('exceljs')).default
+    const wb = new ExcelJS.Workbook()
+    const ws = wb.addWorksheet('Posti assegnati', { views:[{ state:'frozen', ySplit:3 }] })
+    const nCols = COLS.length
+    const nCon = tutti.filter(r=>r.numero_posto).length
+
+    ws.mergeCells(1,1,1,nCols)
+    const rTit = ws.getRow(1)
+    rTit.getCell(1).value     = `Posti assegnati - ${eventoTitle}`
+    rTit.getCell(1).font      = { bold:true, size:14, color:{ argb:'FFFFFFFF' } }
+    rTit.getCell(1).fill      = { type:'pattern', pattern:'solid', fgColor:{ argb:'FF003DA5' } }
+    rTit.getCell(1).alignment = { horizontal:'center', vertical:'middle' }
+    rTit.height = 28
+
+    ws.mergeCells(2,1,2,nCols)
+    const rSub = ws.getRow(2)
+    rSub.getCell(1).value = `Esportato il ${dataExport} alle ${oraExport} - ${tutti.length} iscritti - ${nCon} con posto - ${tutti.length - nCon} senza posto`
+    rSub.getCell(1).font  = { size:9, color:{ argb:'FF6B7280' }, italic:true }
+    rSub.height = 16
+
+    const hRow = ws.getRow(3)
+    COLS.forEach(({ h }, i) => {
+      const cell = hRow.getCell(i+1)
+      cell.value     = h
+      cell.font      = { bold:true, size:9, color:{ argb:'FFFFFFFF' } }
+      cell.fill      = { type:'pattern', pattern:'solid', fgColor:{ argb:'FF1E3A5F' } }
+      cell.alignment = { horizontal:'center', vertical:'middle', wrapText:true }
+    })
+    hRow.height = 22
+    ws.columns = COLS.map(c => ({ width: c.w }))
+    ws.autoFilter = { from:{ row:3, column:1 }, to:{ row:3, column:nCols } }
+
+    tutti.forEach((r, idx) => {
+      const row   = ws.addRow(COLS.map(c => c.v(r, idx)))
+      const rowBg = idx % 2 === 0 ? 'FFFAFAFA' : 'FFFFFFFF'
+      row.eachCell({ includeEmpty:true }, (cell, ci) => {
+        cell.fill      = { type:'pattern', pattern:'solid', fgColor:{ argb:rowBg } }
+        cell.font      = { size:9 }
+        cell.alignment = { vertical:'middle' }
+        cell.border    = { bottom:{ style:'hair', color:{ argb:'FFE5E7EB' } } }
+        if (ci === POSTO_COL) {
+          cell.alignment = { vertical:'middle', horizontal:'center' }
+          if (r.numero_posto) {
+            cell.fill = { type:'pattern', pattern:'solid', fgColor:{ argb:'FFEFF6FF' } }
+            cell.font = { size:10, bold:true, color:{ argb:'FF1D4ED8' } }
+          } else {
+            cell.fill = { type:'pattern', pattern:'solid', fgColor:{ argb:'FFFEF2F2' } }
+            cell.font = { size:9, bold:true, color:{ argb:'FFDC2626' } }
+          }
+        }
+      })
+      row.height = 17
+    })
+
+    const buffer = await wb.xlsx.writeBuffer()
+    const blob = new Blob([buffer],{ type:'application/vnd.openxmlformats-officedocument.spreadsheetml.sheet' })
+    const url  = URL.createObjectURL(blob)
+    const a    = document.createElement('a')
+    a.href     = url
+    a.download = `posti-assegnati-${eventoTitle.toLowerCase().replace(/[^a-z0-9]+/g,'-').replace(/^-|-$/g,'')}-${new Date().toISOString().slice(0,10)}.xlsx`
+    document.body.appendChild(a); a.click(); document.body.removeChild(a)
+    URL.revokeObjectURL(url)
+    logAttivita('posti_esportati',{ eventoId:selectedEvento, eventoTitolo:eventoTitle, dettagli:{ totale:tutti.length, con_posto:nCon } })
+  }
+
   function tcName(s) {
     if (!s) return ''
     return s.trim().split(/\s+/).map(w => w.charAt(0).toUpperCase() + w.slice(1).toLowerCase()).join(' ')
@@ -1778,6 +1882,7 @@ export default function IscrittiPage() {
         <div style={{ display:'flex', gap:'8px', flexWrap:'wrap', marginBottom:'16px', alignItems:'center' }}>
           <Btn variant="secondary" onClick={exportRegistroPDF}  size="md" style={{ background:'#EFF6FF', color:'#1D4ED8', borderColor:'#BFDBFE', fontWeight:'700' }}><FileText size={16}/> 🖨 Registro PDF</Btn>
           <Btn variant="secondary" onClick={exportRegistroWord} size="md" style={{ background:'#EFF6FF', color:'#1D4ED8', borderColor:'#BFDBFE', fontWeight:'700' }}><FileText size={16}/> 📄 Registro Word</Btn>
+          <Btn variant="secondary" onClick={exportExcelPostiAssegnati} size="md" style={{ background:'#ECFDF5', color:'#16A34A', borderColor:'#86EFAC', fontWeight:'700' }}><Download size={16}/> Scarica in Excel i posti assegnati</Btn>
           <span style={{ fontSize:'12px', color:'#9CA3AF', marginLeft:'4px' }}>
             Lista iscritti ordinata per cognome · da stampare per le mascherine
           </span>
