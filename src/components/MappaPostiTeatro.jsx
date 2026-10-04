@@ -33,6 +33,23 @@ function genPalchi() {
   return s
 }
 
+// ── Balconata (da _balconata.xlsx): 4 blocchi x 3 file ──
+// [blocco, colonna Excel di partenza (B=0), primo posto, ultimo posto]
+const BAL = {
+  '3': [[1,0,1,4],[2,5,5,17],[3,19,18,31],[4,34,32,36]],
+  '2': [[1,0,1,5],[2,5,6,19],[3,19,20,33],[4,34,34,38]],
+  '1': [[1,0,1,5],[2,5,6,18],[3,19,19,31],[4,34,32,36]],
+}
+const BAL_FILE = ['3','2','1'] // dall'alto (terza fila) verso il palco (prima fila)
+function genBalconata() {
+  const s = []
+  BAL_FILE.forEach(f => BAL[f].forEach(([bl,c0,a,b]) => {
+    for (let n=a;n<=b;n++) s.push({id:`BA_${f}_${n}`,tipo:'balconata',fila:f,numero:n,blocco:bl,col:c0+(n-a),
+      label:`Balconata Fila ${f} Posto ${n}`})
+  }))
+  return s
+}
+
 // ── Platea positions: even LEFT desc, odd RIGHT asc, like real theater ──
 function plateaPos(seats) {
   const pos = {}
@@ -110,7 +127,8 @@ export default function MappaPostiTeatro({ registrations, eventId, onReload }) {
 
   const plSeats = useMemo(() => genPlatea(), [])
   const paSeats = useMemo(() => genPalchi(), [])
-  const allSeats = useMemo(() => [...plSeats, ...paSeats], [plSeats, paSeats])
+  const baSeats = useMemo(() => genBalconata(), [])
+  const allSeats = useMemo(() => [...plSeats, ...paSeats, ...baSeats], [plSeats, paSeats, baSeats])
   const plP = useMemo(() => plateaPos(plSeats), [plSeats])
 
   const { seatToReg, regToSeat } = useMemo(() => {
@@ -326,6 +344,34 @@ export default function MappaPostiTeatro({ registrations, eventId, onReload }) {
     return <svg viewBox={`0 0 960 ${h}`} style={{width:'100%',height:'100%'}}>{els}</svg>
   },[piano,paSeats,Dot])
 
+  // ── Balconata SVG ──
+  const BalconataSVG = useMemo(() => {
+    const seatW=22, blockGap=40, rowH=46, x0=90, y0=90
+    const bx = s => x0 + s.col*seatW + (s.blocco-1)*blockGap
+    const W = x0 + 38*seatW + 3*blockGap + 90
+    const els=[]
+    BAL_FILE.forEach((f,ri)=>{
+      const y=y0+ri*rowH
+      els.push(<text key={`f-${f}`} x={x0-40} y={y+4} textAnchor="middle" fontSize={12} fontWeight={900} fill="#DC2626" fontFamily="Inter,sans-serif">{f}</text>)
+      els.push(<text key={`fr-${f}`} x={W-50} y={y+4} textAnchor="middle" fontSize={12} fontWeight={900} fill="#DC2626" fontFamily="Inter,sans-serif">{f}</text>)
+    })
+    ;[1,2,3,4].forEach(bl=>{
+      const ss=baSeats.filter(s=>s.blocco===bl)
+      const minX=Math.min(...ss.map(bx)), maxX=Math.max(...ss.map(bx))
+      els.push(<rect key={`bk-${bl}`} x={minX-14} y={y0-22} width={maxX-minX+28} height={2*rowH+44} rx={10} fill="#f1f5f9" stroke={C.brd} strokeWidth={1}/>)
+      els.push(<text key={`bt-${bl}`} x={(minX+maxX)/2} y={y0-32} textAnchor="middle" fontSize={11} fontWeight={800} fill={C.pri} fontFamily="Inter,sans-serif">BLOCCO {bl}</text>)
+    })
+    baSeats.forEach(s=>{
+      const x=bx(s), y=y0+BAL_FILE.indexOf(s.fila)*rowH
+      els.push(<text key={`nn-${s.id}`} x={x} y={y-10} textAnchor="middle" fontSize={7} fill={C.mut} fontFamily="Inter,sans-serif">{s.numero}</text>)
+      els.push(<Dot key={s.id} seat={s} x={x} y={y} r={7}/>)
+    })
+    const sy=y0+2*rowH+50
+    els.push(<rect key="stg" x={W/2-160} y={sy} width={320} height={32} rx={8} fill={C.blue} opacity={.2}/>)
+    els.push(<text key="st" x={W/2} y={sy+21} textAnchor="middle" fontSize={12} fill={C.blue} fontWeight={700} fontFamily="Inter,sans-serif">PALCOSCENICO</text>)
+    return <svg viewBox={`0 0 ${W} ${sy+50}`} style={{width:'100%',height:'100%'}}>{els}</svg>
+  },[baSeats,Dot])
+
   // Map wrapper with zoom/pan
 
 
@@ -339,15 +385,18 @@ export default function MappaPostiTeatro({ registrations, eventId, onReload }) {
 
     {/* Tabs */}
     <div style={{display:'flex',alignItems:'center',gap:6,padding:'8px 20px',background:'#fff',borderBottom:`1px solid ${C.brd}`,flexWrap:'wrap'}}>
-      {['platea',...PIANI.map(p=>`palchi-${p}`)].map(v=>{
+      {['platea',...PIANI.map(p=>`palchi-${p}`),'balconata'].map(v=>{
         const isP = v==='platea'
+        const isB = v==='balconata'
         const svgPlatea = <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><path d="M3 18h18M5 18V9a1 1 0 0 1 .553-.894l6-3a1 1 0 0 1 .894 0l6 3A1 1 0 0 1 19 9v9"/><rect x="9" y="13" width="6" height="5" rx="1"/></svg>
         const svgPalchi = <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><rect x="2" y="7" width="4" height="10" rx="1"/><rect x="10" y="4" width="4" height="13" rx="1"/><rect x="18" y="7" width="4" height="10" rx="1"/><line x1="2" y1="20" x2="22" y2="20"/></svg>
-        const label = isP
+        const label = isB
+          ? <span style={{display:'flex',alignItems:'center',gap:5}}>{svgPalchi} Balconata ({baSeats.length})</span>
+          : isP
           ? <span style={{display:'flex',alignItems:'center',gap:5}}>{svgPlatea} Platea (498)</span>
           : <span style={{display:'flex',alignItems:'center',gap:5}}>{svgPalchi} Palchi {v.split('-')[1]}° Piano</span>
-        const active = (isP&&view==='platea')||(!isP&&view==='palchi'&&piano===+v.split('-')[1])
-        return <button key={v} onClick={()=>{if(isP)setView('platea');else{setView('palchi');setPiano(+v.split('-')[1])};resetT()}} style={{
+        const active = (isB&&view==='balconata')||(isP&&view==='platea')||(!isP&&!isB&&view==='palchi'&&piano===+v.split('-')[1])
+        return <button key={v} onClick={()=>{if(isB)setView('balconata');else if(isP)setView('platea');else{setView('palchi');setPiano(+v.split('-')[1])};resetT()}} style={{
           padding:'6px 14px',borderRadius:20,border:`1.5px solid ${active?C.pri:C.brd}`,
           background:active?'linear-gradient(90deg,#5B5FEF,#3730A3)':'#fff',color:active?'#fff':C.txt,
           fontSize:12,fontWeight:700,cursor:'pointer',fontFamily:"'Inter',sans-serif"
@@ -374,7 +423,7 @@ export default function MappaPostiTeatro({ registrations, eventId, onReload }) {
         onWheel={onWheel} onMouseDown={onMD} onMouseMove={onMM} onMouseUp={onMU} onMouseLeave={onMU}
         onTouchStart={onTS} onTouchMove={onTM} onTouchEnd={onTE}>
         <div style={{width:'100%',height:'100%',transform:`translate(${transform.x}px,${transform.y}px) scale(${transform.s})`,transformOrigin:'0 0',willChange:'transform'}}>
-          {view==='platea'?PlateaSVG:PalchiSVG}
+          {view==='balconata'?BalconataSVG:view==='platea'?PlateaSVG:PalchiSVG}
         </div>
         {tip && <div style={{position:'absolute',left:Math.min(tip.x+14,(mapRef.current?.offsetWidth||600)-280),top:tip.y-50,
           background:'#1e293b',color:'#fff',padding:'8px 12px',borderRadius:10,fontSize:12,whiteSpace:'nowrap',pointerEvents:'none',zIndex:100,
