@@ -2193,11 +2193,11 @@ export default function IscrittiPage() {
                   <tr style={{ background:'linear-gradient(90deg,#5B5FEF,#3730A3)' }}>
                     <th style={{ padding:'10px 12px', background:'transparent', color:'#fff', width:'40px' }}>
                       <input type="checkbox"
-                        checked={registrations.filter(r => r.email).length > 0 &&
-                          registrations.filter(r => r.email).every(r => teatroSelezione.has(r.id))}
-                        onChange={() => toggleSelezioneTeatroTutti(registrations)}
+                        checked={filteredTeatro.filter(r => r.email).length > 0 &&
+                          filteredTeatro.filter(r => r.email).every(r => teatroSelezione.has(r.id))}
+                        onChange={() => toggleSelezioneTeatroTutti(filteredTeatro)}
                         style={{ cursor:'pointer', width:'16px', height:'16px', accentColor:'#fff' }}
-                        title="Seleziona/deseleziona tutti (con posto e email)"
+                        title="Seleziona/deseleziona tutti i risultati filtrati (con email)"
                       />
                     </th>
                     {['Iscritto','Email','Posto','Conferma presenza','Confermato il','Azioni'].map((h,i) => (
