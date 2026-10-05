@@ -143,6 +143,7 @@ export default function IscrittiPage() {
   const [reminderRis, setReminderRis] = useState(null)
   const [reminderPreview, setReminderPreview] = useState(null) // { html, oggetto, fonte, loading, error }
   const [dryRunRis, setDryRunRis] = useState(null)
+  const [paginaTeatro, setPaginaTeatro] = useState(1)
   const [teatroSelezione, setTeatroSelezione] = useState(new Set()) // Set di reg_id selezionati
   const [filtroPostoAssegnato, setFiltroPostoAssegnato] = useState('tutti') // 'tutti' | 'con_posto' | 'senza_posto'
   const [filtroPresenzaTeatro, setFiltroPresenzaTeatro] = useState('tutti') // 'tutti' | 'in_attesa' | 'confermata' | 'rinuncia'
@@ -587,6 +588,12 @@ export default function IscrittiPage() {
       return true
     })
   })()
+
+  useEffect(() => { setPaginaTeatro(1) }, [filtroPostoAssegnato, filtroMailPosto, filtroPresenzaTeatro, searchTeatro, selectedEvento])
+  const PER_PAGINA_TEATRO = 50
+  const totPagineTeatro = Math.max(1, Math.ceil(filteredTeatro.length / PER_PAGINA_TEATRO))
+  const paginaTeatroEff = Math.min(paginaTeatro, totPagineTeatro)
+  const paginatedTeatro = filteredTeatro.slice((paginaTeatroEff - 1) * PER_PAGINA_TEATRO, paginaTeatroEff * PER_PAGINA_TEATRO)
 
   async function inviaEmailConferma(reg) {
     if (sendingEmail) return
@@ -1923,7 +1930,6 @@ export default function IscrittiPage() {
               { label:'Senza posto',         value: registrations.filter(r => !r.numero_posto).length,                                             color:'#DC2626', filtro:null },
               { label:'Presenza confermata', value: registrations.filter(r => r.presenza_confermata).length,                                       color:'#059669', filtro:'confermata' },
               { label:'Rinunce',             value: registrations.filter(r => r.rinuncia).length,                                                  color:'#DC2626', filtro:'rinuncia' },
-              { label:'In attesa',           value: registrations.filter(r => r.numero_posto && !r.presenza_confermata && !r.rinuncia).length,     color:'#D97706', filtro:'in_attesa' },
               { label:'Mail posto inviate',  value: registrations.filter(r => r.posto_email_inviata).length,                                       color:'#0891B2', filtro:'__mail_inviata' },
               { label:'Mail posto da inviare', value: registrations.filter(r => r.numero_posto && !r.posto_email_inviata).length,                 color:'#BE185D', filtro:'__mail_da_inviare' },
             ].map(st => {
@@ -2200,7 +2206,7 @@ export default function IscrittiPage() {
                   </tr>
                 </thead>
                 <tbody>
-                  {filteredTeatro.map((r, i) => {
+                  {paginatedTeatro.map((r, i) => {
                     const editVal = postoEdit[r.id]
                     const selezionato = teatroSelezione.has(r.id)
                     return (
@@ -2310,6 +2316,24 @@ export default function IscrittiPage() {
                 </tbody>
               </table>
             </div>
+            {totPagineTeatro > 1 && (() => {
+              const btn = (dis) => ({ padding:'6px 12px', borderRadius:'20px', border:'1px solid #D1D5DB', background:'#fff', color: dis ? '#D1D5DB' : '#374151', fontSize:'13px', fontWeight:'700', cursor: dis ? 'default' : 'pointer', fontFamily:"'Inter',sans-serif" })
+              const go = (n) => { setPaginaTeatro(Math.min(Math.max(1, n), totPagineTeatro)); window.scrollTo({ top: 0, behavior: 'smooth' }) }
+              const da = (paginaTeatroEff - 1) * PER_PAGINA_TEATRO + 1
+              const a = Math.min(paginaTeatroEff * PER_PAGINA_TEATRO, filteredTeatro.length)
+              return (
+                <div style={{ display:'flex', alignItems:'center', justifyContent:'space-between', gap:'10px', flexWrap:'wrap', padding:'12px 16px', borderTop:'1px solid #F3F4F6' }}>
+                  <span style={{ fontSize:'13px', color:'#6B7280' }}>Record <strong style={{ color:'#111' }}>{da}-{a}</strong> di {filteredTeatro.length}</span>
+                  <div style={{ display:'flex', alignItems:'center', gap:'6px' }}>
+                    <button disabled={paginaTeatroEff === 1} onClick={() => go(1)} style={btn(paginaTeatroEff === 1)}>«</button>
+                    <button disabled={paginaTeatroEff === 1} onClick={() => go(paginaTeatroEff - 1)} style={btn(paginaTeatroEff === 1)}>‹ Prec</button>
+                    <span style={{ fontSize:'13px', fontWeight:'700', color:'#5B5FEF', padding:'0 8px' }}>Pagina {paginaTeatroEff} di {totPagineTeatro}</span>
+                    <button disabled={paginaTeatroEff === totPagineTeatro} onClick={() => go(paginaTeatroEff + 1)} style={btn(paginaTeatroEff === totPagineTeatro)}>Succ ›</button>
+                    <button disabled={paginaTeatroEff === totPagineTeatro} onClick={() => go(totPagineTeatro)} style={btn(paginaTeatroEff === totPagineTeatro)}>»</button>
+                  </div>
+                </div>
+              )
+            })()}
             {registrations.length === 0 && <div style={{ padding:'48px', textAlign:'center', color:'#9CA3AF', fontSize:'14px' }}>Nessun iscritto per questo evento</div>}
           </div>
         </div>
