@@ -144,6 +144,7 @@ export default function IscrittiPage() {
   const [reminderPreview, setReminderPreview] = useState(null) // { html, oggetto, fonte, loading, error }
   const [dryRunRis, setDryRunRis] = useState(null)
   const [paginaTeatro, setPaginaTeatro] = useState(1)
+  const [sortTeatro, setSortTeatro] = useState({ col: null, dir: 'asc' })
   const [teatroSelezione, setTeatroSelezione] = useState(new Set()) // Set di reg_id selezionati
   const [filtroPostoAssegnato, setFiltroPostoAssegnato] = useState('tutti') // 'tutti' | 'con_posto' | 'senza_posto'
   const [filtroPresenzaTeatro, setFiltroPresenzaTeatro] = useState('tutti') // 'tutti' | 'in_attesa' | 'confermata' | 'rinuncia'
@@ -589,11 +590,33 @@ export default function IscrittiPage() {
     })
   })()
 
-  useEffect(() => { setPaginaTeatro(1) }, [filtroPostoAssegnato, filtroMailPosto, filtroPresenzaTeatro, searchTeatro, selectedEvento])
+  useEffect(() => { setPaginaTeatro(1) }, [filtroPostoAssegnato, filtroMailPosto, filtroPresenzaTeatro, searchTeatro, selectedEvento, sortTeatro])
   const PER_PAGINA_TEATRO = 50
   const totPagineTeatro = Math.max(1, Math.ceil(filteredTeatro.length / PER_PAGINA_TEATRO))
   const paginaTeatroEff = Math.min(paginaTeatro, totPagineTeatro)
-  const paginatedTeatro = filteredTeatro.slice((paginaTeatroEff - 1) * PER_PAGINA_TEATRO, paginaTeatroEff * PER_PAGINA_TEATRO)
+  const sortedTeatro = (() => {
+    if (!sortTeatro.col) return filteredTeatro
+    const coll = new Intl.Collator('it', { numeric: true, sensitivity: 'base' })
+    const key = r => {
+      switch (sortTeatro.col) {
+        case 'iscritto': return `${r.cognome || ''} ${r.nome || ''}`.trim()
+        case 'email': return r.email || ''
+        case 'posto': return r.numero_posto || ''
+        case 'presenza': return r.rinuncia ? '3' : r.presenza_confermata ? '1' : '2'
+        case 'confermato': return r.presenza_confermata_at || ''
+        default: return ''
+      }
+    }
+    const arr = [...filteredTeatro].sort((a, b) => {
+      const ka = key(a), kb = key(b)
+      if (!ka && kb) return 1
+      if (ka && !kb) return -1
+      return coll.compare(ka, kb)
+    })
+    if (sortTeatro.dir === 'desc') { const vuoti = arr.filter(r => !key(r)); return [...arr.filter(r => key(r)).reverse(), ...vuoti] }
+    return arr
+  })()
+  const paginatedTeatro = sortedTeatro.slice((paginaTeatroEff - 1) * PER_PAGINA_TEATRO, paginaTeatroEff * PER_PAGINA_TEATRO)
 
   async function inviaEmailConferma(reg) {
     if (sendingEmail) return
@@ -2200,9 +2223,17 @@ export default function IscrittiPage() {
                         title="Seleziona/deseleziona tutti i risultati filtrati (con email)"
                       />
                     </th>
-                    {['Iscritto','Email','Posto','Conferma presenza','Confermato il','Azioni'].map((h,i) => (
-                      <th key={i} style={{ padding:'10px 14px', background:'transparent', color:'#fff', fontSize:'11px', fontWeight:'700', letterSpacing:'.05em', textTransform:'uppercase', textAlign:'left', whiteSpace:'nowrap' }}>{h}</th>
-                    ))}
+                    {[['Iscritto','iscritto'],['Email','email'],['Posto','posto'],['Conferma presenza','presenza'],['Confermato il','confermato'],['Azioni',null]].map(([h,c],i) => {
+                      const att = c && sortTeatro.col === c
+                      return (
+                        <th key={i}
+                          onClick={() => c && setSortTeatro(p => p.col !== c ? { col:c, dir:'asc' } : p.dir === 'asc' ? { col:c, dir:'desc' } : { col:null, dir:'asc' })}
+                          title={c ? 'Clicca per ordinare' : undefined}
+                          style={{ padding:'10px 14px', background:'transparent', color:'#fff', fontSize:'11px', fontWeight:'700', letterSpacing:'.05em', textTransform:'uppercase', textAlign:'left', whiteSpace:'nowrap', cursor: c ? 'pointer' : 'default', userSelect:'none' }}>
+                          {h}{c && <span style={{ marginLeft:'5px', opacity: att ? 1 : .45 }}>{att ? (sortTeatro.dir === 'asc' ? '▲' : '▼') : '⇅'}</span>}
+                        </th>
+                      )
+                    })}
                   </tr>
                 </thead>
                 <tbody>
