@@ -121,7 +121,7 @@ export default function AdminLayout() {
 
         {/* Centro: wordmark cnaeventi */}
         <div className="admin-header-center" style={{ display:'flex', alignItems:'center', gap:0 }}>
-          <div style={s.titleBlock} onClick={() => window.location.reload()} title="Ricarica pagina" role="button" tabIndex={0} style={{ ...s.titleBlock, cursor:'pointer' }}>
+          <div style={s.titleBlock}>
             <svg width="36" height="36" viewBox="0 0 40 40" fill="none" xmlns="http://www.w3.org/2000/svg">
               <defs>
                 <linearGradient id="ht" x1="4" y1="4" x2="36" y2="13" gradientUnits="userSpaceOnUse">

@@ -276,6 +276,8 @@ export default function IscrittiPage() {
     }
 
     // --- INVIO REALE: loop a blocchi finché remaining === 0 ---
+    const bloccaUscita = (e) => { e.preventDefault(); e.returnValue = 'Invio mail in corso: se esci si interrompe.'; return e.returnValue }
+    window.addEventListener('beforeunload', bloccaUscita)
     setInvioPostoInCorso(true)
     setInvioPostoRis({ inCorso: true, sent: 0, failed: 0, remaining: null, errors: [], forza })
 
@@ -327,6 +329,7 @@ export default function IscrittiPage() {
       setInvioPostoRis({ error: String(e), sent: totalSent, failed: totalFailed, errors: allErrors })
     }
 
+    window.removeEventListener('beforeunload', bloccaUscita)
     setInvioPostoInCorso(false)
     loadRegs()
   }

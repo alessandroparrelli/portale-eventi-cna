@@ -36,9 +36,7 @@ const BUILD_VERSION = 'v7-cnaeventi-icons'
 
     // Solo se c'era una versione precedente diversa (non al primissimo
     // avvio in assoluto) ricarica per garantire asset freschi.
-    if (savedVersion) {
-      window.location.reload()
-    }
+    // Nessun reload automatico: i nuovi asset arrivano alla prossima apertura manuale
   } catch (_) {
     // Ambiente senza supporto cache/SW (es. alcuni browser in incognito)
   }
