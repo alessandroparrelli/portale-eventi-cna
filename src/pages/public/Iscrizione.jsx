@@ -103,6 +103,9 @@ export default function Iscrizione() {
   const [error, setError] = useState(null)
   const [searchInput, setSearchInput] = useState(codice || '')
   const [searching, setSearching] = useState(false)
+  const [candidati, setCandidati] = useState(null)
+  const [emailVerifica, setEmailVerifica] = useState('')
+  const [emailErr, setEmailErr] = useState(null)
 
   useEffect(() => {
     if (codice) lookup(codice)
@@ -112,6 +115,7 @@ export default function Iscrizione() {
   async function lookup(cod) {
     setLoading(true)
     setError(null)
+    setCandidati(null); setEmailErr(null)
     const trimmed = cod.trim()
     const isUuid = /^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$/i.test(trimmed)
     let regs = null
@@ -130,7 +134,11 @@ export default function Iscrizione() {
           found = data
         }
         if (!found || found.length === 0) {
-          const { data } = await supabase.from('registrations').select('*').ilike('codice_iscrizione', trimmed).limit(1)
+          const { data } = await supabase.from('registrations').select('*').eq('qr_code', trimmed).limit(1)
+          found = data
+        }
+        if (!found || found.length === 0) {
+          const { data } = await supabase.from('registrations').select('*').ilike('codice_iscrizione', trimmed).limit(50)
           found = data
         }
         if (found && found.length > 0) { regs = found; break }
@@ -148,8 +156,26 @@ export default function Iscrizione() {
       setLoading(false); return
     }
 
+    if (regs.length > 1) {
+      setCandidati(regs); setReg(null); setEvent(null)
+      setLoading(false); return
+    }
+    await mostraIscrizione(regs[0])
+    setLoading(false)
+  }
+
+  function verificaEmail(e) {
+    e?.preventDefault?.()
+    const em = emailVerifica.trim().toLowerCase()
+    const r = (candidati || []).find(c => (c.email || '').trim().toLowerCase() === em)
+    if (!r) { setEmailErr('Email non corrispondente a questo codice.'); return }
+    setCandidati(null); setEmailErr(null)
+    setLoading(true)
+    mostraIscrizione(r).then(() => setLoading(false))
+  }
+
+  async function mostraIscrizione(r) {
     try {
-      const r = regs[0]
       setReg(r)
       if (r.qr_code) setSearchInput(r.qr_code)
       else if (r.codice_iscrizione) setSearchInput(r.codice_iscrizione)
@@ -162,7 +188,6 @@ export default function Iscrizione() {
     } catch (e) {
       setError('Errore durante il caricamento dei dati.')
     }
-    setLoading(false)
   }
 
   async function handleSearch(e) {
@@ -216,6 +241,17 @@ export default function Iscrizione() {
             <Clock size={28} style={{ marginBottom:'12px', display:'block', margin:'0 auto 12px' }} />
             Caricamento…
           </div>
+        )}
+
+        {candidati && !loading && (
+          <form onSubmit={verificaEmail} style={{ backgroundColor:'#fff', border:'1px solid #E8ECF4', borderRadius:'20px', padding:'20px', marginBottom:'16px' }}>
+            <p style={{ fontSize:'15px', fontWeight:'700', color:'#111', margin:'0 0 6px' }}>Verifica la tua identità</p>
+            <p style={{ fontSize:'13px', color:'#6B7280', margin:'0 0 12px' }}>Inserisci l'email con cui ti sei iscritto per visualizzare il tuo biglietto.</p>
+            <input type="email" value={emailVerifica} onChange={e => setEmailVerifica(e.target.value)} placeholder="La tua email" autoComplete="email"
+              style={{ width:'100%', boxSizing:'border-box', border:'1px solid #E8ECF4', borderRadius:'12px', padding:'12px 14px', fontSize:'16px', marginBottom:'10px' }} />
+            {emailErr && <p style={{ fontSize:'13px', color:'#DC2626', margin:'0 0 10px' }}>{emailErr}</p>}
+            <button type="submit" style={{ width:'100%', backgroundColor:'#003DA5', color:'#fff', border:'none', borderRadius:'20px', padding:'12px', fontSize:'14px', fontWeight:'700', cursor:'pointer' }}>Mostra il mio biglietto</button>
+          </form>
         )}
 
         {error && !loading && (
