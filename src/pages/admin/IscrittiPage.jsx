@@ -248,13 +248,14 @@ export default function IscrittiPage() {
     // ids: null = tutti con posto, [id1,...] = selezionati specifici
     // forza: true = reinvia anche a chi ha gia ricevuto (ignora posto_email_inviata)
     if (!selectedEvento) return
+    const ID_CHUNK = 80 // max id per chiamata: oltre, l'URL della query interna diventa troppo lungo
     const LIMIT = 250 // email per blocco — ~50s, abbondantemente dentro il timeout Edge Function
 
     if (dry) {
       setDryRunRis(null)
       try {
         const body = { event_id: selectedEvento, dry_run: true, limit: LIMIT }
-        if (ids !== null) body.registration_ids = ids
+        if (ids !== null) body.registration_ids = ids.slice(0, ID_CHUNK)
         if (forza) body.forza = true
         const res = await fetch('https://hnkhckcclgabunkqfmrz.supabase.co/functions/v1/assegna-posto', {
           method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify(body),
@@ -282,12 +283,14 @@ export default function IscrittiPage() {
     let totalFailed = 0
     let allErrors = []
     let blocco = 0
+    const chunks = []
+    if (ids !== null) for (let i = 0; i < ids.length; i += ID_CHUNK) chunks.push(ids.slice(i, i + ID_CHUNK))
 
     try {
       while (true) {
         blocco++
         const body = { event_id: selectedEvento, limit: LIMIT }
-        if (ids !== null) body.registration_ids = ids
+        if (ids !== null) body.registration_ids = chunks[blocco - 1]
         if (forza) body.forza = true
 
         const res = await fetch('https://hnkhckcclgabunkqfmrz.supabase.co/functions/v1/assegna-posto', {
@@ -306,17 +309,18 @@ export default function IscrittiPage() {
         const remaining = data.remaining ?? 0
 
         setInvioPostoRis({
-          inCorso: !data.completato && ids === null,
+          inCorso: ids === null ? !data.completato : blocco < chunks.length,
           sent: totalSent,
           failed: totalFailed,
-          remaining,
-          completato: data.completato || ids !== null,
+          remaining: ids === null ? remaining : Math.max(0, ids.length - blocco * ID_CHUNK),
+          completato: ids === null ? data.completato : blocco >= chunks.length,
           errors: allErrors,
           blocco,
           forza,
         })
 
-        if (data.completato || ids !== null || data.sent === 0) break
+        if (ids !== null) { if (blocco >= chunks.length) break; await new Promise(r => setTimeout(r, 500)); continue }
+        if (data.completato || data.sent === 0) break
         await new Promise(r => setTimeout(r, 800))
       }
     } catch (e) {
