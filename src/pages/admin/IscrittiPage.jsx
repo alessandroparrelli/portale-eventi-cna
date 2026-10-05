@@ -2233,7 +2233,7 @@ export default function IscrittiPage() {
                                 if (e.key === 'Enter') { e.target.blur(); salvaPosto(r.id, e.target.value) }
                                 if (e.key === 'Escape') setPostoEdit(p => ({ ...p, [r.id]: undefined }))
                               }}
-                              style={{ width:'110px', padding:'6px 10px', border:`1px solid ${postoError[r.id] ? '#DC2626' : '#D1D5DB'}`, borderRadius:'20px', fontSize:'13px', fontWeight:'700', color: r.numero_posto ? '#5B5FEF' : '#6B7280', fontFamily:"'Inter',sans-serif" }}
+                              style={{ width:`${Math.min(Math.max(String(editVal !== undefined ? editVal : (r.numero_posto ?? '')).length, 12) + 3, 40)}ch`, minWidth:'140px', boxSizing:'border-box', padding:'6px 12px', border:`1px solid ${postoError[r.id] ? '#DC2626' : '#D1D5DB'}`, borderRadius:'20px', fontSize:'13px', fontWeight:'700', color: r.numero_posto ? '#5B5FEF' : '#6B7280', fontFamily:"'Inter',sans-serif" }}
                               placeholder="es. Platea 1A"
                             />
                             {postoSaving[r.id] && <span style={{ fontSize:'12px', color:'#9CA3AF' }}>⏳</span>}
