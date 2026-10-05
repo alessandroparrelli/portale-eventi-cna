@@ -644,6 +644,14 @@ export default function IscrittiPage() {
   })()
 
   useEffect(() => { setPaginaTeatro(1) }, [filtroPostoAssegnato, filtroMailPosto, filtroPresenzaTeatro, searchTeatro, selectedEvento, sortTeatro, regolePosto])
+  // La selezione segue sempre i filtri: chi esce dal filtro viene deselezionato
+  useEffect(() => {
+    const visibili = new Set(filteredTeatro.map(r => r.id))
+    setTeatroSelezione(prev => {
+      if ([...prev].every(id => visibili.has(id))) return prev
+      return new Set([...prev].filter(id => visibili.has(id)))
+    })
+  }, [filtroPostoAssegnato, filtroMailPosto, filtroPresenzaTeatro, searchTeatro, regolePosto, registrations])
   const PER_PAGINA_TEATRO = 50
   const totPagineTeatro = Math.max(1, Math.ceil(filteredTeatro.length / PER_PAGINA_TEATRO))
   const paginaTeatroEff = Math.min(paginaTeatro, totPagineTeatro)
@@ -2129,7 +2137,7 @@ export default function IscrittiPage() {
                   <div style={{ flexBasis:'100%', display:'flex', flexWrap:'wrap', gap:'6px', alignItems:'center', paddingTop:'4px' }}>
                     <span style={lab}>Zone attive:</span>
                     {regolePosto.map((g, i) => {
-                      const n = registrations.filter(r => matchRegola(parsePosto(r.numero_posto), g)).length
+                      const n = filteredTeatro.filter(r => matchRegola(parsePosto(r.numero_posto), g)).length
                       return (
                         <span key={i} style={{ display:'inline-flex', alignItems:'center', gap:'6px', padding:'4px 6px 4px 12px', borderRadius:'999px', background:'#5B5FEF', color:'#fff', fontSize:'12px', fontWeight:'700' }}>
                           {etichettaRegola(g)} <span style={{ opacity:.75, fontWeight:'500' }}>({n})</span>
