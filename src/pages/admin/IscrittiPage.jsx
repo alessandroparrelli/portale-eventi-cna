@@ -1924,11 +1924,13 @@ export default function IscrittiPage() {
               { label:'Presenza confermata', value: registrations.filter(r => r.presenza_confermata).length,                                       color:'#059669', filtro:'confermata' },
               { label:'Rinunce',             value: registrations.filter(r => r.rinuncia).length,                                                  color:'#DC2626', filtro:'rinuncia' },
               { label:'In attesa',           value: registrations.filter(r => r.numero_posto && !r.presenza_confermata && !r.rinuncia).length,     color:'#D97706', filtro:'in_attesa' },
+              { label:'Mail posto inviate',  value: registrations.filter(r => r.posto_email_inviata).length,                                       color:'#0891B2', filtro:'__mail_inviata' },
             ].map(st => {
-              const isActive = st.filtro && filtroPresenzaTeatro === st.filtro
+              const isMail = st.filtro === '__mail_inviata'
+              const isActive = isMail ? filtroMailPosto === 'inviata' : (st.filtro && filtroPresenzaTeatro === st.filtro)
               return (
                 <div key={st.label}
-                  onClick={() => st.filtro && setFiltroPresenzaTeatro(filtroPresenzaTeatro === st.filtro ? 'tutti' : st.filtro)}
+                  onClick={() => { if (!st.filtro) return; if (isMail) { setFiltroMailPosto(filtroMailPosto === 'inviata' ? 'tutti' : 'inviata'); return } setFiltroPresenzaTeatro(filtroPresenzaTeatro === st.filtro ? 'tutti' : st.filtro) }}
                   style={{ background: isActive ? st.color : '#fff', border:`2px solid ${isActive ? st.color : '#E8ECF4'}`, borderRadius:'16px', padding:'14px 20px', flex:1, minWidth:'140px', cursor: st.filtro ? 'pointer' : 'default', transition:'all .15s ease', boxShadow: isActive ? `0 4px 12px ${st.color}33` : 'none' }}>
                   <p style={{ margin:'0 0 4px', fontSize:'24px', fontWeight:'900', color: isActive ? '#fff' : st.color, letterSpacing:'-0.02em' }}>{st.value}</p>
                   <p style={{ margin:0, fontSize:'12px', color: isActive ? 'rgba(255,255,255,0.85)' : '#6B7280', fontWeight:'500' }}>{st.label}{st.filtro && <span style={{fontSize:'10px',marginLeft:'4px',opacity:.7}}>{isActive ? '✕' : '↓'}</span>}</p>
@@ -1987,6 +1989,9 @@ export default function IscrittiPage() {
                 × Azzera filtri
               </button>
             )}
+            <span style={{ marginLeft:'auto', display:'inline-flex', alignItems:'center', gap:'6px', padding:'6px 14px', borderRadius:'20px', background: filteredTeatro.length !== registrations.length ? '#5B5FEF' : '#EEEFFD', color: filteredTeatro.length !== registrations.length ? '#fff' : '#5B5FEF', fontSize:'13px', fontWeight:'800', whiteSpace:'nowrap' }}>
+              {filteredTeatro.length} <span style={{ fontWeight:'500', opacity:.85 }}>di {registrations.length} selezionati</span>
+            </span>
           </div>
 
           {/* Ricerca nel tab teatro */}
