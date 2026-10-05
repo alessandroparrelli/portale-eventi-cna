@@ -149,6 +149,7 @@ export default function IscrittiPage() {
   const [fOrdine, setFOrdine] = useState('')
   const [fLato, setFLato] = useState('')
   const [fPalco, setFPalco] = useState('')
+  const [regolePosto, setRegolePosto] = useState([]) // [{settore,fila,ordine,lato,palco}] in OR
   const [sortTeatro, setSortTeatro] = useState({ col: null, dir: 'asc' })
   const [teatroSelezione, setTeatroSelezione] = useState(new Set()) // Set di reg_id selezionati
   const [filtroPostoAssegnato, setFiltroPostoAssegnato] = useState('tutti') // 'tutti' | 'con_posto' | 'senza_posto'
@@ -600,15 +601,21 @@ export default function IscrittiPage() {
       palchi: uniq(palchiFilt.map(x => x.palco)),
     }
   })()
-  const matchPosto = (r) => {
-    if (!fSettore) return true
-    const x = parsePosto(r.numero_posto)
-    if (!x || x.settore !== fSettore) return false
-    if (fFila && x.fila !== fFila) return false
-    if (fOrdine && x.ordine !== fOrdine) return false
-    if (fLato && x.lato !== fLato) return false
-    if (fPalco && x.palco !== fPalco) return false
+  const matchRegola = (x, g) => {
+    if (!x || x.settore !== g.settore) return false
+    if (g.fila && x.fila !== g.fila) return false
+    if (g.ordine && x.ordine !== g.ordine) return false
+    if (g.lato && x.lato !== g.lato) return false
+    if (g.palco && x.palco !== g.palco) return false
     return true
+  }
+  const etichettaRegola = g => g.settore === 'Palchi'
+    ? ['Palchi', g.ordine && `${g.ordine}° Ordine`, g.lato, g.palco && `Palco ${g.palco}`].filter(Boolean).join(' ')
+    : `${g.settore} ${g.fila ? 'Fila ' + g.fila : '(tutte le file)'}`
+  const matchPosto = (r) => {
+    if (regolePosto.length === 0) return true
+    const x = parsePosto(r.numero_posto)
+    return regolePosto.some(g => matchRegola(x, g))
   }
 
   const filteredTeatro = (() => {
@@ -629,7 +636,7 @@ export default function IscrittiPage() {
     })
   })()
 
-  useEffect(() => { setPaginaTeatro(1) }, [filtroPostoAssegnato, filtroMailPosto, filtroPresenzaTeatro, searchTeatro, selectedEvento, sortTeatro, fSettore, fFila, fOrdine, fLato, fPalco])
+  useEffect(() => { setPaginaTeatro(1) }, [filtroPostoAssegnato, filtroMailPosto, filtroPresenzaTeatro, searchTeatro, selectedEvento, sortTeatro, regolePosto])
   const PER_PAGINA_TEATRO = 50
   const totPagineTeatro = Math.max(1, Math.ceil(filteredTeatro.length / PER_PAGINA_TEATRO))
   const paginaTeatroEff = Math.min(paginaTeatro, totPagineTeatro)
@@ -2101,9 +2108,32 @@ export default function IscrittiPage() {
                     {opzioniPosti.palchi.map(x => <option key={x} value={x}>Palco {x}</option>)}
                   </select>
                 </>}
-                {fSettore && (
-                  <button onClick={() => { setFSettore(''); setFFila(''); setFOrdine(''); setFLato(''); setFPalco('') }}
-                    style={{ fontSize:'12px', color:'#DC2626', background:'none', border:'none', cursor:'pointer', padding:0, fontWeight:'600' }}>× Azzera</button>
+                <button disabled={!fSettore}
+                  onClick={() => {
+                    const g = { settore:fSettore, fila:fFila, ordine:fOrdine, lato:fLato, palco:fPalco }
+                    const k = JSON.stringify(g)
+                    setRegolePosto(prev => prev.some(x => JSON.stringify(x) === k) ? prev : [...prev, g])
+                    setFFila(''); setFPalco('')
+                  }}
+                  style={{ padding:'6px 14px', borderRadius:'20px', border:'1px solid #5B5FEF', background: fSettore ? '#EEEFFD' : '#F9FAFB', color: fSettore ? '#5B5FEF' : '#D1D5DB', fontSize:'13px', fontWeight:'700', cursor: fSettore ? 'pointer' : 'default', fontFamily:"'Inter',sans-serif" }}>
+                  + Aggiungi al filtro
+                </button>
+                {regolePosto.length > 0 && (
+                  <div style={{ flexBasis:'100%', display:'flex', flexWrap:'wrap', gap:'6px', alignItems:'center', paddingTop:'4px' }}>
+                    <span style={lab}>Zone attive:</span>
+                    {regolePosto.map((g, i) => {
+                      const n = registrations.filter(r => matchRegola(parsePosto(r.numero_posto), g)).length
+                      return (
+                        <span key={i} style={{ display:'inline-flex', alignItems:'center', gap:'6px', padding:'4px 6px 4px 12px', borderRadius:'999px', background:'#5B5FEF', color:'#fff', fontSize:'12px', fontWeight:'700' }}>
+                          {etichettaRegola(g)} <span style={{ opacity:.75, fontWeight:'500' }}>({n})</span>
+                          <button onClick={() => setRegolePosto(prev => prev.filter((_, j) => j !== i))}
+                            style={{ background:'rgba(255,255,255,.25)', border:'none', color:'#fff', borderRadius:'999px', width:'18px', height:'18px', lineHeight:'16px', cursor:'pointer', padding:0, fontSize:'12px' }}>×</button>
+                        </span>
+                      )
+                    })}
+                    <button onClick={() => setRegolePosto([])}
+                      style={{ fontSize:'12px', color:'#DC2626', background:'none', border:'none', cursor:'pointer', padding:'0 4px', fontWeight:'600' }}>× Rimuovi tutte</button>
+                  </div>
                 )}
                 <button disabled={conEmail.length === 0}
                   onClick={() => setTeatroSelezione(new Set(conEmail.map(r => r.id)))}
