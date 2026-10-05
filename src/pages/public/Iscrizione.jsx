@@ -31,7 +31,7 @@ function QRActions({ qrValue, codice, eventoTitolo }) {
     setSaving(false)
   }
   function shareWhatsApp() {
-    const pageUrl = window.location.origin + '/iscrizione/' + codice
+    const pageUrl = window.location.origin + '/iscrizione/' + qrValue
     const msg = `🏟 La mia iscrizione a "${eventoTitolo || 'evento CNA'}"
 
 Codice: ${codice}

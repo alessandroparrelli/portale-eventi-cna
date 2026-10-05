@@ -2282,7 +2282,7 @@ export default function IscrittiPage() {
                             {r.codice_iscrizione && (
                               <button
                                 onClick={() => {
-                                  const url = `https://portale-eventi-cna.vercel.app/iscrizione/${r.codice_iscrizione}`
+                                  const url = `https://portale-eventi-cna.vercel.app/iscrizione/${r.id}`
                                   navigator.clipboard.writeText(url).then(() => {
                                     // feedback visivo momentaneo
                                     const btn = document.getElementById(`copy-${r.id}`)
@@ -2290,7 +2290,7 @@ export default function IscrittiPage() {
                                   })
                                 }}
                                 id={`copy-${r.id}`}
-                                title={`Copia link iscrizione: /iscrizione/${r.codice_iscrizione}`}
+                                title={`Copia link iscrizione: /iscrizione/${r.id}`}
                                 style={{ background:'none', border:'1px solid #E8ECF4', borderRadius:'20px', padding:'4px 10px', cursor:'pointer', fontSize:'12px', color:'#5B5FEF', fontFamily:"'Inter',sans-serif", fontWeight:'600', whiteSpace:'nowrap' }}>
                                 🔗 Link
                               </button>

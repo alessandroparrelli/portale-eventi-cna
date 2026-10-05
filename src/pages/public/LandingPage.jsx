@@ -102,7 +102,7 @@ function ModalConferma({ reg, event, onClose }) {
   }
 
   function shareWhatsApp() {
-    const pageUrl = window.location.origin + '/iscrizione/' + reg.codice_iscrizione
+    const pageUrl = window.location.origin + '/iscrizione/' + reg.id
     const msg = `🎟 La mia iscrizione a "${event?.titolo || 'evento CNA'}"\n\nCodice: ${reg.codice_iscrizione}\nQR Code: ${pageUrl}\n\n📱 Mostra questa pagina all'ingresso.`
     window.open(`https://wa.me/?text=${encodeURIComponent(msg)}`, '_blank')
   }
@@ -249,7 +249,7 @@ function ModalConferma({ reg, event, onClose }) {
             📅 {calAdded ? '✓ Aggiunto' : 'Aggiungi al calendario'}
           </button>
           {reg.codice_iscrizione && (
-            <a href={`/iscrizione/${reg.codice_iscrizione}`} target="_blank" rel="noopener noreferrer"
+            <a href={`/iscrizione/${reg.id}`} target="_blank" rel="noopener noreferrer"
               style={{ display:'flex',alignItems:'center',gap:'8px',color:'#003DA5',backgroundColor:'transparent',border:'1px solid #003DA5',borderRadius:'20px',padding:'12px 18px',fontSize:'14px',fontWeight:'700',fontFamily:"'Outfit',sans-serif",cursor:'pointer',textDecoration:'none' }}>
               🔍 Verifica iscrizione
             </a>
