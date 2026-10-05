@@ -144,6 +144,11 @@ export default function IscrittiPage() {
   const [reminderPreview, setReminderPreview] = useState(null) // { html, oggetto, fonte, loading, error }
   const [dryRunRis, setDryRunRis] = useState(null)
   const [paginaTeatro, setPaginaTeatro] = useState(1)
+  const [fSettore, setFSettore] = useState('')
+  const [fFila, setFFila] = useState('')
+  const [fOrdine, setFOrdine] = useState('')
+  const [fLato, setFLato] = useState('')
+  const [fPalco, setFPalco] = useState('')
   const [sortTeatro, setSortTeatro] = useState({ col: null, dir: 'asc' })
   const [teatroSelezione, setTeatroSelezione] = useState(new Set()) // Set di reg_id selezionati
   const [filtroPostoAssegnato, setFiltroPostoAssegnato] = useState('tutti') // 'tutti' | 'con_posto' | 'senza_posto'
@@ -573,6 +578,39 @@ export default function IscrittiPage() {
     })
   })()
 
+  const parsePosto = (p) => {
+    if (!p) return null
+    const m = String(p).match(/^\s*(Platea|Balconata)\s+Fila\s+(\S+)/i)
+    if (m) return { settore: m[1][0].toUpperCase() + m[1].slice(1).toLowerCase(), fila: m[2] }
+    const k = String(p).match(/(\d+)\s*\S?\s*Ordine\s+(Destro|Sinistro)\s+Palco\s+(\S+)/i)
+    if (k) return { settore: 'Palchi', ordine: k[1], lato: k[2][0].toUpperCase() + k[2].slice(1).toLowerCase(), palco: k[3] }
+    return { settore: 'Altro' }
+  }
+  const collPosti = new Intl.Collator('it', { numeric: true })
+  const opzioniPosti = (() => {
+    const parsed = registrations.map(r => parsePosto(r.numero_posto)).filter(Boolean)
+    const uniq = arr => [...new Set(arr.filter(Boolean))].sort(collPosti.compare)
+    const nelSettore = parsed.filter(x => x.settore === fSettore)
+    const palchiFilt = nelSettore.filter(x => (!fOrdine || x.ordine === fOrdine) && (!fLato || x.lato === fLato))
+    return {
+      settori: uniq(parsed.map(x => x.settore)),
+      file: uniq(nelSettore.map(x => x.fila)),
+      ordini: uniq(nelSettore.map(x => x.ordine)),
+      lati: uniq(nelSettore.map(x => x.lato)),
+      palchi: uniq(palchiFilt.map(x => x.palco)),
+    }
+  })()
+  const matchPosto = (r) => {
+    if (!fSettore) return true
+    const x = parsePosto(r.numero_posto)
+    if (!x || x.settore !== fSettore) return false
+    if (fFila && x.fila !== fFila) return false
+    if (fOrdine && x.ordine !== fOrdine) return false
+    if (fLato && x.lato !== fLato) return false
+    if (fPalco && x.palco !== fPalco) return false
+    return true
+  }
+
   const filteredTeatro = (() => {
     const qT = searchTeatro.toLowerCase()
     const matchT = r => !qT || r.nome?.toLowerCase().includes(qT) || r.cognome?.toLowerCase().includes(qT) || r.email?.toLowerCase().includes(qT)
@@ -582,6 +620,7 @@ export default function IscrittiPage() {
       if (filtroPostoAssegnato === 'senza_posto' && r.numero_posto) return false
       if (filtroMailPosto === 'inviata' && !r.posto_email_inviata) return false
       if (filtroMailPosto === 'non_inviata' && r.posto_email_inviata) return false
+      if (!matchPosto(r)) return false
       if (filtroPresenzaTeatro === 'in_attesa' && (r.presenza_confermata || r.rinuncia || !r.numero_posto)) return false
       if (filtroPresenzaTeatro === 'confermata' && !r.presenza_confermata) return false
       if (filtroPresenzaTeatro === 'rinuncia' && !r.rinuncia) return false
@@ -590,7 +629,7 @@ export default function IscrittiPage() {
     })
   })()
 
-  useEffect(() => { setPaginaTeatro(1) }, [filtroPostoAssegnato, filtroMailPosto, filtroPresenzaTeatro, searchTeatro, selectedEvento, sortTeatro])
+  useEffect(() => { setPaginaTeatro(1) }, [filtroPostoAssegnato, filtroMailPosto, filtroPresenzaTeatro, searchTeatro, selectedEvento, sortTeatro, fSettore, fFila, fOrdine, fLato, fPalco])
   const PER_PAGINA_TEATRO = 50
   const totPagineTeatro = Math.max(1, Math.ceil(filteredTeatro.length / PER_PAGINA_TEATRO))
   const paginaTeatroEff = Math.min(paginaTeatro, totPagineTeatro)
@@ -2024,6 +2063,56 @@ export default function IscrittiPage() {
               {filteredTeatro.length} <span style={{ fontWeight:'500', opacity:.85 }}>di {registrations.length} selezionati</span>
             </span>
           </div>
+
+          {/* Filtro per settore / fila / palco */}
+          {opzioniPosti.settori.length > 0 && (() => {
+            const sel = { padding:'6px 12px', borderRadius:'20px', border:'1px solid #D1D5DB', fontSize:'13px', fontWeight:'600', background:'#fff', color:'#374151', fontFamily:"'Inter',sans-serif", cursor:'pointer' }
+            const lab = { fontSize:'12px', color:'#6B7280', fontWeight:'600', whiteSpace:'nowrap' }
+            const conEmail = filteredTeatro.filter(r => r.email)
+            return (
+              <div style={{ display:'flex', gap:'10px', flexWrap:'wrap', alignItems:'center', marginBottom:'16px', padding:'12px 14px', background:'#fff', border:'1px solid #E8ECF4', borderRadius:'16px' }}>
+                <span style={{ fontSize:'12px', fontWeight:'800', color:'#5B5FEF', letterSpacing:'.04em' }}>FILTRA PER POSTO</span>
+                <span style={lab}>Settore:</span>
+                <select value={fSettore} onChange={e => { setFSettore(e.target.value); setFFila(''); setFOrdine(''); setFLato(''); setFPalco('') }} style={sel}>
+                  <option value="">Tutti</option>
+                  {opzioniPosti.settori.map(x => <option key={x} value={x}>{x}</option>)}
+                </select>
+                {(fSettore === 'Platea' || fSettore === 'Balconata') && <>
+                  <span style={lab}>Fila:</span>
+                  <select value={fFila} onChange={e => setFFila(e.target.value)} style={sel}>
+                    <option value="">Tutte</option>
+                    {opzioniPosti.file.map(x => <option key={x} value={x}>Fila {x}</option>)}
+                  </select>
+                </>}
+                {fSettore === 'Palchi' && <>
+                  <span style={lab}>Ordine:</span>
+                  <select value={fOrdine} onChange={e => { setFOrdine(e.target.value); setFPalco('') }} style={sel}>
+                    <option value="">Tutti</option>
+                    {opzioniPosti.ordini.map(x => <option key={x} value={x}>{x}° Ordine</option>)}
+                  </select>
+                  <span style={lab}>Lato:</span>
+                  <select value={fLato} onChange={e => { setFLato(e.target.value); setFPalco('') }} style={sel}>
+                    <option value="">Tutti</option>
+                    {opzioniPosti.lati.map(x => <option key={x} value={x}>{x}</option>)}
+                  </select>
+                  <span style={lab}>Palco:</span>
+                  <select value={fPalco} onChange={e => setFPalco(e.target.value)} style={sel}>
+                    <option value="">Tutti</option>
+                    {opzioniPosti.palchi.map(x => <option key={x} value={x}>Palco {x}</option>)}
+                  </select>
+                </>}
+                {fSettore && (
+                  <button onClick={() => { setFSettore(''); setFFila(''); setFOrdine(''); setFLato(''); setFPalco('') }}
+                    style={{ fontSize:'12px', color:'#DC2626', background:'none', border:'none', cursor:'pointer', padding:0, fontWeight:'600' }}>× Azzera</button>
+                )}
+                <button disabled={conEmail.length === 0}
+                  onClick={() => setTeatroSelezione(new Set(conEmail.map(r => r.id)))}
+                  style={{ marginLeft:'auto', padding:'7px 16px', borderRadius:'20px', border:'none', background: conEmail.length ? '#5B5FEF' : '#E5E7EB', color:'#fff', fontSize:'13px', fontWeight:'700', cursor: conEmail.length ? 'pointer' : 'default', fontFamily:"'Inter',sans-serif" }}>
+                  ✓ Seleziona questi ({conEmail.length})
+                </button>
+              </div>
+            )
+          })()}
 
           {/* Ricerca nel tab teatro */}
           <div style={{ position:'relative', marginBottom:'14px' }}>
