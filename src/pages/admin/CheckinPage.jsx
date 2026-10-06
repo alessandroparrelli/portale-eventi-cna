@@ -220,6 +220,8 @@ export default function CheckinPage() {
   const [mestieri,       setMestieri]      = useState([])
   const [presenti,       setPresenti]      = useState([])
   const [numPresenti,    setNumPresenti]   = useState(0)
+  const [syncing,        setSyncing]       = useState(false)
+  const [lastSync,       setLastSync]      = useState(null)
   const [totali,         setTotali]        = useState(0)
   const [loadingP,       setLoadingP]      = useState(false)
   const [processing,     setProcessing]    = useState(false)
@@ -298,7 +300,7 @@ export default function CheckinPage() {
     flushQueue()
     const on = () => flushQueue()
     window.addEventListener('online', on)
-    const iv = setInterval(() => { flushQueue(); if (selectedRef.current && document.visibilityState === 'visible') loadPresenti() }, 20000)
+    const iv = setInterval(() => { flushQueue(); if (selectedRef.current && document.visibilityState === 'visible') loadPresenti(true) }, 15000)
     return () => { window.removeEventListener('online', on); clearInterval(iv) }
   }, [])
 
@@ -323,8 +325,6 @@ export default function CheckinPage() {
     if (rimasti.length < q.length && selectedRef.current) loadPresenti()
   }
 
-  const [syncing, setSyncing] = useState(false)
-  const [lastSync, setLastSync] = useState(null)
   async function sincronizza() {
     if (syncing) return
     setSyncing(true)
@@ -332,7 +332,6 @@ export default function CheckinPage() {
       await flushQueue()
       await loadPresenti()
       if (listaModal) await loadIscritti()
-      setLastSync(new Date())
     } finally { setSyncing(false) }
   }
 
@@ -348,10 +347,10 @@ export default function CheckinPage() {
     if (wantScanRef.current && !html5QrRef.current) startScanner()
   }
 
-  async function loadPresenti() {
-    if (!selectedEvento) return
-    setLoadingP(true)
-    const ev = selectedEvento
+  async function loadPresenti(silenzioso = false) {
+    const ev = selectedRef.current
+    if (!ev) return
+    if (!silenzioso) setLoadingP(true)
     const [{ data }, { count }, { count: countPres }] = await Promise.all([
       supabase.from('registrations').select('id,nome,cognome,ragione_sociale,checkin_at,stato,numero_posto')
         .eq('event_id', ev).eq('presente', true)
@@ -360,7 +359,11 @@ export default function CheckinPage() {
       supabase.from('registrations').select('id', { count: 'exact', head: true }).eq('event_id', ev).eq('presente', true),
     ])
     if (ev !== selectedRef.current) { setLoadingP(false); return }
-    setPresenti(data || []); setTotali(count || 0); setNumPresenti(countPres ?? (data || []).length); setLoadingP(false)
+    if (data) setPresenti(data)
+    if (count != null) setTotali(count)
+    if (countPres != null) setNumPresenti(countPres)
+    if (data && countPres != null) setLastSync(new Date())
+    setLoadingP(false)
   }
 
   async function loadIscritti() {
@@ -581,20 +584,19 @@ export default function CheckinPage() {
       {selectedEvento && (
         <>
           <div style={{ display:'flex', gap:'6px', marginBottom:'8px', alignItems:'stretch' }}>
-            <div style={{ flex:1, display:'flex', alignItems:'center', gap:'8px', background:'linear-gradient(135deg,#059669,#10b981)', borderRadius:'16px', padding:'9px 12px' }}>
+            <div style={{ flex:1, minWidth:0, overflow:'hidden', display:'flex', alignItems:'center', gap:'6px', background:'linear-gradient(135deg,#059669,#10b981)', borderRadius:'16px', padding:'9px 10px' }}>
               <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="#fff" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round"><circle cx="12" cy="12" r="10"/><polyline points="9 12 11 14 15 10"/></svg>
               <span style={{ fontSize:'22px', fontWeight:'900', color:'#fff', letterSpacing:'-0.03em', lineHeight:1 }}>{numPresenti}</span>
               <span style={{ fontSize:'11px', fontWeight:'700', color:'rgba(255,255,255,.85)', textTransform:'uppercase', letterSpacing:'0.04em', lineHeight:1.2 }}>Presenti</span>
             </div>
-            <div style={{ flex:1, display:'flex', alignItems:'center', gap:'8px', background:'linear-gradient(135deg,#b45309,#d97706)', borderRadius:'16px', padding:'9px 12px' }}>
+            <div style={{ flex:1, minWidth:0, overflow:'hidden', display:'flex', alignItems:'center', gap:'6px', background:'linear-gradient(135deg,#b45309,#d97706)', borderRadius:'16px', padding:'9px 10px' }}>
               <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="#fff" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round"><circle cx="12" cy="12" r="10"/><polyline points="12 6 12 12 16 14"/></svg>
               <span style={{ fontSize:'22px', fontWeight:'900', color:'#fff', letterSpacing:'-0.03em', lineHeight:1 }}>{nonPresenti}</span>
               <span style={{ fontSize:'11px', fontWeight:'700', color:'rgba(255,255,255,.85)', textTransform:'uppercase', letterSpacing:'0.04em', lineHeight:1.2 }}>In attesa</span>
             </div>
-            <button onClick={sincronizza} disabled={syncing}
-              style={{ display:'flex', alignItems:'center', justifyContent:'center', gap:'6px', background:'linear-gradient(135deg,#0e7490,#0891b2)', border:'none', borderRadius:'16px', padding:'9px 14px', flexShrink:0, cursor: syncing ? 'default' : 'pointer', color:'#fff', fontFamily:"'Inter',sans-serif" }}>
-              <RefreshCw size={16} style={{ animation: syncing ? 'spin .8s linear infinite' : 'none' }}/>
-              <span style={{ fontSize:'12px', fontWeight:'800', textTransform:'uppercase', letterSpacing:'0.04em', lineHeight:1.15, textAlign:'left' }}>{syncing ? 'Sincronizzo' : 'Sincronizza'}</span>
+            <button onClick={sincronizza} disabled={syncing} aria-label="Sincronizza" title="Sincronizza"
+              style={{ display:'flex', alignItems:'center', justifyContent:'center', width:'48px', flexShrink:0, background:'linear-gradient(135deg,#0e7490,#0891b2)', border:'none', borderRadius:'16px', cursor: syncing ? 'default' : 'pointer', color:'#fff' }}>
+              <RefreshCw size={20} style={{ animation: syncing ? 'spin .8s linear infinite' : 'none' }}/>
             </button>
           </div>
           <div style={{ height:'3px', backgroundColor:'#E8ECF4', borderRadius:'2px', marginBottom:'12px', overflow:'hidden' }}>
