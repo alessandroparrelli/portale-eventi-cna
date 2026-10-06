@@ -380,15 +380,6 @@ export default function StatistichePage() {
                     ))}
                   </div>
                 )}
-                {/* CAP */}
-                {stats.topCap.length > 0 && (
-                  <div style={s.section}>
-                    <h2 style={s.sectionTitle}>Provenienza (top 5 CAP)</h2>
-                    {stats.topCap.map(([cap,count])=>(
-                      <BarMini key={cap} label={cap} value={count} max={stats.total} color='#6B7280'/>
-                    ))}
-                  </div>
-                )}
               </div>
 
               {/* Visite per giorno */}
