@@ -1916,53 +1916,51 @@ export default function IscrittiPage() {
       {/* Stats cards */}
       {/* Bottoni azioni — DOPO il selettore evento */}
       {selectedEvento && (
-        <div style={{ display:'flex', gap:'8px', flexWrap:'wrap', marginBottom:'16px', alignItems:'center' }}>
-          <Btn variant="primary" onClick={() => verificaAssociati(false)} disabled={verificaInCorso} size="md"
-            title="Incrocia le P.IVA dei nuovi iscritti (non ancora controllati) con la tabella associati CNA">
-            {verificaInCorso
-              ? <><span style={{animation:'spin 1s linear infinite',display:'inline-block'}}>⏳</span> Verifica in corso…</>
-              : '🔍 Verifica associati CNA'}
-          </Btn>
-          {verificaEseguita && (
-            <Btn variant="secondary" onClick={() => verificaAssociati(true)} disabled={verificaInCorso} size="md"
-              title="Ricontrolla TUTTI gli iscritti, sovrascrivendo anche i dati gi\u00e0 verificati">
-              ↻ Riverifica tutti
-            </Btn>
-          )}
-          {verificaEseguita && (
-            <span style={{fontSize:'12px',color:'#059669',fontWeight:'600'}}>
-              ✓ {Object.keys(associatiMap).length} trovati
-              {(() => {
-                const ultima = registrations
-                  .map(r => r.associato_verificato_at)
-                  .filter(Boolean)
-                  .sort()
-                  .pop()
-                return ultima ? <span style={{color:'#9CA3AF',fontWeight:'400',marginLeft:'6px'}}>
-                  · aggiornato {new Date(ultima).toLocaleDateString('it-IT')} {new Date(ultima).toLocaleTimeString('it-IT',{hour:'2-digit',minute:'2-digit'})}
-                </span> : null
-              })()}
-            </span>
-          )}
-          <Btn variant="secondary" onClick={loadRegs} size="md" style={{ background:'#FACC15', color:'#111827', borderColor:'#FACC15', fontWeight:'700' }}><RefreshCw size={16}/> Aggiorna</Btn>
-          <Btn variant="primary" onClick={() => { setAddModal(true); setAddError(null); setAddForm({ nome:'', cognome:'', email:'', cellulare:'', ragione_sociale:'', partita_iva:'', cap:'', extra_1:'', extra_2:'', extra_3:'', extra_4:'', extra_5:'' }); setAddCapogruppo(null); setAddCapoSearch('') }} size="md" style={{ fontWeight:'700' }}><UserPlus size={16}/> Aggiungi</Btn>
-          <Btn variant="secondary"
-            onClick={() => apriSmsModal(smsSelezione.size > 0 ? 'selezione' : 'tutti', null)}
-            size="md"
-            style={{ background:'#059669', color:'#fff', borderColor:'#059669', fontWeight:'700', padding:'8px 18px' }}
-            disabled={registrations.filter(r => r.cellulare).length === 0}>
-            <MessageSquare size={16}/>
-            {smsSelezione.size > 0 ? 'Comunica (' + smsSelezione.size + ' selezionati)' : 'Comunica'}
-          </Btn>
-          <div style={{flex:1}}/>
-          {eventi.find(e=>e.id===selectedEvento)?.certificato_abilitato && (
-            <Btn variant="secondary" onClick={inviaCertificati} disabled={invioInCorso} size="md">
-              🏆 {invioInCorso ? 'Invio…' : 'Invia certificati'}
-            </Btn>
-          )}
-          {filterStato === 'presente' && (
-            <Btn variant="secondary" onClick={exportExcelPresenti} size="md" style={{ background:'#ECFDF5', color:'#16A34A', borderColor:'#86EFAC' }}><Download size={16}/> Esporta presenti</Btn>
-          )}
+        <div style={{ marginBottom:'10px' }}>
+          <div className="azioni-iscritti-grid" style={{ display:'grid', gridTemplateColumns:'repeat(6, minmax(0,1fr))', gap:'10px' }}>
+            {(() => {
+              const ultima = registrations.map(r => r.associato_verificato_at).filter(Boolean).sort().pop()
+              const statoVerifica = verificaInCorso ? 'verifica in corso...'
+                : verificaEseguita ? `${Object.keys(associatiMap).length} trovati${ultima ? ' - ' + new Date(ultima).toLocaleDateString('it-IT',{day:'2-digit',month:'2-digit'}) + ' ' + new Date(ultima).toLocaleTimeString('it-IT',{hour:'2-digit',minute:'2-digit'}) : ''}`
+                : 'associati CNA'
+              const nTel = registrations.filter(r => r.cellulare).length
+              const tiles = [
+                { onClick: () => verificaAssociati(false), disabled: verificaInCorso, icon: <Search size={18}/>, r1:'Verifica', r2: statoVerifica,
+                  title:'Incrocia le P.IVA dei nuovi iscritti (non ancora controllati) con la tabella associati CNA',
+                  from:'#EEF2FF', to:'#E0E7FF', bd:'#C7D2FE', fg:'#4338CA' },
+                verificaEseguita && { onClick: () => verificaAssociati(true), disabled: verificaInCorso, icon: <RefreshCw size={18}/>, r1:'Riverifica', r2:'tutti gli associati',
+                  title:'Ricontrolla TUTTI gli iscritti, sovrascrivendo anche i dati gia verificati',
+                  from:'#F5F3FF', to:'#EDE9FE', bd:'#DDD6FE', fg:'#6D28D9' },
+                { onClick: loadRegs, icon: <RefreshCw size={18}/>, r1:'Aggiorna', r2:'elenco iscritti',
+                  from:'#FEFCE8', to:'#FEF9C3', bd:'#FDE047', fg:'#A16207' },
+                { onClick: () => { setAddModal(true); setAddError(null); setAddForm({ nome:'', cognome:'', email:'', cellulare:'', ragione_sociale:'', partita_iva:'', cap:'', extra_1:'', extra_2:'', extra_3:'', extra_4:'', extra_5:'' }); setAddCapogruppo(null); setAddCapoSearch('') },
+                  icon: <UserPlus size={18}/>, r1:'Aggiungi', r2:'iscritto', from:'#EFF6FF', to:'#DBEAFE', bd:'#BFDBFE', fg:'#1D4ED8' },
+                { onClick: () => apriSmsModal(smsSelezione.size > 0 ? 'selezione' : 'tutti', null), disabled: nTel === 0,
+                  icon: <MessageSquare size={18}/>, r1:'Comunica', r2: smsSelezione.size > 0 ? smsSelezione.size + ' selezionati' : 'SMS / WhatsApp',
+                  from:'#ECFDF5', to:'#D1FAE5', bd:'#A7F3D0', fg:'#047857' },
+                eventi.find(e=>e.id===selectedEvento)?.certificato_abilitato && { onClick: inviaCertificati, disabled: invioInCorso,
+                  icon: <span style={{fontSize:'16px'}}>🏆</span>, r1:'Invia', r2: invioInCorso ? 'invio in corso...' : 'certificati',
+                  from:'#FFF7ED', to:'#FFEDD5', bd:'#FED7AA', fg:'#C2410C' },
+                filterStato === 'presente' && { onClick: exportExcelPresenti, icon: <Download size={18}/>, r1:'Esporta', r2:'presenti',
+                  from:'#F0FDF4', to:'#DCFCE7', bd:'#86EFAC', fg:'#15803D' },
+              ].filter(Boolean)
+              return tiles.map((b, i) => (
+                <button key={i} onClick={b.onClick} disabled={b.disabled} title={b.title}
+                  style={{ display:'flex', alignItems:'center', gap:'10px', padding:'10px 14px', minHeight:'56px', width:'100%',
+                    background:`linear-gradient(135deg, ${b.from}, ${b.to})`, border:`1px solid ${b.bd}`, borderRadius:'16px',
+                    color:b.fg, cursor: b.disabled ? 'default' : 'pointer', opacity: b.disabled ? .55 : 1,
+                    fontFamily:"'Inter',sans-serif", textAlign:'left', transition:'transform .12s, box-shadow .12s' }}
+                  onMouseEnter={e => { if (b.disabled) return; e.currentTarget.style.transform = 'translateY(-1px)'; e.currentTarget.style.boxShadow = '0 4px 14px rgba(0,0,0,.08)' }}
+                  onMouseLeave={e => { e.currentTarget.style.transform = 'none'; e.currentTarget.style.boxShadow = 'none' }}>
+                  <span style={{ flexShrink:0, display:'flex' }}>{b.icon}</span>
+                  <span style={{ display:'flex', flexDirection:'column', lineHeight:1.2, minWidth:0 }}>
+                    <span style={{ fontSize:'13px', fontWeight:'800' }}>{b.r1}</span>
+                    <span style={{ fontSize:'12px', fontWeight:'600', opacity:.85, overflow:'hidden', textOverflow:'ellipsis', whiteSpace:'nowrap' }}>{b.r2}</span>
+                  </span>
+                </button>
+              ))
+            })()}
+          </div>
         </div>
       )}
       {/* Riga registro — sempre visibile quando c'è un evento */}
