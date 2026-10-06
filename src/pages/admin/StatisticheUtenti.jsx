@@ -112,9 +112,10 @@ export default function StatisticheUtenti() {
     for (const r of regs) {
       const pv = cleanPiva(r.partita_iva)
       if (!pivaValida(pv)) continue
-      if (!imprese[pv]) imprese[pv] = { piva:pv, ragione_sociale:(r.ragione_sociale||'').trim(), persone:new Set(), iscrizioni:0, eventi:new Set(), associato:false, mestiere:'' }
+      if (!imprese[pv]) imprese[pv] = { piva:pv, ragione_sociale:(r.ragione_sociale||'').trim(), persone:new Set(), regs:[], iscrizioni:0, eventi:new Set(), associato:false, mestiere:'' }
       const i = imprese[pv]
       i.iscrizioni++
+      i.regs.push(r)
       i.persone.add(norm(r.nome) + '|' + norm(r.cognome))
       if (r.event_id) i.eventi.add(r.event_id)
       if (r.associato_cna) i.associato = true
@@ -255,17 +256,7 @@ export default function StatisticheUtenti() {
       </div>
 
       <div style={{ display:'grid', gridTemplateColumns:'repeat(auto-fit,minmax(320px,1fr))', gap:'12px' }}>
-        <Panel title={`Top imprese per eventi (${st.impList.length})`}>
-          {st.impList.slice(0, 10).map(i => (
-            <div key={i.piva} style={s.rowLine}>
-              <div style={{ minWidth:0, flex:1 }}>
-                <p style={s.rowTitle}>{i.ragione_sociale || '(senza nome)'} {i.associato && <Badge c="#16A34A" bg="#DCFCE7">CNA</Badge>}</p>
-                <p style={s.rowSub}>P.IVA {i.piva}{i.mestiere ? ' - ' + i.mestiere : ''} - {i.nPersone} pers.</p>
-              </div>
-              <span style={s.rowNum}>{i.nEventi}</span>
-            </div>
-          ))}
-        </Panel>
+        <ImpreseTable list={st.impList} eventi={eventi}/>
         <Panel title="Categorie / mestieri">
           {st.mest.length === 0 ? <p style={s.note}>Categoria non compilata nelle iscrizioni</p>
             : st.mest.map(([m, n]) => <Bar key={m} label={m} n={n} max={st.mest[0][1]} color="#14B8A6"/>)}
@@ -354,6 +345,128 @@ export default function StatisticheUtenti() {
         </div>
 
         {sel && <Dettaglio p={sel} eventi={eventi} onClose={() => setSel(null)}/>}
+      </div>
+    </div>
+  )
+}
+
+function ImpreseTable({ list, eventi }) {
+  const [q, setQ] = useState('')
+  const [sort, setSort] = useState('eventi')
+  const [fA, setFA] = useState('tutte')
+  const [limit, setLimit] = useState(10)
+  const [open, setOpen] = useState(null)
+  const l = useMemo(() => {
+    const nq = norm(q)
+    return list.filter(i => (fA === 'tutte' || (fA === 'si') === i.associato) && (!nq || norm(i.ragione_sociale + ' ' + i.piva).includes(nq)))
+      .sort({
+        eventi: (a, b) => b.nEventi - a.nEventi || b.nPersone - a.nPersone,
+        persone: (a, b) => b.nPersone - a.nPersone || b.nEventi - a.nEventi,
+        nome: (a, b) => (a.ragione_sociale || a.piva).localeCompare(b.ragione_sociale || b.piva, 'it'),
+      }[sort])
+  }, [list, q, sort, fA])
+  useEffect(() => { setLimit(10) }, [q, sort, fA])
+  return (
+    <div style={s.panel}>
+      <div style={{ display:'flex', alignItems:'center', gap:'8px', flexWrap:'wrap', marginBottom:'10px' }}>
+        <p style={{ ...s.panelTitle, margin:0, flex:'1 1 auto' }}>Imprese ({l.length})</p>
+        <select value={fA} onChange={e => setFA(e.target.value)} style={s.select}>
+          <option value="tutte">Tutte</option><option value="si">Associate CNA</option><option value="no">Non associate</option>
+        </select>
+        <select value={sort} onChange={e => setSort(e.target.value)} style={s.select}>
+          <option value="eventi">Per eventi</option><option value="persone">Per persone</option><option value="nome">A-Z</option>
+        </select>
+      </div>
+      <div style={{ position:'relative', marginBottom:'8px' }}>
+        <Search size={14} style={{ position:'absolute', left:10, top:'50%', transform:'translateY(-50%)', color:'#9CA3AF' }}/>
+        <input value={q} onChange={e => setQ(e.target.value)} placeholder="Cerca impresa o P.IVA..." style={s.input}/>
+      </div>
+      <div style={{ display:'grid', gridTemplateColumns:'1fr 56px 56px 56px', gap:'6px', padding:'6px 0', borderBottom:'1px solid #E8ECF4', fontSize:'10px', fontWeight:700, color:'#9CA3AF', textTransform:'uppercase' }}>
+        <span>Impresa</span><span style={{ textAlign:'center' }}>Eventi</span><span style={{ textAlign:'center' }}>Pers.</span><span style={{ textAlign:'center' }}>Iscr.</span>
+      </div>
+      {l.slice(0, limit).map(i => {
+        const on = open === i.piva
+        const nomeOk = i.ragione_sociale && cleanPiva(i.ragione_sociale) !== i.piva
+        return (
+          <div key={i.piva} style={{ borderBottom:'1px solid #F3F4F6', background: on ? '#F7F8FC' : 'transparent', borderRadius: on ? '12px' : 0 }}>
+            <div onClick={() => setOpen(on ? null : i.piva)} style={{ display:'grid', gridTemplateColumns:'1fr 56px 56px 56px', gap:'6px', alignItems:'center', padding:'9px 4px', cursor:'pointer' }}>
+              <div style={{ minWidth:0, display:'flex', gap:'8px', alignItems:'center' }}>
+                <ChevronDown size={14} style={{ color:'#9CA3AF', flexShrink:0, transform: on ? 'rotate(180deg)' : 'none', transition:'transform .15s' }}/>
+                <div style={{ minWidth:0 }}>
+                  <p style={{ ...s.rowTitle, color: nomeOk ? '#5B5FEF' : '#9CA3AF', whiteSpace:'nowrap' }}>{nomeOk ? i.ragione_sociale : '(ragione sociale mancante)'} {i.associato && <Badge c="#16A34A" bg="#DCFCE7">CNA</Badge>}</p>
+                  <p style={s.rowSub}>P.IVA {i.piva}{i.mestiere ? ' - ' + i.mestiere : ''}</p>
+                </div>
+              </div>
+              <span style={{ ...s.rowNum, textAlign:'center' }}>{i.nEventi}</span>
+              <span style={{ textAlign:'center', fontWeight:700, color:'#111827' }}>{i.nPersone}</span>
+              <span style={{ textAlign:'center', fontWeight:600, color:'#6B7280' }}>{i.iscrizioni}</span>
+            </div>
+            {on && <ImpresaDettaglio i={i} eventi={eventi}/>}
+          </div>
+        )
+      })}
+      {l.length === 0 && <p style={s.note}>Nessuna impresa trovata</p>}
+      {l.length > limit && <button onClick={() => setLimit(limit + 20)} style={{ ...s.btnMore, borderRadius:'0 0 12px 12px' }}><ChevronDown size={14}/> Mostra altre ({l.length - limit})</button>}
+    </div>
+  )
+}
+
+function ImpresaDettaglio({ i, eventi }) {
+  const pers = {}
+  const evs = {}
+  const contatti = { email:new Set(), tel:new Set(), cap:new Set() }
+  let pres = 0
+  for (const r of i.regs) {
+    const k = norm(r.nome) + '|' + norm(r.cognome)
+    if (!pers[k]) pers[k] = { nome: cap(r.nome) + ' ' + cap(r.cognome), email:'', n:0, pres:0 }
+    pers[k].n++
+    if (!pers[k].email && r.email) pers[k].email = r.email.toLowerCase()
+    if (isPresente(r)) { pers[k].pres++; pres++ }
+    if (r.event_id) { evs[r.event_id] = evs[r.event_id] || { n:0, pres:0 }; evs[r.event_id].n++; if (isPresente(r)) evs[r.event_id].pres++ }
+    if (r.email) contatti.email.add(r.email.trim().toLowerCase())
+    if (r.cellulare) contatti.tel.add(r.cellulare.trim())
+    if (r.cap) contatti.cap.add(r.cap.trim())
+  }
+  const date = i.regs.map(r => r.created_at).sort()
+  const evList = Object.entries(evs).map(([id, v]) => ({ ...v, ev: eventi[id] }))
+    .sort((a, b) => (b.ev?.data_inizio || '').localeCompare(a.ev?.data_inizio || ''))
+  const box = { background:'#fff', border:'1px solid #E8ECF4', borderRadius:'12px', padding:'12px' }
+  const h = { fontSize:'11px', fontWeight:800, color:'#6B7280', textTransform:'uppercase', margin:'0 0 8px' }
+  return (
+    <div style={{ padding:'0 8px 12px', display:'flex', flexDirection:'column', gap:'8px' }}>
+      <div style={{ display:'grid', gridTemplateColumns:'repeat(4,1fr)', gap:'6px' }}>
+        <Mini label="Eventi" v={i.nEventi} c="#5B5FEF"/>
+        <Mini label="Persone" v={i.nPersone} c="#111827"/>
+        <Mini label="Presenze" v={pres} c="#059669"/>
+        <Mini label="Prima iscr." v={fmtD(date[0])} c="#111827" small/>
+      </div>
+      <div style={box}>
+        <p style={h}>Anagrafica</p>
+        <p style={{ fontSize:'12px', color:'#374151', margin:'0 0 4px' }}><b>{i.ragione_sociale || '-'}</b> - P.IVA {i.piva}</p>
+        <p style={{ fontSize:'12px', color:'#374151', margin:'0 0 4px' }}>{i.associato ? 'Associata CNA' : 'Non associata CNA'}{i.mestiere ? ' - ' + i.mestiere : ''}{contatti.cap.size ? ' - CAP ' + [...contatti.cap].join(', ') : ''}</p>
+        <p style={s.rowSub}>Ultima iscrizione: {fmtD(date[date.length - 1])}</p>
+        <div style={{ display:'flex', flexWrap:'wrap', gap:'4px 12px', marginTop:'8px' }}>
+          {[...contatti.email].map(e => <a key={e} href={'mailto:' + e} style={{ fontSize:'12px', color:'#5B5FEF', textDecoration:'none', display:'flex', gap:4, alignItems:'center' }}><Mail size={12}/>{e}</a>)}
+          {[...contatti.tel].map(t => <a key={t} href={'tel:' + t} style={{ fontSize:'12px', color:'#5B5FEF', textDecoration:'none', display:'flex', gap:4, alignItems:'center' }}><Phone size={12}/>{t}</a>)}
+        </div>
+      </div>
+      <div style={box}>
+        <p style={h}>Persone ({Object.keys(pers).length})</p>
+        {Object.values(pers).sort((a, b) => b.n - a.n).map(p => (
+          <div key={p.nome + p.email} style={{ display:'flex', justifyContent:'space-between', gap:'8px', padding:'4px 0' }}>
+            <div style={{ minWidth:0 }}><p style={{ ...s.rowTitle, fontWeight:600 }}>{p.nome}</p>{p.email && <p style={s.rowSub}>{p.email}</p>}</div>
+            <span style={{ fontSize:'12px', color:'#6B7280', whiteSpace:'nowrap' }}>{p.n} iscr.{p.pres ? ' - ' + p.pres + ' pres.' : ''}</span>
+          </div>
+        ))}
+      </div>
+      <div style={box}>
+        <p style={h}>Eventi ({evList.length})</p>
+        {evList.map((e, k) => (
+          <div key={k} style={{ display:'flex', justifyContent:'space-between', gap:'8px', padding:'4px 0' }}>
+            <div style={{ minWidth:0 }}><p style={{ ...s.rowTitle, fontWeight:600 }}>{e.ev?.titolo || 'Evento rimosso'}</p><p style={s.rowSub}>{fmtD(e.ev?.data_inizio)}{e.ev?.luogo ? ' - ' + e.ev.luogo : ''}</p></div>
+            <span style={{ fontSize:'12px', color:'#6B7280', whiteSpace:'nowrap' }}>{e.n} pers.{e.pres ? ' - ' + e.pres + ' pres.' : ''}</span>
+          </div>
+        ))}
       </div>
     </div>
   )
