@@ -59,7 +59,7 @@ export default function StatisticheUtenti() {
       try {
         const [r, ev, ms] = await Promise.all([
           fetchAll('registrations', 'id,event_id,nome,cognome,email,cellulare,ragione_sociale,partita_iva,cap,mestiere_id,associato_cna,presente,checkin_at,rinuncia,created_at,codice_iscrizione,stato'),
-          fetchAll('events', 'id,titolo,data_inizio,luogo', 'data_inizio'),
+          fetchAll('events', 'id,titolo,data_inizio,data_fine,luogo', 'data_inizio'),
           supabase.from('mestieri').select('id,nome').then(x => x.data || []),
         ])
         setRegs(r)
@@ -407,18 +407,18 @@ function ImpreseTable({ list, eventi, info }) {
         const on = open === i.piva
         const nomeOk = i.ragione_sociale && cleanPiva(i.ragione_sociale) !== i.piva
         return (
-          <div key={i.piva} style={{ borderBottom:'1px solid #F3F4F6', background: on ? '#F7F8FC' : 'transparent', borderRadius: on ? '12px' : 0 }}>
+          <div key={i.piva} style={{ borderBottom: on ? 'none' : '1px solid #F3F4F6', background: on ? 'linear-gradient(160deg,#003DA5 0%,#0A4FC4 55%,#1E63D6 100%)' : 'transparent', borderRadius: on ? '18px' : 0, margin: on ? '8px 0' : 0, boxShadow: on ? '0 10px 30px rgba(0,61,165,.28)' : 'none', transition:'background .15s' }}>
             <div onClick={() => setOpen(on ? null : i.piva)} style={{ display:'grid', gridTemplateColumns:'1fr 56px 56px 56px', gap:'6px', alignItems:'center', padding:'9px 4px', cursor:'pointer' }}>
               <div style={{ minWidth:0, display:'flex', gap:'8px', alignItems:'center' }}>
-                <ChevronDown size={14} style={{ color:'#9CA3AF', flexShrink:0, transform: on ? 'rotate(180deg)' : 'none', transition:'transform .15s' }}/>
+                <ChevronDown size={14} style={{ color: on ? '#BFDBFE' : '#9CA3AF', flexShrink:0, transform: on ? 'rotate(180deg)' : 'none', transition:'transform .15s' }}/>
                 <div style={{ minWidth:0 }}>
-                  <p style={{ ...s.rowTitle, color: nomeOk ? '#5B5FEF' : '#9CA3AF', whiteSpace:'nowrap' }}>{nomeOk ? i.ragione_sociale : '(ragione sociale mancante)'} {i.associato && <Badge c="#16A34A" bg="#DCFCE7">CNA</Badge>}</p>
-                  <p style={s.rowSub}>P.IVA {i.piva}{i.mestiere ? ' - ' + i.mestiere : ''}</p>
+                  <p style={{ ...s.rowTitle, color: on ? '#FFFFFF' : (nomeOk ? '#5B5FEF' : '#9CA3AF'), whiteSpace:'nowrap', fontSize: on ? '15px' : s.rowTitle.fontSize }}>{nomeOk ? i.ragione_sociale : '(ragione sociale mancante)'} {i.associato && <Badge c="#16A34A" bg="#DCFCE7">CNA</Badge>}</p>
+                  <p style={{ ...s.rowSub, color: on ? '#BFDBFE' : s.rowSub.color }}>P.IVA {i.piva}{i.mestiere ? ' - ' + i.mestiere : ''}</p>
                 </div>
               </div>
-              <span style={{ ...s.rowNum, textAlign:'center' }}>{i.nEventi}</span>
-              <span style={{ textAlign:'center', fontWeight:700, color:'#111827' }}>{i.nPersone}</span>
-              <span style={{ textAlign:'center', fontWeight:600, color:'#6B7280' }}>{i.iscrizioni}</span>
+              <span style={{ ...s.rowNum, textAlign:'center', color: on ? '#fff' : s.rowNum.color }}>{i.nEventi}</span>
+              <span style={{ textAlign:'center', fontWeight:700, color: on ? '#fff' : '#111827' }}>{i.nPersone}</span>
+              <span style={{ textAlign:'center', fontWeight:600, color: on ? '#DBEAFE' : '#6B7280' }}>{i.iscrizioni}</span>
             </div>
             {on && <ImpresaDettaglio i={i} eventi={eventi} x={info[i.piva]}/>}
           </div>
@@ -431,17 +431,21 @@ function ImpreseTable({ list, eventi, info }) {
 }
 
 function ImpresaDettaglio({ i, eventi, x }) {
+  const now = new Date().toISOString()
   const pers = {}
   const evs = {}
   const contatti = { email:new Set(), tel:new Set(), cap:new Set() }
-  let pres = 0
+  let pres = 0, iscrConclusi = 0, presConclusi = 0
   for (const r of i.regs) {
+    const ev = eventi[r.event_id]
+    const concluso = !!ev && (ev.data_fine || ev.data_inizio || '') < now
     const k = norm(r.nome) + '|' + norm(r.cognome)
     if (!pers[k]) pers[k] = { nome: cap(r.nome) + ' ' + cap(r.cognome), email:'', n:0, pres:0 }
     pers[k].n++
     if (!pers[k].email && r.email) pers[k].email = r.email.toLowerCase()
     if (isPresente(r)) { pers[k].pres++; pres++ }
-    if (r.event_id) { evs[r.event_id] = evs[r.event_id] || { n:0, pres:0 }; evs[r.event_id].n++; if (isPresente(r)) evs[r.event_id].pres++ }
+    if (concluso) { iscrConclusi++; if (isPresente(r)) presConclusi++ }
+    if (r.event_id) { evs[r.event_id] = evs[r.event_id] || { n:0, pres:0, concluso }; evs[r.event_id].n++; if (isPresente(r)) evs[r.event_id].pres++ }
     if (r.email) contatti.email.add(r.email.trim().toLowerCase())
     if (r.cellulare) contatti.tel.add(r.cellulare.trim())
     if (r.cap) contatti.cap.add(r.cap.trim())
@@ -449,44 +453,94 @@ function ImpresaDettaglio({ i, eventi, x }) {
   const date = i.regs.map(r => r.created_at).sort()
   const evList = Object.entries(evs).map(([id, v]) => ({ ...v, ev: eventi[id] }))
     .sort((a, b) => (b.ev?.data_inizio || '').localeCompare(a.ev?.data_inizio || ''))
-  const box = { background:'#fff', border:'1px solid #E8ECF4', borderRadius:'12px', padding:'12px' }
-  const h = { fontSize:'11px', fontWeight:800, color:'#6B7280', textTransform:'uppercase', margin:'0 0 8px' }
+  const tasso = iscrConclusi > 0 ? Math.round(presConclusi / iscrConclusi * 100) : null
+
+  const card = { background:'#fff', borderRadius:'14px', padding:'14px 16px', boxShadow:'0 2px 8px rgba(0,0,0,.08)' }
+  const h = { fontSize:'11px', fontWeight:800, color:'#003DA5', textTransform:'uppercase', letterSpacing:'.06em', margin:'0 0 10px', display:'flex', alignItems:'center', gap:'6px' }
+  const riga = { fontSize:'12.5px', color:'#374151', margin:'0 0 5px', lineHeight:1.45 }
+  const chip = (bg, fg) => ({ fontSize:'11px', fontWeight:700, padding:'3px 9px', borderRadius:'999px', background:bg, color:fg, whiteSpace:'nowrap' })
+  const kpi = (label, v, sub) => (
+    <div style={{ background:'rgba(255,255,255,.12)', border:'1px solid rgba(255,255,255,.18)', borderRadius:'14px', padding:'10px 8px', textAlign:'center' }}>
+      <p style={{ fontSize: typeof v === 'string' && v.length > 6 ? '13px' : '22px', fontWeight:900, color:'#fff', margin:0, lineHeight:1.15 }}>{v}</p>
+      <p style={{ fontSize:'11px', color:'#DBEAFE', margin:'3px 0 0', fontWeight:600 }}>{label}</p>
+      {sub && <p style={{ fontSize:'10px', color:'#93C5FD', margin:'1px 0 0' }}>{sub}</p>}
+    </div>
+  )
+
   return (
-    <div style={{ padding:'0 8px 12px', display:'flex', flexDirection:'column', gap:'8px' }}>
-      <div style={{ display:'grid', gridTemplateColumns:'repeat(4,1fr)', gap:'6px' }}>
-        <Mini label="Eventi" v={i.nEventi} c="#5B5FEF"/>
-        <Mini label="Persone" v={i.nPersone} c="#111827"/>
-        <Mini label="Presenze" v={pres} c="#059669"/>
-        <Mini label="Prima iscr." v={fmtD(date[0])} c="#111827" small/>
+    <div style={{ padding:'2px 12px 14px', display:'flex', flexDirection:'column', gap:'10px' }}>
+      <div style={{ display:'grid', gridTemplateColumns:'repeat(4,minmax(0,1fr))', gap:'8px' }}>
+        {kpi('Eventi', i.nEventi)}
+        {kpi('Persone', i.nPersone)}
+        {kpi('Presenze', pres, tasso != null ? tasso + '% presenza' : 'nessun evento concluso')}
+        {kpi('Prima iscr.', fmtD(date[0]))}
       </div>
-      <div style={box}>
+
+      <div style={card}>
         <p style={h}>Anagrafica</p>
-        <p style={{ fontSize:'12px', color:'#374151', margin:'0 0 4px' }}><b>{i.ragione_sociale || '-'}</b> - P.IVA {i.piva}</p>
-        <p style={{ fontSize:'12px', color:'#374151', margin:'0 0 4px' }}>{i.associato ? 'Associata CNA' : 'Non associata CNA'}{i.mestiere ? ' - ' + i.mestiere : ''}{contatti.cap.size ? ' - CAP ' + [...contatti.cap].join(', ') : ''}</p>
-        {x && <p style={{ fontSize:'12px', color:'#374151', margin:'0 0 4px' }}>{[x.unione && 'Unione ' + x.unione, x.natura_giuridica, x.comune, x.addetti ? x.addetti + ' addetti' : ''].filter(Boolean).join(' - ')}</p>}
-        {x?.ateco && <p style={{ fontSize:'12px', color:'#374151', margin:'0 0 4px' }}>ATECO {x.ateco}{x.descrizione_ateco ? ' - ' + x.descrizione_ateco : ''}</p>}
-        {x?.ragione_sociale && cleanPiva(i.ragione_sociale) === i.piva && <p style={{ fontSize:'12px', color:'#374151', margin:'0 0 4px' }}>Denominazione ufficiale: <b>{x.ragione_sociale}</b></p>}
-        <p style={s.rowSub}>Ultima iscrizione: {fmtD(date[date.length - 1])}{x ? ' - fonte: ' + x.fonte : ''}</p>
-        <div style={{ display:'flex', flexWrap:'wrap', gap:'4px 12px', marginTop:'8px' }}>
-          {[...contatti.email].map(e => <a key={e} href={'mailto:' + e} style={{ fontSize:'12px', color:'#5B5FEF', textDecoration:'none', display:'flex', gap:4, alignItems:'center' }}><Mail size={12}/>{e}</a>)}
-          {[...contatti.tel].map(t => <a key={t} href={'tel:' + t} style={{ fontSize:'12px', color:'#5B5FEF', textDecoration:'none', display:'flex', gap:4, alignItems:'center' }}><Phone size={12}/>{t}</a>)}
+        <div style={{ display:'flex', alignItems:'center', gap:'8px', flexWrap:'wrap', marginBottom:'8px' }}>
+          <span style={{ fontSize:'15px', fontWeight:800, color:'#111827' }}>{i.ragione_sociale || '-'}</span>
+          <span style={chip(i.associato ? '#DCFCE7' : '#F3F4F6', i.associato ? '#15803D' : '#6B7280')}>{i.associato ? 'Associata CNA' : 'Non associata'}</span>
         </div>
-      </div>
-      <div style={box}>
-        <p style={h}>Persone ({Object.keys(pers).length})</p>
-        {Object.values(pers).sort((a, b) => b.n - a.n).map(p => (
-          <div key={p.nome + p.email} style={{ display:'flex', justifyContent:'space-between', gap:'8px', padding:'4px 0' }}>
-            <div style={{ minWidth:0 }}><p style={{ ...s.rowTitle, fontWeight:600 }}>{p.nome}</p>{p.email && <p style={s.rowSub}>{p.email}</p>}</div>
-            <span style={{ fontSize:'12px', color:'#6B7280', whiteSpace:'nowrap' }}>{p.n} iscr.{p.pres ? ' - ' + p.pres + ' pres.' : ''}</span>
+        <p style={riga}><b>P.IVA</b> {i.piva}{i.mestiere ? ' · ' + i.mestiere : ''}{contatti.cap.size ? ' · CAP ' + [...contatti.cap].join(', ') : ''}</p>
+        {x && <p style={riga}>{[x.unione && 'Unione ' + x.unione, x.natura_giuridica, x.comune, x.addetti ? x.addetti + ' addetti' : ''].filter(Boolean).join(' · ')}</p>}
+        {x?.ateco && <p style={riga}><b>ATECO</b> {x.ateco}{x.descrizione_ateco ? ' · ' + x.descrizione_ateco : ''}</p>}
+        {x?.ragione_sociale && cleanPiva(i.ragione_sociale) === i.piva && <p style={riga}>Denominazione ufficiale: <b>{x.ragione_sociale}</b></p>}
+        <p style={{ ...s.rowSub, marginTop:'2px' }}>Ultima iscrizione: {fmtD(date[date.length - 1])}{x ? ' · fonte: ' + x.fonte : ''}</p>
+        {(contatti.email.size > 0 || contatti.tel.size > 0) && (
+          <div style={{ display:'flex', flexWrap:'wrap', gap:'6px', marginTop:'10px', paddingTop:'10px', borderTop:'1px solid #EEF2F7' }}>
+            {[...contatti.email].map(e => <a key={e} href={'mailto:' + e} style={{ fontSize:'12px', color:'#003DA5', textDecoration:'none', display:'flex', gap:5, alignItems:'center', background:'#EFF6FF', padding:'4px 10px', borderRadius:'999px', fontWeight:600 }}><Mail size={12}/>{e}</a>)}
+            {[...contatti.tel].map(t => <a key={t} href={'tel:' + t} style={{ fontSize:'12px', color:'#003DA5', textDecoration:'none', display:'flex', gap:5, alignItems:'center', background:'#EFF6FF', padding:'4px 10px', borderRadius:'999px', fontWeight:600 }}><Phone size={12}/>{t}</a>)}
           </div>
-        ))}
+        )}
       </div>
-      <div style={box}>
+
+      <div style={card}>
         <p style={h}>Eventi ({evList.length})</p>
-        {evList.map((e, k) => (
-          <div key={k} style={{ display:'flex', justifyContent:'space-between', gap:'8px', padding:'4px 0' }}>
-            <div style={{ minWidth:0 }}><p style={{ ...s.rowTitle, fontWeight:600 }}>{e.ev?.titolo || 'Evento rimosso'}</p><p style={s.rowSub}>{fmtD(e.ev?.data_inizio)}{e.ev?.luogo ? ' - ' + e.ev.luogo : ''}</p></div>
-            <span style={{ fontSize:'12px', color:'#6B7280', whiteSpace:'nowrap' }}>{e.n} pers.{e.pres ? ' - ' + e.pres + ' pres.' : ''}</span>
+        {evList.map((e, k) => {
+          const badge = e.pres > 0 ? ['Partecipato', '#DCFCE7', '#15803D']
+            : e.concluso ? ['Non partecipato', '#FEE2E2', '#B91C1C']
+            : ['In programma', '#DBEAFE', '#1D4ED8']
+          const pct = e.n ? Math.round(e.pres / e.n * 100) : 0
+          return (
+            <div key={k} style={{ padding:'9px 0', borderTop: k ? '1px solid #F1F4F9' : 'none' }}>
+              <div style={{ display:'flex', justifyContent:'space-between', gap:'8px', alignItems:'flex-start' }}>
+                <div style={{ minWidth:0 }}>
+                  <p style={{ fontSize:'13.5px', fontWeight:700, color:'#111827', margin:0 }}>{e.ev?.titolo || 'Evento rimosso'}</p>
+                  <p style={s.rowSub}>{fmtD(e.ev?.data_inizio)}{e.ev?.luogo ? ' · ' + e.ev.luogo : ''}</p>
+                </div>
+                <span style={chip(badge[1], badge[2])}>{badge[0]}</span>
+              </div>
+              <div style={{ display:'flex', alignItems:'center', gap:'8px', marginTop:'6px' }}>
+                <div style={{ flex:1, height:'6px', background:'#EEF2F7', borderRadius:'99px', overflow:'hidden' }}>
+                  <div style={{ width: pct + '%', height:'100%', background:'#16A34A', borderRadius:'99px' }}/>
+                </div>
+                <span style={{ fontSize:'11.5px', color:'#4B5563', fontWeight:600, whiteSpace:'nowrap' }}>
+                  {e.concluso || e.pres ? `${e.pres} presenti su ${e.n}` : `${e.n} iscritti`}
+                </span>
+              </div>
+            </div>
+          )
+        })}
+      </div>
+
+      <div style={card}>
+        <p style={h}>Persone ({Object.keys(pers).length})</p>
+        {Object.values(pers).sort((a, b) => b.pres - a.pres || b.n - a.n).map((p, k) => (
+          <div key={p.nome + p.email} style={{ display:'flex', justifyContent:'space-between', alignItems:'center', gap:'8px', padding:'7px 0', borderTop: k ? '1px solid #F1F4F9' : 'none' }}>
+            <div style={{ display:'flex', alignItems:'center', gap:'10px', minWidth:0 }}>
+              <div style={{ width:30, height:30, borderRadius:'50%', background:'#E0EAFF', color:'#003DA5', display:'flex', alignItems:'center', justifyContent:'center', fontSize:'11px', fontWeight:800, flexShrink:0 }}>
+                {p.nome.split(' ').map(w => w[0]).slice(0, 2).join('')}
+              </div>
+              <div style={{ minWidth:0 }}>
+                <p style={{ ...s.rowTitle, fontWeight:700 }}>{p.nome}</p>
+                {p.email && <p style={{ ...s.rowSub, overflow:'hidden', textOverflow:'ellipsis' }}>{p.email}</p>}
+              </div>
+            </div>
+            <div style={{ display:'flex', gap:'4px', flexShrink:0 }}>
+              <span style={chip('#EFF6FF', '#1D4ED8')}>{p.n} iscr.</span>
+              {p.pres > 0 && <span style={chip('#DCFCE7', '#15803D')}>{p.pres} pres.</span>}
+            </div>
           </div>
         ))}
       </div>
