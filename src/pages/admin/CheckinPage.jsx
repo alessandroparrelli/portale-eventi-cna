@@ -277,6 +277,19 @@ export default function CheckinPage() {
     return () => { clearTimeout(t); wantScanRef.current = false; stopScanner() }
   }, [selectedEvento])
 
+  // Tempo reale: ogni check-in fatto da qualsiasi dispositivo aggiorna subito i contatori
+  useEffect(() => {
+    if (!selectedEvento) return
+    let t = null
+    const ricarica = () => { clearTimeout(t); t = setTimeout(() => loadPresenti(true), 600) }
+    const ch = supabase.channel('checkin-' + selectedEvento)
+      .on('postgres_changes', { event: '*', schema: 'public', table: 'registrations', filter: 'event_id=eq.' + selectedEvento }, ricarica)
+      .subscribe()
+    const onFocus = () => loadPresenti(true)
+    window.addEventListener('focus', onFocus)
+    return () => { clearTimeout(t); window.removeEventListener('focus', onFocus); supabase.removeChannel(ch) }
+  }, [selectedEvento])
+
   // Il modal di esito blocca le letture finche' non viene chiuso a mano
   useEffect(() => {
     busyRef.current = !!result || processing || !!ticketReg
@@ -300,7 +313,7 @@ export default function CheckinPage() {
     flushQueue()
     const on = () => flushQueue()
     window.addEventListener('online', on)
-    const iv = setInterval(() => { flushQueue(); if (selectedRef.current && document.visibilityState === 'visible') loadPresenti(true) }, 15000)
+    const iv = setInterval(() => { flushQueue(); if (selectedRef.current) loadPresenti(true) }, 15000)
     return () => { window.removeEventListener('online', on); clearInterval(iv) }
   }, [])
 
