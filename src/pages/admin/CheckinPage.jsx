@@ -298,7 +298,7 @@ export default function CheckinPage() {
     flushQueue()
     const on = () => flushQueue()
     window.addEventListener('online', on)
-    const iv = setInterval(flushQueue, 10000)
+    const iv = setInterval(() => { flushQueue(); if (selectedRef.current && document.visibilityState === 'visible') loadPresenti() }, 20000)
     return () => { window.removeEventListener('online', on); clearInterval(iv) }
   }, [])
 
@@ -321,6 +321,19 @@ export default function CheckinPage() {
     setQueueCount(rimasti.length)
     flushingRef.current = false
     if (rimasti.length < q.length && selectedRef.current) loadPresenti()
+  }
+
+  const [syncing, setSyncing] = useState(false)
+  const [lastSync, setLastSync] = useState(null)
+  async function sincronizza() {
+    if (syncing) return
+    setSyncing(true)
+    try {
+      await flushQueue()
+      await loadPresenti()
+      if (listaModal) await loadIscritti()
+      setLastSync(new Date())
+    } finally { setSyncing(false) }
   }
 
   function accoda(item) {
@@ -578,19 +591,22 @@ export default function CheckinPage() {
               <span style={{ fontSize:'22px', fontWeight:'900', color:'#fff', letterSpacing:'-0.03em', lineHeight:1 }}>{nonPresenti}</span>
               <span style={{ fontSize:'11px', fontWeight:'700', color:'rgba(255,255,255,.85)', textTransform:'uppercase', letterSpacing:'0.04em', lineHeight:1.2 }}>In attesa</span>
             </div>
-            <div style={{ display:'flex', alignItems:'center', gap:'6px', background:'linear-gradient(135deg,#0e7490,#0891b2)', borderRadius:'16px', padding:'9px 10px', flexShrink:0 }}>
-              <span style={{ fontSize:'20px', fontWeight:'900', color:'#fff', letterSpacing:'-0.03em', lineHeight:1 }}>{pct}%</span>
-              <button onClick={loadPresenti} disabled={loadingP}
-                style={{ background:'rgba(255,255,255,.25)', border:'none', borderRadius:'20px', cursor:'pointer', padding:'5px', display:'flex', alignItems:'center', color:'#fff' }}>
-                <RefreshCw size={12} style={{ animation: loadingP ? 'spin .8s linear infinite' : 'none' }}/>
-              </button>
-            </div>
+            <button onClick={sincronizza} disabled={syncing}
+              style={{ display:'flex', alignItems:'center', justifyContent:'center', gap:'6px', background:'linear-gradient(135deg,#0e7490,#0891b2)', border:'none', borderRadius:'16px', padding:'9px 14px', flexShrink:0, cursor: syncing ? 'default' : 'pointer', color:'#fff', fontFamily:"'Inter',sans-serif" }}>
+              <RefreshCw size={16} style={{ animation: syncing ? 'spin .8s linear infinite' : 'none' }}/>
+              <span style={{ fontSize:'12px', fontWeight:'800', textTransform:'uppercase', letterSpacing:'0.04em', lineHeight:1.15, textAlign:'left' }}>{syncing ? 'Sincronizzo' : 'Sincronizza'}</span>
+            </button>
           </div>
           <div style={{ height:'3px', backgroundColor:'#E8ECF4', borderRadius:'2px', marginBottom:'12px', overflow:'hidden' }}>
             <div style={{ width:`${pct}%`, height:'100%', background:'linear-gradient(90deg,#059669,#10b981)', borderRadius:'2px', transition:'width .5s' }}/>
           </div>
 
-          {queueCount > 0 && (
+          {lastSync && (
+            <p style={{ fontSize:'11px', color:'#6B7280', margin:'-4px 0 10px', textAlign:'right' }}>
+              Ultima sincronizzazione: {lastSync.toLocaleTimeString('it-IT',{hour:'2-digit',minute:'2-digit',second:'2-digit'})}
+            </p>
+          )}
+                    {queueCount > 0 && (
             <div onClick={flushQueue} style={{ background:'#DBEAFE', border:'1px solid #93C5FD', borderRadius:'14px', padding:'10px 14px', marginBottom:'10px', fontSize:'13px', fontWeight:'700', color:'#1E3A8A', cursor:'pointer' }}>
               {queueCount} check-in in attesa di invio (rete assente). Invio automatico in corso - tocca per riprovare.
             </div>
