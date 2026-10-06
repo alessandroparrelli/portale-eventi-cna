@@ -240,7 +240,7 @@ export default function CheckinPage() {
   const [queueCount, setQueueCount] = useState(readQueue().length)
   const { canManage, ruolo } = useRole()
   const canWrite = canManage('checkin')
-  const canAnnulla = ruolo === 'admin' || ruolo === 'supervisore'
+  const canAnnulla = ['admin','supervisore','registratore'].includes(ruolo)
 
   useEffect(() => {
     const scegli = (lista) => {
