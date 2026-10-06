@@ -119,66 +119,82 @@ function Biglietto({ onClose, titoloEvento, nome, cognome, ragioneSociale, email
   )
 }
 
-/* ── ResultBanner: modal dark uniforme per QR e lista iscritti ── */
+/* -- ResultBanner: modal di esito, resta aperta finche' l'operatore non la chiude -- */
 function ResultBanner({ result, onClose }) {
   if (!result) return null
-  const ok       = result.ok
-  const double   = result.error === 'gia_presente'
-  const notFound = result.error === 'non_trovato'
-
-  const headerBg    = notFound ? '#7F1D1D' : ok ? '#14532D' : '#78350F'
-  const accentColor = notFound ? '#FCA5A5' : ok ? '#86EFAC' : '#FCD34D'
-  const statusLabel = notFound ? 'QR non trovato' : ok ? 'Check-in confermato' : 'Già registrato'
-  const statusIcon  = notFound
-    ? <XCircle size={28} color={accentColor} />
-    : ok
-    ? <CheckCircle2 size={28} color={accentColor} />
+  const err = result.error
+  const ok = !!result.ok
+  const kind = ok ? 'ok'
+    : err === 'gia_presente' ? 'warn'
+    : err === 'in_coda' ? 'queue'
+    : 'err'
+  const headerBg    = { ok:'#14532D', warn:'#78350F', queue:'#1E3A8A', err:'#7F1D1D' }[kind]
+  const accentColor = { ok:'#86EFAC', warn:'#FCD34D', queue:'#93C5FD', err:'#FCA5A5' }[kind]
+  const statusLabel = ok ? 'Check-in confermato'
+    : err === 'gia_presente' ? 'Già registrato'
+    : err === 'in_coda' ? 'Salvato sul telefono'
+    : err === 'altro_evento' ? 'Biglietto di un altro evento'
+    : err === 'non_autorizzato' ? 'Operazione non consentita'
+    : err === 'errore' ? 'Errore'
+    : 'QR non trovato'
+  const statusIcon = ok ? <CheckCircle2 size={28} color={accentColor} />
+    : kind === 'err' ? <XCircle size={28} color={accentColor} />
     : <AlertTriangle size={28} color={accentColor} />
-  const oraGiaPresente = double && result.checkin_at
+  const oraGia = err === 'gia_presente' && result.checkin_at
     ? new Date(result.checkin_at).toLocaleTimeString('it-IT',{hour:'2-digit',minute:'2-digit'})
     : null
+  const showPosto = ok || err === 'gia_presente' || err === 'in_coda'
 
   return (
-    <div
-      style={{ position:'fixed', inset:0, background:'rgba(0,0,0,.75)', display:'flex', alignItems:'center', justifyContent:'center', zIndex:9998, padding:'20px' }}
-      onClick={onClose}
-    >
-      <div
-        onClick={e => e.stopPropagation()}
-        style={{ width:'100%', maxWidth:'420px', background:'#111827', borderRadius:'20px', overflow:'hidden', boxShadow:'0 24px 64px rgba(0,0,0,.6)', animation:'fadeInUp .2s ease' }}
-      >
-        <div style={{ background:headerBg, padding:'18px 22px', display:'flex', alignItems:'center', justifyContent:'space-between' }}>
-          <div style={{ display:'flex', alignItems:'center', gap:'10px' }}>
-            {statusIcon}
-            <span style={{ color:accentColor, fontSize:'16px', fontWeight:'800' }}>{statusLabel}</span>
-          </div>
-          <button onClick={onClose} style={{ background:'rgba(255,255,255,.15)', border:'none', borderRadius:'50%', width:'30px', height:'30px', cursor:'pointer', display:'flex', alignItems:'center', justifyContent:'center', color:'#fff' }}>
-            <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round"><line x1="18" y1="6" x2="6" y2="18"/><line x1="6" y1="6" x2="18" y2="18"/></svg>
-          </button>
+    <div style={{ position:'fixed', inset:0, background:'rgba(0,0,0,.8)', display:'flex', alignItems:'center', justifyContent:'center', zIndex:10000, padding:'20px' }}>
+      <div style={{ width:'100%', maxWidth:'440px', background:'#111827', borderRadius:'20px', overflow:'hidden', boxShadow:'0 24px 64px rgba(0,0,0,.6)', animation:'fadeInUp .2s ease' }}>
+        <div style={{ background:headerBg, padding:'18px 22px', display:'flex', alignItems:'center', gap:'10px' }}>
+          {statusIcon}
+          <span style={{ color:accentColor, fontSize:'17px', fontWeight:'800' }}>{statusLabel}</span>
         </div>
         <div style={{ padding:'24px 22px', display:'flex', flexDirection:'column', gap:'14px' }}>
           {result.nome && (
             <div>
               <div style={{ fontSize:'11px', fontWeight:'700', color:'#6B7280', letterSpacing:'.08em', textTransform:'uppercase', marginBottom:'4px' }}>Partecipante</div>
-              <div style={{ fontSize:'24px', fontWeight:'800', color:'#F9FAFB', lineHeight:1.2 }}>{result.nome}</div>
+              <div style={{ fontSize:'26px', fontWeight:'800', color:'#F9FAFB', lineHeight:1.2 }}>{result.nome}</div>
               {result.ragione_sociale && <div style={{ fontSize:'13px', color:'#9CA3AF', marginTop:'3px' }}>{result.ragione_sociale}</div>}
             </div>
           )}
-          {result.numero_posto && (
-            <div style={{ background:'#1F2937', borderRadius:'12px', padding:'14px 18px' }}>
-              <div style={{ fontSize:'11px', fontWeight:'700', color:'#6B7280', letterSpacing:'.08em', textTransform:'uppercase', marginBottom:'5px' }}>Posto assegnato</div>
-              <div style={{ fontSize:'20px', fontWeight:'800', color:'#60A5FA' }}>{result.numero_posto}</div>
+          {showPosto && (
+            <div style={{ background:'#1F2937', borderRadius:'14px', padding:'18px 20px', border:'2px solid #2563EB' }}>
+              <div style={{ fontSize:'12px', fontWeight:'700', color:'#93C5FD', letterSpacing:'.08em', textTransform:'uppercase', marginBottom:'6px' }}>Posto assegnato</div>
+              <div style={{ fontSize:'28px', fontWeight:'900', color:'#FFFFFF', lineHeight:1.2 }}>{result.numero_posto || 'Nessun posto assegnato'}</div>
             </div>
           )}
-          {notFound && <div style={{ color:'#9CA3AF', fontSize:'14px' }}>Nessun iscritto trovato con questo QR.</div>}
-          {oraGiaPresente && <div style={{ color:'#FCD34D', fontSize:'14px' }}>Già registrato alle {oraGiaPresente}.</div>}
-          <button onClick={onClose} style={{ width:'100%', padding:'14px', background:'#1F2937', color:'#9CA3AF', border:'none', borderRadius:'12px', fontSize:'15px', fontWeight:'600', cursor:'pointer', marginTop:'4px' }}>
-            Chiudi
+          {err === 'non_trovato' && <div style={{ color:'#9CA3AF', fontSize:'14px' }}>Nessun iscritto trovato con questo QR.</div>}
+          {err === 'altro_evento' && <div style={{ color:'#FCA5A5', fontSize:'14px' }}>Questo biglietto appartiene a un evento diverso da quello selezionato. Check-in NON registrato.</div>}
+          {oraGia && <div style={{ color:'#FCD34D', fontSize:'14px' }}>Ingresso già registrato alle {oraGia}.</div>}
+          {err === 'in_coda' && <div style={{ color:'#93C5FD', fontSize:'14px' }}>Connessione assente: il check-in è salvato sul telefono e verrà inviato automaticamente appena torna la rete. Non chiudere l'app.</div>}
+          {result.messaggio && <div style={{ color:'#FCA5A5', fontSize:'14px' }}>{result.messaggio}</div>}
+          <button onClick={onClose} autoFocus style={{ width:'100%', padding:'18px', background:'#2563EB', color:'#fff', border:'none', borderRadius:'14px', fontSize:'18px', fontWeight:'800', cursor:'pointer', marginTop:'4px', fontFamily:"'Inter',sans-serif" }}>
+            Chiudi e continua
           </button>
         </div>
       </div>
     </div>
   )
+}
+
+/* -- Coda locale dei check-in non inviati per assenza di rete -- */
+const QUEUE_KEY = 'cnaeventi_checkin_queue_v1'
+function readQueue() { try { return JSON.parse(localStorage.getItem(QUEUE_KEY) || '[]') } catch { return [] } }
+function writeQueue(q) { try { localStorage.setItem(QUEUE_KEY, JSON.stringify(q)) } catch {} }
+function isNetworkError(error) {
+  if (!error) return false
+  if (typeof navigator !== 'undefined' && navigator.onLine === false) return true
+  const m = String(error.message || error).toLowerCase()
+  return m.includes('fetch') || m.includes('network') || m.includes('load failed') || m.includes('timeout') || m.includes('aborted')
+}
+async function rpcConTimeout(fn, args, ms = 12000) {
+  return await Promise.race([
+    supabase.rpc(fn, args),
+    new Promise(res => setTimeout(() => res({ data: null, error: { message: 'timeout' } }), ms)),
+  ])
 }
 
 /* ─── PAGINA CHECKIN ──────────────────────────────────────────── */
@@ -203,6 +219,7 @@ export default function CheckinPage() {
   const [walkinErrors,   setWalkinErrors]  = useState({})
   const [mestieri,       setMestieri]      = useState([])
   const [presenti,       setPresenti]      = useState([])
+  const [numPresenti,    setNumPresenti]   = useState(0)
   const [totali,         setTotali]        = useState(0)
   const [loadingP,       setLoadingP]      = useState(false)
   const [processing,     setProcessing]    = useState(false)
@@ -213,47 +230,124 @@ export default function CheckinPage() {
   const [checkingId,     setCheckingId]    = useState(null)
   const [ticketReg,      setTicketReg]     = useState(null)
   const html5QrRef = useRef(null)
-  const resultTimerRef = useRef(null)
+  const wantScanRef = useRef(false)      // l'operatore vuole lo scanner attivo
+  const startingRef = useRef(false)
+  const busyRef = useRef(false)          // blocca nuove letture mentre si elabora / modal aperta
+  const lastScanRef = useRef({ code: '', t: 0 })
+  const selectedRef = useRef('')
+  const [queueCount, setQueueCount] = useState(readQueue().length)
   const { canManage, ruolo } = useRole()
   const canWrite = canManage('checkin')
+  const canAnnulla = ruolo === 'admin' || ruolo === 'supervisore'
 
   useEffect(() => {
+    const scegli = (lista) => {
+      setEventi(lista)
+      setSelectedEvento(cur => {
+        if (cur && lista.some(e => e.id === cur)) return cur
+        let saved = ''
+        try { saved = localStorage.getItem('cnaeventi_checkin_evento') || '' } catch {}
+        if (saved && lista.some(e => e.id === saved)) return saved
+        return lista.length === 1 ? lista[0].id : ''
+      })
+    }
     if (ruolo === 'registratore') {
       supabase.rpc('get_eventi_accessibili').then(({ data }) =>
-        setEventi((data || []).filter(e => e.stato === 'pubblicato'))
+        scegli((data || []).filter(e => e.stato === 'pubblicato'))
       )
     } else {
       supabase.from('events').select('id,titolo,stato')
         .eq('stato', 'pubblicato').order('data_inizio', { ascending: false })
-        .then(({ data }) => setEventi(data || []))
+        .then(({ data }) => scegli(data || []))
     }
     supabase.from('mestieri').select('id,nome').eq('attivo', true).order('ordine')
       .then(({ data }) => setMestieri(data || []))
   }, [ruolo])
 
+  // Evento selezionato: memorizza, carica presenti e avvia subito lo scanner
   useEffect(() => {
-    if (selectedEvento) loadPresenti()
-    return () => stopScanner()
+    selectedRef.current = selectedEvento
+    if (!selectedEvento) return
+    try { localStorage.setItem('cnaeventi_checkin_evento', selectedEvento) } catch {}
+    loadPresenti()
+    wantScanRef.current = true
+    const t = setTimeout(() => { startScanner() }, 300)
+    return () => { clearTimeout(t); wantScanRef.current = false; stopScanner() }
   }, [selectedEvento])
 
+  // Il modal di esito blocca le letture finche' non viene chiuso a mano
   useEffect(() => {
-    if (result) {
-      clearTimeout(resultTimerRef.current)
-      resultTimerRef.current = setTimeout(() => setResult(null), 3000)
+    busyRef.current = !!result || processing || !!ticketReg
+  }, [result, processing, ticketReg])
+
+  // Riavvia la fotocamera quando l'app torna in primo piano
+  useEffect(() => {
+    const onVis = () => {
+      if (document.visibilityState === 'visible') {
+        if (wantScanRef.current && !html5QrRef.current) startScanner()
+        flushQueue()
+        if (selectedRef.current) loadPresenti()
+      }
     }
-    return () => clearTimeout(resultTimerRef.current)
-  }, [result])
+    document.addEventListener('visibilitychange', onVis)
+    return () => document.removeEventListener('visibilitychange', onVis)
+  }, [])
+
+  // Invio automatico dei check-in rimasti in coda
+  useEffect(() => {
+    flushQueue()
+    const on = () => flushQueue()
+    window.addEventListener('online', on)
+    const iv = setInterval(flushQueue, 10000)
+    return () => { window.removeEventListener('online', on); clearInterval(iv) }
+  }, [])
+
+  const flushingRef = useRef(false)
+  async function flushQueue() {
+    if (flushingRef.current) return
+    const q = readQueue()
+    if (!q.length) { setQueueCount(0); return }
+    if (typeof navigator !== 'undefined' && navigator.onLine === false) { setQueueCount(q.length); return }
+    flushingRef.current = true
+    const rimasti = []
+    for (const item of q) {
+      const { data, error } = item.tipo === 'qr'
+        ? await rpcConTimeout('checkin_by_qr', { p_qr_code: item.qr, p_event_id: item.eventId })
+        : await rpcConTimeout('checkin_manuale', { p_registration_id: item.regId })
+      if (error) { rimasti.push(item); continue }
+      if (data?.ok) logAttivita(item.tipo === 'qr' ? 'checkin_qr' : 'checkin_manuale', { eventoId: item.eventId, dettagli: { nome: data.nome, da_coda: true } })
+    }
+    writeQueue(rimasti)
+    setQueueCount(rimasti.length)
+    flushingRef.current = false
+    if (rimasti.length < q.length && selectedRef.current) loadPresenti()
+  }
+
+  function accoda(item) {
+    const q = readQueue()
+    if (!q.some(x => x.tipo === item.tipo && x.qr === item.qr && x.regId === item.regId)) q.push({ ...item, at: new Date().toISOString() })
+    writeQueue(q); setQueueCount(q.length)
+  }
+
+  function chiudiEsito() {
+    setResult(null)
+    lastScanRef.current = { code: lastScanRef.current.code, t: Date.now() }
+    if (wantScanRef.current && !html5QrRef.current) startScanner()
+  }
 
   async function loadPresenti() {
     if (!selectedEvento) return
     setLoadingP(true)
-    const [{ data }, { count }] = await Promise.all([
-      supabase.from('registrations').select('id,nome,cognome,ragione_sociale,checkin_at,stato')
-        .eq('event_id', selectedEvento).eq('presente', true)
+    const ev = selectedEvento
+    const [{ data }, { count }, { count: countPres }] = await Promise.all([
+      supabase.from('registrations').select('id,nome,cognome,ragione_sociale,checkin_at,stato,numero_posto')
+        .eq('event_id', ev).eq('presente', true)
         .order('checkin_at', { ascending: false }).limit(100),
-      supabase.from('registrations').select('id', { count: 'exact' }).eq('event_id', selectedEvento),
+      supabase.from('registrations').select('id', { count: 'exact', head: true }).eq('event_id', ev),
+      supabase.from('registrations').select('id', { count: 'exact', head: true }).eq('event_id', ev).eq('presente', true),
     ])
-    setPresenti(data || []); setTotali(count || 0); setLoadingP(false)
+    if (ev !== selectedRef.current) { setLoadingP(false); return }
+    setPresenti(data || []); setTotali(count || 0); setNumPresenti(countPres ?? (data || []).length); setLoadingP(false)
   }
 
   async function loadIscritti() {
@@ -273,11 +367,13 @@ export default function CheckinPage() {
   }
 
   async function annullaCheckin(reg) {
+    if (!canAnnulla) return
     setCheckingId(reg.id)
-    const { error } = await supabase.from('registrations')
-      .update({ presente: false, stato: 'confermato', checkin_at: null })
-      .eq('id', reg.id)
-    if (!error) {
+    const { data, error } = await supabase.rpc('annulla_checkin', { p_registration_id: reg.id })
+    if (error || !data?.ok) {
+      setResult({ ok: false, error: 'errore', nome: `${reg.nome} ${reg.cognome}`, messaggio: 'Annullamento non riuscito: ' + (error?.message || data?.error || 'errore') })
+    } else {
+      logAttivita('checkin_annullato', { eventoId: selectedEvento, dettagli: { nome: `${reg.nome} ${reg.cognome}` } })
       setIscritti(prev => prev.map(r => r.id === reg.id
         ? { ...r, presente: false, stato: 'confermato', checkin_at: null }
         : r
@@ -291,55 +387,98 @@ export default function CheckinPage() {
     const reg = ticketReg
     if (!reg) return
     setCheckingId(reg.id)
+    const { data: rpcData, error } = await rpcConTimeout('checkin_manuale', { p_registration_id: reg.id })
     setTicketReg(null)
-    const { data: rpcData, error } = await supabase.rpc('checkin_manuale', { p_registration_id: reg.id })
-    if (!error && rpcData?.ok) {
-      const now = new Date().toISOString()
-      setIscritti(prev => prev.map(r => r.id === reg.id
-        ? { ...r, presente: true, stato: 'presente', checkin_at: now }
-        : r
-      ))
-      setResult({ ok: true, fromTicket: true, nome: `${reg.nome} ${reg.cognome}`, numero_posto: reg.numero_posto, ragione_sociale: reg.ragione_sociale })
+    const base = { nome: `${reg.nome} ${reg.cognome}`, numero_posto: reg.numero_posto, ragione_sociale: reg.ragione_sociale }
+    if (error) {
+      if (isNetworkError(error)) {
+        accoda({ tipo: 'lista', regId: reg.id, eventId: selectedEvento })
+        setResult({ ...base, ok: false, error: 'in_coda' })
+      } else {
+        setResult({ ...base, ok: false, error: 'errore', messaggio: 'Check-in NON registrato: ' + error.message })
+      }
+    } else if (rpcData?.ok || rpcData?.error === 'gia_presente') {
+      const at = rpcData.checkin_at || new Date().toISOString()
+      setIscritti(prev => prev.map(r => r.id === reg.id ? { ...r, presente: true, stato: 'presente', checkin_at: at } : r))
+      setResult({ ...base, ...rpcData, numero_posto: rpcData.numero_posto ?? reg.numero_posto })
+      if (rpcData.ok) logAttivita('checkin_manuale', { eventoId: selectedEvento, dettagli: { nome: base.nome } })
       loadPresenti()
+    } else {
+      setResult({ ...base, ok: false, error: rpcData?.error || 'errore' })
     }
     setCheckingId(null)
   }
 
   async function doCheckin(qr, manuale = false) {
-    if (!qr.trim()) return
+    const code = (qr || '').trim()
+    if (!code) return
+    busyRef.current = true
     setProcessing(true)
-    const { data, error } = await supabase.rpc('checkin_by_qr', { p_qr_code: qr.trim() })
-    setResult(error ? { ok: false, error: 'non_trovato' } : { ...data, fromTicket: true })
-    setProcessing(false)
-    if (data?.ok) {
-      logAttivita(manuale ? 'checkin_manuale' : 'checkin_qr', { eventoId: selectedEvento, dettagli: { nome: data.nome } })
-      loadPresenti()
+    const eventId = selectedRef.current || selectedEvento
+    const { data, error } = await rpcConTimeout('checkin_by_qr', { p_qr_code: code, p_event_id: eventId || null })
+    if (error) {
+      if (isNetworkError(error)) {
+        accoda({ tipo: 'qr', qr: code, eventId })
+        setResult({ ok: false, error: 'in_coda', nome: null })
+      } else {
+        setResult({ ok: false, error: 'errore', messaggio: 'Check-in NON registrato: ' + error.message })
+      }
+    } else {
+      setResult(data || { ok: false, error: 'errore' })
+      if (data?.ok) {
+        logAttivita(manuale ? 'checkin_manuale' : 'checkin_qr', { eventoId: eventId, dettagli: { nome: data.nome } })
+      }
+      if (data?.ok || data?.error === 'gia_presente') loadPresenti()
     }
+    setProcessing(false)
+  }
+
+  async function onDecoded(decoded) {
+    const code = (decoded || '').trim()
+    if (!code || busyRef.current) return
+    const now = Date.now()
+    // stesso QR ancora inquadrato subito dopo la chiusura del modal: ignora
+    if (code === lastScanRef.current.code && now - lastScanRef.current.t < 4000) return
+    lastScanRef.current = { code, t: now }
+    busyRef.current = true
+    if (navigator.vibrate) { try { navigator.vibrate(120) } catch {} }
+    await doCheckin(code)
   }
 
   async function startScanner() {
-    if (!selectedEvento) return
-    setScanning(true); setResult(null)
-    const { Html5Qrcode } = await import('html5-qrcode')
-    html5QrRef.current = new Html5Qrcode('qr-viewport')
+    if (!selectedRef.current) return
+    wantScanRef.current = true
+    if (html5QrRef.current || startingRef.current) return
+    if (!document.getElementById('qr-viewport')) return
+    startingRef.current = true
+    setScanning(true)
     try {
-      await html5QrRef.current.start(
+      const { Html5Qrcode } = await import('html5-qrcode')
+      const inst = new Html5Qrcode('qr-viewport')
+      html5QrRef.current = inst
+      await inst.start(
         { facingMode: 'environment' },
         { fps: 10, qrbox: window.innerWidth < 600 ? 220 : 280 },
-        async decoded => { await stopScanner(); await doCheckin(decoded) },
+        decoded => { onDecoded(decoded) },
         () => {}
       )
-    } catch {
+    } catch (e) {
+      try { html5QrRef.current?.clear() } catch {}
+      html5QrRef.current = null
       setScanning(false)
-      setResult({ ok: false, error: 'non_trovato', nome: 'Impossibile accedere alla fotocamera.' })
+      wantScanRef.current = false
+    } finally {
+      startingRef.current = false
     }
   }
 
-  async function stopScanner() {
-    if (html5QrRef.current) {
-      try { await html5QrRef.current.stop() } catch {}
-      try { html5QrRef.current.clear() } catch {}
-      html5QrRef.current = null
+  async function stopScanner(manuale = false) {
+    if (manuale) wantScanRef.current = false
+    const inst = html5QrRef.current
+    html5QrRef.current = null
+    if (inst) {
+      try { await inst.stop() } catch {}
+      try { inst.clear() } catch {}
     }
     setScanning(false)
   }
@@ -374,16 +513,21 @@ export default function CheckinPage() {
       p_cap:             w.cap?.trim() || null,
     })
     setProcessing(false)
+    if (error || !data?.ok) {
+      setResult({ ok: false, error: 'errore', nome: `${w.nome} ${w.cognome}`, messaggio: 'Walk-in NON registrato: ' + (error?.message || data?.error || 'errore') })
+      return
+    }
     if (!error && data?.ok) {
-      setResult({ ok: true, fromTicket: true, nome: `${w.nome} ${w.cognome}` })
+      logAttivita('walkin', { eventoId: selectedEvento, dettagli: { nome: `${w.nome} ${w.cognome}` } })
+      setResult({ ok: true, nome: `${w.nome} ${w.cognome}`, numero_posto: null })
       setWalkin({ nome: '', cognome: '', email: '', cellulare: '', ragione_sociale: '', partita_iva: '', cap: '', mestiere_id: '' })
       setWalkinModal(false); loadPresenti()
     }
   }
 
   const titoloEvento = eventi.find(e => e.id === selectedEvento)?.titolo || ''
-  const pct          = totali > 0 ? Math.round((presenti.length / totali) * 100) : 0
-  const nonPresenti  = totali - presenti.length
+  const pct          = totali > 0 ? Math.round((numPresenti / totali) * 100) : 0
+  const nonPresenti  = Math.max(0, totali - numPresenti)
 
   const filteredIscritti = (() => {
     let list = iscritti
@@ -405,7 +549,7 @@ export default function CheckinPage() {
       <EventSelector
         eventi={eventi}
         value={selectedEvento}
-        onChange={e => { setSelectedEvento(e.target.value); setResult(null); stopScanner() }}
+        onChange={e => { setResult(null); setSelectedEvento(e.target.value) }}
         label="Evento in corso"
       />
 
@@ -426,7 +570,7 @@ export default function CheckinPage() {
           <div style={{ display:'flex', gap:'6px', marginBottom:'8px', alignItems:'stretch' }}>
             <div style={{ flex:1, display:'flex', alignItems:'center', gap:'8px', background:'linear-gradient(135deg,#059669,#10b981)', borderRadius:'16px', padding:'9px 12px' }}>
               <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="#fff" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round"><circle cx="12" cy="12" r="10"/><polyline points="9 12 11 14 15 10"/></svg>
-              <span style={{ fontSize:'22px', fontWeight:'900', color:'#fff', letterSpacing:'-0.03em', lineHeight:1 }}>{presenti.length}</span>
+              <span style={{ fontSize:'22px', fontWeight:'900', color:'#fff', letterSpacing:'-0.03em', lineHeight:1 }}>{numPresenti}</span>
               <span style={{ fontSize:'11px', fontWeight:'700', color:'rgba(255,255,255,.85)', textTransform:'uppercase', letterSpacing:'0.04em', lineHeight:1.2 }}>Presenti</span>
             </div>
             <div style={{ flex:1, display:'flex', alignItems:'center', gap:'8px', background:'linear-gradient(135deg,#b45309,#d97706)', borderRadius:'16px', padding:'9px 12px' }}>
@@ -446,7 +590,12 @@ export default function CheckinPage() {
             <div style={{ width:`${pct}%`, height:'100%', background:'linear-gradient(90deg,#059669,#10b981)', borderRadius:'2px', transition:'width .5s' }}/>
           </div>
 
-          <ResultBanner result={result} onClose={() => setResult(null)} />
+          {queueCount > 0 && (
+            <div onClick={flushQueue} style={{ background:'#DBEAFE', border:'1px solid #93C5FD', borderRadius:'14px', padding:'10px 14px', marginBottom:'10px', fontSize:'13px', fontWeight:'700', color:'#1E3A8A', cursor:'pointer' }}>
+              {queueCount} check-in in attesa di invio (rete assente). Invio automatico in corso - tocca per riprovare.
+            </div>
+          )}
+          <ResultBanner result={result} onClose={chiudiEsito} />
 
           <div style={s.scanCard}>
             <div id="qr-viewport" style={{ width:'100%', overflow:'hidden', borderRadius:'10px 10px 0 0', minHeight: scanning ? '280px' : '0', backgroundColor: scanning ? '#000' : 'transparent' }} />
@@ -460,8 +609,8 @@ export default function CheckinPage() {
             )}
             <div style={{ padding:'12px' }}>
               {!scanning
-                ? <button onClick={startScanner} style={s.bigBtn}><Camera size={22} /> Avvia scanner QR</button>
-                : <button onClick={stopScanner} style={{ ...s.bigBtn, background:'#DC2626' }}><CameraOff size={22} /> Ferma scanner</button>
+                ? <button onClick={() => { wantScanRef.current = true; startScanner() }} style={s.bigBtn}><Camera size={22} /> Avvia scanner QR</button>
+                : <button onClick={() => stopScanner(true)} style={{ ...s.bigBtn, background:'#DC2626' }}><CameraOff size={22} /> Ferma scanner</button>
               }
             </div>
           </div>
@@ -487,7 +636,7 @@ export default function CheckinPage() {
           <div style={s.presentiSection}>
             <div style={s.presentiHeader}>
               <p style={s.presentiTitle}>Ultimi check-in</p>
-              <span style={{ fontSize:'13px', color:'#6B7280', fontWeight:'600' }}>{presenti.length} / {totali}</span>
+              <span style={{ fontSize:'13px', color:'#6B7280', fontWeight:'600' }}>{numPresenti} / {totali}</span>
             </div>
             {loadingP ? (
               <p style={s.pEmpty}>Caricamento…</p>
@@ -578,8 +727,8 @@ export default function CheckinPage() {
                     <div key={r.id} style={{ display:'flex', alignItems:'center', gap:'12px', padding:'10px 14px', borderBottom:'1px solid #F3F4F6', background: r.presente ? '#F0FDF4' : '#fff', transition:'background .15s', cursor: r.presente ? 'default' : 'pointer' }}
                       onClick={() => !r.presente && checkinManuale(r)}>
                       <button
-                        onClick={e => { e.stopPropagation(); r.presente ? setConfirmAnnulla(r) : checkinManuale(r) }}
-                        disabled={isChecking}
+                        onClick={e => { e.stopPropagation(); r.presente ? (canAnnulla && setConfirmAnnulla(r)) : checkinManuale(r) }}
+                        disabled={isChecking || (r.presente && !canAnnulla)}
                         style={{ width:'34px', height:'34px', borderRadius:'50%', flexShrink:0, cursor:'pointer', border: r.presente ? 'none' : '2px solid #D1D5DB', background: r.presente ? '#16A34A' : '#fff', display:'flex', alignItems:'center', justifyContent:'center', transition:'all .15s' }}>
                         {isChecking
                           ? <div style={{ width:'14px', height:'14px', border:'2px solid #fff', borderTopColor:'transparent', borderRadius:'50%', animation:'spin .6s linear infinite' }} />
@@ -614,7 +763,6 @@ export default function CheckinPage() {
       {ticketReg && (
         <div
           style={{ position:'fixed', inset:0, background:'rgba(0,0,0,.75)', display:'flex', alignItems:'center', justifyContent:'center', zIndex:9999, padding:'20px' }}
-          onClick={() => setTicketReg(null)}
         >
           <div
             onClick={e => e.stopPropagation()}
