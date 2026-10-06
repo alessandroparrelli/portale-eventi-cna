@@ -382,11 +382,21 @@ export default function CheckinPage() {
   async function loadIscritti() {
     if (!selectedEvento) return
     setLoadingLista(true)
-    const { data } = await supabase.from('registrations')
-      .select('id,nome,cognome,ragione_sociale,email,presente,checkin_at,stato,numero_posto,gruppo_id,referente_id')
-      .eq('event_id', selectedEvento)
-      .order('cognome', { ascending: true })
-    setIscritti(data || [])
+    // Supabase restituisce max 1000 righe per richiesta: carico a pagine
+    const tutti = []
+    const PAGE = 1000
+    for (let from = 0; from < 20000; from += PAGE) {
+      const { data, error } = await supabase.from('registrations')
+        .select('id,nome,cognome,ragione_sociale,email,presente,checkin_at,stato,numero_posto,gruppo_id,referente_id')
+        .eq('event_id', selectedEvento)
+        .order('cognome', { ascending: true })
+        .order('id', { ascending: true })
+        .range(from, from + PAGE - 1)
+      if (error) break
+      tutti.push(...(data || []))
+      if (!data || data.length < PAGE) break
+    }
+    setIscritti(tutti)
     setLoadingLista(false)
   }
 
