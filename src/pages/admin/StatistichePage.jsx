@@ -8,6 +8,7 @@ import GlowTabBar from '../../components/GlowTabBar'
 import GlowStatCard from '../../components/GlowStatCard'
 import GlowTableHead from '../../components/GlowTableHead'
 import * as XLSX from 'xlsx'
+import StatisticheUtenti from './StatisticheUtenti'
 
 function StatCard({ icon: Icon, label, value, color='#5B5FEF', sub, iconClass }) {
   return (
@@ -93,7 +94,7 @@ export default function StatistichePage() {
   }, [])
 
   useEffect(() => {
-    if (tab === 'utenti' && utenti.length === 0) loadUtenti()
+    // tab utenti: dati caricati da StatisticheUtenti
   }, [tab])
 
   useEffect(() => {
@@ -485,171 +486,7 @@ export default function StatistichePage() {
       )}
 
       {/* ══ TAB UTENTI / CRONOLOGIA ══ */}
-      {tab === 'utenti' && (
-        <div style={{ display:'grid', gridTemplateColumns: selectedUtente ? '1fr 1fr' : '1fr', gap:'20px' }} className="stats-user-split">
-
-          {/* Lista partecipanti */}
-          <div>
-            <div style={{ display:'flex', gap:'10px', marginBottom:'16px', alignItems:'center' }}>
-              <div style={{ position:'relative', flex:1 }}>
-                <Search size={15} style={{ position:'absolute', left:10, top:'50%', transform:'translateY(-50%)', color:'#9CA3AF' }}/>
-                <input value={searchUtente} onChange={e=>setSearchUtente(e.target.value)}
-                  placeholder="Cerca per nome, email, azienda…"
-                  style={{ width:'100%', boxSizing:'border-box', border:'1px solid #D1D5DB', borderRadius:'16px', padding:'9px 12px 9px 32px', fontSize:'13px', fontFamily:"'Inter',sans-serif", outline:'none' }}/>
-              </div>
-              <span style={{ fontSize:'12px', color:'#9CA3AF', whiteSpace:'nowrap' }}>{filteredUtenti.length} partecipanti</span>
-              <button
-                onClick={exportPartecipanti}
-                disabled={exportingXlsx || utenti.length === 0}
-                style={{ display:'flex', alignItems:'center', gap:'6px', backgroundColor: exportingXlsx ? '#9CA3AF' : '#16A34A', color:'#fff', border:'none', borderRadius:'20px', padding:'9px 14px', fontSize:'13px', fontWeight:'700', cursor: exportingXlsx ? 'default' : 'pointer', fontFamily:"'Inter',sans-serif", whiteSpace:'nowrap', flexShrink:0 }}>
-                <Download size={15}/>
-                {exportingXlsx ? 'Esportazione…' : 'Esporta Excel'}
-              </button>
-            </div>
-
-            {loadingUtenti ? (
-              <p style={{ color:'#9CA3AF', textAlign:'center', padding:'40px', fontSize:'14px' }}>Caricamento…</p>
-            ) : (
-              <div style={{ backgroundColor:'#fff', borderRadius:'20px', border:'1px solid #E8ECF4', overflow:'hidden' }}>
-                <table style={{ width:'100%', borderCollapse:'collapse', fontSize:'13px' }}>
-                  <GlowTableHead columns={[
-                    { label:'Partecipante', color:'blue' },
-                    { label:'Iscrizioni',   color:'violet' },
-                    { label:'Presenze',     color:'green' },
-                    { label:'Tasso %',      color:'amber' },
-                    { label:'',             color:'neutral' },
-                  ]}/>
-                  <tbody>
-                    {filteredUtenti.slice(0, 50).map((u, idx) => {
-                      const tasso = u.eventi_totali > 0 ? Math.round((u.presenze/u.eventi_totali)*100) : 0
-                      const isSelected = selectedUtente?.email === u.email
-                      return (
-                        <tr key={idx}
-                          style={{ borderBottom:'1px solid #F3F4F6', backgroundColor: isSelected ? '#EEEFFD' : 'transparent', cursor:'pointer', transition:'background-color .1s' }}
-                          onClick={() => selectUtente(u)}
-                          onMouseEnter={e => { if (!isSelected) e.currentTarget.style.backgroundColor='#F9FAFB' }}
-                          onMouseLeave={e => { e.currentTarget.style.backgroundColor = isSelected ? '#EEEFFD' : 'transparent' }}>
-                          <td style={s.td}>
-                            <div style={{ display:'flex', alignItems:'center', gap:'8px' }}>
-                              <div style={{ width:28, height:28, borderRadius:'50%', background:'linear-gradient(135deg,#5B5FEF,#BE123C)', display:'flex', alignItems:'center', justifyContent:'center', flexShrink:0 }}>
-                                <span style={{ fontSize:'11px', fontWeight:'800', color:'#fff' }}>
-                                  {(u.nome?.[0]||'')}{(u.cognome?.[0]||'')}
-                                </span>
-                              </div>
-                              <div>
-                                <p style={{ fontSize:'13px', fontWeight:'600', color:'#111827', margin:0 }}>{[u.nome,u.cognome].filter(Boolean).join(' ')||'—'}</p>
-                                <p style={{ fontSize:'11px', color:'#9CA3AF', margin:0 }}>{u.email||u.ragione_sociale||''}</p>
-                              </div>
-                            </div>
-                          </td>
-                          <td style={s.td}><span style={{ fontWeight:'700', color:'#5B5FEF' }}>{u.eventi_totali}</span></td>
-                          <td style={s.td}><span style={{ fontWeight:'700', color:'#059669' }}>{u.presenze}</span></td>
-                          <td style={s.td}>
-                            <div style={{ display:'flex', alignItems:'center', gap:'6px' }}>
-                              <div style={{ width:36, height:5, backgroundColor:'#F3F4F6', borderRadius:3, overflow:'hidden' }}>
-                                <div style={{ width:`${tasso}%`, height:'100%', background:`linear-gradient(90deg,${tasso>=80?'#059669':tasso>=50?'#D97706':'#5B5FEF'},${tasso>=80?'#10b981':tasso>=50?'#f59e0b':'#7C4DFF'})`, borderRadius:3 }}/>
-                              </div>
-                              <span style={{ fontSize:'11px', color:'#6B7280', fontWeight:'600' }}>{tasso}%</span>
-                            </div>
-                          </td>
-                          <td style={s.td}>
-                            <ArrowRight size={14} style={{ color:'#9CA3AF' }}/>
-                          </td>
-                        </tr>
-                      )
-                    })}
-                  </tbody>
-                </table>
-                {filteredUtenti.length === 0 && (
-                  <div style={{ padding:'40px', textAlign:'center', color:'#9CA3AF', fontSize:'13px' }}>Nessun partecipante trovato</div>
-                )}
-              </div>
-            )}
-          </div>
-
-          {/* Cronologia partecipante selezionato */}
-          {selectedUtente && (
-            <div>
-              <div style={{ backgroundColor:'#fff', borderRadius:'20px', border:'1px solid #E8ECF4', padding:'20px', marginBottom:'16px' }}>
-                <div style={{ display:'flex', alignItems:'center', gap:'12px', marginBottom:'16px' }}>
-                  <div style={{ width:44, height:44, borderRadius:'50%', background:'linear-gradient(135deg,#5B5FEF,#BE123C)', display:'flex', alignItems:'center', justifyContent:'center' }}>
-                    <span style={{ fontSize:'16px', fontWeight:'800', color:'#fff' }}>
-                      {(selectedUtente.nome?.[0]||'')}{(selectedUtente.cognome?.[0]||'')}
-                    </span>
-                  </div>
-                  <div>
-                    <p style={{ fontSize:'16px', fontWeight:'800', color:'#111827', margin:0, letterSpacing:'-0.02em' }}>
-                      {[selectedUtente.nome, selectedUtente.cognome].filter(Boolean).join(' ') || selectedUtente.email}
-                    </p>
-                    {selectedUtente.email && <p style={{ fontSize:'13px', color:'#6B7280', margin:'2px 0 0' }}>{selectedUtente.email}</p>}
-                    {selectedUtente.ragione_sociale && <p style={{ fontSize:'12px', color:'#9CA3AF', margin:'1px 0 0' }}>🏢 {selectedUtente.ragione_sociale}</p>}
-                  </div>
-                  <button onClick={() => setSelectedUtente(null)} style={{ marginLeft:'auto', background:'none', border:'none', cursor:'pointer', color:'#9CA3AF', fontSize:'18px' }}>✕</button>
-                </div>
-                <div style={{ display:'grid', gridTemplateColumns:'1fr 1fr 1fr', gap:'10px' }} className="stat-grid-3">
-                  <GlowStatCard icon="calendar" label="Iscrizioni" value={selectedUtente.eventi_totali} palette="blue"/>
-                  <GlowStatCard icon="check"    label="Presenze"   value={selectedUtente.presenze}      palette="green"/>
-                  <GlowStatCard icon="percent"  label="Tasso"
-                    value={selectedUtente.eventi_totali > 0 ? Math.round((selectedUtente.presenze/selectedUtente.eventi_totali)*100)+'%' : '—'}
-                    palette="amber"/>
-                </div>
-              </div>
-
-              {/* Timeline cronologia */}
-              <div style={{ backgroundColor:'#fff', borderRadius:'20px', border:'1px solid #E8ECF4', overflow:'hidden' }}>
-                <div style={{ padding:'16px 20px', borderBottom:'1px solid #E8ECF4' }}>
-                  <h3 style={{ fontSize:'14px', fontWeight:'700', color:'#111827', margin:0 }}>Cronologia partecipazioni</h3>
-                </div>
-                {cronologia.length === 0 ? (
-                  <p style={{ padding:'24px', textAlign:'center', color:'#9CA3AF', fontSize:'13px' }}>Nessuna partecipazione</p>
-                ) : (
-                  <div style={{ padding:'16px 20px', display:'flex', flexDirection:'column', gap:'0' }}>
-                    {cronologia.map((r, idx) => (
-                      <div key={r.id} style={{ display:'flex', gap:'14px', paddingBottom:'16px', position:'relative' }}>
-                        {idx < cronologia.length - 1 && (
-                          <div style={{ position:'absolute', left:11, top:26, bottom:0, width:2, backgroundColor:'#E8ECF4' }}/>
-                        )}
-                        <div style={{
-                          width:24, height:24, borderRadius:'50%', flexShrink:0, zIndex:1, border:'2px solid',
-                          borderColor: r.presente ? '#059669' : '#D1D5DB',
-                          backgroundColor: r.presente ? '#D1FAE5' : '#F9FAFB',
-                          display:'flex', alignItems:'center', justifyContent:'center', marginTop:2
-                        }}>
-                          {r.presente
-                            ? <CheckCircle2 size={12} style={{ color:'#059669' }}/>
-                            : <Clock size={12} style={{ color:'#9CA3AF' }}/>
-                          }
-                        </div>
-                        <div style={{ flex:1 }}>
-                          <p style={{ fontSize:'13px', fontWeight:'700', color:'#111827', margin:'0 0 2px' }}>
-                            {r.evento?.titolo || 'Evento rimosso'}
-                          </p>
-                          <p style={{ fontSize:'12px', color:'#9CA3AF', margin:0 }}>
-                            {fmtDt(r.evento?.data_inizio)} {r.evento?.luogo ? `· ${r.evento.luogo}` : ''}
-                          </p>
-                          <div style={{ display:'flex', gap:'6px', marginTop:'5px', flexWrap:'wrap' }}>
-                            <span style={{ fontSize:'11px', fontWeight:'700', padding:'2px 8px', borderRadius:'20px',
-                              backgroundColor: r.presente ? '#D1FAE5' : '#F3F4F6',
-                              color: r.presente ? '#065f46' : '#6B7280' }}>
-                              {r.presente ? '✓ Presente' : r.stato || 'iscritto'}
-                            </span>
-                            {r.codice_iscrizione && (
-                              <span style={{ fontSize:'10px', fontFamily:'monospace', color:'#9CA3AF', padding:'2px 6px', backgroundColor:'#F3F4F6', borderRadius:'20px' }}>
-                                {r.codice_iscrizione}
-                              </span>
-                            )}
-                          </div>
-                        </div>
-                        <p style={{ fontSize:'11px', color:'#9CA3AF', flexShrink:0, marginTop:3 }}>{fmtDt(r.created_at)}</p>
-                      </div>
-                    ))}
-                  </div>
-                )}
-              </div>
-            </div>
-          )}
-        </div>
-      )}
+      {tab === 'utenti' && <StatisticheUtenti/>}
     </div>
   )
 }
