@@ -3320,7 +3320,7 @@ export default function IscrittiPage() {
         onClose={()=>setDelConfirm(null)}
         onConfirm={deleteReg}
         title="Elimina iscritto"
-        description={delConfirm ? `Stai per eliminare la registrazione di ${[delConfirm.nome, delConfirm.cognome].filter(Boolean).join(' ')}. Verranno eliminati anche eventuali accompagnatori associati.` : ''}
+        description={delConfirm ? `Stai per eliminare la registrazione di ${[delConfirm.nome, delConfirm.cognome].filter(Boolean).join(' ')}. Gli eventuali accompagnatori restano iscritti: se era capogruppo, il ruolo passa in automatico a uno di loro.` : ''}
       />
       {/* BANNER RISULTATO CERTIFICATI */}
       {invioRisultato && (
