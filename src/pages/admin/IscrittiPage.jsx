@@ -1967,16 +1967,34 @@ export default function IscrittiPage() {
       )}
       {/* Riga registro — sempre visibile quando c'è un evento */}
       {selectedEvento && (
-        <div style={{ display:'flex', gap:'8px', flexWrap:'wrap', marginBottom:'16px', alignItems:'center' }}>
-          <Btn variant="secondary" onClick={exportRegistroPDF}  size="md" style={{ background:'#EFF6FF', color:'#1D4ED8', borderColor:'#BFDBFE', fontWeight:'700' }}><FileText size={16}/> 🖨 Registro PDF</Btn>
-          <Btn variant="secondary" onClick={exportRegistroWord} size="md" style={{ background:'#EFF6FF', color:'#1D4ED8', borderColor:'#BFDBFE', fontWeight:'700' }}><FileText size={16}/> 📄 Registro Word</Btn>
-          <Btn variant="secondary" onClick={exportExcelPostiAssegnati} size="md" style={{ background:'#ECFDF5', color:'#16A34A', borderColor:'#86EFAC', fontWeight:'700' }}><Download size={16}/> Scarica in Excel i posti assegnati</Btn>
-          <Btn variant="secondary" onClick={downloadTemplate} size="md"><Download size={16}/> Template</Btn>
-          <Btn variant="secondary" onClick={() => { setImportModal(true); setImportDone(null); setImportPreview([]); setImportErrors([]) }} size="md"><Upload size={16}/> Importa</Btn>
-          <Btn variant="secondary" onClick={exportExcel} size="md"><Download size={16}/> Esporta elenco iscritti</Btn>
-          <span style={{ fontSize:'12px', color:'#9CA3AF', marginLeft:'4px' }}>
-            Lista iscritti ordinata per cognome · da stampare per le mascherine
-          </span>
+        <div style={{ marginBottom:'16px' }}>
+          <div className="azioni-iscritti-grid" style={{ display:'grid', gridTemplateColumns:'repeat(6, minmax(0,1fr))', gap:'10px' }}>
+            {[
+              { onClick: exportRegistroPDF, icon: <FileText size={18}/>, r1:'Registro', r2:'PDF', from:'#EFF6FF', to:'#DBEAFE', bd:'#BFDBFE', fg:'#1D4ED8' },
+              { onClick: exportRegistroWord, icon: <FileText size={18}/>, r1:'Registro', r2:'Word', from:'#EEF2FF', to:'#E0E7FF', bd:'#C7D2FE', fg:'#4338CA' },
+              { onClick: exportExcelPostiAssegnati, icon: <Download size={18}/>, r1:'Excel', r2:'posti assegnati', from:'#ECFDF5', to:'#D1FAE5', bd:'#A7F3D0', fg:'#047857' },
+              { onClick: downloadTemplate, icon: <Download size={18}/>, r1:'Template', r2:'importa iscritti', from:'#FFFBEB', to:'#FEF3C7', bd:'#FDE68A', fg:'#B45309' },
+              { onClick: () => { setImportModal(true); setImportDone(null); setImportPreview([]); setImportErrors([]) }, icon: <Upload size={18}/>, r1:'Importa', r2:'iscritti', from:'#FDF2F8', to:'#FCE7F3', bd:'#FBCFE8', fg:'#BE185D' },
+              { onClick: exportExcel, icon: <Download size={18}/>, r1:'Esporta', r2:'elenco iscritti', from:'#F0FDFA', to:'#CCFBF1', bd:'#99F6E4', fg:'#0F766E' },
+            ].map((b, i) => (
+              <button key={i} onClick={b.onClick}
+                style={{ display:'flex', alignItems:'center', gap:'10px', padding:'10px 14px', minHeight:'56px', width:'100%',
+                  background:`linear-gradient(135deg, ${b.from}, ${b.to})`, border:`1px solid ${b.bd}`, borderRadius:'16px',
+                  color:b.fg, cursor:'pointer', fontFamily:"'Inter',sans-serif", textAlign:'left', transition:'transform .12s, box-shadow .12s' }}
+                onMouseEnter={e => { e.currentTarget.style.transform = 'translateY(-1px)'; e.currentTarget.style.boxShadow = '0 4px 14px rgba(0,0,0,.08)' }}
+                onMouseLeave={e => { e.currentTarget.style.transform = 'none'; e.currentTarget.style.boxShadow = 'none' }}>
+                <span style={{ flexShrink:0, display:'flex' }}>{b.icon}</span>
+                <span style={{ display:'flex', flexDirection:'column', lineHeight:1.2, minWidth:0 }}>
+                  <span style={{ fontSize:'13px', fontWeight:'800' }}>{b.r1}</span>
+                  <span style={{ fontSize:'12px', fontWeight:'600', opacity:.85 }}>{b.r2}</span>
+                </span>
+              </button>
+            ))}
+          </div>
+          <p style={{ fontSize:'12px', color:'#9CA3AF', margin:'8px 0 0' }}>
+            Registro: lista iscritti ordinata per cognome · da stampare per le mascherine
+          </p>
+          <style>{`@media (max-width: 1100px){ .azioni-iscritti-grid{ grid-template-columns: repeat(3, minmax(0,1fr)) !important } } @media (max-width: 560px){ .azioni-iscritti-grid{ grid-template-columns: repeat(2, minmax(0,1fr)) !important } }`}</style>
         </div>
       )}
 
