@@ -1,469 +1,521 @@
 import { useEffect, useState, useMemo } from 'react'
 import { usePageTitle } from '../../hooks/usePageTitle'
 import { supabase } from '../../lib/supabase'
-import { Activity, Search, RefreshCw, User, ChevronDown, ChevronRight } from 'lucide-react'
-import GlowTabBar from '../../components/GlowTabBar'
-import GlowTableHead from '../../components/GlowTableHead'
+import { Activity, Search, RefreshCw, Download, ChevronDown, ChevronRight, AlertTriangle, X } from 'lucide-react'
+import GlowStatCard from '../../components/GlowStatCard'
 
-const AZIONE_LABELS = {
-  checkin_qr:            { label:'Check-in QR',           color:'#16A34A', bg:'#F0FDF4' },
-  checkin_manuale:       { label:'Check-in manuale',       color:'#D97706', bg:'#FEF3C7' },
-  iscrizione:            { label:'Nuova iscrizione',       color:'#2563EB', bg:'#EFF6FF' },
-  cancellazione:         { label:'Cancellazione',          color:'#DC2626', bg:'#FEF2F2' },
-  evento_creato:         { label:'Evento creato',          color:'#7C3AED', bg:'#F5F3FF' },
-  evento_modificato:     { label:'Evento modificato',      color:'#0891B2', bg:'#ECFEFF' },
-  evento_eliminato:      { label:'Evento eliminato',       color:'#DC2626', bg:'#FEF2F2' },
-  evento_stato:          { label:'Cambio stato',           color:'#059669', bg:'#ECFDF5' },
-  login:                 { label:'Accesso',                color:'#6B7280', bg:'#F9FAFB' },
-  logout:                { label:'Disconnessione',         color:'#6B7280', bg:'#F9FAFB' },
-  utente_creato:         { label:'Utente creato',          color:'#7C3AED', bg:'#F5F3FF' },
-  utente_modificato:     { label:'Utente modificato',      color:'#0891B2', bg:'#ECFEFF' },
-  utente_eliminato:      { label:'Utente eliminato',       color:'#DC2626', bg:'#FEF2F2' },
-  ruolo_creato:          { label:'Ruolo creato',           color:'#7C3AED', bg:'#F5F3FF' },
-  ruolo_modificato:      { label:'Ruolo modificato',       color:'#0891B2', bg:'#ECFEFF' },
-  ruolo_eliminato:       { label:'Ruolo eliminato',        color:'#DC2626', bg:'#FEF2F2' },
-  iscritto_eliminato:    { label:'Iscritto eliminato',     color:'#DC2626', bg:'#FEF2F2' },
-  iscritto_modificato:   { label:'Iscritto modificato',    color:'#0891B2', bg:'#ECFEFF' },
-  iscritto_manuale:      { label:'Iscritto manuale',       color:'#7C3AED', bg:'#F5F3FF' },
-  iscritti_importati:    { label:'Iscritti importati',     color:'#0891B2', bg:'#ECFEFF' },
-  iscritti_esportati:    { label:'Iscritti esportati',     color:'#0891B2', bg:'#ECFEFF' },
-  email_template_salvato:{ label:'Template email salvato', color:'#E85D24', bg:'#FFF7ED' },
-  email_test_inviata:    { label:'Email di test inviata',  color:'#E85D24', bg:'#FFF7ED' },
-  export:                { label:'Export dati',            color:'#0891B2', bg:'#ECFEFF' },
-  sms_inviato:           { label:'SMS inviato',            color:'#059669', bg:'#ECFDF5' },
+// ---------- Catalogo azioni ----------
+const CATEGORIE = {
+  accessi:   { label:'Accessi',         color:'#475569', bg:'#F1F5F9' },
+  checkin:   { label:'Check-in',        color:'#16A34A', bg:'#F0FDF4' },
+  iscritti:  { label:'Iscritti',        color:'#2563EB', bg:'#EFF6FF' },
+  eventi:    { label:'Eventi',          color:'#7C3AED', bg:'#F5F3FF' },
+  comunic:   { label:'Comunicazioni',   color:'#EA580C', bg:'#FFF7ED' },
+  export:    { label:'Export',          color:'#0891B2', bg:'#ECFEFF' },
+  admin:     { label:'Amministrazione', color:'#BE185D', bg:'#FDF2F8' },
+  altro:     { label:'Altro',           color:'#6B7280', bg:'#F9FAFB' },
 }
 
-const SESSION_GAP_MINUTES = 60
+const AZIONI = {
+  login:                  ['Login', 'accessi'],
+  accesso:                ['Apertura app', 'accessi'],
+  logout:                 ['Logout', 'accessi'],
+  checkin_qr:             ['Check-in QR', 'checkin'],
+  checkin_manuale:        ['Check-in manuale', 'checkin'],
+  checkin_annullato:      ['Check-in annullato', 'checkin'],
+  walkin:                 ['Walk-in', 'checkin'],
+  iscrizione:             ['Nuova iscrizione', 'iscritti'],
+  cancellazione:          ['Cancellazione', 'iscritti'],
+  iscritto_manuale:       ['Iscritto aggiunto', 'iscritti'],
+  iscritto_modificato:    ['Iscritto modificato', 'iscritti'],
+  iscritto_eliminato:     ['Iscritto eliminato', 'iscritti'],
+  iscritti_importati:     ['Iscritti importati', 'iscritti'],
+  evento_creato:          ['Evento creato', 'eventi'],
+  evento_modificato:      ['Evento modificato', 'eventi'],
+  evento_eliminato:       ['Evento eliminato', 'eventi'],
+  evento_stato:           ['Cambio stato evento', 'eventi'],
+  email_template_salvato: ['Template email salvato', 'comunic'],
+  email_test_inviata:     ['Email di test', 'comunic'],
+  sms_inviato:            ['SMS inviato', 'comunic'],
+  iscritti_esportati:     ['Export iscritti', 'export'],
+  presenti_esportati:     ['Export presenti', 'export'],
+  posti_esportati:        ['Export posti', 'export'],
+  teatro_posti_esportati: ['Export posti teatro', 'export'],
+  registro_pdf:           ['Registro PDF', 'export'],
+  registro_word:          ['Registro Word', 'export'],
+  export:                 ['Export dati', 'export'],
+  utente_creato:          ['Utente creato', 'admin'],
+  utente_modificato:      ['Utente modificato', 'admin'],
+  utente_eliminato:       ['Utente eliminato', 'admin'],
+  ruolo_creato:           ['Ruolo creato', 'admin'],
+  ruolo_modificato:       ['Ruolo modificato', 'admin'],
+  ruolo_eliminato:        ['Ruolo eliminato', 'admin'],
+  avatar_aggiornato:      ['Avatar aggiornato', 'admin'],
+}
+const infoAzione = a => {
+  const [label, cat] = AZIONI[a] || [a?.replace(/_/g, ' ') || '?', 'altro']
+  return { label, cat, ...CATEGORIE[cat] }
+}
+const isAccesso = a => a === 'login' || a === 'accesso'
 
-function AzioneBadge({ azione, small }) {
-  const c = AZIONE_LABELS[azione] || { label: azione, color:'#6B7280', bg:'#F9FAFB' }
-  return (
-    <span style={{
-      display:'inline-flex', alignItems:'center',
-      padding: small ? '2px 7px' : '3px 10px',
-      borderRadius:'20px',
-      fontSize: small ? '10px' : '11px',
-      fontWeight:'700', color:c.color, backgroundColor:c.bg, whiteSpace:'nowrap'
-    }}>
-      {c.label}
-    </span>
-  )
+const PERIODI = [
+  { id:'oggi', label:'Oggi', giorni:0 },
+  { id:'7',    label:'7 giorni', giorni:7 },
+  { id:'30',   label:'30 giorni', giorni:30 },
+  { id:'90',   label:'90 giorni', giorni:90 },
+]
+const MAX_ROWS = 5000
+const PAGE_VIEW = 150
+
+// ---------- Utility ----------
+const TZ = 'Europe/Rome'
+const dayKey = ts => new Date(ts).toLocaleDateString('sv-SE', { timeZone: TZ })
+const fmtOra = ts => new Date(ts).toLocaleTimeString('it-IT', { hour:'2-digit', minute:'2-digit', timeZone: TZ })
+function fmtRel(ts) {
+  if (!ts) return 'mai'
+  const min = Math.round((Date.now() - new Date(ts)) / 60000)
+  if (min < 1) return 'ora'
+  if (min < 60) return `${min} min fa`
+  const h = Math.round(min / 60)
+  if (h < 24) return `${h} h fa`
+  const g = Math.round(h / 24)
+  if (g < 30) return `${g} ${g === 1 ? 'giorno' : 'giorni'} fa`
+  return new Date(ts).toLocaleDateString('it-IT', { day:'numeric', month:'short', year:'numeric', timeZone: TZ })
+}
+function fmtGiorno(key) {
+  const oggi = dayKey(Date.now())
+  const ieri = dayKey(Date.now() - 86400000)
+  const d = new Date(key + 'T12:00:00')
+  const full = d.toLocaleDateString('it-IT', { weekday:'long', day:'numeric', month:'long' })
+  if (key === oggi) return 'Oggi, ' + full
+  if (key === ieri) return 'Ieri, ' + full
+  return full.charAt(0).toUpperCase() + full.slice(1)
+}
+function dettagliTesto(d) {
+  if (!d || typeof d !== 'object') return ''
+  const skip = new Set(['da_coda', 'offline', 'pagina'])
+  if (d.nome) return d.nome + (d.capogruppo ? ` (capogruppo ${d.capogruppo})` : '')
+  return Object.entries(d).filter(([k]) => !skip.has(k)).map(([k, v]) => `${k.replace(/_/g, ' ')}: ${v}`).join(' | ')
+}
+const iniziali = n => (n || '?').replace(/@.*/, '').split(/[\s.]+/).filter(Boolean).slice(0, 2).map(x => x[0]?.toUpperCase()).join('')
+const nomeUtente = p => p ? ((`${p.nome || ''} ${p.cognome || ''}`).trim() || p.username) : null
+
+// ---------- Componenti ----------
+function Badge({ azione, small }) {
+  const c = infoAzione(azione)
+  return <span style={{ display:'inline-flex', alignItems:'center', gap:5, padding: small ? '2px 8px' : '3px 10px', borderRadius:20, fontSize: small ? 10.5 : 11.5, fontWeight:700, color:c.color, background:c.bg, whiteSpace:'nowrap' }}>
+    <span style={{ width:6, height:6, borderRadius:3, background:c.color }} />{c.label}
+  </span>
 }
 
-function fmtTime(ts) {
-  if (!ts) return '—'
-  return new Date(ts).toLocaleString('it-IT', { hour:'2-digit', minute:'2-digit', second:'2-digit' })
+function Avatar({ nome, size = 30, color = '#5B5FEF' }) {
+  return <div style={{ width:size, height:size, borderRadius:'50%', background:color + '18', color, display:'flex', alignItems:'center', justifyContent:'center', fontSize:size * 0.38, fontWeight:800, flexShrink:0 }}>{iniziali(nome)}</div>
 }
 
-function fmtDayLabel(dateStr) {
-  const d = new Date(dateStr + 'T12:00:00')
-  const oggi = new Date()
-  const ieri = new Date(); ieri.setDate(oggi.getDate() - 1)
-  const fmtFull = d.toLocaleDateString('it-IT', { weekday:'long', day:'numeric', month:'long', year:'numeric' })
-  if (d.toDateString() === oggi.toDateString()) return 'Oggi — ' + fmtFull
-  if (d.toDateString() === ieri.toDateString()) return 'Ieri — ' + fmtFull
-  return fmtFull.charAt(0).toUpperCase() + fmtFull.slice(1)
+function Chip({ active, onClick, children }) {
+  return <button onClick={onClick} style={{ ...s.chip, ...(active ? s.chipOn : {}) }}>{children}</button>
 }
 
-function parseDettaglio(raw) {
-  if (!raw) return null
-  if (typeof raw === 'object') return raw
-  try { return JSON.parse(raw) } catch { return null }
-}
-
-function DettaglioText({ raw }) {
-  const d = parseDettaglio(raw)
-  if (!d || !Object.keys(d).length) return null
-  if (d.nome) return <span>{d.nome}</span>
-  return <span>{Object.entries(d).map(([k,v]) => `${k}: ${v}`).join(' · ')}</span>
-}
-
-// Conta badge con contatore
-function AzioniBadges({ logs, small }) {
-  const counts = {}
-  for (const l of logs) counts[l.azione] = (counts[l.azione] || 0) + 1
-  const entries = Object.entries(counts)
-  return (
-    <div style={{ display:'flex', flexWrap:'wrap', gap:'4px', alignItems:'center' }}>
-      {entries.slice(0, 5).map(([a, n]) => (
-        <span key={a} style={{ position:'relative', display:'inline-flex' }}>
-          <AzioneBadge azione={a} small={small} />
-          {n > 1 && (
-            <span style={{
-              position:'absolute', top:'-5px', right:'-5px',
-              background:'#5B5FEF', color:'#fff', borderRadius:'20px',
-              fontSize:'9px', fontWeight:'800', padding:'1px 4px', lineHeight:'1.2',
-              minWidth:'14px', textAlign:'center'
-            }}>{n}</span>
-          )}
-        </span>
-      ))}
-      {entries.length > 5 && (
-        <span style={{ fontSize:'11px', color:'#9CA3AF' }}>+{entries.length - 5}</span>
-      )}
+// Grafico a barre impilate per categoria, un giorno per colonna
+function GraficoGiorni({ logs, giorni }) {
+  const [hover, setHover] = useState(null)
+  const keys = useMemo(() => {
+    const n = Math.max(giorni, 1)
+    return Array.from({ length: n }, (_, i) => dayKey(Date.now() - (n - 1 - i) * 86400000))
+  }, [giorni])
+  const data = useMemo(() => {
+    const m = Object.fromEntries(keys.map(k => [k, {}]))
+    for (const l of logs) { const k = dayKey(l.created_at); if (m[k]) { const c = infoAzione(l.azione).cat; m[k][c] = (m[k][c] || 0) + 1 } }
+    return keys.map(k => ({ k, cats: m[k], tot: Object.values(m[k]).reduce((a, b) => a + b, 0) }))
+  }, [logs, keys])
+  const max = Math.max(1, ...data.map(d => d.tot))
+  const ordine = Object.keys(CATEGORIE)
+  const H = 120
+  return <div style={s.card}>
+    <div style={s.cardHead}>
+      <span style={s.cardTitle}>Operazioni per giorno</span>
+      <div style={{ display:'flex', flexWrap:'wrap', gap:10 }}>
+        {ordine.filter(c => data.some(d => d.cats[c])).map(c => <span key={c} style={{ fontSize:11, color:'#6B7280', display:'inline-flex', alignItems:'center', gap:4 }}><span style={{ width:8, height:8, borderRadius:2, background:CATEGORIE[c].color }} />{CATEGORIE[c].label}</span>)}
+      </div>
     </div>
-  )
+    <div style={{ position:'relative', display:'flex', alignItems:'flex-end', gap: keys.length > 40 ? 1 : 3, height:H, padding:'0 2px' }}>
+      {data.map(d => <div key={d.k} onMouseEnter={() => setHover(d)} onMouseLeave={() => setHover(null)}
+        style={{ flex:1, height:'100%', display:'flex', flexDirection:'column-reverse', cursor:'default', minWidth:2 }}>
+        {d.tot === 0 && <div style={{ height:2, background:'#EEF0F6', borderRadius:1 }} />}
+        {ordine.filter(c => d.cats[c]).map((c, i, arr) => <div key={c} style={{ height:(d.cats[c] / max) * H, background:CATEGORIE[c].color, opacity: hover && hover.k !== d.k ? 0.45 : 1, borderRadius: i === arr.length - 1 ? '3px 3px 0 0' : 0, borderTop: i ? '1px solid #fff' : 'none' }} />)}
+      </div>)}
+      {hover && <div style={s.tooltip}>
+        <b>{fmtGiorno(hover.k)}</b> - {hover.tot} operazioni
+        {ordine.filter(c => hover.cats[c]).map(c => <div key={c} style={{ color:'#CBD5E1' }}>{CATEGORIE[c].label}: {hover.cats[c]}</div>)}
+      </div>}
+    </div>
+    <div style={{ display:'flex', justifyContent:'space-between', fontSize:10.5, color:'#9CA3AF', marginTop:6 }}>
+      <span>{fmtGiorno(keys[0]).replace(/^(Oggi|Ieri), /, '')}</span><span>{giorni <= 1 ? '' : 'oggi'}</span>
+    </div>
+  </div>
 }
 
-// Spezza i log di un utente in sessioni basate sul gap temporale
-function splitIntoSessions(logs) {
-  const sorted = [...logs].sort((a,b) => new Date(a.created_at) - new Date(b.created_at))
-  const sessions = []
-  let cur = null
-  for (const l of sorted) {
-    const ts = new Date(l.created_at).getTime()
-    if (!cur || (ts - new Date(cur.last_at).getTime()) > SESSION_GAP_MINUTES * 60000) {
-      cur = { start: l.created_at, last_at: l.created_at, logs: [l] }
-      sessions.push(cur)
-    } else {
-      cur.last_at = l.created_at
-      cur.logs.push(l)
-    }
-  }
-  return sessions
+// Tabella riepilogo per utente (inclusi gli utenti senza attivita)
+function RiepilogoUtenti({ righe, onSelect, selected }) {
+  return <div style={s.card}>
+    <div style={s.cardHead}><span style={s.cardTitle}>Riepilogo per utente</span><span style={{ fontSize:12, color:'#9CA3AF' }}>clicca una riga per filtrare</span></div>
+    <div style={{ overflowX:'auto' }}>
+      <table style={s.table}>
+        <thead><tr>
+          {['Utente', 'Ruolo', 'Ultima attivita', 'Operazioni', 'Check-in', 'Iscritti', 'Accessi', 'Dispositivi'].map((h, i) =>
+            <th key={h} style={{ ...s.th, textAlign: i >= 3 && i <= 6 ? 'right' : 'left' }} className={i === 7 || i === 1 ? 'hide-mobile' : undefined}>{h}</th>)}
+        </tr></thead>
+        <tbody>
+          {righe.map(r => {
+            const sel = selected === r.id
+            return <tr key={r.id} onClick={() => onSelect(sel ? 'tutti' : r.id)} style={{ cursor:'pointer', background: sel ? '#EEF0FF' : undefined }}
+              onMouseEnter={e => { if (!sel) e.currentTarget.style.background = '#F8F9FD' }} onMouseLeave={e => { if (!sel) e.currentTarget.style.background = '' }}>
+              <td style={s.td}><div style={{ display:'flex', alignItems:'center', gap:10 }}>
+                <Avatar nome={r.nome} size={28} color={r.attivo === false ? '#9CA3AF' : '#5B5FEF'} />
+                <div style={{ minWidth:0 }}>
+                  <div style={{ fontWeight:700, color:'#111827', fontSize:13 }}>{r.nome}</div>
+                  {r.username && r.username !== r.nome && <div style={{ fontSize:11, color:'#9CA3AF' }}>{r.username}</div>}
+                </div>
+              </div></td>
+              <td style={s.td} className="hide-mobile"><span style={s.ruolo}>{r.ruolo || '-'}</span></td>
+              <td style={s.td}>
+                <div style={{ fontSize:12.5, color: r.inattivo ? '#B45309' : '#374151', fontWeight: r.inattivo ? 700 : 500, whiteSpace:'nowrap' }}>{fmtRel(r.ultima)}</div>
+                {r.avviso && <div style={{ fontSize:10.5, color:'#B45309', display:'flex', alignItems:'center', gap:3 }}><AlertTriangle size={11} />{r.avviso}</div>}
+              </td>
+              <td style={{ ...s.td, ...s.num, fontWeight:800, color: r.tot ? '#111827' : '#D1D5DB' }}>{r.tot}</td>
+              <td style={{ ...s.td, ...s.num }}>{r.checkin || <span style={{ color:'#D1D5DB' }}>0</span>}</td>
+              <td style={{ ...s.td, ...s.num }}>{r.iscritti || <span style={{ color:'#D1D5DB' }}>0</span>}</td>
+              <td style={{ ...s.td, ...s.num }}>{r.accessi || <span style={{ color:'#D1D5DB' }}>0</span>}</td>
+              <td style={{ ...s.td, fontSize:11.5, color:'#6B7280' }} className="hide-mobile">{r.dispositivi || '-'}</td>
+            </tr>
+          })}
+        </tbody>
+      </table>
+    </div>
+  </div>
 }
 
-// Riga singola operazione (livello 3)
-function OpRow({ log }) {
-  const d = parseDettaglio(log.dettaglio)
-  const hasDetail = d && Object.keys(d).length > 0
-  const meta = parseDettaglio(log.metadata) || {}
-
-  // Icona dispositivo
-  const devIcon = meta.dispositivo === 'Mobile' ? '📱' : meta.dispositivo === 'Tablet' ? '🖥️' : meta.dispositivo === 'Desktop' ? '💻' : null
-
-  // Etichetta geo
-  const geo = [meta.citta, meta.paese].filter(Boolean).join(', ')
-
-  return (
-    <tr style={{ backgroundColor:'#F5F7FF' }}>
-      <td style={{ ...s.tdL3, width:'90px', paddingLeft:'64px' }}>
-        <span style={{ fontFamily:'monospace', fontSize:'11px', color:'#9CA3AF' }}>
-          {fmtTime(log.created_at)}
-        </span>
+function RigaOperazione({ l, mostraUtente }) {
+  const [open, setOpen] = useState(false)
+  const d = l.dettagli && typeof l.dettagli === 'object' ? l.dettagli : {}
+  const m = l.metadata && typeof l.metadata === 'object' ? l.metadata : {}
+  const testo = dettagliTesto(d)
+  const luogo = [m.citta, m.paese].filter(Boolean).join(', ')
+  const disp = [m.dispositivo, m.browser, m.os].filter(Boolean).join(' / ')
+  return <>
+    <tr onClick={() => setOpen(o => !o)} style={{ cursor:'pointer' }}
+      onMouseEnter={e => { e.currentTarget.style.background = '#F8F9FD' }} onMouseLeave={e => { e.currentTarget.style.background = '' }}>
+      <td style={{ ...s.td, width:64, fontVariantNumeric:'tabular-nums', color:'#6B7280', fontSize:12 }}>{fmtOra(l.created_at)}</td>
+      {mostraUtente && <td style={{ ...s.td, width:200 }}><div style={{ display:'flex', alignItems:'center', gap:8 }}><Avatar nome={l.utente_nome} size={24} /><span style={{ fontWeight:600, fontSize:12.5, color:'#111827', whiteSpace:'nowrap', overflow:'hidden', textOverflow:'ellipsis', maxWidth:150 }}>{l.utente_nome || 'Sistema'}</span></div></td>}
+      <td style={{ ...s.td, width:170 }}><Badge azione={l.azione} small /></td>
+      <td style={{ ...s.td, fontSize:12.5, color:'#374151' }}>
+        {l.evento_titolo && <span style={{ fontWeight:600, color:'#5B5FEF' }}>{l.evento_titolo}</span>}
+        {l.evento_titolo && testo && <span style={{ color:'#D1D5DB' }}> | </span>}
+        {testo}
+        {d.da_coda && <span style={s.tag}>sincronizzato dopo</span>}
+        {!l.evento_titolo && !testo && <span style={{ color:'#D1D5DB' }}>-</span>}
       </td>
-      <td style={s.tdL3}>
-        <AzioneBadge azione={log.azione} small />
-      </td>
-      <td style={{ ...s.tdL3, color:'#374151', fontSize:'12px' }}>
-        {log.evento_titolo && (
-          <span style={{ fontWeight:'600', color:'#5B5FEF', marginRight:'6px' }}>
-            {log.evento_titolo}
-          </span>
-        )}
-        {hasDetail && <DettaglioText raw={log.dettaglio} />}
-        {!log.evento_titolo && !hasDetail && <span style={{ color:'#D1D5DB' }}>—</span>}
-      </td>
-      {/* Dispositivo + browser */}
-      <td style={s.tdL3}>
-        {(meta.browser || meta.dispositivo) ? (
-          <span style={{ fontSize:'11px', color:'#6B7280', whiteSpace:'nowrap' }}>
-            {devIcon && <span style={{ marginRight:'4px' }}>{devIcon}</span>}
-            {[meta.browser, meta.os].filter(Boolean).join(' · ')}
-          </span>
-        ) : <span style={{ color:'#E8ECF4' }}>—</span>}
-      </td>
-      {/* Geo + IP */}
-      <td style={s.tdL3}>
-        <div>
-          {geo && <p style={{ fontSize:'11px', color:'#6B7280', margin:0 }}>📍 {geo}</p>}
-          {log.ip_address && (
-            <p style={{ fontSize:'10px', color:'#9CA3AF', fontFamily:'monospace', margin:0 }}>{log.ip_address}</p>
-          )}
-          {!geo && !log.ip_address && <span style={{ color:'#E8ECF4' }}>—</span>}
-        </div>
-      </td>
+      <td style={{ ...s.td, fontSize:11.5, color:'#6B7280', whiteSpace:'nowrap' }} className="hide-mobile">{m.dispositivo || '-'}{luogo ? ` | ${luogo}` : ''}</td>
+      <td style={{ ...s.td, width:20, color:'#9CA3AF' }}>{open ? <ChevronDown size={14} /> : <ChevronRight size={14} />}</td>
     </tr>
-  )
+    {open && <tr><td colSpan={mostraUtente ? 6 : 5} style={{ padding:'4px 16px 14px 80px', background:'#FAFBFE', borderBottom:'1px solid #EEF0F6' }}>
+      <div style={s.detGrid}>
+        <div><span style={s.detK}>Data e ora</span>{new Date(l.created_at).toLocaleString('it-IT', { timeZone: TZ })}</div>
+        <div><span style={s.detK}>Utente</span>{l.utente_nome} {l.username && l.username !== l.utente_nome ? `(${l.username})` : ''}</div>
+        <div><span style={s.detK}>Dispositivo</span>{disp || '-'}</div>
+        <div><span style={s.detK}>Localita</span>{luogo || '-'}</div>
+        <div><span style={s.detK}>IP</span><span style={{ fontFamily:'monospace' }}>{l.ip_address || m.ip || '-'}</span></div>
+        {l.evento_titolo && <div><span style={s.detK}>Evento</span>{l.evento_titolo}</div>}
+        {Object.keys(d).length > 0 && <div style={{ gridColumn:'1 / -1' }}><span style={s.detK}>Dettagli</span>{Object.entries(d).map(([k, v]) => `${k.replace(/_/g, ' ')}: ${typeof v === 'object' ? JSON.stringify(v) : v}`).join(' | ')}</div>}
+      </div>
+    </td></tr>}
+  </>
 }
 
-// Riga sessione (livello 2) — espandibile → mostra operazioni
-function SessionBlock({ session, defaultOpen }) {
-  const [open, setOpen] = useState(defaultOpen || false)
-  const n = session.logs.length
-  const durMin = Math.round((new Date(session.last_at) - new Date(session.start)) / 60000)
-  const durLabel = durMin < 1 ? null : durMin < 60 ? `${durMin} min` : `${Math.floor(durMin/60)}h ${durMin%60 ? durMin%60+'m' : ''}`
-
-  return (
-    <>
-      <tr
-        style={{ ...s.trSess, cursor: n > 1 ? 'pointer' : 'default', backgroundColor: open ? '#EEF2FF' : '#F8FAFF' }}
-        onClick={() => n > 0 && setOpen(o => !o)}
-        onMouseEnter={e => { if (!open) e.currentTarget.style.backgroundColor = '#EFF1FF' }}
-        onMouseLeave={e => { if (!open) e.currentTarget.style.backgroundColor = '#F8FAFF' }}
-      >
-        <td style={{ ...s.tdL2, paddingLeft:'36px', width:'130px' }}>
-          <div style={{ display:'flex', alignItems:'center', gap:'6px' }}>
-            {open
-              ? <ChevronDown size={12} style={{ color:'#9CA3AF', flexShrink:0 }} />
-              : <ChevronRight size={12} style={{ color:'#9CA3AF', flexShrink:0 }} />}
-            <div>
-              <span style={{ fontFamily:'monospace', fontSize:'12px', color:'#374151' }}>
-                {fmtTime(session.start)}
-              </span>
-              {durLabel && (
-                <span style={{ fontSize:'10px', color:'#9CA3AF', marginLeft:'5px' }}>
-                  {durLabel}
-                </span>
-              )}
-            </div>
-          </div>
-        </td>
-        <td style={s.tdL2}>
-          <AzioniBadges logs={session.logs} small />
-        </td>
-        <td style={s.tdL2}>
-          <span style={{ fontSize:'11px', color:'#9CA3AF' }}>{n} {n === 1 ? 'op.' : 'op.'}</span>
-        </td>
-        <td style={s.tdL2} />
-        <td style={s.tdL2}>
-          <span style={{ fontSize:'11px', color:'#D1D5DB', fontFamily:'monospace' }}>
-            {session.logs[0]?.ip_address || '—'}
-          </span>
-        </td>
-      </tr>
-      {open && session.logs.map(l => <OpRow key={l.id} log={l} />)}
-    </>
-  )
-}
-
-// Riga utente×giorno (livello 1) — espandibile → mostra sessioni
-function UserDayRow({ utenteNome, sessions, defaultOpen }) {
-  const [open, setOpen] = useState(defaultOpen || false)
-  const allLogs = sessions.flatMap(s => s.logs)
-  const nSess = sessions.length
-  const nOp = allLogs.length
-
-  return (
-    <>
-      <tr
-        style={{ ...s.trUser, cursor:'pointer', backgroundColor: open ? '#FFF8F8' : '#fff' }}
-        onClick={() => setOpen(o => !o)}
-        onMouseEnter={e => { if (!open) e.currentTarget.style.backgroundColor = '#FFF5F5' }}
-        onMouseLeave={e => { if (!open) e.currentTarget.style.backgroundColor = '#fff' }}
-      >
-        {/* Utente */}
-        <td style={s.tdL1}>
-          <div style={{ display:'flex', alignItems:'center', gap:'10px' }}>
-            {open
-              ? <ChevronDown size={15} style={{ color:'#9CA3AF', flexShrink:0 }} />
-              : <ChevronRight size={15} style={{ color:'#9CA3AF', flexShrink:0 }} />}
-            <div style={{ width:'30px', height:'30px', borderRadius:'50%', backgroundColor:'#EEEFFD', display:'flex', alignItems:'center', justifyContent:'center', flexShrink:0 }}>
-              <User size={15} style={{ color:'#5B5FEF' }} />
-            </div>
-            <span style={{ fontSize:'14px', fontWeight:'700', color:'#111827' }}>{utenteNome}</span>
-          </div>
-        </td>
-        {/* Riepilogo azioni */}
-        <td style={s.tdL1}>
-          <AzioniBadges logs={allLogs} />
-        </td>
-        {/* Contatori */}
-        <td style={s.tdL1}>
-          <span style={{ fontSize:'12px', color:'#6B7280' }}>
-            {nSess} {nSess === 1 ? 'sessione' : 'sessioni'} · {nOp} operazioni
-          </span>
-        </td>
-        <td style={s.tdL1} />
-        <td style={s.tdL1} />
-      </tr>
-      {open && sessions.map((sess, i) => (
-        <SessionBlock key={sess.start + i} session={sess} defaultOpen={nSess === 1} />
-      ))}
-    </>
-  )
-}
-
-// Costruisce struttura: [ { dateStr, utenti: [ { nome, sessions } ] } ]
-function buildTree(logs) {
-  // 1. Raggruppa per giorno (ora di Roma approssimata — usiamo locale del browser)
-  const byDay = {}
-  for (const l of logs) {
-    const d = new Date(l.created_at)
-    const dateStr = d.toLocaleDateString('sv-SE') // YYYY-MM-DD
-    if (!byDay[dateStr]) byDay[dateStr] = {}
-    const utente = l.utente_nome || 'Sistema'
-    if (!byDay[dateStr][utente]) byDay[dateStr][utente] = []
-    byDay[dateStr][utente].push(l)
-  }
-
-  // 2. Per ogni giorno/utente costruisce le sessioni
-  const days = Object.keys(byDay).sort((a,b) => b.localeCompare(a)) // desc
-  return days.map(dateStr => ({
-    dateStr,
-    utenti: Object.entries(byDay[dateStr]).map(([nome, uLogs]) => ({
-      nome,
-      sessions: splitIntoSessions(uLogs),
-    })).sort((a,b) => a.nome.localeCompare(b.nome)),
-  }))
-}
-
+// ---------- Pagina ----------
 export default function ActivityLogPage() {
-  usePageTitle('Log attività')
+  usePageTitle('Log attivita')
+  const [periodo, setPeriodo] = useState('7')
   const [logs, setLogs] = useState([])
+  const [utenti, setUtenti] = useState([])
   const [loading, setLoading] = useState(true)
+  const [troncato, setTroncato] = useState(false)
+  const [fUtente, setFUtente] = useState('tutti')
+  const [fCat, setFCat] = useState('tutte')
+  const [fEvento, setFEvento] = useState('tutti')
   const [search, setSearch] = useState('')
-  const [filterAzione, setFilterAzione] = useState('tutti')
-  const [total, setTotal] = useState(0)
-  const PAGE = 500
+  const [nascondiAccessi, setNascondiAccessi] = useState(false)
+  const [visibili, setVisibili] = useState(PAGE_VIEW)
 
-  useEffect(() => { loadLogs() }, [filterAzione])
+  const giorni = PERIODI.find(p => p.id === periodo)?.giorni ?? 7
 
-  async function loadLogs() {
+  useEffect(() => { load() }, [periodo])
+  useEffect(() => { setVisibili(PAGE_VIEW) }, [fUtente, fCat, fEvento, search, nascondiAccessi, periodo])
+
+  async function load() {
     setLoading(true)
-    let q = supabase
-      .from('activity_log')
-      .select('*', { count:'exact' })
-      .order('created_at', { ascending:false })
-      .limit(PAGE)
-    if (filterAzione !== 'tutti') q = q.eq('azione', filterAzione)
-    const { data, count } = await q
-    const normalized = (data || []).map(l => {
-      let dettaglio = l.dettaglio || l.dettagli || null
-      if (dettaglio && typeof dettaglio === 'object') dettaglio = JSON.stringify(dettaglio)
-      return {
-        ...l,
-        utente_nome:   l.utente_nome || l.username || null,
-        evento_titolo: l.evento_titolo || null,
-        ip_address:    l.ip_address || l.ip || null,
-        dettaglio,
-      }
-    })
-    setLogs(normalized)
-    setTotal(count || 0)
+    const da = new Date()
+    if (giorni === 0) da.setHours(0, 0, 0, 0)
+    else { da.setHours(0, 0, 0, 0); da.setDate(da.getDate() - (giorni - 1)) }
+    const [{ data: lg }, { data: us }] = await Promise.all([
+      supabase.from('activity_log')
+        .select('id,created_at,user_id,username,utente_nome,azione,dettagli,evento_id,evento_titolo,ip_address,metadata')
+        .gte('created_at', da.toISOString()).order('created_at', { ascending:false }).limit(MAX_ROWS),
+      supabase.from('admin_profiles').select('id,username,nome,cognome,ruolo,attivo,ultimo_accesso'),
+    ])
+    setLogs(lg || [])
+    setTroncato((lg || []).length >= MAX_ROWS)
+    setUtenti(us || [])
     setLoading(false)
   }
 
-  const tree = useMemo(() => {
-    let filtered = logs
-    if (search) {
-      const q = search.toLowerCase()
-      filtered = logs.filter(l =>
-        l.utente_nome?.toLowerCase().includes(q) ||
-        l.dettaglio?.toLowerCase().includes(q) ||
-        l.evento_titolo?.toLowerCase().includes(q) ||
-        l.azione?.toLowerCase().includes(q)
-      )
+  const eventi = useMemo(() => {
+    const m = new Map()
+    for (const l of logs) if (l.evento_id && !m.has(l.evento_id)) m.set(l.evento_id, l.evento_titolo || 'Evento senza titolo')
+    return [...m.entries()].sort((a, b) => a[1].localeCompare(b[1]))
+  }, [logs])
+
+  // log filtrati da tutti i filtri tranne l'utente (usati per il riepilogo utenti)
+  const logsSenzaUtente = useMemo(() => {
+    const q = search.trim().toLowerCase()
+    return logs.filter(l => {
+      if (fCat !== 'tutte' && infoAzione(l.azione).cat !== fCat) return false
+      if (fEvento !== 'tutti' && l.evento_id !== fEvento) return false
+      if (q) {
+        const hay = [l.utente_nome, l.username, l.evento_titolo, infoAzione(l.azione).label, dettagliTesto(l.dettagli)].join(' ').toLowerCase()
+        if (!hay.includes(q)) return false
+      }
+      return true
+    })
+  }, [logs, fCat, fEvento, search])
+
+  const filtrati = useMemo(() => logsSenzaUtente.filter(l =>
+    (fUtente === 'tutti' || l.user_id === fUtente) && (!nascondiAccessi || infoAzione(l.azione).cat !== 'accessi')
+  ), [logsSenzaUtente, fUtente, nascondiAccessi])
+
+  const kpi = useMemo(() => {
+    const k = { tot: 0, utenti: new Set(), checkin: 0, iscritti: 0, comunic: 0, export: 0, mobile: 0 }
+    for (const l of filtrati) {
+      const c = infoAzione(l.azione).cat
+      if (c !== 'accessi') k.tot++
+      k.utenti.add(l.user_id)
+      if (l.azione === 'checkin_qr' || l.azione === 'checkin_manuale' || l.azione === 'walkin') k.checkin++
+      if (c === 'iscritti') k.iscritti++
+      if (c === 'comunic') k.comunic++
+      if (c === 'export') k.export++
+      if (l.metadata?.dispositivo === 'Mobile') k.mobile++
     }
-    return buildTree(filtered)
-  }, [logs, search])
+    return { ...k, utenti: k.utenti.size }
+  }, [filtrati])
+
+  const riepilogo = useMemo(() => {
+    const per = new Map()
+    for (const l of logsSenzaUtente) {
+      if (!per.has(l.user_id)) per.set(l.user_id, { tot: 0, checkin: 0, iscritti: 0, accessi: 0, disp: new Set(), ultima: null, nomeLog: l.utente_nome, username: l.username })
+      const r = per.get(l.user_id)
+      const c = infoAzione(l.azione).cat
+      if (c === 'accessi') r.accessi++; else r.tot++
+      if (l.azione === 'checkin_qr' || l.azione === 'checkin_manuale' || l.azione === 'walkin') r.checkin++
+      if (c === 'iscritti') r.iscritti++
+      if (l.metadata?.dispositivo) r.disp.add(l.metadata.dispositivo)
+      if (!r.ultima || l.created_at > r.ultima) r.ultima = l.created_at
+    }
+    const ids = new Set([...utenti.map(u => u.id), ...per.keys()])
+    const filtroAttivo = fCat !== 'tutte' || fEvento !== 'tutti' || search.trim()
+    return [...ids].map(id => {
+      const p = utenti.find(u => u.id === id)
+      const r = per.get(id) || { tot: 0, checkin: 0, iscritti: 0, accessi: 0, disp: new Set(), ultima: null }
+      const ultima = [r.ultima, p?.ultimo_accesso].filter(Boolean).sort().pop() || null
+      const giorniFermo = ultima ? (Date.now() - new Date(ultima)) / 86400000 : Infinity
+      let avviso = null
+      if (p && p.attivo !== false && !ultima) avviso = 'nessun accesso registrato'
+      else if (p && p.attivo !== false && r.accessi > 0 && r.tot === 0 && !filtroAttivo) avviso = 'solo accessi, nessuna operazione'
+      return {
+        id, nome: nomeUtente(p) || r.nomeLog || 'Utente rimosso', username: p?.username || r.username, ruolo: p?.ruolo, attivo: p?.attivo,
+        tot: r.tot, checkin: r.checkin, iscritti: r.iscritti, accessi: r.accessi, dispositivi: [...r.disp].join(', '),
+        ultima, inattivo: giorniFermo > 14, avviso,
+      }
+    })
+      .filter(r => !filtroAttivo || r.tot + r.accessi > 0)
+      .sort((a, b) => (b.tot + b.accessi) - (a.tot + a.accessi) || String(b.ultima || '').localeCompare(String(a.ultima || '')))
+  }, [logsSenzaUtente, utenti, fCat, fEvento, search])
+
+  const perGiorno = useMemo(() => {
+    const out = []
+    for (const l of filtrati.slice(0, visibili)) {
+      const k = dayKey(l.created_at)
+      if (!out.length || out[out.length - 1].k !== k) out.push({ k, logs: [] })
+      out[out.length - 1].logs.push(l)
+    }
+    return out
+  }, [filtrati, visibili])
+
+  function esportaCsv() {
+    const esc = v => `"${String(v ?? '').replace(/"/g, '""')}"`
+    const rows = [['Data', 'Ora', 'Utente', 'Username', 'Azione', 'Categoria', 'Evento', 'Dettagli', 'Dispositivo', 'Browser', 'OS', 'Localita', 'IP']]
+    for (const l of filtrati) {
+      const a = infoAzione(l.azione), m = l.metadata || {}
+      const dt = new Date(l.created_at)
+      rows.push([dt.toLocaleDateString('it-IT', { timeZone: TZ }), dt.toLocaleTimeString('it-IT', { timeZone: TZ }), l.utente_nome, l.username, a.label, a.label && CATEGORIE[a.cat].label,
+        l.evento_titolo, dettagliTesto(l.dettagli), m.dispositivo, m.browser, m.os, [m.citta, m.paese].filter(Boolean).join(', '), l.ip_address || m.ip])
+    }
+    const blob = new Blob(['\uFEFF' + rows.map(r => r.map(esc).join(';')).join('\n')], { type: 'text/csv;charset=utf-8' })
+    const a = document.createElement('a')
+    a.href = URL.createObjectURL(blob)
+    a.download = `log-attivita-${dayKey(Date.now())}.csv`
+    a.click()
+    setTimeout(() => URL.revokeObjectURL(a.href), 1000)
+  }
+
+  const utenteSel = fUtente !== 'tutti' ? riepilogo.find(r => r.id === fUtente) || { nome: utenti.find(u => u.id === fUtente)?.username } : null
+  const filtriAttivi = fUtente !== 'tutti' || fCat !== 'tutte' || fEvento !== 'tutti' || search
+  const reset = () => { setFUtente('tutti'); setFCat('tutte'); setFEvento('tutti'); setSearch('') }
 
   return (
     <div style={s.page} className="admin-page">
       <div style={s.header} className="page-header-row">
         <div>
-          <h1 style={s.title}>Log Attività</h1>
-          <p style={s.sub}>{total.toLocaleString('it-IT')} eventi</p>
+          <h1 style={s.title}>Log Attivita</h1>
+          <p style={s.sub}>Chi ha fatto cosa, quando e da quale dispositivo</p>
         </div>
-        <button onClick={loadLogs} style={s.refreshBtn} disabled={loading}>
-          <RefreshCw size={15} style={{ animation: loading ? 'spin 1s linear infinite' : 'none' }} />
-          Aggiorna
-        </button>
-      </div>
-
-      <GlowTabBar
-        active={filterAzione}
-        onChange={setFilterAzione}
-        tabs={[
-          { id:'tutti',           label:'Tutto',        icon:'📋', color:'blue'   },
-          { id:'iscrizione',      label:'Iscrizioni',   icon:'✅', color:'green'  },
-          { id:'checkin_qr',      label:'Check-in QR',  icon:'📱', color:'cyan'   },
-          { id:'checkin_manuale', label:'Check-in man.', icon:'✋', color:'amber' },
-          { id:'evento_creato',   label:'Nuovi eventi', icon:'🗓', color:'violet' },
-          { id:'login',           label:'Accessi',      icon:'🔑', color:'coral'  },
-        ]}
-      />
-
-      <div style={{ display:'flex', gap:'10px', marginBottom:'16px', marginTop:'-8px' }}>
-        <div style={{ position:'relative', flex:1, maxWidth:'380px' }}>
-          <Search size={15} style={{ position:'absolute', left:'12px', top:'50%', transform:'translateY(-50%)', color:'#9CA3AF' }} />
-          <input
-            value={search} onChange={e => setSearch(e.target.value)}
-            placeholder="Cerca utente, azione, evento…"
-            style={{ ...s.input, paddingLeft:'36px', width:'100%', boxSizing:'border-box' }}
-          />
+        <div style={{ display:'flex', gap:8, flexWrap:'wrap' }}>
+          <button onClick={esportaCsv} style={s.btn} disabled={!filtrati.length}><Download size={15} />Esporta CSV</button>
+          <button onClick={load} style={s.btn} disabled={loading}><RefreshCw size={15} style={{ animation: loading ? 'spin 1s linear infinite' : 'none' }} />Aggiorna</button>
         </div>
       </div>
 
-      {loading && !tree.length ? (
-        <div style={s.emptyState}>
-          <Activity size={32} style={{ color:'#D1D5DB', marginBottom:'12px' }} />
-          <p style={{ color:'#9CA3AF', fontSize:'14px', margin:0 }}>Caricamento…</p>
+      {/* Filtri */}
+      <div style={s.filterBar}>
+        <div style={{ display:'flex', gap:6, flexWrap:'wrap' }}>
+          {PERIODI.map(p => <Chip key={p.id} active={periodo === p.id} onClick={() => setPeriodo(p.id)}>{p.label}</Chip>)}
         </div>
-      ) : !tree.length ? (
-        <div style={s.emptyState}>
-          <Activity size={32} style={{ color:'#D1D5DB', marginBottom:'12px' }} />
-          <p style={{ fontWeight:'700', color:'#374151', margin:'0 0 4px' }}>Nessuna attività trovata</p>
+        <div style={s.filterRow}>
+          <div style={{ position:'relative', flex:'1 1 220px', minWidth:180 }}>
+            <Search size={15} style={{ position:'absolute', left:12, top:'50%', transform:'translateY(-50%)', color:'#9CA3AF' }} />
+            <input value={search} onChange={e => setSearch(e.target.value)} placeholder="Cerca nome, iscritto, evento..." style={{ ...s.input, paddingLeft:36, width:'100%' }} />
+          </div>
+          <select value={fUtente} onChange={e => setFUtente(e.target.value)} style={s.select}>
+            <option value="tutti">Tutti gli utenti</option>
+            {[...utenti].sort((a, b) => (nomeUtente(a) || '').localeCompare(nomeUtente(b) || '')).map(u => <option key={u.id} value={u.id}>{nomeUtente(u)}</option>)}
+          </select>
+          <select value={fCat} onChange={e => setFCat(e.target.value)} style={s.select}>
+            <option value="tutte">Tutte le attivita</option>
+            {Object.entries(CATEGORIE).filter(([k]) => k !== 'altro').map(([k, c]) => <option key={k} value={k}>{c.label}</option>)}
+          </select>
+          <select value={fEvento} onChange={e => setFEvento(e.target.value)} style={{ ...s.select, maxWidth:240 }}>
+            <option value="tutti">Tutti gli eventi</option>
+            {eventi.map(([id, t]) => <option key={id} value={id}>{t}</option>)}
+          </select>
+          {filtriAttivi && <button onClick={reset} style={s.linkBtn}><X size={13} />Azzera filtri</button>}
         </div>
-      ) : (
-        tree.map((day, di) => (
-          <div key={day.dateStr} style={{ marginBottom:'24px' }}>
-            {/* Separatore giorno */}
-            <div style={s.dayHeader}>
-              <span style={s.dayLabel}>{fmtDayLabel(day.dateStr)}</span>
-              <span style={s.dayMeta}>
-                {day.utenti.length} {day.utenti.length === 1 ? 'utente' : 'utenti'} · {day.utenti.reduce((acc, u) => acc + u.sessions.flatMap(s => s.logs).length, 0)} operazioni
-              </span>
-            </div>
+      </div>
 
-            <div style={s.tableCard}>
-              <div style={{ overflowX:'auto' }} className="table-wrap">
-                <table style={s.table}>
-                  <GlowTableHead columns={[
-                    { label:'Utente / Sessione' },
-                    { label:'Operazioni' },
-                    { label:'' },
-                    { label:'Dispositivo', hideOnMobile:true },
-                    { label:'Localita / IP', hideOnMobile:true },
-                  ]} />
-                  <tbody>
-                    {day.utenti.map(u => (
-                      <UserDayRow
-                        key={u.nome}
-                        utenteNome={u.nome}
-                        sessions={u.sessions}
-                        defaultOpen={di === 0 && day.utenti.length === 1}
-                      />
-                    ))}
-                  </tbody>
-                </table>
+      {utenteSel && <div style={s.focusBar}>
+        <Avatar nome={utenteSel.nome} size={34} />
+        <div style={{ flex:1, minWidth:0 }}>
+          <div style={{ fontWeight:800, color:'#111827' }}>{utenteSel.nome} {utenteSel.ruolo && <span style={s.ruolo}>{utenteSel.ruolo}</span>}</div>
+          <div style={{ fontSize:12, color:'#6B7280' }}>Ultima attivita: {fmtRel(utenteSel.ultima)}{utenteSel.dispositivi ? ` | ${utenteSel.dispositivi}` : ''}</div>
+        </div>
+        <button onClick={() => setFUtente('tutti')} style={s.linkBtn}><X size={13} />Tutti gli utenti</button>
+      </div>}
+
+      {/* KPI */}
+      <div style={s.kpiGrid} className="stat-grid-auto">
+        <GlowStatCard icon="activity" label="Operazioni" value={kpi.tot.toLocaleString('it-IT')} sub="esclusi accessi" palette="blue" />
+        <GlowStatCard icon="users" label="Utenti attivi" value={kpi.utenti} sub={`su ${utenti.filter(u => u.attivo !== false).length} abilitati`} palette="violet" />
+        <GlowStatCard icon="qr" label="Check-in" value={kpi.checkin} sub="QR, manuali, walk-in" palette="green" />
+        <GlowStatCard icon="usercheck" label="Gestione iscritti" value={kpi.iscritti} sub="aggiunte, modifiche, eliminazioni" palette="cyan" />
+        <GlowStatCard icon="globe" label="Comunicazioni / export" value={`${kpi.comunic} / ${kpi.export}`} sub="SMS e email / file scaricati" palette="coral" />
+      </div>
+
+      {loading && !logs.length ? (
+        <div style={s.empty}><Activity size={32} style={{ color:'#D1D5DB', marginBottom:12 }} /><p style={{ color:'#9CA3AF', margin:0 }}>Caricamento...</p></div>
+      ) : (<>
+        <div style={s.twoCol} className="log-two-col">
+          <GraficoGiorni logs={filtrati} giorni={giorni === 0 ? 1 : giorni} />
+          <div style={s.card}>
+            <div style={s.cardHead}><span style={s.cardTitle}>Attivita piu frequenti</span></div>
+            {(() => {
+              const c = {}
+              for (const l of filtrati) c[l.azione] = (c[l.azione] || 0) + 1
+              const top = Object.entries(c).sort((a, b) => b[1] - a[1]).slice(0, 7)
+              const mx = top[0]?.[1] || 1
+              if (!top.length) return <p style={{ fontSize:13, color:'#9CA3AF', margin:0 }}>Nessun dato</p>
+              return top.map(([a, n]) => { const i = infoAzione(a); return <div key={a} style={{ marginBottom:9 }}>
+                <div style={{ display:'flex', justifyContent:'space-between', fontSize:12.5, marginBottom:3 }}><span style={{ color:'#374151', fontWeight:600 }}>{i.label}</span><span style={{ color:'#6B7280', fontVariantNumeric:'tabular-nums' }}>{n}</span></div>
+                <div style={{ height:6, background:'#F1F3F9', borderRadius:3 }}><div style={{ width:`${(n / mx) * 100}%`, height:'100%', background:i.color, borderRadius:3 }} /></div>
+              </div> })
+            })()}
+          </div>
+        </div>
+
+        {fUtente === 'tutti' && <RiepilogoUtenti righe={riepilogo} onSelect={setFUtente} selected={fUtente} />}
+
+        {/* Cronologia */}
+        <div style={{ ...s.cardHead, margin:'28px 2px 10px' }}>
+          <span style={{ ...s.cardTitle, fontSize:16 }}>Cronologia <span style={{ color:'#9CA3AF', fontWeight:500, fontSize:13 }}>{filtrati.length.toLocaleString('it-IT')} voci</span></span>
+          <label style={{ fontSize:12.5, color:'#6B7280', display:'flex', alignItems:'center', gap:6, cursor:'pointer' }}>
+            <input type="checkbox" checked={nascondiAccessi} onChange={e => setNascondiAccessi(e.target.checked)} />Nascondi login e aperture app
+          </label>
+        </div>
+
+        {!filtrati.length ? (
+          <div style={{ ...s.card, ...s.empty }}><Activity size={28} style={{ color:'#D1D5DB', marginBottom:10 }} /><p style={{ fontWeight:700, color:'#374151', margin:'0 0 4px' }}>Nessuna attivita nel periodo</p>
+            {utenteSel && <p style={{ fontSize:13, color:'#9CA3AF', margin:0 }}>Prova ad allargare il periodo.</p>}</div>
+        ) : perGiorno.map(g => (
+          <div key={g.k} style={{ marginBottom:18 }}>
+            <div style={s.dayHead}><span>{fmtGiorno(g.k)}</span><span style={{ fontWeight:500, color:'#9CA3AF', fontSize:12 }}>{filtrati.filter(l => dayKey(l.created_at) === g.k).length} voci</span></div>
+            <div style={{ ...s.card, padding:0, overflow:'hidden' }}>
+              <div style={{ overflowX:'auto' }}>
+                <table style={s.table}><tbody>{g.logs.map(l => <RigaOperazione key={l.id} l={l} mostraUtente={fUtente === 'tutti'} />)}</tbody></table>
               </div>
             </div>
           </div>
-        ))
-      )}
+        ))}
 
-      {total > PAGE && (
-        <p style={{ fontSize:'12px', color:'#9CA3AF', textAlign:'center', marginTop:'12px' }}>
-          Visualizzati gli ultimi {PAGE} eventi. Usa i filtri per affinare la ricerca.
-        </p>
-      )}
+        {filtrati.length > visibili && <div style={{ textAlign:'center', margin:'8px 0 24px' }}>
+          <button onClick={() => setVisibili(v => v + PAGE_VIEW * 2)} style={s.btn}>Mostra altre {Math.min(PAGE_VIEW * 2, filtrati.length - visibili)} voci</button>
+        </div>}
+        {troncato && <p style={{ fontSize:12, color:'#B45309', textAlign:'center' }}>Il periodo contiene piu di {MAX_ROWS.toLocaleString('it-IT')} voci: vengono mostrate le piu recenti. Riduci il periodo per vedere tutto.</p>}
+      </>)}
 
-      <style>{`@keyframes spin{from{transform:rotate(0)}to{transform:rotate(360deg)}}`}</style>
+      <style>{`
+        @keyframes spin{from{transform:rotate(0)}to{transform:rotate(360deg)}}
+        @media (max-width: 900px){ .log-two-col{ grid-template-columns: 1fr !important; } }
+        @media (max-width: 700px){ .hide-mobile{ display:none !important; } }
+      `}</style>
     </div>
   )
 }
 
 const s = {
-  page:       { width:'100%' },
-  header:     { display:'flex', justifyContent:'space-between', alignItems:'flex-start', marginBottom:'24px', gap:'12px', flexWrap:'wrap' },
-  title:      { fontSize:'32px', fontWeight:'900', color:'#111827', letterSpacing:'-0.03em', margin:0, fontFamily:"'Inter', sans-serif", fontVariationSettings:"'wght' 900" },
-  sub:        { fontSize:'14px', color:'#6B7280', margin:'4px 0 0', fontWeight:'500' },
-  refreshBtn: { display:'flex', alignItems:'center', gap:'6px', border:'1px solid #E8ECF4', backgroundColor:'#fff', borderRadius:'20px', padding:'8px 14px', fontSize:'13px', fontWeight:'600', cursor:'pointer', fontFamily:"'Inter',sans-serif", color:'#374151' },
-  input:      { border:'1px solid #D1D5DB', borderRadius:'20px', padding:'9px 12px', fontSize:'13px', fontFamily:"'Inter',sans-serif", color:'#111827', backgroundColor:'#fff', outline:'none' },
-  tableCard:  { backgroundColor:'#fff', borderRadius:'16px', border:'1px solid #E8ECF4', overflow:'hidden' },
-  table:      { width:'100%', borderCollapse:'collapse', fontSize:'13px' },
-  emptyState: { padding:'64px 32px', textAlign:'center', display:'flex', flexDirection:'column', alignItems:'center' },
-  // Day header
-  dayHeader:  { display:'flex', alignItems:'baseline', gap:'12px', marginBottom:'8px', paddingLeft:'2px' },
-  dayLabel:   { fontSize:'15px', fontWeight:'800', color:'#111827', letterSpacing:'-0.02em' },
-  dayMeta:    { fontSize:'12px', color:'#9CA3AF', fontWeight:'500' },
-  // L1 — utente
-  trUser:     { borderBottom:'1px solid #F3F4F6', transition:'background-color 0.1s' },
-  tdL1:       { padding:'13px 16px', verticalAlign:'middle' },
-  // L2 — sessione
-  trSess:     { borderBottom:'1px solid #EAECF8', transition:'background-color 0.1s' },
-  tdL2:       { padding:'8px 16px', verticalAlign:'middle' },
-  // L3 — operazione
-  tdL3:       { padding:'6px 16px', verticalAlign:'middle', borderBottom:'1px solid #EEF0FB', fontSize:'12px', color:'#374151' },
+  page:      { width:'100%' },
+  header:    { display:'flex', justifyContent:'space-between', alignItems:'flex-start', marginBottom:20, gap:12, flexWrap:'wrap' },
+  title:     { fontSize:32, fontWeight:900, color:'#111827', letterSpacing:'-0.03em', margin:0, fontFamily:"'Inter', sans-serif" },
+  sub:       { fontSize:14, color:'#6B7280', margin:'4px 0 0', fontWeight:500 },
+  btn:       { display:'inline-flex', alignItems:'center', gap:6, border:'1px solid #E8ECF4', background:'#fff', borderRadius:20, padding:'8px 14px', fontSize:13, fontWeight:600, cursor:'pointer', fontFamily:"'Inter',sans-serif", color:'#374151' },
+  linkBtn:   { display:'inline-flex', alignItems:'center', gap:4, border:'none', background:'transparent', color:'#5B5FEF', fontSize:12.5, fontWeight:700, cursor:'pointer', padding:'6px 4px', fontFamily:"'Inter',sans-serif" },
+  filterBar: { background:'#fff', border:'1px solid #E8ECF4', borderRadius:16, padding:14, marginBottom:16, display:'flex', flexDirection:'column', gap:12 },
+  filterRow: { display:'flex', gap:8, flexWrap:'wrap', alignItems:'center' },
+  chip:      { border:'1px solid #E8ECF4', background:'#fff', borderRadius:20, padding:'6px 14px', fontSize:12.5, fontWeight:600, color:'#4B5563', cursor:'pointer', fontFamily:"'Inter',sans-serif" },
+  chipOn:    { background:'#5B5FEF', borderColor:'#5B5FEF', color:'#fff' },
+  input:     { border:'1px solid #E5E7EB', borderRadius:20, padding:'8px 12px', fontSize:13, fontFamily:"'Inter',sans-serif", color:'#111827', background:'#F9FAFB', outline:'none', boxSizing:'border-box' },
+  select:    { border:'1px solid #E5E7EB', borderRadius:20, padding:'8px 12px', fontSize:13, fontFamily:"'Inter',sans-serif", color:'#111827', background:'#F9FAFB', outline:'none', cursor:'pointer' },
+  focusBar:  { display:'flex', alignItems:'center', gap:12, background:'#EEF0FF', border:'1px solid #DADCFB', borderRadius:16, padding:'12px 16px', marginBottom:16, flexWrap:'wrap' },
+  kpiGrid:   { display:'grid', gridTemplateColumns:'repeat(auto-fit, minmax(170px, 1fr))', gap:12, marginBottom:16 },
+  twoCol:    { display:'grid', gridTemplateColumns:'minmax(0,2fr) minmax(0,1fr)', gap:16, marginBottom:16 },
+  card:      { background:'#fff', border:'1px solid #E8ECF4', borderRadius:16, padding:18, marginBottom:16 },
+  cardHead:  { display:'flex', justifyContent:'space-between', alignItems:'center', gap:10, flexWrap:'wrap', marginBottom:14 },
+  cardTitle: { fontSize:14, fontWeight:800, color:'#111827', letterSpacing:'-0.01em' },
+  tooltip:   { position:'absolute', top:-8, right:0, background:'#111827', color:'#fff', fontSize:11.5, padding:'8px 10px', borderRadius:10, pointerEvents:'none', zIndex:5, lineHeight:1.5 },
+  table:     { width:'100%', borderCollapse:'collapse', fontSize:13 },
+  th:        { fontSize:11, fontWeight:700, color:'#6B7280', textTransform:'uppercase', letterSpacing:'0.04em', padding:'8px 12px', borderBottom:'1px solid #EEF0F6', whiteSpace:'nowrap' },
+  td:        { padding:'10px 12px', borderBottom:'1px solid #F1F3F9', verticalAlign:'middle' },
+  num:       { textAlign:'right', fontVariantNumeric:'tabular-nums', fontSize:13, color:'#374151' },
+  ruolo:     { display:'inline-block', fontSize:11, fontWeight:700, color:'#5B5FEF', background:'#EEEFFD', borderRadius:20, padding:'2px 8px', textTransform:'capitalize' },
+  tag:       { marginLeft:6, fontSize:10, fontWeight:700, color:'#B45309', background:'#FEF3C7', borderRadius:20, padding:'1px 6px' },
+  dayHead:   { display:'flex', justifyContent:'space-between', alignItems:'baseline', fontSize:13.5, fontWeight:800, color:'#111827', margin:'0 2px 8px' },
+  detGrid:   { display:'grid', gridTemplateColumns:'repeat(auto-fit, minmax(200px, 1fr))', gap:'8px 20px', fontSize:12.5, color:'#374151' },
+  detK:      { display:'block', fontSize:10.5, fontWeight:700, color:'#9CA3AF', textTransform:'uppercase', letterSpacing:'0.04em', marginBottom:1 },
+  empty:     { padding:'48px 24px', textAlign:'center', display:'flex', flexDirection:'column', alignItems:'center' },
 }

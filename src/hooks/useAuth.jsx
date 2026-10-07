@@ -1,6 +1,6 @@
 import { createContext, useContext, useEffect, useState } from 'react'
 import { supabase } from '../lib/supabase'
-import { logAttivita, resetActivityLogCache } from '../lib/activityLog'
+import { logAttivita, resetActivityLogCache, registraAccessoSeServe } from '../lib/activityLog'
 
 const AuthContext = createContext(null)
 
@@ -13,7 +13,15 @@ export function AuthProvider({ children }) {
     supabase.auth.getSession().then(({ data: { session } }) => {
       setUser(session?.user ?? null)
       setLoading(false)
+      if (session?.user && !location.pathname.startsWith('/login')) registraAccessoSeServe()
     })
+
+    // App ripresa dopo un periodo in background (tipico su smartphone)
+    const onVisible = () => {
+      if (document.visibilityState !== 'visible') return
+      supabase.auth.getSession().then(({ data: { session } }) => { if (session?.user) registraAccessoSeServe() })
+    }
+    document.addEventListener('visibilitychange', onVisible)
 
     const { data: { subscription } } = supabase.auth.onAuthStateChange((event, session) => {
       if (event === 'SIGNED_OUT' || event === 'USER_DELETED') {
@@ -27,7 +35,7 @@ export function AuthProvider({ children }) {
       }
     })
 
-    return () => subscription.unsubscribe()
+    return () => { subscription.unsubscribe(); document.removeEventListener('visibilitychange', onVisible) }
   }, [])
 
   const signIn = async (emailOrUsername, password) => {
@@ -52,8 +60,9 @@ export function AuthProvider({ children }) {
     // Successo: aspetta che la sessione sia salvata, poi naviga
     await new Promise(r => setTimeout(r, 300))
     if (data?.user?.id) {
-      logAttivita('login')
-      supabase.from('admin_profiles').update({ ultimo_accesso: new Date().toISOString() }).eq('id', data.user.id)
+      // Attendere il log PRIMA del redirect: prima la navigazione interrompeva la richiesta
+      await logAttivita('login')
+      await supabase.from('admin_profiles').update({ ultimo_accesso: new Date().toISOString() }).eq('id', data.user.id)
     }
     window.location.href = '/admin'
     return { data, error: null }
