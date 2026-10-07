@@ -223,7 +223,7 @@ export default function StatisticheUtenti() {
     return {
       perEvento, conclusi, tassoPres: iscrConcl ? Math.round(presConcl / iscrConcl * 100) : null, noShow: Math.max(0, iscrConcl - presConcl),
       nuovi30, assidui, rinunce: regs.filter(r => r.rinuncia).length,
-      natura: conta(i => i.natura_giuridica).slice(0, 6), settori: conta(i => i.settore || i.descrizione_ateco).slice(0, 8),
+      natura: conta(i => (/[a-z]{3,}/i.test(i.natura_giuridica || '') ? i.natura_giuridica : '')).slice(0, 6), settori: conta(i => i.settore || i.descrizione_ateco).slice(0, 8),
       comuni: conta(i => i.comune).slice(0, 8), dim, nImpInfo: imp.length, mesi, nuoviMese, iscrMese,
     }
   }, [regs, eventi, persone, st, info])

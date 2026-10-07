@@ -25,7 +25,9 @@ export default function AreaCurveChart({ series, labels, tips, height = 200, max
     let d = `M ${pts[0].x} ${pts[0].y} `
     for (let i = 0; i < pts.length - 1; i++) {
       const p0 = pts[Math.max(i - 1, 0)], p1 = pts[i], p2 = pts[i + 1], p3 = pts[Math.min(i + 2, pts.length - 1)]
-      const c1y = Math.min(BASE, p1.y + (p2.y - p0.y) / 6), c2y = Math.min(BASE, p2.y - (p3.y - p1.y) / 6)
+      // punti di controllo limitati all'area del grafico: la curva non esce mai dal riquadro
+      const lim = y => Math.max(PT, Math.min(BASE, y))
+      const c1y = lim(p1.y + (p2.y - p0.y) / 6), c2y = lim(p2.y - (p3.y - p1.y) / 6)
       d += `C ${p1.x + (p2.x - p0.x) / 6} ${c1y} ${p2.x - (p3.x - p1.x) / 6} ${c2y} ${p2.x} ${p2.y} `
     }
     return d

@@ -152,7 +152,7 @@ export default function StatisticheEventoAnalisi({ evento, regs, views, altreReg
           { label: 'Iscrizioni', n: tot },
           { label: 'Iscrizioni attive', n: tot - a.rinunce, sub: `${a.rinunce} rinunce` },
           { label: 'Presenza confermata', n: a.confermati, sub: 'risposta al link di conferma' },
-          { label: 'Presenti', n: a.presenti },
+          { label: 'Presenti', n: a.presenti, base: 2, sub: 'rispetto alle iscrizioni attive' },
         ]} />
       </Sezione>
 
@@ -262,7 +262,7 @@ function Funnel({ steps }) {
   return (
     <div style={{ display: 'flex', flexDirection: 'column', gap: 8 }}>
       {steps.map((s, i) => {
-        const prev = i ? steps[i - 1].n : null
+        const prev = i ? steps[s.base ?? i - 1].n : null
         return (
           <div key={s.label} style={{ display: 'grid', gridTemplateColumns: 'minmax(120px, 180px) 1fr 70px', gap: 12, alignItems: 'center' }}>
             <div>
@@ -277,7 +277,7 @@ function Funnel({ steps }) {
           </div>
         )
       })}
-      <div style={{ fontSize: 11, color: '#9CA3AF', textAlign: 'right' }}>% = passaggio rispetto al gradino precedente</div>
+      <div style={{ fontSize: 11, color: '#9CA3AF', textAlign: 'right' }}>% = passaggio rispetto al gradino precedente (presenti: rispetto alle iscrizioni attive)</div>
     </div>
   )
 }
