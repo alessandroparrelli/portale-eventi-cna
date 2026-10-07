@@ -197,6 +197,120 @@ function GraficoGiorni({ logs, giorni }) {
   </div>
 }
 
+// Riepilogo per utente: solo chi ha attivita nel periodo; clic = attivita dell'utente
+function RiepilogoUtenti({ righe, logsPerUtente, nascondiAccessi, setNascondiAccessi, multiGiorno, apertoIniziale }) {
+  const [aperti, setAperti] = useState(() => new Set(apertoIniziale ? [apertoIniziale] : []))
+  useEffect(() => { if (apertoIniziale) setAperti(new Set([apertoIniziale])) }, [apertoIniziale])
+  const toggle = id => setAperti(prev => { const n = new Set(prev); n.has(id) ? n.delete(id) : n.add(id); return n })
+  const tutti = righe.length > 0 && righe.every(r => aperti.has(r.id))
+  return <div style={{ ...s.card, padding:0, overflow:'hidden' }}>
+    <div style={{ ...s.cardHead, padding:'16px 18px 0' }}>
+      <span style={s.cardTitle}>Attivita per utente <span style={{ color:'#9CA3AF', fontWeight:500, fontSize:12.5 }}>{righe.length} {righe.length === 1 ? 'utente attivo' : 'utenti attivi'}</span></span>
+      <div style={{ display:'flex', gap:14, alignItems:'center', flexWrap:'wrap' }}>
+        <label style={{ fontSize:12.5, color:'#6B7280', display:'flex', alignItems:'center', gap:6, cursor:'pointer' }}>
+          <input type="checkbox" checked={nascondiAccessi} onChange={e => setNascondiAccessi(e.target.checked)} />Nascondi login e aperture app
+        </label>
+        {righe.length > 1 && <button style={s.linkBtn} onClick={() => setAperti(tutti ? new Set() : new Set(righe.map(r => r.id)))}>{tutti ? 'Chiudi tutti' : 'Espandi tutti'}</button>}
+      </div>
+    </div>
+    {!righe.length ? <div style={s.empty}><Activity size={28} style={{ color:'#D1D5DB', marginBottom:10 }} /><p style={{ fontWeight:700, color:'#374151', margin:0 }}>Nessuna attivita nel periodo</p></div> :
+    <div style={{ overflowX:'auto' }}>
+      <table style={s.table}>
+        <thead><tr>
+          {['', 'Utente', 'Ruolo', 'Prima / ultima', 'Operazioni', 'Check-in', 'Iscritti', 'Accessi', 'Dispositivi'].map((h, i) =>
+            <th key={i} style={{ ...s.th, textAlign: i >= 4 && i <= 7 ? 'right' : 'left', width: i === 0 ? 28 : undefined }} className={i === 8 || i === 2 ? 'hide-mobile' : undefined}>{h}</th>)}
+        </tr></thead>
+        <tbody>
+          {righe.map(r => {
+            const open = aperti.has(r.id)
+            const ops = (logsPerUtente.get(r.id) || []).filter(l => !nascondiAccessi || infoAzione(l.azione).cat !== 'accessi')
+            return <Fragment key={r.id}>
+              <tr onClick={() => toggle(r.id)} style={{ cursor:'pointer', background: open ? '#F4F5FF' : undefined }}
+                onMouseEnter={e => { if (!open) e.currentTarget.style.background = '#F8F9FD' }} onMouseLeave={e => { if (!open) e.currentTarget.style.background = '' }}>
+                <td style={{ ...s.td, color:'#9CA3AF', paddingRight:0 }}>{open ? <ChevronDown size={15} /> : <ChevronRight size={15} />}</td>
+                <td style={s.td}><div style={{ display:'flex', alignItems:'center', gap:10 }}>
+                  <Avatar nome={r.nome} size={30} color={r.attivo === false ? '#9CA3AF' : '#5B5FEF'} />
+                  <div style={{ minWidth:0 }}>
+                    <div style={{ fontWeight:700, color:'#111827', fontSize:13.5 }}>{r.nome}</div>
+                    {r.username && r.username !== r.nome && <div style={{ fontSize:11, color:'#9CA3AF' }}>{r.username}</div>}
+                  </div>
+                </div></td>
+                <td style={s.td} className="hide-mobile"><span style={s.ruolo}>{r.ruolo || '-'}</span></td>
+                <td style={{ ...s.td, fontSize:12, color:'#374151', whiteSpace:'nowrap' }}>
+                  {multiGiorno ? <>{fmtBreve(r.prima)} <span style={{ color:'#D1D5DB' }}>/</span> {fmtBreve(r.ultima)}</> : <>{fmtOra(r.prima)} - {fmtOra(r.ultima)}</>}
+                  <div style={{ fontSize:10.5, color:'#9CA3AF' }}>{r.giorniAttivi > 1 ? `${r.giorniAttivi} giorni attivi` : fmtRel(r.ultima)}</div>
+                </td>
+                <td style={{ ...s.td, ...s.num, fontWeight:800, color: r.tot ? '#111827' : '#D1D5DB' }}>{r.tot}</td>
+                <td style={{ ...s.td, ...s.num }}>{r.checkin || <span style={{ color:'#D1D5DB' }}>0</span>}</td>
+                <td style={{ ...s.td, ...s.num }}>{r.iscritti || <span style={{ color:'#D1D5DB' }}>0</span>}</td>
+                <td style={{ ...s.td, ...s.num }}>{r.accessi || <span style={{ color:'#D1D5DB' }}>0</span>}</td>
+                <td style={{ ...s.td, fontSize:11.5, color:'#6B7280' }} className="hide-mobile">{r.dispositivi || '-'}</td>
+              </tr>
+              {open && <tr><td colSpan={9} style={{ padding:0, background:'#FAFBFE', borderBottom:'1px solid #E8ECF4' }}>
+                <AttivitaUtente ops={ops} multiGiorno={multiGiorno} />
+              </td></tr>}
+            </Fragment>
+          })}
+        </tbody>
+      </table>
+    </div>}
+  </div>
+}
+
+function AttivitaUtente({ ops, multiGiorno }) {
+  const [quante, setQuante] = useState(100)
+  if (!ops.length) return <p style={{ fontSize:12.5, color:'#9CA3AF', padding:'14px 52px', margin:0 }}>Solo login e aperture app in questo periodo.</p>
+  const gruppi = []
+  for (const l of ops.slice(0, quante)) {
+    const k = dayKey(l.created_at)
+    if (!gruppi.length || gruppi[gruppi.length - 1].k !== k) gruppi.push({ k, logs: [] })
+    gruppi[gruppi.length - 1].logs.push(l)
+  }
+  return <div style={{ padding:'6px 0 10px 40px' }}>
+    {gruppi.map(g => <div key={g.k}>
+      {multiGiorno && <div style={{ fontSize:11.5, fontWeight:800, color:'#5B5FEF', padding:'10px 12px 4px', textTransform:'uppercase', letterSpacing:'0.04em' }}>{fmtGiorno(g.k)} <span style={{ color:'#9CA3AF', fontWeight:600 }}>({ops.filter(l => dayKey(l.created_at) === g.k).length})</span></div>}
+      <table style={s.table}><tbody>{g.logs.map(l => <RigaOperazione key={l.id} l={l} />)}</tbody></table>
+    </div>)}
+    {ops.length > quante && <div style={{ padding:'10px 12px' }}><button onClick={e => { e.stopPropagation(); setQuante(q => q + 200) }} style={s.btn}>Mostra altre {Math.min(200, ops.length - quante)} di {ops.length}</button></div>}
+  </div>
+}
+
+function RigaOperazione({ l }) {
+  const [open, setOpen] = useState(false)
+  const d = l.dettagli && typeof l.dettagli === 'object' ? l.dettagli : {}
+  const m = l.metadata && typeof l.metadata === 'object' ? l.metadata : {}
+  const testo = dettagliTesto(d)
+  const luogo = [m.citta, m.paese].filter(Boolean).join(', ')
+  const disp = [m.dispositivo, m.browser, m.os].filter(Boolean).join(' / ')
+  return <>
+    <tr onClick={() => setOpen(o => !o)} style={{ cursor:'pointer' }}
+      onMouseEnter={e => { e.currentTarget.style.background = '#F8F9FD' }} onMouseLeave={e => { e.currentTarget.style.background = '' }}>
+      <td style={{ ...s.td, width:64, fontVariantNumeric:'tabular-nums', color:'#6B7280', fontSize:12 }}>{fmtOra(l.created_at)}</td>
+      <td style={{ ...s.td, width:170 }}><Badge azione={l.azione} small /></td>
+      <td style={{ ...s.td, fontSize:12.5, color:'#374151' }}>
+        {l.evento_titolo && <span style={{ fontWeight:600, color:'#5B5FEF' }}>{l.evento_titolo}</span>}
+        {l.evento_titolo && testo && <span style={{ color:'#D1D5DB' }}> | </span>}
+        {testo}
+        {d.da_coda && <span style={s.tag}>sincronizzato dopo</span>}
+        {!l.evento_titolo && !testo && <span style={{ color:'#D1D5DB' }}>-</span>}
+      </td>
+      <td style={{ ...s.td, fontSize:11.5, color:'#6B7280', whiteSpace:'nowrap' }} className="hide-mobile">{m.dispositivo || '-'}{luogo ? ` | ${luogo}` : ''}</td>
+      <td style={{ ...s.td, width:20, color:'#9CA3AF' }}>{open ? <ChevronDown size={14} /> : <ChevronRight size={14} />}</td>
+    </tr>
+    {open && <tr><td colSpan={5} style={{ padding:'4px 16px 14px 76px', background:'#FAFBFE', borderBottom:'1px solid #EEF0F6' }}>
+      <div style={s.detGrid}>
+        <div><span style={s.detK}>Data e ora</span>{new Date(l.created_at).toLocaleString('it-IT', { timeZone: TZ })}</div>
+        <div><span style={s.detK}>Utente</span>{l.utente_nome} {l.username && l.username !== l.utente_nome ? `(${l.username})` : ''}</div>
+        <div><span style={s.detK}>Dispositivo</span>{disp || '-'}</div>
+        <div><span style={s.detK}>Localita</span>{luogo || '-'}</div>
+        <div><span style={s.detK}>IP</span><span style={{ fontFamily:'monospace' }}>{l.ip_address || m.ip || '-'}</span></div>
+        {l.evento_titolo && <div><span style={s.detK}>Evento</span>{l.evento_titolo}</div>}
+        {Object.keys(d).length > 0 && <div style={{ gridColumn:'1 / -1' }}><span style={s.detK}>Dettagli</span>{Object.entries(d).map(([k, v]) => `${k.replace(/_/g, ' ')}: ${typeof v === 'object' ? JSON.stringify(v) : v}`).join(' | ')}</div>}
+      </div>
+    </td></tr>}
+  </>
+}
+
 function BarreCard({ titolo, nota, valori, etichette, titoli }) {
   const max = Math.max(1, ...valori)
   return <div style={s.card}>
@@ -520,7 +634,7 @@ const s = {
   filterBar: { background:'#fff', border:'1px solid #E8ECF4', borderRadius:16, padding:14, marginBottom:16, display:'flex', flexDirection:'column', gap:12 },
   filterRow: { display:'flex', gap:8, flexWrap:'wrap', alignItems:'center' },
   chip:      { border:'1px solid #E8ECF4', background:'#fff', borderRadius:20, padding:'6px 14px', fontSize:12.5, fontWeight:600, color:'#4B5563', cursor:'pointer', fontFamily:"'Inter',sans-serif" },
-  chipOn:    { background:'#5B5FEF', borderColor:'#5B5FEF', color:'#fff' },
+  chipOn:    { background:'#5B5FEF', border:'1px solid #5B5FEF', color:'#fff' },
   input:     { border:'1px solid #E5E7EB', borderRadius:20, padding:'8px 12px', fontSize:13, fontFamily:"'Inter',sans-serif", color:'#111827', background:'#F9FAFB', outline:'none', boxSizing:'border-box' },
   select:    { border:'1px solid #E5E7EB', borderRadius:20, padding:'8px 12px', fontSize:13, fontFamily:"'Inter',sans-serif", color:'#111827', background:'#F9FAFB', outline:'none', cursor:'pointer' },
   focusBar:  { display:'flex', alignItems:'center', gap:12, background:'#EEF0FF', border:'1px solid #DADCFB', borderRadius:16, padding:'12px 16px', marginBottom:16, flexWrap:'wrap' },
