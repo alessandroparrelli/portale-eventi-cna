@@ -6,6 +6,7 @@ import { temaConDefault } from '../../components/editor/AspettoTab'
 import SocialLinks from '../../components/SocialLinks'
 import { useSocial } from '../../hooks/useSocial'
 import BlockRenderer, { Animate } from '../../components/public/BlockRenderer'
+import PrivacyConsenso from '../../components/public/PrivacyConsenso'
 import ContenutoBlocks from '../../components/public/ContenutoBlocks'
 
 const LOGO_URL = 'https://raw.githubusercontent.com/alessandroparrelli/fileappoggio/main/NUOVO-LOGO-CNA-ROMA-SOLO-ROMA.png'
@@ -200,10 +201,7 @@ function FormContatti({ lp, tema }) {
         </div>
       )}
       {altriF.map(f=>renderField(f))}
-      <label style={{display:'flex',alignItems:'flex-start',gap:'10px',cursor:'pointer'}}>
-        <input type="checkbox" checked={privacy} onChange={e=>setPrivacy(e.target.checked)} style={{marginTop:'2px',flexShrink:0,accentColor:cp}}/>
-        <span style={{fontSize:'13px',color:'#374151',lineHeight:1.5}}>Ho letto e accetto la <a href="#" style={{color:cp}}>Privacy Policy</a> *</span>
-      </label>
+      <PrivacyConsenso id="privacy-landing" color={cp} checked={privacy} onChange={setPrivacy}/>
       <label style={{display:'flex',alignItems:'flex-start',gap:'10px',cursor:'pointer'}}>
         <input type="checkbox" checked={newsletter} onChange={e=>setNewsletter(e.target.checked)} style={{marginTop:'2px',flexShrink:0,accentColor:cp}}/>
         <span style={{fontSize:'13px',color:'#374151',lineHeight:1.5}}>Desidero ricevere comunicazioni da CNA Roma</span>

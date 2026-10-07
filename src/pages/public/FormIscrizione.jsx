@@ -1,6 +1,7 @@
 import { useState, useEffect } from 'react'
 import { supabase } from '../../lib/supabase'
 import { Loader2, User, Users } from 'lucide-react'
+import PrivacyConsenso from '../../components/public/PrivacyConsenso'
 
 /* ─── Input generico ─── */
 function Inp({ label, required, value, onChange, type = 'text', placeholder, error }) {
@@ -229,6 +230,8 @@ export default function FormIscrizione({ event, onSuccess, tema = {} }) {
   const [errors,   setErrors]   = useState([])
   const [loading,  setLoading]  = useState(false)
   const [errGen,   setErrGen]   = useState('')
+  const [privacy,  setPrivacy]  = useState([false])
+  const [privErr,  setPrivErr]  = useState([])
 
   useEffect(() => {
     Promise.all([
@@ -242,6 +245,7 @@ export default function FormIscrizione({ event, onSuccess, tema = {} }) {
       // Inizializza sempre con 1 persona — l'utente può aggiungerne fino a postiPerUtente
       setPersone([{ ...empty }])
       setErrors([{}])
+      setPrivacy([false]); setPrivErr([])
     })
   }, [event.id])
 
@@ -263,12 +267,15 @@ export default function FormIscrizione({ event, onSuccess, tema = {} }) {
     const empty = emptyPersona(campi)
     setPersone(prev => [...prev, { ...empty }])
     setErrors(prev => [...prev, {}])
+    setPrivacy(prev => [...prev, false])
   }
 
   function removePersona(idx) {
     if (persone.length <= 1) return
     setPersone(prev => prev.filter((_, i) => i !== idx))
     setErrors(prev => prev.filter((_, i) => i !== idx))
+    setPrivacy(prev => prev.filter((_, i) => i !== idx))
+    setPrivErr(prev => prev.filter((_, i) => i !== idx))
   }
 
   async function submit(e) {
@@ -276,7 +283,10 @@ export default function FormIscrizione({ event, onSuccess, tema = {} }) {
     setErrGen('')
 
     const newErrors = persone.map(p => validatePersona(p, campi))
+    const pErr = persone.map((_, i) => (privacy[i] ? '' : "L'accettazione della privacy e obbligatoria"))
+    setPrivErr(pErr)
     if (newErrors.some(e => Object.keys(e).length > 0)) { setErrors(newErrors); return }
+    if (pErr.some(Boolean)) { setErrGen("Per completare l'iscrizione accetta l'informativa privacy" + (persone.length > 1 ? ' per ogni persona' : '') + '.'); return }
 
     setLoading(true)
     try {
@@ -429,6 +439,10 @@ export default function FormIscrizione({ event, onSuccess, tema = {} }) {
             campi={campi} mestieri={mestieri}
             isAccompagnatore={idx > 0}
           />
+          <div style={{ padding:'0 4px 16px' }}>
+            <PrivacyConsenso id={`privacy-${idx}`} color={brandColor} checked={privacy[idx]} error={privErr[idx]}
+              onChange={v => { setPrivacy(prev => { const n = [...prev]; n[idx] = v; return n }); if (v) setPrivErr(prev => { const n = [...prev]; n[idx] = ''; return n }) }} />
+          </div>
         </div>
       ))}
 
@@ -440,9 +454,6 @@ export default function FormIscrizione({ event, onSuccess, tema = {} }) {
           : 'Conferma iscrizione →'}
       </button>
 
-      <p style={{ fontSize: '12px', color: '#9CA3AF', margin: '8px 0 0', textAlign: 'center' }}>
-        I dati saranno trattati nel rispetto del GDPR.
-      </p>
       <style>{`@keyframes spin{from{transform:rotate(0deg)}to{transform:rotate(360deg)}}`}</style>
     </form>
   )
