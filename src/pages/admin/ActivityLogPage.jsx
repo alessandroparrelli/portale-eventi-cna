@@ -63,8 +63,10 @@ const PERIODI = [
   { id:'7',    label:'7 giorni', giorni:7 },
   { id:'30',   label:'30 giorni', giorni:30 },
   { id:'90',   label:'90 giorni', giorni:90 },
+  { id:'tutti', label:'Tutti', giorni:null },
 ]
-const MAX_ROWS = 5000
+const MAX_ROWS = 20000
+const BLOCCO = 1000 // limite righe per richiesta di Supabase
 
 // ---------- Utility ----------
 const TZ = 'Europe/Rome'
@@ -311,26 +313,43 @@ export default function ActivityLogPage() {
   const [search, setSearch] = useState('')
   const [nascondiAccessi, setNascondiAccessi] = useState(false)
 
-  const giorni = PERIODI.find(p => p.id === periodo)?.giorni ?? 7
+  const giorni = PERIODI.find(p => p.id === periodo)?.giorni
+  const giorniDalPrimo = useMemo(() => logs.length ? Math.max(1, Math.round((new Date(dayKey(Date.now())) - new Date(dayKey(logs[logs.length - 1].created_at))) / 86400000) + 1) : 1, [logs])
 
   useEffect(() => { load() }, [periodo])
 
   async function load() {
     setLoading(true)
-    const da = new Date()
-    if (giorni === 0) da.setHours(0, 0, 0, 0)
-    else { da.setHours(0, 0, 0, 0); da.setDate(da.getDate() - (giorni - 1)) }
-    const [{ data: lg }, { data: us }] = await Promise.all([
-      supabase.from('activity_log')
-        .select('id,created_at,user_id,username,utente_nome,azione,dettagli,evento_id,evento_titolo,ip_address,metadata')
-        .gte('created_at', da.toISOString()).order('created_at', { ascending:false }).limit(MAX_ROWS),
+    let da = null
+    if (giorni != null) {
+      da = new Date(); da.setHours(0, 0, 0, 0)
+      if (giorni > 0) da.setDate(da.getDate() - (giorni - 1))
+    }
+    const caricaLog = async () => {
+      const out = []
+      for (let off = 0; off < MAX_ROWS; off += BLOCCO) {
+        let q = supabase.from('activity_log')
+          .select('id,created_at,user_id,username,utente_nome,azione,dettagli,evento_id,evento_titolo,ip_address,metadata')
+          .order('created_at', { ascending:false }).order('id', { ascending:false })
+          .range(off, off + BLOCCO - 1)
+        if (da) q = q.gte('created_at', da.toISOString())
+        const { data, error } = await q
+        if (error || !data) break
+        out.push(...data)
+        if (data.length < BLOCCO) break
+      }
+      return out
+    }
+    const [lg, { data: us }] = await Promise.all([
+      caricaLog(),
       supabase.from('admin_profiles').select('id,username,nome,cognome,ruolo,attivo,ultimo_accesso'),
     ])
-    setLogs(lg || [])
-    setTroncato((lg || []).length >= MAX_ROWS)
+    setLogs(lg)
+    setTroncato(lg.length >= MAX_ROWS)
     setUtenti(us || [])
     setLoading(false)
   }
+
 
   const eventi = useMemo(() => {
     const m = new Map()
@@ -507,7 +526,7 @@ export default function ActivityLogPage() {
         <div style={s.empty}><Activity size={32} style={{ color:'#D1D5DB', marginBottom:12 }} /><p style={{ color:'#9CA3AF', margin:0 }}>Caricamento...</p></div>
       ) : (<>
         <div style={s.twoCol} className="log-two-col">
-          <GraficoGiorni logs={filtrati} giorni={giorni === 0 ? 1 : giorni} />
+          <GraficoGiorni logs={filtrati} giorni={giorni == null ? giorniDalPrimo : giorni === 0 ? 1 : giorni} />
           <div style={s.card}>
             <div style={s.cardHead}><span style={s.cardTitle}>Attivita piu frequenti</span></div>
             {(() => {
