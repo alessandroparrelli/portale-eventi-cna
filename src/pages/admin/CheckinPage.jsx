@@ -525,16 +525,12 @@ export default function CheckinPage() {
   async function submitWalkin(e) {
     e.preventDefault()
     const w = walkin
-    if (!w.nome.trim() || !w.cognome.trim() || !w.email.trim() || !w.cellulare.trim() || !w.ragione_sociale.trim() || !w.partita_iva.trim() || !w.cap?.trim() || !w.mestiere_id) {
+    if (!w.nome.trim() || !w.cognome.trim() || !w.email.trim() || !w.cellulare.trim()) {
       setWalkinErrors({
         nome:            !w.nome.trim()           ? 'Obbligatorio' : '',
         cognome:         !w.cognome.trim()         ? 'Obbligatorio' : '',
         email:           !w.email.trim()           ? 'Obbligatorio' : '',
         cellulare:       !w.cellulare.trim()       ? 'Obbligatorio' : '',
-        ragione_sociale: !w.ragione_sociale.trim() ? 'Obbligatorio' : '',
-        partita_iva:     !w.partita_iva.trim()     ? 'Obbligatorio' : '',
-        cap:             !w.cap?.trim()            ? 'Obbligatorio' : '',
-        mestiere_id:     !w.mestiere_id            ? 'Seleziona categoria' : '',
       })
       return
     }
@@ -546,8 +542,8 @@ export default function CheckinPage() {
       p_cognome:         w.cognome.trim(),
       p_email:           w.email.trim(),
       p_cellulare:       w.cellulare.trim(),
-      p_ragione_sociale: w.ragione_sociale.trim(),
-      p_partita_iva:     w.partita_iva.trim(),
+      p_ragione_sociale: w.ragione_sociale.trim() || null,
+      p_partita_iva:     w.partita_iva?.trim() || null,
       p_mestiere_id:     w.mestiere_id || null,
       p_cap:             w.cap?.trim() || null,
     })
@@ -918,7 +914,7 @@ export default function CheckinPage() {
       {walkinModal && (
         <Modal title="Aggiungi walk-in" onClose={() => setWalkinModal(false)} width="480px">
           <form onSubmit={submitWalkin} style={{ display:'flex', flexDirection:'column', gap:'12px' }}>
-            <p style={{ fontSize:'13px', color:'#6B7280', margin:0 }}>Aggiunge il partecipante direttamente tra i presenti. Tutti i campi sono obbligatori.</p>
+            <p style={{ fontSize:'13px', color:'#6B7280', margin:0 }}>Aggiunge il partecipante direttamente tra i presenti. I campi con * sono obbligatori.</p>
             <div style={{ display:'flex', flexDirection:'column', gap:'10px' }}>
               <div style={{ display:'grid', gridTemplateColumns:'1fr 1fr', gap:'10px' }} className="form-grid-2col">
                 <Field label="Nome *" error={walkinErrors.nome}><Input value={walkin.nome} onChange={e => setWalkin(p => ({ ...p, nome: e.target.value }))} placeholder="Mario" /></Field>
@@ -927,11 +923,11 @@ export default function CheckinPage() {
               <Field label="Email *" error={walkinErrors.email}><Input type="email" value={walkin.email} onChange={e => setWalkin(p => ({ ...p, email: e.target.value }))} placeholder="mario@example.it" /></Field>
               <div style={{ display:'grid', gridTemplateColumns:'1fr 1fr', gap:'10px' }} className="form-grid-2col">
                 <Field label="Cellulare *" error={walkinErrors.cellulare}><Input value={walkin.cellulare} onChange={e => setWalkin(p => ({ ...p, cellulare: e.target.value }))} placeholder="333 1234567" /></Field>
-                <Field label="CAP *" error={walkinErrors.cap}><Input value={walkin.cap || ''} onChange={e => setWalkin(p => ({ ...p, cap: e.target.value }))} placeholder="00100" /></Field>
+                <Field label="CAP" error={walkinErrors.cap}><Input value={walkin.cap || ''} onChange={e => setWalkin(p => ({ ...p, cap: e.target.value }))} placeholder="00100" /></Field>
               </div>
-              <Field label="Ragione Sociale *" error={walkinErrors.ragione_sociale}><Input value={walkin.ragione_sociale} onChange={e => setWalkin(p => ({ ...p, ragione_sociale: e.target.value }))} placeholder="Rossi Falegnameria Srl" /></Field>
-              <Field label="Partita IVA *" error={walkinErrors.partita_iva}><Input value={walkin.partita_iva || ''} onChange={e => setWalkin(p => ({ ...p, partita_iva: e.target.value }))} placeholder="12345670015" /></Field>
-              <Field label="Categoria professionale *" error={walkinErrors.mestiere_id}>
+              <Field label="Ragione Sociale" error={walkinErrors.ragione_sociale}><Input value={walkin.ragione_sociale} onChange={e => setWalkin(p => ({ ...p, ragione_sociale: e.target.value }))} placeholder="Rossi Falegnameria Srl" /></Field>
+              <Field label="Partita IVA" error={walkinErrors.partita_iva}><Input value={walkin.partita_iva || ''} onChange={e => setWalkin(p => ({ ...p, partita_iva: e.target.value }))} placeholder="12345670015" /></Field>
+              <Field label="Categoria professionale" error={walkinErrors.mestiere_id}>
                 <select value={walkin.mestiere_id || ''} onChange={e => setWalkin(p => ({ ...p, mestiere_id: e.target.value }))}
                   style={{ width:'100%', padding:'10px 12px', border:`1px solid ${walkinErrors.mestiere_id ? '#DC2626' : '#D1D5DB'}`, borderRadius:'20px', fontSize:'16px', fontFamily:"'Inter',sans-serif", outline:'none', backgroundColor:'#FFF', appearance:'none' }}>
                   <option value="">— Seleziona categoria —</option>
