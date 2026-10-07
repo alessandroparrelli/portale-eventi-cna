@@ -118,157 +118,83 @@ function Chip({ active, onClick, children }) {
   return <button onClick={onClick} style={{ ...s.chip, ...(active ? s.chipOn : {}) }}>{children}</button>
 }
 
-// Grafico a barre impilate per categoria, un giorno per colonna
+// Curva morbida con area sfumata (stesso stile del grafico "Iscrizioni - 7 giorni" della dashboard).
+// Con periodo "Oggi" mostra l'andamento per ora, altrimenti per giorno.
+function curvaBezier(pts) {
+  if (pts.length < 2) return ''
+  let d = ''
+  for (let i = 0; i < pts.length - 1; i++) {
+    const p0 = pts[Math.max(i - 1, 0)], p1 = pts[i], p2 = pts[i + 1], p3 = pts[Math.min(i + 2, pts.length - 1)]
+    // limita i punti di controllo per non scendere sotto lo zero
+    const cp1y = p1.y + (p2.y - p0.y) / 6, cp2y = p2.y - (p3.y - p1.y) / 6
+    if (i === 0) d += `M ${p1.x} ${p1.y} `
+    d += `C ${p1.x + (p2.x - p0.x) / 6} ${Math.min(cp1y, BASE_Y)} ${p2.x - (p3.x - p1.x) / 6} ${Math.min(cp2y, BASE_Y)} ${p2.x} ${p2.y} `
+  }
+  return d
+}
+const G_W = 720, G_H = 200, G_PL = 38, G_PR = 14, G_PT = 14, G_PB = 28
+const BASE_Y = G_H - G_PB
+
 function GraficoGiorni({ logs, giorni }) {
   const [hover, setHover] = useState(null)
-  const keys = useMemo(() => {
-    const n = Math.max(giorni, 1)
-    return Array.from({ length: n }, (_, i) => dayKey(Date.now() - (n - 1 - i) * 86400000))
-  }, [giorni])
-  const data = useMemo(() => {
-    const m = Object.fromEntries(keys.map(k => [k, {}]))
-    for (const l of logs) { const k = dayKey(l.created_at); if (m[k]) { const c = infoAzione(l.azione).cat; m[k][c] = (m[k][c] || 0) + 1 } }
-    return keys.map(k => ({ k, cats: m[k], tot: Object.values(m[k]).reduce((a, b) => a + b, 0) }))
-  }, [logs, keys])
-  const max = Math.max(1, ...data.map(d => d.tot))
+  const perOra = giorni <= 1
+  const serie = useMemo(() => {
+    const keys = perOra
+      ? Array.from({ length: 24 }, (_, h) => String(h))
+      : Array.from({ length: giorni }, (_, i) => dayKey(Date.now() - (giorni - 1 - i) * 86400000))
+    const m = Object.fromEntries(keys.map(k => [k, { tot: 0, cats: {} }]))
+    for (const l of logs) {
+      const k = perOra ? String(Number(new Date(l.created_at).toLocaleString('en-GB', { hour:'2-digit', hour12:false, timeZone: TZ })) % 24) : dayKey(l.created_at)
+      if (!m[k]) continue
+      const c = infoAzione(l.azione).cat
+      m[k].tot++; m[k].cats[c] = (m[k].cats[c] || 0) + 1
+    }
+    return keys.map(k => ({ k, ...m[k] }))
+  }, [logs, giorni, perOra])
+
+  const cW = G_W - G_PL - G_PR, cH = G_H - G_PT - G_PB
+  const max = Math.max(1, ...serie.map(d => d.tot))
+  const passo = max <= 10 ? 5 : max <= 30 ? 10 : max <= 150 ? 50 : Math.pow(10, Math.floor(Math.log10(max)))
+  const top = Math.ceil(max / passo) * passo
+  const griglia = [0, top / 3, (top * 2) / 3, top].map(v => Math.round(v))
+  const n = serie.length
+  const pts = serie.map((d, i) => ({ x: G_PL + (n === 1 ? cW / 2 : (i / (n - 1)) * cW), y: G_PT + cH - (d.tot / top) * cH, d }))
+  const linea = curvaBezier(pts)
+  const area = linea + ` L ${pts[n - 1].x} ${BASE_Y} L ${pts[0].x} ${BASE_Y} Z`
+  const totale = serie.reduce((a, d) => a + d.tot, 0)
+  const etichetta = d => perOra ? `${d.k}:00` : new Date(d.k + 'T12:00:00').toLocaleDateString('it-IT', n <= 7 ? { weekday:'short' } : { day:'numeric', month:'short' })
+  const ogni = Math.max(1, Math.ceil(n / (perOra ? 8 : 8)))
+  const ultimo = pts[n - 1]
   const ordine = Object.keys(CATEGORIE)
-  const H = 120
-  return <div style={s.card}>
-    <div style={s.cardHead}>
-      <span style={s.cardTitle}>Operazioni per giorno</span>
-      <div style={{ display:'flex', flexWrap:'wrap', gap:10 }}>
-        {ordine.filter(c => data.some(d => d.cats[c])).map(c => <span key={c} style={{ fontSize:11, color:'#6B7280', display:'inline-flex', alignItems:'center', gap:4 }}><span style={{ width:8, height:8, borderRadius:2, background:CATEGORIE[c].color }} />{CATEGORIE[c].label}</span>)}
-      </div>
-    </div>
-    <div style={{ position:'relative', display:'flex', alignItems:'flex-end', gap: keys.length > 40 ? 1 : 3, height:H, padding:'0 2px' }}>
-      {data.map(d => <div key={d.k} onMouseEnter={() => setHover(d)} onMouseLeave={() => setHover(null)}
-        style={{ flex:1, height:'100%', display:'flex', flexDirection:'column-reverse', cursor:'default', minWidth:2 }}>
-        {d.tot === 0 && <div style={{ height:2, background:'#EEF0F6', borderRadius:1 }} />}
-        {ordine.filter(c => d.cats[c]).map((c, i, arr) => <div key={c} style={{ height:(d.cats[c] / max) * H, background:CATEGORIE[c].color, opacity: hover && hover.k !== d.k ? 0.45 : 1, borderRadius: i === arr.length - 1 ? '3px 3px 0 0' : 0, borderTop: i ? '1px solid #fff' : 'none' }} />)}
-      </div>)}
-      {hover && <div style={s.tooltip}>
-        <b>{fmtGiorno(hover.k)}</b> - {hover.tot} operazioni
-        {ordine.filter(c => hover.cats[c]).map(c => <div key={c} style={{ color:'#CBD5E1' }}>{CATEGORIE[c].label}: {hover.cats[c]}</div>)}
+
+  return <div style={{ ...s.card, borderRadius:20, boxShadow:'0 1px 4px rgba(20,20,40,.05)' }}>
+    <div style={s.cardHead}><span style={{ fontSize:14, fontWeight:600, color:'#111827' }}>{perOra ? 'Operazioni di oggi, per ora' : `Operazioni per giorno - ${n} giorni`}</span></div>
+    <div style={{ position:'relative' }}>
+      <svg viewBox={`0 0 ${G_W} ${G_H}`} style={{ width:'100%', height:'auto', overflow:'visible', display:'block' }} onMouseLeave={() => setHover(null)}>
+        <defs>
+          <linearGradient id="logAreaGrad" x1="0" y1="0" x2="0" y2="1">
+            <stop offset="0%" stopColor="#5B5FEF" stopOpacity="0.18" />
+            <stop offset="100%" stopColor="#5B5FEF" stopOpacity="0.03" />
+          </linearGradient>
+        </defs>
+        {griglia.map((v, i) => { const y = G_PT + cH - (v / top) * cH; return <g key={i}>
+          <line x1={G_PL} y1={y} x2={G_W - G_PR} y2={y} stroke="#E8ECF4" strokeWidth="1" />
+          <text x={G_PL - 8} y={y + 4} textAnchor="end" fontSize="11" fill="#9CA3AF" fontFamily="Inter,sans-serif">{v}</text>
+        </g> })}
+        {n > 1 && <path d={area} fill="url(#logAreaGrad)" />}
+        {n > 1 && <path d={linea} fill="none" stroke="#5B5FEF" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round" />}
+        {pts.map((p, i) => (i % ogni === 0 || i === n - 1) && <text key={'l' + i} x={p.x} y={G_H - 6} textAnchor="middle" fontSize="11" fill="#9CA3AF" fontFamily="Inter,sans-serif">{etichetta(p.d)}</text>)}
+        {hover && <line x1={hover.x} y1={G_PT} x2={hover.x} y2={BASE_Y} stroke="#C7C9F9" strokeWidth="1" strokeDasharray="3 3" />}
+        {(hover ? [hover] : [ultimo]).map(p => <circle key="dot" cx={p.x} cy={p.y} r="4.5" fill="#5B5FEF" stroke="#fff" strokeWidth="2" />)}
+        {pts.map((p, i) => <rect key={'h' + i} x={p.x - cW / Math.max(1, n - 1) / 2} y={G_PT} width={cW / Math.max(1, n - 1)} height={cH} fill="transparent" onMouseEnter={() => setHover(p)} />)}
+      </svg>
+      {hover && <div style={{ ...s.tooltip, top:0, left: `${(hover.x / G_W) * 100}%`, right:'auto', transform: hover.x > G_W * 0.7 ? 'translateX(calc(-100% - 10px))' : 'translateX(10px)' }}>
+        <b>{perOra ? `Ore ${hover.d.k}:00` : fmtGiorno(hover.d.k)}</b><div>{hover.d.tot} operazioni</div>
+        {ordine.filter(c => hover.d.cats[c]).map(c => <div key={c} style={{ color:'#CBD5E1' }}>{CATEGORIE[c].label}: {hover.d.cats[c]}</div>)}
       </div>}
     </div>
-    <div style={{ display:'flex', justifyContent:'space-between', fontSize:10.5, color:'#9CA3AF', marginTop:6 }}>
-      <span>{fmtGiorno(keys[0]).replace(/^(Oggi|Ieri), /, '')}</span><span>{giorni <= 1 ? '' : 'oggi'}</span>
-    </div>
+    <p style={{ fontSize:12, color:'#9CA3AF', margin:'6px 0 0', textAlign:'right' }}>Totale periodo: <strong style={{ color:'#5B5FEF' }}>{totale.toLocaleString('it-IT')}</strong></p>
   </div>
-}
-
-// Riepilogo per utente: solo chi ha attivita nel periodo; clic = attivita dell'utente
-function RiepilogoUtenti({ righe, logsPerUtente, nascondiAccessi, setNascondiAccessi, multiGiorno, apertoIniziale }) {
-  const [aperti, setAperti] = useState(() => new Set(apertoIniziale ? [apertoIniziale] : []))
-  useEffect(() => { if (apertoIniziale) setAperti(new Set([apertoIniziale])) }, [apertoIniziale])
-  const toggle = id => setAperti(prev => { const n = new Set(prev); n.has(id) ? n.delete(id) : n.add(id); return n })
-  const tutti = righe.length > 0 && righe.every(r => aperti.has(r.id))
-  return <div style={{ ...s.card, padding:0, overflow:'hidden' }}>
-    <div style={{ ...s.cardHead, padding:'16px 18px 0' }}>
-      <span style={s.cardTitle}>Attivita per utente <span style={{ color:'#9CA3AF', fontWeight:500, fontSize:12.5 }}>{righe.length} {righe.length === 1 ? 'utente attivo' : 'utenti attivi'}</span></span>
-      <div style={{ display:'flex', gap:14, alignItems:'center', flexWrap:'wrap' }}>
-        <label style={{ fontSize:12.5, color:'#6B7280', display:'flex', alignItems:'center', gap:6, cursor:'pointer' }}>
-          <input type="checkbox" checked={nascondiAccessi} onChange={e => setNascondiAccessi(e.target.checked)} />Nascondi login e aperture app
-        </label>
-        {righe.length > 1 && <button style={s.linkBtn} onClick={() => setAperti(tutti ? new Set() : new Set(righe.map(r => r.id)))}>{tutti ? 'Chiudi tutti' : 'Espandi tutti'}</button>}
-      </div>
-    </div>
-    {!righe.length ? <div style={s.empty}><Activity size={28} style={{ color:'#D1D5DB', marginBottom:10 }} /><p style={{ fontWeight:700, color:'#374151', margin:0 }}>Nessuna attivita nel periodo</p></div> :
-    <div style={{ overflowX:'auto' }}>
-      <table style={s.table}>
-        <thead><tr>
-          {['', 'Utente', 'Ruolo', 'Prima / ultima', 'Operazioni', 'Check-in', 'Iscritti', 'Accessi', 'Dispositivi'].map((h, i) =>
-            <th key={i} style={{ ...s.th, textAlign: i >= 4 && i <= 7 ? 'right' : 'left', width: i === 0 ? 28 : undefined }} className={i === 8 || i === 2 ? 'hide-mobile' : undefined}>{h}</th>)}
-        </tr></thead>
-        <tbody>
-          {righe.map(r => {
-            const open = aperti.has(r.id)
-            const ops = (logsPerUtente.get(r.id) || []).filter(l => !nascondiAccessi || infoAzione(l.azione).cat !== 'accessi')
-            return <Fragment key={r.id}>
-              <tr onClick={() => toggle(r.id)} style={{ cursor:'pointer', background: open ? '#F4F5FF' : undefined }}
-                onMouseEnter={e => { if (!open) e.currentTarget.style.background = '#F8F9FD' }} onMouseLeave={e => { if (!open) e.currentTarget.style.background = '' }}>
-                <td style={{ ...s.td, color:'#9CA3AF', paddingRight:0 }}>{open ? <ChevronDown size={15} /> : <ChevronRight size={15} />}</td>
-                <td style={s.td}><div style={{ display:'flex', alignItems:'center', gap:10 }}>
-                  <Avatar nome={r.nome} size={30} color={r.attivo === false ? '#9CA3AF' : '#5B5FEF'} />
-                  <div style={{ minWidth:0 }}>
-                    <div style={{ fontWeight:700, color:'#111827', fontSize:13.5 }}>{r.nome}</div>
-                    {r.username && r.username !== r.nome && <div style={{ fontSize:11, color:'#9CA3AF' }}>{r.username}</div>}
-                  </div>
-                </div></td>
-                <td style={s.td} className="hide-mobile"><span style={s.ruolo}>{r.ruolo || '-'}</span></td>
-                <td style={{ ...s.td, fontSize:12, color:'#374151', whiteSpace:'nowrap' }}>
-                  {multiGiorno ? <>{fmtBreve(r.prima)} <span style={{ color:'#D1D5DB' }}>/</span> {fmtBreve(r.ultima)}</> : <>{fmtOra(r.prima)} - {fmtOra(r.ultima)}</>}
-                  <div style={{ fontSize:10.5, color:'#9CA3AF' }}>{r.giorniAttivi > 1 ? `${r.giorniAttivi} giorni attivi` : fmtRel(r.ultima)}</div>
-                </td>
-                <td style={{ ...s.td, ...s.num, fontWeight:800, color: r.tot ? '#111827' : '#D1D5DB' }}>{r.tot}</td>
-                <td style={{ ...s.td, ...s.num }}>{r.checkin || <span style={{ color:'#D1D5DB' }}>0</span>}</td>
-                <td style={{ ...s.td, ...s.num }}>{r.iscritti || <span style={{ color:'#D1D5DB' }}>0</span>}</td>
-                <td style={{ ...s.td, ...s.num }}>{r.accessi || <span style={{ color:'#D1D5DB' }}>0</span>}</td>
-                <td style={{ ...s.td, fontSize:11.5, color:'#6B7280' }} className="hide-mobile">{r.dispositivi || '-'}</td>
-              </tr>
-              {open && <tr><td colSpan={9} style={{ padding:0, background:'#FAFBFE', borderBottom:'1px solid #E8ECF4' }}>
-                <AttivitaUtente ops={ops} multiGiorno={multiGiorno} />
-              </td></tr>}
-            </Fragment>
-          })}
-        </tbody>
-      </table>
-    </div>}
-  </div>
-}
-
-function AttivitaUtente({ ops, multiGiorno }) {
-  const [quante, setQuante] = useState(100)
-  if (!ops.length) return <p style={{ fontSize:12.5, color:'#9CA3AF', padding:'14px 52px', margin:0 }}>Solo login e aperture app in questo periodo.</p>
-  const gruppi = []
-  for (const l of ops.slice(0, quante)) {
-    const k = dayKey(l.created_at)
-    if (!gruppi.length || gruppi[gruppi.length - 1].k !== k) gruppi.push({ k, logs: [] })
-    gruppi[gruppi.length - 1].logs.push(l)
-  }
-  return <div style={{ padding:'6px 0 10px 40px' }}>
-    {gruppi.map(g => <div key={g.k}>
-      {multiGiorno && <div style={{ fontSize:11.5, fontWeight:800, color:'#5B5FEF', padding:'10px 12px 4px', textTransform:'uppercase', letterSpacing:'0.04em' }}>{fmtGiorno(g.k)} <span style={{ color:'#9CA3AF', fontWeight:600 }}>({ops.filter(l => dayKey(l.created_at) === g.k).length})</span></div>}
-      <table style={s.table}><tbody>{g.logs.map(l => <RigaOperazione key={l.id} l={l} />)}</tbody></table>
-    </div>)}
-    {ops.length > quante && <div style={{ padding:'10px 12px' }}><button onClick={e => { e.stopPropagation(); setQuante(q => q + 200) }} style={s.btn}>Mostra altre {Math.min(200, ops.length - quante)} di {ops.length}</button></div>}
-  </div>
-}
-
-function RigaOperazione({ l }) {
-  const [open, setOpen] = useState(false)
-  const d = l.dettagli && typeof l.dettagli === 'object' ? l.dettagli : {}
-  const m = l.metadata && typeof l.metadata === 'object' ? l.metadata : {}
-  const testo = dettagliTesto(d)
-  const luogo = [m.citta, m.paese].filter(Boolean).join(', ')
-  const disp = [m.dispositivo, m.browser, m.os].filter(Boolean).join(' / ')
-  return <>
-    <tr onClick={() => setOpen(o => !o)} style={{ cursor:'pointer' }}
-      onMouseEnter={e => { e.currentTarget.style.background = '#F8F9FD' }} onMouseLeave={e => { e.currentTarget.style.background = '' }}>
-      <td style={{ ...s.td, width:64, fontVariantNumeric:'tabular-nums', color:'#6B7280', fontSize:12 }}>{fmtOra(l.created_at)}</td>
-      <td style={{ ...s.td, width:170 }}><Badge azione={l.azione} small /></td>
-      <td style={{ ...s.td, fontSize:12.5, color:'#374151' }}>
-        {l.evento_titolo && <span style={{ fontWeight:600, color:'#5B5FEF' }}>{l.evento_titolo}</span>}
-        {l.evento_titolo && testo && <span style={{ color:'#D1D5DB' }}> | </span>}
-        {testo}
-        {d.da_coda && <span style={s.tag}>sincronizzato dopo</span>}
-        {!l.evento_titolo && !testo && <span style={{ color:'#D1D5DB' }}>-</span>}
-      </td>
-      <td style={{ ...s.td, fontSize:11.5, color:'#6B7280', whiteSpace:'nowrap' }} className="hide-mobile">{m.dispositivo || '-'}{luogo ? ` | ${luogo}` : ''}</td>
-      <td style={{ ...s.td, width:20, color:'#9CA3AF' }}>{open ? <ChevronDown size={14} /> : <ChevronRight size={14} />}</td>
-    </tr>
-    {open && <tr><td colSpan={5} style={{ padding:'4px 16px 14px 76px', background:'#FAFBFE', borderBottom:'1px solid #EEF0F6' }}>
-      <div style={s.detGrid}>
-        <div><span style={s.detK}>Data e ora</span>{new Date(l.created_at).toLocaleString('it-IT', { timeZone: TZ })}</div>
-        <div><span style={s.detK}>Utente</span>{l.utente_nome} {l.username && l.username !== l.utente_nome ? `(${l.username})` : ''}</div>
-        <div><span style={s.detK}>Dispositivo</span>{disp || '-'}</div>
-        <div><span style={s.detK}>Localita</span>{luogo || '-'}</div>
-        <div><span style={s.detK}>IP</span><span style={{ fontFamily:'monospace' }}>{l.ip_address || m.ip || '-'}</span></div>
-        {l.evento_titolo && <div><span style={s.detK}>Evento</span>{l.evento_titolo}</div>}
-        {Object.keys(d).length > 0 && <div style={{ gridColumn:'1 / -1' }}><span style={s.detK}>Dettagli</span>{Object.entries(d).map(([k, v]) => `${k.replace(/_/g, ' ')}: ${typeof v === 'object' ? JSON.stringify(v) : v}`).join(' | ')}</div>}
-      </div>
-    </td></tr>}
-  </>
 }
 
 function BarreCard({ titolo, nota, valori, etichette, titoli }) {
