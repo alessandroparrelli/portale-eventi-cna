@@ -1,7 +1,7 @@
-import { useEffect, useState, useMemo } from 'react'
+import { useEffect, useState, useMemo, Fragment } from 'react'
 import { usePageTitle } from '../../hooks/usePageTitle'
 import { supabase } from '../../lib/supabase'
-import { Activity, Search, RefreshCw, Download, ChevronDown, ChevronRight, AlertTriangle, X } from 'lucide-react'
+import { Activity, Search, RefreshCw, Download, ChevronDown, ChevronRight, X } from 'lucide-react'
 import GlowStatCard from '../../components/GlowStatCard'
 
 // ---------- Catalogo azioni ----------
@@ -65,7 +65,6 @@ const PERIODI = [
   { id:'90',   label:'90 giorni', giorni:90 },
 ]
 const MAX_ROWS = 5000
-const PAGE_VIEW = 150
 
 // ---------- Utility ----------
 const TZ = 'Europe/Rome'
@@ -97,6 +96,7 @@ function dettagliTesto(d) {
   if (d.nome) return d.nome + (d.capogruppo ? ` (capogruppo ${d.capogruppo})` : '')
   return Object.entries(d).filter(([k]) => !skip.has(k)).map(([k, v]) => `${k.replace(/_/g, ' ')}: ${v}`).join(' | ')
 }
+const fmtBreve = ts => ts ? new Date(ts).toLocaleString('it-IT', { day:'numeric', month:'short', hour:'2-digit', minute:'2-digit', timeZone: TZ }) : '-'
 const iniziali = n => (n || '?').replace(/@.*/, '').split(/[\s.]+/).filter(Boolean).slice(0, 2).map(x => x[0]?.toUpperCase()).join('')
 const nomeUtente = p => p ? ((`${p.nome || ''} ${p.cognome || ''}`).trim() || p.username) : null
 
@@ -155,47 +155,85 @@ function GraficoGiorni({ logs, giorni }) {
   </div>
 }
 
-// Tabella riepilogo per utente (inclusi gli utenti senza attivita)
-function RiepilogoUtenti({ righe, onSelect, selected }) {
-  return <div style={s.card}>
-    <div style={s.cardHead}><span style={s.cardTitle}>Riepilogo per utente</span><span style={{ fontSize:12, color:'#9CA3AF' }}>clicca una riga per filtrare</span></div>
+// Riepilogo per utente: solo chi ha attivita nel periodo; clic = attivita dell'utente
+function RiepilogoUtenti({ righe, logsPerUtente, nascondiAccessi, setNascondiAccessi, multiGiorno, apertoIniziale }) {
+  const [aperti, setAperti] = useState(() => new Set(apertoIniziale ? [apertoIniziale] : []))
+  useEffect(() => { if (apertoIniziale) setAperti(new Set([apertoIniziale])) }, [apertoIniziale])
+  const toggle = id => setAperti(prev => { const n = new Set(prev); n.has(id) ? n.delete(id) : n.add(id); return n })
+  const tutti = righe.length > 0 && righe.every(r => aperti.has(r.id))
+  return <div style={{ ...s.card, padding:0, overflow:'hidden' }}>
+    <div style={{ ...s.cardHead, padding:'16px 18px 0' }}>
+      <span style={s.cardTitle}>Attivita per utente <span style={{ color:'#9CA3AF', fontWeight:500, fontSize:12.5 }}>{righe.length} {righe.length === 1 ? 'utente attivo' : 'utenti attivi'}</span></span>
+      <div style={{ display:'flex', gap:14, alignItems:'center', flexWrap:'wrap' }}>
+        <label style={{ fontSize:12.5, color:'#6B7280', display:'flex', alignItems:'center', gap:6, cursor:'pointer' }}>
+          <input type="checkbox" checked={nascondiAccessi} onChange={e => setNascondiAccessi(e.target.checked)} />Nascondi login e aperture app
+        </label>
+        {righe.length > 1 && <button style={s.linkBtn} onClick={() => setAperti(tutti ? new Set() : new Set(righe.map(r => r.id)))}>{tutti ? 'Chiudi tutti' : 'Espandi tutti'}</button>}
+      </div>
+    </div>
+    {!righe.length ? <div style={s.empty}><Activity size={28} style={{ color:'#D1D5DB', marginBottom:10 }} /><p style={{ fontWeight:700, color:'#374151', margin:0 }}>Nessuna attivita nel periodo</p></div> :
     <div style={{ overflowX:'auto' }}>
       <table style={s.table}>
         <thead><tr>
-          {['Utente', 'Ruolo', 'Ultima attivita', 'Operazioni', 'Check-in', 'Iscritti', 'Accessi', 'Dispositivi'].map((h, i) =>
-            <th key={h} style={{ ...s.th, textAlign: i >= 3 && i <= 6 ? 'right' : 'left' }} className={i === 7 || i === 1 ? 'hide-mobile' : undefined}>{h}</th>)}
+          {['', 'Utente', 'Ruolo', 'Prima / ultima', 'Operazioni', 'Check-in', 'Iscritti', 'Accessi', 'Dispositivi'].map((h, i) =>
+            <th key={i} style={{ ...s.th, textAlign: i >= 4 && i <= 7 ? 'right' : 'left', width: i === 0 ? 28 : undefined }} className={i === 8 || i === 2 ? 'hide-mobile' : undefined}>{h}</th>)}
         </tr></thead>
         <tbody>
           {righe.map(r => {
-            const sel = selected === r.id
-            return <tr key={r.id} onClick={() => onSelect(sel ? 'tutti' : r.id)} style={{ cursor:'pointer', background: sel ? '#EEF0FF' : undefined }}
-              onMouseEnter={e => { if (!sel) e.currentTarget.style.background = '#F8F9FD' }} onMouseLeave={e => { if (!sel) e.currentTarget.style.background = '' }}>
-              <td style={s.td}><div style={{ display:'flex', alignItems:'center', gap:10 }}>
-                <Avatar nome={r.nome} size={28} color={r.attivo === false ? '#9CA3AF' : '#5B5FEF'} />
-                <div style={{ minWidth:0 }}>
-                  <div style={{ fontWeight:700, color:'#111827', fontSize:13 }}>{r.nome}</div>
-                  {r.username && r.username !== r.nome && <div style={{ fontSize:11, color:'#9CA3AF' }}>{r.username}</div>}
-                </div>
-              </div></td>
-              <td style={s.td} className="hide-mobile"><span style={s.ruolo}>{r.ruolo || '-'}</span></td>
-              <td style={s.td}>
-                <div style={{ fontSize:12.5, color: r.inattivo ? '#B45309' : '#374151', fontWeight: r.inattivo ? 700 : 500, whiteSpace:'nowrap' }}>{fmtRel(r.ultima)}</div>
-                {r.avviso && <div style={{ fontSize:10.5, color:'#B45309', display:'flex', alignItems:'center', gap:3 }}><AlertTriangle size={11} />{r.avviso}</div>}
-              </td>
-              <td style={{ ...s.td, ...s.num, fontWeight:800, color: r.tot ? '#111827' : '#D1D5DB' }}>{r.tot}</td>
-              <td style={{ ...s.td, ...s.num }}>{r.checkin || <span style={{ color:'#D1D5DB' }}>0</span>}</td>
-              <td style={{ ...s.td, ...s.num }}>{r.iscritti || <span style={{ color:'#D1D5DB' }}>0</span>}</td>
-              <td style={{ ...s.td, ...s.num }}>{r.accessi || <span style={{ color:'#D1D5DB' }}>0</span>}</td>
-              <td style={{ ...s.td, fontSize:11.5, color:'#6B7280' }} className="hide-mobile">{r.dispositivi || '-'}</td>
-            </tr>
+            const open = aperti.has(r.id)
+            const ops = (logsPerUtente.get(r.id) || []).filter(l => !nascondiAccessi || infoAzione(l.azione).cat !== 'accessi')
+            return <Fragment key={r.id}>
+              <tr onClick={() => toggle(r.id)} style={{ cursor:'pointer', background: open ? '#F4F5FF' : undefined }}
+                onMouseEnter={e => { if (!open) e.currentTarget.style.background = '#F8F9FD' }} onMouseLeave={e => { if (!open) e.currentTarget.style.background = '' }}>
+                <td style={{ ...s.td, color:'#9CA3AF', paddingRight:0 }}>{open ? <ChevronDown size={15} /> : <ChevronRight size={15} />}</td>
+                <td style={s.td}><div style={{ display:'flex', alignItems:'center', gap:10 }}>
+                  <Avatar nome={r.nome} size={30} color={r.attivo === false ? '#9CA3AF' : '#5B5FEF'} />
+                  <div style={{ minWidth:0 }}>
+                    <div style={{ fontWeight:700, color:'#111827', fontSize:13.5 }}>{r.nome}</div>
+                    {r.username && r.username !== r.nome && <div style={{ fontSize:11, color:'#9CA3AF' }}>{r.username}</div>}
+                  </div>
+                </div></td>
+                <td style={s.td} className="hide-mobile"><span style={s.ruolo}>{r.ruolo || '-'}</span></td>
+                <td style={{ ...s.td, fontSize:12, color:'#374151', whiteSpace:'nowrap' }}>
+                  {multiGiorno ? <>{fmtBreve(r.prima)} <span style={{ color:'#D1D5DB' }}>/</span> {fmtBreve(r.ultima)}</> : <>{fmtOra(r.prima)} - {fmtOra(r.ultima)}</>}
+                  <div style={{ fontSize:10.5, color:'#9CA3AF' }}>{r.giorniAttivi > 1 ? `${r.giorniAttivi} giorni attivi` : fmtRel(r.ultima)}</div>
+                </td>
+                <td style={{ ...s.td, ...s.num, fontWeight:800, color: r.tot ? '#111827' : '#D1D5DB' }}>{r.tot}</td>
+                <td style={{ ...s.td, ...s.num }}>{r.checkin || <span style={{ color:'#D1D5DB' }}>0</span>}</td>
+                <td style={{ ...s.td, ...s.num }}>{r.iscritti || <span style={{ color:'#D1D5DB' }}>0</span>}</td>
+                <td style={{ ...s.td, ...s.num }}>{r.accessi || <span style={{ color:'#D1D5DB' }}>0</span>}</td>
+                <td style={{ ...s.td, fontSize:11.5, color:'#6B7280' }} className="hide-mobile">{r.dispositivi || '-'}</td>
+              </tr>
+              {open && <tr><td colSpan={9} style={{ padding:0, background:'#FAFBFE', borderBottom:'1px solid #E8ECF4' }}>
+                <AttivitaUtente ops={ops} multiGiorno={multiGiorno} />
+              </td></tr>}
+            </Fragment>
           })}
         </tbody>
       </table>
-    </div>
+    </div>}
   </div>
 }
 
-function RigaOperazione({ l, mostraUtente }) {
+function AttivitaUtente({ ops, multiGiorno }) {
+  const [quante, setQuante] = useState(100)
+  if (!ops.length) return <p style={{ fontSize:12.5, color:'#9CA3AF', padding:'14px 52px', margin:0 }}>Solo login e aperture app in questo periodo.</p>
+  const gruppi = []
+  for (const l of ops.slice(0, quante)) {
+    const k = dayKey(l.created_at)
+    if (!gruppi.length || gruppi[gruppi.length - 1].k !== k) gruppi.push({ k, logs: [] })
+    gruppi[gruppi.length - 1].logs.push(l)
+  }
+  return <div style={{ padding:'6px 0 10px 40px' }}>
+    {gruppi.map(g => <div key={g.k}>
+      {multiGiorno && <div style={{ fontSize:11.5, fontWeight:800, color:'#5B5FEF', padding:'10px 12px 4px', textTransform:'uppercase', letterSpacing:'0.04em' }}>{fmtGiorno(g.k)} <span style={{ color:'#9CA3AF', fontWeight:600 }}>({ops.filter(l => dayKey(l.created_at) === g.k).length})</span></div>}
+      <table style={s.table}><tbody>{g.logs.map(l => <RigaOperazione key={l.id} l={l} />)}</tbody></table>
+    </div>)}
+    {ops.length > quante && <div style={{ padding:'10px 12px' }}><button onClick={e => { e.stopPropagation(); setQuante(q => q + 200) }} style={s.btn}>Mostra altre {Math.min(200, ops.length - quante)} di {ops.length}</button></div>}
+  </div>
+}
+
+function RigaOperazione({ l }) {
   const [open, setOpen] = useState(false)
   const d = l.dettagli && typeof l.dettagli === 'object' ? l.dettagli : {}
   const m = l.metadata && typeof l.metadata === 'object' ? l.metadata : {}
@@ -206,7 +244,6 @@ function RigaOperazione({ l, mostraUtente }) {
     <tr onClick={() => setOpen(o => !o)} style={{ cursor:'pointer' }}
       onMouseEnter={e => { e.currentTarget.style.background = '#F8F9FD' }} onMouseLeave={e => { e.currentTarget.style.background = '' }}>
       <td style={{ ...s.td, width:64, fontVariantNumeric:'tabular-nums', color:'#6B7280', fontSize:12 }}>{fmtOra(l.created_at)}</td>
-      {mostraUtente && <td style={{ ...s.td, width:200 }}><div style={{ display:'flex', alignItems:'center', gap:8 }}><Avatar nome={l.utente_nome} size={24} /><span style={{ fontWeight:600, fontSize:12.5, color:'#111827', whiteSpace:'nowrap', overflow:'hidden', textOverflow:'ellipsis', maxWidth:150 }}>{l.utente_nome || 'Sistema'}</span></div></td>}
       <td style={{ ...s.td, width:170 }}><Badge azione={l.azione} small /></td>
       <td style={{ ...s.td, fontSize:12.5, color:'#374151' }}>
         {l.evento_titolo && <span style={{ fontWeight:600, color:'#5B5FEF' }}>{l.evento_titolo}</span>}
@@ -218,7 +255,7 @@ function RigaOperazione({ l, mostraUtente }) {
       <td style={{ ...s.td, fontSize:11.5, color:'#6B7280', whiteSpace:'nowrap' }} className="hide-mobile">{m.dispositivo || '-'}{luogo ? ` | ${luogo}` : ''}</td>
       <td style={{ ...s.td, width:20, color:'#9CA3AF' }}>{open ? <ChevronDown size={14} /> : <ChevronRight size={14} />}</td>
     </tr>
-    {open && <tr><td colSpan={mostraUtente ? 6 : 5} style={{ padding:'4px 16px 14px 80px', background:'#FAFBFE', borderBottom:'1px solid #EEF0F6' }}>
+    {open && <tr><td colSpan={5} style={{ padding:'4px 16px 14px 76px', background:'#FAFBFE', borderBottom:'1px solid #EEF0F6' }}>
       <div style={s.detGrid}>
         <div><span style={s.detK}>Data e ora</span>{new Date(l.created_at).toLocaleString('it-IT', { timeZone: TZ })}</div>
         <div><span style={s.detK}>Utente</span>{l.utente_nome} {l.username && l.username !== l.utente_nome ? `(${l.username})` : ''}</div>
@@ -230,6 +267,34 @@ function RigaOperazione({ l, mostraUtente }) {
       </div>
     </td></tr>}
   </>
+}
+
+function BarreCard({ titolo, nota, valori, etichette, titoli }) {
+  const max = Math.max(1, ...valori)
+  return <div style={s.card}>
+    <div style={s.cardHead}><span style={s.cardTitle}>{titolo}</span>{nota && <span style={{ fontSize:11.5, color:'#5B5FEF', fontWeight:700 }}>{nota}</span>}</div>
+    <div style={{ display:'flex', alignItems:'flex-end', gap:3, height:90 }}>
+      {valori.map((v, i) => <div key={i} title={titoli[i]} style={{ flex:1, height:'100%', display:'flex', alignItems:'flex-end' }}>
+        <div style={{ width:'100%', height: v ? Math.max(3, (v / max) * 90) : 2, background: v === max && v ? '#5B5FEF' : v ? '#A5A8F6' : '#EEF0F6', borderRadius:'3px 3px 0 0' }} />
+      </div>)}
+    </div>
+    <div style={{ display:'flex', gap:3, marginTop:5 }}>{etichette.map((e, i) => <span key={i} style={{ flex:1, fontSize:10, color:'#9CA3AF', textAlign:'center' }}>{e}</span>)}</div>
+  </div>
+}
+
+function ListaCard({ titolo, righe, vuoto, percento }) {
+  const max = Math.max(1, ...righe.map(r => r.n))
+  const tot = righe.reduce((a, r) => a + (r.k.startsWith('Browser ') ? 0 : r.n), 0) || 1
+  return <div style={s.card}>
+    <div style={s.cardHead}><span style={s.cardTitle}>{titolo}</span></div>
+    {!righe.length ? <p style={{ fontSize:12.5, color:'#9CA3AF', margin:0 }}>{vuoto}</p> : righe.map(r => <div key={r.k} style={{ marginBottom:9 }}>
+      <div style={{ display:'flex', justifyContent:'space-between', gap:8, fontSize:12.5, marginBottom:3 }}>
+        <span style={{ color:'#374151', fontWeight:600, overflow:'hidden', textOverflow:'ellipsis', whiteSpace:'nowrap' }}>{r.k}{r.sub && <span style={{ color:'#9CA3AF', fontWeight:500, fontSize:11 }}> | {r.sub}</span>}</span>
+        <span style={{ color:'#6B7280', fontVariantNumeric:'tabular-nums', flexShrink:0 }}>{percento && !r.k.startsWith('Browser ') ? `${Math.round(r.n / tot * 100)}%` : r.n}</span>
+      </div>
+      <div style={{ height:6, background:'#F1F3F9', borderRadius:3 }}><div style={{ width:`${(r.n / max) * 100}%`, height:'100%', background:r.color, borderRadius:3 }} /></div>
+    </div>)}
+  </div>
 }
 
 // ---------- Pagina ----------
@@ -245,12 +310,10 @@ export default function ActivityLogPage() {
   const [fEvento, setFEvento] = useState('tutti')
   const [search, setSearch] = useState('')
   const [nascondiAccessi, setNascondiAccessi] = useState(false)
-  const [visibili, setVisibili] = useState(PAGE_VIEW)
 
   const giorni = PERIODI.find(p => p.id === periodo)?.giorni ?? 7
 
   useEffect(() => { load() }, [periodo])
-  useEffect(() => { setVisibili(PAGE_VIEW) }, [fUtente, fCat, fEvento, search, nascondiAccessi, periodo])
 
   async function load() {
     setLoading(true)
@@ -289,9 +352,7 @@ export default function ActivityLogPage() {
     })
   }, [logs, fCat, fEvento, search])
 
-  const filtrati = useMemo(() => logsSenzaUtente.filter(l =>
-    (fUtente === 'tutti' || l.user_id === fUtente) && (!nascondiAccessi || infoAzione(l.azione).cat !== 'accessi')
-  ), [logsSenzaUtente, fUtente, nascondiAccessi])
+  const filtrati = useMemo(() => logsSenzaUtente.filter(l => fUtente === 'tutti' || l.user_id === fUtente), [logsSenzaUtente, fUtente])
 
   const kpi = useMemo(() => {
     const k = { tot: 0, utenti: new Set(), checkin: 0, iscritti: 0, comunic: 0, export: 0, mobile: 0 }
@@ -308,47 +369,70 @@ export default function ActivityLogPage() {
     return { ...k, utenti: k.utenti.size }
   }, [filtrati])
 
-  const riepilogo = useMemo(() => {
-    const per = new Map()
-    for (const l of logsSenzaUtente) {
-      if (!per.has(l.user_id)) per.set(l.user_id, { tot: 0, checkin: 0, iscritti: 0, accessi: 0, disp: new Set(), ultima: null, nomeLog: l.utente_nome, username: l.username })
-      const r = per.get(l.user_id)
+  const logsPerUtente = useMemo(() => {
+    const m = new Map()
+    for (const l of filtrati) { if (!m.has(l.user_id)) m.set(l.user_id, []); m.get(l.user_id).push(l) }
+    return m
+  }, [filtrati])
+
+  // Solo utenti con almeno un'attivita (anche solo login) nel periodo/filtri scelti
+  const riepilogo = useMemo(() => [...logsPerUtente.entries()].map(([id, ls]) => {
+    const p = utenti.find(u => u.id === id)
+    const r = { tot: 0, checkin: 0, iscritti: 0, accessi: 0, disp: new Set(), giorni: new Set() }
+    for (const l of ls) {
       const c = infoAzione(l.azione).cat
       if (c === 'accessi') r.accessi++; else r.tot++
       if (l.azione === 'checkin_qr' || l.azione === 'checkin_manuale' || l.azione === 'walkin') r.checkin++
       if (c === 'iscritti') r.iscritti++
       if (l.metadata?.dispositivo) r.disp.add(l.metadata.dispositivo)
-      if (!r.ultima || l.created_at > r.ultima) r.ultima = l.created_at
+      r.giorni.add(dayKey(l.created_at))
     }
-    const ids = new Set([...utenti.map(u => u.id), ...per.keys()])
-    const filtroAttivo = fCat !== 'tutte' || fEvento !== 'tutti' || search.trim()
-    return [...ids].map(id => {
-      const p = utenti.find(u => u.id === id)
-      const r = per.get(id) || { tot: 0, checkin: 0, iscritti: 0, accessi: 0, disp: new Set(), ultima: null }
-      const ultima = [r.ultima, p?.ultimo_accesso].filter(Boolean).sort().pop() || null
-      const giorniFermo = ultima ? (Date.now() - new Date(ultima)) / 86400000 : Infinity
-      let avviso = null
-      if (p && p.attivo !== false && !ultima) avviso = 'nessun accesso registrato'
-      else if (p && p.attivo !== false && r.accessi > 0 && r.tot === 0 && !filtroAttivo) avviso = 'solo accessi, nessuna operazione'
-      return {
-        id, nome: nomeUtente(p) || r.nomeLog || 'Utente rimosso', username: p?.username || r.username, ruolo: p?.ruolo, attivo: p?.attivo,
-        tot: r.tot, checkin: r.checkin, iscritti: r.iscritti, accessi: r.accessi, dispositivi: [...r.disp].join(', '),
-        ultima, inattivo: giorniFermo > 14, avviso,
-      }
-    })
-      .filter(r => !filtroAttivo || r.tot + r.accessi > 0)
-      .sort((a, b) => (b.tot + b.accessi) - (a.tot + a.accessi) || String(b.ultima || '').localeCompare(String(a.ultima || '')))
-  }, [logsSenzaUtente, utenti, fCat, fEvento, search])
+    return {
+      id, nome: nomeUtente(p) || ls[0].utente_nome || 'Utente rimosso', username: p?.username || ls[0].username, ruolo: p?.ruolo, attivo: p?.attivo,
+      tot: r.tot, checkin: r.checkin, iscritti: r.iscritti, accessi: r.accessi, dispositivi: [...r.disp].join(', '),
+      prima: ls[ls.length - 1].created_at, ultima: ls[0].created_at, giorniAttivi: r.giorni.size,
+    }
+  }).sort((a, b) => b.tot - a.tot || b.accessi - a.accessi || b.ultima.localeCompare(a.ultima)), [logsPerUtente, utenti])
 
-  const perGiorno = useMemo(() => {
-    const out = []
-    for (const l of filtrati.slice(0, visibili)) {
-      const k = dayKey(l.created_at)
-      if (!out.length || out[out.length - 1].k !== k) out.push({ k, logs: [] })
-      out[out.length - 1].logs.push(l)
+  const stats = useMemo(() => {
+    const ore = Array(24).fill(0), sett = Array(7).fill(0)
+    const ev = new Map(), disp = {}, brow = {}, operatori = {}
+    let annullati = 0, coda = 0
+    const sessioni = new Map()
+    for (const l of filtrati) {
+      const d = new Date(l.created_at)
+      const ora = Number(d.toLocaleString('en-GB', { hour:'2-digit', hour12:false, timeZone: TZ })) % 24
+      const gs = (new Date(dayKey(l.created_at) + 'T12:00:00').getDay() + 6) % 7
+      const cat = infoAzione(l.azione).cat
+      if (cat !== 'accessi') { ore[ora]++; sett[gs]++ }
+      if (l.evento_id && cat !== 'accessi') {
+        if (!ev.has(l.evento_id)) ev.set(l.evento_id, { titolo: l.evento_titolo || 'Evento senza titolo', n: 0, utenti: new Set(), checkin: 0 })
+        const e = ev.get(l.evento_id); e.n++; e.utenti.add(l.user_id)
+        if (l.azione === 'checkin_qr' || l.azione === 'checkin_manuale' || l.azione === 'walkin') e.checkin++
+      }
+      const m = l.metadata || {}
+      if (m.dispositivo) disp[m.dispositivo] = (disp[m.dispositivo] || 0) + 1
+      if (m.browser) brow[m.browser] = (brow[m.browser] || 0) + 1
+      if (l.azione === 'checkin_annullato') annullati++
+      if (l.dettagli?.da_coda) coda++
+      if (l.azione === 'checkin_qr' || l.azione === 'checkin_manuale' || l.azione === 'walkin') {
+        const k = l.utente_nome || 'Sistema'; operatori[k] = (operatori[k] || 0) + 1
+      }
+      // giornate lavorative per utente: primo e ultimo timestamp del giorno
+      const sk = l.user_id + '|' + dayKey(l.created_at)
+      const t = d.getTime(), cur = sessioni.get(sk)
+      if (!cur) sessioni.set(sk, [t, t]); else { cur[0] = Math.min(cur[0], t); cur[1] = Math.max(cur[1], t) }
     }
-    return out
-  }, [filtrati, visibili])
+    const durate = [...sessioni.values()].map(([a, b]) => (b - a) / 60000).filter(x => x >= 1)
+    const piccoOra = ore.indexOf(Math.max(...ore))
+    return {
+      ore, sett, piccoOra: ore[piccoOra] ? piccoOra : null, annullati, coda,
+      eventi: [...ev.values()].sort((a, b) => b.n - a.n).slice(0, 6),
+      disp: Object.entries(disp).sort((a, b) => b[1] - a[1]), brow: Object.entries(brow).sort((a, b) => b[1] - a[1]),
+      operatori: Object.entries(operatori).sort((a, b) => b[1] - a[1]).slice(0, 6),
+      durataMedia: durate.length ? Math.round(durate.reduce((a, b) => a + b, 0) / durate.length) : null,
+    }
+  }, [filtrati])
 
   function esportaCsv() {
     const esc = v => `"${String(v ?? '').replace(/"/g, '""')}"`
@@ -367,7 +451,6 @@ export default function ActivityLogPage() {
     setTimeout(() => URL.revokeObjectURL(a.href), 1000)
   }
 
-  const utenteSel = fUtente !== 'tutti' ? riepilogo.find(r => r.id === fUtente) || { nome: utenti.find(u => u.id === fUtente)?.username } : null
   const filtriAttivi = fUtente !== 'tutti' || fCat !== 'tutte' || fEvento !== 'tutti' || search
   const reset = () => { setFUtente('tutti'); setFCat('tutte'); setFEvento('tutti'); setSearch('') }
 
@@ -410,14 +493,6 @@ export default function ActivityLogPage() {
         </div>
       </div>
 
-      {utenteSel && <div style={s.focusBar}>
-        <Avatar nome={utenteSel.nome} size={34} />
-        <div style={{ flex:1, minWidth:0 }}>
-          <div style={{ fontWeight:800, color:'#111827' }}>{utenteSel.nome} {utenteSel.ruolo && <span style={s.ruolo}>{utenteSel.ruolo}</span>}</div>
-          <div style={{ fontSize:12, color:'#6B7280' }}>Ultima attivita: {fmtRel(utenteSel.ultima)}{utenteSel.dispositivi ? ` | ${utenteSel.dispositivi}` : ''}</div>
-        </div>
-        <button onClick={() => setFUtente('tutti')} style={s.linkBtn}><X size={13} />Tutti gli utenti</button>
-      </div>}
 
       {/* KPI */}
       <div style={s.kpiGrid} className="stat-grid-auto">
@@ -449,33 +524,35 @@ export default function ActivityLogPage() {
           </div>
         </div>
 
-        {fUtente === 'tutti' && <RiepilogoUtenti righe={riepilogo} onSelect={setFUtente} selected={fUtente} />}
+        <RiepilogoUtenti righe={riepilogo} logsPerUtente={logsPerUtente} nascondiAccessi={nascondiAccessi}
+          setNascondiAccessi={setNascondiAccessi} multiGiorno={giorni !== 0} apertoIniziale={fUtente !== 'tutti' ? fUtente : null} />
 
-        {/* Cronologia */}
-        <div style={{ ...s.cardHead, margin:'28px 2px 10px' }}>
-          <span style={{ ...s.cardTitle, fontSize:16 }}>Cronologia <span style={{ color:'#9CA3AF', fontWeight:500, fontSize:13 }}>{filtrati.length.toLocaleString('it-IT')} voci</span></span>
-          <label style={{ fontSize:12.5, color:'#6B7280', display:'flex', alignItems:'center', gap:6, cursor:'pointer' }}>
-            <input type="checkbox" checked={nascondiAccessi} onChange={e => setNascondiAccessi(e.target.checked)} />Nascondi login e aperture app
-          </label>
+        <div style={{ ...s.cardTitle, fontSize:16, margin:'26px 2px 12px' }}>Statistiche</div>
+        <div style={s.statGrid}>
+          <BarreCard titolo="Fasce orarie" nota={stats.piccoOra != null ? `picco ${stats.piccoOra}:00-${stats.piccoOra + 1}:00` : ''}
+            valori={stats.ore} etichette={stats.ore.map((_, i) => i % 3 === 0 ? String(i) : '')} titoli={stats.ore.map((n, i) => `${i}:00 - ${n} operazioni`)} />
+          <BarreCard titolo="Giorni della settimana" valori={stats.sett} etichette={['Lun','Mar','Mer','Gio','Ven','Sab','Dom']}
+            titoli={stats.sett.map((n, i) => `${['Lunedi','Martedi','Mercoledi','Giovedi','Venerdi','Sabato','Domenica'][i]} - ${n} operazioni`)} />
+          <ListaCard titolo="Eventi piu gestiti" vuoto="Nessuna operazione su eventi"
+            righe={stats.eventi.map(e => ({ k: e.titolo, n: e.n, sub: `${e.utenti.size} ${e.utenti.size === 1 ? 'utente' : 'utenti'}${e.checkin ? ` | ${e.checkin} check-in` : ''}`, color:'#7C3AED' }))} />
+          <ListaCard titolo="Check-in per operatore" vuoto="Nessun check-in nel periodo"
+            righe={stats.operatori.map(([k, n]) => ({ k, n, color:'#16A34A' }))} />
+          <ListaCard titolo="Dispositivi" vuoto="Nessun dato"
+            righe={[...stats.disp.map(([k, n]) => ({ k, n, color:'#0891B2' })), ...stats.brow.slice(0, 4).map(([k, n]) => ({ k: 'Browser ' + k, n, color:'#94A3B8' }))]} percento />
+          <div style={s.card}>
+            <div style={s.cardHead}><span style={s.cardTitle}>Indicatori</span></div>
+            {[
+              ['Tempo medio di lavoro al giorno', stats.durataMedia != null ? (stats.durataMedia >= 60 ? `${Math.floor(stats.durataMedia / 60)} h ${stats.durataMedia % 60} min` : `${stats.durataMedia} min`) : '-', 'tra prima e ultima azione di un utente nella giornata'],
+              ['Check-in annullati', stats.annullati, 'correzioni dopo una scansione'],
+              ['Azioni sincronizzate in ritardo', stats.coda, 'fatte offline o con rete debole'],
+              ['Utenti attivi / abilitati', `${riepilogo.length} / ${utenti.filter(u => u.attivo !== false).length}`, 'chi ha almeno un accesso nel periodo'],
+            ].map(([k, v, d]) => <div key={k} style={{ display:'flex', justifyContent:'space-between', gap:12, padding:'8px 0', borderBottom:'1px solid #F1F3F9' }}>
+              <div><div style={{ fontSize:12.5, fontWeight:600, color:'#374151' }}>{k}</div><div style={{ fontSize:11, color:'#9CA3AF' }}>{d}</div></div>
+              <div style={{ fontSize:16, fontWeight:800, color:'#111827', whiteSpace:'nowrap', fontVariantNumeric:'tabular-nums' }}>{v}</div>
+            </div>)}
+          </div>
         </div>
 
-        {!filtrati.length ? (
-          <div style={{ ...s.card, ...s.empty }}><Activity size={28} style={{ color:'#D1D5DB', marginBottom:10 }} /><p style={{ fontWeight:700, color:'#374151', margin:'0 0 4px' }}>Nessuna attivita nel periodo</p>
-            {utenteSel && <p style={{ fontSize:13, color:'#9CA3AF', margin:0 }}>Prova ad allargare il periodo.</p>}</div>
-        ) : perGiorno.map(g => (
-          <div key={g.k} style={{ marginBottom:18 }}>
-            <div style={s.dayHead}><span>{fmtGiorno(g.k)}</span><span style={{ fontWeight:500, color:'#9CA3AF', fontSize:12 }}>{filtrati.filter(l => dayKey(l.created_at) === g.k).length} voci</span></div>
-            <div style={{ ...s.card, padding:0, overflow:'hidden' }}>
-              <div style={{ overflowX:'auto' }}>
-                <table style={s.table}><tbody>{g.logs.map(l => <RigaOperazione key={l.id} l={l} mostraUtente={fUtente === 'tutti'} />)}</tbody></table>
-              </div>
-            </div>
-          </div>
-        ))}
-
-        {filtrati.length > visibili && <div style={{ textAlign:'center', margin:'8px 0 24px' }}>
-          <button onClick={() => setVisibili(v => v + PAGE_VIEW * 2)} style={s.btn}>Mostra altre {Math.min(PAGE_VIEW * 2, filtrati.length - visibili)} voci</button>
-        </div>}
         {troncato && <p style={{ fontSize:12, color:'#B45309', textAlign:'center' }}>Il periodo contiene piu di {MAX_ROWS.toLocaleString('it-IT')} voci: vengono mostrate le piu recenti. Riduci il periodo per vedere tutto.</p>}
       </>)}
 
@@ -503,6 +580,7 @@ const s = {
   select:    { border:'1px solid #E5E7EB', borderRadius:20, padding:'8px 12px', fontSize:13, fontFamily:"'Inter',sans-serif", color:'#111827', background:'#F9FAFB', outline:'none', cursor:'pointer' },
   focusBar:  { display:'flex', alignItems:'center', gap:12, background:'#EEF0FF', border:'1px solid #DADCFB', borderRadius:16, padding:'12px 16px', marginBottom:16, flexWrap:'wrap' },
   kpiGrid:   { display:'grid', gridTemplateColumns:'repeat(auto-fit, minmax(170px, 1fr))', gap:12, marginBottom:16 },
+  statGrid:  { display:'grid', gridTemplateColumns:'repeat(auto-fill, minmax(300px, 1fr))', gap:16 },
   twoCol:    { display:'grid', gridTemplateColumns:'minmax(0,2fr) minmax(0,1fr)', gap:16, marginBottom:16 },
   card:      { background:'#fff', border:'1px solid #E8ECF4', borderRadius:16, padding:18, marginBottom:16 },
   cardHead:  { display:'flex', justifyContent:'space-between', alignItems:'center', gap:10, flexWrap:'wrap', marginBottom:14 },
