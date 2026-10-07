@@ -9,6 +9,19 @@ import GlowStatCard from '../../components/GlowStatCard'
 import GlowTableHead from '../../components/GlowTableHead'
 import * as XLSX from 'xlsx'
 import StatisticheUtenti from './StatisticheUtenti'
+import StatisticheEventoAnalisi from './StatisticheEventoAnalisi'
+
+// Supabase restituisce al massimo 1000 righe per richiesta: carica a blocchi
+async function caricaTutto(build) {
+  const out = []
+  for (let off = 0; off < 100000; off += 1000) {
+    const { data, error } = await build().range(off, off + 999)
+    if (error || !data) break
+    out.push(...data)
+    if (data.length < 1000) break
+  }
+  return out
+}
 
 function StatCard({ icon: Icon, label, value, color='#5B5FEF', sub, iconClass }) {
   return (
@@ -78,6 +91,8 @@ export default function StatistichePage() {
   const [mestieri, setMestieri] = useState([])
   const [loading, setLoading] = useState(false)
   const [pageViews, setPageViews] = useState(null) // { total, byDay }
+  const [raw, setRaw] = useState(null) // dati grezzi per le analisi aggiuntive
+  const [altreRegs, setAltreRegs] = useState(null)
 
   // Sezione utenti
   const [utenti, setUtenti] = useState([])
@@ -88,7 +103,7 @@ export default function StatistichePage() {
   const [exportingXlsx, setExportingXlsx] = useState(false)
 
   useEffect(() => {
-    supabase.from('events').select('id,titolo,capienza_max,data_inizio,stato').order('data_inizio',{ascending:false})
+    supabase.from('events').select('id,titolo,capienza_max,data_inizio,stato,obiettivo_iscritti,obiettivo_presenze').order('data_inizio',{ascending:false})
       .then(({data})=>setEventi(data||[]))
     supabase.from('mestieri').select('id,nome').then(({data})=>setMestieri(data||[]))
   }, [])
@@ -98,20 +113,22 @@ export default function StatistichePage() {
   }, [tab])
 
   useEffect(() => {
-    if (!selectedEvento) { setStats(null); setSurvey([]); setPageViews(null); return }
+    if (!selectedEvento) { setStats(null); setSurvey([]); setPageViews(null); setRaw(null); return }
     loadStats()
   }, [selectedEvento])
 
   async function loadStats() {
     setLoading(true)
-    const [{ data: regs }, { data: surveyData }, { data: views }] = await Promise.all([
-      supabase.from('registrations').select('*').eq('event_id', selectedEvento),
-      supabase.from('survey_answers').select('*')
-        .in('registration_id',
-          (await supabase.from('registrations').select('id').eq('event_id', selectedEvento)).data?.map(r=>r.id) || []
-        ),
-      supabase.from('page_views').select('visited_at,country,city').eq('event_id', selectedEvento),
+    const [regs, surveyData, views, emailLog, smsLog, altre] = await Promise.all([
+      caricaTutto(() => supabase.from('registrations').select('*').eq('event_id', selectedEvento).order('created_at')),
+      caricaTutto(() => supabase.from('survey_answers').select('*, registrations!inner(event_id)').eq('registrations.event_id', selectedEvento)),
+      caricaTutto(() => supabase.from('page_views').select('visited_at,country,city,region,session_id,user_agent').eq('event_id', selectedEvento).order('visited_at')),
+      caricaTutto(() => supabase.from('email_log').select('tipo,stato,registrations!inner(event_id)').eq('registrations.event_id', selectedEvento)),
+      caricaTutto(() => supabase.from('sms_log').select('stato').eq('evento_id', selectedEvento)),
+      altreRegs ? Promise.resolve(altreRegs) : caricaTutto(() => supabase.from('registrations').select('event_id,email,nome,cognome').order('id')),
     ])
+    if (!altreRegs) setAltreRegs(altre)
+    setRaw({ regs, views, emailLog, smsLog, altre })
     // Visite
     const vList = views || []
     const vByDay = {}
@@ -370,6 +387,9 @@ export default function StatistichePage() {
                 ) : <p style={{ fontSize:'14px', color:'#9CA3AF' }}>Nessun dato disponibile</p>}
               </div>
 
+              {raw && <StatisticheEventoAnalisi evento={eventi.find(e=>e.id===selectedEvento)} regs={raw.regs} views={raw.views}
+                altreRegs={raw.altre} eventiMap={Object.fromEntries(eventi.map(e=>[e.id,e]))} emailLog={raw.emailLog} smsLog={raw.smsLog}/>}
+
               <div style={{ display:'grid', gridTemplateColumns:'1fr 1fr', gap:'16px' }} className="grid-2col">
                 {/* Categorie */}
                 {topMestieri.length > 0 && (
@@ -381,34 +401,6 @@ export default function StatistichePage() {
                   </div>
                 )}
               </div>
-
-              {/* Visite per giorno */}
-              {pageViews && pageViews.total > 0 && (() => {
-                const days = Object.keys(pageViews.byDay).sort()
-                const maxV = Math.max(...Object.values(pageViews.byDay), 1)
-                return (
-                  <div style={s.section}>
-                    <h2 style={s.sectionTitle}>Visite alla landing page</h2>
-                    <p style={{ fontSize:'12px', color:'#9CA3AF', margin:'-4px 0 12px' }}>Visitatori unici per sessione · totale: <strong style={{color:'#5B5FEF'}}>{pageViews.total}</strong></p>
-                    {days.length > 0 ? (
-                      <div style={{ display:'flex', alignItems:'flex-end', gap:'4px', height:'80px', overflowX:'auto', paddingBottom:'4px' }}>
-                        {days.map(d => {
-                          const v = pageViews.byDay[d]
-                          const h = Math.max(Math.round((v/maxV)*72), 4)
-                          const label = new Date(d+'T12:00:00').toLocaleDateString('it-IT',{day:'2-digit',month:'short'})
-                          return (
-                            <div key={d} style={{ display:'flex', flexDirection:'column', alignItems:'center', gap:'2px', flex:'0 0 auto', minWidth:'32px' }} title={`${label}: ${v} visit${v===1?'a':'e'}`}>
-                              <span style={{ fontSize:'9px', color:'#5B5FEF', fontWeight:'700' }}>{v}</span>
-                              <div style={{ width:'24px', height:`${h}px`, background:'linear-gradient(180deg,#3B82F6,#5B5FEF)', borderRadius:'3px 3px 0 0' }}/>
-                              <span style={{ fontSize:'9px', color:'#9CA3AF', whiteSpace:'nowrap', transform:'rotate(-35deg)', transformOrigin:'top center', marginTop:'6px', display:'block' }}>{label}</span>
-                            </div>
-                          )
-                        })}
-                      </div>
-                    ) : <p style={{ fontSize:'14px', color:'#9CA3AF' }}>Nessuna visita registrata</p>}
-                  </div>
-                )
-              })()}
 
               {/* Provenienza geografica */}
               {pageViews && pageViews.total > 0 && pageViews.topCities && pageViews.topCities.length > 0 && (

@@ -3,6 +3,7 @@ import { supabase } from '../../lib/supabase'
 import { Search, Download, CheckCircle2, Clock, Building2, Mail, Phone, X, ChevronDown } from 'lucide-react'
 import GlowStatCard from '../../components/GlowStatCard'
 import * as XLSX from 'xlsx'
+import AreaCurveChart from '../../components/AreaCurveChart'
 
 // ---------- helpers (ASCII only in comments) ----------
 const norm = (s) => (s || '').toString().normalize('NFD').replace(/[\u0300-\u036f]/g, '')
@@ -177,6 +178,56 @@ export default function StatisticheUtenti() {
     }
   }, [persone, regs, mestieri, info])
 
+  // ---------- statistiche aggiuntive ----------
+  const st2 = useMemo(() => {
+    const ora = new Date().toISOString()
+    const chiave = r => norm(r.nome) + '|' + norm(r.cognome)
+    // prima partecipazione di ogni persona (per evento piu vecchio)
+    const primoEvento = {}
+    const ordinati = [...regs].sort((a, b) => (eventi[a.event_id]?.data_inizio || a.created_at).localeCompare(eventi[b.event_id]?.data_inizio || b.created_at))
+    for (const r of ordinati) { const k = chiave(r); if (k !== '|' && !primoEvento[k]) primoEvento[k] = r.event_id }
+    // per evento
+    const ev = {}
+    for (const r of regs) {
+      if (!r.event_id) continue
+      if (!ev[r.event_id]) ev[r.event_id] = { id: r.event_id, iscritti: 0, presenti: 0, rinunce: 0, nuovi: 0, ritorni: 0 }
+      const e = ev[r.event_id]
+      e.iscritti++
+      if (isPresente(r)) e.presenti++
+      if (r.rinuncia) e.rinunce++
+      if (primoEvento[chiave(r)] === r.event_id) e.nuovi++; else e.ritorni++
+    }
+    const perEvento = Object.values(ev).map(e => ({ ...e, titolo: eventi[e.id]?.titolo || 'Evento', data: eventi[e.id]?.data_inizio || '' }))
+      .sort((a, b) => b.data.localeCompare(a.data))
+    // eventi conclusi in cui il check-in e stato usato
+    const conclusi = perEvento.filter(e => e.data && e.data < ora && e.presenti > 0)
+    const iscrConcl = conclusi.reduce((x, e) => x + e.iscritti - e.rinunce, 0)
+    const presConcl = conclusi.reduce((x, e) => x + e.presenti, 0)
+    // nuovi negli ultimi 30 giorni
+    const lim = new Date(Date.now() - 30 * 86400000).toISOString()
+    const nuovi30 = persone.filter(p => p.prima >= lim).length
+    // piu assidui
+    const assidui = [...persone].filter(p => p.presenze > 0).sort((a, b) => b.presenze - a.presenze || b.nEventi - a.nEventi).slice(0, 10)
+    // anagrafica imprese (archivio CNA / camera di commercio)
+    const imp = st.impList.map(i => info[i.piva]).filter(Boolean)
+    const conta = f => { const m = {}; imp.forEach(i => { const v = f(i); if (v) m[v] = (m[v] || 0) + 1 }); return Object.entries(m).sort((a, b) => b[1] - a[1]) }
+    const dim = { 'Ditta individuale (1)': 0, 'Micro (2-9)': 0, 'Piccola (10-49)': 0, 'Media/grande (50+)': 0 }
+    imp.forEach(i => { const a = i.addetti; if (a == null) return; dim[a <= 1 ? 'Ditta individuale (1)' : a <= 9 ? 'Micro (2-9)' : a <= 49 ? 'Piccola (10-49)' : 'Media/grande (50+)']++ })
+    // nuovi partecipanti per mese: ultimi 12 mesi con zeri
+    const mesi = []
+    const d = new Date(); d.setDate(1)
+    for (let i = 11; i >= 0; i--) { const x = new Date(d.getFullYear(), d.getMonth() - i, 1); mesi.push(x.toLocaleDateString('sv-SE').slice(0, 7)) }
+    const nuoviMese = Object.fromEntries(mesi.map(m => [m, 0])), iscrMese = Object.fromEntries(mesi.map(m => [m, 0]))
+    persone.forEach(p => { const m = (p.prima || '').slice(0, 7); if (m in nuoviMese) nuoviMese[m]++ })
+    regs.forEach(r => { const m = (r.created_at || '').slice(0, 7); if (m in iscrMese) iscrMese[m]++ })
+    return {
+      perEvento, conclusi, tassoPres: iscrConcl ? Math.round(presConcl / iscrConcl * 100) : null, noShow: Math.max(0, iscrConcl - presConcl),
+      nuovi30, assidui, rinunce: regs.filter(r => r.rinuncia).length,
+      natura: conta(i => i.natura_giuridica).slice(0, 6), settori: conta(i => i.settore || i.descrizione_ateco).slice(0, 8),
+      comuni: conta(i => i.comune).slice(0, 8), dim, nImpInfo: imp.length, mesi, nuoviMese, iscrMese,
+    }
+  }, [regs, eventi, persone, st, info])
+
   const filtrate = useMemo(() => {
     const nq = norm(q)
     let l = persone.filter(p => {
@@ -243,6 +294,9 @@ export default function StatisticheUtenti() {
         <GlowStatCard icon="star"      label="Associati CNA"     value={st.assoc} sub={`${pct(st.assoc)}% persone - ${st.impAssoc} imprese`} palette="green"/>
         <GlowStatCard icon="trending"  label="Ricorrenti (2+ eventi)" value={st.ricorrenti} sub={`${pct(st.ricorrenti)}% - media ${st.mediaEventi} eventi`} palette="amber"/>
         <GlowStatCard icon="check"     label="Presenze registrate" value={st.presTot} sub={st.presTot === 0 ? 'nessun check-in effettuato' : `${Math.round(st.presTot/regs.length*100)}% delle iscrizioni`} palette="teal"/>
+        <GlowStatCard icon="percent"   label="Tasso di presenza" value={st2.tassoPres != null ? st2.tassoPres + '%' : '-'} sub={st2.conclusi.length ? `su ${st2.conclusi.length} eventi conclusi con check-in` : 'nessun evento concluso con check-in'} palette="green"/>
+        <GlowStatCard icon="userx"     label="Assenze (no-show)" value={st2.noShow} sub={`${st2.rinunce} rinunce comunicate`} palette="red"/>
+        <GlowStatCard icon="activity"  label="Nuovi ultimi 30 giorni" value={st2.nuovi30} sub="persone alla prima iscrizione" palette="cyan"/>
       </div>
 
       {/* Distribuzioni */}
@@ -257,22 +311,82 @@ export default function StatisticheUtenti() {
         <Panel title="Fidelizzazione (eventi per persona)">
           {Object.entries(st.freq).map(([k, n]) => <Bar key={k} label={`${k} event${k === '1' ? 'o' : 'i'}`} n={n} max={nPers} color="#7C4DFF"/>)}
         </Panel>
-        <Panel title="Nuovi partecipanti per mese">
-          {st.mesi.length === 0 ? <p style={s.note}>Nessun dato</p> : (() => {
-            const mx = Math.max(...st.mesi.map(m => m[1]))
-            return (
-              <div style={{ display:'flex', alignItems:'flex-end', gap:'4px', height:'120px', paddingTop:'8px' }}>
-                {st.mesi.map(([m, n]) => (
-                  <div key={m} style={{ flex:1, display:'flex', flexDirection:'column', alignItems:'center', gap:'3px', height:'100%', justifyContent:'flex-end' }}>
-                    <span style={{ fontSize:'10px', fontWeight:'700', color:'#5B5FEF' }}>{n}</span>
-                    <div style={{ width:'100%', height:`${Math.max(4, n / mx * 80)}%`, background:'#5B5FEF', borderRadius:'4px 4px 0 0' }}/>
-                    <span style={{ fontSize:'9px', color:'#9CA3AF' }}>{new Date(m + '-01').toLocaleDateString('it-IT', { month:'short' })}</span>
-                  </div>
-                ))}
+        <Panel title="Fidelizzazione per evento">
+          {st2.perEvento.slice(0, 7).map(e => (
+            <div key={e.id} style={{ marginBottom:'9px' }}>
+              <div style={{ display:'flex', justifyContent:'space-between', fontSize:'12px', marginBottom:'3px', gap:8 }}>
+                <span style={{ color:'#374151', fontWeight:600, overflow:'hidden', textOverflow:'ellipsis', whiteSpace:'nowrap' }}>{e.titolo}</span>
+                <span style={{ color:'#6B7280', flexShrink:0 }}><b style={{ color:'#059669' }}>{e.ritorni}</b> ritorni / <b style={{ color:'#5B5FEF' }}>{e.nuovi}</b> nuovi</span>
               </div>
-            )
-          })()}
+              <StackBar parts={[{ label:'Ritorni', n:e.ritorni, color:'#059669' }, { label:'Nuovi', n:e.nuovi, color:'#A5A8F6' }]}/>
+            </div>
+          ))}
+          <p style={s.note}>Ritorno = la persona aveva gia partecipato a un evento precedente.</p>
         </Panel>
+      </div>
+
+      <Panel title="Crescita della community (ultimi 12 mesi)">
+        <AreaCurveChart labels={st2.mesi.map(m => new Date(m + '-01T12:00:00').toLocaleDateString('it-IT', { month:'short' }))}
+          tips={st2.mesi.map(m => new Date(m + '-01T12:00:00').toLocaleDateString('it-IT', { month:'long', year:'numeric' }))}
+          series={[{ name:'Iscrizioni', color:'#A5A8F6', values: st2.mesi.map(m => st2.iscrMese[m]) }, { name:'Nuove persone', color:'#5B5FEF', values: st2.mesi.map(m => st2.nuoviMese[m]) }]}/>
+      </Panel>
+
+      <Panel title="Presenza per evento">
+        {st2.perEvento.length === 0 ? <p style={s.note}>Nessun evento</p> :
+        <div style={{ overflowX:'auto' }}>
+          <table style={{ width:'100%', borderCollapse:'collapse', fontSize:'13px', minWidth:'560px' }}>
+            <thead><tr>{['Evento','Data','Iscritti','Rinunce','Presenti','Presenza','Nuovi'].map(h => <th key={h} style={{ ...s.th, background:'transparent', textAlign: h === 'Evento' || h === 'Data' ? 'left' : 'right' }}>{h}</th>)}</tr></thead>
+            <tbody>{st2.perEvento.slice(0, 12).map(e => {
+              const attivi = e.iscritti - e.rinunce
+              const p = attivi ? Math.round(e.presenti / attivi * 100) : 0
+              const futuro = !e.data || e.data > new Date().toISOString()
+              return <tr key={e.id} style={{ borderBottom:'1px solid #F3F4F6' }}>
+                <td style={{ ...s.td, fontWeight:700, color:'#111827', maxWidth:260, overflow:'hidden', textOverflow:'ellipsis', whiteSpace:'nowrap' }}>{e.titolo}</td>
+                <td style={{ ...s.td, color:'#6B7280', whiteSpace:'nowrap' }}>{fmtD(e.data)}</td>
+                <td style={{ ...s.td, textAlign:'right', fontWeight:700 }}>{e.iscritti}</td>
+                <td style={{ ...s.td, textAlign:'right', color: e.rinunce ? '#B45309' : '#D1D5DB' }}>{e.rinunce}</td>
+                <td style={{ ...s.td, textAlign:'right', color: e.presenti ? '#059669' : '#D1D5DB', fontWeight:700 }}>{e.presenti}</td>
+                <td style={{ ...s.td, textAlign:'right', minWidth:120 }}>{futuro && !e.presenti ? <span style={{ color:'#9CA3AF', fontSize:'12px' }}>in programma</span> : !e.presenti ? <span style={{ color:'#9CA3AF', fontSize:'12px' }}>check-in non usato</span> :
+                  <div style={{ display:'flex', alignItems:'center', gap:6, justifyContent:'flex-end' }}>
+                    <div style={{ width:60, height:6, background:'#F3F4F6', borderRadius:3 }}><div style={{ width:`${Math.min(100,p)}%`, height:'100%', background: p >= 70 ? '#059669' : p >= 50 ? '#F59E0B' : '#DC2626', borderRadius:3 }}/></div>
+                    <b style={{ fontSize:'12px' }}>{p}%</b>
+                  </div>}</td>
+                <td style={{ ...s.td, textAlign:'right', color:'#5B5FEF' }}>{e.iscritti ? Math.round(e.nuovi / e.iscritti * 100) : 0}%</td>
+              </tr>
+            })}</tbody>
+          </table>
+        </div>}
+      </Panel>
+
+      <div style={{ display:'grid', gridTemplateColumns:'repeat(auto-fit,minmax(280px,1fr))', gap:'12px' }}>
+        <Panel title="Partecipanti piu assidui">
+          {st2.assidui.length === 0 ? <p style={s.note}>Nessuna presenza registrata</p> : st2.assidui.map((p, i) => (
+            <div key={p.key} style={s.rowLine} onClick={() => setSel(p)}>
+              <span style={{ width:18, fontSize:'12px', fontWeight:800, color: i < 3 ? '#F59E0B' : '#9CA3AF' }}>{i + 1}</span>
+              <Avatar p={p} size={26}/>
+              <div style={{ flex:1, minWidth:0, cursor:'pointer' }}>
+                <p style={s.rowTitle}>{p.cognome} {p.nome}</p>
+                <p style={s.rowSub}>{p.aziende[0]?.ragione_sociale || (p.tipo === 'privato' ? 'Privato' : '')}</p>
+              </div>
+              <span style={s.rowNum}>{p.presenze}</span>
+            </div>
+          ))}
+        </Panel>
+        <Panel title="Dimensione imprese (addetti)">
+          {st2.nImpInfo === 0 ? <p style={s.note}>Dati anagrafici non ancora disponibili</p> : <>
+            {Object.entries(st2.dim).map(([k, n]) => <Bar key={k} label={k} n={n} max={st2.nImpInfo} color="#7C4DFF"/>)}
+            <p style={s.note}>Su {st2.nImpInfo} imprese con dati da archivio CNA / camera di commercio.</p>
+          </>}
+        </Panel>
+        {st2.natura.length > 0 && <Panel title="Forma giuridica">
+          {st2.natura.map(([k, n]) => <Bar key={k} label={k} n={n} max={st2.natura[0][1]} color="#0891B2"/>)}
+        </Panel>}
+        {st2.settori.length > 0 && <Panel title="Settori di attivita">
+          {st2.settori.map(([k, n]) => <Bar key={k} label={k} n={n} max={st2.settori[0][1]} color="#14B8A6"/>)}
+        </Panel>}
+        {st2.comuni.length > 0 && <Panel title="Comuni delle imprese">
+          {st2.comuni.map(([k, n]) => <Bar key={k} label={k} n={n} max={st2.comuni[0][1]} color="#F97316"/>)}
+        </Panel>}
       </div>
 
       <div style={{ display:'grid', gridTemplateColumns:'repeat(auto-fit,minmax(320px,1fr))', gap:'12px' }}>
