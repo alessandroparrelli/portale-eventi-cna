@@ -54,7 +54,7 @@ const AZIONI = {
 }
 const infoAzione = a => {
   const [label, cat] = AZIONI[a] || [a?.replace(/_/g, ' ') || '?', 'altro']
-  return { label, cat, ...CATEGORIE[cat] }
+  return { ...CATEGORIE[cat], label, cat, catLabel: CATEGORIE[cat].label }
 }
 const isAccesso = a => a === 'login' || a === 'accesso'
 
@@ -499,7 +499,7 @@ export default function ActivityLogPage() {
     for (const l of filtrati) {
       const a = infoAzione(l.azione), m = l.metadata || {}
       const dt = new Date(l.created_at)
-      rows.push([dt.toLocaleDateString('it-IT', { timeZone: TZ }), dt.toLocaleTimeString('it-IT', { timeZone: TZ }), l.utente_nome, l.username, a.label, a.label && CATEGORIE[a.cat].label,
+      rows.push([dt.toLocaleDateString('it-IT', { timeZone: TZ }), dt.toLocaleTimeString('it-IT', { timeZone: TZ }), l.utente_nome, l.username, a.label, a.catLabel,
         l.evento_titolo, dettagliTesto(l.dettagli), m.dispositivo, m.browser, m.os, [m.citta, m.paese].filter(Boolean).join(', '), l.ip_address || m.ip])
     }
     const blob = new Blob(['\uFEFF' + rows.map(r => r.map(esc).join(';')).join('\n')], { type: 'text/csv;charset=utf-8' })
