@@ -13,12 +13,12 @@ export function AuthProvider({ children }) {
     supabase.auth.getSession().then(({ data: { session } }) => {
       setUser(session?.user ?? null)
       setLoading(false)
-      if (session?.user && !location.pathname.startsWith('/login')) registraAccessoSeServe()
+      if (session?.user && location.pathname.startsWith('/admin')) registraAccessoSeServe()
     })
 
     // App ripresa dopo un periodo in background (tipico su smartphone)
     const onVisible = () => {
-      if (document.visibilityState !== 'visible') return
+      if (document.visibilityState !== 'visible' || !location.pathname.startsWith('/admin')) return
       supabase.auth.getSession().then(({ data: { session } }) => { if (session?.user) registraAccessoSeServe() })
     }
     document.addEventListener('visibilitychange', onVisible)
