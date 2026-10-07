@@ -238,4 +238,5 @@ header img { display: block; }
 }
 
 /* Niente pull-to-refresh / bounce che ricarica la pagina */
-html, body { overscroll-behavior-y: none; }
+html { overscroll-behavior-y: none; }
+body { overscroll-behavior-y: auto; }

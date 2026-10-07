@@ -396,7 +396,7 @@ export default function LandingPage() {
           outline:none !important;
         }
         /* Blocca overflow orizzontale */
-        html, body { overflow-x:hidden; max-width:100vw; }
+        html, body { overflow-x:clip; max-width:100vw; }
         * { box-sizing:border-box; }
         /* Blocca zoom iOS */
         input, select, textarea { font-size:16px !important; }
