@@ -554,6 +554,9 @@ export default function CheckinPage() {
     }
     if (!error && data?.ok) {
       logAttivita('walkin', { eventoId: selectedEvento, dettagli: { nome: `${w.nome} ${w.cognome}` } })
+      // notifica email agli organizzatori dell'evento (non blocca il check-in)
+      if (data.id) supabase.functions.invoke('notifica-walkin', { body: { registration_id: data.id } })
+        .then(({ error: nErr }) => { if (nErr) console.warn('Notifica walk-in non inviata:', nErr.message) })
       setResult({ ok: true, nome: `${w.nome} ${w.cognome}`, numero_posto: null })
       setWalkin({ nome: '', cognome: '', email: '', cellulare: '', ragione_sociale: '', partita_iva: '', cap: '', mestiere_id: '' })
       setWalkinModal(false); loadPresenti()
