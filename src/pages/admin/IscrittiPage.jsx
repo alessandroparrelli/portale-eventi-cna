@@ -7,7 +7,7 @@ import { useAuth } from '../../hooks/useAuth'
 import GlowTableHead from '../../components/GlowTableHead'
 import GlowStatCard from '../../components/GlowStatCard'
 import { Modal, PresenzaBadge, Field, Input, Select, Btn, EmptyState } from '../../components/ui'
-import { Users, Search, Download, Upload, Eye, Trash2, UserCheck, AlertCircle, CheckCircle2, X, MapPin, Ticket, RefreshCw, MessageSquare, UserPlus, Link2, Pencil, FileText } from 'lucide-react'
+import { Users, Search, Download, Upload, Eye, Trash2, UserCheck, AlertCircle, CheckCircle2, X, MapPin, Ticket, RefreshCw, MessageSquare, UserPlus, Link2, Pencil, FileText, Building2 } from 'lucide-react'
 import DeleteConfirmModal from '../../components/DeleteConfirmModal'
 import * as XLSX from 'xlsx'
 import ExcelJS from 'exceljs/dist/exceljs.min.js'
@@ -1921,9 +1921,12 @@ export default function IscrittiPage() {
             {(() => {
               const ultima = registrations.map(r => r.associato_verificato_at).filter(Boolean).sort().pop()
               const statoVerifica = verificaInCorso ? 'verifica in corso...'
-                : verificaEseguita ? `${Object.keys(associatiMap).length} trovati${ultima ? ' - ' + new Date(ultima).toLocaleDateString('it-IT',{day:'2-digit',month:'2-digit'}) + ' ' + new Date(ultima).toLocaleTimeString('it-IT',{hour:'2-digit',minute:'2-digit'}) : ''}`
+                : verificaEseguita ? `ultima${ultima ? ' ' + new Date(ultima).toLocaleDateString('it-IT',{day:'2-digit',month:'2-digit'}) + ' ' + new Date(ultima).toLocaleTimeString('it-IT',{hour:'2-digit',minute:'2-digit'}) : ''}`
                 : 'associati CNA'
               const nTel = registrations.filter(r => r.cellulare).length
+              // contatori associati: imprese = P.IVA distinte associate, persone = iscritti di imprese associate
+              const regAssoc = registrations.filter(r => r.associato_cna === true)
+              const nImpAssoc = new Set(regAssoc.map(r => (r.partita_iva || '').toString().replace(/\D/g, '').replace(/^0+/, '')).filter(Boolean)).size
               const tiles = [
                 { onClick: () => verificaAssociati(false), disabled: verificaInCorso, icon: <Search size={18}/>, r1:'Verifica', r2: statoVerifica,
                   title:'Incrocia le P.IVA dei nuovi iscritti (non ancora controllati) con la tabella associati CNA',
@@ -1931,6 +1934,12 @@ export default function IscrittiPage() {
                 verificaEseguita && { onClick: () => verificaAssociati(true), disabled: verificaInCorso, icon: <RefreshCw size={18}/>, r1:'Riverifica', r2:'tutti gli associati',
                   title:'Ricontrolla TUTTI gli iscritti, sovrascrivendo anche i dati gia verificati',
                   from:'#F5F3FF', to:'#EDE9FE', bd:'#DDD6FE', fg:'#6D28D9' },
+                verificaEseguita && { info: true, icon: <Building2 size={18}/>, r1: nImpAssoc.toLocaleString('it-IT') + ' imprese', r2:'associate CNA',
+                  title:'Partite IVA distinte risultate associate nel Tesseramento',
+                  from:'#F0FDF4', to:'#DCFCE7', bd:'#BBF7D0', fg:'#15803D' },
+                verificaEseguita && { info: true, icon: <Users size={18}/>, r1: regAssoc.length.toLocaleString('it-IT') + ' persone', r2:'di imprese associate',
+                  title:'Iscritti (titolari e accompagnatori) la cui impresa risulta associata',
+                  from:'#F0FDFA', to:'#CCFBF1', bd:'#99F6E4', fg:'#0F766E' },
                 { onClick: loadRegs, icon: <RefreshCw size={18}/>, r1:'Aggiorna', r2:'elenco iscritti',
                   from:'#FEFCE8', to:'#FEF9C3', bd:'#FDE047', fg:'#A16207' },
                 { onClick: () => { setAddModal(true); setAddError(null); setAddForm({ nome:'', cognome:'', email:'', cellulare:'', ragione_sociale:'', partita_iva:'', cap:'', extra_1:'', extra_2:'', extra_3:'', extra_4:'', extra_5:'' }); setAddCapogruppo(null); setAddCapoSearch('') },
@@ -1945,12 +1954,12 @@ export default function IscrittiPage() {
                   from:'#F0FDF4', to:'#DCFCE7', bd:'#86EFAC', fg:'#15803D' },
               ].filter(Boolean)
               return tiles.map((b, i) => (
-                <button key={i} onClick={b.onClick} disabled={b.disabled} title={b.title}
+                <button key={i} onClick={b.onClick} disabled={b.disabled || b.info} title={b.title}
                   style={{ display:'flex', alignItems:'center', gap:'10px', padding:'10px 14px', minHeight:'56px', width:'100%',
                     background:`linear-gradient(135deg, ${b.from}, ${b.to})`, border:`1px solid ${b.bd}`, borderRadius:'16px',
-                    color:b.fg, cursor: b.disabled ? 'default' : 'pointer', opacity: b.disabled ? .55 : 1,
+                    color:b.fg, cursor: b.disabled || b.info ? 'default' : 'pointer', opacity: b.disabled && !b.info ? .55 : 1,
                     fontFamily:"'Inter',sans-serif", textAlign:'left', transition:'transform .12s, box-shadow .12s' }}
-                  onMouseEnter={e => { if (b.disabled) return; e.currentTarget.style.transform = 'translateY(-1px)'; e.currentTarget.style.boxShadow = '0 4px 14px rgba(0,0,0,.08)' }}
+                  onMouseEnter={e => { if (b.disabled || b.info) return; e.currentTarget.style.transform = 'translateY(-1px)'; e.currentTarget.style.boxShadow = '0 4px 14px rgba(0,0,0,.08)' }}
                   onMouseLeave={e => { e.currentTarget.style.transform = 'none'; e.currentTarget.style.boxShadow = 'none' }}>
                   <span style={{ flexShrink:0, display:'flex' }}>{b.icon}</span>
                   <span style={{ display:'flex', flexDirection:'column', lineHeight:1.2, minWidth:0 }}>
