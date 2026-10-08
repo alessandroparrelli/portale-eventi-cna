@@ -234,9 +234,9 @@ function Sezione({ titolo, sotto, children }) {
 function Kpi({ label, value, sub, tone }) {
   return (
     <div style={{ ...st.kpi, ...(tone === 'warn' ? { borderColor: '#FCD34D', background: '#FFFBEB' } : {}) }}>
-      <div style={{ fontSize: 11.5, fontWeight: 700, color: '#6B7280', textTransform: 'uppercase', letterSpacing: '.04em' }}>{label}</div>
-      <div style={{ fontSize: 26, fontWeight: 900, color: tone === 'warn' ? '#B45309' : '#111827', letterSpacing: '-.02em', margin: '4px 0 2px', fontVariantNumeric: 'tabular-nums' }}>{value}</div>
-      <div style={{ fontSize: 12, color: '#9CA3AF' }}>{sub}</div>
+      <div style={{ fontSize: 10.5, fontWeight: 700, color: '#6B7280', textTransform: 'uppercase', letterSpacing: '.05em' }}>{label}</div>
+      <div style={{ fontSize: 20, fontWeight: 800, color: tone === 'warn' ? '#B45309' : '#111827', letterSpacing: '-.02em', margin: '3px 0 1px', fontVariantNumeric: 'tabular-nums' }}>{value}</div>
+      <div style={{ fontSize: 11.5, color: '#9CA3AF' }}>{sub}</div>
     </div>
   )
 }
@@ -245,12 +245,12 @@ function Progress({ label, n, max, color, nota }) {
   const p = pct(n, max)
   return (
     <div style={{ marginBottom: 14 }}>
-      <div style={{ display: 'flex', justifyContent: 'space-between', fontSize: 13, marginBottom: 5 }}>
-        <span style={{ fontWeight: 700, color: '#374151' }}>{label}</span>
+      <div style={{ display: 'flex', justifyContent: 'space-between', fontSize: 12.5, marginBottom: 5 }}>
+        <span style={{ fontWeight: 600, color: '#374151' }}>{label}</span>
         <span style={{ color: '#6B7280', fontVariantNumeric: 'tabular-nums' }}><b style={{ color: p >= 100 ? '#059669' : color }}>{n}</b> / {max} ({p}%)</span>
       </div>
-      <div style={{ height: 10, background: '#F1F3F9', borderRadius: 6, overflow: 'hidden' }}>
-        <div style={{ width: `${Math.min(100, p)}%`, height: '100%', background: p >= 100 ? '#059669' : color, borderRadius: 6 }} />
+      <div style={{ height: 8, background: '#F1F3F9', borderRadius: 4, overflow: 'hidden' }}>
+        <div style={{ width: `${Math.min(100, p)}%`, height: '100%', background: p >= 100 ? '#059669' : color, borderRadius: 4 }} />
       </div>
       {nota && <div style={{ fontSize: 11.5, color: '#9CA3AF', marginTop: 4 }}>{nota}</div>}
     </div>
@@ -260,24 +260,24 @@ function Progress({ label, n, max, color, nota }) {
 function Funnel({ steps }) {
   const max = Math.max(1, steps[0].n)
   return (
-    <div style={{ display: 'flex', flexDirection: 'column', gap: 8 }}>
+    <div style={{ display: 'flex', flexDirection: 'column', gap: 10 }}>
       {steps.map((s, i) => {
         const prev = i ? steps[s.base ?? i - 1].n : null
         return (
-          <div key={s.label} style={{ display: 'grid', gridTemplateColumns: 'minmax(120px, 180px) 1fr 70px', gap: 12, alignItems: 'center' }}>
+          <div key={s.label} style={{ display: 'grid', gridTemplateColumns: 'minmax(130px, 190px) 1fr 52px', gap: 12, alignItems: 'center' }}>
             <div>
-              <div style={{ fontSize: 13, fontWeight: 700, color: '#374151' }}>{s.label}</div>
-              {s.sub && <div style={{ fontSize: 11, color: '#9CA3AF' }}>{s.sub}</div>}
+              <div style={{ fontSize: 12.5, fontWeight: 600, color: '#374151', lineHeight: 1.3 }}>{s.label}</div>
+              {s.sub && <div style={{ fontSize: 11, color: '#9CA3AF', lineHeight: 1.3 }}>{s.sub}</div>}
             </div>
-            <div style={{ background: '#F5F6FB', borderRadius: 8, height: 26, position: 'relative' }}>
-              <div style={{ width: `${Math.max(s.n ? 1.5 : 0, (s.n / max) * 100)}%`, height: '100%', borderRadius: 8, background: `linear-gradient(90deg, #5B5FEF, ${['#5B5FEF', '#6D63F2', '#7C4DFF', '#8B5CF6', '#059669'][i] || '#5B5FEF'})` }} />
-              <span style={{ position: 'absolute', left: 10, top: 4, fontSize: 12.5, fontWeight: 800, color: s.n / max > 0.12 ? '#fff' : '#374151' }}>{s.n.toLocaleString('it-IT')}</span>
+            <div style={{ background: '#F5F6FB', borderRadius: 6, height: 18, position: 'relative' }}>
+              <div style={{ width: `${Math.max(s.n ? 1.5 : 0, (s.n / max) * 100)}%`, height: '100%', borderRadius: 6, background: `linear-gradient(90deg, #5B5FEF, ${['#5B5FEF', '#6D63F2', '#7C4DFF', '#8B5CF6', '#059669'][i] || '#5B5FEF'})` }} />
+              <span style={{ position: 'absolute', left: 8, top: 1.5, fontSize: 11.5, fontWeight: 700, color: s.n / max > 0.12 ? '#fff' : '#374151' }}>{s.n.toLocaleString('it-IT')}</span>
             </div>
-            <div style={{ fontSize: 12, color: '#6B7280', textAlign: 'right', fontVariantNumeric: 'tabular-nums' }}>{prev != null ? `${pct(s.n, prev)}%` : ''}</div>
+            <div style={{ fontSize: 11.5, color: '#6B7280', textAlign: 'right', fontVariantNumeric: 'tabular-nums' }}>{prev != null ? `${pct(s.n, prev)}%` : ''}</div>
           </div>
         )
       })}
-      <div style={{ fontSize: 11, color: '#9CA3AF', textAlign: 'right' }}>% = passaggio rispetto al gradino precedente (presenti: rispetto alle iscrizioni attive)</div>
+      <div style={{ fontSize: 10.5, color: '#9CA3AF', textAlign: 'right', marginTop: 2 }}>% = passaggio rispetto al gradino precedente (presenti: rispetto alle iscrizioni attive)</div>
     </div>
   )
 }
@@ -285,7 +285,7 @@ function Funnel({ steps }) {
 function Stack({ parts }) {
   const tot = parts.reduce((s, p) => s + p.n, 0) || 1
   return (
-    <div style={{ display: 'flex', height: 12, borderRadius: 6, overflow: 'hidden', gap: 2, marginBottom: 14 }}>
+    <div style={{ display: 'flex', height: 8, borderRadius: 4, overflow: 'hidden', gap: 2, marginBottom: 14 }}>
       {parts.filter(p => p.n > 0).map(p => <div key={p.l} title={`${p.l}: ${p.n}`} style={{ flex: p.n / tot, background: p.c }} />)}
     </div>
   )
@@ -321,10 +321,10 @@ function Barre({ valori, etichette, titoli, altezza = 80 }) {
 }
 
 const st = {
-  section: { backgroundColor: '#FFFFFF', border: '1px solid #E8ECF4', borderRadius: 20, padding: 20 },
-  title: { fontSize: 15, fontWeight: 900, color: '#111827', letterSpacing: '-0.02em', margin: '0 0 4px', fontFamily: "'Inter', sans-serif" },
-  sub: { fontSize: 12, color: '#9CA3AF', margin: '0 0 16px' },
+  section: { backgroundColor: '#FFFFFF', border: '1px solid #E8ECF4', borderRadius: 20, padding: '18px 20px' },
+  title: { fontSize: 14, fontWeight: 800, color: '#111827', letterSpacing: '-0.01em', margin: '0 0 4px', fontFamily: "'Inter', sans-serif" },
+  sub: { fontSize: 12, color: '#9CA3AF', margin: '0 0 14px' },
   grid2: { display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(320px, 1fr))', gap: 16 },
   grid4: { display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(190px, 1fr))', gap: 12 },
-  kpi: { background: '#fff', border: '1px solid #E8ECF4', borderRadius: 16, padding: '14px 16px' },
+  kpi: { background: '#fff', border: '1px solid #E8ECF4', borderRadius: 16, padding: '12px 14px' },
 }

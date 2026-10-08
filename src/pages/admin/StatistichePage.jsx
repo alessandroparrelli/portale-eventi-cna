@@ -480,8 +480,8 @@ const s = {
   title: { fontSize:'32px', fontWeight:'900', color:'#111827', letterSpacing:'-0.03em', margin:0, fontFamily:"'Inter', sans-serif", fontVariationSettings:"'wght' 900" },
   subtitle: { fontSize:'14px', color:'#6B7280', margin:'4px 0 0', fontWeight:'500' },
   statsGrid: { display:'grid', gridTemplateColumns:'repeat(auto-fit,minmax(180px,1fr))', gap:'12px' },
-  section: { backgroundColor:'#FFFFFF', border:'1px solid #E8ECF4', borderRadius:'20px', padding:'20px' },
-  sectionTitle: { fontSize:'15px', fontWeight:'900', color:'#111827', letterSpacing:'-0.02em', margin:'0 0 16px', fontFamily:"'Inter', sans-serif", fontVariationSettings:"'wght' 900" },
+  section: { backgroundColor:'#FFFFFF', border:'1px solid #E8ECF4', borderRadius:'20px', padding:'18px 20px' },
+  sectionTitle: { fontSize:'14px', fontWeight:'800', color:'#111827', letterSpacing:'-0.01em', margin:'0 0 14px', fontFamily:"'Inter', sans-serif" },
   th: { padding:'10px 14px', textAlign:'left', borderBottom:'1px solid #E8ECF4', backgroundColor:'#FAFAFA', fontWeight:'normal' },
   td: { padding:'11px 14px', verticalAlign:'middle' },
 }
