@@ -373,18 +373,6 @@ export default function LandingPagePublic() {
           {lp.hero_titolo&&<h1 style={{fontSize:titoloSize,fontWeight:titoloGrassetto?'900':'400',color:titoloColore,margin:'0 0 12px',letterSpacing:'-0.04em',lineHeight:1.05,textTransform:titoloMaiuscolo?'uppercase':'none'}}>{lp.hero_titolo}</h1>}
           {lp.hero_titolo2&&<h2 style={{fontSize:titolo2Size,fontWeight:titolo2Grassetto?'700':'400',color:titolo2Colore,margin:'0 0 20px',letterSpacing:'-0.02em',lineHeight:1.3}}>{lp.hero_titolo2}</h2>}
           {lp.hero_sottotitolo&&<p style={{fontSize:'clamp(14px,1.8vw,18px)',color:'rgba(255,255,255,.80)',margin:'0 0 28px',lineHeight:1.7,fontWeight:'400'}}>{lp.hero_sottotitolo}</p>}
-          {lp.form_abilitato&&(
-            <a href="#lp-form" style={{
-              display:'inline-block', background:'#fff', color:cp,
-              borderRadius:tema.btn_stile==='pill'?'999px':'8px',
-              padding:'14px 32px', fontSize:'15px', fontWeight:'800', textDecoration:'none',
-              transition:'transform .15s,box-shadow .15s'
-            }}
-              onMouseEnter={e=>{e.currentTarget.style.transform='translateY(-2px)';e.currentTarget.style.boxShadow='0 8px 24px rgba(0,0,0,0.3)'}}
-              onMouseLeave={e=>{e.currentTarget.style.transform='translateY(0)';e.currentTarget.style.boxShadow='none'}}>
-              {lp.form_bottone_testo||'Contattaci'} →
-            </a>
-          )}
         </div>
       </div>
 
