@@ -1,4 +1,4 @@
-import React, { useState, useEffect } from 'react'
+import React, { useState, useEffect, useRef } from 'react'
 const DIM_MAP={'clamp(13px,1.5vw,16px)':'16px','clamp(15px,2vw,20px)':'22px','clamp(18px,2.5vw,26px)':'30px','clamp(22px,3vw,34px)':'40px'}
 function normDim(v){return DIM_MAP[v]||v||'22px'}
 
@@ -74,6 +74,21 @@ export default function LandingEditorPage() {
   const [saved, setSaved] = useState(false)
   // campo custom in modifica
   const [editingField, setEditingField] = useState(null) // null | { index, field }
+  // Anteprima live split-view
+  const [showPreview, setShowPreview]     = useState(false)
+  const [previewDevice, setPreviewDevice] = useState('desktop')
+  const [splitWidth, setSplitWidth]       = useState(420)
+  const [previewKey, setPreviewKey]       = useState(0)
+  const containerRef = useRef(null)
+
+  function startDrag(e) {
+    e.preventDefault()
+    const startX = e.clientX, startW = splitWidth
+    const onMove = ev => setSplitWidth(Math.max(320, Math.min(720, startW + ev.clientX - startX)))
+    const onUp   = () => { document.removeEventListener('mousemove', onMove); document.removeEventListener('mouseup', onUp) }
+    document.addEventListener('mousemove', onMove)
+    document.addEventListener('mouseup', onUp)
+  }
 
   useEffect(() => { load() }, [id])
 

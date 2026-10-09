@@ -1,5 +1,6 @@
 import { useState, useEffect, useCallback } from 'react'
-import { Outlet, NavLink } from 'react-router-dom'
+import { Outlet, NavLink, useLocation } from 'react-router-dom'
+import ErrorBoundary from './ErrorBoundary'
 import Sidebar from './Sidebar'
 import { useAuth } from '../hooks/useAuth'
 import { useRole } from '../hooks/useRole'
@@ -157,7 +158,7 @@ export default function AdminLayout() {
       <div style={s.body}>
         <Sidebar mobileOpen={mobileOpen} onMobileClose={closeMobile} isMobile={isMobile}/>
         <main style={s.main}>
-          <Outlet />
+          <PageBoundary><Outlet /></PageBoundary>
         </main>
       </div>
 
@@ -253,4 +254,12 @@ const s = {
     fontWeight: '400',
     lineHeight: 1.4,
   },
+}
+
+
+// Isola gli errori di una singola pagina: la sidebar resta visibile e
+// cambiando voce di menu la pagina successiva viene montata da zero
+function PageBoundary({ children }) {
+  const { pathname } = useLocation()
+  return <ErrorBoundary key={pathname}>{children}</ErrorBoundary>
 }
