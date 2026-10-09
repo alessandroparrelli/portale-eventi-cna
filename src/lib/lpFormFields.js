@@ -26,5 +26,8 @@ export function normalizeFormFields(arr) {
   const custom = base
     .filter(x => x && !STD_FIELDS.some(s => s.key === x.key))
     .map(x => ({ ...x, std: false, enabled: x.enabled !== false }))
+  // Rispetta l'ordine salvato; i campi standard nuovi vanno in coda ai salvati
+  const pos = k => { const i = base.findIndex(x => x && x.key === k); return i < 0 ? 1000 + STD_FIELDS.findIndex(s => s.key === k) : i }
+  std.sort((a, b) => pos(a.key) - pos(b.key))
   return [...std, ...custom]
 }

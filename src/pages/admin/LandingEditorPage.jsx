@@ -695,12 +695,12 @@ function FormTab({ data, upd, editingField, setEditingField }) {
         <div>
           <p style={{ fontSize:'13px', fontWeight:'700', color:'#374151', margin:'0 0 10px' }}>Campi standard</p>
           <div style={{ border:'1px solid #E8ECF4', borderRadius:'16px', overflow:'hidden' }}>
-            {STD_FIELDS.map((f, i) => {
-              const cur = fields.find(x => x.key === f.key) || {}
+            {stdFields.map((cur, i) => {
+              const f = STD_FIELDS.find(x => x.key === cur.key) || cur
               const enabled = !!cur.enabled
               const req = !!cur.required
               return (
-                <div key={f.key} style={{ display:'flex', alignItems:'center', gap:'12px', padding:'11px 16px', borderBottom: i < STD_FIELDS.length-1 ? '1px solid #F3F4F6' : 'none', background: i%2===0?'#fff':'#FAFAFA' }}>
+                <div key={f.key} style={{ display:'flex', alignItems:'center', gap:'12px', padding:'11px 16px', borderBottom: i < stdFields.length-1 ? '1px solid #F3F4F6' : 'none', background: i%2===0?'#fff':'#FAFAFA' }}>
                   <input type="checkbox" checked={enabled} disabled={!!f.locked}
                     onChange={() => toggleStd(f.key)}
                     style={{ width:'15px', height:'15px', accentColor:'#5B5FEF', cursor:f.locked?'default':'pointer', flexShrink:0 }} />
@@ -713,6 +713,8 @@ function FormTab({ data, upd, editingField, setEditingField }) {
                       {req ? 'obbligatorio' : 'facoltativo'}
                     </button>
                   )}
+                  <button type="button" disabled={i===0} onClick={() => moveField(i,-1)} style={{ ...btnIco, opacity:i===0?0.3:1 }} title="Su">{'\u2191'}</button>
+                  <button type="button" disabled={i===stdFields.length-1} onClick={() => moveField(i,1)} style={{ ...btnIco, opacity:i===stdFields.length-1?0.3:1 }} title="Giu">{'\u2193'}</button>
                 </div>
               )
             })}
