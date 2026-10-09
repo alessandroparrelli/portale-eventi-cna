@@ -1,6 +1,6 @@
 import React, { useState, useEffect, useRef } from 'react'
 import { STD_FIELDS, normalizeFormFields } from '../../lib/lpFormFields'
-import { renderHeroOg, uploadOg } from '../../lib/ogImage'
+import { updateLandingOg } from '../../lib/ogImage'
 const DIM_MAP={'clamp(13px,1.5vw,16px)':'16px','clamp(15px,2vw,20px)':'22px','clamp(18px,2.5vw,26px)':'30px','clamp(22px,3vw,34px)':'40px'}
 function normDim(v){return DIM_MAP[v]||v||'22px'}
 
@@ -156,21 +156,7 @@ export default function LandingEditorPage() {
     }).eq('id', id)
     setSaving(false)
     if (!error) { setSaved(true); setTimeout(() => setSaved(false), 2500) }
-    if (!error) {
-      // Anteprima condivisione: immagine hero con logo e titoli
-      try {
-        const lh = d.layout_hero || {}
-        const blob = await renderHeroOg({
-          bg: d.hero_immagine_url, bgColor: lh.hero_sfondo, bgPosition: lh.bg_position,
-          overlayColor: lh.overlay_colore, overlay: Math.min(90, parseInt(lh.overlay_opacita ?? '50', 10) || 0) / 100,
-          logo: d.logo_url || 'https://raw.githubusercontent.com/alessandroparrelli/fileappoggio/main/NUOVO-LOGO-CNA-ROMA-SOLO-ROMA.png',
-          titolo: d.hero_titolo || d.titolo, sottotitolo: d.hero_titolo2 || d.hero_sottotitolo,
-          titoloColore: lh.titolo_colore, sottotitoloColore: lh.titolo2_colore,
-        })
-        const url = await uploadOg(blob, 'lp-' + d.slug)
-        if (url) await supabase.from('landing_pages').update({ og_image_url: url }).eq('id', id)
-      } catch (e) { console.error('og image', e) }
-    }
+    if (!error) updateLandingOg({ ...d, id }).catch(e => console.error('og image', e))
   }
 
   if (!data) return (

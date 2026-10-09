@@ -1,4 +1,5 @@
 import React, { useEffect, useRef, useState } from 'react'
+import { updateEventOg } from '../../lib/ogImage'
 const DIM_MAP={'clamp(13px,1.5vw,16px)':'16px','clamp(15px,2vw,20px)':'22px','clamp(18px,2.5vw,26px)':'30px','clamp(22px,3vw,34px)':'40px'}
 function normDim(v){return DIM_MAP[v]||v||'22px'}
 
@@ -798,6 +799,7 @@ export default function EventoEditorPage() {
         setSaving(false)
         return
       }
+      updateEventOg({ ...ev, ...payload, id }).catch(e => console.error('og image', e))
       // Se il teatro viene abilitato, assicura che esista la riga email posto_teatro
       if (payload.teatro_abilitato) {
         const { data: existingTpl } = await supabase.from('email_templates')

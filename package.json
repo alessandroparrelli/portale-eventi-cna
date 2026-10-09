@@ -5,12 +5,11 @@
   "type": "module",
   "scripts": {
     "dev": "vite",
-    "build": "vite build && node scripts/generate-og-pages.mjs",
+    "build": "vite build",
     "lint": "eslint .",
     "preview": "vite preview"
   },
   "dependencies": {
-    "@resvg/resvg-js": "^2.6.2",
     "@supabase/supabase-js": "^2.107.0",
     "@tiptap/extension-color": "^3.26.0",
     "@tiptap/extension-font-family": "^3.26.0",
@@ -40,7 +39,6 @@
     "react": "^19.2.6",
     "react-dom": "^19.2.6",
     "react-router-dom": "^7.17.0",
-    "satori": "^0.47.1",
     "tiptap-extension-font-size": "^1.2.0",
     "xlsx": "^0.18.5"
   },

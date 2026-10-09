@@ -5,6 +5,7 @@ import Sidebar from './Sidebar'
 import { useAuth } from '../hooks/useAuth'
 import { useRole } from '../hooks/useRole'
 import { supabase } from '../lib/supabase'
+import { syncMissingOg } from '../lib/ogImage'
 
 const RUOLO_COLORS = { superadmin:'#5B5FEF', admin:'#5B5FEF', supervisore:'#7C4DFF', utente:'#6B7280' }
 const RUOLO_LABELS = { superadmin:'Super Admin', admin:'Admin', supervisore:'Supervisore', utente:'Utente' }
@@ -23,6 +24,10 @@ function UserBox() {
   const { ruolo } = useRole()
   const [avatarUrl,    setAvatarUrl]    = useState(null)
   const [displayName,  setDisplayName]  = useState('')
+
+  useEffect(() => {
+    if (user?.id) setTimeout(() => syncMissingOg(), 3000)
+  }, [user?.id])
 
   useEffect(() => {
     if (!user?.id) return

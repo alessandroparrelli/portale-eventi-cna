@@ -34,7 +34,7 @@ function escHtml(str) {
 
 async function fetchEvent(slug) {
   const res = await fetch(
-    `${SUPABASE_URL}/rest/v1/events?slug=eq.${encodeURIComponent(slug)}&select=titolo,sottotitolo,immagine_hero,data_inizio,luogo&limit=1`,
+    `${SUPABASE_URL}/rest/v1/events?slug=eq.${encodeURIComponent(slug)}&select=titolo,sottotitolo,immagine_hero,og_image_url,data_inizio,luogo&limit=1`,
     { headers: { 'apikey': SUPABASE_ANON_KEY, 'Authorization': `Bearer ${SUPABASE_ANON_KEY}` } }
   )
   if (!res.ok) return null
@@ -138,7 +138,7 @@ export default async function handler(req, res) {
       const html = buildHtml({
         title:       data?.titolo,
         description: desc || null,
-        image:       data?.immagine_hero,
+        image:       data?.og_image_url || data?.immagine_hero,
         url:         pageUrl,
       })
       res.setHeader('Content-Type', 'text/html; charset=utf-8')
