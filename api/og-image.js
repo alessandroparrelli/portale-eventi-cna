@@ -4,7 +4,6 @@
  */
 import { ImageResponse } from '@vercel/og'
 
-export const config = { runtime: 'edge' }
 
 const SUPABASE_URL = 'https://hnkhckcclgabunkqfmrz.supabase.co'
 const ANON = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6Imhua2hja2NjbGdhYnVua3FmbXJ6Iiwicm9sZSI6ImFub24iLCJpYXQiOjE3ODA2MDgyNjMsImV4cCI6MjA5NjE4NDI2M30.d3VA9FqBL7E5GRzKM_usMzl-4ZcsfAdH15DxJjvmou4'
@@ -26,7 +25,7 @@ function hexToRgba(hex, a) {
   return `rgba(${(n >> 16) & 255},${(n >> 8) & 255},${n & 255},${a})`
 }
 
-export default async function handler(req) {
+export async function GET(req) {
   const slug = new URL(req.url).searchParams.get('slug') || ''
   const r = await fetch(`${SUPABASE_URL}/rest/v1/landing_pages?slug=eq.${encodeURIComponent(slug)}&select=titolo,hero_titolo,hero_titolo2,hero_sottotitolo,hero_immagine_url,logo_url,layout_hero&limit=1`,
     { headers: { apikey: ANON, Authorization: `Bearer ${ANON}` } })
