@@ -22,7 +22,7 @@ function buildHtml(spaHtml, ev) {
   const pageUrl = `${APP_URL}/eventi/${ev.slug}`
   const title   = esc(ev.titolo || 'Evento CNA Roma')
   const desc    = esc(ev.sottotitolo || ev.luogo || 'Evento organizzato da CNA Roma')
-  const img     = `https://portale-eventi-cna.vercel.app/api/og-image?type=evento&slug=${encodeURIComponent(ev.slug)}`
+  const img     = ev.immagine_hero || DEFAULT_IMG
 
   const ogTags = `
     <meta property="og:type"         content="website">
@@ -32,7 +32,6 @@ function buildHtml(spaHtml, ev) {
     <meta property="og:image"        content="${esc(img)}">
     <meta property="og:image:width"  content="1200">
     <meta property="og:image:height" content="630">
-    <meta property="og:image:type"   content="image/png">
     <meta property="og:site_name"    content="CNA Roma">
     <meta property="og:locale"       content="it_IT">
     <meta name="twitter:card"        content="summary_large_image">

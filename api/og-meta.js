@@ -34,7 +34,7 @@ function escHtml(str) {
 
 async function fetchEvent(slug) {
   const res = await fetch(
-    `${SUPABASE_URL}/rest/v1/events?slug=eq.${encodeURIComponent(slug)}&select=titolo,sottotitolo,data_inizio,luogo&limit=1`,
+    `${SUPABASE_URL}/rest/v1/events?slug=eq.${encodeURIComponent(slug)}&select=titolo,sottotitolo,immagine_hero,data_inizio,luogo&limit=1`,
     { headers: { 'apikey': SUPABASE_ANON_KEY, 'Authorization': `Bearer ${SUPABASE_ANON_KEY}` } }
   )
   if (!res.ok) return null
@@ -44,7 +44,7 @@ async function fetchEvent(slug) {
 
 async function fetchLanding(slug) {
   const res = await fetch(
-    `${SUPABASE_URL}/rest/v1/landing_pages?slug=eq.${encodeURIComponent(slug)}&select=titolo,hero_titolo,hero_titolo2,hero_sottotitolo,meta_descrizione,updated_at&limit=1`,
+    `${SUPABASE_URL}/rest/v1/landing_pages?slug=eq.${encodeURIComponent(slug)}&select=titolo,hero_titolo,hero_titolo2,hero_sottotitolo,meta_descrizione,hero_immagine_url&limit=1`,
     { headers: { 'apikey': SUPABASE_ANON_KEY, 'Authorization': `Bearer ${SUPABASE_ANON_KEY}` } }
   )
   if (!res.ok) return null
@@ -118,8 +118,8 @@ export default async function handler(req, res) {
       pageUrl = `${SITE_URL}/lp/${slug}`
       const html = buildHtml({
         title:       data?.hero_titolo || data?.titolo,
-        description: data?.meta_descrizione || data?.hero_titolo2 || data?.hero_sottotitolo || 'CNA Roma',
-        image:       `${SITE_URL}/api/og-image?slug=${encodeURIComponent(slug)}&v=${encodeURIComponent(data?.updated_at || '')}`,
+        description: data?.hero_titolo2 || data?.hero_sottotitolo || data?.meta_descrizione || 'CNA Roma',
+        image:       data?.hero_immagine_url,
         url:         pageUrl,
       })
       res.setHeader('Content-Type', 'text/html; charset=utf-8')
@@ -140,7 +140,7 @@ export default async function handler(req, res) {
       const html = buildHtml({
         title:       data?.titolo,
         description: desc || null,
-        image:       `${SITE_URL}/api/og-image?type=evento&slug=${encodeURIComponent(slug)}&v=${encodeURIComponent(data?.updated_at || '')}`,
+        image:       data?.immagine_hero,
         url:         pageUrl,
       })
       res.setHeader('Content-Type', 'text/html; charset=utf-8')
