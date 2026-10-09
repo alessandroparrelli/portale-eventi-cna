@@ -27,7 +27,9 @@ export function useRole() {
       setLoading(false)
     })
     return () => { active = false }
-  }, [user])
+    // Dipende solo dall'id: il refresh del token crea un nuovo oggetto user
+    // ma non deve ricaricare i permessi (causava smonta/rimonta delle pagine)
+  }, [user?.id])
 
   const ruolo = profile?.ruolo ?? user?.user_metadata?.ruolo ?? 'utente'
 
