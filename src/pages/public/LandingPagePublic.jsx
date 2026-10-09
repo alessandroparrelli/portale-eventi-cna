@@ -1,4 +1,5 @@
 import { useState, useEffect } from 'react'
+import { normalizeFormFields } from '../../lib/lpFormFields'
 import { useParams } from 'react-router-dom'
 import { supabase } from '../../lib/supabase'
 import { RICH_CSS } from '../../components/editor/RichEditor'
@@ -62,9 +63,7 @@ function FormContatti({ lp, tema }) {
   const [submitted, setSubmitted] = useState(false)
   const [err, setErr] = useState('')
 
-  const fields = (lp.form_fields&&lp.form_fields.length>0)
-    ? lp.form_fields.filter(f=>f.enabled!==false)
-    : [{key:'nome',label:'Nome',tipo:'testo',enabled:true,std:true},{key:'cognome',label:'Cognome',tipo:'testo',enabled:true,std:true},{key:'email',label:'Email',tipo:'email',enabled:true,required:true,std:true}]
+  const fields = normalizeFormFields(lp.form_fields).filter(f=>f.enabled!==false)
 
   function setVal(key, val) { setValues(p=>({...p,[key]:val})) }
   function toggleMulti(key, val) {

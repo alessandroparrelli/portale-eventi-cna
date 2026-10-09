@@ -1,4 +1,5 @@
 import React, { useState, useEffect, useRef } from 'react'
+import { STD_FIELDS, normalizeFormFields } from '../../lib/lpFormFields'
 const DIM_MAP={'clamp(13px,1.5vw,16px)':'16px','clamp(15px,2vw,20px)':'22px','clamp(18px,2.5vw,26px)':'30px','clamp(22px,3vw,34px)':'40px'}
 function normDim(v){return DIM_MAP[v]||v||'22px'}
 
@@ -40,15 +41,6 @@ const FIELD_TYPES = [
   { value:'number',   label:'Numero' },
 ]
 
-// Campi standard sempre presenti (non eliminabili)
-const STD_FIELDS = [
-  { key:'nome',     label:'Nome',     tipo:'testo',  default_on:true  },
-  { key:'cognome',  label:'Cognome',  tipo:'testo',  default_on:true  },
-  { key:'email',    label:'Email',    tipo:'email',  default_on:true,  required:true },
-  { key:'telefono', label:'Telefono', tipo:'tel',    default_on:false  },
-  { key:'azienda',  label:'Azienda',  tipo:'testo',  default_on:false  },
-  { key:'citta',    label:'Città',    tipo:'testo',  default_on:false  },
-]
 
 const LAYOUT_HERO_DEFAULT = {
   altezza: '420',
@@ -96,7 +88,7 @@ export default function LandingEditorPage() {
     const { data: lp } = await supabase.from('landing_pages').select('*').eq('id', id).single()
     if (lp) {
       if (!lp.layout_hero) lp.layout_hero = { ...LAYOUT_HERO_DEFAULT }
-      if (!lp.form_fields) lp.form_fields = STD_FIELDS.map(f => ({ ...f, std:true, enabled:f.default_on }))
+      lp.form_fields = normalizeFormFields(lp.form_fields)
       setData(lp)
       dataRef.current = lp
     }
@@ -633,12 +625,16 @@ export default function LandingEditorPage() {
 // TAB FORM — gestione campi standard + custom
 // ═══════════════════════════════════════════════════════
 function FormTab({ data, upd, editingField, setEditingField }) {
-  const fields = data.form_fields || STD_FIELDS.map(f => ({ ...f, std:true, enabled:f.default_on }))
+  const fields = normalizeFormFields(data.form_fields)
 
   function setFields(f) { upd('form_fields', f) }
 
   function toggleStd(key) {
     setFields(fields.map(f => f.key === key ? { ...f, enabled: !f.enabled } : f))
+  }
+
+  function toggleReq(key) {
+    setFields(fields.map(f => f.key === key ? { ...f, required: !f.required } : f))
   }
 
   function addCustom() {
@@ -700,16 +696,23 @@ function FormTab({ data, upd, editingField, setEditingField }) {
           <p style={{ fontSize:'13px', fontWeight:'700', color:'#374151', margin:'0 0 10px' }}>Campi standard</p>
           <div style={{ border:'1px solid #E8ECF4', borderRadius:'16px', overflow:'hidden' }}>
             {STD_FIELDS.map((f, i) => {
-              const cur = fields.find(x => x.key === f.key)
-              const enabled = cur ? cur.enabled : f.default_on
+              const cur = fields.find(x => x.key === f.key) || {}
+              const enabled = !!cur.enabled
+              const req = !!cur.required
               return (
                 <div key={f.key} style={{ display:'flex', alignItems:'center', gap:'12px', padding:'11px 16px', borderBottom: i < STD_FIELDS.length-1 ? '1px solid #F3F4F6' : 'none', background: i%2===0?'#fff':'#FAFAFA' }}>
-                  <input type="checkbox" checked={enabled || !!f.required} disabled={!!f.required}
+                  <input type="checkbox" checked={enabled} disabled={!!f.locked}
                     onChange={() => toggleStd(f.key)}
-                    style={{ width:'15px', height:'15px', accentColor:'#5B5FEF', cursor:f.required?'default':'pointer', flexShrink:0 }} />
-                  <span style={{ fontSize:'14px', color:(enabled||f.required)?'#0A0A0A':'#9CA3AF', flex:1 }}>{f.label}</span>
+                    style={{ width:'15px', height:'15px', accentColor:'#5B5FEF', cursor:f.locked?'default':'pointer', flexShrink:0 }} />
+                  <span onClick={() => !f.locked && toggleStd(f.key)} style={{ fontSize:'14px', color:enabled?'#0A0A0A':'#9CA3AF', flex:1, cursor:f.locked?'default':'pointer' }}>{cur.label || f.label}</span>
                   <span style={{ fontSize:'11px', color:'#9CA3AF', background:'#F3F4F6', padding:'2px 7px', borderRadius:'20px' }}>{f.tipo}</span>
-                  {f.required && <span style={{ fontSize:'11px', color:'#9CA3AF', fontStyle:'italic' }}>obbligatorio</span>}
+                  {enabled && (
+                    <button type="button" disabled={!!f.locked} onClick={() => toggleReq(f.key)}
+                      style={{ fontSize:'11px', fontWeight:'600', padding:'3px 10px', borderRadius:'20px', cursor:f.locked?'default':'pointer',
+                        border:'1px solid '+(req?'#5B5FEF':'#E8ECF4'), background:req?'#EEF0FF':'#fff', color:req?'#5B5FEF':'#6B7280' }}>
+                      {req ? 'obbligatorio' : 'facoltativo'}
+                    </button>
+                  )}
                 </div>
               )
             })}
