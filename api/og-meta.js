@@ -44,7 +44,7 @@ async function fetchEvent(slug) {
 
 async function fetchLanding(slug) {
   const res = await fetch(
-    `${SUPABASE_URL}/rest/v1/landing_pages?slug=eq.${encodeURIComponent(slug)}&select=titolo,hero_titolo,hero_titolo2,hero_sottotitolo,meta_descrizione,hero_immagine_url&limit=1`,
+    `${SUPABASE_URL}/rest/v1/landing_pages?slug=eq.${encodeURIComponent(slug)}&select=titolo,hero_titolo,hero_titolo2,hero_sottotitolo,meta_descrizione,hero_immagine_url,og_image_url&limit=1`,
     { headers: { 'apikey': SUPABASE_ANON_KEY, 'Authorization': `Bearer ${SUPABASE_ANON_KEY}` } }
   )
   if (!res.ok) return null
@@ -117,7 +117,7 @@ export default async function handler(req, res) {
       const html = buildHtml({
         title:       data?.hero_titolo || data?.titolo,
         description: data?.hero_titolo2 || data?.hero_sottotitolo || data?.meta_descrizione || 'CNA Roma',
-        image:       data?.hero_immagine_url,
+        image:       data?.og_image_url || data?.hero_immagine_url,
         url:         pageUrl,
       })
       res.setHeader('Content-Type', 'text/html; charset=utf-8')
