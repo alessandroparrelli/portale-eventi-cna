@@ -69,8 +69,6 @@ function buildHtml({ title, description, image, url }) {
   <meta property="og:title"       content="${t}"/>
   <meta property="og:description" content="${d}"/>
   <meta property="og:image"       content="${escHtml(i)}"/>
-  <meta property="og:image:width" content="1200"/>
-  <meta property="og:image:height" content="630"/>
   <meta property="og:url"         content="${u}"/>
   <!-- Twitter / X -->
   <meta name="twitter:card"        content="summary_large_image"/>
