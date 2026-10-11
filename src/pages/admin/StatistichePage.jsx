@@ -10,6 +10,7 @@ import GlowTableHead from '../../components/GlowTableHead'
 import * as XLSX from 'xlsx'
 import StatisticheUtenti from './StatisticheUtenti'
 import StatisticheEventoAnalisi from './StatisticheEventoAnalisi'
+import StatistichePartecipanti from './StatistichePartecipanti'
 
 // Supabase restituisce al massimo 1000 righe per richiesta: carica a blocchi
 async function caricaTutto(build) {
@@ -389,6 +390,8 @@ export default function StatistichePage() {
 
               {raw && <StatisticheEventoAnalisi evento={eventi.find(e=>e.id===selectedEvento)} regs={raw.regs} views={raw.views}
                 altreRegs={raw.altre} eventiMap={Object.fromEntries(eventi.map(e=>[e.id,e]))} emailLog={raw.emailLog} smsLog={raw.smsLog}/>}
+              {raw && <StatistichePartecipanti evento={eventi.find(e=>e.id===selectedEvento)} regs={raw.regs}
+                altreRegs={raw.altre} eventiMap={Object.fromEntries(eventi.map(e=>[e.id,e]))} mestieri={mestieri}/>}
 
               <div style={{ display:'grid', gridTemplateColumns:'1fr 1fr', gap:'16px' }} className="grid-2col">
                 {/* Categorie */}
