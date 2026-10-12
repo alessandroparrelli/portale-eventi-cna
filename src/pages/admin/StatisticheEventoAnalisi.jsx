@@ -20,92 +20,94 @@ function rangeGiorni(da, a) {
   return out
 }
 
+export function calcolaAnalisi({ evento, regs, views, altreRegs, eventiMap, emailLog, smsLog }) {
+  const oggi = dayKey(Date.now())
+  const dataEv = evento?.data_inizio ? dayKey(evento.data_inizio) : null
+  const passato = dataEv ? dataEv < oggi : false
+  const giorniMancanti = dataEv ? Math.round((new Date(dataEv) - new Date(oggi)) / 86400000) : null
+  const attivi = regs.filter(r => !r.rinuncia)
+
+  // ---- andamento iscrizioni e visite
+  let minTs = null
+  for (const r of regs) if (r.created_at && (!minTs || r.created_at < minTs)) minTs = r.created_at
+  for (const v of views) if (v.visited_at && (!minTs || v.visited_at < minTs)) minTs = v.visited_at
+  const primo = minTs ? dayKey(minTs) : oggi
+  const ultimo = passato ? dataEv : oggi
+  const giorni = rangeGiorni(primo, ultimo < primo ? primo : ultimo)
+  const iscrG = Object.fromEntries(giorni.map(g => [g, 0])), visG = Object.fromEntries(giorni.map(g => [g, 0]))
+  for (const r of regs) { const k = dayKey(r.created_at); if (k in iscrG) iscrG[k]++ }
+  for (const v of views) { const k = dayKey(v.visited_at); if (k in visG) visG[k]++ }
+  let cum = 0
+  const cumulativo = giorni.map(g => (cum += iscrG[g]))
+
+  // ritmo e proiezione
+  const ult7 = giorni.slice(-7).reduce((s, g) => s + iscrG[g], 0)
+  const ritmo = ult7 / Math.min(7, giorni.length || 1)
+  const proiezione = !passato && giorniMancanti > 0 ? Math.round(regs.length + ritmo * giorniMancanti) : null
+  const piccoG = giorni.reduce((b, g) => (iscrG[g] > (iscrG[b] ?? -1) ? g : b), giorni[0])
+
+  // ---- funnel
+  const sessioni = new Set(views.map(v => v.session_id || v.visited_at)).size
+  const confermati = regs.filter(r => r.presenza_confermata).length
+  const presenti = regs.filter(isPresente).length
+
+  // ---- composizione
+  const accompagnatori = regs.filter(r => r.referente_id).length
+  const referenti = new Set(regs.map(r => r.referente_id).filter(Boolean))
+  const capogruppo = regs.filter(r => !r.referente_id && referenti.has(r.id)).length
+  const singoli = regs.length - accompagnatori - capogruppo
+  const assocSi = regs.filter(r => r.associato_cna === true).length
+  const assocNo = regs.filter(r => r.associato_cna === false).length
+  const conPosto = regs.filter(r => r.numero_posto).length
+  const rinunce = regs.filter(r => r.rinuncia).length
+  const conPiva = regs.filter(r => (r.partita_iva || '').replace(/\D/g, '').length === 11).length
+
+  // ---- nuovi vs gia visti (altri eventi precedenti)
+  const visti = new Set()
+  for (const r of altreRegs) {
+    if (r.event_id === evento.id) continue
+    const ev = eventiMap[r.event_id]
+    if (ev?.data_inizio && evento.data_inizio && ev.data_inizio >= evento.data_inizio) continue
+    if (r.email) visti.add('e' + norm(r.email))
+    if (r.nome || r.cognome) visti.add('n' + norm(r.nome) + '|' + norm(r.cognome))
+  }
+  const ritorni = regs.filter(r => visti.has('e' + norm(r.email)) || visti.has('n' + norm(r.nome) + '|' + norm(r.cognome))).length
+
+  // ---- quando si iscrivono
+  const ore = Array(24).fill(0), sett = Array(7).fill(0)
+  for (const r of regs) { ore[oraDi(r.created_at)]++; sett[(new Date(dayKey(r.created_at) + 'T12:00:00').getDay() + 6) % 7]++ }
+
+  // ---- arrivi (check-in) per quarto d'ora
+  const arrivi = {}
+  for (const r of regs) if (r.checkin_at) { const k = `${String(oraDi(r.checkin_at)).padStart(2, '0')}:${String(Math.floor(minDi(r.checkin_at) / 15) * 15).padStart(2, '0')}`; arrivi[k] = (arrivi[k] || 0) + 1 }
+  const arriviK = Object.keys(arrivi).sort()
+
+  // ---- dispositivi visitatori
+  const mobile = views.filter(v => /mobi|iphone|android/i.test(v.user_agent || '')).length
+
+  // ---- imprese e CAP
+  const imp = {}
+  for (const r of regs) { const k = norm(r.ragione_sociale); if (!k) continue; if (!imp[k]) imp[k] = { nome: r.ragione_sociale.trim(), n: 0 }; imp[k].n++ }
+  const topImprese = Object.values(imp).sort((x, y) => y.n - x.n).slice(0, 8)
+  const caps = {}
+  for (const r of regs) { const c = (r.cap || '').trim(); if (c) caps[c] = (caps[c] || 0) + 1 }
+  const topCap = Object.entries(caps).sort((x, y) => y[1] - x[1]).slice(0, 8)
+  const roma = regs.filter(r => /^001\d\d$/.test((r.cap || '').trim())).length
+
+  // ---- comunicazioni
+  const email = {}
+  for (const l of emailLog) { const k = l.tipo || 'altro'; if (!email[k]) email[k] = { ok: 0, ko: 0 }; (/err|fail|bounce/i.test(l.stato || '') ? email[k].ko++ : email[k].ok++) }
+  const smsOk = smsLog.filter(x => x.stato === 'inviato').length
+
+  return {
+    oggi, dataEv, passato, giorniMancanti, attivi, giorni, iscrG, visG, cumulativo, ritmo, proiezione, piccoG,
+    sessioni, confermati, presenti, accompagnatori, capogruppo, singoli, assocSi, assocNo, conPosto, rinunce, conPiva,
+    ritorni, ore, sett, arrivi, arriviK, mobile, topImprese, topCap, roma, email, smsOk, smsKo: smsLog.length - smsOk,
+  }
+}
+
 export default function StatisticheEventoAnalisi({ evento, regs, views, altreRegs, eventiMap, emailLog, smsLog }) {
-  const a = useMemo(() => {
-    const oggi = dayKey(Date.now())
-    const dataEv = evento?.data_inizio ? dayKey(evento.data_inizio) : null
-    const passato = dataEv ? dataEv < oggi : false
-    const giorniMancanti = dataEv ? Math.round((new Date(dataEv) - new Date(oggi)) / 86400000) : null
-    const attivi = regs.filter(r => !r.rinuncia)
-
-    // ---- andamento iscrizioni e visite
-    let minTs = null
-    for (const r of regs) if (r.created_at && (!minTs || r.created_at < minTs)) minTs = r.created_at
-    for (const v of views) if (v.visited_at && (!minTs || v.visited_at < minTs)) minTs = v.visited_at
-    const primo = minTs ? dayKey(minTs) : oggi
-    const ultimo = passato ? dataEv : oggi
-    const giorni = rangeGiorni(primo, ultimo < primo ? primo : ultimo)
-    const iscrG = Object.fromEntries(giorni.map(g => [g, 0])), visG = Object.fromEntries(giorni.map(g => [g, 0]))
-    for (const r of regs) { const k = dayKey(r.created_at); if (k in iscrG) iscrG[k]++ }
-    for (const v of views) { const k = dayKey(v.visited_at); if (k in visG) visG[k]++ }
-    let cum = 0
-    const cumulativo = giorni.map(g => (cum += iscrG[g]))
-
-    // ritmo e proiezione
-    const ult7 = giorni.slice(-7).reduce((s, g) => s + iscrG[g], 0)
-    const ritmo = ult7 / Math.min(7, giorni.length || 1)
-    const proiezione = !passato && giorniMancanti > 0 ? Math.round(regs.length + ritmo * giorniMancanti) : null
-    const piccoG = giorni.reduce((b, g) => (iscrG[g] > (iscrG[b] ?? -1) ? g : b), giorni[0])
-
-    // ---- funnel
-    const sessioni = new Set(views.map(v => v.session_id || v.visited_at)).size
-    const confermati = regs.filter(r => r.presenza_confermata).length
-    const presenti = regs.filter(isPresente).length
-
-    // ---- composizione
-    const accompagnatori = regs.filter(r => r.referente_id).length
-    const referenti = new Set(regs.map(r => r.referente_id).filter(Boolean))
-    const capogruppo = regs.filter(r => !r.referente_id && referenti.has(r.id)).length
-    const singoli = regs.length - accompagnatori - capogruppo
-    const assocSi = regs.filter(r => r.associato_cna === true).length
-    const assocNo = regs.filter(r => r.associato_cna === false).length
-    const conPosto = regs.filter(r => r.numero_posto).length
-    const rinunce = regs.filter(r => r.rinuncia).length
-    const conPiva = regs.filter(r => (r.partita_iva || '').replace(/\D/g, '').length === 11).length
-
-    // ---- nuovi vs gia visti (altri eventi precedenti)
-    const visti = new Set()
-    for (const r of altreRegs) {
-      if (r.event_id === evento.id) continue
-      const ev = eventiMap[r.event_id]
-      if (ev?.data_inizio && evento.data_inizio && ev.data_inizio >= evento.data_inizio) continue
-      if (r.email) visti.add('e' + norm(r.email))
-      if (r.nome || r.cognome) visti.add('n' + norm(r.nome) + '|' + norm(r.cognome))
-    }
-    const ritorni = regs.filter(r => visti.has('e' + norm(r.email)) || visti.has('n' + norm(r.nome) + '|' + norm(r.cognome))).length
-
-    // ---- quando si iscrivono
-    const ore = Array(24).fill(0), sett = Array(7).fill(0)
-    for (const r of regs) { ore[oraDi(r.created_at)]++; sett[(new Date(dayKey(r.created_at) + 'T12:00:00').getDay() + 6) % 7]++ }
-
-    // ---- arrivi (check-in) per quarto d'ora
-    const arrivi = {}
-    for (const r of regs) if (r.checkin_at) { const k = `${String(oraDi(r.checkin_at)).padStart(2, '0')}:${String(Math.floor(minDi(r.checkin_at) / 15) * 15).padStart(2, '0')}`; arrivi[k] = (arrivi[k] || 0) + 1 }
-    const arriviK = Object.keys(arrivi).sort()
-
-    // ---- dispositivi visitatori
-    const mobile = views.filter(v => /mobi|iphone|android/i.test(v.user_agent || '')).length
-
-    // ---- imprese e CAP
-    const imp = {}
-    for (const r of regs) { const k = norm(r.ragione_sociale); if (!k) continue; if (!imp[k]) imp[k] = { nome: r.ragione_sociale.trim(), n: 0 }; imp[k].n++ }
-    const topImprese = Object.values(imp).sort((x, y) => y.n - x.n).slice(0, 8)
-    const caps = {}
-    for (const r of regs) { const c = (r.cap || '').trim(); if (c) caps[c] = (caps[c] || 0) + 1 }
-    const topCap = Object.entries(caps).sort((x, y) => y[1] - x[1]).slice(0, 8)
-    const roma = regs.filter(r => /^001\d\d$/.test((r.cap || '').trim())).length
-
-    // ---- comunicazioni
-    const email = {}
-    for (const l of emailLog) { const k = l.tipo || 'altro'; if (!email[k]) email[k] = { ok: 0, ko: 0 }; (/err|fail|bounce/i.test(l.stato || '') ? email[k].ko++ : email[k].ok++) }
-    const smsOk = smsLog.filter(x => x.stato === 'inviato').length
-
-    return {
-      oggi, dataEv, passato, giorniMancanti, attivi, giorni, iscrG, visG, cumulativo, ritmo, proiezione, piccoG,
-      sessioni, confermati, presenti, accompagnatori, capogruppo, singoli, assocSi, assocNo, conPosto, rinunce, conPiva,
-      ritorni, ore, sett, arrivi, arriviK, mobile, topImprese, topCap, roma, email, smsOk, smsKo: smsLog.length - smsOk,
-    }
-  }, [evento, regs, views, altreRegs, eventiMap, emailLog, smsLog])
+  const a = useMemo(() => calcolaAnalisi({ evento, regs, views, altreRegs, eventiMap, emailLog, smsLog }), [evento, regs, views, altreRegs, eventiMap, emailLog, smsLog])
 
   const tot = regs.length
   const cap = evento?.capienza_max || null

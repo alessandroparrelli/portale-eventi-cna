@@ -12,7 +12,7 @@ const pivaOk = p => (p || '').replace(/\D/g, '').length === 11
 // ---------- genere stimato dal nome ----------
 const MASCHILI_A = new Set(['andrea', 'luca', 'nicola', 'mattia', 'elia', 'enea', 'gianluca', 'tobia', 'battista', 'giosue', 'joshua', 'zaccaria', 'geremia', 'isaia', 'evangelista', 'leonida', 'gianandrea', 'pierluca', 'giannicola', 'mustafa', 'akira', 'sasha', 'misha', 'kosta', 'nikita', 'ilya'])
 const FEMMINILI_ALTRO = new Set(['beatrice', 'alice', 'irene', 'adele', 'agnese', 'matilde', 'rachele', 'noemi', 'ester', 'esther', 'carmen', 'ines', 'nives', 'clarice', 'eurydice', 'berenice', 'cloe', 'chloe', 'zoe', 'aurore', 'desiree', 'deborah', 'debora', 'miriam', 'myriam', 'ruth', 'judith', 'giuditta', 'margherite', 'consuelo', 'rosario', 'maddalene', 'elisabeth', 'elizabeth', 'isabel', 'mabel', 'rebecca', 'jennifer', 'kimberly', 'catherine', 'caterine', 'jasmine', 'yasmine', 'jasmin', 'nicole', 'michelle', 'danielle', 'gabrielle', 'raffaelle', 'simone_f', 'giusy', 'susy', 'katy', 'kelly', 'emily', 'mary', 'sally', 'jenny', 'betty', 'patty', 'dolly', 'milly', 'lily', 'mimi', 'gigi_f', 'denise', 'lise', 'louise', 'elise', 'eloise', 'iris', 'doris', 'thais', 'lois', 'agnes', 'mercedes', 'dolores', 'lourdes', 'ingrid', 'astrid', 'sigrid', 'gudrun', 'karin', 'kristin', 'helen', 'ellen', 'karen', 'carmel', 'rachel', 'isabelle', 'annabelle', 'christine', 'nadine', 'sabine', 'pauline', 'caroline', 'jacqueline', 'madeleine', 'evelyn', 'jocelyn', 'kathleen', 'colleen', 'eileen', 'maureen', 'doreen', 'noreen', 'aileen', 'arlene', 'darlene', 'charlene', 'marlene', 'irina', 'nour', 'nur', 'jo', 'dalila'])
-function genereDaNome(nome) {
+export function genereDaNome(nome) {
   const n = norm(nome).split(/[\s\-'_]/)[0]
   if (!n || n.length < 2) return 'nd'
   if (MASCHILI_A.has(n)) return 'M'
@@ -30,7 +30,7 @@ const RX_ASSOC = /\b(associazione|assoc\.|ass\.ne|aps|asd|onlus|odv|ets|fondazio
 const RX_IMPRESA = /\b(s\.?r\.?l\.?s?|s\.?p\.?a\.?|s\.?n\.?c\.?|s\.?a\.?s\.?|s\.?a\.?p\.?a\.?|soc\.?\s*coop|societa|soc\.|coop\.?|cooperativa|ditta|impresa|studio|di\b.*\b&|&\s*c\.?|group|holding|srl|spa|snc|sas)\b/
 const RX_OSPITE = /\b(ospit[ei]|invitat[oi]|guest|staff|stampa|giornalist|relator[ei]|artist[ai]|danza|ballerin)/
 
-function tipoOrg(r) {
+export function tipoOrg(r) {
   const rs = norm(r.ragione_sociale)
   const dom = norm((r.email || '').split('@')[1])
   if (!rs) {
@@ -75,7 +75,141 @@ const MUNICIPI = { '00118': 'IX/X', '00119': 'X', '00120': 'I (Vaticano)', '0012
 
 const PERSONALI = /^(gmail|googlemail|yahoo|libero|hotmail|outlook|live|msn|icloud|me|mac|alice|tin|tiscali|virgilio|fastwebnet|email|inwind|aruba|tim|vodafone|katamail|jumpy|teletu|infinito|proton|protonmail)\./
 
-const TIPO_COLORI = { 'Impresa': '#5B5FEF', 'Privato cittadino': '#94A3B8', 'Sistema CNA': '#003DA5', 'Ente pubblico': '#059669', 'Scuola / formazione': '#F59E0B', 'Associazione / ente non profit': '#EC4899', 'Ospiti / staff': '#7C4DFF' }
+export const TIPO_COLORI = { 'Impresa': '#5B5FEF', 'Privato cittadino': '#94A3B8', 'Sistema CNA': '#003DA5', 'Ente pubblico': '#059669', 'Scuola / formazione': '#F59E0B', 'Associazione / ente non profit': '#EC4899', 'Ospiti / staff': '#7C4DFF' }
+
+export function calcolaPartecipanti({ evento, regs, altreRegs, eventiMap, mestieri, campi, base }) {
+  const attivi = regs.filter(r => !r.rinuncia)
+  const P = base === 'presenti' ? regs.filter(isPresente) : attivi
+  const tot = P.length
+
+  // genere
+  const gen = { M: 0, F: 0, nd: 0 }
+  for (const r of P) gen[genereDaNome(r.nome)]++
+
+  // tipologia
+  const tipi = {}
+  for (const r of P) { const t = tipoOrg(r); tipi[t] = (tipi[t] || 0) + 1 }
+
+  // imprese / organizzazioni
+  const org = {}
+  for (const r of P) {
+    const k = norm(r.ragione_sociale) || (pivaOk(r.partita_iva) ? 'piva:' + r.partita_iva.replace(/\D/g, '') : '')
+    if (!k) continue
+    if (!org[k]) org[k] = { nome: (r.ragione_sociale || '').trim() || 'P.IVA ' + r.partita_iva, tipo: tipoOrg(r), n: 0, assoc: null, piva: '', forma: formaGiuridica(r.ragione_sociale), persone: [] }
+    const o = org[k]
+    o.n++
+    o.persone.push(`${r.nome || ''} ${r.cognome || ''}`.trim())
+    if (pivaOk(r.partita_iva) && !o.piva) o.piva = r.partita_iva.replace(/\D/g, '')
+    if (r.associato_cna === true) o.assoc = true
+    else if (r.associato_cna === false && o.assoc !== true) o.assoc = false
+  }
+  const orgList = Object.values(org).sort((a, b) => b.n - a.n || a.nome.localeCompare(b.nome))
+  const imprese = orgList.filter(o => o.tipo === 'Impresa')
+  const pIn = imprese.reduce((s, o) => s + o.n, 0)
+  const delega = { '1': 0, '2': 0, '3-5': 0, '6-10': 0, 'oltre 10': 0 }
+  for (const o of imprese) delega[o.n === 1 ? '1' : o.n === 2 ? '2' : o.n <= 5 ? '3-5' : o.n <= 10 ? '6-10' : 'oltre 10']++
+  const impAssoc = imprese.filter(o => o.assoc === true).length
+  const impNoAssoc = imprese.filter(o => o.assoc === false).length
+  const forme = {}
+  for (const o of imprese) { const f = o.forma || 'Non indicata'; forme[f] = (forme[f] || 0) + 1 }
+
+  // associazione CNA (persone)
+  const aSi = P.filter(r => r.associato_cna === true).length
+  const aNo = P.filter(r => r.associato_cna === false).length
+  const anz = { 'meno di 1 anno': 0, '1-5 anni': 0, '6-10 anni': 0, '11-20 anni': 0, 'oltre 20 anni': 0 }
+  let anzN = 0
+  for (const r of P) {
+    if (r.associato_cna !== true || !r.associato_data_stipula) continue
+    const m = String(r.associato_data_stipula).match(/(\d{4})/)
+    if (!m) continue
+    const y = new Date().getFullYear() - Number(m[1])
+    if (y < 0 || y > 90) continue
+    anzN++
+    anz[y < 1 ? 'meno di 1 anno' : y <= 5 ? '1-5 anni' : y <= 10 ? '6-10 anni' : y <= 20 ? '11-20 anni' : 'oltre 20 anni']++
+  }
+
+  // territorio
+  const zone = {}, prov = {}, mun = {}
+  for (const r of P) {
+    const z = zonaDaCap(r.cap); zone[z] = (zone[z] || 0) + 1
+    const c = (r.cap || '').trim()
+    if (PROVINCE_LAZIO[c.slice(0, 2)]) prov[PROVINCE_LAZIO[c.slice(0, 2)]] = (prov[PROVINCE_LAZIO[c.slice(0, 2)]] || 0) + 1
+    if (MUNICIPI[c]) for (const m of MUNICIPI[c].split('/')) mun['Municipio ' + m.split(' ')[0]] = (mun['Municipio ' + m.split(' ')[0]] || 0) + 1 / MUNICIPI[c].split('/').length
+  }
+
+  // recapiti
+  let mailPers = 0, mailAz = 0, mailNo = 0, cell = 0
+  const domini = {}
+  for (const r of P) {
+    const dom = norm((r.email || '').split('@')[1])
+    if (!dom) mailNo++
+    else if (PERSONALI.test(dom)) mailPers++
+    else { mailAz++; domini[dom] = (domini[dom] || 0) + 1 }
+    if ((r.cellulare || '').replace(/\D/g, '').length >= 9) cell++
+  }
+
+  // campi extra del form
+  const extra = campi.map(c => {
+    const dist = {}
+    let compilati = 0
+    for (const r of P) {
+      const v = (r[c.colonna_db] || '').toString().trim()
+      if (!v) continue
+      compilati++
+      for (const p of (c.tipo === 'checkbox' || c.tipo === 'multiselect' ? v.split(/[,;|]/) : [v])) { const k = p.trim(); if (k) dist[k] = (dist[k] || 0) + 1 }
+    }
+    return { label: c.label || c.colonna_db, compilati, dist: Object.entries(dist).sort((a, b) => b[1] - a[1]) }
+  }).filter(x => x.compilati)
+
+  // mestieri
+  const mest = {}
+  const mNome = Object.fromEntries((mestieri || []).map(m => [m.id, m.nome]))
+  for (const r of P) if (r.mestiere_id) { const k = mNome[r.mestiere_id] || 'Altro'; mest[k] = (mest[k] || 0) + 1 }
+
+  // gruppi
+  const accomp = P.filter(r => r.referente_id).length
+  const gruppi = {}
+  for (const r of P) if (r.referente_id) gruppi[r.referente_id] = (gruppi[r.referente_id] || 0) + 1
+
+  // fedelta
+  const storico = {}
+  for (const r of altreRegs || []) {
+    if (r.event_id === evento.id) continue
+    const ev = eventiMap[r.event_id]
+    if (!ev?.data_inizio || ev.data_inizio >= evento.data_inizio) continue
+    const k = norm(r.email) || norm(r.nome) + '|' + norm(r.cognome)
+    if (!storico[k]) storico[k] = new Set()
+    storico[k].add(r.event_id)
+  }
+  const fed = { 'Primo evento': 0, '1 evento precedente': 0, '2-3 eventi precedenti': 0, '4 o piu': 0 }
+  for (const r of P) {
+    const n = (storico[norm(r.email)] || storico[norm(r.nome) + '|' + norm(r.cognome)])?.size || 0
+    fed[n === 0 ? 'Primo evento' : n === 1 ? '1 evento precedente' : n <= 3 ? '2-3 eventi precedenti' : '4 o piu']++
+  }
+
+  // tasso di presenza per segmento (sempre su iscritti attivi)
+  const segm = (fn) => { const g = {}; for (const r of attivi) { const k = fn(r); if (!g[k]) g[k] = { i: 0, p: 0 }; g[k].i++; if (isPresente(r)) g[k].p++ } return Object.entries(g).filter(([, v]) => v.i >= 3).sort((a, b) => b[1].i - a[1].i) }
+  const presPerTipo = segm(tipoOrg)
+  const presPerAssoc = segm(r => r.associato_cna === true ? 'Associati CNA' : r.associato_cna === false ? 'Non associati' : 'Non verificati')
+  const presPerGenere = segm(r => ({ M: 'Uomini', F: 'Donne', nd: 'Non determinabile' })[genereDaNome(r.nome)])
+  const presPerRuolo = segm(r => r.referente_id ? 'Accompagnatori' : 'Iscritti diretti')
+  const anticipo = segm(r => {
+    if (!evento.data_inizio || !r.created_at) return 'n/d'
+    const g = Math.floor((new Date(evento.data_inizio) - new Date(r.created_at)) / 86400000)
+    return g < 0 ? 'Il giorno stesso / walk-in' : g <= 2 ? '0-2 giorni prima' : g <= 7 ? '3-7 giorni prima' : g <= 30 ? '8-30 giorni prima' : 'Oltre 30 giorni prima'
+  })
+
+  // check-in
+  const perStaff = {}
+  for (const r of regs) if (r.checkin_by && isPresente(r)) perStaff[r.checkin_by] = (perStaff[r.checkin_by] || 0) + 1
+  const walkin = regs.filter(r => r.stato === 'walk-in').length
+
+  return {
+    P, tot, gen, tipi, orgList, imprese, pIn, delega, impAssoc, impNoAssoc, forme, aSi, aNo, anz, anzN,
+    zone, prov, mun, mailPers, mailAz, mailNo, cell, domini, extra, mest, accomp, nGruppi: Object.keys(gruppi).length,
+    fed, presPerTipo, presPerAssoc, presPerGenere, presPerRuolo, anticipo, perStaff, walkin, iscrittiAttivi: attivi.length,
+  }
+}
 
 export default function StatistichePartecipanti({ evento, regs, altreRegs, eventiMap, mestieri }) {
   const [base, setBase] = useState('presenti') // presenti | iscritti
@@ -96,139 +230,7 @@ export default function StatistichePartecipanti({ evento, regs, altreRegs, event
   const presentiTot = regs.filter(isPresente).length
   useEffect(() => { if (presentiTot === 0) setBase('iscritti'); else setBase('presenti') }, [evento?.id, presentiTot])
 
-  const d = useMemo(() => {
-    const attivi = regs.filter(r => !r.rinuncia)
-    const P = base === 'presenti' ? regs.filter(isPresente) : attivi
-    const tot = P.length
-
-    // genere
-    const gen = { M: 0, F: 0, nd: 0 }
-    for (const r of P) gen[genereDaNome(r.nome)]++
-
-    // tipologia
-    const tipi = {}
-    for (const r of P) { const t = tipoOrg(r); tipi[t] = (tipi[t] || 0) + 1 }
-
-    // imprese / organizzazioni
-    const org = {}
-    for (const r of P) {
-      const k = norm(r.ragione_sociale) || (pivaOk(r.partita_iva) ? 'piva:' + r.partita_iva.replace(/\D/g, '') : '')
-      if (!k) continue
-      if (!org[k]) org[k] = { nome: (r.ragione_sociale || '').trim() || 'P.IVA ' + r.partita_iva, tipo: tipoOrg(r), n: 0, assoc: null, piva: '', forma: formaGiuridica(r.ragione_sociale), persone: [] }
-      const o = org[k]
-      o.n++
-      o.persone.push(`${r.nome || ''} ${r.cognome || ''}`.trim())
-      if (pivaOk(r.partita_iva) && !o.piva) o.piva = r.partita_iva.replace(/\D/g, '')
-      if (r.associato_cna === true) o.assoc = true
-      else if (r.associato_cna === false && o.assoc !== true) o.assoc = false
-    }
-    const orgList = Object.values(org).sort((a, b) => b.n - a.n || a.nome.localeCompare(b.nome))
-    const imprese = orgList.filter(o => o.tipo === 'Impresa')
-    const pIn = imprese.reduce((s, o) => s + o.n, 0)
-    const delega = { '1': 0, '2': 0, '3-5': 0, '6-10': 0, 'oltre 10': 0 }
-    for (const o of imprese) delega[o.n === 1 ? '1' : o.n === 2 ? '2' : o.n <= 5 ? '3-5' : o.n <= 10 ? '6-10' : 'oltre 10']++
-    const impAssoc = imprese.filter(o => o.assoc === true).length
-    const impNoAssoc = imprese.filter(o => o.assoc === false).length
-    const forme = {}
-    for (const o of imprese) { const f = o.forma || 'Non indicata'; forme[f] = (forme[f] || 0) + 1 }
-
-    // associazione CNA (persone)
-    const aSi = P.filter(r => r.associato_cna === true).length
-    const aNo = P.filter(r => r.associato_cna === false).length
-    const anz = { 'meno di 1 anno': 0, '1-5 anni': 0, '6-10 anni': 0, '11-20 anni': 0, 'oltre 20 anni': 0 }
-    let anzN = 0
-    for (const r of P) {
-      if (r.associato_cna !== true || !r.associato_data_stipula) continue
-      const m = String(r.associato_data_stipula).match(/(\d{4})/)
-      if (!m) continue
-      const y = new Date().getFullYear() - Number(m[1])
-      if (y < 0 || y > 90) continue
-      anzN++
-      anz[y < 1 ? 'meno di 1 anno' : y <= 5 ? '1-5 anni' : y <= 10 ? '6-10 anni' : y <= 20 ? '11-20 anni' : 'oltre 20 anni']++
-    }
-
-    // territorio
-    const zone = {}, prov = {}, mun = {}
-    for (const r of P) {
-      const z = zonaDaCap(r.cap); zone[z] = (zone[z] || 0) + 1
-      const c = (r.cap || '').trim()
-      if (PROVINCE_LAZIO[c.slice(0, 2)]) prov[PROVINCE_LAZIO[c.slice(0, 2)]] = (prov[PROVINCE_LAZIO[c.slice(0, 2)]] || 0) + 1
-      if (MUNICIPI[c]) for (const m of MUNICIPI[c].split('/')) mun['Municipio ' + m.split(' ')[0]] = (mun['Municipio ' + m.split(' ')[0]] || 0) + 1 / MUNICIPI[c].split('/').length
-    }
-
-    // recapiti
-    let mailPers = 0, mailAz = 0, mailNo = 0, cell = 0
-    const domini = {}
-    for (const r of P) {
-      const dom = norm((r.email || '').split('@')[1])
-      if (!dom) mailNo++
-      else if (PERSONALI.test(dom)) mailPers++
-      else { mailAz++; domini[dom] = (domini[dom] || 0) + 1 }
-      if ((r.cellulare || '').replace(/\D/g, '').length >= 9) cell++
-    }
-
-    // campi extra del form
-    const extra = campi.map(c => {
-      const dist = {}
-      let compilati = 0
-      for (const r of P) {
-        const v = (r[c.colonna_db] || '').toString().trim()
-        if (!v) continue
-        compilati++
-        for (const p of (c.tipo === 'checkbox' || c.tipo === 'multiselect' ? v.split(/[,;|]/) : [v])) { const k = p.trim(); if (k) dist[k] = (dist[k] || 0) + 1 }
-      }
-      return { label: c.label || c.colonna_db, compilati, dist: Object.entries(dist).sort((a, b) => b[1] - a[1]) }
-    }).filter(x => x.compilati)
-
-    // mestieri
-    const mest = {}
-    const mNome = Object.fromEntries((mestieri || []).map(m => [m.id, m.nome]))
-    for (const r of P) if (r.mestiere_id) { const k = mNome[r.mestiere_id] || 'Altro'; mest[k] = (mest[k] || 0) + 1 }
-
-    // gruppi
-    const accomp = P.filter(r => r.referente_id).length
-    const gruppi = {}
-    for (const r of P) if (r.referente_id) gruppi[r.referente_id] = (gruppi[r.referente_id] || 0) + 1
-
-    // fedelta
-    const storico = {}
-    for (const r of altreRegs || []) {
-      if (r.event_id === evento.id) continue
-      const ev = eventiMap[r.event_id]
-      if (!ev?.data_inizio || ev.data_inizio >= evento.data_inizio) continue
-      const k = norm(r.email) || norm(r.nome) + '|' + norm(r.cognome)
-      if (!storico[k]) storico[k] = new Set()
-      storico[k].add(r.event_id)
-    }
-    const fed = { 'Primo evento': 0, '1 evento precedente': 0, '2-3 eventi precedenti': 0, '4 o piu': 0 }
-    for (const r of P) {
-      const n = (storico[norm(r.email)] || storico[norm(r.nome) + '|' + norm(r.cognome)])?.size || 0
-      fed[n === 0 ? 'Primo evento' : n === 1 ? '1 evento precedente' : n <= 3 ? '2-3 eventi precedenti' : '4 o piu']++
-    }
-
-    // tasso di presenza per segmento (sempre su iscritti attivi)
-    const segm = (fn) => { const g = {}; for (const r of attivi) { const k = fn(r); if (!g[k]) g[k] = { i: 0, p: 0 }; g[k].i++; if (isPresente(r)) g[k].p++ } return Object.entries(g).filter(([, v]) => v.i >= 3).sort((a, b) => b[1].i - a[1].i) }
-    const presPerTipo = segm(tipoOrg)
-    const presPerAssoc = segm(r => r.associato_cna === true ? 'Associati CNA' : r.associato_cna === false ? 'Non associati' : 'Non verificati')
-    const presPerGenere = segm(r => ({ M: 'Uomini', F: 'Donne', nd: 'Non determinabile' })[genereDaNome(r.nome)])
-    const presPerRuolo = segm(r => r.referente_id ? 'Accompagnatori' : 'Iscritti diretti')
-    const anticipo = segm(r => {
-      if (!evento.data_inizio || !r.created_at) return 'n/d'
-      const g = Math.floor((new Date(evento.data_inizio) - new Date(r.created_at)) / 86400000)
-      return g < 0 ? 'Il giorno stesso / walk-in' : g <= 2 ? '0-2 giorni prima' : g <= 7 ? '3-7 giorni prima' : g <= 30 ? '8-30 giorni prima' : 'Oltre 30 giorni prima'
-    })
-
-    // check-in
-    const perStaff = {}
-    for (const r of regs) if (r.checkin_by && isPresente(r)) perStaff[r.checkin_by] = (perStaff[r.checkin_by] || 0) + 1
-    const walkin = regs.filter(r => r.stato === 'walk-in').length
-
-    return {
-      P, tot, gen, tipi, orgList, imprese, pIn, delega, impAssoc, impNoAssoc, forme, aSi, aNo, anz, anzN,
-      zone, prov, mun, mailPers, mailAz, mailNo, cell, domini, extra, mest, accomp, nGruppi: Object.keys(gruppi).length,
-      fed, presPerTipo, presPerAssoc, presPerGenere, presPerRuolo, anticipo, perStaff, walkin, iscrittiAttivi: attivi.length,
-    }
-  }, [regs, base, campi, mestieri, altreRegs, eventiMap, evento])
+  const d = useMemo(() => calcolaPartecipanti({ evento, regs, altreRegs, eventiMap, mestieri, campi, base }), [regs, base, campi, mestieri, altreRegs, eventiMap, evento])
 
   const enti = d.orgList.filter(o => o.tipo === 'Ente pubblico')
   const filtrate = d.orgList.filter(o => (!tipoSel || o.tipo === tipoSel) && (!filtroImp || norm(o.nome).includes(norm(filtroImp)) || o.piva.includes(filtroImp)))

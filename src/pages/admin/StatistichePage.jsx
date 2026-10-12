@@ -102,9 +102,20 @@ export default function StatistichePage() {
   const [selectedUtente, setSelectedUtente] = useState(null)
   const [cronologia, setCronologia] = useState([])
   const [exportingXlsx, setExportingXlsx] = useState(false)
+  const [generandoPdf, setGenerandoPdf] = useState(false)
+
+  async function scaricaReport() {
+    if (!raw || generandoPdf) return
+    setGenerandoPdf(true)
+    try {
+      const { generaReportEvento } = await import('../../lib/reportEventoPdf')
+      await generaReportEvento({ evento: eventi.find(e=>e.id===selectedEvento), stats, pageViews, survey, raw, mestieri, eventi })
+    } catch (e) { console.error(e); alert('Errore nella generazione del report: ' + (e.message || e)) }
+    setGenerandoPdf(false)
+  }
 
   useEffect(() => {
-    supabase.from('events').select('id,titolo,capienza_max,data_inizio,stato,obiettivo_iscritti,obiettivo_presenze').order('data_inizio',{ascending:false})
+    supabase.from('events').select('id,titolo,capienza_max,data_inizio,stato,obiettivo_iscritti,obiettivo_presenze,luogo').order('data_inizio',{ascending:false})
       .then(({data})=>setEventi(data||[]))
     supabase.from('mestieri').select('id,nome').then(({data})=>setMestieri(data||[]))
   }, [])
@@ -333,6 +344,13 @@ export default function StatistichePage() {
 
           {selectedEvento && !loading && stats && (
             <div style={{ display:'flex', flexDirection:'column', gap:'20px' }}>
+              <div style={{ display:'flex', justifyContent:'flex-end' }}>
+                <button onClick={scaricaReport} disabled={!raw || generandoPdf}
+                  style={{ display:'inline-flex', alignItems:'center', gap:8, border:'none', borderRadius:20, padding:'9px 18px', fontSize:13, fontWeight:700, color:'#fff', cursor: generandoPdf ? 'wait' : 'pointer', background:'linear-gradient(135deg,#003DA5,#5B5FEF)', boxShadow:'0 4px 14px rgba(91,95,239,.25)', opacity: !raw || generandoPdf ? 0.6 : 1 }}>
+                  <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.2" strokeLinecap="round" strokeLinejoin="round"><path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"/><polyline points="14 2 14 8 20 8"/><line x1="12" y1="18" x2="12" y2="12"/><polyline points="9 15 12 18 15 15"/></svg>
+                  {generandoPdf ? 'Generazione report...' : 'Scarica report PDF'}
+                </button>
+              </div>
               <div style={s.statsGrid} className="stat-grid-auto">
                 <GlowStatCard icon="users"     label="Iscritti totali" value={stats.total}      palette="blue"
                   sub={stats.capienza ? `Capienza: ${stats.capienza}` : undefined}/>
