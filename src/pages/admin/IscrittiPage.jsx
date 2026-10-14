@@ -711,7 +711,7 @@ export default function IscrittiPage() {
     if (!p) return 'P.IVA assente'
     const a = associatiMap[p]
     if (!a) return 'Non trovato'
-    return a.associato ? 'Associato' : 'Non associato'
+    return a.associato ? 'Associato' : 'Non iscritto CNA'
   }
 
   async function exportExcel() {
@@ -744,15 +744,15 @@ export default function IscrittiPage() {
         const refPiva = referentiPivaMap[r.referente_id]
         if (refPiva && associatiMap[refPiva]?.associato) {
           const refAss = associatiMap[refPiva]
-          return { bg:C.assocBg, fg:C.assocFg, br:C.assocBr, label:'Associato CNA (tramite referente)', datastipulaRef: refAss.datastipula||'' }
+          return { bg:C.assocBg, fg:C.assocFg, br:C.assocBr, label:'Iscritto CNA (tramite referente)', datastipulaRef: refAss.datastipula||'' }
         }
       }
       if (!p) return { bg:C.noPivaBg, fg:C.noPivaFg, br:C.noPivaBr, label:'P.IVA assente' }
       const a = associatiMap[p]
       if (!a) return { bg:C.nfBg, fg:C.nfFg, br:C.nfBr, label:'Non trovato' }
       return a.associato
-        ? { bg:C.assocBg, fg:C.assocFg, br:C.assocBr, label:'Associato CNA' }
-        : { bg:C.disdBg, fg:C.disdFg, br:C.disdBr, label:'Non associato' }
+        ? { bg:C.assocBg, fg:C.assocFg, br:C.assocBr, label:'Iscritto CNA' }
+        : { bg:C.disdBg, fg:C.disdFg, br:C.disdBr, label:'Non iscritto CNA' }
     }
 
     const cols = ['#','Nome','Cognome','Ragione Sociale','P.IVA','Email','Cellulare',
@@ -961,9 +961,9 @@ export default function IscrittiPage() {
       })
 
       const legenda = [
-        { label:'Associato CNA', desc:'Socio attivo, nessuna disdetta registrata', bg:C.assocBg, fg:C.assocFg },
+        { label:'Iscritto CNA', desc:'Socio attivo, nessuna disdetta registrata', bg:C.assocBg, fg:C.assocFg },
         { label:'Associato (tramite referente)', desc:'Accompagnatore di un associato CNA — contratto e data stipula del referente del gruppo', bg:C.assocBg, fg:C.assocFg },
-        { label:'Non associato', desc:'P.IVA presente in archivio ma non come iscritto attivo (disdetta o altro servizio)', bg:C.disdBg, fg:C.disdFg },
+        { label:'Non iscritto CNA', desc:'P.IVA presente in archivio ma non come iscritto attivo (disdetta o altro servizio)', bg:C.disdBg, fg:C.disdFg },
         { label:'Non trovato', desc:'P.IVA non presente in archivio associati', bg:C.nfBg, fg:C.nfFg },
         { label:'P.IVA assente', desc:'Iscritto senza P.IVA — verifica non eseguibile', bg:C.noPivaBg, fg:C.noPivaFg },
       ]
@@ -1017,7 +1017,7 @@ export default function IscrittiPage() {
       { h:'Partita IVA',          w:16, v:r=>r.partita_iva||'' },
       { h:'CAP',                  w:8,  v:r=>r.cap||'' },
       { h:'Categoria',            w:22, v:r=>getMestiere(r.mestiere_id) },
-      { h:'Associato CNA',        w:14, v:r=>fmtBool(r.associato_cna) },
+      { h:'Iscritto CNA',        w:14, v:r=>fmtBool(r.associato_cna) },
       { h:'Data stipula',         w:14, v:r=>r.associato_data_stipula||'' },
       { h:'Stato iscrizione',     w:14, v:r=>r.stato||'' },
       { h:'Posto assegnato',      w:22, v:r=>r.numero_posto||'' },
@@ -1121,7 +1121,7 @@ export default function IscrittiPage() {
       { h:'Partita IVA',          w:16, v:r=>r.partita_iva||'' },
       { h:'CAP',                  w:8,  v:r=>r.cap||'' },
       { h:'Categoria',            w:22, v:r=>getMestiere(r.mestiere_id) },
-      { h:'Associato CNA',        w:14, v:r=>fmtBool(r.associato_cna) },
+      { h:'Iscritto CNA',        w:14, v:r=>fmtBool(r.associato_cna) },
       { h:'Stato iscrizione',     w:14, v:r=>r.stato||'' },
       { h:'Presenza confermata',  w:18, v:r=>r.rinuncia ? 'Rinuncia' : fmtBool(r.presenza_confermata) },
       { h:'Mail posto inviata',   w:16, v:r=>fmtBool(!!r.posto_email_inviata) },
@@ -1661,7 +1661,7 @@ export default function IscrittiPage() {
     'Mestiere': r => getMestiere(r.mestiere_id).toLowerCase(),
     'Iscritto il': r => r.created_at||'',
     'Stato': r => r.stato||'',
-    'Associato CNA': r => {
+    'Iscritto CNA': r => {
       const p = (r.partita_iva||'').toString().replace(/\s/g,'').replace(/^0+/,'')
       if (!p) return '3'
       const a = verificaEseguita ? associatiMap[p] : null
@@ -2595,7 +2595,7 @@ export default function IscrittiPage() {
                   color: verificaInfo.errore ? '#DC2626' : '#1D4ED8' }}>
                   {verificaInfo.errore
                     ? `❌ ${verificaInfo.errore}`
-                    : `✅ ${verificaInfo.trovati} associati trovati su ${verificaInfo.cercati} P.IVA — colonne Associato CNA e Data stipula aggiornate`}
+                    : `✅ ${verificaInfo.trovati} associati trovati su ${verificaInfo.cercati} P.IVA — colonne Iscritto CNA e Data stipula aggiornate`}
                 </p>
                 <button onClick={() => setVerificaInfo(null)}
                   style={{ background:'none', border:'none', cursor:'pointer', color:'#9CA3AF', fontSize:'18px', padding:0, flexShrink:0 }}>×</button>
@@ -2613,7 +2613,7 @@ export default function IscrittiPage() {
                     { label:'Stato',       color:'green',   sortable:true },
                     ...formFields.map(f => ({ label: f.label, color:'purple', sortable:true, hideOnMobile:true })),
                     ...(verificaEseguita ? [
-                      { label:'Associato CNA', color:'green', sortable:true, hideOnMobile:true },
+                      { label:'Iscritto CNA', color:'green', sortable:true, hideOnMobile:true },
                       { label:'Data stipula',  color:'amber', sortable:true, hideOnMobile:true },
                     ] : []),
                     { label:'Azioni', color:'neutral', sortable:false },
@@ -2659,7 +2659,7 @@ export default function IscrittiPage() {
                                 ? <span style={{fontSize:'11px',fontWeight:'700',color:'#DC2626',backgroundColor:'#FEF2F2',padding:'3px 10px',borderRadius:'999px'}}>◌ Non trovato</span>
                                 : _ass.associato
                                   ? <span style={{fontSize:'11px',fontWeight:'700',color:'#15803D',backgroundColor:'#F0FDF4',padding:'3px 10px',borderRadius:'999px'}}>✓ Associato</span>
-                                  : <span style={{fontSize:'11px',fontWeight:'700',color:'#DC2626',backgroundColor:'#FEF2F2',padding:'3px 10px',borderRadius:'999px'}}>✗ Non associato</span>
+                                  : <span style={{fontSize:'11px',fontWeight:'700',color:'#DC2626',backgroundColor:'#FEF2F2',padding:'3px 10px',borderRadius:'999px'}}>✗ Non iscritto CNA</span>
                             }
                           </td>
                           <td style={s.td} className="col-hide-mobile">
@@ -2754,8 +2754,8 @@ export default function IscrittiPage() {
                 borderTop:'1px solid #F3F4F6',marginTop:'4px'}}>
                 <span style={{fontSize:'11px',fontWeight:'600',color:'#6B7280',alignSelf:'center'}}>LEGENDA:</span>
                 {[
-                  {bg:'#F0FDF4',color:'#15803D',label:'✓ Associato CNA'},
-                  {bg:'#FEF2F2',color:'#DC2626',label:'✗ Non associato'},
+                  {bg:'#F0FDF4',color:'#15803D',label:'✓ Iscritto CNA'},
+                  {bg:'#FEF2F2',color:'#DC2626',label:'✗ Non iscritto CNA'},
                   {bg:'#FEF2F2',color:'#DC2626',label:'◌ Non trovato in archivio'},
                   {bg:'#FFF7ED',color:'#EA580C',label:'⚠ P.IVA assente'},
                 ].map(({bg,color,label})=>(

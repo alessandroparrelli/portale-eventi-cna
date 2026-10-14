@@ -257,7 +257,7 @@ export default function StatisticheUtenti() {
         'Cognome': p.cognome, 'Nome': p.nome, 'Tipologia': TIPO_LABEL[p.tipo],
         'Ragione sociale': p.aziende.map(a => a.ragione_sociale).filter(Boolean).join(' | '),
         'P.IVA': p.aziende.map(a => a.piva).filter(Boolean).join(' | '),
-        'Associato CNA': p.associato ? 'Si' : 'No',
+        'Iscritto CNA': p.associato ? 'Si' : 'No',
         'Categoria': p.mestieri.join(', '), 'CAP': p.caps.join(', '),
         'Email': p.emails.join(', '), 'Cellulare': p.tel.join(', '),
         'Eventi': p.nEventi, 'Iscrizioni': p.iscrizioni, 'Presenze': p.presenze, 'Rinunce': p.rinunce,
@@ -268,7 +268,7 @@ export default function StatisticheUtenti() {
       ws1['!cols'] = [16,16,14,32,16,10,20,8,30,16,8,10,10,8,14,14,60].map(w => ({ wch:w }))
       XLSX.utils.book_append_sheet(wb, ws1, 'Persone uniche')
       const sh2 = st.impList.map(i => ({
-        'Ragione sociale': i.ragione_sociale, 'P.IVA': i.piva, 'Associata CNA': i.associato ? 'Si' : 'No',
+        'Ragione sociale': i.ragione_sociale, 'P.IVA': i.piva, 'Iscritta CNA': i.associato ? 'Si' : 'No',
         'Categoria': i.mestiere, 'Persone': i.nPersone, 'Eventi': i.nEventi, 'Iscrizioni': i.iscrizioni,
       }))
       const ws2 = XLSX.utils.json_to_sheet(sh2)
@@ -594,7 +594,7 @@ function ImpresaDettaglio({ i, eventi, x }) {
         <p style={h}>Anagrafica</p>
         <div style={{ display:'flex', alignItems:'center', gap:'8px', flexWrap:'wrap', marginBottom:'8px' }}>
           <span style={{ fontSize:'15px', fontWeight:800, color:'#111827' }}>{i.ragione_sociale || '-'}</span>
-          <span style={chip(i.associato ? '#DCFCE7' : '#F3F4F6', i.associato ? '#15803D' : '#6B7280')}>{i.associato ? 'Associata CNA' : 'Non associata'}</span>
+          <span style={chip(i.associato ? '#DCFCE7' : '#F3F4F6', i.associato ? '#15803D' : '#6B7280')}>{i.associato ? 'Iscritta CNA' : 'Non iscritta CNA'}</span>
         </div>
         <p style={riga}><b>P.IVA</b> {i.piva}{i.mestiere ? ' · ' + i.mestiere : ''}{contatti.cap.size ? ' · CAP ' + [...contatti.cap].join(', ') : ''}</p>
         {x && <p style={riga}>{[x.unione && 'Unione ' + x.unione, x.natura_giuridica, x.comune, x.addetti ? x.addetti + ' addetti' : ''].filter(Boolean).join(' · ')}</p>}
@@ -674,7 +674,7 @@ function Dettaglio({ p, eventi, onClose }) {
             <p style={{ fontSize:'17px', fontWeight:800, color:'#111827', margin:0 }}>{p.nome} {p.cognome}</p>
             <div style={{ display:'flex', gap:'4px', marginTop:'4px' }}>
               <Badge c={TIPO_COL[p.tipo]} bg="#F3F4F6">{TIPO_LABEL[p.tipo]}</Badge>
-              {p.associato && <Badge c="#16A34A" bg="#DCFCE7">Associato CNA</Badge>}
+              {p.associato && <Badge c="#16A34A" bg="#DCFCE7">Iscritto CNA</Badge>}
             </div>
           </div>
           <button onClick={onClose} style={{ background:'none', border:'none', cursor:'pointer', color:'#9CA3AF' }}><X size={18}/></button>
